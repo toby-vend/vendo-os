@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "slack": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+      }
+    },
+    "gohighlevel": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@drausal/gohighlevel-mcp"],
+      "env": {
+        "BEARER_TOKEN_BEARERAUTH": "${GHL_API_KEY}"
+      }
+    },
+    "gdrive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-gdrive"],
+      "env": {
+        "GDRIVE_CREDENTIALS_PATH": "${GDRIVE_CREDENTIALS_PATH}",
+        "GDRIVE_OAUTH_PATH": "${GDRIVE_OAUTH_PATH}"
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "vendo-os",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync:meetings": "tsx scripts/sync/sync-meetings.ts",
+    "sync:meetings:backfill": "tsx scripts/sync/sync-meetings.ts --backfill",
+    "process:meetings": "tsx scripts/analysis/process-meetings.ts",
+    "query": "tsx scripts/query/search-meetings.ts",
+    "db:init": "tsx scripts/utils/db.ts --init",
+    "brief:data": "tsx scripts/functions/generate-daily-brief.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0",
+    "sql.js": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

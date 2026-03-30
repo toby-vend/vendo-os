@@ -1,0 +1,37 @@
+# Environment variables (API keys, secrets)
+.env
+.env.local
+.env.*.local
+
+# Databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+
+# Data snapshots (regenerable from APIs)
+data/ghl-snapshot.json
+data/sync.log
+data/launchd-stdout.log
+data/launchd-stderr.log
+
+# Node
+node_modules/
+
+# Claude Code local overrides
+.claude/settings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.log
+.secrets/
