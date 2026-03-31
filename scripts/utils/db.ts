@@ -197,6 +197,55 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_xero_contacts_customer ON xero_contacts(is_customer)');
   db.run('CREATE INDEX IF NOT EXISTS idx_xero_pnl_period ON xero_pnl_monthly(period_start)');
 
+  // --- Meta Ads tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS meta_ad_accounts (
+      id TEXT PRIMARY KEY,
+      account_id TEXT NOT NULL,
+      name TEXT,
+      account_status INTEGER,
+      currency TEXT,
+      timezone_name TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS meta_insights (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      account_id TEXT NOT NULL,
+      account_name TEXT,
+      level TEXT NOT NULL,
+      campaign_id TEXT,
+      campaign_name TEXT,
+      adset_id TEXT,
+      adset_name TEXT,
+      ad_id TEXT,
+      ad_name TEXT,
+      impressions INTEGER DEFAULT 0,
+      clicks INTEGER DEFAULT 0,
+      spend REAL DEFAULT 0,
+      cpc REAL,
+      cpm REAL,
+      ctr REAL,
+      reach INTEGER,
+      frequency REAL,
+      conversions TEXT,
+      conversion_values TEXT,
+      actions TEXT,
+      cost_per_action TEXT,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, account_id, level, campaign_id, adset_id, ad_id)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_meta_insights_date ON meta_insights(date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_meta_insights_account ON meta_insights(account_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_meta_insights_level ON meta_insights(level)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_meta_insights_campaign ON meta_insights(campaign_id)');
+
   // FTS4 virtual table for full-text search (sql.js includes FTS4, not FTS5)
   db.run(`
     CREATE VIRTUAL TABLE IF NOT EXISTS meetings_fts USING fts4(
