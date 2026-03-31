@@ -16,11 +16,12 @@
     "sync:meta": "tsx scripts/sync/sync-meta-ads.ts",
     "sync:meta:backfill": "tsx scripts/sync/sync-meta-ads.ts --backfill",
     "sync:meta:accounts": "tsx scripts/sync/sync-meta-ads.ts --accounts-only",
-    "dev": "tsx watch web/server.ts",
-    "start": "tsx web/server.ts"
+    "dev": "tsx watch web/start.ts",
+    "start": "tsx web/start.ts"
   },
   "dependencies": {
     "@fastify/static": "^9.0.0",
+    "@libsql/client": "^0.17.2",
     "dotenv": "^16.4.0",
     "eta": "^4.5.1",
     "fastify": "^5.8.4",
