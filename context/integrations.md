@@ -39,7 +39,7 @@
 
 | Service | Purpose | Connection Type | Status | Priority |
 |---------|---------|----------------|--------|----------|
-| Xero | Invoicing, P&L, cash flow | API | Not connected | High |
+| Xero | Invoicing, P&L, cash flow | API | **Connected** | High |
 
 ### Ad Platforms
 
