@@ -17,7 +17,8 @@
     "sync:meta:backfill": "tsx scripts/sync/sync-meta-ads.ts --backfill",
     "sync:meta:accounts": "tsx scripts/sync/sync-meta-ads.ts --accounts-only",
     "dev": "tsx watch web/start.ts",
-    "start": "tsx web/start.ts"
+    "start": "tsx web/start.ts",
+    "db:push": "tsx scripts/sync/push-to-turso.ts"
   },
   "dependencies": {
     "@fastify/static": "^9.0.0",
