@@ -9,7 +9,10 @@
     "process:meetings": "tsx scripts/analysis/process-meetings.ts",
     "query": "tsx scripts/query/search-meetings.ts",
     "db:init": "tsx scripts/utils/db.ts --init",
-    "brief:data": "tsx scripts/functions/generate-daily-brief.ts"
+    "brief:data": "tsx scripts/functions/generate-daily-brief.ts",
+    "xero:auth": "tsx scripts/auth/xero-auth.ts",
+    "sync:xero": "tsx scripts/sync/sync-xero.ts",
+    "sync:xero:backfill": "tsx scripts/sync/sync-xero.ts --backfill"
   },
   "dependencies": {
     "dotenv": "^16.4.0",
