@@ -121,6 +121,82 @@ export async function initSchema(): Promise<void> {
     )
   `);
 
+  // --- Xero tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS xero_invoices (
+      id TEXT PRIMARY KEY,
+      invoice_number TEXT,
+      type TEXT NOT NULL,
+      contact_id TEXT,
+      contact_name TEXT,
+      date TEXT,
+      due_date TEXT,
+      status TEXT,
+      subtotal REAL,
+      total_tax REAL,
+      total REAL,
+      amount_due REAL,
+      amount_paid REAL,
+      currency TEXT,
+      reference TEXT,
+      updated_at TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS xero_contacts (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT,
+      is_customer INTEGER DEFAULT 0,
+      is_supplier INTEGER DEFAULT 0,
+      status TEXT,
+      outstanding_receivable REAL DEFAULT 0,
+      overdue_receivable REAL DEFAULT 0,
+      outstanding_payable REAL DEFAULT 0,
+      overdue_payable REAL DEFAULT 0,
+      updated_at TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS xero_pnl_monthly (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      period_start TEXT NOT NULL,
+      period_end TEXT NOT NULL,
+      total_income REAL,
+      total_cost_of_sales REAL,
+      gross_profit REAL,
+      total_expenses REAL,
+      net_profit REAL,
+      raw_report TEXT,
+      synced_at TEXT NOT NULL,
+      UNIQUE(period_start, period_end)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS xero_bank_summary (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      account_name TEXT NOT NULL,
+      opening_balance REAL,
+      closing_balance REAL,
+      period_start TEXT,
+      period_end TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_xero_invoices_date ON xero_invoices(date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_xero_invoices_status ON xero_invoices(status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_xero_invoices_type ON xero_invoices(type)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_xero_invoices_contact ON xero_invoices(contact_name)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_xero_contacts_customer ON xero_contacts(is_customer)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_xero_pnl_period ON xero_pnl_monthly(period_start)');
+
   // FTS4 virtual table for full-text search (sql.js includes FTS4, not FTS5)
   db.run(`
     CREATE VIRTUAL TABLE IF NOT EXISTS meetings_fts USING fts4(
