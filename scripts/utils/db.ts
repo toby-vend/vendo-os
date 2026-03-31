@@ -246,6 +246,55 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_meta_insights_level ON meta_insights(level)');
   db.run('CREATE INDEX IF NOT EXISTS idx_meta_insights_campaign ON meta_insights(campaign_id)');
 
+  // --- GHL (GoHighLevel) tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ghl_pipelines (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      location_id TEXT NOT NULL,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ghl_stages (
+      id TEXT PRIMARY KEY,
+      pipeline_id TEXT NOT NULL REFERENCES ghl_pipelines(id),
+      name TEXT NOT NULL,
+      position INTEGER DEFAULT 0,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ghl_opportunities (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      monetary_value REAL DEFAULT 0,
+      pipeline_id TEXT NOT NULL,
+      stage_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      source TEXT,
+      contact_id TEXT,
+      contact_name TEXT,
+      contact_company TEXT,
+      contact_email TEXT,
+      contact_phone TEXT,
+      contact_tags TEXT,
+      created_at TEXT,
+      updated_at TEXT,
+      last_stage_change_at TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_ghl_opps_pipeline ON ghl_opportunities(pipeline_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ghl_opps_stage ON ghl_opportunities(stage_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ghl_opps_status ON ghl_opportunities(status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ghl_opps_created ON ghl_opportunities(created_at)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ghl_stages_pipeline ON ghl_stages(pipeline_id)');
+
   // FTS4 virtual table for full-text search (sql.js includes FTS4, not FTS5)
   db.run(`
     CREATE VIRTUAL TABLE IF NOT EXISTS meetings_fts USING fts4(
