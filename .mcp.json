@@ -25,6 +25,10 @@
         "GDRIVE_CREDENTIALS_PATH": "${GDRIVE_CREDENTIALS_PATH}",
         "GDRIVE_OAUTH_PATH": "${GDRIVE_OAUTH_PATH}"
       }
+    },
+    "miro": {
+      "type": "http",
+      "url": "https://mcp.miro.com/"
     }
   }
 }
