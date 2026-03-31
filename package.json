@@ -13,6 +13,7 @@
     "xero:auth": "tsx scripts/auth/xero-auth.ts",
     "sync:xero": "tsx scripts/sync/sync-xero.ts",
     "sync:xero:backfill": "tsx scripts/sync/sync-xero.ts --backfill",
+    "sync:ghl": "tsx scripts/sync/sync-ghl.ts",
     "sync:meta": "tsx scripts/sync/sync-meta-ads.ts",
     "sync:meta:backfill": "tsx scripts/sync/sync-meta-ads.ts --backfill",
     "sync:meta:accounts": "tsx scripts/sync/sync-meta-ads.ts --accounts-only",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@vercel/node": "^5.6.22",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
   }
