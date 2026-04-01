@@ -1,0 +1,48 @@
+<% layout('/layouts/base') %>
+
+<p><a href="/clients">&laquo; Back to clients</a></p>
+
+<h1><%= it.client.name %></h1>
+
+<p class="meeting-meta">
+  <strong>Vertical:</strong> <%= it.client.vertical || '—' %>
+  | <strong>Status:</strong> <span class="badge badge-active"><%= it.client.status %></span>
+  | <strong>Meetings:</strong> <%= it.client.meeting_count %>
+  <% if (it.client.first_meeting_date) { %> | <strong>Since:</strong> <%= it.client.first_meeting_date.slice(0, 10) %><% } %>
+</p>
+
+<h2>Meetings</h2>
+<table class="compact">
+  <thead>
+    <tr><th>Date</th><th>Title</th><th>Category</th><th>Duration</th></tr>
+  </thead>
+  <tbody>
+    <% it.meetings.forEach(m => { %>
+    <tr>
+      <td><%= m.date ? m.date.slice(0, 10) : '—' %></td>
+      <td><a href="/meetings/<%= m.id %>"><%= m.title %></a></td>
+      <td><%= m.category || '—' %></td>
+      <td class="duration"><%= m.duration_seconds ? Math.round(m.duration_seconds / 60) + ' min' : '—' %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<% if (it.actions.length) { %>
+<h2>Action Items (<%= it.actions.length %>)</h2>
+<table class="compact">
+  <thead>
+    <tr><th>Status</th><th>Description</th><th>Assignee</th><th>From Meeting</th></tr>
+  </thead>
+  <tbody>
+    <% it.actions.forEach(a => { %>
+    <tr>
+      <td><span class="badge <%= a.completed ? 'badge-completed' : 'badge-open' %>"><%= a.completed ? 'Done' : 'Open' %></span></td>
+      <td><%= a.description %></td>
+      <td><%= a.assignee || '—' %></td>
+      <td><a href="/meetings/<%= a.meeting_id %>"><%= a.meeting_title || '—' %></a></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

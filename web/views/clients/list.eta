@@ -1,0 +1,24 @@
+<% layout('/layouts/base') %>
+
+<h1>Clients <small>(<%= it.clients.length %> total)</small></h1>
+
+<table class="compact">
+  <thead>
+    <tr><th>Client</th><th>Meetings</th><th>Vertical</th><th>Status</th><th>First Meeting</th><th>Last Meeting</th></tr>
+  </thead>
+  <tbody>
+    <% if (!it.clients.length) { %>
+    <tr><td colspan="6">No clients found. Run process-meetings first.</td></tr>
+    <% } %>
+    <% it.clients.forEach(c => { %>
+    <tr>
+      <td><a href="/clients/<%= encodeURIComponent(c.name) %>"><%= c.name %></a></td>
+      <td><%= c.meeting_count %></td>
+      <td><%= c.vertical || '—' %></td>
+      <td><span class="badge badge-active"><%= c.status %></span></td>
+      <td><%= c.first_meeting_date ? c.first_meeting_date.slice(0, 10) : '—' %></td>
+      <td><%= c.last_meeting_date ? c.last_meeting_date.slice(0, 10) : '—' %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

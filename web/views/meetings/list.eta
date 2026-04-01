@@ -1,0 +1,43 @@
+<% layout('/layouts/base') %>
+
+<h1>Meetings <small>(<%= it.total %> total)</small></h1>
+
+<form class="filter-bar" hx-get="/meetings" hx-target="#results" hx-push-url="true">
+  <div>
+    <label for="search">Search</label>
+    <input type="search" id="search" name="search" value="<%= it.query?.search || '' %>"
+           placeholder="Search meetings..."
+           hx-get="/meetings" hx-target="#results" hx-trigger="keyup changed delay:300ms"
+           hx-include="closest form">
+  </div>
+  <div>
+    <label for="client">Client</label>
+    <select id="client" name="client" onchange="this.form.requestSubmit()">
+      <option value="">All clients</option>
+      <% it.clientNames.forEach(c => { %>
+        <option value="<%= c %>" <%= it.query?.client === c ? 'selected' : '' %>><%= c %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="category">Category</label>
+    <select id="category" name="category" onchange="this.form.requestSubmit()">
+      <option value="">All categories</option>
+      <% it.categories.forEach(c => { %>
+        <option value="<%= c.slug %>" <%= it.query?.category === c.slug ? 'selected' : '' %>><%= c.label %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="from">From</label>
+    <input type="date" id="from" name="from" value="<%= it.query?.from || '' %>" onchange="this.form.requestSubmit()">
+  </div>
+  <div>
+    <label for="to">To</label>
+    <input type="date" id="to" name="to" value="<%= it.query?.to || '' %>" onchange="this.form.requestSubmit()">
+  </div>
+</form>
+
+<div id="results">
+  <%~ include('/meetings/results', it) %>
+</div>

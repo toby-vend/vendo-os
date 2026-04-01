@@ -1,0 +1,45 @@
+<% layout('/layouts/base') %>
+
+<h1>Deal Detail</h1>
+
+<p><a href="/pipeline">&laquo; Back to pipeline</a></p>
+
+<h2><%= it.opp.name || it.opp.contact_name || 'Unnamed Deal' %></h2>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= (it.opp.monetary_value || 0).toLocaleString() %></p>
+    <p class="stat-label">Deal Value</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="font-size: 24px; color: <%= it.opp.status === 'won' ? 'var(--vendo-green)' : it.opp.status === 'lost' ? '#ef4444' : '#E2E8F0' %>;"><%= it.opp.status %></p>
+    <p class="stat-label">Status</p>
+  </article>
+</div>
+
+<article>
+  <table class="compact">
+    <tbody>
+      <tr><td><strong>Pipeline</strong></td><td><%= it.opp.pipeline_name || '—' %></td></tr>
+      <tr><td><strong>Stage</strong></td><td><span class="badge badge-active"><%= it.opp.stage_name || '—' %></span></td></tr>
+      <tr><td><strong>Source</strong></td><td><%= it.opp.source || '—' %></td></tr>
+      <tr><td><strong>Created</strong></td><td><%= it.opp.created_at ? it.opp.created_at.slice(0, 10) : '—' %></td></tr>
+      <tr><td><strong>Last Updated</strong></td><td><%= it.opp.updated_at ? it.opp.updated_at.slice(0, 10) : '—' %></td></tr>
+      <tr><td><strong>Last Stage Change</strong></td><td><%= it.opp.last_stage_change_at ? it.opp.last_stage_change_at.slice(0, 10) : '—' %></td></tr>
+    </tbody>
+  </table>
+</article>
+
+<% if (it.opp.contact_name || it.opp.contact_company || it.opp.contact_email) { %>
+<h3>Contact</h3>
+<article>
+  <table class="compact">
+    <tbody>
+      <% if (it.opp.contact_name) { %><tr><td><strong>Name</strong></td><td><%= it.opp.contact_name %></td></tr><% } %>
+      <% if (it.opp.contact_company) { %><tr><td><strong>Company</strong></td><td><%= it.opp.contact_company %></td></tr><% } %>
+      <% if (it.opp.contact_email) { %><tr><td><strong>Email</strong></td><td><%= it.opp.contact_email %></td></tr><% } %>
+      <% if (it.opp.contact_phone) { %><tr><td><strong>Phone</strong></td><td><%= it.opp.contact_phone %></td></tr><% } %>
+    </tbody>
+  </table>
+</article>
+<% } %>

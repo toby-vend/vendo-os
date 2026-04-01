@@ -1,0 +1,47 @@
+<% if (it.error) { %>
+  <div class="alert alert-error"><%= it.error %></div>
+<% } else if (it.files.length === 0) { %>
+  <div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+    <p>No files found<% if (it.search) { %> for "<strong><%= it.search %></strong>"<% } %></p>
+  </div>
+<% } else { %>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Owner</th>
+        <th>Modified</th>
+        <th>Size</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.files.forEach(file => { %>
+        <tr>
+          <td>
+            <a href="<%= it.driveLink(file) %>" target="_blank" rel="noopener" class="drive-file-link">
+              <span class="drive-type-badge drive-type-<%= it.mimeLabel(file.mimeType).toLowerCase() %>"><%= it.mimeLabel(file.mimeType) %></span>
+              <%= file.name %>
+            </a>
+          </td>
+          <td class="muted"><%= it.mimeLabel(file.mimeType) %></td>
+          <td class="muted"><%= file.owners?.[0]?.displayName || '—' %></td>
+          <td class="muted"><%= new Date(file.modifiedTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+          <td class="muted"><%= it.formatSize(file.size) %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <% if (it.nextPageToken) { %>
+    <div style="text-align:center; padding:1rem;">
+      <button class="btn btn-outline"
+              hx-get="/drive?search=<%= encodeURIComponent(it.search || '') %>&type=<%= encodeURIComponent(it.type || '') %>&pageToken=<%= encodeURIComponent(it.nextPageToken) %>"
+              hx-target="#results"
+              hx-swap="innerHTML">
+        Load more
+      </button>
+    </div>
+  <% } %>
+<% } %>

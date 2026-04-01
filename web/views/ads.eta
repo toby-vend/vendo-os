@@ -1,0 +1,50 @@
+<% layout('/layouts/base') %>
+
+<h1>Ad Performance (Meta)</h1>
+
+<form class="filter-bar" method="GET" action="/ads">
+  <div>
+    <label for="days">Date Range</label>
+    <select id="days" name="days" onchange="this.form.submit()">
+      <option value="7" <%= it.days === 7 ? 'selected' : '' %>>Last 7 days</option>
+      <option value="14" <%= it.days === 14 ? 'selected' : '' %>>Last 14 days</option>
+      <option value="30" <%= it.days === 30 ? 'selected' : '' %>>Last 30 days</option>
+      <option value="90" <%= it.days === 90 ? 'selected' : '' %>>Last 90 days</option>
+    </select>
+  </div>
+</form>
+
+<% if (!it.accounts.length) { %>
+  <p>No ad data for the selected period. Ensure Meta Ads are synced.</p>
+<% } else { %>
+
+<h2>Client Spend</h2>
+<table class="compact">
+  <thead>
+    <tr><th>Client</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CPM</th><th>CTR</th><th></th></tr>
+  </thead>
+  <tbody>
+    <% it.accounts.forEach(a => { %>
+    <tr>
+      <td><%= a.account_name || a.account_id %></td>
+      <td>&pound;<%= a.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td><%= a.impressions.toLocaleString() %></td>
+      <td><%= a.clicks.toLocaleString() %></td>
+      <td>&pound;<%= a.cpc.toFixed(2) %></td>
+      <td>&pound;<%= a.cpm.toFixed(2) %></td>
+      <td><%= a.ctr.toFixed(2) %>%</td>
+      <td>
+        <button class="outline secondary"
+                hx-get="/ads/campaigns/<%= a.account_id %>?days=<%= it.days %>"
+                hx-target="#campaigns-<%= a.account_id.replace(/[^a-zA-Z0-9]/g, '') %>"
+                hx-swap="innerHTML">
+          Campaigns
+        </button>
+      </td>
+    </tr>
+    <tr><td colspan="8" id="campaigns-<%= a.account_id.replace(/[^a-zA-Z0-9]/g, '') %>"></td></tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<% } %>

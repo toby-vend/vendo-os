@@ -1,0 +1,35 @@
+<% layout('/layouts/base') %>
+
+<div class="drive-header">
+  <h1>Google Drive</h1>
+  <a href="https://drive.google.com" target="_blank" rel="noopener" class="btn btn-outline btn-sm">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    Open in Drive
+  </a>
+</div>
+
+<form class="filter-bar" hx-get="/drive" hx-target="#results" hx-push-url="true">
+  <div style="flex:2">
+    <label for="search">Search files</label>
+    <input type="search" id="search" name="search" value="<%= it.search || '' %>"
+           placeholder="Search Google Drive..."
+           hx-get="/drive" hx-target="#results" hx-trigger="keyup changed delay:400ms"
+           hx-include="closest form">
+  </div>
+  <div>
+    <label for="type">File type</label>
+    <select id="type" name="type" onchange="this.form.requestSubmit()">
+      <option value="">All types</option>
+      <option value="doc" <%= it.type === 'doc' ? 'selected' : '' %>>Docs</option>
+      <option value="sheet" <%= it.type === 'sheet' ? 'selected' : '' %>>Sheets</option>
+      <option value="slides" <%= it.type === 'slides' ? 'selected' : '' %>>Slides</option>
+      <option value="pdf" <%= it.type === 'pdf' ? 'selected' : '' %>>PDFs</option>
+      <option value="folder" <%= it.type === 'folder' ? 'selected' : '' %>>Folders</option>
+      <option value="video" <%= it.type === 'video' ? 'selected' : '' %>>Videos</option>
+    </select>
+  </div>
+</form>
+
+<div id="results">
+  <%~ include('/drive-results', it) %>
+</div>

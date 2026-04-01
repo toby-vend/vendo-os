@@ -1,0 +1,22 @@
+<% if (!it.campaigns.length) { %>
+  <p><em>No campaign data for this account in the selected period.</em></p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CPM</th><th>CTR</th></tr>
+  </thead>
+  <tbody>
+    <% it.campaigns.forEach(c => { %>
+    <tr>
+      <td><%= c.campaign_name || c.campaign_id %></td>
+      <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td><%= c.impressions.toLocaleString() %></td>
+      <td><%= c.clicks.toLocaleString() %></td>
+      <td>&pound;<%= c.cpc.toFixed(2) %></td>
+      <td>&pound;<%= c.cpm.toFixed(2) %></td>
+      <td><%= c.ctr.toFixed(2) %>%</td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

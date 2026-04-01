@@ -1,0 +1,13 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; text-align: center;">
+  <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" width="32" height="32">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0110 0v4"/>
+    </svg>
+  </div>
+  <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; margin-bottom: 0.5rem;">Access Denied</h2>
+  <p style="color: #94A3B8; font-size: 14px; max-width: 400px;">You don't have permission to view this page. Contact an admin if you need access.</p>
+  <a href="/" style="margin-top: 1.5rem; padding: 8px 20px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; text-decoration: none; font-size: 14px;">Go to Dashboard</a>
+</div>

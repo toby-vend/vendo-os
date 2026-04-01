@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Vendo OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', 'Inter', -apple-system, sans-serif;
+      background: #0B0B0B;
+      color: #E2E8F0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Logo */
+    .login-logo {
+      width: 56px;
+      height: 56px;
+      background: #22C55E;
+      color: #0B0B0B;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 28px;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Brand name */
+    .login-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Typewriter area */
+    .typewriter-wrap {
+      height: 32px;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .typewriter-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: #22C55E;
+      letter-spacing: -0.01em;
+    }
+
+    .typewriter-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 22px;
+      background: #22C55E;
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 0.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Card */
+    .login-card {
+      background: #141414;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+    }
+
+    .login-card label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94A3B8;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      background: #0B0B0B;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 8px;
+      color: #E2E8F0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .login-card input:focus {
+      border-color: #22C55E;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+    }
+
+    .login-card input::placeholder {
+      color: #64748b;
+    }
+
+    .login-card button {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.625rem 1.25rem;
+      background: #22C55E;
+      color: #0B0B0B;
+      border: none;
+      border-radius: 999px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .login-card button:hover {
+      background: #16A34A;
+      transform: scale(1.02);
+    }
+
+    .error-text {
+      color: #ef4444;
+      font-weight: 600;
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 1rem;
+    }
+
+    .login-footer {
+      margin-top: 2rem;
+      font-size: 12px;
+      color: rgba(148, 163, 184, 0.5);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-logo">V</div>
+    <div class="login-brand">Vendo Digital</div>
+    <div class="typewriter-wrap">
+      <span class="typewriter-text" id="typewriter"></span><span class="typewriter-cursor"></span>
+    </div>
+
+    <div class="login-card">
+      <% if (it.error) { %>
+        <p class="error-text"><%= it.error %></p>
+      <% } %>
+      <form method="POST" action="/login">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@vendo.digital" required autofocus>
+        <div style="margin-top: 1rem;">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit">Log In</button>
+      </form>
+    </div>
+
+    <p class="login-footer">Vendo OS &mdash; Team Dashboard</p>
+  </div>
+
+  <script>
+  (function() {
+    const words = ["Driving Strategic Digital Growth", "We Are Vendo Digital"];
+    const el = document.getElementById('typewriter');
+    const speed = 80;
+    const deleteSpeed = 40;
+    const pauseAfterWord = 2000;
+    const pauseAfterDelete = 500;
+    let wordIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+
+    function tick() {
+      const word = words[wordIdx];
+
+      if (!deleting) {
+        charIdx++;
+        el.textContent = word.slice(0, charIdx);
+        if (charIdx === word.length) {
+          setTimeout(function() { deleting = true; tick(); }, pauseAfterWord);
+          return;
+        }
+        setTimeout(tick, speed);
+      } else {
+        charIdx--;
+        el.textContent = word.slice(0, charIdx);
+        if (charIdx === 0) {
+          deleting = false;
+          wordIdx = (wordIdx + 1) % words.length;
+          setTimeout(tick, pauseAfterDelete);
+          return;
+        }
+        setTimeout(tick, deleteSpeed);
+      }
+    }
+
+    setTimeout(tick, 600);
+  })();
+  </script>
+</body>
+</html>

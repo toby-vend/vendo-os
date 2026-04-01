@@ -1,0 +1,91 @@
+<% layout('/layouts/base') %>
+
+<h1>Dashboard</h1>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.totalMeetings %></p>
+    <p class="stat-label">Total Meetings</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.openActions %></p>
+    <p class="stat-label">Open Action Items</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.activeClients %></p>
+    <p class="stat-label">Active Clients</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.stats.adSpend30d.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Ad Spend (30d)</p>
+  </article>
+</div>
+
+<div class="two-col">
+  <div>
+    <h2>Recent Meetings</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Date</th><th>Title</th><th>Client</th><th>Category</th></tr>
+      </thead>
+      <tbody>
+        <% it.recentMeetings.forEach(m => { %>
+        <tr>
+          <td><%= m.date ? m.date.slice(0, 10) : '—' %></td>
+          <td><a href="/meetings/<%= m.id %>"><%= m.title %></a></td>
+          <td><%= m.client_name || '—' %></td>
+          <td><%= m.category || '—' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <p><a href="/meetings">View all meetings</a></p>
+
+    <h2>Open Actions by Assignee</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Assignee</th><th>Total</th><th>Open</th></tr>
+      </thead>
+      <tbody>
+        <% it.assigneeSummary.forEach(a => { %>
+        <tr>
+          <td><a href="/action-items?assignee=<%= encodeURIComponent(a.assignee) %>&status=open"><%= a.assignee %></a></td>
+          <td><%= a.total %></td>
+          <td><strong><%= a.open %></strong></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <h2>Data Freshness</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Source</th><th>Last Sync</th><th>Rows</th></tr>
+      </thead>
+      <tbody>
+        <% it.syncStatus.forEach(s => { %>
+        <tr>
+          <td><%= s.source %></td>
+          <td>
+            <% if (s.lastSync) { %>
+              <span class="<%= (Date.now() - new Date(s.lastSync).getTime()) < 86400000 ? 'sync-ok' : 'sync-stale' %>">
+                <%= s.lastSync.slice(0, 10) %>
+              </span>
+            <% } else { %>
+              <span class="sync-none">Not synced</span>
+            <% } %>
+          </td>
+          <td><%= s.rowCount.toLocaleString() %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <h2>Today's Brief</h2>
+    <% const today = new Date().toISOString().slice(0, 10); %>
+    <p><a href="/briefs/<%= today %>">View brief for <%= today %></a></p>
+    <p><a href="/briefs">All briefs</a></p>
+  </div>
+</div>

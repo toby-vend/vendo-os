@@ -22,8 +22,8 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-gdrive"],
       "env": {
-        "GDRIVE_CREDENTIALS_PATH": "/Users/Toby_1/.config/google/credentials.json",
-        "GDRIVE_OAUTH_PATH": "/Users/Toby_1/.config/google/gdrive-token.json"
+        "GDRIVE_CREDENTIALS_PATH": "/Users/Toby_1/Vendo-OS/.secrets/.gdrive-server-credentials.json",
+        "GDRIVE_OAUTH_PATH": "/Users/Toby_1/Vendo-OS/.secrets/gcp-oauth.keys.json"
       }
     },
     "miro": {

@@ -1,0 +1,126 @@
+<% layout('/layouts/base') %>
+
+<h1>Pipeline</h1>
+
+<% if (!it.overview.length) { %>
+  <article>
+    <p>No pipeline data yet. Run <code>npm run sync:ghl</code> to pull data from GoHighLevel.</p>
+  </article>
+<% } else { %>
+
+<% it.overview.forEach(pipe => { %>
+
+<% if (it.overview.length > 1) { %>
+  <h2><%= pipe.pipeline_name %></h2>
+<% } %>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value"><%= pipe.totalOpen %></p>
+    <p class="stat-label">Open Deals</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= Math.round(pipe.totalOpenValue).toLocaleString() %></p>
+    <p class="stat-label">Pipeline Value</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= pipe.wonThisMonth %></p>
+    <p class="stat-label">Won This Month</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= Math.round(pipe.wonThisMonthValue).toLocaleString() %></p>
+    <p class="stat-label">Won Value (Month)</p>
+  </article>
+</div>
+
+<!-- Stage breakdown -->
+<h3>Stages</h3>
+<table class="compact">
+  <thead>
+    <tr><th>Stage</th><th>Open Deals</th><th>Value</th></tr>
+  </thead>
+  <tbody>
+    <% pipe.stages.forEach(s => { %>
+    <tr>
+      <td><%= s.name %></td>
+      <td><%= s.count %></td>
+      <td>&pound;<%= Math.round(s.value).toLocaleString() %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<% }) %>
+
+<div class="two-col">
+  <div>
+    <!-- Recent open deals -->
+    <h2>Recent Open Deals</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Date</th><th>Deal</th><th>Company</th><th>Stage</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <% if (!it.recent.length) { %>
+        <tr><td colspan="5">No open deals</td></tr>
+        <% } %>
+        <% it.recent.forEach(o => { %>
+        <tr>
+          <td><%= o.created_at ? o.created_at.slice(0, 10) : '—' %></td>
+          <td><a href="/pipeline/<%= o.id %>"><%= o.name || o.contact_name || '—' %></a></td>
+          <td><%= o.contact_company || '—' %></td>
+          <td><span class="badge badge-active"><%= o.stage_name || '—' %></span></td>
+          <td>&pound;<%= (o.monetary_value || 0).toLocaleString() %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <!-- Won deals -->
+    <h2>Won Deals (30d)</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Date</th><th>Deal</th><th>Company</th><th>Value</th><th>Source</th></tr>
+      </thead>
+      <tbody>
+        <% if (!it.won.length) { %>
+        <tr><td colspan="5">No won deals in the last 30 days</td></tr>
+        <% } %>
+        <% it.won.forEach(o => { %>
+        <tr>
+          <td><%= o.updated_at ? o.updated_at.slice(0, 10) : '—' %></td>
+          <td><a href="/pipeline/<%= o.id %>"><%= o.name || o.contact_name || '—' %></a></td>
+          <td><%= o.contact_company || '—' %></td>
+          <td>&pound;<%= (o.monetary_value || 0).toLocaleString() %></td>
+          <td><%= o.source || '—' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <!-- Stalled deals -->
+    <h2>Stalled Deals (14+ days)</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Deal</th><th>Stage</th><th>Days</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <% if (!it.stalled.length) { %>
+        <tr><td colspan="4">No stalled deals</td></tr>
+        <% } %>
+        <% it.stalled.forEach(o => { %>
+        <tr>
+          <td><a href="/pipeline/<%= o.id %>"><%= o.name || o.contact_name || '—' %></a></td>
+          <td><%= o.stage_name || '—' %></td>
+          <td><strong class="sync-stale"><%= o.days_in_stage %></strong></td>
+          <td>&pound;<%= (o.monetary_value || 0).toLocaleString() %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<% } %>

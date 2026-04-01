@@ -1,0 +1,21 @@
+<% layout('/layouts/base') %>
+
+<h1>Daily Briefs</h1>
+
+<% if (!it.briefs.length) { %>
+  <p>No briefs generated yet. Run <code>npm run brief:data</code> to generate one.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr><th>Date</th><th></th></tr>
+  </thead>
+  <tbody>
+    <% it.briefs.forEach(b => { %>
+    <tr>
+      <td><a href="/briefs/<%= b.date %>"><%= b.date %></a></td>
+      <td><a href="/briefs/<%= b.date %>">View</a></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

@@ -1,0 +1,74 @@
+<% layout('/layouts/base') %>
+
+<p><a href="/meetings">&laquo; Back to meetings</a></p>
+
+<h1><%= it.meeting.title %></h1>
+
+<p class="meeting-meta">
+  <strong>Date:</strong> <%= it.meeting.date ? it.meeting.date.slice(0, 10) : '—' %>
+  <% if (it.meeting.client_name) { %> | <strong>Client:</strong> <a href="/clients/<%= encodeURIComponent(it.meeting.client_name) %>"><%= it.meeting.client_name %></a><% } %>
+  <% if (it.meeting.category) { %> | <strong>Category:</strong> <%= it.meeting.category %><% } %>
+  <% if (it.meeting.duration_seconds) { %> | <strong>Duration:</strong> <%= Math.round(it.meeting.duration_seconds / 60) %> min<% } %>
+  <% if (it.meeting.url) { %> | <a href="<%= it.meeting.url %>" target="_blank">View in Fathom</a><% } %>
+</p>
+
+<% if (it.meeting.attendees) { %>
+  <p class="meeting-meta"><strong>Attendees:</strong> <%= it.meeting.attendees %></p>
+<% } %>
+
+<div class="tabs" role="tablist">
+  <a href="#summary" role="tab" aria-selected="true" class="active"
+     onclick="showTab(event, 'summary')">Summary</a>
+  <a href="#transcript" role="tab"
+     onclick="showTab(event, 'transcript')">Transcript</a>
+  <a href="#actions" role="tab"
+     onclick="showTab(event, 'actions')">Action Items (<%= it.actions.length %>)</a>
+</div>
+
+<div id="tab-summary" class="tab-panel">
+  <% if (it.meeting.summary) { %>
+    <div class="brief-content"><%~ it.meeting.summary.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') %></div>
+  <% } else { %>
+    <p>No summary available</p>
+  <% } %>
+</div>
+
+<div id="tab-transcript" class="tab-panel" style="display:none">
+  <% if (it.meeting.transcript) { %>
+    <div class="transcript-content"><%= it.meeting.transcript %></div>
+  <% } else { %>
+    <p>No transcript available</p>
+  <% } %>
+</div>
+
+<div id="tab-actions" class="tab-panel" style="display:none">
+  <% if (it.actions.length) { %>
+  <table class="compact">
+    <thead>
+      <tr><th>Status</th><th>Description</th><th>Assignee</th></tr>
+    </thead>
+    <tbody>
+      <% it.actions.forEach(a => { %>
+      <tr>
+        <td><span class="badge <%= a.completed ? 'badge-completed' : 'badge-open' %>"><%= a.completed ? 'Done' : 'Open' %></span></td>
+        <td><%= a.description %></td>
+        <td><%= a.assignee || '—' %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } else { %>
+    <p>No action items</p>
+  <% } %>
+</div>
+
+<script>
+function showTab(e, name) {
+  e.preventDefault();
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tabs a').forEach(a => { a.classList.remove('active'); a.setAttribute('aria-selected', 'false'); });
+  document.getElementById('tab-' + name).style.display = 'block';
+  e.target.classList.add('active');
+  e.target.setAttribute('aria-selected', 'true');
+}
+</script>

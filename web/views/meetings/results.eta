@@ -1,0 +1,36 @@
+<table class="compact">
+  <thead>
+    <tr><th>Date</th><th>Title</th><th>Client</th><th>Category</th><th>Duration</th></tr>
+  </thead>
+  <tbody>
+    <% if (!it.meetings.length) { %>
+    <tr><td colspan="5">No meetings found</td></tr>
+    <% } %>
+    <% it.meetings.forEach(m => { %>
+    <tr>
+      <td><%= m.date ? m.date.slice(0, 10) : '—' %></td>
+      <td>
+        <a href="/meetings/<%= m.id %>"><%= m.title %></a>
+        <% if (m.excerpt) { %>
+          <br><small><%~ m.excerpt %></small>
+        <% } %>
+      </td>
+      <td><%= m.client_name || '—' %></td>
+      <td><%= m.category || '—' %></td>
+      <td class="duration"><%= m.duration_seconds ? Math.round(m.duration_seconds / 60) + ' min' : '—' %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<% if (it.totalPages > 1) { %>
+<div class="pagination">
+  <% if (it.page > 1) { %>
+    <a href="?<%= new URLSearchParams({ ...it.query, page: String(it.page - 1) }).toString() %>">&laquo; Prev</a>
+  <% } %>
+  <span>Page <%= it.page %> of <%= it.totalPages %></span>
+  <% if (it.page < it.totalPages) { %>
+    <a href="?<%= new URLSearchParams({ ...it.query, page: String(it.page + 1) }).toString() %>">Next &raquo;</a>
+  <% } %>
+</div>
+<% } %>
