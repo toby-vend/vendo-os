@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 04-skills-library 04-01-PLAN.md
-last_updated: "2026-04-01T21:28:52.973Z"
+stopped_at: Completed 04-skills-library 04-02-PLAN.md
+last_updated: "2026-04-01T21:40:09.091Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 8
+  completed_phases: 4
+  total_plans: 10
+  completed_plans: 9
   percent: 0
 ---
 
@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-drive-document-processing P01 | 176s | 2 tasks | 2 files |
 | Phase 03-drive-document-processing P02 | 238s | 2 tasks | 4 files |
 | Phase 04-skills-library P01 | 385 | 1 tasks | 2 files |
+| Phase 04-skills-library P02 | 120 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions affecting current work:
 - [Phase 03-drive-document-processing]: subfolderName propagated through listFilesInFolder recursion avoids extra files.get API calls during re-index
 - [Phase 04-skills-library]: syncSkillFts signature accepts (rowid, oldTitle, oldContent, newTitle, newContent): FTS5 content-sync delete requires OLD values to remove previously indexed tokens
 - [Phase 04-skills-library]: FTS5 tests use real in-memory libsql database — mock.module at top level + --import tsx/esm pattern; bm25() returns negative values so ORDER BY ASC gives most-relevant-first
+- [Phase 04-skills-library]: updateSkillContent fetches old row BEFORE upsert so old FTS5 values are available for content-sync delete step; new INSERT path passes empty strings (safe no-op)
+- [Phase 04-skills-library]: Unknown subfolder names fall back to 'general' in resolveSkillType (not raw slug); SKILL_TYPE_MAP exported for Phase 6 reference
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T21:28:52.970Z
-Stopped at: Completed 04-skills-library 04-01-PLAN.md
+Last session: 2026-04-01T21:40:09.089Z
+Stopped at: Completed 04-skills-library 04-02-PLAN.md
 Resume file: None
