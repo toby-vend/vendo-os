@@ -651,4 +651,82 @@ export async function initAuthSchema(): Promise<void> {
     route_slug TEXT NOT NULL,
     PRIMARY KEY (channel_id, route_slug)
   )`, args: [] });
+
+  await client.execute({ sql: `CREATE TABLE IF NOT EXISTS user_oauth_tokens (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider TEXT NOT NULL DEFAULT 'google',
+    access_token_enc TEXT NOT NULL,
+    refresh_token_enc TEXT NOT NULL,
+    token_expiry INTEGER NOT NULL,
+    scopes TEXT NOT NULL,
+    provider_email TEXT,
+    provider_name TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, provider)
+  )`, args: [] });
+}
+
+// --- OAuth Tokens ---
+
+export interface UserOAuthTokenRow {
+  user_id: string;
+  provider: string;
+  access_token_enc: string;
+  refresh_token_enc: string;
+  token_expiry: number;
+  scopes: string;
+  provider_email: string | null;
+  provider_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getUserOAuthToken(userId: string, provider = 'google'): Promise<UserOAuthTokenRow | null> {
+  const result = await rows<UserOAuthTokenRow>(
+    'SELECT * FROM user_oauth_tokens WHERE user_id = ? AND provider = ?', [userId, provider]
+  );
+  return result[0] ?? null;
+}
+
+export async function hasUserOAuthToken(userId: string, provider = 'google'): Promise<boolean> {
+  const count = await scalar('SELECT COUNT(*) FROM user_oauth_tokens WHERE user_id = ? AND provider = ?', [userId, provider]);
+  return (count as number) > 0;
+}
+
+export async function upsertUserOAuthToken(data: {
+  userId: string;
+  provider: string;
+  accessTokenEnc: string;
+  refreshTokenEnc: string;
+  tokenExpiry: number;
+  scopes: string;
+  providerEmail?: string;
+  providerName?: string;
+}): Promise<void> {
+  const now = new Date().toISOString();
+  await client.execute({
+    sql: `INSERT INTO user_oauth_tokens (user_id, provider, access_token_enc, refresh_token_enc, token_expiry, scopes, provider_email, provider_name, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(user_id, provider) DO UPDATE SET
+            access_token_enc = excluded.access_token_enc,
+            refresh_token_enc = excluded.refresh_token_enc,
+            token_expiry = excluded.token_expiry,
+            scopes = excluded.scopes,
+            provider_email = excluded.provider_email,
+            provider_name = excluded.provider_name,
+            updated_at = excluded.updated_at`,
+    args: [data.userId, data.provider, data.accessTokenEnc, data.refreshTokenEnc, data.tokenExpiry, data.scopes, data.providerEmail ?? null, data.providerName ?? null, now, now],
+  });
+}
+
+export async function updateUserOAuthAccessToken(userId: string, provider: string, accessTokenEnc: string, tokenExpiry: number): Promise<void> {
+  await client.execute({
+    sql: 'UPDATE user_oauth_tokens SET access_token_enc = ?, token_expiry = ?, updated_at = ? WHERE user_id = ? AND provider = ?',
+    args: [accessTokenEnc, tokenExpiry, new Date().toISOString(), userId, provider],
+  });
+}
+
+export async function deleteUserOAuthToken(userId: string, provider = 'google'): Promise<void> {
+  await client.execute({ sql: 'DELETE FROM user_oauth_tokens WHERE user_id = ? AND provider = ?', args: [userId, provider] });
 }
