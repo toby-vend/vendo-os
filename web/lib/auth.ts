@@ -11,6 +11,7 @@ export interface SessionUser {
   mustChangePassword: boolean;
   channels: string[];       // channel slugs
   allowedRoutes: string[];  // route slugs
+  googleConnected: boolean;
 }
 
 export interface SessionPayload {
