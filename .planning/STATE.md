@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-04-01T18:33:46.673Z"
+stopped_at: Completed 01-infrastructure-02-PLAN.md
+last_updated: "2026-04-01T19:30:40.576Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-infrastructure P02 | 8 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ Recent decisions affecting current work:
 - Real-time webhook sync over periodic cron (stale SOPs mean wrong agent output)
 - Skills layer before client CRM portal (direct revenue impact)
 - Extend existing Fastify/Eta stack (proven in production)
+- [Phase 01-infrastructure]: skills_fts FTS5 virtual table added only to Turso/libsql path — sql.js 1.11.0 is FTS4-only and skills queries run via web app
+- [Phase 01-infrastructure]: initAuthSchema renamed to initSchema (broader scope); deprecated alias retained for backward compatibility
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T18:33:46.671Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-infrastructure/01-CONTEXT.md
+Last session: 2026-04-01T19:30:40.573Z
+Stopped at: Completed 01-infrastructure-02-PLAN.md
+Resume file: None

@@ -66,7 +66,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Infrastructure
 
 - [ ] **INFR-01**: Split queries.ts monolith into domain-specific query modules before adding skills queries
-- [ ] **INFR-02**: Database schema extended with skills, brand_hub, task_runs, drive_watch_channels tables
+- [x] **INFR-02**: Database schema extended with skills, brand_hub, task_runs, drive_watch_channels tables
 - [ ] **INFR-03**: OAuth token handling hardened (crypto key versioning resolved, silent-failure path surfaces status)
 
 ## v2 Requirements
@@ -112,7 +112,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFR-01 | Phase 1 | Pending |
-| INFR-02 | Phase 1 | Pending |
+| INFR-02 | Phase 1 | Complete |
 | INFR-03 | Phase 1 | Pending |
 | SYNC-01 | Phase 2 | Pending |
 | SYNC-03 | Phase 2 | Pending |
