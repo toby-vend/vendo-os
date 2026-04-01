@@ -305,16 +305,16 @@ describe('syncSkillFts', () => {
     const rowid = rowResult.rows[0][0] as number;
     await testDb.execute({ sql: 'INSERT INTO skills_fts(rowid, title, content) VALUES(?, ?, ?)', args: [rowid, 'Old Title', 'old content about widgets'] });
 
-    // Update the row in skills then sync FTS
-    await testDb.execute({ sql: "UPDATE skills SET title = 'New Title', content = 'new content about gadgets' WHERE rowid = ?", args: [rowid] });
-    await syncSkillFts(rowid, 'New Title', 'new content about gadgets');
+    // Update the row in skills then sync FTS — pass OLD values for delete, NEW values for insert
+    await testDb.execute({ sql: 'UPDATE skills SET title=?, content=? WHERE rowid=?', args: ['New Title', 'new content about gadgets', rowid] });
+    await syncSkillFts(rowid, 'Old Title', 'old content about widgets', 'New Title', 'new content about gadgets');
 
     // New term is findable
-    const newResult = await testDb.execute({ sql: "SELECT rowid FROM skills_fts WHERE skills_fts MATCH 'gadgets'", args: [] });
+    const newResult = await testDb.execute({ sql: 'SELECT rowid FROM skills_fts WHERE skills_fts MATCH ?', args: ['gadgets'] });
     assert.ok(newResult.rows.some(r => r[0] === rowid), 'Expected to find "gadgets" in FTS after sync');
 
     // Old term is no longer associated with this rowid
-    const oldResult = await testDb.execute({ sql: "SELECT rowid FROM skills_fts WHERE skills_fts MATCH 'widgets'", args: [] });
+    const oldResult = await testDb.execute({ sql: 'SELECT rowid FROM skills_fts WHERE skills_fts MATCH ?', args: ['widgets'] });
     const oldRowids = oldResult.rows.map(r => r[0]);
     assert.ok(!oldRowids.includes(rowid), 'Old term "widgets" should not be in FTS after sync');
   });
