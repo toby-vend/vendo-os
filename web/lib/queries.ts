@@ -64,9 +64,15 @@ export interface ActionItemRow {
 
 export interface ClientRow {
   name: string;
+  email: string | null;
   meeting_count: number;
   vertical: string | null;
   status: string;
+  source: string;
+  total_invoiced: number;
+  outstanding: number;
+  first_invoice_date: string | null;
+  last_invoice_date: string | null;
   first_meeting_date: string | null;
   last_meeting_date: string | null;
 }
@@ -245,11 +251,23 @@ export async function getActionItems(opts: ActionItemSearchOpts): Promise<{ item
 // --- Clients ---
 
 export async function getClients(): Promise<ClientRow[]> {
-  return rows<ClientRow>('SELECT name, meeting_count, vertical, status, first_meeting_date, last_meeting_date FROM clients ORDER BY meeting_count DESC');
+  return rows<ClientRow>(`
+    SELECT name, email, meeting_count, vertical, status, source,
+           total_invoiced, outstanding, first_invoice_date, last_invoice_date,
+           first_meeting_date, last_meeting_date
+    FROM clients
+    WHERE source = 'xero'
+    ORDER BY total_invoiced DESC, meeting_count DESC
+  `);
 }
 
 export async function getClientByName(name: string): Promise<{ client: ClientRow | null; meetings: MeetingRow[]; actions: ActionItemRow[] }> {
-  const clients = await rows<ClientRow>('SELECT * FROM clients WHERE name = ?', [name]);
+  const clients = await rows<ClientRow>(`
+    SELECT name, email, meeting_count, vertical, status, source,
+           total_invoiced, outstanding, first_invoice_date, last_invoice_date,
+           first_meeting_date, last_meeting_date
+    FROM clients WHERE name = ?
+  `, [name]);
   const cl = clients[0] ?? null;
   if (!cl) return { client: null, meetings: [], actions: [] };
 

@@ -42,7 +42,7 @@ export const googleOAuthRoutes: FastifyPluginAsync = async (app) => {
     const user = (request as any).user as SessionUser | null;
     if (!user) { reply.redirect('/login'); return; }
 
-    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
     if (!clientId) {
       reply.code(500).send('Google OAuth is not configured');
       return;
@@ -91,8 +91,8 @@ export const googleOAuthRoutes: FastifyPluginAsync = async (app) => {
     // Clear state cookie
     reply.header('Set-Cookie', 'google_oauth_state=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
 
-    const clientId = process.env.GOOGLE_CLIENT_ID!;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
+    const clientId = process.env.GOOGLE_CLIENT_ID!.trim();
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET!.trim();
     const redirectUri = getRedirectUri(request);
 
     // Exchange code for tokens

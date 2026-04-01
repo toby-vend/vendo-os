@@ -79,14 +79,30 @@ export async function initSchema(): Promise<void> {
     CREATE TABLE IF NOT EXISTS clients (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT UNIQUE NOT NULL,
+      xero_contact_id TEXT,
+      email TEXT,
       aliases TEXT,
       vertical TEXT,
       status TEXT DEFAULT 'active',
+      source TEXT DEFAULT 'xero',
+      total_invoiced REAL DEFAULT 0,
+      outstanding REAL DEFAULT 0,
+      first_invoice_date TEXT,
+      last_invoice_date TEXT,
       first_meeting_date TEXT,
       last_meeting_date TEXT,
       meeting_count INTEGER DEFAULT 0
     )
   `);
+
+  // Migrate: add new columns if upgrading from old schema
+  try { db.run('ALTER TABLE clients ADD COLUMN xero_contact_id TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN email TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN source TEXT DEFAULT \'xero\''); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN total_invoiced REAL DEFAULT 0'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN outstanding REAL DEFAULT 0'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN first_invoice_date TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN last_invoice_date TEXT'); } catch { /* already exists */ }
 
   db.run(`
     CREATE TABLE IF NOT EXISTS key_decisions (

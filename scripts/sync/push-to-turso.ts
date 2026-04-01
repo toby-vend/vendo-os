@@ -53,6 +53,20 @@ async function main() {
     await remote.execute(sql.replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS'));
   }
 
+  // Run schema migrations for existing tables
+  const migrations = [
+    'ALTER TABLE clients ADD COLUMN xero_contact_id TEXT',
+    'ALTER TABLE clients ADD COLUMN email TEXT',
+    "ALTER TABLE clients ADD COLUMN source TEXT DEFAULT 'xero'",
+    'ALTER TABLE clients ADD COLUMN total_invoiced REAL DEFAULT 0',
+    'ALTER TABLE clients ADD COLUMN outstanding REAL DEFAULT 0',
+    'ALTER TABLE clients ADD COLUMN first_invoice_date TEXT',
+    'ALTER TABLE clients ADD COLUMN last_invoice_date TEXT',
+  ];
+  for (const sql of migrations) {
+    try { await remote.execute(sql); } catch { /* column already exists */ }
+  }
+
   // Create indexes
   const indexes = local.exec("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL");
   if (indexes.length) {
