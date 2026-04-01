@@ -182,6 +182,7 @@ export async function getSkillByDriveFileId(driveFileId: string): Promise<SkillR
 
 /**
  * Insert or update a skill with full content (triggers version increment on conflict).
+ * FTS5 index is updated inline so search results reflect the new content immediately.
  */
 export async function updateSkillContent(data: {
   driveFileId: string;
@@ -192,6 +193,13 @@ export async function updateSkillContent(data: {
   skillType: string;
   driveModifiedAt: string;
 }): Promise<void> {
+  // Fetch current values before upsert so we can pass correct old values to FTS5 delete
+  const existing = await rows<{ rowid: number; title: string; content: string }>(
+    'SELECT rowid, title, content FROM skills WHERE drive_file_id = ?',
+    [data.driveFileId],
+  );
+  const oldRow = existing[0] ?? null;
+
   const now = new Date().toISOString();
   await db.execute({
     sql: `INSERT INTO skills (drive_file_id, title, content, content_hash, channel, skill_type, drive_modified_at, indexed_at, version)
@@ -210,6 +218,18 @@ export async function updateSkillContent(data: {
       data.channel, data.skillType, data.driveModifiedAt, now,
     ],
   });
+
+  // Fetch rowid (needed for both INSERT and UPDATE paths — UPSERT does not return it)
+  const rowid = await scalar<number>('SELECT rowid FROM skills WHERE drive_file_id = ?', [data.driveFileId]);
+  if (rowid !== null) {
+    if (oldRow) {
+      // Update: pass old values for FTS5 delete, new values for re-insert
+      await syncSkillFts(rowid, oldRow.title, oldRow.content, data.title, data.content);
+    } else {
+      // Insert: no old entry in FTS5, pass empty strings for the delete step (no-op)
+      await syncSkillFts(rowid, '', '', data.title, data.content);
+    }
+  }
 }
 
 /**
