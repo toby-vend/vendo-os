@@ -80,7 +80,7 @@ Plans:
   2. Each skill record shows its Drive document version (modified timestamp) and content hash
   3. When a Drive document is updated, the corresponding skill record is re-indexed with new content and version
   4. Querying for a task type with no matching SOPs returns an explicit "no skill found" signal, not an empty result that silently degrades output
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 04-01-PLAN.md — FTS5 search queries, gap detection, version tracking (TDD)
@@ -162,7 +162,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 1. Infrastructure | 3/3 | Complete    | 2026-04-01 |
 | 2. Drive Webhook Foundation | 2/2 | Complete    | 2026-04-01 |
 | 3. Drive Document Processing | 1/2 | Complete    | 2026-04-01 |
-| 4. Skills Library | 0/2 | Planning complete | - |
+| 4. Skills Library | 1/2 | In Progress|  |
 | 5. Brand Hub | 0/TBD | Not started | - |
 | 6. Task Matching Engine | 0/TBD | Not started | - |
 | 7. Agent Execution | 0/TBD | Not started | - |

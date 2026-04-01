@@ -18,11 +18,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Skills Library
 
-- [ ] **SKIL-01**: SOPs and templates are stored in an FTS5-indexed skills table with channel, skill type, and document metadata
-- [ ] **SKIL-02**: Skills are queryable by channel, skill type, and free-text search
-- [ ] **SKIL-03**: Each skill record tracks document version (Drive modified timestamp) and content hash
+- [x] **SKIL-01**: SOPs and templates are stored in an FTS5-indexed skills table with channel, skill type, and document metadata
+- [x] **SKIL-02**: Skills are queryable by channel, skill type, and free-text search
+- [x] **SKIL-03**: Each skill record tracks document version (Drive modified timestamp) and content hash
 - [ ] **SKIL-04**: When a Drive document is updated, the corresponding skill record is re-indexed with the new version
-- [ ] **SKIL-05**: System surfaces an explicit "no matching skill found" signal when retrieval confidence is below threshold
+- [x] **SKIL-05**: System surfaces an explicit "no matching skill found" signal when retrieval confidence is below threshold
 
 ### Brand Hub
 
@@ -120,11 +120,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SYNC-02 | Phase 3 | Complete |
 | SYNC-04 | Phase 3 | Complete |
 | SYNC-05 | Phase 3 | Complete |
-| SKIL-01 | Phase 4 | Pending |
-| SKIL-02 | Phase 4 | Pending |
-| SKIL-03 | Phase 4 | Pending |
+| SKIL-01 | Phase 4 | Complete |
+| SKIL-02 | Phase 4 | Complete |
+| SKIL-03 | Phase 4 | Complete |
 | SKIL-04 | Phase 4 | Pending |
-| SKIL-05 | Phase 4 | Pending |
+| SKIL-05 | Phase 4 | Complete |
 | BRND-01 | Phase 5 | Pending |
 | BRND-02 | Phase 5 | Pending |
 | BRND-03 | Phase 5 | Pending |

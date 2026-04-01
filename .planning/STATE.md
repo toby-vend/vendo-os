@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 context gathered
-last_updated: "2026-04-01T21:26:34.005Z"
+stopped_at: Completed 04-skills-library 04-01-PLAN.md
+last_updated: "2026-04-01T21:28:52.973Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 3
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-drive-webhook-foundation P02 | 226s | 2 tasks | 8 files |
 | Phase 03-drive-document-processing P01 | 176s | 2 tasks | 2 files |
 | Phase 03-drive-document-processing P02 | 238s | 2 tasks | 4 files |
+| Phase 04-skills-library P01 | 385 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions affecting current work:
 - [Phase 03-drive-document-processing]: Spreadsheets excluded from extractContent — metadata only; CHANNEL_FOLDER_MAP env var guards prevent undefined Map key; hashContent SHA-256 used as content-change gate (not drive_modified_at)
 - [Phase 03-drive-document-processing]: Dynamic import of getGoogleAccessToken inside processQueue loop avoids circular mock.module interference in tests
 - [Phase 03-drive-document-processing]: subfolderName propagated through listFilesInFolder recursion avoids extra files.get API calls during re-index
+- [Phase 04-skills-library]: syncSkillFts signature accepts (rowid, oldTitle, oldContent, newTitle, newContent): FTS5 content-sync delete requires OLD values to remove previously indexed tokens
+- [Phase 04-skills-library]: FTS5 tests use real in-memory libsql database — mock.module at top level + --import tsx/esm pattern; bm25() returns negative values so ORDER BY ASC gives most-relevant-first
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T21:26:34.003Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-brand-hub/05-CONTEXT.md
+Last session: 2026-04-01T21:28:52.970Z
+Stopped at: Completed 04-skills-library 04-01-PLAN.md
+Resume file: None
