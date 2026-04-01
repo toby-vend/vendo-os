@@ -178,6 +178,7 @@ app.register(chatRoutes, { prefix: '/chat' });
 app.register(tasksRoutes, { prefix: '/tasks' });
 app.register(driveWebhookRoutes, { prefix: '/api/drive' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
+app.register(taskRunRoutes, { prefix: '/api/tasks' });
 
 // Export for Vercel
 export default app;
