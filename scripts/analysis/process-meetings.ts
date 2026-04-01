@@ -199,7 +199,7 @@ function normaliseName(name: string): string {
 }
 
 /** Build a lookup of normalised Xero client names → canonical client name */
-function buildClientLookup(db: ReturnType<typeof import('sql.js').Database.prototype.constructor>): Map<string, string> {
+function buildClientLookup(db: any): Map<string, string> {
   const lookup = new Map<string, string>();
 
   const result = db.exec("SELECT name, aliases FROM clients WHERE source = 'xero'");
