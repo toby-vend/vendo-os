@@ -1,0 +1,119 @@
+import { rows, scalar, db } from './base.js';
+
+// --- Types ---
+
+export type TaskRunStatus =
+  | 'queued'
+  | 'generating'
+  | 'qa_check'
+  | 'draft_ready'
+  | 'approved'
+  | 'failed';
+
+export interface TaskRunRow {
+  id: number;
+  client_id: number;
+  channel: string;
+  task_type: string;
+  status: TaskRunStatus;
+  sops_used: string | null;
+  brand_context_id: number | null;
+  output: string | null;
+  qa_score: number | null;
+  qa_critique: string | null;
+  attempts: number;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// --- Queries ---
+
+/**
+ * Insert a new task run with status=queued and attempts=0.
+ * Returns the integer ID of the inserted row.
+ */
+export async function createTaskRun(data: {
+  clientId: number;
+  channel: string;
+  taskType: string;
+  createdBy: string;
+}): Promise<number> {
+  const now = new Date().toISOString();
+  const result = await db.execute({
+    sql: `INSERT INTO task_runs (client_id, channel, task_type, status, attempts, created_by, created_at, updated_at)
+          VALUES (?, ?, ?, 'queued', 0, ?, ?, ?)`,
+    args: [data.clientId, data.channel, data.taskType, data.createdBy, now, now],
+  });
+  return Number(result.lastInsertRowid);
+}
+
+/**
+ * Update the status of a task run. Optionally writes sops_used (as JSON) and
+ * brand_context_id when provided in extras.
+ */
+export async function updateTaskRunStatus(
+  id: number,
+  status: TaskRunStatus,
+  extras?: { sopsUsed?: number[]; brandContextId?: number | null },
+): Promise<void> {
+  const now = new Date().toISOString();
+
+  if (extras?.sopsUsed !== undefined || extras?.brandContextId !== undefined) {
+    const sopsUsed = extras.sopsUsed !== undefined ? JSON.stringify(extras.sopsUsed) : null;
+    const brandContextId = extras.brandContextId !== undefined ? extras.brandContextId : null;
+
+    await db.execute({
+      sql: `UPDATE task_runs SET status = ?, sops_used = COALESCE(?, sops_used), brand_context_id = COALESCE(?, brand_context_id), updated_at = ? WHERE id = ?`,
+      args: [status, sopsUsed, brandContextId, now, id],
+    });
+  } else {
+    await db.execute({
+      sql: `UPDATE task_runs SET status = ?, updated_at = ? WHERE id = ?`,
+      args: [status, now, id],
+    });
+  }
+}
+
+/**
+ * Retrieve a full task run row by ID. Returns null if not found.
+ */
+export async function getTaskRun(id: number): Promise<TaskRunRow | null> {
+  const result = await rows<TaskRunRow>(
+    'SELECT * FROM task_runs WHERE id = ? LIMIT 1',
+    [id],
+  );
+  return result[0] ?? null;
+}
+
+/**
+ * List task runs with optional filters for status and clientId.
+ * Results ordered by created_at DESC, defaulting to 50 rows.
+ */
+export async function listTaskRuns(filters?: {
+  status?: TaskRunStatus;
+  clientId?: number;
+  limit?: number;
+}): Promise<TaskRunRow[]> {
+  const conditions: string[] = [];
+  const args: (string | number | null)[] = [];
+
+  if (filters?.status !== undefined) {
+    conditions.push('status = ?');
+    args.push(filters.status);
+  }
+
+  if (filters?.clientId !== undefined) {
+    conditions.push('client_id = ?');
+    args.push(filters.clientId);
+  }
+
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const limit = filters?.limit ?? 50;
+  args.push(limit);
+
+  return rows<TaskRunRow>(
+    `SELECT * FROM task_runs ${where} ORDER BY created_at DESC LIMIT ?`,
+    args,
+  );
+}
