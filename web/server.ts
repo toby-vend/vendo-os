@@ -24,6 +24,7 @@ import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
 import { tasksRoutes } from './routes/tasks.js';
 import { driveWebhookRoutes } from './routes/drive-webhook.js';
+import { driveCronRoutes } from './routes/drive-cron.js';
 import {
   parseCookies,
   verifySessionToken,
