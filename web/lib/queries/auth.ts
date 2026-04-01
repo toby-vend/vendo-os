@@ -220,6 +220,22 @@ export async function initSchema(): Promise<void> {
 
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_brand_hub_client ON brand_hub(client_id)`, args: [] });
 
+  // Migrate: add title column to brand_hub if upgrading from old schema
+  try {
+    await db.execute({ sql: `ALTER TABLE brand_hub ADD COLUMN title TEXT NOT NULL DEFAULT ''`, args: [] });
+  } catch { /* already exists */ }
+
+  // UNIQUE index required for ON CONFLICT(drive_file_id) upsert
+  await db.execute({ sql: `CREATE UNIQUE INDEX IF NOT EXISTS idx_brand_hub_drive_file ON brand_hub(drive_file_id)`, args: [] });
+
+  // FTS5 virtual table for brand hub full-text search (Turso/libsql only — NOT sql.js)
+  await db.execute({ sql: `CREATE VIRTUAL TABLE IF NOT EXISTS brand_hub_fts USING fts5(
+    client_name,
+    content,
+    content='brand_hub',
+    tokenize='unicode61'
+  )`, args: [] });
+
   // Drive watch channels table
   await db.execute({ sql: `CREATE TABLE IF NOT EXISTS drive_watch_channels (
     id INTEGER PRIMARY KEY,
