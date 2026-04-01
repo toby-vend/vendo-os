@@ -235,6 +235,7 @@ export async function updateSkillContent(data: {
 /**
  * Update skill metadata (title, channel, skill_type, drive_modified_at) without touching
  * content or content_hash. Used for renames, moves, and metadata-only changes.
+ * FTS5 title is updated inline if the title has changed.
  */
 export async function updateSkillMetadata(data: {
   driveFileId: string;
@@ -243,11 +244,23 @@ export async function updateSkillMetadata(data: {
   skillType: string;
   driveModifiedAt: string;
 }): Promise<void> {
+  // Fetch current row before update so we have old title/content for FTS5 sync
+  const existing = await rows<{ rowid: number; title: string; content: string }>(
+    'SELECT rowid, title, content FROM skills WHERE drive_file_id = ?',
+    [data.driveFileId],
+  );
+  const oldRow = existing[0] ?? null;
+
   await db.execute({
     sql: `UPDATE skills SET title = ?, channel = ?, skill_type = ?, drive_modified_at = ?
           WHERE drive_file_id = ?`,
     args: [data.title, data.channel, data.skillType, data.driveModifiedAt, data.driveFileId],
   });
+
+  // Sync FTS5 if the row existed — re-index with new title and existing content
+  if (oldRow) {
+    await syncSkillFts(oldRow.rowid, oldRow.title, oldRow.content, data.title, oldRow.content);
+  }
 }
 
 /**
