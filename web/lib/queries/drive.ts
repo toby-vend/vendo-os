@@ -22,6 +22,19 @@ export interface DriveSyncQueueRow {
   error: string | null;
 }
 
+export interface SkillRow {
+  id: number;
+  drive_file_id: string;
+  title: string;
+  content: string;
+  content_hash: string;
+  channel: string;
+  skill_type: string;
+  drive_modified_at: string;
+  indexed_at: string;
+  version: number;
+}
+
 // --- Drive Watch Channels ---
 
 export async function getDriveWatchChannel(channelId: string): Promise<DriveWatchChannelRow | null> {
