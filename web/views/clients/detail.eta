@@ -5,11 +5,22 @@
 <h1><%= it.client.name %></h1>
 
 <p class="meeting-meta">
+  <% if (it.client.email) { %><strong>Email:</strong> <%= it.client.email %> | <% } %>
   <strong>Vertical:</strong> <%= it.client.vertical || '—' %>
   | <strong>Status:</strong> <span class="badge badge-active"><%= it.client.status %></span>
   | <strong>Meetings:</strong> <%= it.client.meeting_count %>
   <% if (it.client.first_meeting_date) { %> | <strong>Since:</strong> <%= it.client.first_meeting_date.slice(0, 10) %><% } %>
 </p>
+
+<% if (it.client.total_invoiced > 0 || it.client.outstanding > 0) { %>
+<h2>Financials</h2>
+<table class="compact" style="max-width: 400px">
+  <tr><td><strong>Total Invoiced</strong></td><td>&pound;<%= it.client.total_invoiced.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td></tr>
+  <% if (it.client.outstanding > 0) { %><tr><td><strong>Outstanding</strong></td><td>&pound;<%= it.client.outstanding.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td></tr><% } %>
+  <% if (it.client.first_invoice_date) { %><tr><td><strong>First Invoice</strong></td><td><%= it.client.first_invoice_date.slice(0, 10) %></td></tr><% } %>
+  <% if (it.client.last_invoice_date) { %><tr><td><strong>Last Invoice</strong></td><td><%= it.client.last_invoice_date.slice(0, 10) %></td></tr><% } %>
+</table>
+<% } %>
 
 <h2>Meetings</h2>
 <table class="compact">
@@ -17,6 +28,9 @@
     <tr><th>Date</th><th>Title</th><th>Category</th><th>Duration</th></tr>
   </thead>
   <tbody>
+    <% if (!it.meetings.length) { %>
+    <tr><td colspan="4">No meetings linked yet.</td></tr>
+    <% } %>
     <% it.meetings.forEach(m => { %>
     <tr>
       <td><%= m.date ? m.date.slice(0, 10) : '—' %></td>
