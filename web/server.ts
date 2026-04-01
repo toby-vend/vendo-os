@@ -167,6 +167,8 @@ app.register(pipelineRoutes, { prefix: '/pipeline' });
 app.register(driveRoutes, { prefix: '/drive' });
 app.register(adminUsersRoutes, { prefix: '/admin/users' });
 app.register(adminPermissionsRoutes, { prefix: '/admin/permissions' });
+app.register(googleOAuthRoutes);
+app.register(settingsRoutes, { prefix: '/settings' });
 
 // Export for Vercel
 export default app;
