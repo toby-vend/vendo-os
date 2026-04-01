@@ -150,9 +150,38 @@ export class FathomClient {
       .join('\n');
   }
 
+  async getTranscriptWithSpeakers(recordingId: number): Promise<{
+    text: string;
+    speakers: Array<{ name: string; email: string | null }>;
+  }> {
+    const data = await this.request<TranscriptResponse>(`/recordings/${recordingId}/transcript`);
+
+    if (!data.transcript || !Array.isArray(data.transcript)) {
+      return { text: '', speakers: [] };
+    }
+
+    const text = data.transcript
+      .map(entry => `[${entry.timestamp}] ${entry.speaker.display_name}: ${entry.text}`)
+      .join('\n');
+
+    // Deduplicate speakers by name
+    const speakerMap = new Map<string, string | null>();
+    for (const entry of data.transcript) {
+      const name = entry.speaker.display_name;
+      const email = entry.speaker.matched_calendar_invitee_email;
+      if (!speakerMap.has(name) || (email && !speakerMap.get(name))) {
+        speakerMap.set(name, email || null);
+      }
+    }
+
+    const speakers = Array.from(speakerMap.entries()).map(([name, email]) => ({ name, email }));
+
+    return { text, speakers };
+  }
+
   get rateLimitUsage(): string {
     return this.rateLimiter.usage;
   }
 }
 
-export type { FathomMeeting, FathomListResponse };
+export type { FathomMeeting, FathomListResponse, TranscriptEntry };
