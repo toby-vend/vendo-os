@@ -160,9 +160,10 @@ export async function processChange(change: DriveChange, accessToken: string): P
 
   const fileId = change.fileId;
 
-  // 2. Trashed or removed → delete
+  // 2. Trashed or removed → delete from both skills and brand_hub
   if (change.removed || change.file?.trashed) {
     await deleteSkill(fileId);
+    await deleteBrandFile(fileId); // No-op if file is not in brand_hub
     return;
   }
 
@@ -170,6 +171,16 @@ export async function processChange(change: DriveChange, accessToken: string): P
   if (!change.file) return;
 
   const { name, mimeType, modifiedTime } = change.file;
+
+  // 3.5. Brand file check — route to brand_hub if under BRANDS_FOLDER
+  if (BRANDS_FOLDER_ID) {
+    const clientFolder = await resolveClientFolder(fileId, accessToken);
+    if (clientFolder !== null) {
+      // This is a brand file — handle in brand path, not skills
+      await processBrandChange(change, accessToken, clientFolder);
+      return;
+    }
+  }
 
   // 4. Resolve channel; if null the file is outside watched folders → delete
   const channel = await resolveChannel(fileId, accessToken);
