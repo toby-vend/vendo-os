@@ -50,6 +50,16 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
       await setUserChannels(userId, channelIds);
     }
 
+    // Send invite notifications (non-blocking — don't delay the redirect)
+    const currentUser = (request as any).user as SessionUser;
+    sendInviteNotifications({
+      name,
+      email,
+      password,
+      role,
+      invitedBy: currentUser.name,
+    }).catch(e => console.error('[notify] Invite notification error:', e));
+
     reply.redirect('/admin/users');
   });
 
