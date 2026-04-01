@@ -29,7 +29,10 @@
     "drive:reindex": "tsx scripts/sync/sync-drive.ts",
     "drive:reindex:watch": "tsx scripts/sync/sync-drive.ts --watch",
     "drive:process": "tsx scripts/sync/process-drive-queue.ts",
-    "google-ads:auth": "tsx scripts/auth/google-ads-auth.ts"
+    "google-ads:auth": "tsx scripts/auth/google-ads-auth.ts",
+    "sync:gads": "tsx scripts/sync/sync-google-ads.ts",
+    "sync:gads:backfill": "tsx scripts/sync/sync-google-ads.ts --backfill",
+    "sync:gads:accounts": "tsx scripts/sync/sync-google-ads.ts --accounts-only"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
