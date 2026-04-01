@@ -1,10 +1,11 @@
-import { getUserOAuthToken, updateUserOAuthAccessToken } from './queries.js';
-import { encryptToken, decryptToken } from './crypto.js';
+import { getUserOAuthToken, updateUserOAuthAccessToken, upsertUserOAuthToken } from './queries.js';
+import { encryptToken, decryptToken, isV0Token } from './crypto.js';
 
 /**
  * Get a valid Google access token for a user.
  * Returns null if the user hasn't connected their Google account.
  * Automatically refreshes expired tokens.
+ * Lazily re-encrypts v0 tokens to v1 format on access.
  */
 export async function getGoogleAccessToken(userId: string): Promise<string | null> {
   const row = await getUserOAuthToken(userId, 'google');
@@ -12,6 +13,18 @@ export async function getGoogleAccessToken(userId: string): Promise<string | nul
 
   const accessToken = decryptToken(row.access_token_enc);
   const refreshToken = decryptToken(row.refresh_token_enc);
+
+  // Lazy v0 → v1 migration: re-encrypt in background, never block the hot path
+  if (isV0Token(row.access_token_enc)) {
+    upsertUserOAuthToken({
+      userId,
+      provider: 'google',
+      accessTokenEnc: encryptToken(accessToken),
+      refreshTokenEnc: encryptToken(refreshToken),
+      tokenExpiry: row.token_expiry,
+      scopes: row.scopes ?? '',
+    }).catch(e => console.error('[crypto] lazy migration failed:', e));
+  }
 
   // If token is still valid (60s buffer), return it
   if (row.token_expiry > Date.now() + 60_000) {
