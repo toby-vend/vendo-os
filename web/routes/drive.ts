@@ -51,7 +51,12 @@ export const driveRoutes: FastifyPluginAsync = async (app) => {
     if (!user) { reply.redirect('/login'); return; }
 
     // Check if user has connected their Google account
-    const token = await getGoogleAccessToken(user.id);
+    let token: string | null = null;
+    try {
+      token = await getGoogleAccessToken(user.id);
+    } catch (e) {
+      console.error('[Drive] Token error:', (e as Error).message);
+    }
     if (!token) {
       reply.render('drive', {
         files: [],
