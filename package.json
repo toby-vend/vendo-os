@@ -24,6 +24,7 @@
     "db:push": "tsx scripts/sync/push-to-turso.ts",
     "seed:domains": "tsx scripts/matching/seed-domains.ts",
     "sync:meetings:transcripts-only": "tsx scripts/sync/sync-meetings.ts --transcripts-only",
+    "sync:meetings:backfill-invitees": "tsx scripts/sync/sync-meetings.ts --backfill-invitees",
     "drive:reindex": "tsx scripts/sync/sync-drive.ts",
     "drive:reindex:watch": "tsx scripts/sync/sync-drive.ts --watch"
   },
