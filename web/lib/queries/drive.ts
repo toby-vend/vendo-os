@@ -250,3 +250,94 @@ export async function updateDrivePageToken(channelId: string, pageToken: string)
     args: [pageToken, channelId],
   });
 }
+
+// --- Skills FTS5 Search ---
+
+/**
+ * Full-text search across skills. Returns results in the given channel plus
+ * any skills in the 'general' channel, ranked by BM25 relevance.
+ *
+ * When zero results are found, gap is set to true to signal a missing SOP.
+ */
+export async function searchSkills(
+  query: string,
+  channel: string,
+  limit = 5,
+): Promise<SkillSearchResponse> {
+  // Sanitise: strip quotes, split on whitespace, append * to each token
+  const ftsQuery = query.replace(/['"]/g, '').trim().split(/\s+/).filter(Boolean).map(w => w + '*').join(' ');
+
+  if (!ftsQuery) {
+    return { results: [], gap: true, query, channel };
+  }
+
+  const results = await rows<SkillSearchResult>(`
+    SELECT s.id, s.title, s.content, s.channel, s.skill_type, s.drive_modified_at, s.content_hash,
+           bm25(skills_fts) as bm25_score
+    FROM skills_fts fts
+    JOIN skills s ON s.rowid = fts.rowid
+    WHERE skills_fts MATCH ?
+      AND (s.channel = ? OR s.channel = 'general')
+    ORDER BY bm25(skills_fts) ASC
+    LIMIT ?
+  `, [ftsQuery, channel, limit]);
+
+  return {
+    results,
+    gap: results.length === 0,
+    query,
+    channel,
+  };
+}
+
+// --- Skills FTS5 Sync Helpers ---
+
+/**
+ * Update the FTS5 index for a skill after its content has changed.
+ * Uses the explicit DELETE-then-INSERT pattern required by content-sync tables.
+ */
+export async function syncSkillFts(rowid: number, title: string, content: string): Promise<void> {
+  await db.execute({
+    sql: `INSERT INTO skills_fts(skills_fts, rowid, title, content) VALUES('delete', ?, ?, ?)`,
+    args: [rowid, title, content],
+  });
+  await db.execute({
+    sql: `INSERT INTO skills_fts(rowid, title, content) VALUES(?, ?, ?)`,
+    args: [rowid, title, content],
+  });
+}
+
+/**
+ * Remove a skill entry from the FTS5 index.
+ * Must receive the current title and content values (required by content-sync tables).
+ */
+export async function deleteSkillFts(rowid: number, title: string, content: string): Promise<void> {
+  await db.execute({
+    sql: `INSERT INTO skills_fts(skills_fts, rowid, title, content) VALUES('delete', ?, ?, ?)`,
+    args: [rowid, title, content],
+  });
+}
+
+// --- Skills Version Tracking ---
+
+/**
+ * Get version metadata for a skill by its Drive file ID.
+ * Returns null if the skill has not been indexed.
+ */
+export async function getSkillVersion(driveFileId: string): Promise<SkillVersionInfo | null> {
+  const result = await rows<SkillVersionInfo>(
+    `SELECT drive_modified_at, content_hash, indexed_at, version FROM skills WHERE drive_file_id = ?`,
+    [driveFileId],
+  );
+  return result[0] ?? null;
+}
+
+/**
+ * Return all skills in a channel that were indexed after the given ISO date string.
+ */
+export async function getSkillsByVersion(channel: string, since: string): Promise<SkillRow[]> {
+  return rows<SkillRow>(
+    `SELECT * FROM skills WHERE channel = ? AND indexed_at > ? ORDER BY indexed_at DESC`,
+    [channel, since],
+  );
+}
