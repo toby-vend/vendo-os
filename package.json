@@ -28,7 +28,8 @@
     "sync:meetings:backfill-invitees": "tsx scripts/sync/sync-meetings.ts --backfill-invitees",
     "drive:reindex": "tsx scripts/sync/sync-drive.ts",
     "drive:reindex:watch": "tsx scripts/sync/sync-drive.ts --watch",
-    "drive:process": "tsx scripts/sync/process-drive-queue.ts"
+    "drive:process": "tsx scripts/sync/process-drive-queue.ts",
+    "google-ads:auth": "tsx scripts/auth/google-ads-auth.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
