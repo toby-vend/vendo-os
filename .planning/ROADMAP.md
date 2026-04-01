@@ -110,7 +110,11 @@ Plans:
   2. The task matching engine retrieves the top relevant SOPs for the given channel and task type
   3. Client brand context is injected into the task context alongside SOPs — never mixed with another client's data
   4. Every task in the system has one of the defined statuses: queued / generating / qa_check / draft_ready / approved / failed
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Task runs query module, context assembly engine (TDD)
+- [ ] 06-02-PLAN.md — Fastify HTTP route with fire-and-forget, server registration
 
 ### Phase 7: Agent Execution
 **Goal**: The background task executor produces a structured draft — ad copy, content brief, or report section — grounded in retrieved SOPs and brand context, with channel-specific output structure
@@ -168,7 +172,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. Drive Document Processing | 2/2 | Complete    | 2026-04-01 |
 | 4. Skills Library | 2/2 | Complete    | 2026-04-01 |
 | 5. Brand Hub | 2/2 | Complete   | 2026-04-01 |
-| 6. Task Matching Engine | 0/TBD | Not started | - |
+| 6. Task Matching Engine | 0/2 | Planning complete | - |
 | 7. Agent Execution | 0/TBD | Not started | - |
 | 8. QA and Compliance | 0/TBD | Not started | - |
 | 9. Audit and Traceability | 0/TBD | Not started | - |
