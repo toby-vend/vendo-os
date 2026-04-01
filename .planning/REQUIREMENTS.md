@@ -26,10 +26,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Brand Hub
 
-- [ ] **BRND-01**: Per-client brand files are ingested from Drive and stored with client association
-- [ ] **BRND-02**: Brand context is queryable by client name or ID
-- [ ] **BRND-03**: Brand hub supports 25+ clients without performance degradation
-- [ ] **BRND-04**: Client brand context is strictly isolated — queries for client A never return client B data
+- [x] **BRND-01**: Per-client brand files are ingested from Drive and stored with client association
+- [x] **BRND-02**: Brand context is queryable by client name or ID
+- [x] **BRND-03**: Brand hub supports 25+ clients without performance degradation
+- [x] **BRND-04**: Client brand context is strictly isolated — queries for client A never return client B data
 
 ### Task Execution
 
@@ -125,10 +125,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SKIL-03 | Phase 4 | Complete |
 | SKIL-04 | Phase 4 | Complete |
 | SKIL-05 | Phase 4 | Complete |
-| BRND-01 | Phase 5 | Pending |
-| BRND-02 | Phase 5 | Pending |
-| BRND-03 | Phase 5 | Pending |
-| BRND-04 | Phase 5 | Pending |
+| BRND-01 | Phase 5 | Complete |
+| BRND-02 | Phase 5 | Complete |
+| BRND-03 | Phase 5 | Complete |
+| BRND-04 | Phase 5 | Complete |
 | TASK-01 | Phase 6 | Pending |
 | TASK-02 | Phase 6 | Pending |
 | TASK-03 | Phase 6 | Pending |

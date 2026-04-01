@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 04-skills-library 04-02-PLAN.md
-last_updated: "2026-04-01T21:43:34.012Z"
+stopped_at: Completed 05-brand-hub 05-01-PLAN.md
+last_updated: "2026-04-01T21:52:42.688Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
   percent: 0
 ---
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03-drive-document-processing P02 | 238s | 2 tasks | 4 files |
 | Phase 04-skills-library P01 | 385 | 1 tasks | 2 files |
 | Phase 04-skills-library P02 | 120 | 2 tasks | 2 files |
+| Phase 05-brand-hub P01 | 266 | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,10 @@ Recent decisions affecting current work:
 - [Phase 04-skills-library]: FTS5 tests use real in-memory libsql database — mock.module at top level + --import tsx/esm pattern; bm25() returns negative values so ORDER BY ASC gives most-relevant-first
 - [Phase 04-skills-library]: updateSkillContent fetches old row BEFORE upsert so old FTS5 values are available for content-sync delete step; new INSERT path passes empty strings (safe no-op)
 - [Phase 04-skills-library]: Unknown subfolder names fall back to 'general' in resolveSkillType (not raw slug); SKILL_TYPE_MAP exported for Phase 6 reference
+- [Phase 05-brand-hub]: libsql maps rowid to INTEGER PRIMARY KEY column name — SELECT id not rowid to avoid undefined in row objects
+- [Phase 05-brand-hub]: FTS5 content-sync writes must be serialised — concurrent upserts via Promise.all corrupt the vtab (SQLITE_CORRUPT_VTAB)
+- [Phase 05-brand-hub]: searchBrandContent without clientSlug returns global results — BRND-04 client scoping is opt-in via parameter
+- [Phase 05-brand-hub]: brand_hub_fts indexes client_name + content columns (not title) — matches brand context lookup search intent
 
 ### Pending Todos
 
@@ -104,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T21:40:09.089Z
-Stopped at: Completed 04-skills-library 04-02-PLAN.md
+Last session: 2026-04-01T21:52:42.686Z
+Stopped at: Completed 05-brand-hub 05-01-PLAN.md
 Resume file: None
