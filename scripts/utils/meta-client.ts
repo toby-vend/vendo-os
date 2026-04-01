@@ -175,6 +175,55 @@ export class MetaClient {
     return rows;
   }
 
+  /**
+   * Search the public Ad Library for ads by keyword or page ID.
+   * Returns ads visible to anyone — useful for competitor research.
+   */
+  async searchAdLibrary(options: {
+    searchTerms?: string;
+    searchPageIds?: string[];
+    countries: string[];        // ISO codes, e.g. ['GB', 'US']
+    activeStatus?: 'ACTIVE' | 'INACTIVE' | 'ALL';
+    limit?: number;             // max results to collect (across pages)
+  }): Promise<MetaAdLibraryResult[]> {
+    const { searchTerms, searchPageIds, countries, activeStatus = 'ACTIVE', limit = 500 } = options;
+
+    if (!searchTerms && !searchPageIds?.length) {
+      throw new Error('Provide searchTerms or searchPageIds');
+    }
+
+    const fields = [
+      'id', 'ad_creative_bodies', 'ad_creative_link_titles',
+      'ad_creative_link_descriptions', 'ad_creative_link_captions',
+      'page_id', 'page_name',
+      'ad_delivery_start_time', 'ad_delivery_stop_time',
+      'ad_snapshot_url', 'languages',
+      'publisher_platforms', 'estimated_audience_size',
+    ].join(',');
+
+    const params = new URLSearchParams({
+      access_token: this.accessToken,
+      ad_reached_countries: JSON.stringify(countries),
+      ad_active_status: activeStatus,
+      fields,
+      limit: '100',
+    });
+
+    if (searchTerms) params.set('search_terms', searchTerms);
+    if (searchPageIds?.length) params.set('search_page_ids', searchPageIds.join(','));
+
+    const results: MetaAdLibraryResult[] = [];
+    let url: string | null = `${BASE_URL}/ads_archive?${params.toString()}`;
+
+    while (url && results.length < limit) {
+      const resp = await this.request<MetaPaginatedResponse<MetaAdLibraryResult>>(url);
+      results.push(...resp.data);
+      url = resp.paging?.next || null;
+    }
+
+    return results.slice(0, limit);
+  }
+
   get rateLimitUsage(): string {
     return this.rateLimiter.usage;
   }
