@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 05-brand-hub 05-01-PLAN.md
-last_updated: "2026-04-01T21:52:42.688Z"
+stopped_at: Completed 05-brand-hub 05-02-PLAN.md
+last_updated: "2026-04-01T21:58:01.751Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-skills-library P01 | 385 | 1 tasks | 2 files |
 | Phase 04-skills-library P02 | 120 | 2 tasks | 2 files |
 | Phase 05-brand-hub P01 | 266 | 1 tasks | 4 files |
+| Phase 05-brand-hub P02 | 183 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 05-brand-hub]: FTS5 content-sync writes must be serialised — concurrent upserts via Promise.all corrupt the vtab (SQLITE_CORRUPT_VTAB)
 - [Phase 05-brand-hub]: searchBrandContent without clientSlug returns global results — BRND-04 client scoping is opt-in via parameter
 - [Phase 05-brand-hub]: brand_hub_fts indexes client_name + content columns (not title) — matches brand context lookup search intent
+- [Phase 05-brand-hub]: resolveClientFolder walks parent chain up to 5 levels (matches resolveChannel pattern) to find immediate child of BRANDS_FOLDER
+- [Phase 05-brand-hub]: brand check (step 3.5) inserted BEFORE resolveChannel to ensure brand files never reach skills null-channel delete path
+- [Phase 05-brand-hub]: deleteBrandFile called on every trashed/removed change as a safe no-op when file is not in brand_hub
 
 ### Pending Todos
 
@@ -109,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T21:52:42.686Z
-Stopped at: Completed 05-brand-hub 05-01-PLAN.md
+Last session: 2026-04-01T21:58:01.749Z
+Stopped at: Completed 05-brand-hub 05-02-PLAN.md
 Resume file: None

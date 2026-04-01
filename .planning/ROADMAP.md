@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Drive Webhook Foundation** - Register webhook channels, receive push notifications, renew before expiry (completed 2026-04-01)
 - [x] **Phase 3: Drive Document Processing** - Classify documents by folder, detect content changes, handle moves and deletions (completed 2026-04-01)
 - [x] **Phase 4: Skills Library** - FTS5-indexed SOP store with channel classification and version tracking (completed 2026-04-01)
-- [ ] **Phase 5: Brand Hub** - Per-client brand context ingested from Drive and queryable in isolation
+- [x] **Phase 5: Brand Hub** - Per-client brand context ingested from Drive and queryable in isolation (completed 2026-04-01)
 - [ ] **Phase 6: Task Matching Engine** - Match task type and client to relevant SOPs and brand context, async queuing
 - [ ] **Phase 7: Agent Execution** - Produce structured draft output per channel using retrieved context
 - [ ] **Phase 8: QA and Compliance** - Validate output against SOP criteria, AHPRA pre-flight, retry with critique
@@ -95,7 +95,7 @@ Plans:
   2. A query for client A never returns any data belonging to client B — verified by a test that asserts this explicitly
   3. All 25+ active clients can have brand files ingested without performance degradation on retrieval
   4. When a client's brand file in Drive is updated, the brand hub record reflects the new content on next sync
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 05-01-PLAN.md — Brand query module with FTS5 search, client isolation tests (TDD)
@@ -167,7 +167,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Drive Webhook Foundation | 2/2 | Complete    | 2026-04-01 |
 | 3. Drive Document Processing | 2/2 | Complete    | 2026-04-01 |
 | 4. Skills Library | 2/2 | Complete    | 2026-04-01 |
-| 5. Brand Hub | 1/2 | In Progress|  |
+| 5. Brand Hub | 2/2 | Complete   | 2026-04-01 |
 | 6. Task Matching Engine | 0/TBD | Not started | - |
 | 7. Agent Execution | 0/TBD | Not started | - |
 | 8. QA and Compliance | 0/TBD | Not started | - |
