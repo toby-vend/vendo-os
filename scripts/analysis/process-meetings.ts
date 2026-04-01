@@ -185,6 +185,79 @@ function detectVertical(clientName: string): string | null {
   return null;
 }
 
+// --- Fuzzy client matching against Xero-sourced clients ---
+
+/** Normalise a name for comparison: lowercase, strip common suffixes, punctuation */
+function normaliseName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\b(ltd|limited|llp|plc|inc|uk|t\/a)\b/g, '')
+    .replace(/\(.*?\)/g, '')           // strip parenthetical qualifiers
+    .replace(/[^a-z0-9\s]/g, '')       // strip punctuation
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Build a lookup of normalised Xero client names → canonical client name */
+function buildClientLookup(db: ReturnType<typeof import('sql.js').Database.prototype.constructor>): Map<string, string> {
+  const lookup = new Map<string, string>();
+
+  const result = db.exec("SELECT name, aliases FROM clients WHERE source = 'xero'");
+  if (!result.length) return lookup;
+
+  for (const row of result[0].values) {
+    const name = row[0] as string;
+    const aliases = row[1] as string | null;
+
+    // Add normalised full name
+    lookup.set(normaliseName(name), name);
+
+    // Add each word-boundary segment for partial matching
+    // e.g. "Peak Dental (Shams Moopen Ltd)" → "peak dental"
+    const norm = normaliseName(name);
+    const words = norm.split(' ').filter(w => w.length > 2);
+    // Add first 2-3 significant words as a key
+    if (words.length >= 2) {
+      lookup.set(words.slice(0, 2).join(' '), name);
+      if (words.length >= 3) {
+        lookup.set(words.slice(0, 3).join(' '), name);
+      }
+    }
+
+    // Add aliases
+    if (aliases) {
+      try {
+        const aliasList = JSON.parse(aliases) as string[];
+        for (const alias of aliasList) {
+          lookup.set(normaliseName(alias), name);
+        }
+      } catch { /* not JSON, treat as single alias */
+        lookup.set(normaliseName(aliases), name);
+      }
+    }
+  }
+
+  return lookup;
+}
+
+/** Try to match an extracted meeting client name to a known Xero client */
+function matchToXeroClient(extracted: string, lookup: Map<string, string>): string | null {
+  const norm = normaliseName(extracted);
+  if (!norm) return null;
+
+  // 1. Exact normalised match
+  if (lookup.has(norm)) return lookup.get(norm)!;
+
+  // 2. Check if extracted name is a substring of any Xero name (or vice versa)
+  for (const [key, canonical] of lookup) {
+    if (key.includes(norm) || norm.includes(key)) {
+      return canonical;
+    }
+  }
+
+  return null;
+}
+
 // --- Main processing ---
 async function processMeetings() {
   await initSchema();
@@ -195,6 +268,10 @@ async function processMeetings() {
     closeDb();
     return;
   }
+
+  // Build lookup of known Xero clients for matching
+  const clientLookup = buildClientLookup(db);
+  log('PROCESS', `Loaded ${clientLookup.size} client name variants from Xero`);
 
   // Get meetings to process
   const query = REPROCESS
@@ -212,7 +289,8 @@ async function processMeetings() {
   log('PROCESS', `Processing ${meetings.length} meetings...`);
 
   let categorised = 0;
-  let clientsExtracted = 0;
+  let clientsMatched = 0;
+  let unmatchedNames: string[] = [];
   let actionsParsed = 0;
   let decisionsExtracted = 0;
 
@@ -223,20 +301,28 @@ async function processMeetings() {
     const category = categoriseMeeting(title);
     categorised++;
 
-    // 2. Extract client name
-    const clientName = extractClientName(title);
-    if (clientName) clientsExtracted++;
+    // 2. Extract and match client name
+    const rawClientName = extractClientName(title);
+    let matchedClientName: string | null = null;
 
-    // 3. Update meeting
+    if (rawClientName) {
+      matchedClientName = matchToXeroClient(rawClientName, clientLookup);
+      if (matchedClientName) {
+        clientsMatched++;
+      } else {
+        unmatchedNames.push(rawClientName);
+      }
+    }
+
+    // 3. Update meeting — only set client_name if matched to a Xero client
     db.run('UPDATE meetings SET category = ?, client_name = ?, processed_at = ? WHERE id = ?',
-      [category, clientName, new Date().toISOString(), id]);
+      [category, matchedClientName, new Date().toISOString(), id]);
 
     // 4. Parse action items
     if (rawActionItems) {
       try {
         const items = JSON.parse(rawActionItems);
         if (Array.isArray(items)) {
-          // Clear existing action items for this meeting if reprocessing
           if (REPROCESS) {
             db.run('DELETE FROM action_items WHERE meeting_id = ?', [id]);
           }
@@ -249,7 +335,6 @@ async function processMeetings() {
             const normalised = assigneeName ? normaliseAssignee(assigneeName) : null;
             const completed = item.completed ? 1 : 0;
 
-            // Check for duplicates
             const existing = db.exec(
               'SELECT id FROM action_items WHERE meeting_id = ? AND description = ?',
               [id, desc]
@@ -283,41 +368,29 @@ async function processMeetings() {
         decisionsExtracted++;
       }
     }
-
-    // 6. Upsert client
-    if (clientName) {
-      const existingClient = db.exec('SELECT id FROM clients WHERE name = ?', [clientName]);
-      if (!existingClient.length || !existingClient[0].values.length) {
-        const vertical = detectVertical(clientName);
-        db.run(
-          'INSERT INTO clients (name, vertical, first_meeting_date, last_meeting_date, meeting_count) VALUES (?, ?, ?, ?, 1)',
-          [clientName, vertical, date, date]
-        );
-      } else {
-        db.run(
-          'UPDATE clients SET last_meeting_date = MAX(last_meeting_date, ?), meeting_count = meeting_count + 1 WHERE name = ?',
-          [date, clientName]
-        );
-      }
-    }
   }
 
-  // Fix client meeting counts (in case of reprocess)
-  if (REPROCESS) {
-    db.run(`
-      UPDATE clients SET meeting_count = (
-        SELECT COUNT(*) FROM meetings WHERE meetings.client_name = clients.name
-      ), first_meeting_date = (
-        SELECT MIN(date) FROM meetings WHERE meetings.client_name = clients.name
-      ), last_meeting_date = (
-        SELECT MAX(date) FROM meetings WHERE meetings.client_name = clients.name
-      )
-    `);
-  }
+  // Update meeting counts on Xero-sourced clients
+  db.run(`
+    UPDATE clients SET
+      meeting_count = (SELECT COUNT(*) FROM meetings WHERE meetings.client_name = clients.name),
+      first_meeting_date = (SELECT MIN(date) FROM meetings WHERE meetings.client_name = clients.name),
+      last_meeting_date = (SELECT MAX(date) FROM meetings WHERE meetings.client_name = clients.name)
+    WHERE source = 'xero'
+  `);
+
+  // Clean out old Fathom-only clients that have no Xero backing
+  db.run("DELETE FROM clients WHERE source = 'fathom' OR source IS NULL");
 
   saveDb();
 
-  log('PROCESS', `Done: ${categorised} categorised, ${clientsExtracted} clients extracted, ${actionsParsed} action items, ${decisionsExtracted} decisions`);
+  // Deduplicate unmatched names
+  const uniqueUnmatched = [...new Set(unmatchedNames)];
+
+  log('PROCESS', `Done: ${categorised} categorised, ${clientsMatched} matched to Xero clients, ${actionsParsed} action items, ${decisionsExtracted} decisions`);
+  if (uniqueUnmatched.length) {
+    log('PROCESS', `Unmatched meeting names (${uniqueUnmatched.length}): ${uniqueUnmatched.join(', ')}`);
+  }
 
   await generateReport();
   closeDb();
