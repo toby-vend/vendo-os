@@ -18,6 +18,7 @@
   <article class="stat-card">
     <p class="stat-value">&pound;<%= it.stats.adSpend30d.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
     <p class="stat-label">Ad Spend (30d)</p>
+    <p class="stat-breakdown">Meta &pound;<%= (it.stats.metaSpend30d / 1000).toFixed(1) %>k | Google &pound;<%= (it.stats.gadsSpend30d / 1000).toFixed(1) %>k</p>
   </article>
 </div>
 
