@@ -174,6 +174,7 @@ app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });
 app.register(tasksRoutes, { prefix: '/tasks' });
+app.register(driveWebhookRoutes, { prefix: '/api/drive' });
 
 // Export for Vercel
 export default app;
