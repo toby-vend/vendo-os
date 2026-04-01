@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 05-brand-hub 05-02-PLAN.md
-last_updated: "2026-04-01T22:01:05.569Z"
+stopped_at: Completed 06-task-matching-engine 06-01-PLAN.md
+last_updated: "2026-04-01T22:23:25.883Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 13
+  completed_plans: 12
   percent: 0
 ---
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04-skills-library P02 | 120 | 2 tasks | 2 files |
 | Phase 05-brand-hub P01 | 266 | 1 tasks | 4 files |
 | Phase 05-brand-hub P02 | 183 | 2 tasks | 3 files |
+| Phase 06-task-matching-engine P01 | 240 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 05-brand-hub]: resolveClientFolder walks parent chain up to 5 levels (matches resolveChannel pattern) to find immediate child of BRANDS_FOLDER
 - [Phase 05-brand-hub]: brand check (step 3.5) inserted BEFORE resolveChannel to ensure brand files never reach skills null-channel delete path
 - [Phase 05-brand-hub]: deleteBrandFile called on every trashed/removed change as a safe no-op when file is not in brand_hub
+- [Phase 06-task-matching-engine]: COALESCE in updateTaskRunStatus preserves existing sops_used/brand_context_id when extras not passed — avoids nulling columns on simple status updates
+- [Phase 06-task-matching-engine]: assembleContext takes clientId not clientSlug — resolveClientSlug() does brand_hub lookup internally, keeping HTTP route call signature clean
+- [Phase 06-task-matching-engine]: Mutable holder pattern for mock.module closures in node:test — avoids re-registering mocks per test
 
 ### Pending Todos
 
@@ -113,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T21:58:01.749Z
-Stopped at: Completed 05-brand-hub 05-02-PLAN.md
+Last session: 2026-04-01T22:23:25.881Z
+Stopped at: Completed 06-task-matching-engine 06-01-PLAN.md
 Resume file: None

@@ -33,13 +33,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Task Execution
 
-- [ ] **TASK-01**: AM can assign a task by selecting client, channel, and task type
-- [ ] **TASK-02**: Task matching engine retrieves relevant SOPs based on channel + task type
-- [ ] **TASK-03**: Task matching engine retrieves client brand context and injects it into agent prompt
+- [x] **TASK-01**: AM can assign a task by selecting client, channel, and task type
+- [x] **TASK-02**: Task matching engine retrieves relevant SOPs based on channel + task type
+- [x] **TASK-03**: Task matching engine retrieves client brand context and injects it into agent prompt
 - [ ] **TASK-04**: Agent produces structured draft output (ad copy, content brief, report section) from retrieved context
 - [ ] **TASK-05**: Each channel (paid social, SEO, paid ads) has distinct agent behaviour with channel-specific output structure
 - [ ] **TASK-06**: Task execution runs asynchronously — does not block the web request
-- [ ] **TASK-07**: Each task has a status: queued / generating / qa_check / draft_ready / approved / failed
+- [x] **TASK-07**: Each task has a status: queued / generating / qa_check / draft_ready / approved / failed
 
 ### QA & Compliance
 
@@ -129,11 +129,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRND-02 | Phase 5 | Complete |
 | BRND-03 | Phase 5 | Complete |
 | BRND-04 | Phase 5 | Complete |
-| TASK-01 | Phase 6 | Pending |
-| TASK-02 | Phase 6 | Pending |
-| TASK-03 | Phase 6 | Pending |
+| TASK-01 | Phase 6 | Complete |
+| TASK-02 | Phase 6 | Complete |
+| TASK-03 | Phase 6 | Complete |
 | TASK-06 | Phase 6 | Pending |
-| TASK-07 | Phase 6 | Pending |
+| TASK-07 | Phase 6 | Complete |
 | TASK-04 | Phase 7 | Pending |
 | TASK-05 | Phase 7 | Pending |
 | QA-01 | Phase 8 | Pending |
