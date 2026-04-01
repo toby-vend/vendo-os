@@ -209,4 +209,144 @@ async function fetchMissingTranscripts(client: FathomClient) {
   log('SYNC', `Transcripts complete: ${fetched} fetched, ${failed} failed`);
 }
 
+/**
+ * Backfill calendar_invitees for meetings that already have transcripts.
+ * Re-fetches transcript from Fathom to extract speaker emails, then
+ * re-lists meetings to capture invitee_domains_type and action item emails.
+ */
+async function backfillInvitees(client: FathomClient) {
+  const db = await getDb();
+
+  // Phase 1: Re-fetch transcripts to extract speaker emails
+  const needsSpeakers = db.exec(
+    'SELECT id FROM meetings WHERE transcript IS NOT NULL AND calendar_invitees IS NULL'
+  );
+
+  if (needsSpeakers.length && needsSpeakers[0].values.length) {
+    const ids = needsSpeakers[0].values.map((row: unknown[]) => String(row[0]));
+    log('SYNC', `Backfilling speaker emails for ${ids.length} meetings...`);
+
+    let fetched = 0;
+    let failed = 0;
+
+    for (const id of ids) {
+      try {
+        const { text, speakers } = await client.getTranscriptWithSpeakers(Number(id));
+
+        const invitees: Array<{ name: string; email: string | null; domain: string | null }> = [];
+        const seenEmails = new Set<string>();
+
+        for (const speaker of speakers) {
+          if (speaker.email && !seenEmails.has(speaker.email)) {
+            seenEmails.add(speaker.email);
+            const domain = speaker.email.split('@')[1]?.toLowerCase() || null;
+            invitees.push({ name: speaker.name, email: speaker.email, domain });
+          }
+        }
+
+        if (invitees.length > 0) {
+          db.run('UPDATE meetings SET calendar_invitees = ? WHERE id = ?',
+            [JSON.stringify(invitees), id]);
+        }
+
+        // Update transcript too in case it has improved
+        if (text) {
+          db.run('UPDATE meetings SET transcript = ? WHERE id = ?', [text, id]);
+        }
+
+        fetched++;
+      } catch (err) {
+        logError('SYNC', `Failed to fetch speakers for ${id}`, err);
+        failed++;
+      }
+
+      if ((fetched + failed) % 20 === 0) {
+        saveDb();
+        log('SYNC', `Speakers: ${fetched} fetched, ${failed} failed, ${ids.length - fetched - failed} remaining [rate: ${client.rateLimitUsage}]`);
+      }
+    }
+
+    saveDb();
+    log('SYNC', `Speaker backfill complete: ${fetched} fetched, ${failed} failed`);
+  } else {
+    log('SYNC', 'All meetings already have invitee data');
+  }
+
+  // Phase 2: Re-list meetings to capture invitee_domains_type and action item emails
+  const needsDomainType = db.exec(
+    'SELECT COUNT(*) FROM meetings WHERE invitee_domains_type IS NULL'
+  );
+  const needsCount = needsDomainType[0].values[0][0] as number;
+
+  if (needsCount > 0) {
+    log('SYNC', `Backfilling invitee_domains_type for ${needsCount} meetings via re-list...`);
+
+    let cursor: string | undefined;
+    let page = 0;
+    let updated = 0;
+
+    while (true) {
+      page++;
+      const resp = await client.listMeetings({
+        cursor,
+        includeSummary: false,
+        includeActionItems: true,
+      });
+
+      for (const m of resp.items) {
+        const id = String(m.recording_id);
+        const domainsType = m.calendar_invitees_domains_type || null;
+
+        // Extract action item assignee emails
+        const invitees: Array<{ name: string; email: string | null; domain: string | null }> = [];
+        const seenEmails = new Set<string>();
+        if (m.action_items) {
+          for (const item of m.action_items) {
+            if (item.assignee?.email && !seenEmails.has(item.assignee.email)) {
+              seenEmails.add(item.assignee.email);
+              const domain = item.assignee.email.split('@')[1]?.toLowerCase() || null;
+              invitees.push({ name: item.assignee.name, email: item.assignee.email, domain });
+            }
+          }
+        }
+
+        // Merge with existing calendar_invitees (from transcript speakers)
+        const existing = db.exec('SELECT calendar_invitees FROM meetings WHERE id = ?', [id]);
+        let merged = invitees;
+        if (existing.length && existing[0].values[0][0]) {
+          try {
+            const prev: Array<{ name: string; email: string | null; domain: string | null }> = JSON.parse(existing[0].values[0][0] as string);
+            const prevEmails = new Set(prev.map(i => i.email).filter(Boolean));
+            for (const inv of invitees) {
+              if (inv.email && !prevEmails.has(inv.email)) {
+                prev.push(inv);
+              }
+            }
+            merged = prev;
+          } catch { /* ignore */ }
+        }
+
+        const inviteesJson = merged.length > 0 ? JSON.stringify(merged) : null;
+        db.run(
+          'UPDATE meetings SET invitee_domains_type = COALESCE(?, invitee_domains_type), calendar_invitees = COALESCE(?, calendar_invitees) WHERE id = ?',
+          [domainsType, inviteesJson, id]
+        );
+        updated++;
+      }
+
+      log('SYNC', `Re-list page ${page}: ${resp.items.length} meetings, ${updated} updated [rate: ${client.rateLimitUsage}]`);
+
+      if (resp.next_cursor) {
+        saveDb();
+      }
+
+      if (!resp.next_cursor || resp.items.length === 0) break;
+      cursor = resp.next_cursor;
+    }
+
+    saveDb();
+    log('SYNC', `Domain type backfill complete: ${updated} meetings updated`);
+  }
+}
+
 syncMeetings();
