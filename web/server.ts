@@ -21,6 +21,7 @@ import { adminUsersRoutes } from './routes/admin/users.js';
 import { adminPermissionsRoutes } from './routes/admin/permissions.js';
 import { googleOAuthRoutes } from './routes/google-oauth.js';
 import { settingsRoutes } from './routes/settings.js';
+import { chatRoutes } from './routes/chat.js';
 import {
   parseCookies,
   verifySessionToken,
