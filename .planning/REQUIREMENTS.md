@@ -111,13 +111,50 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| INFR-01 | Phase 1 | Pending |
+| INFR-02 | Phase 1 | Pending |
+| INFR-03 | Phase 1 | Pending |
+| SYNC-01 | Phase 2 | Pending |
+| SYNC-03 | Phase 2 | Pending |
+| SYNC-06 | Phase 2 | Pending |
+| SYNC-02 | Phase 3 | Pending |
+| SYNC-04 | Phase 3 | Pending |
+| SYNC-05 | Phase 3 | Pending |
+| SKIL-01 | Phase 4 | Pending |
+| SKIL-02 | Phase 4 | Pending |
+| SKIL-03 | Phase 4 | Pending |
+| SKIL-04 | Phase 4 | Pending |
+| SKIL-05 | Phase 4 | Pending |
+| BRND-01 | Phase 5 | Pending |
+| BRND-02 | Phase 5 | Pending |
+| BRND-03 | Phase 5 | Pending |
+| BRND-04 | Phase 5 | Pending |
+| TASK-01 | Phase 6 | Pending |
+| TASK-02 | Phase 6 | Pending |
+| TASK-03 | Phase 6 | Pending |
+| TASK-06 | Phase 6 | Pending |
+| TASK-07 | Phase 6 | Pending |
+| TASK-04 | Phase 7 | Pending |
+| TASK-05 | Phase 7 | Pending |
+| QA-01 | Phase 8 | Pending |
+| QA-02 | Phase 8 | Pending |
+| QA-03 | Phase 8 | Pending |
+| QA-04 | Phase 8 | Pending |
+| QA-05 | Phase 8 | Pending |
+| AUDT-01 | Phase 9 | Pending |
+| AUDT-02 | Phase 9 | Pending |
+| AUDT-03 | Phase 9 | Pending |
+| UI-01 | Phase 10 | Pending |
+| UI-02 | Phase 10 | Pending |
+| UI-03 | Phase 10 | Pending |
+| UI-04 | Phase 10 | Pending |
+| UI-05 | Phase 10 | Pending |
 
 **Coverage:**
 - v1 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-01*
-*Last updated: 2026-04-01 after initial definition*
+*Last updated: 2026-04-01 — traceability populated after roadmap creation*
