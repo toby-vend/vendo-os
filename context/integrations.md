@@ -26,7 +26,7 @@
 
 | Service | Purpose | Connection Type | Status | Priority |
 |---------|---------|----------------|--------|----------|
-| Asana | Task management, team workload | API / MCP | Not connected | Medium |
+| Asana | Task management, team workload | MCP | **Connected** | Medium |
 
 ### Communication
 
