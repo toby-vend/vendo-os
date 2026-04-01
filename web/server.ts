@@ -22,6 +22,8 @@ import { adminPermissionsRoutes } from './routes/admin/permissions.js';
 import { googleOAuthRoutes } from './routes/google-oauth.js';
 import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
+import { tasksRoutes } from './routes/tasks.js';
+import { driveWebhookRoutes } from './routes/drive-webhook.js';
 import {
   parseCookies,
   verifySessionToken,
@@ -171,6 +173,7 @@ app.register(adminPermissionsRoutes, { prefix: '/admin/permissions' });
 app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });
+app.register(tasksRoutes, { prefix: '/tasks' });
 
 // Export for Vercel
 export default app;
