@@ -309,9 +309,12 @@ async function main() {
     await syncPnl(client);
     await syncBankSummary(client);
 
+    const clientCount = await syncClientsFromXero();
+
     log('XERO', '--- Sync Summary ---');
     log('XERO', `  Invoices: ${invoiceCount}`);
     log('XERO', `  Contacts: ${contactCount}`);
+    log('XERO', `  Clients upserted: ${clientCount}`);
     log('XERO', `  P&L: last ${BACKFILL ? 24 : 12} months`);
     log('XERO', `  Bank summary: current month`);
     log('XERO', 'Sync complete');
