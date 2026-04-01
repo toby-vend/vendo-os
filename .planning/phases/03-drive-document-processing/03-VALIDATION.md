@@ -19,8 +19,8 @@ created: 2026-04-01
 |----------|-------|
 | **Framework** | Node.js built-in `node:test` |
 | **Config file** | none |
-| **Quick run command** | `node --import tsx/esm --test scripts/sync/process-drive-queue.test.ts` |
-| **Full suite command** | `node --import tsx/esm --test "web/**/*.test.ts" "scripts/**/*.test.ts"` |
+| **Quick run command** | `node --import tsx/esm --experimental-test-module-mocks --test scripts/sync/process-drive-queue.test.ts` |
+| **Full suite command** | `node --import tsx/esm --experimental-test-module-mocks --test "web/**/*.test.ts" "scripts/**/*.test.ts"` |
 | **Estimated runtime** | ~5 seconds |
 
 ---
