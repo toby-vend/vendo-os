@@ -25,6 +25,7 @@ import { chatRoutes } from './routes/chat.js';
 import { tasksRoutes } from './routes/tasks.js';
 import { driveWebhookRoutes } from './routes/drive-webhook.js';
 import { driveCronRoutes } from './routes/drive-cron.js';
+import { taskRunRoutes } from './routes/task-runs.js';
 import {
   parseCookies,
   verifySessionToken,
