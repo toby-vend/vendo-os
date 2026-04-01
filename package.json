@@ -26,7 +26,8 @@
     "sync:meetings:transcripts-only": "tsx scripts/sync/sync-meetings.ts --transcripts-only",
     "sync:meetings:backfill-invitees": "tsx scripts/sync/sync-meetings.ts --backfill-invitees",
     "drive:reindex": "tsx scripts/sync/sync-drive.ts",
-    "drive:reindex:watch": "tsx scripts/sync/sync-drive.ts --watch"
+    "drive:reindex:watch": "tsx scripts/sync/sync-drive.ts --watch",
+    "drive:process": "tsx scripts/sync/process-drive-queue.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
