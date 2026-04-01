@@ -314,6 +314,49 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_action_items_completed ON action_items(completed)');
   db.run('CREATE INDEX IF NOT EXISTS idx_key_decisions_meeting ON key_decisions(meeting_id)');
 
+  // --- Auth tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'standard',
+      must_change_password INTEGER DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS channels (
+      id TEXT PRIMARY KEY,
+      slug TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS user_channels (
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      channel_id TEXT NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
+      PRIMARY KEY (user_id, channel_id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS channel_permissions (
+      channel_id TEXT NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
+      route_slug TEXT NOT NULL,
+      PRIMARY KEY (channel_id, route_slug)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_user_channels_user ON user_channels(user_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_channel_permissions_channel ON channel_permissions(channel_id)');
+
   seedCategories(db);
   saveDb();
 }
