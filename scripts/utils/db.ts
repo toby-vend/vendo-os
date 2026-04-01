@@ -478,6 +478,24 @@ export async function initSchema(): Promise<void> {
     )
   `);
 
+  // Migrate: add user_id column to drive_watch_channels if upgrading from old schema
+  try { db.run('ALTER TABLE drive_watch_channels ADD COLUMN user_id TEXT'); } catch { /* already exists */ }
+
+  // --- Drive sync queue table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS drive_sync_queue (
+      id INTEGER PRIMARY KEY,
+      channel_id TEXT NOT NULL,
+      resource_state TEXT NOT NULL,
+      received_at TEXT NOT NULL,
+      processed_at TEXT,
+      error TEXT
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_dsq_unprocessed ON drive_sync_queue(processed_at)');
+
   // --- Task runs table ---
 
   db.run(`
