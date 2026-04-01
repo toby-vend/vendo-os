@@ -2,7 +2,7 @@
  * Drive re-index script — walks configured Google Drive folders and populates the skills table.
  *
  * Usage:
- *   npm run drive:reindex              # Walk all configured folders and upsert file metadata
+ *   npm run drive:reindex              # Walk all configured folders and upsert file metadata + content
  *   npm run drive:reindex:watch        # Same, then register a Drive webhook watch channel
  *
  * Requires in .env.local:
@@ -16,8 +16,9 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getGoogleAccessToken } from '../../web/lib/google-tokens.js';
-import { upsertSkillFromDrive } from '../../web/lib/queries/drive.js';
+import { upsertSkillFromDrive, updateSkillContent } from '../../web/lib/queries/drive.js';
 import { registerWatchChannel } from '../../web/lib/drive-sync.js';
+import { extractContent, hashContent } from '../../web/lib/drive-sync.js';
 
 const WATCH = process.argv.includes('--watch');
 
@@ -45,6 +46,7 @@ const FOLDER_CONFIG: Record<string, string | undefined> = {
 
 // Brands folder handled separately — not a skill channel
 const BRANDS_FOLDER = process.env.DRIVE_FOLDER_BRANDS;
+void BRANDS_FOLDER; // reserved for brand_hub phase
 
 // --- Types ---
 
@@ -54,6 +56,7 @@ interface DriveFile {
   mimeType: string;
   modifiedTime: string;
   size?: string;
+  subfolderName?: string; // first subfolder under the channel root (for skillType derivation)
 }
 
 interface DriveFilesListResponse {
@@ -71,14 +74,34 @@ const INDEXABLE_MIME_TYPES = new Set([
 
 const FOLDER_MIME = 'application/vnd.google-apps.folder';
 
+// --- Helpers ---
+
+/**
+ * Slugify a folder name for use as a skill_type value.
+ * "Ad copy templates" → "ad_copy_templates"
+ */
+function slugifyFolderName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+}
+
 // --- Drive API helpers ---
 
 /**
  * List all files in a folder, recursing into sub-folders.
+ * `subfolderName` tracks the first subfolder under the channel root for skillType derivation.
+ * When undefined, the folder IS the channel root; when we recurse into a subfolder for the
+ * first time we set it to that subfolder's name and propagate it unchanged from then on.
  */
-async function listFilesInFolder(folderId: string, accessToken: string): Promise<DriveFile[]> {
+async function listFilesInFolder(
+  folderId: string,
+  accessToken: string,
+  subfolderName?: string,
+): Promise<DriveFile[]> {
   const allFiles: DriveFile[] = [];
-  const subFolders: string[] = [];
+  const subFolderEntries: Array<{ id: string; name: string }> = [];
 
   let nextPageToken: string | undefined;
 
@@ -106,9 +129,9 @@ async function listFilesInFolder(folderId: string, accessToken: string): Promise
 
     for (const file of data.files) {
       if (file.mimeType === FOLDER_MIME) {
-        subFolders.push(file.id);
+        subFolderEntries.push({ id: file.id, name: file.name });
       } else {
-        allFiles.push(file);
+        allFiles.push({ ...file, subfolderName });
       }
     }
 
@@ -116,8 +139,11 @@ async function listFilesInFolder(folderId: string, accessToken: string): Promise
   } while (nextPageToken);
 
   // Recurse into sub-folders
-  for (const subFolderId of subFolders) {
-    const subFiles = await listFilesInFolder(subFolderId, accessToken);
+  for (const subFolder of subFolderEntries) {
+    // If we are at the channel root (no subfolderName yet), set it to this subfolder's name.
+    // Otherwise, propagate the existing subfolderName unchanged.
+    const nextSubfolderName = subfolderName ?? subFolder.name;
+    const subFiles = await listFilesInFolder(subFolder.id, accessToken, nextSubfolderName);
     allFiles.push(...subFiles);
   }
 
@@ -145,8 +171,9 @@ async function main(): Promise<void> {
 
   // Walk folders
   let totalFiles = 0;
-  let totalUpserted = 0;
   let totalFolders = 0;
+  let contentExtracted = 0;
+  let metadataOnly = 0;
 
   for (const [channel, folderId] of Object.entries(FOLDER_CONFIG)) {
     if (!folderId) {
@@ -171,14 +198,35 @@ async function main(): Promise<void> {
     for (const file of files) {
       if (!INDEXABLE_MIME_TYPES.has(file.mimeType)) continue;
 
+      // Derive skill_type from subfolder context gathered during the walk.
+      // If the file is directly inside the channel root (no subfolderName), use 'sop'.
+      const skillType = file.subfolderName ? slugifyFolderName(file.subfolderName) : 'sop';
+
       try {
-        await upsertSkillFromDrive({
-          driveFileId: file.id,
-          title: file.name,
-          channel,
-          driveModifiedAt: file.modifiedTime,
-        });
-        totalUpserted++;
+        const content = await extractContent(file.id, file.mimeType, accessToken);
+
+        if (content !== null) {
+          const contentHash = hashContent(content);
+          await updateSkillContent({
+            driveFileId: file.id,
+            title: file.name,
+            content,
+            contentHash,
+            channel,
+            skillType,
+            driveModifiedAt: file.modifiedTime,
+          });
+          contentExtracted++;
+        } else {
+          // Non-indexable or size-limit exceeded — fall back to metadata-only upsert
+          await upsertSkillFromDrive({
+            driveFileId: file.id,
+            title: file.name,
+            channel,
+            driveModifiedAt: file.modifiedTime,
+          });
+          metadataOnly++;
+        }
       } catch (err) {
         logError(`Failed to upsert skill for file '${file.name}' (${file.id})`, err);
       }
@@ -214,11 +262,12 @@ async function main(): Promise<void> {
 
   // Summary
   log('--- Re-index Summary ---');
-  log(`  Folders walked:  ${totalFolders}`);
-  log(`  Files found:     ${totalFiles}`);
-  log(`  Skills upserted: ${totalUpserted}`);
+  log(`  Folders walked:    ${totalFolders}`);
+  log(`  Files found:       ${totalFiles}`);
+  log(`  Content extracted: ${contentExtracted}`);
+  log(`  Metadata only:     ${metadataOnly}`);
   if (WATCH) {
-    log(`  Watch channel:   ${channelRegistered ? 'registered' : 'FAILED'}`);
+    log(`  Watch channel:     ${channelRegistered ? 'registered' : 'FAILED'}`);
   }
   log('Re-index complete');
 }
