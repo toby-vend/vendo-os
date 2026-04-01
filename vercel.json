@@ -20,6 +20,12 @@
       "use": "@vercel/static"
     }
   ],
+  "crons": [
+    {
+      "path": "/api/cron/renew-drive-channels",
+      "schedule": "0 6 * * *"
+    }
+  ],
   "routes": [
     { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
     { "src": "/api/chat", "dest": "/api/chat.ts", "methods": ["POST"] },
