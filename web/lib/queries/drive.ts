@@ -295,15 +295,26 @@ export async function searchSkills(
 /**
  * Update the FTS5 index for a skill after its content has changed.
  * Uses the explicit DELETE-then-INSERT pattern required by content-sync tables.
+ *
+ * oldTitle/oldContent must be the values currently indexed in FTS5 (before the
+ * skills row was updated). newTitle/newContent are the replacement values.
+ * Passing the old values to the delete command is required for the FTS5
+ * content-sync table to correctly remove the previously indexed tokens.
  */
-export async function syncSkillFts(rowid: number, title: string, content: string): Promise<void> {
+export async function syncSkillFts(
+  rowid: number,
+  oldTitle: string,
+  oldContent: string,
+  newTitle: string,
+  newContent: string,
+): Promise<void> {
   await db.execute({
-    sql: `INSERT INTO skills_fts(skills_fts, rowid, title, content) VALUES('delete', ?, ?, ?)`,
-    args: [rowid, title, content],
+    sql: `INSERT INTO skills_fts(skills_fts, rowid, title, content) VALUES(?, ?, ?, ?)`,
+    args: ['delete', rowid, oldTitle, oldContent],
   });
   await db.execute({
     sql: `INSERT INTO skills_fts(rowid, title, content) VALUES(?, ?, ?)`,
-    args: [rowid, title, content],
+    args: [rowid, newTitle, newContent],
   });
 }
 
