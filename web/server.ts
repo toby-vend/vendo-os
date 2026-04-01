@@ -69,7 +69,7 @@ app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
   // Public routes (no session required)
-  if (path.startsWith('/assets/') || path === '/login' || path === '/api/drive/webhook') return;
+  if (path.startsWith('/assets/') || path === '/login' || path === '/api/drive/webhook' || path.startsWith('/api/cron/')) return;
 
   const cookies = parseCookies(request.headers.cookie || '');
   const token = cookies['vendo_session'];
