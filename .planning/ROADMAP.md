@@ -50,7 +50,11 @@ Plans:
   2. Webhook channels are renewed automatically before their 7-day expiry — no manual intervention required
   3. Running the full re-index command populates the skills table from all current Drive documents
   4. The pageToken survives Vercel serverless cold starts — sync does not gap on restart
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Drive queries module, webhook endpoint, channel registration logic
+- [ ] 02-02-PLAN.md — Cron channel renewal route, full re-index CLI script
 
 ### Phase 3: Drive Document Processing
 **Goal**: Every document arriving via webhook is classified by channel, content-hashed for change detection, and correctly updated when moved, renamed, or deleted
@@ -148,7 +152,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 3/3 | Complete    | 2026-04-01 |
-| 2. Drive Webhook Foundation | 0/TBD | Not started | - |
+| 2. Drive Webhook Foundation | 0/2 | Not started | - |
 | 3. Drive Document Processing | 0/TBD | Not started | - |
 | 4. Skills Library | 0/TBD | Not started | - |
 | 5. Brand Hub | 0/TBD | Not started | - |
