@@ -262,7 +262,12 @@ export async function getClients(): Promise<ClientRow[]> {
 }
 
 export async function getClientByName(name: string): Promise<{ client: ClientRow | null; meetings: MeetingRow[]; actions: ActionItemRow[] }> {
-  const clients = await rows<ClientRow>('SELECT * FROM clients WHERE name = ?', [name]);
+  const clients = await rows<ClientRow>(`
+    SELECT name, email, meeting_count, vertical, status, source,
+           total_invoiced, outstanding, first_invoice_date, last_invoice_date,
+           first_meeting_date, last_meeting_date
+    FROM clients WHERE name = ?
+  `, [name]);
   const cl = clients[0] ?? null;
   if (!cl) return { client: null, meetings: [], actions: [] };
 
