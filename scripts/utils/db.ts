@@ -327,6 +327,42 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_meta_adlib_start ON meta_ad_library(ad_delivery_start)');
   db.run('CREATE INDEX IF NOT EXISTS idx_meta_adlib_search ON meta_ad_library(search_term)');
 
+  // --- Google Ads tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gads_accounts (
+      id TEXT PRIMARY KEY,
+      descriptive_name TEXT,
+      currency_code TEXT,
+      time_zone TEXT,
+      manager_id TEXT,
+      status TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gads_campaign_spend (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      account_id TEXT NOT NULL,
+      account_name TEXT,
+      campaign_id TEXT NOT NULL,
+      campaign_name TEXT,
+      campaign_status TEXT,
+      spend_micros INTEGER DEFAULT 0,
+      spend REAL DEFAULT 0,
+      impressions INTEGER DEFAULT 0,
+      clicks INTEGER DEFAULT 0,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, account_id, campaign_id)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_gads_spend_date ON gads_campaign_spend(date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gads_spend_account ON gads_campaign_spend(account_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gads_spend_campaign ON gads_campaign_spend(campaign_id)');
+
   // --- GHL (GoHighLevel) tables ---
 
   db.run(`
