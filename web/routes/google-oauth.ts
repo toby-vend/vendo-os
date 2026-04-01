@@ -42,7 +42,7 @@ export const googleOAuthRoutes: FastifyPluginAsync = async (app) => {
     const user = (request as any).user as SessionUser | null;
     if (!user) { reply.redirect('/login'); return; }
 
-    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
     if (!clientId) {
       reply.code(500).send('Google OAuth is not configured');
       return;
