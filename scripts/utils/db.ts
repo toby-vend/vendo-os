@@ -389,6 +389,82 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_user_channels_user ON user_channels(user_id)');
   db.run('CREATE INDEX IF NOT EXISTS idx_channel_permissions_channel ON channel_permissions(channel_id)');
 
+  // --- Skills tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS skills (
+      id INTEGER PRIMARY KEY,
+      drive_file_id TEXT NOT NULL UNIQUE,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      content_hash TEXT NOT NULL,
+      channel TEXT NOT NULL,
+      skill_type TEXT NOT NULL,
+      drive_modified_at TEXT NOT NULL,
+      indexed_at TEXT NOT NULL,
+      version INTEGER NOT NULL DEFAULT 1
+    )
+  `);
+
+  -- skills_fts omitted: FTS5 not available in sql.js; queried via web app (Turso) only
+
+  // --- Brand hub table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS brand_hub (
+      id INTEGER PRIMARY KEY,
+      client_id INTEGER NOT NULL,
+      client_name TEXT NOT NULL,
+      client_slug TEXT NOT NULL,
+      content TEXT NOT NULL,
+      content_hash TEXT NOT NULL,
+      drive_file_id TEXT,
+      drive_modified_at TEXT,
+      indexed_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_brand_hub_client ON brand_hub(client_id)');
+
+  // --- Drive watch channels table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS drive_watch_channels (
+      id INTEGER PRIMARY KEY,
+      channel_id TEXT NOT NULL UNIQUE,
+      resource_id TEXT NOT NULL,
+      expiration INTEGER NOT NULL,
+      page_token TEXT,
+      created_at TEXT NOT NULL,
+      renewed_at TEXT
+    )
+  `);
+
+  // --- Task runs table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS task_runs (
+      id INTEGER PRIMARY KEY,
+      client_id INTEGER NOT NULL,
+      channel TEXT NOT NULL,
+      task_type TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'queued',
+      sops_used TEXT,
+      brand_context_id INTEGER,
+      output TEXT,
+      qa_score REAL,
+      qa_critique TEXT,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_task_runs_client ON task_runs(client_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_task_runs_status ON task_runs(status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_task_runs_created ON task_runs(created_at)');
+
   seedCategories(db);
   saveDb();
 }
