@@ -159,7 +159,7 @@ async function fetchMissingTranscripts(client: FathomClient) {
     return;
   }
 
-  const ids = missing[0].values.map(row => String(row[0]));
+  const ids = missing[0].values.map((row: unknown[]) => String(row[0]));
   log('SYNC', `Fetching transcripts for ${ids.length} meetings...`);
 
   let fetched = 0;
