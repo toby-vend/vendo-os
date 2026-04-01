@@ -79,7 +79,7 @@
     </thead>
     <tbody>
       <% if (!it.users || it.users.length === 0) { %>
-      <tr><td colspan="6" style="padding: 2rem; text-align: center; color: #64748B;">No users yet. Invite your first user above.</td></tr>
+      <tr><td colspan="7" style="padding: 2rem; text-align: center; color: #64748B;">No users yet. Invite your first user above.</td></tr>
       <% } else { %>
       <% it.users.forEach(u => { %>
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);" id="user-row-<%= u.id %>">
