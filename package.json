@@ -17,9 +17,13 @@
     "sync:meta": "tsx scripts/sync/sync-meta-ads.ts",
     "sync:meta:backfill": "tsx scripts/sync/sync-meta-ads.ts --backfill",
     "sync:meta:accounts": "tsx scripts/sync/sync-meta-ads.ts --accounts-only",
+    "sync:asana": "tsx scripts/sync/sync-asana.ts",
+    "sync:asana:discover": "tsx scripts/sync/sync-asana.ts --discover",
     "dev": "tsx watch web/start.ts",
     "start": "tsx web/start.ts",
-    "db:push": "tsx scripts/sync/push-to-turso.ts"
+    "db:push": "tsx scripts/sync/push-to-turso.ts",
+    "seed:domains": "tsx scripts/matching/seed-domains.ts",
+    "sync:meetings:transcripts-only": "tsx scripts/sync/sync-meetings.ts --transcripts-only"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
