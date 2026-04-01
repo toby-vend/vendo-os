@@ -90,3 +90,29 @@ export async function getUnprocessedSyncQueueItems(limit = 100): Promise<DriveSy
     [limit]
   );
 }
+
+// --- Skills (Drive upsert) ---
+
+/**
+ * Upsert a Drive file's metadata into the skills table.
+ * Content is left empty — Phase 3 handles extraction.
+ * Idempotent: safe to run multiple times.
+ */
+export async function upsertSkillFromDrive(data: {
+  driveFileId: string;
+  title: string;
+  channel: string;
+  driveModifiedAt: string;
+}): Promise<void> {
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `INSERT INTO skills (drive_file_id, title, content, content_hash, channel, skill_type, drive_modified_at, indexed_at, version)
+          VALUES (?, ?, '', '', ?, 'sop', ?, ?, 1)
+          ON CONFLICT(drive_file_id) DO UPDATE SET
+            title = excluded.title,
+            channel = excluded.channel,
+            drive_modified_at = excluded.drive_modified_at,
+            indexed_at = excluded.indexed_at`,
+    args: [data.driveFileId, data.title, data.channel, data.driveModifiedAt, now],
+  });
+}
