@@ -170,6 +170,7 @@ app.register(adminUsersRoutes, { prefix: '/admin/users' });
 app.register(adminPermissionsRoutes, { prefix: '/admin/permissions' });
 app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
+app.register(chatRoutes, { prefix: '/chat' });
 
 // Export for Vercel
 export default app;
