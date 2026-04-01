@@ -151,8 +151,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-05 | Phase 10 | Pending |
 
 **Coverage:**
-- v1 requirements: 30 total
-- Mapped to phases: 30
+- v1 requirements: 38 total
+- Mapped to phases: 38
 - Unmapped: 0
 
 ---
