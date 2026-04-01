@@ -229,6 +229,23 @@ export async function initSchema(): Promise<void> {
     renewed_at TEXT
   )`, args: [] });
 
+  // Migrate: add user_id column to drive_watch_channels if upgrading from old schema
+  try {
+    await db.execute({ sql: 'ALTER TABLE drive_watch_channels ADD COLUMN user_id TEXT', args: [] });
+  } catch { /* already exists */ }
+
+  // Drive sync queue table
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS drive_sync_queue (
+    id INTEGER PRIMARY KEY,
+    channel_id TEXT NOT NULL,
+    resource_state TEXT NOT NULL,
+    received_at TEXT NOT NULL,
+    processed_at TEXT,
+    error TEXT
+  )`, args: [] });
+
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_dsq_unprocessed ON drive_sync_queue(processed_at) WHERE processed_at IS NULL`, args: [] });
+
   // Task runs table
   await db.execute({ sql: `CREATE TABLE IF NOT EXISTS task_runs (
     id INTEGER PRIMARY KEY,
@@ -250,6 +267,30 @@ export async function initSchema(): Promise<void> {
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_task_runs_client ON task_runs(client_id)`, args: [] });
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_task_runs_status ON task_runs(status)`, args: [] });
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_task_runs_created ON task_runs(created_at)`, args: [] });
+
+  // Asana tasks
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS asana_tasks (
+    gid TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    assignee_gid TEXT,
+    assignee_name TEXT,
+    due_on TEXT,
+    completed INTEGER DEFAULT 0,
+    completed_at TEXT,
+    section_name TEXT,
+    project_gid TEXT,
+    project_name TEXT,
+    notes TEXT,
+    permalink_url TEXT,
+    created_at TEXT,
+    modified_at TEXT,
+    synced_at TEXT NOT NULL
+  )`, args: [] });
+
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_asana_tasks_assignee ON asana_tasks(assignee_name)`, args: [] });
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_asana_tasks_due ON asana_tasks(due_on)`, args: [] });
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_asana_tasks_completed ON asana_tasks(completed)`, args: [] });
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_asana_tasks_project ON asana_tasks(project_gid)`, args: [] });
 }
 
 /** @deprecated Use initSchema instead */
