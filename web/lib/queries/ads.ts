@@ -77,3 +77,33 @@ export async function getCampaignSummary(accountId: string, days = 30): Promise<
     ORDER BY spend DESC
   `, [accountId, days]);
 }
+
+// --- Google Ads ---
+
+export async function getGadsAccountSummary(days = 30): Promise<GadsAccountSummary[]> {
+  return rows<GadsAccountSummary>(`
+    SELECT account_id, account_name,
+           SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(spend) as spend,
+           CASE WHEN SUM(clicks) > 0 THEN ROUND(SUM(spend) / SUM(clicks), 2) ELSE 0 END as cpc,
+           CASE WHEN SUM(impressions) > 0 THEN ROUND(SUM(spend) / SUM(impressions) * 1000, 2) ELSE 0 END as cpm,
+           CASE WHEN SUM(impressions) > 0 THEN ROUND(CAST(SUM(clicks) AS REAL) / SUM(impressions) * 100, 2) ELSE 0 END as ctr
+    FROM gads_campaign_spend
+    WHERE date >= date('now', '-' || ? || ' days')
+    GROUP BY account_id, account_name
+    ORDER BY spend DESC
+  `, [days]);
+}
+
+export async function getGadsCampaignSummary(accountId: string, days = 30): Promise<GadsCampaignSummary[]> {
+  return rows<GadsCampaignSummary>(`
+    SELECT campaign_id, campaign_name,
+           SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(spend) as spend,
+           CASE WHEN SUM(clicks) > 0 THEN ROUND(SUM(spend) / SUM(clicks), 2) ELSE 0 END as cpc,
+           CASE WHEN SUM(impressions) > 0 THEN ROUND(SUM(spend) / SUM(impressions) * 1000, 2) ELSE 0 END as cpm,
+           CASE WHEN SUM(impressions) > 0 THEN ROUND(CAST(SUM(clicks) AS REAL) / SUM(impressions) * 100, 2) ELSE 0 END as ctr
+    FROM gads_campaign_spend
+    WHERE account_id = ? AND date >= date('now', '-' || ? || ' days')
+    GROUP BY campaign_id, campaign_name
+    ORDER BY spend DESC
+  `, [accountId, days]);
+}
