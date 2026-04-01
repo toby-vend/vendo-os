@@ -46,7 +46,7 @@
 | Service | Purpose | Connection Type | Status | Priority |
 |---------|---------|----------------|--------|----------|
 | Meta Ads | Paid social campaign management | API | **Connected** | High |
-| Google Ads | Paid search campaign management | API | Not connected | High |
+| Google Ads | Paid search campaign management | API | **Connected** | High |
 | Microsoft Ads | Paid search campaign management | API | Not connected | Medium |
 
 ### Reporting & Analytics
