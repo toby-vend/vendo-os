@@ -11,7 +11,21 @@
       "WebFetch",
       "WebSearch",
       "TodoWrite",
-      "NotebookEdit"
+      "NotebookEdit",
+      "Skill",
+      "ToolSearch",
+      "TaskCreate",
+      "TaskGet",
+      "TaskList",
+      "TaskOutput",
+      "TaskStop",
+      "TaskUpdate",
+      "mcp__claude_ai_Gmail__*",
+      "mcp__claude_ai_Google_Calendar__*",
+      "mcp__claude_ai_Make__*",
+      "mcp__claude_ai_Slack__*",
+      "mcp__plugin_vercel-plugin_vercel__*",
+      "mcp__miro__*"
     ]
   },
   "hooks": {
