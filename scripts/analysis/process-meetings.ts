@@ -5,63 +5,23 @@ import { getDb, initSchema, saveDb, closeDb, rebuildFts, log, logError } from '.
 import { writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { normaliseAssignee } from '../matching/team.js';
+import { buildMatchContext } from '../matching/build-match-context.js';
+import { matchMeeting } from '../matching/waterfall-matcher.js';
+import { learnDomains, loadExistingDomains } from '../matching/domain-learner.js';
+import type { MeetingData } from '../matching/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../..');
 const REPROCESS = process.argv.includes('--reprocess');
 const REPORT_ONLY = process.argv.includes('--report-only');
-
-// --- Team member normalisation (from context/team.md) ---
-const TEAM_MEMBERS: Record<string, string[]> = {
-  'Max Rivens': ['Max Rivens', 'Max'],
-  'Toby Raeburn': ['Toby Raeburn', 'Toby R'],
-  'Alfie Wakelin': ['Alfie Wakelin', 'Alfie'],
-  'Sam Franks': ['Sam Franks', 'Sam'],
-  'Ben Dyer': ['Ben Dyer', 'Ben D'],
-  'Jake Dennis': ['Jake Dennis', 'Jake'],
-  'Helen Walker': ['Helen Walker', 'Helen'],
-  'Chris Tomkins': ['Chris Tomkins', 'Chris'],
-  'Shaun Silverside': ['Shaun Silverside', 'Shaun'],
-  'Amya Casallas': ['Amya Casallas', 'Amya', 'Amya Casillas'],
-  'Benjamin Momo': ['Benjamin Momo', 'Benjamin', 'Momo', 'Ben Momo', 'Ben M'],
-  'Faith Larkum': ['Faith Larkum', 'Faith'],
-  'Rhiannon Larkman': ['Rhiannon Larkman', 'Rhiannon', 'Rhi'],
-  'Matthew Potter': ['Matthew Potter', 'Matthew', 'Matt P'],
-  'Holly Turner': ['Holly Turner', 'Holly'],
-  'Dilith N': ['Dilith Nanayakkara', 'Dilith', 'Diliff'],
-  'Charuka Shiran': ['Charuka Shiran', 'Charuka', 'Shuruka'],
-  'Selvin Mendes': ['Selvin Mendes', 'Selvin'],
-  'Naveen': ['Naveen'],
-  'Sarah': ['Sarah'],
-  'Caira': ['Caira'],
-  'Sahan': ['Sahan'],
-};
-
-// Build reverse lookup: lowercase alias → canonical name
-const ALIAS_TO_NAME: Record<string, string> = {};
-for (const [canonical, aliases] of Object.entries(TEAM_MEMBERS)) {
-  for (const alias of aliases) {
-    ALIAS_TO_NAME[alias.toLowerCase()] = canonical;
-  }
-}
-
-function normaliseAssignee(name: string): string | null {
-  if (!name) return null;
-  const lower = name.toLowerCase().trim();
-  if (ALIAS_TO_NAME[lower]) return ALIAS_TO_NAME[lower];
-
-  // Try partial match (first name only)
-  for (const [alias, canonical] of Object.entries(ALIAS_TO_NAME)) {
-    if (lower === alias.split(' ')[0]) return canonical;
-  }
-  return name.trim(); // Return original if no match — could be a client
-}
+const SKIP_AI = process.argv.includes('--skip-ai');
 
 // --- Meeting categorisation ---
 interface CategoryRule {
   slug: string;
   keywords: string[];
-  requiresClient?: boolean; // Only match if title looks like it has a client
+  requiresClient?: boolean;
 }
 
 const CATEGORY_RULES: CategoryRule[] = [
@@ -82,7 +42,6 @@ function categoriseMeeting(title: string): string {
     const matches = rule.keywords.some(kw => lower.includes(kw));
     if (matches) {
       if (rule.requiresClient) {
-        // Only match if there's a client separator in the title
         const hasClient = /[x|\/\-–—]/.test(title) && !lower.includes('team');
         if (!hasClient) continue;
       }
@@ -91,60 +50,6 @@ function categoriseMeeting(title: string): string {
   }
 
   return 'other';
-}
-
-// --- Client name extraction ---
-const CLIENT_SEPARATORS = [
-  ' x Vendo', ' x vendo',
-  ' / Vendo', ' / vendo',
-  ' | Vendo', ' | vendo',
-  ' - Vendo', ' - vendo',
-  ' – Vendo', ' – vendo',
-  ' — Vendo', ' — vendo',
-  'Vendo x ', 'vendo x ',
-  'Vendo / ', 'vendo / ',
-  'Vendo | ', 'vendo | ',
-  'Vendo - ', 'vendo - ',
-  'Vendo Digital', 'vendo digital',
-];
-
-function extractClientName(title: string): string | null {
-  const lower = title.toLowerCase();
-
-  // Skip non-client meeting types
-  if (lower.includes('interview') || lower.includes('team meeting') || lower.includes('1 - 1') || lower.includes('1-1')) {
-    return null;
-  }
-
-  // Try to extract client from "Client x Vendo" or "Vendo x Client" patterns
-  for (const sep of CLIENT_SEPARATORS) {
-    const sepLower = sep.toLowerCase();
-    const idx = lower.indexOf(sepLower);
-    if (idx === -1) continue;
-
-    if (sepLower.startsWith('vendo')) {
-      // "Vendo x Client" pattern — client is after separator
-      const after = title.substring(idx + sep.length).trim();
-      const cleaned = after.split(/[|–—:]/)[0].trim();
-      if (cleaned.length > 1) return cleaned;
-    } else {
-      // "Client x Vendo" pattern — client is before separator
-      const before = title.substring(0, idx).trim();
-      if (before.length > 1) return before;
-    }
-  }
-
-  // Try generic separator patterns for titles like "ClientName | Meeting Type"
-  const pipeMatch = title.match(/^(.+?)\s*[|–—]\s*.+$/);
-  if (pipeMatch) {
-    const candidate = pipeMatch[1].trim();
-    // Only if it doesn't look like an internal meeting
-    if (candidate.length > 2 && !lower.includes('paid social') && !lower.includes('paid search') && !lower.includes('seo')) {
-      return candidate;
-    }
-  }
-
-  return null;
 }
 
 // --- Decision extraction from summaries ---
@@ -158,7 +63,6 @@ const DECISION_PATTERNS = [
 
 function extractDecisions(summary: string): string[] {
   if (!summary) return [];
-  // Clean the summary first — strip all markdown links
   const cleaned = stripMarkdownLinks(summary);
   const decisions: string[] = [];
   for (const pattern of DECISION_PATTERNS) {
@@ -166,7 +70,6 @@ function extractDecisions(summary: string): string[] {
     let match;
     while ((match = pattern.exec(cleaned)) !== null) {
       const text = match[0].trim();
-      // Skip if it's just a URL fragment or too short
       if (text.length < 20 || text.includes('fathom.video')) continue;
       decisions.push(text);
     }
@@ -185,79 +88,6 @@ function detectVertical(clientName: string): string | null {
   return null;
 }
 
-// --- Fuzzy client matching against Xero-sourced clients ---
-
-/** Normalise a name for comparison: lowercase, strip common suffixes, punctuation */
-function normaliseName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\b(ltd|limited|llp|plc|inc|uk|t\/a)\b/g, '')
-    .replace(/\(.*?\)/g, '')           // strip parenthetical qualifiers
-    .replace(/[^a-z0-9\s]/g, '')       // strip punctuation
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/** Build a lookup of normalised Xero client names → canonical client name */
-function buildClientLookup(db: any): Map<string, string> {
-  const lookup = new Map<string, string>();
-
-  const result = db.exec("SELECT name, aliases FROM clients WHERE source = 'xero'");
-  if (!result.length) return lookup;
-
-  for (const row of result[0].values) {
-    const name = row[0] as string;
-    const aliases = row[1] as string | null;
-
-    // Add normalised full name
-    lookup.set(normaliseName(name), name);
-
-    // Add each word-boundary segment for partial matching
-    // e.g. "Peak Dental (Shams Moopen Ltd)" → "peak dental"
-    const norm = normaliseName(name);
-    const words = norm.split(' ').filter(w => w.length > 2);
-    // Add first 2-3 significant words as a key
-    if (words.length >= 2) {
-      lookup.set(words.slice(0, 2).join(' '), name);
-      if (words.length >= 3) {
-        lookup.set(words.slice(0, 3).join(' '), name);
-      }
-    }
-
-    // Add aliases
-    if (aliases) {
-      try {
-        const aliasList = JSON.parse(aliases) as string[];
-        for (const alias of aliasList) {
-          lookup.set(normaliseName(alias), name);
-        }
-      } catch { /* not JSON, treat as single alias */
-        lookup.set(normaliseName(aliases), name);
-      }
-    }
-  }
-
-  return lookup;
-}
-
-/** Try to match an extracted meeting client name to a known Xero client */
-function matchToXeroClient(extracted: string, lookup: Map<string, string>): string | null {
-  const norm = normaliseName(extracted);
-  if (!norm) return null;
-
-  // 1. Exact normalised match
-  if (lookup.has(norm)) return lookup.get(norm)!;
-
-  // 2. Check if extracted name is a substring of any Xero name (or vice versa)
-  for (const [key, canonical] of lookup) {
-    if (key.includes(norm) || norm.includes(key)) {
-      return canonical;
-    }
-  }
-
-  return null;
-}
-
 // --- Main processing ---
 async function processMeetings() {
   await initSchema();
@@ -269,14 +99,17 @@ async function processMeetings() {
     return;
   }
 
-  // Build lookup of known Xero clients for matching
-  const clientLookup = buildClientLookup(db);
-  log('PROCESS', `Loaded ${clientLookup.size} client name variants from Xero`);
+  // Build waterfall match context
+  const ctx = buildMatchContext(db);
+  log('PROCESS', `Match context: ${ctx.emailDomainLookup.size} email domains, ${ctx.clientNameLookup.size} client name variants, ${ctx.contactNameLookup.size} contact names`);
+
+  // Load existing domain mappings for dedup
+  const existingDomains = loadExistingDomains(db);
 
   // Get meetings to process
   const query = REPROCESS
-    ? 'SELECT id, title, date, summary, raw_action_items FROM meetings'
-    : 'SELECT id, title, date, summary, raw_action_items FROM meetings WHERE processed_at IS NULL';
+    ? 'SELECT id, title, date, summary, transcript, raw_action_items, calendar_invitees, invitee_domains_type FROM meetings'
+    : 'SELECT id, title, date, summary, transcript, raw_action_items, calendar_invitees, invitee_domains_type FROM meetings WHERE processed_at IS NULL';
 
   const results = db.exec(query);
   if (!results.length || !results[0].values.length) {
@@ -290,35 +123,60 @@ async function processMeetings() {
 
   let categorised = 0;
   let clientsMatched = 0;
-  let unmatchedNames: string[] = [];
+  let domainsLearned = 0;
   let actionsParsed = 0;
   let decisionsExtracted = 0;
+  const methodCounts: Record<string, number> = {};
 
   for (const row of meetings) {
-    const [id, title, date, summary, rawActionItems] = row as [string, string, string, string | null, string | null];
+    const [id, title, date, summary, transcript, rawActionItems, calendarInvitees, inviteeDomainsType] =
+      row as [string, string, string, string | null, string | null, string | null, string | null, string | null];
 
     // 1. Categorise
     const category = categoriseMeeting(title);
     categorised++;
 
-    // 2. Extract and match client name
-    const rawClientName = extractClientName(title);
-    let matchedClientName: string | null = null;
+    // 2. Waterfall client matching
+    const meetingData: MeetingData = {
+      id, title, summary, transcript,
+      calendar_invitees: calendarInvitees,
+      raw_action_items: rawActionItems,
+      invitee_domains_type: inviteeDomainsType,
+    };
 
-    if (rawClientName) {
-      matchedClientName = matchToXeroClient(rawClientName, clientLookup);
-      if (matchedClientName) {
-        clientsMatched++;
-      } else {
-        unmatchedNames.push(rawClientName);
-      }
+    const matchResult = await matchMeeting(meetingData, ctx, { skipAi: SKIP_AI });
+
+    if (matchResult.client_name) {
+      clientsMatched++;
     }
+    methodCounts[matchResult.method] = (methodCounts[matchResult.method] || 0) + 1;
 
-    // 3. Update meeting — only set client_name if matched to a Xero client
-    db.run('UPDATE meetings SET category = ?, client_name = ?, processed_at = ? WHERE id = ?',
-      [category, matchedClientName, new Date().toISOString(), id]);
+    // 3. Update meeting
+    db.run(`
+      UPDATE meetings SET
+        category = ?, client_name = ?, match_method = ?, match_confidence = ?,
+        needs_review = ?, processed_at = ?
+      WHERE id = ?
+    `, [
+      category, matchResult.client_name, matchResult.method, matchResult.confidence,
+      matchResult.method === 'unmatched' || (matchResult.evidence as any)?.multi_client ? 1 : 0,
+      new Date().toISOString(), id,
+    ]);
 
-    // 4. Parse action items
+    // 4. Write match log (upsert)
+    if (REPROCESS) {
+      db.run('DELETE FROM meeting_match_log WHERE meeting_id = ?', [id]);
+    }
+    db.run(`
+      INSERT OR REPLACE INTO meeting_match_log (meeting_id, client_name, method, confidence, evidence, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [id, matchResult.client_name, matchResult.method, matchResult.confidence,
+        JSON.stringify(matchResult.evidence), new Date().toISOString()]);
+
+    // 5. Learn new domain mappings
+    domainsLearned += learnDomains(db, meetingData, matchResult, existingDomains);
+
+    // 6. Parse action items
     if (rawActionItems) {
       try {
         const items = JSON.parse(rawActionItems);
@@ -353,7 +211,7 @@ async function processMeetings() {
       }
     }
 
-    // 5. Extract decisions
+    // 7. Extract decisions
     if (summary) {
       if (REPROCESS) {
         db.run('DELETE FROM key_decisions WHERE meeting_id = ?', [id]);
@@ -370,7 +228,7 @@ async function processMeetings() {
     }
   }
 
-  // Update meeting counts on Xero-sourced clients
+  // Update meeting counts on clients
   db.run(`
     UPDATE clients SET
       meeting_count = (SELECT COUNT(*) FROM meetings WHERE meetings.client_name = clients.name),
@@ -384,13 +242,8 @@ async function processMeetings() {
 
   saveDb();
 
-  // Deduplicate unmatched names
-  const uniqueUnmatched = [...new Set(unmatchedNames)];
-
-  log('PROCESS', `Done: ${categorised} categorised, ${clientsMatched} matched to Xero clients, ${actionsParsed} action items, ${decisionsExtracted} decisions`);
-  if (uniqueUnmatched.length) {
-    log('PROCESS', `Unmatched meeting names (${uniqueUnmatched.length}): ${uniqueUnmatched.join(', ')}`);
-  }
+  log('PROCESS', `Done: ${categorised} categorised, ${clientsMatched} matched to clients, ${actionsParsed} action items, ${decisionsExtracted} decisions, ${domainsLearned} domains learned`);
+  log('PROCESS', `Match methods: ${Object.entries(methodCounts).map(([k, v]) => `${k}=${v}`).join(', ')}`);
 
   await generateReport();
   closeDb();
@@ -409,6 +262,13 @@ async function generateReport() {
   const categories = db.exec(`
     SELECT category, COUNT(*) as cnt FROM meetings
     GROUP BY category ORDER BY cnt DESC
+  `);
+
+  // Match method breakdown
+  const matchMethods = db.exec(`
+    SELECT match_method, match_confidence, COUNT(*) as cnt FROM meetings
+    WHERE match_method IS NOT NULL
+    GROUP BY match_method, match_confidence ORDER BY cnt DESC
   `);
 
   // Monthly volume (last 6 months)
@@ -456,6 +316,10 @@ async function generateReport() {
     LIMIT 30
   `);
 
+  // Needs review count
+  const needsReview = db.exec('SELECT COUNT(*) FROM meetings WHERE needs_review = 1');
+  const reviewCount = needsReview.length ? needsReview[0].values[0][0] as number : 0;
+
   // Build report
   let report = `# Meeting Intelligence Report\n\n`;
   report += `_Generated: ${now} | ${totalMeetings} meetings | ${dateRange[0]?.slice(0, 10)} to ${dateRange[1]?.slice(0, 10)}_\n\n---\n\n`;
@@ -468,6 +332,15 @@ async function generateReport() {
       report += `| ${row[0] || 'uncategorised'} | ${row[1]} | ${pct}% |\n`;
     }
   }
+
+  // Match method breakdown
+  report += `\n## Match Method Breakdown\n\n| Method | Confidence | Count |\n|--------|-----------|-------|\n`;
+  if (matchMethods.length && matchMethods[0].values.length) {
+    for (const row of matchMethods[0].values) {
+      report += `| ${row[0]} | ${row[1]} | ${row[2]} |\n`;
+    }
+  }
+  report += `\n_Meetings needing review: ${reviewCount}_\n`;
 
   // Monthly volume
   report += `\n## Monthly Volume\n\n| Month | Meetings |\n|-------|----------|\n`;
