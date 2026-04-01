@@ -4,19 +4,20 @@
 
 <table class="compact">
   <thead>
-    <tr><th>Client</th><th>Meetings</th><th>Vertical</th><th>Status</th><th>First Meeting</th><th>Last Meeting</th></tr>
+    <tr><th>Client</th><th>Total Invoiced</th><th>Outstanding</th><th>Meetings</th><th>Vertical</th><th>Last Invoice</th><th>Last Meeting</th></tr>
   </thead>
   <tbody>
     <% if (!it.clients.length) { %>
-    <tr><td colspan="6">No clients found. Run process-meetings first.</td></tr>
+    <tr><td colspan="7">No clients found. Run Xero sync first.</td></tr>
     <% } %>
     <% it.clients.forEach(c => { %>
     <tr>
       <td><a href="/clients/<%= encodeURIComponent(c.name) %>"><%= c.name %></a></td>
+      <td>&pound;<%= (c.total_invoiced || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
+      <td><%= c.outstanding > 0 ? '£' + c.outstanding.toLocaleString('en-GB', { minimumFractionDigits: 2 }) : '—' %></td>
       <td><%= c.meeting_count %></td>
       <td><%= c.vertical || '—' %></td>
-      <td><span class="badge badge-active"><%= c.status %></span></td>
-      <td><%= c.first_meeting_date ? c.first_meeting_date.slice(0, 10) : '—' %></td>
+      <td><%= c.last_invoice_date ? c.last_invoice_date.slice(0, 10) : '—' %></td>
       <td><%= c.last_meeting_date ? c.last_meeting_date.slice(0, 10) : '—' %></td>
     </tr>
     <% }) %>
