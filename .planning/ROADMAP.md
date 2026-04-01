@@ -34,7 +34,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Existing dashboard routes and data syncs continue to work after the queries.ts split
   3. All new tables exist in the schema: skills, skills_fts, brand_hub, drive_watch_channels, task_runs
   4. Admin dashboard surfaces OAuth token status — silent failure is visible
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Crypto key versioning, dual-key rotation, lazy migration, admin OAuth status
+- [ ] 01-02-PLAN.md — Database schema extension (5 new tables in both schema paths)
+- [ ] 01-03-PLAN.md — Split queries.ts monolith into domain modules with barrel export
 
 ### Phase 2: Drive Webhook Foundation
 **Goal**: The system receives real-time push notifications from Google Drive and never loses sync due to silent channel expiry
@@ -142,7 +147,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 0/TBD | Not started | - |
+| 1. Infrastructure | 0/3 | Planning complete | - |
 | 2. Drive Webhook Foundation | 0/TBD | Not started | - |
 | 3. Drive Document Processing | 0/TBD | Not started | - |
 | 4. Skills Library | 0/TBD | Not started | - |
