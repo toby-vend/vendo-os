@@ -48,8 +48,9 @@ created: 2026-04-01
 
 ## Wave 0 Requirements
 
-- [ ] `scripts/sync/process-drive-queue.test.ts` — covers channel classification, content hashing, move/rename/delete behaviours
-- [ ] `web/lib/queries/drive.test.ts` — covers new query functions (updateSkillContent, updateSkillMetadata, deleteSkill, etc.)
+- [ ] `scripts/sync/process-drive-queue.test.ts` — covers channel classification, content hashing, move/rename/delete behaviours (created by 03-02 Task 1 TDD)
+
+*`web/lib/queries/drive.test.ts` — not needed as separate file; query functions exercised through queue processor tests.*
 
 ---
 
