@@ -1,22 +1,59 @@
 /**
  * Tests for Skills FTS5 search, gap detection, and version tracking.
  *
- * Uses a real in-memory libsql database with the FTS5 schema so SQL
- * is validated against an actual engine.
+ * Uses a real in-memory libsql database with the FTS5 schema so SQL is
+ * validated against an actual engine, not mocked.
  *
- * Run: node --test --experimental-test-module-mocks web/lib/queries/drive.test.ts
+ * Run:
+ *   node --test --experimental-test-module-mocks --import tsx/esm web/lib/queries/drive.test.ts
  */
-import { describe, it, before } from 'node:test';
+import { describe, it, before, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { mock } from 'node:test';
 import { createClient, type Client } from '@libsql/client';
 
-// --- In-memory database setup ---
+// ---------------------------------------------------------------------------
+// In-memory database — created before module mock so the mock closure
+// captures the same client instance.
+// ---------------------------------------------------------------------------
 
-let testDb: Client;
+const testDb: Client = createClient({ url: ':memory:' });
 
-async function setupSchema(db: Client) {
-  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS skills (
+// ---------------------------------------------------------------------------
+// Mock ./base.js before importing drive.ts so the module picks up the in-memory
+// client. mock.module must be called at top level for the mock to intercept.
+// ---------------------------------------------------------------------------
+
+mock.module('./base.js', {
+  namedExports: {
+    db: testDb,
+    rows: async <T>(sql: string, args: (string | number | null)[] = []): Promise<T[]> => {
+      const result = await testDb.execute({ sql, args });
+      return result.rows as unknown as T[];
+    },
+    scalar: async <T = number>(sql: string, args: (string | number | null)[] = []): Promise<T | null> => {
+      const result = await testDb.execute({ sql, args });
+      if (!result.rows.length) return null;
+      const row = result.rows[0];
+      return row[result.columns[0]] as T;
+    },
+  },
+});
+
+// Import module under test AFTER mock is registered
+const {
+  searchSkills,
+  getSkillVersion,
+  getSkillsByVersion,
+  syncSkillFts,
+  deleteSkillFts,
+} = await import('./drive.js');
+
+// ---------------------------------------------------------------------------
+// Schema + fixture helpers
+// ---------------------------------------------------------------------------
+
+async function setupSchema() {
+  await testDb.execute({ sql: `CREATE TABLE IF NOT EXISTS skills (
     id INTEGER PRIMARY KEY,
     drive_file_id TEXT NOT NULL UNIQUE,
     title TEXT NOT NULL,
@@ -29,7 +66,7 @@ async function setupSchema(db: Client) {
     version INTEGER NOT NULL DEFAULT 1
   )`, args: [] });
 
-  await db.execute({ sql: `CREATE VIRTUAL TABLE IF NOT EXISTS skills_fts USING fts5(
+  await testDb.execute({ sql: `CREATE VIRTUAL TABLE IF NOT EXISTS skills_fts USING fts5(
     title,
     content,
     content='skills',
@@ -37,7 +74,7 @@ async function setupSchema(db: Client) {
   )`, args: [] });
 }
 
-async function insertFixture(db: Client, skill: {
+async function insertFixture(skill: {
   drive_file_id: string;
   title: string;
   content: string;
@@ -48,7 +85,7 @@ async function insertFixture(db: Client, skill: {
   indexed_at: string;
   version?: number;
 }) {
-  await db.execute({
+  await testDb.execute({
     sql: `INSERT INTO skills (drive_file_id, title, content, content_hash, channel, skill_type, drive_modified_at, indexed_at, version)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
@@ -57,52 +94,19 @@ async function insertFixture(db: Client, skill: {
       skill.version ?? 1,
     ],
   });
-  // Populate FTS
-  const row = await db.execute({ sql: 'SELECT rowid FROM skills WHERE drive_file_id = ?', args: [skill.drive_file_id] });
+  const row = await testDb.execute({ sql: 'SELECT rowid FROM skills WHERE drive_file_id = ?', args: [skill.drive_file_id] });
   const rowid = row.rows[0][0] as number;
-  await db.execute({ sql: 'INSERT INTO skills_fts(rowid, title, content) VALUES(?, ?, ?)', args: [rowid, skill.title, skill.content] });
+  await testDb.execute({ sql: 'INSERT INTO skills_fts(rowid, title, content) VALUES(?, ?, ?)', args: [rowid, skill.title, skill.content] });
 }
 
-// --- Module under test (loaded after mocking db) ---
-
-let searchSkills: (query: string, channel: string, limit?: number) => Promise<import('./drive.js').SkillSearchResponse>;
-let getSkillVersion: (driveFileId: string) => Promise<import('./drive.js').SkillVersionInfo | null>;
-let getSkillsByVersion: (channel: string, since: string) => Promise<import('./drive.js').SkillRow[]>;
-let syncSkillFts: (rowid: number, title: string, content: string) => Promise<void>;
-let deleteSkillFts: (rowid: number, title: string, content: string) => Promise<void>;
+// ---------------------------------------------------------------------------
+// Test fixtures — inserted once in `before()`
+// ---------------------------------------------------------------------------
 
 before(async () => {
-  // Create in-memory db
-  testDb = createClient({ url: ':memory:' });
-  await setupSchema(testDb);
+  await setupSchema();
 
-  // Patch the base module's client to use in-memory db
-  mock.module('./base.js', {
-    namedExports: {
-      db: testDb,
-      rows: async <T>(sql: string, args: (string | number | null)[] = []) => {
-        const result = await testDb.execute({ sql, args });
-        return result.rows as unknown as T[];
-      },
-      scalar: async <T = number>(sql: string, args: (string | number | null)[] = []) => {
-        const result = await testDb.execute({ sql, args });
-        if (!result.rows.length) return null;
-        const row = result.rows[0];
-        return row[result.columns[0]] as T;
-      },
-    },
-  });
-
-  // Import module under test AFTER mock is in place
-  const mod = await import('./drive.js');
-  searchSkills = mod.searchSkills as typeof searchSkills;
-  getSkillVersion = mod.getSkillVersion;
-  getSkillsByVersion = mod.getSkillsByVersion;
-  syncSkillFts = mod.syncSkillFts;
-  deleteSkillFts = mod.deleteSkillFts;
-
-  // Insert test fixtures
-  await insertFixture(testDb, {
+  await insertFixture({
     drive_file_id: 'file-001',
     title: 'Ad Copy Framework for Paid Social',
     content: 'This SOP describes how to write compelling ad copy for Facebook and Instagram campaigns targeting dental practices.',
@@ -113,7 +117,7 @@ before(async () => {
     indexed_at: '2026-01-01T10:05:00Z',
   });
 
-  await insertFixture(testDb, {
+  await insertFixture({
     drive_file_id: 'file-002',
     title: 'Brand Voice and Tone Guide',
     content: 'General guidelines for maintaining consistent brand voice across all channels and communication templates.',
@@ -124,7 +128,7 @@ before(async () => {
     indexed_at: '2026-01-15T09:05:00Z',
   });
 
-  await insertFixture(testDb, {
+  await insertFixture({
     drive_file_id: 'file-003',
     title: 'SEO Content Template',
     content: 'Template for creating SEO-optimised content for organic search campaigns.',
@@ -135,7 +139,7 @@ before(async () => {
     indexed_at: '2026-02-01T08:05:00Z',
   });
 
-  await insertFixture(testDb, {
+  await insertFixture({
     drive_file_id: 'file-004',
     title: 'Retargeting Ad Copy SOP',
     content: 'Step-by-step SOP for writing retargeting ad copy to re-engage website visitors with paid social ads.',
@@ -148,7 +152,9 @@ before(async () => {
   });
 });
 
-// --- searchSkills tests ---
+// ---------------------------------------------------------------------------
+// searchSkills tests
+// ---------------------------------------------------------------------------
 
 describe('searchSkills', () => {
   it('returns results matching the query in the specified channel', async () => {
@@ -156,14 +162,13 @@ describe('searchSkills', () => {
     assert.strictEqual(response.gap, false);
     assert.ok(response.results.length > 0, 'Expected at least one result');
     const titles = response.results.map(r => r.title);
-    // ad copy is in paid_social skills
     assert.ok(
       titles.some(t => t.includes('Ad Copy') || t.includes('Retargeting')),
       `Expected ad copy results, got: ${titles.join(', ')}`
     );
   });
 
-  it('includes general channel skills in results for any channel', async () => {
+  it('includes general channel skills in results for any channel search', async () => {
     const response = await searchSkills('brand voice', 'paid_social');
     assert.strictEqual(response.gap, false);
     assert.ok(response.results.length > 0, 'Expected at least one result');
@@ -172,8 +177,8 @@ describe('searchSkills', () => {
   });
 
   it('does NOT return results from a different non-general channel', async () => {
-    const response = await searchSkills('SEO content', 'paid_social');
     // organic_social skill should not appear when searching paid_social
+    const response = await searchSkills('SEO', 'paid_social');
     const channels = response.results.map(r => r.channel);
     assert.ok(
       channels.every(c => c === 'paid_social' || c === 'general'),
@@ -194,15 +199,12 @@ describe('searchSkills', () => {
     assert.strictEqual(response.channel, 'paid_social');
   });
 
-  it('returns gap: false when results are found', async () => {
-    const response = await searchSkills('template', 'paid_social');
-    // general channel has "template" in Brand Voice content, so should find something
-    // If no results, gap should be true — this also tests the gap logic correctly
-    assert.strictEqual(typeof response.gap, 'boolean');
+  it('gap property equals (results.length === 0)', async () => {
+    const response = await searchSkills('ad copy', 'paid_social');
     assert.strictEqual(response.gap, response.results.length === 0);
   });
 
-  it('includes required fields in each result', async () => {
+  it('includes all required fields in each result', async () => {
     const response = await searchSkills('ad copy', 'paid_social');
     assert.ok(response.results.length > 0);
     const result = response.results[0];
@@ -217,27 +219,28 @@ describe('searchSkills', () => {
     assert.strictEqual(typeof result.bm25_score, 'number');
   });
 
-  it('sanitises FTS5 operators from query (quotes stripped)', async () => {
-    // Should not throw even with special characters in query
+  it('sanitises FTS5 operators — does not throw with quoted query', async () => {
     await assert.doesNotReject(async () => {
       await searchSkills('"ad copy"', 'paid_social');
     });
   });
 
-  it('returns gap: true with empty results when query becomes empty after sanitisation', async () => {
+  it('returns gap: true when query becomes empty after sanitisation', async () => {
     const response = await searchSkills('""', 'paid_social');
     assert.strictEqual(response.gap, true);
     assert.strictEqual(response.results.length, 0);
   });
 
-  it('returns response metadata with query and channel', async () => {
+  it('response includes query and channel metadata', async () => {
     const response = await searchSkills('ad copy', 'paid_social');
     assert.strictEqual(response.query, 'ad copy');
     assert.strictEqual(response.channel, 'paid_social');
   });
 });
 
-// --- getSkillVersion tests ---
+// ---------------------------------------------------------------------------
+// getSkillVersion tests
+// ---------------------------------------------------------------------------
 
 describe('getSkillVersion', () => {
   it('returns version info for an existing skill', async () => {
@@ -261,12 +264,14 @@ describe('getSkillVersion', () => {
   });
 });
 
-// --- getSkillsByVersion tests ---
+// ---------------------------------------------------------------------------
+// getSkillsByVersion tests
+// ---------------------------------------------------------------------------
 
 describe('getSkillsByVersion', () => {
-  it('returns skills in the given channel updated after sinceDate', async () => {
+  it('returns skills in the given channel indexed after sinceDate', async () => {
     const skills = await getSkillsByVersion('paid_social', '2026-02-01T00:00:00Z');
-    // file-004 was indexed at 2026-03-01, file-001 at 2026-01-01 (before cutoff)
+    // file-004 indexed at 2026-03-01, file-001 indexed at 2026-01-01 (before cutoff)
     assert.ok(skills.length >= 1, 'Expected at least one skill');
     const fileIds = skills.map(s => s.drive_file_id);
     assert.ok(fileIds.includes('file-004'), 'Expected file-004 in results');
@@ -284,11 +289,13 @@ describe('getSkillsByVersion', () => {
   });
 });
 
-// --- syncSkillFts tests ---
+// ---------------------------------------------------------------------------
+// syncSkillFts tests
+// ---------------------------------------------------------------------------
 
 describe('syncSkillFts', () => {
-  it('updates FTS index for an existing skill', async () => {
-    // Insert a skill specifically for this test
+  it('updates FTS index so new terms are findable and old terms are removed', async () => {
+    // Insert skill dedicated to this test
     await testDb.execute({
       sql: `INSERT INTO skills (drive_file_id, title, content, content_hash, channel, skill_type, drive_modified_at, indexed_at, version)
             VALUES ('file-sync-test', 'Old Title', 'old content about widgets', 'hash-s1', 'general', 'sop', '2026-01-01T00:00:00Z', '2026-01-01T00:01:00Z', 1)`,
@@ -296,49 +303,46 @@ describe('syncSkillFts', () => {
     });
     const rowResult = await testDb.execute({ sql: 'SELECT rowid FROM skills WHERE drive_file_id = ?', args: ['file-sync-test'] });
     const rowid = rowResult.rows[0][0] as number;
-    // Populate initial FTS entry
     await testDb.execute({ sql: 'INSERT INTO skills_fts(rowid, title, content) VALUES(?, ?, ?)', args: [rowid, 'Old Title', 'old content about widgets'] });
 
-    // Update the skills table title
+    // Update the row in skills then sync FTS
     await testDb.execute({ sql: "UPDATE skills SET title = 'New Title', content = 'new content about gadgets' WHERE rowid = ?", args: [rowid] });
-
-    // Sync FTS
     await syncSkillFts(rowid, 'New Title', 'new content about gadgets');
 
-    // Verify new term is findable
+    // New term is findable
     const newResult = await testDb.execute({ sql: "SELECT rowid FROM skills_fts WHERE skills_fts MATCH 'gadgets'", args: [] });
-    assert.ok(newResult.rows.length > 0, 'Expected to find new term "gadgets" in FTS after sync');
+    assert.ok(newResult.rows.some(r => r[0] === rowid), 'Expected to find "gadgets" in FTS after sync');
 
-    // Verify old term is no longer findable for this rowid
+    // Old term is no longer associated with this rowid
     const oldResult = await testDb.execute({ sql: "SELECT rowid FROM skills_fts WHERE skills_fts MATCH 'widgets'", args: [] });
     const oldRowids = oldResult.rows.map(r => r[0]);
     assert.ok(!oldRowids.includes(rowid), 'Old term "widgets" should not be in FTS after sync');
   });
 });
 
-// --- deleteSkillFts tests ---
+// ---------------------------------------------------------------------------
+// deleteSkillFts tests
+// ---------------------------------------------------------------------------
 
 describe('deleteSkillFts', () => {
-  it('removes a skill from the FTS index', async () => {
-    // Insert a skill specifically for this test
+  it('removes the entry from the FTS index', async () => {
     await testDb.execute({
       sql: `INSERT INTO skills (drive_file_id, title, content, content_hash, channel, skill_type, drive_modified_at, indexed_at, version)
-            VALUES ('file-del-test', 'Delete Me Title', 'unique phrase to be deleted from fts index', 'hash-d1', 'general', 'sop', '2026-01-01T00:00:00Z', '2026-01-01T00:01:00Z', 1)`,
+            VALUES ('file-del-test', 'Delete Me Title', 'unique zorblax phrase to be removed', 'hash-d1', 'general', 'sop', '2026-01-01T00:00:00Z', '2026-01-01T00:01:00Z', 1)`,
       args: [],
     });
     const rowResult = await testDb.execute({ sql: 'SELECT rowid FROM skills WHERE drive_file_id = ?', args: ['file-del-test'] });
     const rowid = rowResult.rows[0][0] as number;
-    await testDb.execute({ sql: 'INSERT INTO skills_fts(rowid, title, content) VALUES(?, ?, ?)', args: [rowid, 'Delete Me Title', 'unique phrase to be deleted from fts index'] });
+    await testDb.execute({ sql: 'INSERT INTO skills_fts(rowid, title, content) VALUES(?, ?, ?)', args: [rowid, 'Delete Me Title', 'unique zorblax phrase to be removed'] });
 
-    // Verify it's findable before delete
-    const before = await testDb.execute({ sql: "SELECT rowid FROM skills_fts WHERE skills_fts MATCH 'deleted'", args: [] });
+    // Verify findable before deletion
+    const before = await testDb.execute({ sql: "SELECT rowid FROM skills_fts WHERE skills_fts MATCH 'zorblax'", args: [] });
     assert.ok(before.rows.some(r => r[0] === rowid), 'Expected to find entry before deletion');
 
-    // Delete from FTS
-    await deleteSkillFts(rowid, 'Delete Me Title', 'unique phrase to be deleted from fts index');
+    await deleteSkillFts(rowid, 'Delete Me Title', 'unique zorblax phrase to be removed');
 
-    // Verify it's gone
-    const after = await testDb.execute({ sql: "SELECT rowid FROM skills_fts WHERE skills_fts MATCH 'deleted'", args: [] });
+    // Verify gone after deletion
+    const after = await testDb.execute({ sql: "SELECT rowid FROM skills_fts WHERE skills_fts MATCH 'zorblax'", args: [] });
     const afterRowids = after.rows.map(r => r[0]);
     assert.ok(!afterRowids.includes(rowid), 'Entry should be removed from FTS after deleteSkillFts');
   });
