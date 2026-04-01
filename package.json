@@ -32,7 +32,8 @@
     "google-ads:auth": "tsx scripts/auth/google-ads-auth.ts",
     "sync:gads": "tsx scripts/sync/sync-google-ads.ts",
     "sync:gads:backfill": "tsx scripts/sync/sync-google-ads.ts --backfill",
-    "sync:gads:accounts": "tsx scripts/sync/sync-google-ads.ts --accounts-only"
+    "sync:gads:accounts": "tsx scripts/sync/sync-google-ads.ts --accounts-only",
+    "brand:reindex": "tsx scripts/sync/sync-brands.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
