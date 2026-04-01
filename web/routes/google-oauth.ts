@@ -16,7 +16,7 @@ const SCOPES = [
 function getRedirectUri(request: { protocol: string; hostname: string; headers: Record<string, string | string[] | undefined> }): string {
   // In production behind a proxy, use x-forwarded-proto/host
   const proto = (request.headers['x-forwarded-proto'] as string) || request.protocol || 'http';
-  const host = (request.headers['x-forwarded-host'] as string) || request.hostname;
+  const host = (request.headers['x-forwarded-host'] as string) || (request.headers.host as string) || request.hostname;
   return `${proto}://${host}/auth/google/callback`;
 }
 
