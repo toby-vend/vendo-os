@@ -129,3 +129,99 @@ export async function upsertSkillFromDrive(data: {
     args: [data.driveFileId, data.title, data.channel, data.driveModifiedAt, now],
   });
 }
+
+// --- Queue Processing ---
+
+/**
+ * Mark a queue item as processed. Pass an error string if processing failed.
+ */
+export async function markQueueItemProcessed(id: number, error?: string): Promise<void> {
+  await db.execute({
+    sql: `UPDATE drive_sync_queue SET processed_at = ?, error = ? WHERE id = ?`,
+    args: [new Date().toISOString(), error ?? null, id],
+  });
+}
+
+// --- Skills (Phase 3 content + metadata) ---
+
+/**
+ * Get a skill record by its Drive file ID. Returns null if not found.
+ */
+export async function getSkillByDriveFileId(driveFileId: string): Promise<SkillRow | null> {
+  const result = await rows<SkillRow>(
+    'SELECT * FROM skills WHERE drive_file_id = ?',
+    [driveFileId],
+  );
+  return result[0] ?? null;
+}
+
+/**
+ * Insert or update a skill with full content (triggers version increment on conflict).
+ */
+export async function updateSkillContent(data: {
+  driveFileId: string;
+  title: string;
+  content: string;
+  contentHash: string;
+  channel: string;
+  skillType: string;
+  driveModifiedAt: string;
+}): Promise<void> {
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `INSERT INTO skills (drive_file_id, title, content, content_hash, channel, skill_type, drive_modified_at, indexed_at, version)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+          ON CONFLICT(drive_file_id) DO UPDATE SET
+            title = excluded.title,
+            content = excluded.content,
+            content_hash = excluded.content_hash,
+            channel = excluded.channel,
+            skill_type = excluded.skill_type,
+            drive_modified_at = excluded.drive_modified_at,
+            indexed_at = excluded.indexed_at,
+            version = version + 1`,
+    args: [
+      data.driveFileId, data.title, data.content, data.contentHash,
+      data.channel, data.skillType, data.driveModifiedAt, now,
+    ],
+  });
+}
+
+/**
+ * Update skill metadata (title, channel, skill_type, drive_modified_at) without touching
+ * content or content_hash. Used for renames, moves, and metadata-only changes.
+ */
+export async function updateSkillMetadata(data: {
+  driveFileId: string;
+  title: string;
+  channel: string;
+  skillType: string;
+  driveModifiedAt: string;
+}): Promise<void> {
+  await db.execute({
+    sql: `UPDATE skills SET title = ?, channel = ?, skill_type = ?, drive_modified_at = ?
+          WHERE drive_file_id = ?`,
+    args: [data.title, data.channel, data.skillType, data.driveModifiedAt, data.driveFileId],
+  });
+}
+
+/**
+ * Delete a skill record by Drive file ID.
+ * Used when a file is trashed, permanently deleted, or moved outside watched folders.
+ */
+export async function deleteSkill(driveFileId: string): Promise<void> {
+  await db.execute({
+    sql: `DELETE FROM skills WHERE drive_file_id = ?`,
+    args: [driveFileId],
+  });
+}
+
+/**
+ * Advance the stored pageToken for a watch channel after processing its changes.
+ */
+export async function updateDrivePageToken(channelId: string, pageToken: string): Promise<void> {
+  await db.execute({
+    sql: `UPDATE drive_watch_channels SET page_token = ? WHERE channel_id = ?`,
+    args: [pageToken, channelId],
+  });
+}
