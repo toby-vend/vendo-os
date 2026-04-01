@@ -358,6 +358,20 @@ p { margin-bottom: 0.75rem; }
   margin: 0;
 }
 
+.stat-card .stat-breakdown {
+  font-family: var(--vendo-sans);
+  font-size: 11px;
+  color: var(--vendo-text-muted);
+  margin: 4px 0 0;
+}
+
+.stat-inline {
+  font-family: var(--vendo-sans);
+  font-size: 14px;
+  color: var(--vendo-text-muted);
+  margin: 0 0 1rem;
+}
+
 /* === Cards / Articles === */
 
 article {
