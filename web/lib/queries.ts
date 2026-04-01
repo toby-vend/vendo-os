@@ -251,7 +251,14 @@ export async function getActionItems(opts: ActionItemSearchOpts): Promise<{ item
 // --- Clients ---
 
 export async function getClients(): Promise<ClientRow[]> {
-  return rows<ClientRow>('SELECT name, meeting_count, vertical, status, first_meeting_date, last_meeting_date FROM clients ORDER BY meeting_count DESC');
+  return rows<ClientRow>(`
+    SELECT name, email, meeting_count, vertical, status, source,
+           total_invoiced, outstanding, first_invoice_date, last_invoice_date,
+           first_meeting_date, last_meeting_date
+    FROM clients
+    WHERE source = 'xero'
+    ORDER BY total_invoiced DESC, meeting_count DESC
+  `);
 }
 
 export async function getClientByName(name: string): Promise<{ client: ClientRow | null; meetings: MeetingRow[]; actions: ActionItemRow[] }> {
