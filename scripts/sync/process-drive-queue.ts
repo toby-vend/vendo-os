@@ -93,13 +93,6 @@ async function resolveClientFolder(
 }
 
 /**
- * Returns true if the file is under BRANDS_FOLDER_ID. Only called when BRANDS_FOLDER_ID is set.
- */
-async function isBrandFile(fileId: string, accessToken: string): Promise<boolean> {
-  return (await resolveClientFolder(fileId, accessToken)) !== null;
-}
-
-/**
  * Process a brand file change: extract content and upsert to brand_hub.
  * Non-indexable files are skipped (no empty rows inserted).
  */
