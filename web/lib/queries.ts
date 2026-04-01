@@ -64,9 +64,15 @@ export interface ActionItemRow {
 
 export interface ClientRow {
   name: string;
+  email: string | null;
   meeting_count: number;
   vertical: string | null;
   status: string;
+  source: string;
+  total_invoiced: number;
+  outstanding: number;
+  first_invoice_date: string | null;
+  last_invoice_date: string | null;
   first_meeting_date: string | null;
   last_meeting_date: string | null;
 }
