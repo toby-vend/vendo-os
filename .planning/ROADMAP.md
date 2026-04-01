@@ -65,7 +65,11 @@ Plans:
   2. A metadata-only update (rename without content change) does not trigger a re-index of the document body
   3. Deleting a Drive document removes the corresponding skill record from the database
   4. A document moved between channel folders updates its channel classification in the skills table
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Query functions and Drive API helpers (classification, extraction, hashing)
+- [ ] 03-02-PLAN.md — Queue processor, unit tests, re-index content extraction
 
 ### Phase 4: Skills Library
 **Goal**: SOPs, templates, and frameworks from Drive are stored in a queryable FTS5 index, classified by channel and skill type, with version tracking
@@ -152,8 +156,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 3/3 | Complete    | 2026-04-01 |
-| 2. Drive Webhook Foundation | 1/2 | Complete    | 2026-04-01 |
-| 3. Drive Document Processing | 0/TBD | Not started | - |
+| 2. Drive Webhook Foundation | 2/2 | Complete    | 2026-04-01 |
+| 3. Drive Document Processing | 0/2 | Not started | - |
 | 4. Skills Library | 0/TBD | Not started | - |
 | 5. Brand Hub | 0/TBD | Not started | - |
 | 6. Task Matching Engine | 0/TBD | Not started | - |
