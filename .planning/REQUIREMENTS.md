@@ -10,10 +10,10 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Drive Sync
 
 - [x] **SYNC-01**: System receives Google Drive webhook notifications when files are created, updated, or deleted
-- [ ] **SYNC-02**: System classifies incoming documents by channel (paid social / SEO / paid ads) based on Drive folder path
+- [x] **SYNC-02**: System classifies incoming documents by channel (paid social / SEO / paid ads) based on Drive folder path
 - [x] **SYNC-03**: System auto-renews webhook watch channels before silent expiry (max 7 days)
-- [ ] **SYNC-04**: System detects actual content changes via content hashing, skipping metadata-only updates
-- [ ] **SYNC-05**: System handles document renames, moves between folders, and deletions correctly
+- [x] **SYNC-04**: System detects actual content changes via content hashing, skipping metadata-only updates
+- [x] **SYNC-05**: System handles document renames, moves between folders, and deletions correctly
 - [x] **SYNC-06**: System provides a manual full re-index command for initial population and recovery
 
 ### Skills Library
@@ -117,9 +117,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SYNC-01 | Phase 2 | Complete |
 | SYNC-03 | Phase 2 | Complete |
 | SYNC-06 | Phase 2 | Complete |
-| SYNC-02 | Phase 3 | Pending |
-| SYNC-04 | Phase 3 | Pending |
-| SYNC-05 | Phase 3 | Pending |
+| SYNC-02 | Phase 3 | Complete |
+| SYNC-04 | Phase 3 | Complete |
+| SYNC-05 | Phase 3 | Complete |
 | SKIL-01 | Phase 4 | Pending |
 | SKIL-02 | Phase 4 | Pending |
 | SKIL-03 | Phase 4 | Pending |
