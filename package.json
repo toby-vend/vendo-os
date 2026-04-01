@@ -22,6 +22,7 @@
     "db:push": "tsx scripts/sync/push-to-turso.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.81.0",
     "@fastify/static": "^9.0.0",
     "@libsql/client": "^0.17.2",
     "@vercel/analytics": "^2.0.1",
