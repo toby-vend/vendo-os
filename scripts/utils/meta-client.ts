@@ -45,6 +45,22 @@ export interface MetaInsightRow {
   conversion_values?: Array<{ action_type: string; value: string }>;
 }
 
+export interface MetaAdLibraryResult {
+  id: string;
+  ad_creative_bodies?: string[];
+  ad_creative_link_titles?: string[];
+  ad_creative_link_descriptions?: string[];
+  ad_creative_link_captions?: string[];
+  page_id: string;
+  page_name: string;
+  ad_delivery_start_time?: string;
+  ad_delivery_stop_time?: string;
+  ad_snapshot_url?: string;
+  languages?: string[];
+  publisher_platforms?: string[];
+  estimated_audience_size?: { lower_bound: number; upper_bound: number };
+}
+
 interface PagingCursor {
   after?: string;
 }
