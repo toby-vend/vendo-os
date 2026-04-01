@@ -49,19 +49,24 @@ export interface AssigneeSummary {
 // --- Dashboard ---
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const [totalMeetings, openActions, activeClients, adSpend30d, range] = await Promise.all([
+  const [totalMeetings, openActions, activeClients, metaSpend, gadsSpend, range] = await Promise.all([
     scalar('SELECT COUNT(*) FROM meetings'),
     scalar('SELECT COUNT(*) FROM action_items WHERE completed = 0'),
     scalar("SELECT COUNT(*) FROM clients WHERE status = 'active'"),
     scalar("SELECT COALESCE(SUM(spend), 0) FROM meta_insights WHERE date >= date('now', '-30 days')"),
+    scalar("SELECT COALESCE(SUM(spend), 0) FROM gads_campaign_spend WHERE date >= date('now', '-30 days')"),
     db.execute('SELECT MIN(date) as min_date, MAX(date) as max_date FROM meetings'),
   ]);
   const row = range.rows[0];
+  const metaSpend30d = Math.round(((metaSpend as number) ?? 0) * 100) / 100;
+  const gadsSpend30d = Math.round(((gadsSpend as number) ?? 0) * 100) / 100;
   return {
     totalMeetings: (totalMeetings as number) ?? 0,
     openActions: (openActions as number) ?? 0,
     activeClients: (activeClients as number) ?? 0,
-    adSpend30d: Math.round(((adSpend30d as number) ?? 0) * 100) / 100,
+    adSpend30d: Math.round((metaSpend30d + gadsSpend30d) * 100) / 100,
+    metaSpend30d,
+    gadsSpend30d,
     dateRange: { from: (row?.min_date as string) || '', to: (row?.max_date as string) || '' },
   };
 }
