@@ -76,6 +76,12 @@
             <span class="nav-label">Drive</span>
           </a>
           <% } %>
+          <% if (canSee('chat')) { %>
+          <a href="/chat" class="nav-item<%= it.currentPath?.startsWith('/chat') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span class="nav-label">Chat</span>
+          </a>
+          <% } %>
         </div>
         <div class="nav-section">
           <span class="nav-section-label">System</span>
