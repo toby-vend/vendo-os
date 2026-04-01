@@ -589,6 +589,8 @@ export async function upsertMeeting(meeting: {
   transcript: string | null;
   attendees: string | null;
   raw_action_items: string | null;
+  calendar_invitees?: string | null;
+  invitee_domains_type?: string | null;
 }): Promise<'inserted' | 'updated'> {
   const db = await getDb();
   const now = new Date().toISOString();
@@ -604,21 +606,25 @@ export async function upsertMeeting(meeting: {
         transcript = COALESCE(?, transcript),
         attendees = COALESCE(?, attendees),
         raw_action_items = COALESCE(?, raw_action_items),
+        calendar_invitees = COALESCE(?, calendar_invitees),
+        invitee_domains_type = COALESCE(?, invitee_domains_type),
         synced_at = ?
       WHERE id = ?
     `, [
       meeting.title, meeting.date, meeting.duration_seconds, meeting.url,
       meeting.summary, meeting.transcript, meeting.attendees, meeting.raw_action_items,
+      meeting.calendar_invitees ?? null, meeting.invitee_domains_type ?? null,
       now, meeting.id,
     ]);
     return 'updated';
   } else {
     db.run(`
-      INSERT INTO meetings (id, title, date, duration_seconds, url, summary, transcript, attendees, raw_action_items, synced_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO meetings (id, title, date, duration_seconds, url, summary, transcript, attendees, raw_action_items, calendar_invitees, invitee_domains_type, synced_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       meeting.id, meeting.title, meeting.date, meeting.duration_seconds, meeting.url,
-      meeting.summary, meeting.transcript, meeting.attendees, meeting.raw_action_items, now,
+      meeting.summary, meeting.transcript, meeting.attendees, meeting.raw_action_items,
+      meeting.calendar_invitees ?? null, meeting.invitee_domains_type ?? null, now,
     ]);
     return 'inserted';
   }
