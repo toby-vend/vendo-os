@@ -67,8 +67,8 @@ if (!process.env.VERCEL) {
 app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
-  // Public routes
-  if (path.startsWith('/assets/') || path === '/login') return;
+  // Public routes (no session required)
+  if (path.startsWith('/assets/') || path === '/login' || path === '/api/drive/webhook') return;
 
   const cookies = parseCookies(request.headers.cookie || '');
   const token = cookies['vendo_session'];
