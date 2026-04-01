@@ -266,8 +266,20 @@ export async function updateSkillMetadata(data: {
 /**
  * Delete a skill record by Drive file ID.
  * Used when a file is trashed, permanently deleted, or moved outside watched folders.
+ * FTS5 entry is removed before the skills row is deleted (required by content-sync tables).
  */
 export async function deleteSkill(driveFileId: string): Promise<void> {
+  // Fetch row BEFORE deletion — FTS5 content-sync delete needs existing title and content
+  const existing = await rows<{ rowid: number; title: string; content: string }>(
+    'SELECT rowid, title, content FROM skills WHERE drive_file_id = ?',
+    [driveFileId],
+  );
+  const oldRow = existing[0] ?? null;
+
+  if (oldRow) {
+    await deleteSkillFts(oldRow.rowid, oldRow.title, oldRow.content);
+  }
+
   await db.execute({
     sql: `DELETE FROM skills WHERE drive_file_id = ?`,
     args: [driveFileId],
