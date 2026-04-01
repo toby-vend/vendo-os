@@ -24,7 +24,31 @@ export interface CampaignSummary {
   ctr: number;
 }
 
-// --- Ads ---
+// --- Google Ads interfaces ---
+
+export interface GadsAccountSummary {
+  account_id: string;
+  account_name: string | null;
+  impressions: number;
+  clicks: number;
+  spend: number;
+  cpc: number;
+  cpm: number;
+  ctr: number;
+}
+
+export interface GadsCampaignSummary {
+  campaign_id: string;
+  campaign_name: string | null;
+  impressions: number;
+  clicks: number;
+  spend: number;
+  cpc: number;
+  cpm: number;
+  ctr: number;
+}
+
+// --- Meta Ads ---
 
 export async function getAdAccountSummary(days = 30): Promise<AdAccountSummary[]> {
   return rows<AdAccountSummary>(`
