@@ -121,6 +121,37 @@ export async function initSchema(): Promise<void> {
     )
   `);
 
+  // --- Waterfall matcher tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS contact_email_domains (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      domain TEXT NOT NULL,
+      client_name TEXT NOT NULL,
+      source TEXT NOT NULL,
+      contact_email TEXT,
+      created_at TEXT NOT NULL,
+      UNIQUE(domain, client_name)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_ced_domain ON contact_email_domains(domain)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS meeting_match_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      meeting_id TEXT NOT NULL REFERENCES meetings(id),
+      client_name TEXT,
+      method TEXT NOT NULL,
+      confidence TEXT NOT NULL,
+      evidence TEXT,
+      created_at TEXT NOT NULL,
+      UNIQUE(meeting_id)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_mml_meeting ON meeting_match_log(meeting_id)');
+
   db.run(`
     CREATE TABLE IF NOT EXISTS sync_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
