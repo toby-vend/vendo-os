@@ -529,6 +529,14 @@ export async function initSchema(): Promise<void> {
 
   db.run('CREATE INDEX IF NOT EXISTS idx_brand_hub_client ON brand_hub(client_id)');
 
+  // Migrate: add title column to brand_hub if upgrading from old schema
+  try { db.run("ALTER TABLE brand_hub ADD COLUMN title TEXT NOT NULL DEFAULT ''"); } catch { /* already exists */ }
+
+  // UNIQUE index required for ON CONFLICT(drive_file_id) upsert
+  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_brand_hub_drive_file ON brand_hub(drive_file_id)');
+
+  // brand_hub_fts omitted: FTS5 not available in sql.js; queried via web app (Turso) only
+
   // --- Drive watch channels table ---
 
   db.run(`
