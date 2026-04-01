@@ -167,9 +167,27 @@ async function fetchMissingTranscripts(client: FathomClient) {
 
   for (const id of ids) {
     try {
-      const transcript = await client.getTranscript(Number(id));
-      if (transcript) {
-        db.run('UPDATE meetings SET transcript = ? WHERE id = ?', [transcript, id]);
+      const { text, speakers } = await client.getTranscriptWithSpeakers(Number(id));
+      if (text) {
+        // Merge transcript speaker emails into calendar_invitees
+        const existingInvitees = db.exec('SELECT calendar_invitees FROM meetings WHERE id = ?', [id]);
+        let invitees: Array<{ name: string; email: string | null; domain: string | null }> = [];
+        if (existingInvitees.length && existingInvitees[0].values[0][0]) {
+          try { invitees = JSON.parse(existingInvitees[0].values[0][0] as string); } catch { /* ignore */ }
+        }
+
+        const seenEmails = new Set(invitees.map(i => i.email).filter(Boolean));
+        for (const speaker of speakers) {
+          if (speaker.email && !seenEmails.has(speaker.email)) {
+            seenEmails.add(speaker.email);
+            const domain = speaker.email.split('@')[1]?.toLowerCase() || null;
+            invitees.push({ name: speaker.name, email: speaker.email, domain });
+          }
+        }
+
+        const inviteesJson = invitees.length > 0 ? JSON.stringify(invitees) : null;
+        db.run('UPDATE meetings SET transcript = ?, calendar_invitees = COALESCE(?, calendar_invitees) WHERE id = ?',
+          [text, inviteesJson, id]);
         fetched++;
       }
     } catch (err) {
