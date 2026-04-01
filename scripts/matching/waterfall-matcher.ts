@@ -33,7 +33,7 @@ function isInternalMeeting(meeting: MeetingData, _ctx: MatchContext): boolean {
   if (INTERNAL_KEYWORDS.some(kw => lower.includes(kw))) return true;
 
   // Fathom's own classification — authoritative
-  if (meeting.invitee_domains_type === 'internal') return true;
+  if (meeting.invitee_domains_type === 'internal' || meeting.invitee_domains_type === 'only_internal') return true;
 
   // Note: we do NOT infer internal from "all calendar_invitees are team domains"
   // because our invitee data comes from transcript speaker matching, which is
