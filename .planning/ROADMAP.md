@@ -12,7 +12,7 @@ VendoOS already has a working web dashboard, meeting intelligence pipeline, and 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Infrastructure** - Harden OAuth tokens, split queries.ts, extend database schema
+- [x] **Phase 1: Infrastructure** - Harden OAuth tokens, split queries.ts, extend database schema (completed 2026-04-01)
 - [ ] **Phase 2: Drive Webhook Foundation** - Register webhook channels, receive push notifications, renew before expiry
 - [ ] **Phase 3: Drive Document Processing** - Classify documents by folder, detect content changes, handle moves and deletions
 - [ ] **Phase 4: Skills Library** - FTS5-indexed SOP store with channel classification and version tracking
@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Existing dashboard routes and data syncs continue to work after the queries.ts split
   3. All new tables exist in the schema: skills, skills_fts, brand_hub, drive_watch_channels, task_runs
   4. Admin dashboard surfaces OAuth token status — silent failure is visible
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 01-01-PLAN.md — Crypto key versioning, dual-key rotation, lazy migration, admin OAuth status
@@ -147,7 +147,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 2/3 | In Progress|  |
+| 1. Infrastructure | 3/3 | Complete   | 2026-04-01 |
 | 2. Drive Webhook Foundation | 0/TBD | Not started | - |
 | 3. Drive Document Processing | 0/TBD | Not started | - |
 | 4. Skills Library | 0/TBD | Not started | - |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-infrastructure 01-01-PLAN.md
-last_updated: "2026-04-01T19:32:49.146Z"
+stopped_at: Completed 01-infrastructure 01-03-PLAN.md
+last_updated: "2026-04-01T19:40:25.301Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-infrastructure P02 | 8 | 2 tasks | 2 files |
 | Phase 01-infrastructure P01 | 4 | 2 tasks | 5 files |
+| Phase 01-infrastructure P03 | 8 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,8 @@ Recent decisions affecting current work:
 - [Phase 01-infrastructure]: Token version prefix: v1:<base64> for all new encrypted tokens; bare base64 treated as legacy v0
 - [Phase 01-infrastructure]: Dual-key Map cache keyed by raw env value enables concurrent key rotation without module reload
 - [Phase 01-infrastructure]: Lazy v0-to-v1 migration is fire-and-forget — never await on token access hot path
+- [Phase 01-infrastructure]: moduleResolution: bundler does not auto-resolve queries.js to queries/index.js — retained queries.ts as thin barrel for zero consumer import changes
+- [Phase 01-infrastructure]: Domain module split pattern: new query modules go in web/lib/queries/ and import rows/scalar/db from ./base.js; consumer imports unchanged via thin barrel
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T19:32:49.145Z
-Stopped at: Completed 01-infrastructure 01-01-PLAN.md
+Last session: 2026-04-01T19:40:25.299Z
+Stopped at: Completed 01-infrastructure 01-03-PLAN.md
 Resume file: None
