@@ -24,6 +24,7 @@
   "dependencies": {
     "@fastify/static": "^9.0.0",
     "@libsql/client": "^0.17.2",
+    "@vercel/analytics": "^2.0.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^16.4.0",
     "eta": "^4.5.1",
