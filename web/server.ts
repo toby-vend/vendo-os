@@ -19,13 +19,15 @@ import { driveRoutes } from './routes/drive.js';
 import { authRoutes } from './routes/auth.js';
 import { adminUsersRoutes } from './routes/admin/users.js';
 import { adminPermissionsRoutes } from './routes/admin/permissions.js';
+import { googleOAuthRoutes } from './routes/google-oauth.js';
+import { settingsRoutes } from './routes/settings.js';
 import {
   parseCookies,
   verifySessionToken,
   getRouteSlug,
   type SessionUser,
 } from './lib/auth.js';
-import { getUserById, getUserChannelSlugs, getUserAllowedRoutes } from './lib/queries.js';
+import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, hasUserOAuthToken } from './lib/queries.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
