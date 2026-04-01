@@ -6,6 +6,7 @@ import { FathomClient, type FathomMeeting } from '../utils/fathom-client.js';
 
 const BACKFILL = process.argv.includes('--backfill');
 const TRANSCRIPTS_ONLY = process.argv.includes('--transcripts-only');
+const BACKFILL_INVITEES = process.argv.includes('--backfill-invitees');
 
 function parseMeeting(m: FathomMeeting) {
   let durationSeconds: number | null = null;
