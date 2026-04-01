@@ -1,7 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import {
   getPipelineOverview,
-  getOpportunitiesByStage,
   getOpportunityDetail,
   getRecentOpportunities,
   getWonDeals,
