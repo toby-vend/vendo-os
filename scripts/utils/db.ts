@@ -406,7 +406,7 @@ export async function initSchema(): Promise<void> {
     )
   `);
 
-  -- skills_fts omitted: FTS5 not available in sql.js; queried via web app (Turso) only
+  // skills_fts omitted: FTS5 not available in sql.js; queried via web app (Turso) only
 
   // --- Brand hub table ---
 
