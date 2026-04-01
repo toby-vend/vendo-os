@@ -353,6 +353,22 @@ export async function initSchema(): Promise<void> {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS user_oauth_tokens (
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      provider TEXT NOT NULL DEFAULT 'google',
+      access_token_enc TEXT NOT NULL,
+      refresh_token_enc TEXT NOT NULL,
+      token_expiry INTEGER NOT NULL,
+      scopes TEXT NOT NULL,
+      provider_email TEXT,
+      provider_name TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      PRIMARY KEY (user_id, provider)
+    )
+  `);
+
   db.run('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
   db.run('CREATE INDEX IF NOT EXISTS idx_user_channels_user ON user_channels(user_id)');
   db.run('CREATE INDEX IF NOT EXISTS idx_channel_permissions_channel ON channel_permissions(channel_id)');
