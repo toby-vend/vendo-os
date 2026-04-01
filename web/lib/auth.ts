@@ -95,6 +95,7 @@ const ROUTE_MAP: [string, string][] = [
   ['/sync-status', 'sync-status'],
   ['/drive', 'drive'],
   ['/settings', 'settings'],
+  ['/chat', 'chat'],
 ];
 
 export function getRouteSlug(url: string): string | null {
