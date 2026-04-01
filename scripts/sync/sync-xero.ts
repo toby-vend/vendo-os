@@ -272,6 +272,92 @@ async function syncBankSummary(client: XeroClient): Promise<void> {
   }
 }
 
+async function syncClientsFromXero(): Promise<number> {
+  log('XERO', 'Syncing clients from Xero customers...');
+  const db = await getDb();
+  let count = 0;
+
+  // Get all Xero contacts marked as customers
+  const customers = db.exec(`
+    SELECT c.id, c.name, c.email, c.outstanding_receivable, c.status
+    FROM xero_contacts c
+    WHERE c.is_customer = 1 AND c.status = 'ACTIVE'
+    ORDER BY c.name
+  `);
+
+  if (!customers.length || !customers[0].values.length) {
+    log('XERO', 'No Xero customers found');
+    return 0;
+  }
+
+  // Get invoice totals and date ranges per contact
+  const invoiceStats = db.exec(`
+    SELECT contact_id,
+           SUM(CASE WHEN status IN ('PAID', 'AUTHORISED') THEN total ELSE 0 END) as total_invoiced,
+           MIN(date) as first_invoice,
+           MAX(date) as last_invoice
+    FROM xero_invoices
+    WHERE type = 'ACCREC' AND status != 'DELETED'
+    GROUP BY contact_id
+  `);
+
+  const invoiceMap = new Map<string, { total: number; first: string | null; last: string | null }>();
+  if (invoiceStats.length && invoiceStats[0].values.length) {
+    for (const row of invoiceStats[0].values) {
+      invoiceMap.set(row[0] as string, {
+        total: (row[1] as number) || 0,
+        first: row[2] as string | null,
+        last: row[3] as string | null,
+      });
+    }
+  }
+
+  // Skip Vendo's own record and junk entries
+  const SKIP_NAMES = new Set(['vendo digital ltd', 'vendo digital']);
+
+  for (const row of customers[0].values) {
+    const [xeroId, name, email, outstanding] = row as [string, string, string | null, number];
+
+    if (SKIP_NAMES.has(name.toLowerCase())) continue;
+    // Skip entries that look like Stripe IDs or email addresses used as names
+    if (name.startsWith('cus_') || (name.includes('@') && !name.includes(' '))) continue;
+
+    const stats = invoiceMap.get(xeroId);
+
+    db.run(`
+      INSERT INTO clients (name, xero_contact_id, email, source, total_invoiced, outstanding, first_invoice_date, last_invoice_date)
+      VALUES (?, ?, ?, 'xero', ?, ?, ?, ?)
+      ON CONFLICT(name) DO UPDATE SET
+        xero_contact_id = excluded.xero_contact_id,
+        email = COALESCE(excluded.email, clients.email),
+        source = 'xero',
+        total_invoiced = excluded.total_invoiced,
+        outstanding = excluded.outstanding,
+        first_invoice_date = excluded.first_invoice_date,
+        last_invoice_date = excluded.last_invoice_date
+    `, [
+      name,
+      xeroId,
+      email || null,
+      stats?.total ?? 0,
+      outstanding ?? 0,
+      stats?.first ?? null,
+      stats?.last ?? null,
+    ]);
+    count++;
+  }
+
+  // Mark any clients not in Xero as legacy (from old Fathom-only sourcing)
+  db.run(`
+    UPDATE clients SET source = 'fathom'
+    WHERE xero_contact_id IS NULL AND source != 'fathom'
+  `);
+
+  saveDb();
+  log('XERO', `Clients synced: ${count} from Xero`);
+  return count;
+}
+
 async function main() {
   const clientId = process.env.XERO_CLIENT_ID;
   const clientSecret = process.env.XERO_CLIENT_SECRET;
