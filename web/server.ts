@@ -91,10 +91,11 @@ app.addHook('onRequest', async (request, reply) => {
     return;
   }
 
-  const channels = await getUserChannelSlugs(dbUser.id);
-  const allowedRoutes = dbUser.role === 'admin'
-    ? [] // admins bypass route checks
-    : await getUserAllowedRoutes(dbUser.id);
+  const [channels, allowedRoutes, googleConnected] = await Promise.all([
+    getUserChannelSlugs(dbUser.id),
+    dbUser.role === 'admin' ? Promise.resolve([]) : getUserAllowedRoutes(dbUser.id),
+    hasUserOAuthToken(dbUser.id, 'google'),
+  ]);
 
   const user: SessionUser = {
     id: dbUser.id,
@@ -104,6 +105,7 @@ app.addHook('onRequest', async (request, reply) => {
     mustChangePassword: dbUser.must_change_password === 1,
     channels,
     allowedRoutes,
+    googleConnected,
   };
 
   (request as any).user = user;
