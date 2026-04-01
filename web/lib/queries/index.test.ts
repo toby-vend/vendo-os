@@ -146,4 +146,14 @@ describe('queries barrel smoke test', () => {
     assert.strictEqual(typeof getAdAccountSummary, 'function');
     assert.strictEqual(typeof getCampaignSummary, 'function');
   });
+
+  it('drive functions are exported', () => {
+    assert.strictEqual(typeof getDriveWatchChannel, 'function');
+    assert.strictEqual(typeof upsertDriveWatchChannel, 'function');
+    assert.strictEqual(typeof getChannelsExpiringWithin24h, 'function');
+    assert.strictEqual(typeof getAllDriveWatchChannels, 'function');
+    assert.strictEqual(typeof deleteDriveWatchChannel, 'function');
+    assert.strictEqual(typeof insertDriveSyncQueueItem, 'function');
+    assert.strictEqual(typeof getUnprocessedSyncQueueItems, 'function');
+  });
 });
