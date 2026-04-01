@@ -550,13 +550,15 @@ export async function getUserById(id: string): Promise<UserRow | null> {
   return result[0] ?? null;
 }
 
-export async function getAllUsers(): Promise<(UserRow & { channels: string })[]> {
-  return rows<UserRow & { channels: string }>(`
+export async function getAllUsers(): Promise<(UserRow & { channels: string; google_connected: number })[]> {
+  return rows<UserRow & { channels: string; google_connected: number }>(`
     SELECT u.*,
-           COALESCE(GROUP_CONCAT(c.name, ', '), '') as channels
+           COALESCE(GROUP_CONCAT(c.name, ', '), '') as channels,
+           COUNT(t.user_id) as google_connected
     FROM users u
     LEFT JOIN user_channels uc ON u.id = uc.user_id
     LEFT JOIN channels c ON uc.channel_id = c.id
+    LEFT JOIN user_oauth_tokens t ON u.id = t.user_id AND t.provider = 'google'
     GROUP BY u.id
     ORDER BY u.name
   `);
