@@ -14,6 +14,8 @@ export interface DashboardStats {
   openActions: number;
   activeClients: number;
   adSpend30d: number;
+  metaSpend30d: number;
+  gadsSpend30d: number;
   dateRange: { from: string; to: string };
 }
 
