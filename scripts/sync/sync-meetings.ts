@@ -19,6 +19,19 @@ function parseMeeting(m: FathomMeeting) {
   const summary = m.default_summary?.markdown_formatted || null;
   const actionItems = m.action_items ? JSON.stringify(m.action_items) : null;
 
+  // Extract invitee emails from action items (available at list time)
+  const invitees: Array<{ name: string; email: string | null; domain: string | null }> = [];
+  const seenEmails = new Set<string>();
+  if (m.action_items) {
+    for (const item of m.action_items) {
+      if (item.assignee?.email && !seenEmails.has(item.assignee.email)) {
+        seenEmails.add(item.assignee.email);
+        const domain = item.assignee.email.split('@')[1]?.toLowerCase() || null;
+        invitees.push({ name: item.assignee.name, email: item.assignee.email, domain });
+      }
+    }
+  }
+
   return {
     id: String(m.recording_id),
     title: m.title || m.meeting_title || 'Untitled',
@@ -29,6 +42,8 @@ function parseMeeting(m: FathomMeeting) {
     transcript: null as string | null, // fetched separately
     attendees: null as string | null,
     raw_action_items: actionItems,
+    calendar_invitees: invitees.length > 0 ? JSON.stringify(invitees) : null,
+    invitee_domains_type: m.calendar_invitees_domains_type || null,
   };
 }
 
