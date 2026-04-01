@@ -645,9 +645,10 @@ export async function setAllPermissions(permissions: { channelId: string; routeS
   }
 }
 
-// --- Auth: Schema init (for Turso production) ---
+// --- Schema init (for Turso production) ---
 
-export async function initAuthSchema(): Promise<void> {
+export async function initSchema(): Promise<void> {
+  // Auth tables
   await client.execute({ sql: `CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, name TEXT NOT NULL,
     password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'standard',
@@ -683,7 +684,80 @@ export async function initAuthSchema(): Promise<void> {
     updated_at TEXT NOT NULL,
     PRIMARY KEY (user_id, provider)
   )`, args: [] });
+
+  // Skills tables
+  await client.execute({ sql: `CREATE TABLE IF NOT EXISTS skills (
+    id INTEGER PRIMARY KEY,
+    drive_file_id TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    content_hash TEXT NOT NULL,
+    channel TEXT NOT NULL,
+    skill_type TEXT NOT NULL,
+    drive_modified_at TEXT NOT NULL,
+    indexed_at TEXT NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1
+  )`, args: [] });
+
+  // FTS5 virtual table for skills full-text search (Turso/libsql only — NOT sql.js)
+  await client.execute({ sql: `CREATE VIRTUAL TABLE IF NOT EXISTS skills_fts USING fts5(
+    title,
+    content,
+    content='skills',
+    tokenize='unicode61'
+  )`, args: [] });
+
+  // Brand hub table
+  await client.execute({ sql: `CREATE TABLE IF NOT EXISTS brand_hub (
+    id INTEGER PRIMARY KEY,
+    client_id INTEGER NOT NULL,
+    client_name TEXT NOT NULL,
+    client_slug TEXT NOT NULL,
+    content TEXT NOT NULL,
+    content_hash TEXT NOT NULL,
+    drive_file_id TEXT,
+    drive_modified_at TEXT,
+    indexed_at TEXT NOT NULL
+  )`, args: [] });
+
+  await client.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_brand_hub_client ON brand_hub(client_id)`, args: [] });
+
+  // Drive watch channels table
+  await client.execute({ sql: `CREATE TABLE IF NOT EXISTS drive_watch_channels (
+    id INTEGER PRIMARY KEY,
+    channel_id TEXT NOT NULL UNIQUE,
+    resource_id TEXT NOT NULL,
+    expiration INTEGER NOT NULL,
+    page_token TEXT,
+    created_at TEXT NOT NULL,
+    renewed_at TEXT
+  )`, args: [] });
+
+  // Task runs table
+  await client.execute({ sql: `CREATE TABLE IF NOT EXISTS task_runs (
+    id INTEGER PRIMARY KEY,
+    client_id INTEGER NOT NULL,
+    channel TEXT NOT NULL,
+    task_type TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'queued',
+    sops_used TEXT,
+    brand_context_id INTEGER,
+    output TEXT,
+    qa_score REAL,
+    qa_critique TEXT,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    created_by TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )`, args: [] });
+
+  await client.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_task_runs_client ON task_runs(client_id)`, args: [] });
+  await client.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_task_runs_status ON task_runs(status)`, args: [] });
+  await client.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_task_runs_created ON task_runs(created_at)`, args: [] });
 }
+
+/** @deprecated Use initSchema instead */
+export const initAuthSchema = initSchema;
 
 // --- OAuth Tokens ---
 
