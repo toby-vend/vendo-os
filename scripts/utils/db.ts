@@ -444,6 +444,8 @@ export async function initSchema(): Promise<void> {
     )
   `);
 
+  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_skills_drive_file ON skills(drive_file_id) WHERE drive_file_id IS NOT NULL');
+
   // skills_fts omitted: FTS5 not available in sql.js; queried via web app (Turso) only
 
   // --- Brand hub table ---
