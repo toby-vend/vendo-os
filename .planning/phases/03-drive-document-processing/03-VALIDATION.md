@@ -38,9 +38,9 @@ created: 2026-04-01
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 03-01-01 | 01 | 1 | SYNC-02 | unit | `node --import tsx/esm --test scripts/sync/process-drive-queue.test.ts` | ❌ W0 | ⬜ pending |
-| 03-01-02 | 01 | 1 | SYNC-04 | unit | `node --import tsx/esm --test scripts/sync/process-drive-queue.test.ts` | ❌ W0 | ⬜ pending |
-| 03-01-03 | 01 | 1 | SYNC-05 | unit | `node --import tsx/esm --test scripts/sync/process-drive-queue.test.ts` | ❌ W0 | ⬜ pending |
+| 03-01-01 | 01 | 1 | SYNC-02 | unit | `node --import tsx/esm --experimental-test-module-mocks --test scripts/sync/process-drive-queue.test.ts` | ❌ W0 | ⬜ pending |
+| 03-01-02 | 01 | 1 | SYNC-04 | unit | `node --import tsx/esm --experimental-test-module-mocks --test scripts/sync/process-drive-queue.test.ts` | ❌ W0 | ⬜ pending |
+| 03-01-03 | 01 | 1 | SYNC-05 | unit | `node --import tsx/esm --experimental-test-module-mocks --test scripts/sync/process-drive-queue.test.ts` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
