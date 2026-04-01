@@ -70,7 +70,9 @@ async function syncMeetings() {
   let totalUpdated = 0;
 
   try {
-    if (TRANSCRIPTS_ONLY) {
+    if (BACKFILL_INVITEES) {
+      await backfillInvitees(client);
+    } else if (TRANSCRIPTS_ONLY) {
       await fetchMissingTranscripts(client);
     } else {
       // Determine start point
