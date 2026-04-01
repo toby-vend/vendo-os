@@ -1,5 +1,8 @@
 import { rows, scalar, db } from './base.js';
 
+// scalar is used for rowid lookups — import kept for future use if tree-shaken
+void scalar;
+
 // --- Interfaces ---
 
 export interface SkillSearchResult {
