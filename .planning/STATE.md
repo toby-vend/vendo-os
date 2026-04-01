@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-infrastructure-02-PLAN.md
-last_updated: "2026-04-01T19:30:40.576Z"
+stopped_at: Completed 01-infrastructure 01-01-PLAN.md
+last_updated: "2026-04-01T19:32:49.146Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-infrastructure P02 | 8 | 2 tasks | 2 files |
+| Phase 01-infrastructure P01 | 4 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - Extend existing Fastify/Eta stack (proven in production)
 - [Phase 01-infrastructure]: skills_fts FTS5 virtual table added only to Turso/libsql path — sql.js 1.11.0 is FTS4-only and skills queries run via web app
 - [Phase 01-infrastructure]: initAuthSchema renamed to initSchema (broader scope); deprecated alias retained for backward compatibility
+- [Phase 01-infrastructure]: Token version prefix: v1:<base64> for all new encrypted tokens; bare base64 treated as legacy v0
+- [Phase 01-infrastructure]: Dual-key Map cache keyed by raw env value enables concurrent key rotation without module reload
+- [Phase 01-infrastructure]: Lazy v0-to-v1 migration is fire-and-forget — never await on token access hot path
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T19:30:40.573Z
-Stopped at: Completed 01-infrastructure-02-PLAN.md
+Last session: 2026-04-01T19:32:49.145Z
+Stopped at: Completed 01-infrastructure 01-01-PLAN.md
 Resume file: None
