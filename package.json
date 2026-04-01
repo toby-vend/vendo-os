@@ -17,6 +17,7 @@
     "sync:meta": "tsx scripts/sync/sync-meta-ads.ts",
     "sync:meta:backfill": "tsx scripts/sync/sync-meta-ads.ts --backfill",
     "sync:meta:accounts": "tsx scripts/sync/sync-meta-ads.ts --accounts-only",
+    "sync:meta:adlib": "tsx scripts/sync/sync-meta-ad-library.ts",
     "sync:asana": "tsx scripts/sync/sync-asana.ts",
     "sync:asana:discover": "tsx scripts/sync/sync-asana.ts --discover",
     "dev": "tsx watch web/start.ts",
