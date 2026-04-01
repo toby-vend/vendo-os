@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { getGoogleAccessToken } from '../lib/google-tokens.js';
+import type { SessionUser } from '../lib/auth.js';
 
 interface DriveFile {
   id: string;
@@ -10,60 +10,6 @@ interface DriveFile {
   owners?: Array<{ displayName: string; emailAddress: string }>;
   size?: string;
   webViewLink?: string;
-}
-
-interface TokenData {
-  access_token: string;
-  refresh_token: string;
-  expiry_date: number;
-}
-
-interface OAuthKeys {
-  installed: {
-    client_id: string;
-    client_secret: string;
-    token_uri: string;
-  };
-}
-
-const CREDENTIALS_PATH = process.env.GDRIVE_CREDENTIALS_PATH
-  || resolve(process.cwd(), '.secrets/.gdrive-server-credentials.json');
-const OAUTH_PATH = process.env.GDRIVE_OAUTH_PATH
-  || resolve(process.cwd(), '.secrets/gcp-oauth.keys.json');
-
-async function getAccessToken(): Promise<string> {
-  const tokenData: TokenData = JSON.parse(readFileSync(CREDENTIALS_PATH, 'utf-8'));
-  const oauthKeys: OAuthKeys = JSON.parse(readFileSync(OAUTH_PATH, 'utf-8'));
-
-  // If token is still valid (with 60s buffer), use it
-  if (tokenData.expiry_date > Date.now() + 60_000) {
-    return tokenData.access_token;
-  }
-
-  // Refresh the token
-  const res = await fetch(oauthKeys.installed.token_uri, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: oauthKeys.installed.client_id,
-      client_secret: oauthKeys.installed.client_secret,
-      refresh_token: tokenData.refresh_token,
-      grant_type: 'refresh_token',
-    }),
-  });
-
-  const refreshed = await res.json() as { access_token: string; expires_in: number };
-  // Update stored credentials
-  const updated = {
-    ...tokenData,
-    access_token: refreshed.access_token,
-    expiry_date: Date.now() + refreshed.expires_in * 1000,
-  };
-
-  const { writeFileSync } = await import('fs');
-  writeFileSync(CREDENTIALS_PATH, JSON.stringify(updated), 'utf-8');
-
-  return refreshed.access_token;
 }
 
 const MIME_LABELS: Record<string, string> = {
@@ -101,6 +47,26 @@ function formatSize(bytes?: string): string {
 
 export const driveRoutes: FastifyPluginAsync = async (app) => {
   app.get('/', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!user) { reply.redirect('/login'); return; }
+
+    // Check if user has connected their Google account
+    const token = await getGoogleAccessToken(user.id);
+    if (!token) {
+      reply.render('drive', {
+        files: [],
+        nextPageToken: '',
+        error: '',
+        search: '',
+        type: '',
+        notConnected: true,
+        mimeLabel,
+        driveLink,
+        formatSize,
+      });
+      return;
+    }
+
     const q = request.query as Record<string, string>;
     const search = q.search?.trim() || '';
     const type = q.type || '';
@@ -137,7 +103,6 @@ export const driveRoutes: FastifyPluginAsync = async (app) => {
     let error = '';
 
     try {
-      const token = await getAccessToken();
       const res = await fetch(apiUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -159,6 +124,7 @@ export const driveRoutes: FastifyPluginAsync = async (app) => {
       error,
       search,
       type,
+      notConnected: false,
       mimeLabel,
       driveLink,
       formatSize,
