@@ -124,11 +124,13 @@ export async function getClientByName(name: string): Promise<{ client: ClientRow
 export async function getSyncStatus(): Promise<SyncLogRow[]> {
   const sources: SyncLogRow[] = [];
 
-  const [meetingSync, meetingCount, metaSync, metaCount, xeroInvSync, xeroInvCount, xeroConSync, xeroConCount, xeroPnlSync, xeroPnlCount, ghlSync, ghlCount] = await Promise.all([
+  const [meetingSync, meetingCount, metaSync, metaCount, gadsSync, gadsCount, xeroInvSync, xeroInvCount, xeroConSync, xeroConCount, xeroPnlSync, xeroPnlCount, ghlSync, ghlCount] = await Promise.all([
     scalar<string>("SELECT MAX(synced_at) FROM meetings"),
     scalar('SELECT COUNT(*) FROM meetings'),
     scalar<string>("SELECT MAX(synced_at) FROM meta_insights"),
     scalar('SELECT COUNT(*) FROM meta_insights'),
+    scalar<string>("SELECT MAX(synced_at) FROM gads_campaign_spend"),
+    scalar('SELECT COUNT(*) FROM gads_campaign_spend'),
     scalar<string>("SELECT MAX(synced_at) FROM xero_invoices"),
     scalar('SELECT COUNT(*) FROM xero_invoices'),
     scalar<string>("SELECT MAX(synced_at) FROM xero_contacts"),
@@ -141,6 +143,7 @@ export async function getSyncStatus(): Promise<SyncLogRow[]> {
 
   sources.push({ source: 'Fathom (Meetings)', lastSync: meetingSync, rowCount: (meetingCount as number) ?? 0 });
   sources.push({ source: 'Meta Ads', lastSync: metaSync, rowCount: (metaCount as number) ?? 0 });
+  sources.push({ source: 'Google Ads', lastSync: gadsSync, rowCount: (gadsCount as number) ?? 0 });
   sources.push({ source: 'GHL (Pipeline)', lastSync: ghlSync, rowCount: (ghlCount as number) ?? 0 });
   sources.push({ source: 'Xero (Invoices)', lastSync: xeroInvSync, rowCount: (xeroInvCount as number) ?? 0 });
   sources.push({ source: 'Xero (Contacts)', lastSync: xeroConSync, rowCount: (xeroConCount as number) ?? 0 });
