@@ -1,0 +1,122 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h1>Tasks <small>(<%= it.total %> total)</small></h1>
+  <a href="/tasks/new" class="btn btn-primary" style="padding: 8px 18px; font-size: 13px; color: #0B0B0B; background: #22C55E; border-radius: 8px; text-decoration: none; font-weight: 600;">+ New Task</a>
+</div>
+
+<% if (it.query?.created) { %>
+<div style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; font-size: 14px; color: #E2E8F0;">
+  Task created successfully in Asana.
+</div>
+<% } %>
+
+<!-- Stats cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="stat-card">
+    <div class="stat-label">Open</div>
+    <div class="stat-value"><%= it.stats.open %></div>
+  </div>
+  <div class="stat-card" style="<%= it.stats.overdue > 0 ? 'border-color: rgba(239,68,68,0.3);' : '' %>">
+    <div class="stat-label">Overdue</div>
+    <div class="stat-value" style="<%= it.stats.overdue > 0 ? 'color: #EF4444;' : '' %>"><%= it.stats.overdue %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Due Today</div>
+    <div class="stat-value"><%= it.stats.dueToday %></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Due This Week</div>
+    <div class="stat-value"><%= it.stats.dueThisWeek %></div>
+  </div>
+</div>
+
+<form class="filter-bar" method="GET" action="/tasks">
+  <div>
+    <label for="search">Search</label>
+    <input type="text" id="search" name="search" value="<%= it.query?.search || '' %>" placeholder="Search tasks..." onchange="this.form.submit()">
+  </div>
+  <div>
+    <label for="assignee">Assignee</label>
+    <select id="assignee" name="assignee" onchange="this.form.submit()">
+      <option value="">All assignees</option>
+      <% it.assignees.forEach(a => { %>
+        <option value="<%= a %>" <%= it.query?.assignee === a ? 'selected' : '' %>><%= a %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="project">Project</label>
+    <select id="project" name="project" onchange="this.form.submit()">
+      <option value="">All projects</option>
+      <% it.projects.forEach(p => { %>
+        <option value="<%= p.gid %>" <%= it.query?.project === p.gid ? 'selected' : '' %>><%= p.name %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="status">Status</label>
+    <select id="status" name="status" onchange="this.form.submit()">
+      <option value="open" <%= (it.query?.status || 'open') === 'open' ? 'selected' : '' %>>Open</option>
+      <option value="completed" <%= it.query?.status === 'completed' ? 'selected' : '' %>>Completed</option>
+      <option value="all" <%= it.query?.status === 'all' ? 'selected' : '' %>>All</option>
+    </select>
+  </div>
+  <div>
+    <label for="due">Due</label>
+    <select id="due" name="due" onchange="this.form.submit()">
+      <option value="" <%= !it.query?.due ? 'selected' : '' %>>Any time</option>
+      <option value="overdue" <%= it.query?.due === 'overdue' ? 'selected' : '' %>>Overdue</option>
+      <option value="today" <%= it.query?.due === 'today' ? 'selected' : '' %>>Today</option>
+      <option value="week" <%= it.query?.due === 'week' ? 'selected' : '' %>>This week</option>
+    </select>
+  </div>
+</form>
+
+<table class="compact">
+  <thead>
+    <tr><th>Status</th><th>Task</th><th>Assignee</th><th>Project</th><th>Due</th><th></th></tr>
+  </thead>
+  <tbody>
+    <% if (!it.tasks.length) { %>
+    <tr><td colspan="6">No tasks found</td></tr>
+    <% } %>
+    <% const today = new Date().toISOString().slice(0, 10); %>
+    <% it.tasks.forEach(task => { %>
+    <% const isOverdue = task.due_on && task.due_on < today && !task.completed; %>
+    <tr>
+      <td>
+        <span class="badge <%= task.completed ? 'badge-completed' : (isOverdue ? 'badge-overdue' : 'badge-open') %>">
+          <%= task.completed ? 'Done' : (isOverdue ? 'Overdue' : 'Open') %>
+        </span>
+      </td>
+      <td>
+        <div><%= task.name %></div>
+        <% if (task.notes) { %>
+          <div style="font-size: 12px; color: #64748B; margin-top: 2px; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= task.notes.slice(0, 100) %></div>
+        <% } %>
+      </td>
+      <td><%= task.assignee_name || '—' %></td>
+      <td><%= task.project_name || '—' %></td>
+      <td style="<%= isOverdue ? 'color: #EF4444; font-weight: 600;' : '' %>"><%= task.due_on || '—' %></td>
+      <td>
+        <% if (task.permalink_url) { %>
+          <a href="<%= task.permalink_url %>" target="_blank" rel="noopener" style="font-size: 12px; color: #94A3B8; text-decoration: none;">Open in Asana</a>
+        <% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<% if (it.totalPages > 1) { %>
+<div class="pagination">
+  <% if (it.page > 1) { %>
+    <a href="?<%= new URLSearchParams({ ...it.query, page: String(it.page - 1) }).toString() %>">&laquo; Prev</a>
+  <% } %>
+  <span>Page <%= it.page %> of <%= it.totalPages %></span>
+  <% if (it.page < it.totalPages) { %>
+    <a href="?<%= new URLSearchParams({ ...it.query, page: String(it.page + 1) }).toString() %>">Next &raquo;</a>
+  <% } %>
+</div>
+<% } %>

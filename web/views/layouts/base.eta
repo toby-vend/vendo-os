@@ -76,6 +76,12 @@
             <span class="nav-label">Drive</span>
           </a>
           <% } %>
+          <% if (canSee('tasks')) { %>
+          <a href="/tasks" class="nav-item<%= it.currentPath?.startsWith('/tasks') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span class="nav-label">Tasks</span>
+          </a>
+          <% } %>
           <% if (canSee('chat')) { %>
           <a href="/chat" class="nav-item<%= it.currentPath?.startsWith('/chat') ? ' active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -126,7 +132,7 @@
           <button class="mobile-menu-btn" onclick="toggleSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat' }; %>
+          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Tasks', '/tasks/new': 'New Task' }; %>
           <h1 class="topbar-title"><%= pageNames[it.currentPath] || 'Vendo OS' %></h1>
         </div>
         <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">

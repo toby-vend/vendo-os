@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Drive Sync
 
-- [ ] **SYNC-01**: System receives Google Drive webhook notifications when files are created, updated, or deleted
+- [x] **SYNC-01**: System receives Google Drive webhook notifications when files are created, updated, or deleted
 - [ ] **SYNC-02**: System classifies incoming documents by channel (paid social / SEO / paid ads) based on Drive folder path
 - [ ] **SYNC-03**: System auto-renews webhook watch channels before silent expiry (max 7 days)
 - [ ] **SYNC-04**: System detects actual content changes via content hashing, skipping metadata-only updates
@@ -114,7 +114,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 1 | Complete |
 | INFR-03 | Phase 1 | Complete |
-| SYNC-01 | Phase 2 | Pending |
+| SYNC-01 | Phase 2 | Complete |
 | SYNC-03 | Phase 2 | Pending |
 | SYNC-06 | Phase 2 | Pending |
 | SYNC-02 | Phase 3 | Pending |

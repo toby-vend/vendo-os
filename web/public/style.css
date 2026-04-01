@@ -434,6 +434,7 @@ table.compact th, table.compact td {
 .badge-open { background: rgba(234, 179, 8, 0.12); color: #eab308; }
 .badge-completed { background: var(--vendo-green-subtle); color: var(--vendo-green); }
 .badge-active { background: var(--vendo-green-subtle); color: var(--vendo-green); }
+.badge-overdue { background: rgba(239, 68, 68, 0.12); color: #EF4444; }
 
 /* === Filter Bar === */
 

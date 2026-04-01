@@ -1,0 +1,68 @@
+<% layout('/layouts/base') %>
+
+<div style="max-width: 600px;">
+  <h1>New Task</h1>
+
+  <% if (it.query?.error === 'name_required') { %>
+  <div style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; font-size: 14px; color: #EF4444;">
+    Task name is required.
+  </div>
+  <% } %>
+  <% if (it.query?.error === 'asana_not_configured') { %>
+  <div style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; font-size: 14px; color: #EF4444;">
+    Asana is not configured. Set ASANA_API_KEY and ASANA_WORKSPACE_GID in .env.local.
+  </div>
+  <% } %>
+  <% if (it.query?.error === 'asana_api_error') { %>
+  <div style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; font-size: 14px; color: #EF4444;">
+    Failed to create task in Asana. Check your API key and try again.
+  </div>
+  <% } %>
+  <% if (it.query?.error === 'unexpected') { %>
+  <div style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; font-size: 14px; color: #EF4444;">
+    An unexpected error occurred. Please try again.
+  </div>
+  <% } %>
+
+  <form method="POST" action="/tasks" style="display: flex; flex-direction: column; gap: 1.25rem;">
+    <div>
+      <label for="name" style="display: block; font-size: 13px; color: #94A3B8; margin-bottom: 4px;">Task Name *</label>
+      <input type="text" id="name" name="name" required placeholder="e.g. Set up Veltuff Meta campaigns" style="width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #E2E8F0; font-size: 14px;">
+    </div>
+
+    <div>
+      <label for="assignee" style="display: block; font-size: 13px; color: #94A3B8; margin-bottom: 4px;">Assignee</label>
+      <select id="assignee" name="assignee" style="width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #E2E8F0; font-size: 14px;">
+        <option value="">Unassigned</option>
+        <% it.workspaceUsers.forEach(u => { %>
+          <option value="<%= u.gid %>"><%= u.name %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div>
+      <label for="project" style="display: block; font-size: 13px; color: #94A3B8; margin-bottom: 4px;">Project</label>
+      <select id="project" name="project" style="width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #E2E8F0; font-size: 14px;">
+        <option value="">No project</option>
+        <% it.projects.forEach(p => { %>
+          <option value="<%= p.gid %>"><%= p.name %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div>
+      <label for="due_on" style="display: block; font-size: 13px; color: #94A3B8; margin-bottom: 4px;">Due Date</label>
+      <input type="date" id="due_on" name="due_on" style="width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #E2E8F0; font-size: 14px;">
+    </div>
+
+    <div>
+      <label for="notes" style="display: block; font-size: 13px; color: #94A3B8; margin-bottom: 4px;">Notes</label>
+      <textarea id="notes" name="notes" rows="4" placeholder="Additional details..." style="width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #E2E8F0; font-size: 14px; resize: vertical;"></textarea>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem;">
+      <button type="submit" style="padding: 10px 24px; font-size: 14px; color: #0B0B0B; background: #22C55E; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Create Task</button>
+      <a href="/tasks" style="padding: 10px 24px; font-size: 14px; color: #94A3B8; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center;">Cancel</a>
+    </div>
+  </form>
+</div>
