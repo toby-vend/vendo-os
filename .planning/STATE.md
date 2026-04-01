@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-drive-webhook-foundation/02-01-PLAN.md
-last_updated: "2026-04-01T20:16:43.764Z"
+stopped_at: Completed 02-drive-webhook-foundation/02-02-PLAN.md
+last_updated: "2026-04-01T20:23:03.365Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-infrastructure P01 | 4 | 2 tasks | 5 files |
 | Phase 01-infrastructure P03 | 8 | 2 tasks | 10 files |
 | Phase 02-drive-webhook-foundation P01 | 233s | 2 tasks | 8 files |
+| Phase 02-drive-webhook-foundation P02 | 226s | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,9 @@ Recent decisions affecting current work:
 - [Phase 02-drive-webhook-foundation]: mock.module requires --experimental-test-module-mocks in Node 25 — webhook tests use this flag
 - [Phase 02-drive-webhook-foundation]: Webhook route exempted from session auth via path check in onRequest hook — Google POSTs are unauthenticated, DRIVE_WEBHOOK_SECRET token is the auth mechanism
 - [Phase 02-drive-webhook-foundation]: drive_sync_queue partial index (WHERE processed_at IS NULL) in Turso path only — sql.js uses unconditional index
+- [Phase 02-drive-webhook-foundation]: Cron route exempted from session auth via path-prefix check — same pattern as webhook route
+- [Phase 02-drive-webhook-foundation]: Re-index script imports from Turso path (web/lib/queries) — writes to production data
+- [Phase 02-drive-webhook-foundation]: Content field empty in skills upsert — Phase 3 handles Drive file content extraction
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T20:16:43.762Z
-Stopped at: Completed 02-drive-webhook-foundation/02-01-PLAN.md
+Last session: 2026-04-01T20:23:03.364Z
+Stopped at: Completed 02-drive-webhook-foundation/02-02-PLAN.md
 Resume file: None
