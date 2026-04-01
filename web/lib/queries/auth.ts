@@ -195,6 +195,8 @@ export async function initSchema(): Promise<void> {
     version INTEGER NOT NULL DEFAULT 1
   )`, args: [] });
 
+  await db.execute({ sql: `CREATE UNIQUE INDEX IF NOT EXISTS idx_skills_drive_file ON skills(drive_file_id) WHERE drive_file_id IS NOT NULL`, args: [] });
+
   // FTS5 virtual table for skills full-text search (Turso/libsql only — NOT sql.js)
   await db.execute({ sql: `CREATE VIRTUAL TABLE IF NOT EXISTS skills_fts USING fts5(
     title,
