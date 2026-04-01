@@ -104,6 +104,13 @@ export async function initSchema(): Promise<void> {
   try { db.run('ALTER TABLE clients ADD COLUMN first_invoice_date TEXT'); } catch { /* already exists */ }
   try { db.run('ALTER TABLE clients ADD COLUMN last_invoice_date TEXT'); } catch { /* already exists */ }
 
+  // Migrate: waterfall matcher columns on meetings
+  try { db.run('ALTER TABLE meetings ADD COLUMN match_method TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE meetings ADD COLUMN match_confidence TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE meetings ADD COLUMN calendar_invitees TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE meetings ADD COLUMN invitee_domains_type TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE meetings ADD COLUMN needs_review INTEGER DEFAULT 0'); } catch { /* already exists */ }
+
   db.run(`
     CREATE TABLE IF NOT EXISTS key_decisions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -464,6 +471,33 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_task_runs_client ON task_runs(client_id)');
   db.run('CREATE INDEX IF NOT EXISTS idx_task_runs_status ON task_runs(status)');
   db.run('CREATE INDEX IF NOT EXISTS idx_task_runs_created ON task_runs(created_at)');
+
+  // --- Asana tasks table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS asana_tasks (
+      gid TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      assignee_gid TEXT,
+      assignee_name TEXT,
+      due_on TEXT,
+      completed INTEGER DEFAULT 0,
+      completed_at TEXT,
+      section_name TEXT,
+      project_gid TEXT,
+      project_name TEXT,
+      notes TEXT,
+      permalink_url TEXT,
+      created_at TEXT,
+      modified_at TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_assignee ON asana_tasks(assignee_name)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_due ON asana_tasks(due_on)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_completed ON asana_tasks(completed)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_project ON asana_tasks(project_gid)');
 
   seedCategories(db);
   saveDb();
