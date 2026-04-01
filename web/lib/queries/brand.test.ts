@@ -433,9 +433,9 @@ describe('deleteBrandFts', () => {
 
 describe('BRND-03 performance: 25+ clients', () => {
   it('inserts and queries 25+ clients without error', async () => {
-    const insertPromises = [];
+    // Serialise inserts — FTS5 content-sync tables do not tolerate concurrent writes
     for (let i = 1; i <= 25; i++) {
-      insertPromises.push(upsertBrandFromDrive({
+      await upsertBrandFromDrive({
         driveFileId: `perf-client-${i}-file`,
         title: `Brand Doc ${i}`,
         content: `Brand content for performance client number ${i}.`,
@@ -444,9 +444,8 @@ describe('BRND-03 performance: 25+ clients', () => {
         clientName: `Perf Client ${String(i).padStart(2, '0')}`,
         clientSlug: `perf-client-${i}`,
         driveModifiedAt: '2026-01-01T00:00:00Z',
-      }));
+      });
     }
-    await Promise.all(insertPromises);
 
     const clients = await listBrandClients();
     assert.ok(clients.length >= 25, `Expected at least 25 clients, got ${clients.length}`);
