@@ -11,6 +11,7 @@ import {
   getUserByEmail,
 } from '../../lib/queries.js';
 import { hashPassword, generateId, type SessionUser } from '../../lib/auth.js';
+import { sendInviteNotifications } from '../../lib/notifications.js';
 
 export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
   // List all users
