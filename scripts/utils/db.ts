@@ -300,6 +300,33 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_meta_insights_level ON meta_insights(level)');
   db.run('CREATE INDEX IF NOT EXISTS idx_meta_insights_campaign ON meta_insights(campaign_id)');
 
+  // --- Meta Ad Library (competitor research) ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS meta_ad_library (
+      id TEXT PRIMARY KEY,
+      page_id TEXT NOT NULL,
+      page_name TEXT NOT NULL,
+      body TEXT,
+      link_title TEXT,
+      link_description TEXT,
+      link_caption TEXT,
+      ad_delivery_start TEXT,
+      ad_delivery_stop TEXT,
+      snapshot_url TEXT,
+      languages TEXT,
+      platforms TEXT,
+      audience_lower INTEGER,
+      audience_upper INTEGER,
+      search_term TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_meta_adlib_page ON meta_ad_library(page_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_meta_adlib_start ON meta_ad_library(ad_delivery_start)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_meta_adlib_search ON meta_ad_library(search_term)');
+
   // --- GHL (GoHighLevel) tables ---
 
   db.run(`
