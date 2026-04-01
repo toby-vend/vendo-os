@@ -58,6 +58,14 @@ import {
   // ads
   getAdAccountSummary,
   getCampaignSummary,
+  // drive
+  getDriveWatchChannel,
+  upsertDriveWatchChannel,
+  getChannelsExpiringWithin24h,
+  getAllDriveWatchChannels,
+  deleteDriveWatchChannel,
+  insertDriveSyncQueueItem,
+  getUnprocessedSyncQueueItems,
 } from './index.js';
 
 describe('queries barrel smoke test', () => {
