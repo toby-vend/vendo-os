@@ -310,8 +310,24 @@ function slugifyFolderName(name: string): string {
 }
 
 /**
+ * Controlled vocabulary mapping: slugified subfolder name → canonical skill_type.
+ * Exported for testing and reference by Phase 6.
+ */
+export const SKILL_TYPE_MAP: Record<string, string> = {
+  ad_copy_templates: 'ad_copy_template',
+  creative_frameworks: 'creative_framework',
+  content_guides: 'content_guide',
+  performance_sops: 'performance_sop',
+  audience_research: 'audience_research',
+  reporting_templates: 'reporting_template',
+  client_comms: 'client_comms',
+  onboarding: 'onboarding',
+};
+
+/**
  * Derive skill_type from the file's immediate parent subfolder name.
  * If the file is directly inside a top-level channel folder, returns 'sop'.
+ * Unknown subfolder names fall back to 'general'.
  * Falls back to 'sop' if resolution fails.
  */
 export async function resolveSkillType(
@@ -329,8 +345,10 @@ export async function resolveSkillType(
 
     const parent = await filesGet(parentId, accessToken, 'id,name');
     const name = parent.name as string | undefined;
-    const slugified = name ? slugifyFolderName(name) : '';
-    return slugified || 'sop';
+    const slug = name ? slugifyFolderName(name) : '';
+
+    // Look up in controlled vocabulary; unknown subfolder names fall back to 'general'
+    return SKILL_TYPE_MAP[slug] ?? 'general';
   } catch {
     return 'sop';
   }
