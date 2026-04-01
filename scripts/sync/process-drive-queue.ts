@@ -1,6 +1,8 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
+import { createHash } from 'node:crypto';
+
 import {
   getUnprocessedSyncQueueItems,
   getDriveWatchChannel,
@@ -12,6 +14,8 @@ import {
   updateDrivePageToken,
 } from '../../web/lib/queries/drive.js';
 
+import { upsertBrandFromDrive, deleteBrandFile, getBrandFile } from '../../web/lib/queries/brand.js';
+
 import {
   listChanges,
   resolveChannel,
@@ -20,6 +24,122 @@ import {
   hashContent,
   type DriveChange,
 } from '../../web/lib/drive-sync.js';
+
+// --- Brand routing config ---
+
+const BRANDS_FOLDER_ID = process.env.DRIVE_FOLDER_BRANDS;
+
+// --- Brand helper functions ---
+
+/**
+ * Derive a stable integer client ID from a Drive folder ID.
+ * Uses first 8 hex chars of SHA-256(folderId) parsed as a positive integer.
+ */
+function deriveClientId(driveFolderId: string): number {
+  return parseInt(createHash('sha256').update(driveFolderId, 'utf8').digest('hex').slice(0, 8), 16);
+}
+
+/**
+ * Slugify a client folder name for use as client_slug.
+ * "Kana Health Group" → "kana-health-group"
+ */
+function slugifyClientName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
+ * Walk the parent chain (up to 5 levels) to find the immediate child folder of BRANDS_FOLDER_ID.
+ * Returns { id, name } of the client folder if the file is under BRANDS_FOLDER, null otherwise.
+ * Only called when BRANDS_FOLDER_ID is set.
+ */
+async function resolveClientFolder(
+  fileId: string,
+  accessToken: string,
+): Promise<{ id: string; name: string } | null> {
+  const brandsId = BRANDS_FOLDER_ID!;
+  let currentId = fileId;
+
+  for (let level = 0; level < 5; level++) {
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(currentId)}?fields=id,parents`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    if (!res.ok) return null;
+
+    const file = await res.json() as { id: string; parents?: string[] };
+    const parents = file.parents;
+    if (!parents?.length) return null;
+
+    const parentId = parents[0];
+
+    if (parentId === brandsId) {
+      // currentId is a direct child of BRANDS_FOLDER — it IS the client folder
+      const parentRes = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(currentId)}?fields=id,name`,
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      if (!parentRes.ok) return null;
+      const clientFolder = await parentRes.json() as { id: string; name: string };
+      return { id: clientFolder.id, name: clientFolder.name };
+    }
+
+    currentId = parentId;
+  }
+
+  return null;
+}
+
+/**
+ * Returns true if the file is under BRANDS_FOLDER_ID. Only called when BRANDS_FOLDER_ID is set.
+ */
+async function isBrandFile(fileId: string, accessToken: string): Promise<boolean> {
+  return (await resolveClientFolder(fileId, accessToken)) !== null;
+}
+
+/**
+ * Process a brand file change: extract content and upsert to brand_hub.
+ * Non-indexable files are skipped (no empty rows inserted).
+ */
+async function processBrandChange(
+  change: DriveChange,
+  accessToken: string,
+  clientFolder: { id: string; name: string },
+): Promise<void> {
+  const fileId = change.fileId;
+  const { name, mimeType, modifiedTime } = change.file!;
+
+  const content = await extractContent(fileId, mimeType, accessToken);
+  if (content === null) {
+    // Non-indexable (PDF, Sheet, image) — skip entirely
+    console.log(`[brand] Skipping non-indexable file: ${name} (${mimeType})`);
+    return;
+  }
+
+  const contentHash = hashContent(content);
+  const existing = await getBrandFile(fileId);
+
+  if (existing && existing.content_hash === contentHash) {
+    // Same content — no update needed
+    return;
+  }
+
+  const clientId = deriveClientId(clientFolder.id);
+  const clientSlug = slugifyClientName(clientFolder.name);
+
+  await upsertBrandFromDrive({
+    driveFileId: fileId,
+    title: name,
+    content,
+    contentHash,
+    clientId,
+    clientName: clientFolder.name,
+    clientSlug,
+    driveModifiedAt: modifiedTime,
+  });
+}
 
 /**
  * Process a single Drive change event.
