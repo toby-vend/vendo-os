@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 03-drive-document-processing-03-01-PLAN.md
-last_updated: "2026-04-01T20:52:37.873Z"
+stopped_at: Completed 03-drive-document-processing-03-02-PLAN.md
+last_updated: "2026-04-01T20:59:16.623Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-drive-webhook-foundation P01 | 233s | 2 tasks | 8 files |
 | Phase 02-drive-webhook-foundation P02 | 226s | 2 tasks | 8 files |
 | Phase 03-drive-document-processing P01 | 176s | 2 tasks | 2 files |
+| Phase 03-drive-document-processing P02 | 238s | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [Phase 02-drive-webhook-foundation]: Re-index script imports from Turso path (web/lib/queries) — writes to production data
 - [Phase 02-drive-webhook-foundation]: Content field empty in skills upsert — Phase 3 handles Drive file content extraction
 - [Phase 03-drive-document-processing]: Spreadsheets excluded from extractContent — metadata only; CHANNEL_FOLDER_MAP env var guards prevent undefined Map key; hashContent SHA-256 used as content-change gate (not drive_modified_at)
+- [Phase 03-drive-document-processing]: Dynamic import of getGoogleAccessToken inside processQueue loop avoids circular mock.module interference in tests
+- [Phase 03-drive-document-processing]: subfolderName propagated through listFilesInFolder recursion avoids extra files.get API calls during re-index
 
 ### Pending Todos
 
@@ -95,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T20:52:37.871Z
-Stopped at: Completed 03-drive-document-processing-03-01-PLAN.md
+Last session: 2026-04-01T20:59:16.621Z
+Stopped at: Completed 03-drive-document-processing-03-02-PLAN.md
 Resume file: None
