@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 06-task-matching-engine 06-01-PLAN.md
-last_updated: "2026-04-01T22:23:25.883Z"
+stopped_at: Completed 06-task-matching-engine 06-02-PLAN.md
+last_updated: "2026-04-01T22:27:26.029Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 0
 ---
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05-brand-hub P01 | 266 | 1 tasks | 4 files |
 | Phase 05-brand-hub P02 | 183 | 2 tasks | 3 files |
 | Phase 06-task-matching-engine P01 | 240 | 2 tasks | 4 files |
+| Phase 06-task-matching-engine P02 | 125 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,8 @@ Recent decisions affecting current work:
 - [Phase 06-task-matching-engine]: COALESCE in updateTaskRunStatus preserves existing sops_used/brand_context_id when extras not passed — avoids nulling columns on simple status updates
 - [Phase 06-task-matching-engine]: assembleContext takes clientId not clientSlug — resolveClientSlug() does brand_hub lookup internally, keeping HTTP route call signature clean
 - [Phase 06-task-matching-engine]: Mutable holder pattern for mock.module closures in node:test — avoids re-registering mocks per test
+- [Phase 06-task-matching-engine]: Fire-and-forget placed after reply.code(202).send() — guarantees 202 is returned before assembleContext starts; no await
+- [Phase 06-task-matching-engine]: Status query param validated against TaskRunStatus union — invalid values silently ignored (no filter applied) rather than 400 (filter semantics not strict)
 
 ### Pending Todos
 
@@ -117,6 +120,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T22:23:25.881Z
-Stopped at: Completed 06-task-matching-engine 06-01-PLAN.md
+Last session: 2026-04-01T22:27:19.791Z
+Stopped at: Completed 06-task-matching-engine 06-02-PLAN.md
 Resume file: None

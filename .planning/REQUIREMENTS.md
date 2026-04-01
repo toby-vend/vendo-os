@@ -38,7 +38,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TASK-03**: Task matching engine retrieves client brand context and injects it into agent prompt
 - [ ] **TASK-04**: Agent produces structured draft output (ad copy, content brief, report section) from retrieved context
 - [ ] **TASK-05**: Each channel (paid social, SEO, paid ads) has distinct agent behaviour with channel-specific output structure
-- [ ] **TASK-06**: Task execution runs asynchronously — does not block the web request
+- [x] **TASK-06**: Task execution runs asynchronously — does not block the web request
 - [x] **TASK-07**: Each task has a status: queued / generating / qa_check / draft_ready / approved / failed
 
 ### QA & Compliance
@@ -132,7 +132,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TASK-01 | Phase 6 | Complete |
 | TASK-02 | Phase 6 | Complete |
 | TASK-03 | Phase 6 | Complete |
-| TASK-06 | Phase 6 | Pending |
+| TASK-06 | Phase 6 | Complete |
 | TASK-07 | Phase 6 | Complete |
 | TASK-04 | Phase 7 | Pending |
 | TASK-05 | Phase 7 | Pending |
