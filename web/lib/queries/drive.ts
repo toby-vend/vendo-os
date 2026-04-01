@@ -2,6 +2,31 @@ import { rows, scalar, db } from './base.js';
 
 // --- Interfaces ---
 
+export interface SkillSearchResult {
+  id: number;
+  title: string;
+  content: string;
+  channel: string;
+  skill_type: string;
+  drive_modified_at: string;
+  content_hash: string;
+  bm25_score: number;
+}
+
+export interface SkillSearchResponse {
+  results: SkillSearchResult[];
+  gap: boolean;
+  query: string;
+  channel: string;
+}
+
+export interface SkillVersionInfo {
+  drive_modified_at: string;
+  content_hash: string;
+  indexed_at: string;
+  version: number;
+}
+
 export interface DriveWatchChannelRow {
   id: number;
   channel_id: string;
