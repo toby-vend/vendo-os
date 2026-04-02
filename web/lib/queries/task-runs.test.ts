@@ -519,8 +519,14 @@ describe('assembleContext', () => {
     // Phase 7: assembleContext now calls generateDraft which transitions to draft_ready on success
     assert.strictEqual(row.status, 'draft_ready', 'Status should be draft_ready after full assembleContext+generateDraft');
     assert.ok(row.sops_used !== null && row.sops_used !== undefined, 'sops_used should be set');
-    const sopIds = JSON.parse(row.sops_used as string);
-    assert.deepStrictEqual(sopIds, [1, 2], 'sops_used should contain skill IDs from searchSkills results');
+    const sopSnapshots = JSON.parse(row.sops_used as string);
+    assert.ok(Array.isArray(sopSnapshots), 'sops_used should be an array');
+    assert.strictEqual(sopSnapshots.length, 2, 'sops_used should contain 2 SopSnapshot entries');
+    assert.strictEqual(sopSnapshots[0].id, 1, 'first SopSnapshot id should be 1');
+    assert.strictEqual(sopSnapshots[1].id, 2, 'second SopSnapshot id should be 2');
+    assert.ok('title' in sopSnapshots[0], 'SopSnapshot must have title');
+    assert.ok('drive_modified_at' in sopSnapshots[0], 'SopSnapshot must have drive_modified_at');
+    assert.ok('content_hash' in sopSnapshots[0], 'SopSnapshot must have content_hash');
   });
 
   it('writes brand_context_id from getBrandContext first result', async () => {
