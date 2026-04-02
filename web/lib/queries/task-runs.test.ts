@@ -421,7 +421,8 @@ describe('assembleContext', () => {
 
     const row = await getTaskRun(id);
     assert.ok(row !== null);
-    assert.strictEqual(row.status, 'generating', 'Status should be generating after assembleContext');
+    // Phase 7: assembleContext now calls generateDraft which transitions to draft_ready on success
+    assert.strictEqual(row.status, 'draft_ready', 'Status should be draft_ready after full assembleContext+generateDraft');
     assert.ok(row.sops_used !== null && row.sops_used !== undefined, 'sops_used should be set');
     const sopIds = JSON.parse(row.sops_used as string);
     assert.deepStrictEqual(sopIds, [1, 2], 'sops_used should contain skill IDs from searchSkills results');
