@@ -40,8 +40,8 @@ export async function getGSCSummary(clientId: number, days = 30): Promise<GSCSum
              ELSE 0
            END as avg_position
     FROM gsc_daily d
-    JOIN client_account_map cam ON cam.platform_account_id = d.site_id AND cam.platform = 'gsc'
-    WHERE cam.client_id = ?
+    JOIN client_source_mappings csm ON csm.external_id = d.site_id AND csm.source ='gsc'
+    WHERE csm.client_id = ?
       AND d.date >= date('now', '-' || ? || ' days')
   `, [clientId, days]);
   return result[0] ?? null;
@@ -63,8 +63,8 @@ export async function getTopQueries(clientId: number, days = 30, limit = 20): Pr
              ELSE 0
            END as position
     FROM gsc_queries q
-    JOIN client_account_map cam ON cam.platform_account_id = q.site_id AND cam.platform = 'gsc'
-    WHERE cam.client_id = ?
+    JOIN client_source_mappings csm ON csm.external_id = q.site_id AND csm.source ='gsc'
+    WHERE csm.client_id = ?
       AND q.date >= date('now', '-' || ? || ' days')
     GROUP BY q.query
     ORDER BY clicks DESC
@@ -88,8 +88,8 @@ export async function getTopPages(clientId: number, days = 30, limit = 20): Prom
              ELSE 0
            END as position
     FROM gsc_pages p
-    JOIN client_account_map cam ON cam.platform_account_id = p.site_id AND cam.platform = 'gsc'
-    WHERE cam.client_id = ?
+    JOIN client_source_mappings csm ON csm.external_id = p.site_id AND csm.source ='gsc'
+    WHERE csm.client_id = ?
       AND p.date >= date('now', '-' || ? || ' days')
     GROUP BY p.page
     ORDER BY clicks DESC

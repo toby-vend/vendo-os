@@ -22,13 +22,11 @@ export const adminClientMappingRoutes: FastifyPluginAsync = async (app) => {
   app.post('/', async (request, reply) => {
     const body = request.body as Record<string, string>;
     const client_id = Number(body.client_id);
-    const client_name = (body.client_name || '').trim();
-    const platform = (body.platform || '').trim();
-    const platform_account_id = (body.platform_account_id || '').trim();
-    const platform_account_name = (body.platform_account_name || '').trim();
-    const crm_type = (body.crm_type || 'ghl').trim();
+    const source = (body.platform || body.source || '').trim();
+    const external_id = (body.platform_account_id || body.external_id || '').trim();
+    const external_name = (body.platform_account_name || body.external_name || '').trim();
 
-    if (!client_id || !platform || !platform_account_id) {
+    if (!client_id || !source || !external_id) {
       reply.redirect('/admin/client-mapping');
       return;
     }
@@ -36,11 +34,9 @@ export const adminClientMappingRoutes: FastifyPluginAsync = async (app) => {
     try {
       await addClientMapping({
         client_id,
-        client_name: client_name || `Client ${client_id}`,
-        platform,
-        platform_account_id,
-        platform_account_name: platform_account_name || platform_account_id,
-        crm_type,
+        source,
+        external_id,
+        external_name: external_name || external_id,
       });
     } catch {
       // UNIQUE constraint — already mapped

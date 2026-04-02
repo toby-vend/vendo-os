@@ -29,8 +29,8 @@ export async function getMetaCampaignsForClient(clientId: number, days = 30): Pr
            CASE WHEN SUM(mi.impressions) > 0 THEN ROUND(CAST(SUM(mi.clicks) AS REAL) / SUM(mi.impressions) * 100, 2) ELSE 0 END as ctr,
            0 as conversions
     FROM meta_insights mi
-    JOIN client_account_map cam ON cam.platform_account_id = mi.account_id AND cam.platform = 'meta'
-    WHERE cam.client_id = ?
+    JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source ='meta'
+    WHERE csm.client_id = ?
       AND mi.date >= date('now', '-' || ? || ' days')
       AND mi.level = 'campaign'
     GROUP BY mi.campaign_id, mi.campaign_name
@@ -50,8 +50,8 @@ export async function getGadsCampaignsForClient(clientId: number, days = 30): Pr
            CASE WHEN SUM(gs.impressions) > 0 THEN ROUND(CAST(SUM(gs.clicks) AS REAL) / SUM(gs.impressions) * 100, 2) ELSE 0 END as ctr,
            COALESCE(SUM(gs.conversions), 0) as conversions
     FROM gads_campaign_spend gs
-    JOIN client_account_map cam ON cam.platform_account_id = gs.account_id AND cam.platform = 'gads'
-    WHERE cam.client_id = ?
+    JOIN client_source_mappings csm ON csm.external_id = gs.account_id AND csm.source ='gads'
+    WHERE csm.client_id = ?
       AND gs.date >= date('now', '-' || ? || ' days')
     GROUP BY gs.campaign_id, gs.campaign_name
     ORDER BY spend DESC
@@ -61,15 +61,9 @@ export async function getGadsCampaignsForClient(clientId: number, days = 30): Pr
 // --- Client name lookup ---
 
 export async function getClientName(clientId: number): Promise<string> {
-  const result = await rows<{ client_name: string }>(
-    'SELECT client_name FROM client_user_map WHERE client_id = ? LIMIT 1',
+  const result = await rows<{ name: string }>(
+    'SELECT COALESCE(display_name, name) as name FROM clients WHERE id = ? LIMIT 1',
     [clientId],
   );
-  if (result[0]) return result[0].client_name;
-
-  const cam = await rows<{ client_name: string }>(
-    'SELECT client_name FROM client_account_map WHERE client_id = ? LIMIT 1',
-    [clientId],
-  );
-  return cam[0]?.client_name ?? `Client ${clientId}`;
+  return result[0]?.name ?? `Client ${clientId}`;
 }

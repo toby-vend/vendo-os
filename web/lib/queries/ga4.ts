@@ -54,8 +54,8 @@ export async function getGA4Summary(clientId: number, days = 30): Promise<GA4Dai
            END as bounce_rate,
            SUM(g.conversions) as conversions
     FROM ga4_daily g
-    JOIN client_account_map cam ON cam.platform_account_id = g.property_id AND cam.platform = 'ga4'
-    WHERE cam.client_id = ?
+    JOIN client_source_mappings csm ON csm.external_id = g.property_id AND csm.source ='ga4'
+    WHERE csm.client_id = ?
       AND g.date >= date('now', '-' || ? || ' days')
     GROUP BY g.date
     ORDER BY g.date ASC
@@ -72,8 +72,8 @@ export async function getGA4TrafficSources(clientId: number, days = 30): Promise
            SUM(ts.users) as users,
            SUM(ts.conversions) as conversions
     FROM ga4_traffic_sources ts
-    JOIN client_account_map cam ON cam.platform_account_id = ts.property_id AND cam.platform = 'ga4'
-    WHERE cam.client_id = ?
+    JOIN client_source_mappings csm ON csm.external_id = ts.property_id AND csm.source ='ga4'
+    WHERE csm.client_id = ?
       AND ts.date >= date('now', '-' || ? || ' days')
     GROUP BY ts.source, ts.medium
     ORDER BY sessions DESC
@@ -89,8 +89,8 @@ export async function getOrganicTrend(clientId: number, days = 30): Promise<GA4O
            SUM(ts.users) as users,
            SUM(ts.conversions) as conversions
     FROM ga4_traffic_sources ts
-    JOIN client_account_map cam ON cam.platform_account_id = ts.property_id AND cam.platform = 'ga4'
-    WHERE cam.client_id = ?
+    JOIN client_source_mappings csm ON csm.external_id = ts.property_id AND csm.source ='ga4'
+    WHERE csm.client_id = ?
       AND ts.date >= date('now', '-' || ? || ' days')
       AND ts.medium = 'organic'
     GROUP BY ts.date

@@ -48,8 +48,8 @@ export async function getChannelSpend(clientId: number, days = 30): Promise<Chan
     scalar<number>(`
       SELECT COALESCE(SUM(mi.spend), 0)
       FROM meta_insights mi
-      JOIN client_account_map cam ON cam.platform_account_id = mi.account_id AND cam.platform = 'meta'
-      WHERE cam.client_id = ?
+      JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source ='meta'
+      WHERE csm.client_id = ?
         AND mi.date >= date('now', '-' || ? || ' days')
         AND mi.level = 'campaign'
     `, [clientId, days]),
@@ -57,8 +57,8 @@ export async function getChannelSpend(clientId: number, days = 30): Promise<Chan
     scalar<number>(`
       SELECT COALESCE(SUM(gs.spend), 0)
       FROM gads_campaign_spend gs
-      JOIN client_account_map cam ON cam.platform_account_id = gs.account_id AND cam.platform = 'gads'
-      WHERE cam.client_id = ?
+      JOIN client_source_mappings csm ON csm.external_id = gs.account_id AND csm.source ='gads'
+      WHERE csm.client_id = ?
         AND gs.date >= date('now', '-' || ? || ' days')
     `, [clientId, days]),
   ]);

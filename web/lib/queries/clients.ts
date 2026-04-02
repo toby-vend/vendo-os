@@ -223,18 +223,16 @@ export async function getClientEnrichedData(clientId: number): Promise<ClientDet
   };
 }
 
-// --- Client-account mapping (client_account_map) ---
+// --- Client-account mapping (via client_source_mappings) ---
 
 export interface ClientAccountMapping {
   id: number;
   client_id: number;
   client_name: string;
-  platform: string;
-  platform_account_id: string;
-  platform_account_name: string | null;
-  crm_type: string;
+  source: string;
+  external_id: string;
+  external_name: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 export interface GhlLocationRow {
@@ -247,41 +245,37 @@ export interface GhlLocationRow {
 
 export async function getAllClientMappings(): Promise<ClientAccountMapping[]> {
   return rows<ClientAccountMapping>(`
-    SELECT id, client_id, client_name, platform, platform_account_id,
-           platform_account_name, crm_type, created_at, updated_at
-    FROM client_account_map
-    ORDER BY client_name COLLATE NOCASE, platform
+    SELECT csm.id, csm.client_id, COALESCE(c.display_name, c.name) as client_name,
+           csm.source, csm.external_id, csm.external_name, csm.created_at
+    FROM client_source_mappings csm
+    JOIN clients c ON c.id = csm.client_id
+    ORDER BY client_name COLLATE NOCASE, csm.source
   `);
 }
 
 export async function addClientMapping(mapping: {
   client_id: number;
-  client_name: string;
-  platform: string;
-  platform_account_id: string;
-  platform_account_name: string;
-  crm_type: string;
+  source: string;
+  external_id: string;
+  external_name: string;
 }): Promise<void> {
   const now = new Date().toISOString();
   await db.execute({
-    sql: `INSERT INTO client_account_map
-          (client_id, client_name, platform, platform_account_id, platform_account_name, crm_type, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO client_source_mappings
+          (client_id, source, external_id, external_name, created_at)
+          VALUES (?, ?, ?, ?, ?)`,
     args: [
       mapping.client_id,
-      mapping.client_name,
-      mapping.platform,
-      mapping.platform_account_id,
-      mapping.platform_account_name,
-      mapping.crm_type,
-      now,
+      mapping.source,
+      mapping.external_id,
+      mapping.external_name,
       now,
     ],
   });
 }
 
 export async function removeClientMapping(mappingId: number): Promise<void> {
-  await db.execute({ sql: 'DELETE FROM client_account_map WHERE id = ?', args: [mappingId] });
+  await db.execute({ sql: 'DELETE FROM client_source_mappings WHERE id = ?', args: [mappingId] });
 }
 
 export async function getGhlLocations(): Promise<GhlLocationRow[]> {
