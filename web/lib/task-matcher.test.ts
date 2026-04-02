@@ -175,6 +175,13 @@ mock.module('./queries/base.js', {
 });
 
 // ---------------------------------------------------------------------------
+// Set a dummy API key so generateDraft doesn't throw before reaching the mock
+// (Test 7 explicitly deletes it to test the missing-key path)
+// ---------------------------------------------------------------------------
+
+process.env.ANTHROPIC_API_KEY = 'test-api-key-mock';
+
+// ---------------------------------------------------------------------------
 // Import module under test AFTER mocks are registered
 // ---------------------------------------------------------------------------
 
