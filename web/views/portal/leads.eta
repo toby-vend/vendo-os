@@ -100,4 +100,93 @@
   <% } %>
 </div>
 
+<% if (it.ghlResult && it.ghlResult.total > 0) { %>
+<div class="portal-section" style="margin-top: 1.5rem;">
+  <h2>Pipeline Leads <span style="font-size: 14px; font-family: var(--vendo-sans); color: var(--vendo-text-muted); font-weight: 400;">(<%= it.ghlResult.total.toLocaleString() %> total)</span></h2>
+
+  <!-- Tag + Status Filters -->
+  <form class="portal-filters" method="GET" action="/portal/leads" style="margin-bottom: 1rem;">
+    <input type="hidden" name="days" value="<%= it.days %>">
+    <% if (it.filters.source) { %><input type="hidden" name="source" value="<%= it.filters.source %>"><% } %>
+    <% if (it.filters.treatment) { %><input type="hidden" name="treatment" value="<%= it.filters.treatment %>"><% } %>
+    <% if (it.filters.status) { %><input type="hidden" name="status" value="<%= it.filters.status %>"><% } %>
+    <div>
+      <label for="ghl_status">Status</label>
+      <select id="ghl_status" name="ghl_status" onchange="this.form.submit()">
+        <option value="">All</option>
+        <option value="open" <%= it.filters.ghl_status === 'open' ? 'selected' : '' %>>Open</option>
+        <option value="won" <%= it.filters.ghl_status === 'won' ? 'selected' : '' %>>Won</option>
+        <option value="lost" <%= it.filters.ghl_status === 'lost' ? 'selected' : '' %>>Lost</option>
+        <option value="abandoned" <%= it.filters.ghl_status === 'abandoned' ? 'selected' : '' %>>Abandoned</option>
+      </select>
+    </div>
+    <% if (it.ghlTags && it.ghlTags.length > 0) { %>
+    <div>
+      <label for="tag">Tag</label>
+      <select id="tag" name="tag" onchange="this.form.submit()">
+        <option value="">All Tags</option>
+        <% it.ghlTags.forEach(t => { %>
+        <option value="<%= t.tag %>" <%= it.filters.tag === t.tag ? 'selected' : '' %>><%= t.tag %> (<%= t.count %>)</option>
+        <% }) %>
+      </select>
+    </div>
+    <% } %>
+  </form>
+
+  <table class="compact">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Contact</th>
+        <th>Stage</th>
+        <th>Tags</th>
+        <th>Value</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.ghlResult.leads.forEach(l => { %>
+      <tr>
+        <td><%= l.created_at ? l.created_at.slice(0, 10) : '—' %></td>
+        <td>
+          <%= l.contact_name || '—' %>
+          <% if (l.contact_email) { %>
+          <div style="font-size: 11px; color: #64748B;"><%= l.contact_email %></div>
+          <% } %>
+        </td>
+        <td><%= l.stage_name || '—' %></td>
+        <td>
+          <% if (l.tags) { try { const tags = JSON.parse(l.tags); tags.forEach(t => { %>
+            <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(59,130,246,0.12); color: #60A5FA; margin: 1px 2px;"><%= t %></span>
+          <% }); } catch {} } else { %>—<% } %>
+        </td>
+        <td><%= l.monetary_value ? '&pound;' + l.monetary_value.toLocaleString('en-GB', { minimumFractionDigits: 0 }) : '—' %></td>
+        <td>
+          <%
+            const ghlColours = { open: '#3B82F6', won: '#22C55E', lost: '#F87171', abandoned: '#94A3B8' };
+            const gc = ghlColours[l.status] || '#94A3B8';
+          %>
+          <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; background: <%= gc %>22; color: <%= gc %>; text-transform: capitalize;"><%= l.status %></span>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <%
+    const ghlPages = Math.ceil(it.ghlResult.total / it.pageSize);
+    const ghlBase = `/portal/leads?days=${it.days}&ghl_status=${it.filters.ghl_status || ''}&tag=${it.filters.tag || ''}`;
+  %>
+  <% if (ghlPages > 1) { %>
+  <div class="portal-pagination">
+    <span>Page <%= it.page %> of <%= ghlPages %></span>
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="<%= ghlBase %>&page=<%= it.page - 1 %>" class="<%= it.page <= 1 ? 'disabled' : '' %>">Previous</a>
+      <a href="<%= ghlBase %>&page=<%= it.page + 1 %>" class="<%= it.page >= ghlPages ? 'disabled' : '' %>">Next</a>
+    </div>
+  </div>
+  <% } %>
+</div>
+<% } %>
+
 </div>

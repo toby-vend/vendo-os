@@ -3,7 +3,7 @@ import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend,
 import { getGA4Summary, getGA4TrafficSources, getOrganicTrend } from '../lib/queries/ga4.js';
 import { getGSCSummary, getTopQueries, getTopPages } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
-import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities } from '../lib/queries/portal.js';
+import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags } from '../lib/queries/portal.js';
 
 // --- Helpers ---
 
@@ -126,10 +126,19 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       pageSize,
     };
 
-    const [leadsResult, sources, treatments, clientName] = await Promise.all([
+    const ghlFilters = {
+      status: q.ghl_status || undefined,
+      tag: q.tag || undefined,
+      page,
+      pageSize,
+    };
+
+    const [leadsResult, sources, treatments, ghlResult, ghlTags, clientName] = await Promise.all([
       getAttributedLeads(clientId, days, filters),
       getLeadsBySource(clientId, days),
       getLeadsByTreatment(clientId, days),
+      getGhlLeads(clientId, days, ghlFilters),
+      getGhlLeadTags(clientId, days),
       getClientName(clientId),
     ]);
 
@@ -137,7 +146,9 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       leadsResult,
       sources,
       treatments,
-      filters: { source: q.source || '', treatment: q.treatment || '', status: q.status || '' },
+      ghlResult,
+      ghlTags,
+      filters: { source: q.source || '', treatment: q.treatment || '', status: q.status || '', ghl_status: q.ghl_status || '', tag: q.tag || '' },
       page,
       pageSize,
       clientName,

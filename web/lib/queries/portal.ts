@@ -105,6 +105,99 @@ export async function getGhlRecentOpportunities(clientId: number, limit = 20): P
   `, [clientId, clientId, limit]);
 }
 
+// --- GHL leads (opportunities as leads for the leads page) ---
+
+export interface GhlLeadRow {
+  id: string;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  stage_name: string | null;
+  monetary_value: number;
+  status: string;
+  tags: string | null;
+  created_at: string | null;
+}
+
+export interface GhlLeadsResult {
+  leads: GhlLeadRow[];
+  total: number;
+}
+
+export async function getGhlLeads(
+  clientId: number,
+  days = 30,
+  filters?: { status?: string; tag?: string; page?: number; pageSize?: number },
+): Promise<GhlLeadsResult> {
+  const page = filters?.page ?? 1;
+  const pageSize = filters?.pageSize ?? 50;
+  const offset = (page - 1) * pageSize;
+
+  const conditions: string[] = [
+    `(o.location_id IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl')
+      OR o.contact_company IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl'))`,
+    "o.created_at >= date('now', '-' || ? || ' days')",
+  ];
+  const args: (string | number)[] = [clientId, clientId, days];
+
+  if (filters?.status) {
+    conditions.push('o.status = ?');
+    args.push(filters.status);
+  }
+  if (filters?.tag) {
+    conditions.push("o.contact_tags LIKE '%' || ? || '%'");
+    args.push(filters.tag);
+  }
+
+  const whereClause = conditions.join(' AND ');
+
+  const [leads, total] = await Promise.all([
+    rows<GhlLeadRow>(`
+      SELECT o.id, o.contact_name, o.contact_email, o.contact_phone,
+             s.name as stage_name, o.monetary_value, o.status,
+             o.contact_tags as tags, o.created_at
+      FROM ghl_opportunities o
+      LEFT JOIN ghl_stages s ON o.stage_id = s.id
+      WHERE ${whereClause}
+      ORDER BY o.created_at DESC
+      LIMIT ? OFFSET ?
+    `, [...args, pageSize, offset]),
+
+    rows<{ c: number }>(`
+      SELECT COUNT(*) as c
+      FROM ghl_opportunities o
+      WHERE ${whereClause}
+    `, args),
+  ]);
+
+  return { leads, total: total[0]?.c ?? 0 };
+}
+
+export async function getGhlLeadTags(clientId: number, days = 30): Promise<{ tag: string; count: number }[]> {
+  const result = await rows<{ tags: string }>(`
+    SELECT o.contact_tags as tags
+    FROM ghl_opportunities o
+    WHERE (o.location_id IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl')
+           OR o.contact_company IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl'))
+      AND o.created_at >= date('now', '-' || ? || ' days')
+      AND o.contact_tags IS NOT NULL AND o.contact_tags != '[]'
+  `, [clientId, clientId, days]);
+
+  const tagCounts = new Map<string, number>();
+  for (const row of result) {
+    try {
+      const tags = JSON.parse(row.tags) as string[];
+      for (const t of tags) {
+        tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+      }
+    } catch { /* skip malformed */ }
+  }
+
+  return Array.from(tagCounts.entries())
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
 // --- Client name lookup ---
 
 export async function getClientName(clientId: number): Promise<string> {
