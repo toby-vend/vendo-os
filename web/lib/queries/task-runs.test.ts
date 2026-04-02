@@ -84,6 +84,47 @@ mock.module('../queries/brand.js', {
   },
 });
 
+// ---------------------------------------------------------------------------
+// Mock @anthropic-ai/sdk so assembleContext/generateDraft can complete
+// without a real API key. Returns a valid structured JSON response.
+// ---------------------------------------------------------------------------
+
+process.env.ANTHROPIC_API_KEY = 'test-key-for-task-runs-tests';
+
+mock.module('@anthropic-ai/sdk', {
+  namedExports: {},
+  defaultExport: class MockAnthropic {
+    messages = {
+      create: async () => ({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              variants: [{ primary_text: 'Copy A', headline: 'H1', description: 'D1', cta: 'Buy' }],
+              sources: [{ id: 1, title: 'Ad copy SOP' }],
+            }),
+          },
+        ],
+      }),
+    };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Mock ../task-types/index.js so loadTaskTypeConfig doesn't throw for
+// the 'meta:ad_copy' key used in assembleContext tests.
+// ---------------------------------------------------------------------------
+
+mock.module('../task-types/index.js', {
+  namedExports: {
+    loadTaskTypeConfig: (_channel: string, _taskType: string) => ({
+      schema: { type: 'object', properties: {}, additionalProperties: true },
+      buildSystemPrompt: (_sopContent: string) => 'system prompt',
+      buildUserMessage: (_taskType: string, _brandContent: string, _clientName?: string) => 'user message',
+    }),
+  },
+});
+
 // Import modules under test AFTER mocks are registered
 const {
   createTaskRun,
