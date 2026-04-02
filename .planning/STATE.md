@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-02T08:54:14.571Z"
+stopped_at: Completed 08-qa-and-compliance 08-01-PLAN.md
+last_updated: "2026-04-02T09:44:36.030Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 7
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 17
+  completed_plans: 16
   percent: 0
 ---
 
@@ -65,6 +65,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 06-task-matching-engine P02 | 125 | 2 tasks | 2 files |
 | Phase 07-agent-execution P01 | 124 | 1 tasks | 5 files |
 | Phase 07-agent-execution P02 | 440 | 2 tasks | 4 files |
+| Phase 08-qa-and-compliance P01 | 140 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [Phase 07-agent-execution]: generateDraft handles its own retry and failure transitions internally — assembleContext outer catch only fires on unexpected errors
 - [Phase 07-agent-execution]: updateTaskRunOutput atomically sets status=draft_ready and writes output JSON in single UPDATE
 - [Phase 07-agent-execution]: Empty sources array treated as retryable failure — enforces SOP attribution invariant from day one
+- [Phase 08-qa-and-compliance]: AHPRA-Q1 'specialises in' uses negative lookbehind to exclude explicitly allowed 'special interest in' phrase
+- [Phase 08-qa-and-compliance]: checkAHPRACompliance emits at most one violation per rule (first pattern match wins) — consistent with rule-level reporting model
+- [Phase 08-qa-and-compliance]: AHPRA checker receives full serialised draft text string — no field-by-field JSON parsing required
 
 ### Pending Todos
 
@@ -128,6 +132,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T08:54:14.567Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-qa-and-compliance/08-CONTEXT.md
+Last session: 2026-04-02T09:44:36.027Z
+Stopped at: Completed 08-qa-and-compliance 08-01-PLAN.md
+Resume file: None
