@@ -57,6 +57,12 @@ const ahpraHolder: {
 };
 
 // ---------------------------------------------------------------------------
+// Set a dummy API key so runSOPCheck doesn't throw before reaching the mock
+// ---------------------------------------------------------------------------
+
+process.env.ANTHROPIC_API_KEY = 'test-api-key-mock';
+
+// ---------------------------------------------------------------------------
 // Module mocks — must be called at top level before any imports
 // ---------------------------------------------------------------------------
 
