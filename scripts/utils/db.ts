@@ -644,6 +644,102 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_completed ON asana_tasks(completed)');
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_project ON asana_tasks(project_gid)');
 
+  // --- LinkedIn content table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS linkedin_content (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      pillar TEXT NOT NULL,
+      topic TEXT NOT NULL,
+      draft TEXT,
+      status TEXT NOT NULL DEFAULT 'idea',
+      scheduled_date TEXT,
+      published_at TEXT,
+      engagement_likes INTEGER DEFAULT 0,
+      engagement_comments INTEGER DEFAULT 0,
+      engagement_reposts INTEGER DEFAULT 0,
+      engagement_impressions INTEGER DEFAULT 0,
+      source_meeting_id TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_linkedin_status ON linkedin_content(status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_linkedin_pillar ON linkedin_content(pillar)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_linkedin_scheduled ON linkedin_content(scheduled_date)');
+
+  // --- Outbound campaigns table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS outbound_campaigns (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      prospect_name TEXT NOT NULL,
+      prospect_company TEXT,
+      prospect_email TEXT,
+      prospect_linkedin TEXT,
+      icp_match_score REAL DEFAULT 0,
+      channel TEXT NOT NULL DEFAULT 'email',
+      sequence_step INTEGER DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'queued',
+      last_contact_at TEXT,
+      response_type TEXT,
+      meeting_booked INTEGER DEFAULT 0,
+      converted INTEGER DEFAULT 0,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_outbound_status ON outbound_campaigns(status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_outbound_company ON outbound_campaigns(prospect_company)');
+
+  // --- Case studies table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS case_studies (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      win_type TEXT NOT NULL,
+      metric_highlight TEXT,
+      client_approved INTEGER DEFAULT 0,
+      anonymous INTEGER DEFAULT 0,
+      draft TEXT,
+      status TEXT NOT NULL DEFAULT 'identified',
+      distribution TEXT,
+      published_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_case_studies_client ON case_studies(client_name)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_case_studies_status ON case_studies(status)');
+
+  // --- Referrals table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS referrals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      referrer_name TEXT NOT NULL,
+      referrer_type TEXT NOT NULL DEFAULT 'client',
+      referred_name TEXT NOT NULL,
+      referred_company TEXT,
+      ghl_opportunity_id TEXT,
+      status TEXT NOT NULL DEFAULT 'received',
+      converted INTEGER DEFAULT 0,
+      reward_type TEXT,
+      reward_amount REAL,
+      reward_paid INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_name)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_referrals_status ON referrals(status)');
+
   // --- AI audit log table ---
 
   db.run(`

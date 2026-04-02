@@ -57,7 +57,19 @@
     "expenses:pnl": "tsx scripts/functions/expense-tracking.ts --pnl",
     "expenses:pending": "tsx scripts/functions/expense-tracking.ts --pending",
     "kpi": "tsx scripts/functions/kpi-dashboard.ts",
-    "kpi:json": "tsx scripts/functions/kpi-dashboard.ts --json"
+    "kpi:json": "tsx scripts/functions/kpi-dashboard.ts --json",
+    "linkedin": "tsx scripts/functions/linkedin-content.ts",
+    "linkedin:draft": "tsx scripts/functions/linkedin-content.ts --draft",
+    "linkedin:status": "tsx scripts/functions/linkedin-content.ts --status",
+    "linkedin:stats": "tsx scripts/functions/linkedin-content.ts --stats",
+    "outbound": "tsx scripts/functions/outbound-leadgen.ts",
+    "outbound:draft": "tsx scripts/functions/outbound-leadgen.ts --draft",
+    "outbound:funnel": "tsx scripts/functions/outbound-leadgen.ts --funnel",
+    "casestudy": "tsx scripts/functions/case-studies.ts",
+    "casestudy:draft": "tsx scripts/functions/case-studies.ts --draft",
+    "casestudy:status": "tsx scripts/functions/case-studies.ts --status",
+    "referral": "tsx scripts/functions/referral-tracking.ts",
+    "referral:partners": "tsx scripts/functions/referral-tracking.ts --partners"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
