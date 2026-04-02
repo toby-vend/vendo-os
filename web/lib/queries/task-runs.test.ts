@@ -89,6 +89,7 @@ const {
   createTaskRun,
   getTaskRun,
   updateTaskRunStatus,
+  updateTaskRunOutput,
   listTaskRuns,
 } = await import('./task-runs.js');
 
