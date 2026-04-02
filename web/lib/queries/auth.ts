@@ -286,6 +286,23 @@ export async function initSchema(): Promise<void> {
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_task_runs_status ON task_runs(status)`, args: [] });
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_task_runs_created ON task_runs(created_at)`, args: [] });
 
+  // AUDT-03: Attempt database-level append-only enforcement.
+  // Turso/libsql hosted environment may not support CREATE TRIGGER DDL.
+  // If it fails, the application-layer policy (no DELETE export in task-runs.ts) is the enforcer.
+  try {
+    await db.execute({
+      sql: `CREATE TRIGGER IF NOT EXISTS prevent_task_run_delete
+            BEFORE DELETE ON task_runs
+            BEGIN
+              SELECT RAISE(ABORT, 'task_runs is append-only — deletions are prohibited (AUDT-03)');
+            END`,
+      args: [],
+    });
+  } catch {
+    // Turso/libsql does not support triggers — append-only enforced at application layer.
+    // See web/lib/queries/task-runs.ts module header comment.
+  }
+
   // Asana tasks
   await db.execute({ sql: `CREATE TABLE IF NOT EXISTS asana_tasks (
     gid TEXT PRIMARY KEY,
