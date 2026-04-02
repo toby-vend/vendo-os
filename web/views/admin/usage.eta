@@ -41,59 +41,68 @@
   </div>
 </div>
 
-<!-- Per-User Breakdown -->
-<h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.75rem; color: #E2E8F0;">Usage by User</h3>
+<!-- User Limits & Usage -->
+<h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.75rem; color: #E2E8F0;">Users</h3>
 <div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">
   <table style="width: 100%; border-collapse: collapse;">
     <thead>
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
         <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">User</th>
-        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Input Tokens</th>
-        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Output Tokens</th>
-        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Calls</th>
+        <th style="text-align: center; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Role</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Tokens (Period)</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Daily Used</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Daily Limit</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Monthly Used</th>
         <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Monthly Limit</th>
-        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Used This Month</th>
-        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Set Limit</th>
+        <th style="text-align: center; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;"></th>
       </tr>
     </thead>
     <tbody>
-      <% if (!it.byUser || it.byUser.length === 0) { %>
-      <tr><td colspan="7" style="padding: 2rem; text-align: center; color: #64748B;">No usage data yet.</td></tr>
+      <% if (!it.usersWithUsage || it.usersWithUsage.length === 0) { %>
+      <tr><td colspan="8" style="padding: 2rem; text-align: center; color: #64748B;">No users found.</td></tr>
       <% } else { %>
-      <% it.byUser.forEach(u => {
-        const limitInfo = u.user_id ? it.limitsMap.get(u.user_id) : null;
-        const monthlyLimit = limitInfo?.monthly_token_limit ?? null;
-        const monthlyUsed = limitInfo?.monthly_used ?? 0;
+      <% it.usersWithUsage.forEach(u => {
+        const isAdmin = u.role === 'admin';
+        const dailyOver = !isAdmin && u.daily_token_limit !== null && Number(u.daily_used) >= u.daily_token_limit;
+        const monthlyOver = !isAdmin && u.monthly_token_limit !== null && Number(u.monthly_used) >= u.monthly_token_limit;
       %>
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
         <td style="padding: 12px 16px;">
-          <div style="font-size: 14px; color: #E2E8F0; font-weight: 500;"><%= u.user_name || 'System' %></div>
-          <div style="font-size: 12px; color: #64748B;"><%= u.user_email || 'Automated' %></div>
+          <div style="font-size: 14px; color: #E2E8F0; font-weight: 500;"><%= u.user_name %></div>
+          <div style="font-size: 12px; color: #64748B;"><%= u.user_email %></div>
         </td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(u.total_input).toLocaleString() %></td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(u.total_output).toLocaleString() %></td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #94A3B8;"><%= Number(u.total_calls).toLocaleString() %></td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: <%= monthlyLimit !== null ? '#E2E8F0' : '#64748B' %>;">
-          <%= monthlyLimit !== null ? Number(monthlyLimit).toLocaleString() : 'Unlimited' %>
+        <td style="padding: 12px 16px; text-align: center;">
+          <span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; <%= isAdmin ? 'background: rgba(34,197,94,0.15); color: #22C55E;' : 'background: rgba(148,163,184,0.15); color: #94A3B8;' %>">
+            <%= isAdmin ? 'Admin' : 'Standard' %>
+          </span>
         </td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px;">
-          <% if (monthlyLimit !== null && Number(monthlyUsed) >= monthlyLimit) { %>
-          <span style="color: #EF4444; font-weight: 600;"><%= Number(monthlyUsed).toLocaleString() %></span>
-          <% } else { %>
-          <span style="color: #94A3B8;"><%= Number(monthlyUsed).toLocaleString() %></span>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;">
+          <%= (Number(u.total_input) + Number(u.total_output)).toLocaleString() %>
+          <% if (Number(u.total_calls) > 0) { %>
+          <div style="font-size: 11px; color: #64748B;"><%= Number(u.total_calls) %> calls</div>
           <% } %>
         </td>
-        <td style="padding: 12px 16px; text-align: right;">
-          <% if (u.user_id) { %>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; color: <%= dailyOver ? '#EF4444' : '#94A3B8' %>; <%= dailyOver ? 'font-weight: 600;' : '' %>">
+          <%= Number(u.daily_used).toLocaleString() %>
+        </td>
+        <% if (isAdmin) { %>
+        <td style="padding: 12px 16px; text-align: right; font-size: 13px; color: #64748B;">Unlimited</td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; color: #94A3B8;"><%= Number(u.monthly_used).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 13px; color: #64748B;">Unlimited</td>
+        <td style="padding: 12px 16px;"></td>
+        <% } else { %>
+        <td style="padding: 12px 16px; text-align: right;" colspan="3">
           <form method="POST" action="/admin/usage/limits/<%= u.user_id %>" style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
-            <input type="number" name="monthly_limit" placeholder="Unlimited" value="<%= monthlyLimit !== null ? monthlyLimit : '' %>"
+            <input type="number" name="daily_limit" placeholder="Unlimited" value="<%= u.daily_token_limit !== null ? u.daily_token_limit : '' %>" min="0"
                    style="width: 100px; padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: right;">
-            <button type="submit" style="font-size: 11px; color: #22C55E; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 4px 8px; cursor: pointer; white-space: nowrap;">Save</button>
+            <span style="font-size: 14px; font-variant-numeric: tabular-nums; color: <%= monthlyOver ? '#EF4444; font-weight: 600' : '#94A3B8' %>;"><%= Number(u.monthly_used).toLocaleString() %></span>
+            <input type="number" name="monthly_limit" placeholder="Unlimited" value="<%= u.monthly_token_limit !== null ? u.monthly_token_limit : '' %>" min="0"
+                   style="width: 100px; padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: right;">
+            <button type="submit" style="font-size: 11px; color: #22C55E; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 4px 10px; cursor: pointer; white-space: nowrap;">Save</button>
           </form>
-          <% } else { %>
-          <span style="font-size: 12px; color: #64748B;">N/A</span>
-          <% } %>
         </td>
+        <td></td>
+        <% } %>
       </tr>
       <% }) %>
       <% } %>

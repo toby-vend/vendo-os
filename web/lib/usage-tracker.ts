@@ -15,12 +15,9 @@ export async function trackUsage(params: {
 export async function enforceLimit(userId: string | null): Promise<{ allowed: boolean; message?: string }> {
   if (!userId) return { allowed: true };
 
-  const { allowed, used, limit } = await checkUserWithinLimit(userId);
-  if (!allowed) {
-    return {
-      allowed: false,
-      message: `Monthly token limit reached (${used.toLocaleString()} / ${limit!.toLocaleString()} tokens). Please contact an admin.`,
-    };
+  const result = await checkUserWithinLimit(userId);
+  if (!result.allowed) {
+    return { allowed: false, message: `${result.message} Please contact an admin.` };
   }
   return { allowed: true };
 }

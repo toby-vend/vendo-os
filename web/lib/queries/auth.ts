@@ -347,6 +347,13 @@ export async function initSchema(): Promise<void> {
     monthly_token_limit INTEGER,
     updated_at TEXT NOT NULL
   )`, args: [] });
+
+  // Add daily_token_limit column (migration for existing tables)
+  try {
+    await db.execute({ sql: 'ALTER TABLE user_token_limits ADD COLUMN daily_token_limit INTEGER', args: [] });
+  } catch {
+    // Column already exists
+  }
 }
 
 /** @deprecated Use initSchema instead */

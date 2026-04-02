@@ -155,59 +155,125 @@ export async function getUserMonthlyUsage(userId: string): Promise<number> {
   return result ?? 0;
 }
 
-export async function getUserTokenLimit(userId: string): Promise<number | null> {
+export async function getUserDailyUsage(userId: string): Promise<number> {
+  const today = new Date().toISOString().slice(0, 10);
   const result = await scalar<number>(
-    'SELECT monthly_token_limit FROM user_token_limits WHERE user_id = ?',
-    [userId],
+    `SELECT COALESCE(SUM(input_tokens + output_tokens), 0) FROM api_usage WHERE user_id = ? AND created_at >= ?`,
+    [userId, today],
   );
-  return result;
+  return result ?? 0;
 }
 
-export async function setUserTokenLimit(userId: string, limit: number | null): Promise<void> {
-  if (limit === null) {
+interface UserLimits {
+  monthly_token_limit: number | null;
+  daily_token_limit: number | null;
+}
+
+export async function getUserTokenLimits(userId: string): Promise<UserLimits> {
+  const result = await rows<UserLimits>(
+    'SELECT monthly_token_limit, daily_token_limit FROM user_token_limits WHERE user_id = ?',
+    [userId],
+  );
+  if (result.length === 0) return { monthly_token_limit: null, daily_token_limit: null };
+  return result[0];
+}
+
+export async function setUserTokenLimits(userId: string, limits: { monthly: number | null; daily: number | null }): Promise<void> {
+  if (limits.monthly === null && limits.daily === null) {
     await db.execute({ sql: 'DELETE FROM user_token_limits WHERE user_id = ?', args: [userId] });
   } else {
     await db.execute({
-      sql: `INSERT INTO user_token_limits (user_id, monthly_token_limit, updated_at)
-            VALUES (?, ?, ?)
-            ON CONFLICT(user_id) DO UPDATE SET monthly_token_limit = excluded.monthly_token_limit, updated_at = excluded.updated_at`,
-      args: [userId, limit, new Date().toISOString()],
+      sql: `INSERT INTO user_token_limits (user_id, monthly_token_limit, daily_token_limit, updated_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+              monthly_token_limit = excluded.monthly_token_limit,
+              daily_token_limit = excluded.daily_token_limit,
+              updated_at = excluded.updated_at`,
+      args: [userId, limits.monthly, limits.daily, new Date().toISOString()],
     });
   }
 }
 
-export async function checkUserWithinLimit(userId: string): Promise<{ allowed: boolean; used: number; limit: number | null }> {
-  const [used, limit] = await Promise.all([
-    getUserMonthlyUsage(userId),
-    getUserTokenLimit(userId),
-  ]);
-  if (limit === null) return { allowed: true, used, limit };
-  return { allowed: used < limit, used, limit };
+export async function checkUserWithinLimit(userId: string): Promise<{ allowed: boolean; message?: string }> {
+  const limits = await getUserTokenLimits(userId);
+
+  // Check daily limit
+  if (limits.daily_token_limit !== null) {
+    const dailyUsed = await getUserDailyUsage(userId);
+    if (dailyUsed >= limits.daily_token_limit) {
+      return { allowed: false, message: `Daily token limit reached (${dailyUsed.toLocaleString()} / ${limits.daily_token_limit.toLocaleString()}).` };
+    }
+  }
+
+  // Check monthly limit
+  if (limits.monthly_token_limit !== null) {
+    const monthlyUsed = await getUserMonthlyUsage(userId);
+    if (monthlyUsed >= limits.monthly_token_limit) {
+      return { allowed: false, message: `Monthly token limit reached (${monthlyUsed.toLocaleString()} / ${limits.monthly_token_limit.toLocaleString()}).` };
+    }
+  }
+
+  return { allowed: true };
 }
 
 // --- Per-user limit info for admin view ---
 
-export interface UserLimitRow {
+export interface UserWithUsageRow {
   user_id: string;
+  user_name: string;
+  user_email: string;
+  role: 'admin' | 'standard';
   monthly_token_limit: number | null;
+  daily_token_limit: number | null;
   monthly_used: number;
+  daily_used: number;
+  total_input: number;
+  total_output: number;
+  total_calls: number;
 }
 
-export async function getAllUserLimits(): Promise<UserLimitRow[]> {
+export async function getAllUsersWithUsage(filter: DateFilter = {}): Promise<UserWithUsageRow[]> {
   const now = new Date();
   const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-  return rows<UserLimitRow>(
+  const today = now.toISOString().slice(0, 10);
+  const { clause, args: filterArgs } = dateWhere(filter);
+
+  // Build the filtered usage subquery
+  const filteredUsageWhere = clause ? clause.replace(' WHERE ', '') : '1=1';
+
+  return rows<UserWithUsageRow>(
     `SELECT u.id as user_id,
+            u.name as user_name,
+            u.email as user_email,
+            u.role,
             l.monthly_token_limit,
-            COALESCE(m.used, 0) as monthly_used
+            l.daily_token_limit,
+            COALESCE(mu.used, 0) as monthly_used,
+            COALESCE(du.used, 0) as daily_used,
+            COALESCE(fu.total_input, 0) as total_input,
+            COALESCE(fu.total_output, 0) as total_output,
+            COALESCE(fu.total_calls, 0) as total_calls
      FROM users u
      LEFT JOIN user_token_limits l ON u.id = l.user_id
      LEFT JOIN (
        SELECT user_id, SUM(input_tokens + output_tokens) as used
-       FROM api_usage
-       WHERE created_at >= ?
+       FROM api_usage WHERE created_at >= ?
        GROUP BY user_id
-     ) m ON u.id = m.user_id`,
-    [monthStart],
+     ) mu ON u.id = mu.user_id
+     LEFT JOIN (
+       SELECT user_id, SUM(input_tokens + output_tokens) as used
+       FROM api_usage WHERE created_at >= ?
+       GROUP BY user_id
+     ) du ON u.id = du.user_id
+     LEFT JOIN (
+       SELECT user_id,
+              SUM(input_tokens) as total_input,
+              SUM(output_tokens) as total_output,
+              COUNT(*) as total_calls
+       FROM api_usage WHERE ${filteredUsageWhere}
+       GROUP BY user_id
+     ) fu ON u.id = fu.user_id
+     ORDER BY u.role ASC, u.name ASC`,
+    [monthStart, today, ...filterArgs],
   );
 }
