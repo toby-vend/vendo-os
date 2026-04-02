@@ -141,7 +141,11 @@ Plans:
   3. Output containing a prohibited AHPRA claim is flagged with the specific rule violated
   4. AHPRA compliance check runs on every draft before status moves to draft_ready — it cannot be bypassed
   5. QA failures never loop indefinitely — maximum three total attempts (initial + 2 retries) is enforced
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — AHPRA dental advertising compliance checker (deterministic rule-based module)
+- [ ] 08-02-PLAN.md — QA judge (Haiku LLM), retry-with-critique loop, generateDraft wiring
 
 ### Phase 9: Audit and Traceability
 **Goal**: Every generation is logged in an append-only record — who triggered it, which client, which SOPs were used, which SOP versions, and what QA score was achieved
@@ -178,6 +182,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Brand Hub | 2/2 | Complete   | 2026-04-01 |
 | 6. Task Matching Engine | 2/2 | Complete   | 2026-04-01 |
 | 7. Agent Execution | 2/2 | Complete   | 2026-04-02 |
-| 8. QA and Compliance | 0/TBD | Not started | - |
+| 8. QA and Compliance | 0/2 | Not started | - |
 | 9. Audit and Traceability | 0/TBD | Not started | - |
 | 10. AM Interface | 0/TBD | Not started | - |
