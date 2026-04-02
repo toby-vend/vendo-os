@@ -1283,6 +1283,88 @@ export async function initSchema(): Promise<void> {
 
   db.run('CREATE INDEX IF NOT EXISTS idx_cum_client ON client_user_map(client_id)');
 
+  // --- Harvest tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS harvest_users (
+      id INTEGER PRIMARY KEY,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      email TEXT,
+      is_active INTEGER DEFAULT 1,
+      weekly_capacity_hours REAL DEFAULT 0,
+      default_hourly_rate REAL,
+      cost_rate REAL,
+      roles TEXT,
+      created_at TEXT,
+      updated_at TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS harvest_time_entries (
+      id INTEGER PRIMARY KEY,
+      spent_date TEXT NOT NULL,
+      hours REAL DEFAULT 0,
+      notes TEXT,
+      is_running INTEGER DEFAULT 0,
+      billable INTEGER DEFAULT 0,
+      billable_rate REAL,
+      cost_rate REAL,
+      user_id INTEGER NOT NULL,
+      user_name TEXT,
+      client_id INTEGER,
+      client_name TEXT,
+      project_id INTEGER,
+      project_name TEXT,
+      task_id INTEGER,
+      task_name TEXT,
+      created_at TEXT,
+      updated_at TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_entries_date ON harvest_time_entries(spent_date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_entries_user ON harvest_time_entries(user_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_entries_project ON harvest_time_entries(project_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_entries_client ON harvest_time_entries(client_name)');
+
+  // Migrate: add columns if upgrading from old schema
+  try { db.run('ALTER TABLE harvest_time_entries ADD COLUMN cost_rate REAL'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE harvest_users ADD COLUMN default_hourly_rate REAL'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE harvest_users ADD COLUMN cost_rate REAL'); } catch { /* already exists */ }
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS harvest_clients (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      currency TEXT DEFAULT 'GBP',
+      is_active INTEGER DEFAULT 1,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS harvest_projects (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      code TEXT,
+      client_id INTEGER,
+      client_name TEXT,
+      is_active INTEGER DEFAULT 1,
+      is_billable INTEGER DEFAULT 1,
+      budget REAL,
+      budget_by TEXT,
+      hourly_rate REAL,
+      cost_budget REAL,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_projects_client ON harvest_projects(client_id)');
+
   seedCategories(db);
   saveDb();
 }

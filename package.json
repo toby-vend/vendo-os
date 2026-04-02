@@ -41,6 +41,8 @@
     "brand:reindex": "tsx scripts/sync/sync-brands.ts",
     "leads:score": "tsx scripts/functions/lead-scoring.ts",
     "onboard:check": "tsx scripts/functions/client-onboarding.ts",
+    "sync:harvest": "tsx scripts/sync/sync-harvest.ts",
+    "sync:harvest:backfill": "tsx scripts/sync/sync-harvest.ts --backfill",
     "sync:all": "tsx scripts/sync/run-all.ts",
     "sync:all:no-push": "tsx scripts/sync/run-all.ts --no-push",
     "health:score": "tsx scripts/functions/client-health.ts",
