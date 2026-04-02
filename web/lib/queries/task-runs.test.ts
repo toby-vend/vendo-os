@@ -125,6 +125,23 @@ mock.module('../task-types/index.js', {
   },
 });
 
+// ---------------------------------------------------------------------------
+// Mock ../qa-checker.js so runSOPCheck is defined when assembleContext runs
+// QA checks during the draft generation loop.
+// ---------------------------------------------------------------------------
+
+const qaCheckerHolder = {
+  result: { passed: true, issues: [] as { rule: string; detail: string }[] },
+};
+
+mock.module('../qa-checker.js', {
+  namedExports: {
+    runSOPCheck: async (_draftText: string, _sopContent: string) => {
+      return qaCheckerHolder.result;
+    },
+  },
+});
+
 // Import modules under test AFTER mocks are registered
 const {
   createTaskRun,
