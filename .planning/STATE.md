@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 10-am-interface-01-PLAN.md
-last_updated: "2026-04-02T13:38:42.635Z"
+stopped_at: "Checkpoint reached: Task 2 human-verify in 10-am-interface-03-PLAN.md"
+last_updated: "2026-04-02T13:44:15.122Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 9
   total_plans: 22
-  completed_plans: 20
+  completed_plans: 21
   percent: 0
 ---
 
@@ -70,6 +70,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 09-audit-and-traceability P01 | 358 | 2 tasks | 4 files |
 | Phase 09-audit-and-traceability P02 | 176 | 2 tasks | 3 files |
 | Phase 10-am-interface P01 | 300 | 2 tasks | 5 files |
+| Phase 10-am-interface P03 | 167 | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,8 @@ Recent decisions affecting current work:
 - [Phase 10-am-interface]: TaskRunListRow extends TaskRunRow pattern used for query-specific row shapes with JOINs
 - [Phase 10-am-interface]: dateTo filter appends T23:59:59.999Z for full-day inclusion in listTaskRuns
 - [Phase 10-am-interface]: Skills nav link uses canSee('drive') guard — skills are Drive-derived, same permission
+- [Phase 10-am-interface]: SkillForDisplay Pick<> type bridges SkillRow and SkillSearchResult so groupBySkillType works on both browse and search paths
+- [Phase 10-am-interface]: listSkillChannels() queries DISTINCT channel dynamically — tabs appear automatically when new channels are indexed
 
 ### Pending Todos
 
@@ -145,6 +148,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T13:38:42.633Z
-Stopped at: Completed 10-am-interface-01-PLAN.md
+Last session: 2026-04-02T13:44:15.121Z
+Stopped at: Checkpoint reached: Task 2 human-verify in 10-am-interface-03-PLAN.md
 Resume file: None
