@@ -267,6 +267,38 @@ describe('updateTaskRunStatus', () => {
 });
 
 // ---------------------------------------------------------------------------
+// updateTaskRunOutput tests
+// ---------------------------------------------------------------------------
+
+describe('updateTaskRunOutput', () => {
+  it('sets status to draft_ready and stores the output JSON string', async () => {
+    const id = await createTaskRun({ clientId: 50, channel: 'paid_social', taskType: 'ad_copy', createdBy: 'output-test' });
+
+    const outputData = { sources: [{ id: 1, title: 'Ad copy SOP' }], variants: ['Copy A', 'Copy B'] };
+    const outputJson = JSON.stringify(outputData);
+
+    await updateTaskRunOutput(id, outputJson);
+
+    const row = await getTaskRun(id);
+    assert.ok(row !== null);
+    assert.strictEqual(row.status, 'draft_ready', 'Status must be draft_ready after updateTaskRunOutput');
+    assert.strictEqual(row.output, outputJson, 'Output field must match the JSON string that was written');
+  });
+
+  it('stored output is retrievable and round-trips correctly', async () => {
+    const id = await createTaskRun({ clientId: 51, channel: 'seo', taskType: 'content_brief', createdBy: 'output-test' });
+
+    const payload = { sources: [{ id: 3, title: 'Content SOP' }], meta_title: 'Test title', headings: ['H1', 'H2'] };
+    await updateTaskRunOutput(id, JSON.stringify(payload));
+
+    const row = await getTaskRun(id);
+    assert.ok(row !== null && row.output !== null);
+    const parsed = JSON.parse(row.output as string);
+    assert.deepStrictEqual(parsed, payload, 'Parsed output must deeply equal the original object');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // listTaskRuns tests
 // ---------------------------------------------------------------------------
 
