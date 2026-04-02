@@ -202,7 +202,13 @@ export async function assembleContext(
       return;
     }
 
-    const sopIds = skillResponse.results.map(r => r.id);
+    // Map search results to enriched SOP snapshots for audit trail (AUDT-01)
+    const sopSnapshots: SopSnapshot[] = skillResponse.results.map(s => ({
+      id: s.id,
+      title: s.title,
+      drive_modified_at: s.drive_modified_at,
+      content_hash: s.content_hash,
+    }));
 
     // Step 3: Resolve client slug from brand_hub
     const clientSlug = await resolveClientSlug(clientId);
@@ -217,8 +223,8 @@ export async function assembleContext(
       }
     }
 
-    // Step 5: Transition to generating with assembled context
-    await updateTaskRunStatus(taskRunId, 'generating', { sopsUsed: sopIds, brandContextId });
+    // Step 5: Transition to generating with assembled context (sopsUsed as enriched SopSnapshot[])
+    await updateTaskRunStatus(taskRunId, 'generating', { sopsUsed: sopSnapshots, brandContextId });
 
     // Step 6: Generate draft with QA routing (Phase 8)
     await generateDraft(taskRunId, channel, taskType, skillResponse.results, brandFiles);
