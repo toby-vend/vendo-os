@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { getClients, getClientByName } from '../lib/queries.js';
+import { getClients, getClientByName, getClientEnrichedData } from '../lib/queries.js';
 
 export const clientsRoutes: FastifyPluginAsync = async (app) => {
   app.get('/', async (_request, reply) => {
@@ -12,6 +12,11 @@ export const clientsRoutes: FastifyPluginAsync = async (app) => {
     const decoded = decodeURIComponent(name);
     const data = await getClientByName(decoded);
     if (!data.client) { reply.code(404).send('Client not found'); return; }
-    reply.render('clients/detail', data);
+
+    const enriched = data.client.id
+      ? await getClientEnrichedData(data.client.id)
+      : { metaSpend: null, gadsSpend: null, asanaTasks: [], ghlOpps: [] };
+
+    reply.render('clients/detail', { ...data, enriched });
   });
 };

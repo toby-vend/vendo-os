@@ -103,6 +103,24 @@ export async function initSchema(): Promise<void> {
   try { db.run('ALTER TABLE clients ADD COLUMN outstanding REAL DEFAULT 0'); } catch { /* already exists */ }
   try { db.run('ALTER TABLE clients ADD COLUMN first_invoice_date TEXT'); } catch { /* already exists */ }
   try { db.run('ALTER TABLE clients ADD COLUMN last_invoice_date TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN display_name TEXT'); } catch { /* already exists */ }
+
+  // --- Client source mappings (links external system IDs to a client) ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS client_source_mappings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_id INTEGER NOT NULL REFERENCES clients(id),
+      source TEXT NOT NULL,
+      external_id TEXT NOT NULL,
+      external_name TEXT,
+      created_at TEXT NOT NULL,
+      UNIQUE(source, external_id)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_csm_client ON client_source_mappings(client_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_csm_source ON client_source_mappings(source)');
 
   // Migrate: waterfall matcher columns on meetings
   try { db.run('ALTER TABLE meetings ADD COLUMN match_method TEXT'); } catch { /* already exists */ }
@@ -362,6 +380,11 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_gads_spend_date ON gads_campaign_spend(date)');
   db.run('CREATE INDEX IF NOT EXISTS idx_gads_spend_account ON gads_campaign_spend(account_id)');
   db.run('CREATE INDEX IF NOT EXISTS idx_gads_spend_campaign ON gads_campaign_spend(campaign_id)');
+
+  // Migrate: add conversion columns to gads_campaign_spend
+  try { db.run('ALTER TABLE gads_campaign_spend ADD COLUMN conversions REAL DEFAULT 0'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE gads_campaign_spend ADD COLUMN conversion_value REAL DEFAULT 0'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE gads_campaign_spend ADD COLUMN cost_per_conversion REAL'); } catch { /* already exists */ }
 
   // --- GHL (GoHighLevel) tables ---
 
@@ -1057,6 +1080,208 @@ export async function initSchema(): Promise<void> {
 
   db.run('CREATE INDEX IF NOT EXISTS idx_creative_reviews_client ON creative_reviews(client_name)');
   db.run('CREATE INDEX IF NOT EXISTS idx_creative_reviews_status ON creative_reviews(status)');
+
+  // --- Client-account mapping table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS client_account_map (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_id INTEGER NOT NULL,
+      client_name TEXT NOT NULL,
+      platform TEXT NOT NULL,
+      platform_account_id TEXT NOT NULL,
+      platform_account_name TEXT,
+      crm_type TEXT NOT NULL DEFAULT 'ghl',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      UNIQUE(client_id, platform, platform_account_id)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_cam_client ON client_account_map(client_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_cam_platform ON client_account_map(platform)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_cam_platform_account ON client_account_map(platform_account_id)');
+
+  // --- GA4 tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ga4_properties (
+      id TEXT PRIMARY KEY,
+      display_name TEXT,
+      time_zone TEXT,
+      currency TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ga4_daily (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      property_id TEXT NOT NULL,
+      sessions INTEGER DEFAULT 0,
+      users INTEGER DEFAULT 0,
+      new_users INTEGER DEFAULT 0,
+      page_views INTEGER DEFAULT 0,
+      engaged_sessions INTEGER DEFAULT 0,
+      engagement_rate REAL,
+      avg_session_duration REAL,
+      bounce_rate REAL,
+      conversions INTEGER DEFAULT 0,
+      conversion_events TEXT,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, property_id)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_ga4_daily_date ON ga4_daily(date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ga4_daily_property ON ga4_daily(property_id)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ga4_traffic_sources (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      property_id TEXT NOT NULL,
+      source TEXT,
+      medium TEXT,
+      campaign TEXT,
+      sessions INTEGER DEFAULT 0,
+      users INTEGER DEFAULT 0,
+      conversions INTEGER DEFAULT 0,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, property_id, source, medium, campaign)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_ga4_traffic_date ON ga4_traffic_sources(date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ga4_traffic_property ON ga4_traffic_sources(property_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ga4_traffic_source ON ga4_traffic_sources(source, medium)');
+
+  // --- Google Search Console tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gsc_sites (
+      id TEXT PRIMARY KEY,
+      permission_level TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gsc_daily (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      site_id TEXT NOT NULL,
+      clicks INTEGER DEFAULT 0,
+      impressions INTEGER DEFAULT 0,
+      ctr REAL,
+      avg_position REAL,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, site_id)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_gsc_daily_date ON gsc_daily(date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gsc_daily_site ON gsc_daily(site_id)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gsc_queries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      site_id TEXT NOT NULL,
+      query TEXT NOT NULL,
+      clicks INTEGER DEFAULT 0,
+      impressions INTEGER DEFAULT 0,
+      ctr REAL,
+      position REAL,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, site_id, query)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_gsc_queries_date ON gsc_queries(date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gsc_queries_site ON gsc_queries(site_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gsc_queries_query ON gsc_queries(query)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gsc_pages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      site_id TEXT NOT NULL,
+      page TEXT NOT NULL,
+      clicks INTEGER DEFAULT 0,
+      impressions INTEGER DEFAULT 0,
+      ctr REAL,
+      position REAL,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, site_id, page)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_gsc_pages_date ON gsc_pages(date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gsc_pages_site ON gsc_pages(site_id)');
+
+  // --- Lead attribution table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS attributed_leads (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ghl_opportunity_id TEXT NOT NULL UNIQUE,
+      client_id INTEGER NOT NULL,
+      client_name TEXT NOT NULL,
+      contact_name TEXT,
+      contact_email TEXT,
+      contact_phone TEXT,
+      attributed_source TEXT NOT NULL,
+      attribution_method TEXT NOT NULL,
+      attribution_confidence TEXT NOT NULL DEFAULT 'medium',
+      utm_source TEXT,
+      utm_medium TEXT,
+      utm_campaign TEXT,
+      landing_page TEXT,
+      treatment_type TEXT,
+      treatment_value REAL,
+      conversion_status TEXT NOT NULL DEFAULT 'lead',
+      lead_date TEXT NOT NULL,
+      qualified_at TEXT,
+      converted_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_attr_leads_client ON attributed_leads(client_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_attr_leads_source ON attributed_leads(attributed_source)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_attr_leads_treatment ON attributed_leads(treatment_type)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_attr_leads_status ON attributed_leads(conversion_status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_attr_leads_date ON attributed_leads(lead_date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_attr_leads_ghl ON attributed_leads(ghl_opportunity_id)');
+
+  // --- Treatment types reference table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS treatment_types (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug TEXT NOT NULL UNIQUE,
+      label TEXT NOT NULL,
+      default_value REAL NOT NULL DEFAULT 0,
+      vertical TEXT NOT NULL DEFAULT 'dental',
+      keywords TEXT
+    )
+  `);
+
+  // --- Client-user mapping table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS client_user_map (
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      client_id INTEGER NOT NULL,
+      client_name TEXT NOT NULL,
+      PRIMARY KEY (user_id)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_cum_client ON client_user_map(client_id)');
 
   seedCategories(db);
   saveDb();

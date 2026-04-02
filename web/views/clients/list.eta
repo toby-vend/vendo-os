@@ -12,7 +12,7 @@
     <% } %>
     <% it.clients.forEach(c => { %>
     <tr>
-      <td><a href="/clients/<%= encodeURIComponent(c.name) %>"><%= c.name %></a></td>
+      <td><a href="/clients/<%= encodeURIComponent(c.name) %>"><%= c.display_name || c.name %></a></td>
       <td>&pound;<%= (c.total_invoiced || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
       <td><%= c.outstanding > 0 ? '£' + c.outstanding.toLocaleString('en-GB', { minimumFractionDigits: 2 }) : '—' %></td>
       <td><%= c.meeting_count %></td>

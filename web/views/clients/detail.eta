@@ -2,7 +2,10 @@
 
 <p><a href="/clients">&laquo; Back to clients</a></p>
 
-<h1><%= it.client.name %></h1>
+<h1><%= it.client.display_name || it.client.name %></h1>
+<% if (it.client.display_name && it.client.display_name !== it.client.name) { %>
+<p style="color: #94A3B8; margin-top: -0.5rem; font-size: 13px;">Xero: <%= it.client.name %></p>
+<% } %>
 
 <p class="meeting-meta">
   <% if (it.client.email) { %><strong>Email:</strong> <%= it.client.email %> | <% } %>
@@ -20,6 +23,26 @@
   <% if (it.client.first_invoice_date) { %><tr><td><strong>First Invoice</strong></td><td><%= it.client.first_invoice_date.slice(0, 10) %></td></tr><% } %>
   <% if (it.client.last_invoice_date) { %><tr><td><strong>Last Invoice</strong></td><td><%= it.client.last_invoice_date.slice(0, 10) %></td></tr><% } %>
 </table>
+<% } %>
+
+<% if (it.enriched && (it.enriched.metaSpend || it.enriched.gadsSpend)) { %>
+<h2>Ad Spend</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; max-width: 600px;">
+  <% if (it.enriched.metaSpend) { %>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Meta Ads</div>
+    <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;">&pound;<%= it.enriched.metaSpend.total_spend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
+    <div style="color: #64748B; font-size: 12px;"><%= it.enriched.metaSpend.impressions.toLocaleString() %> impr &middot; <%= it.enriched.metaSpend.clicks.toLocaleString() %> clicks</div>
+  </div>
+  <% } %>
+  <% if (it.enriched.gadsSpend) { %>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Google Ads</div>
+    <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;">&pound;<%= it.enriched.gadsSpend.total_spend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
+    <div style="color: #64748B; font-size: 12px;"><%= it.enriched.gadsSpend.impressions.toLocaleString() %> impr &middot; <%= it.enriched.gadsSpend.clicks.toLocaleString() %> clicks</div>
+  </div>
+  <% } %>
+</div>
 <% } %>
 
 <h2>Meetings</h2>
@@ -55,6 +78,47 @@
       <td><%= a.description %></td>
       <td><%= a.assignee || '—' %></td>
       <td><a href="/meetings/<%= a.meeting_id %>"><%= a.meeting_title || '—' %></a></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
+
+<% if (it.enriched && it.enriched.asanaTasks.length) { %>
+<h2>Asana Tasks (<%= it.enriched.asanaTasks.length %>)</h2>
+<table class="compact">
+  <thead>
+    <tr><th>Status</th><th>Task</th><th>Assignee</th><th>Due</th><th>Project</th></tr>
+  </thead>
+  <tbody>
+    <% it.enriched.asanaTasks.forEach(t => { %>
+    <tr>
+      <td><span class="badge <%= t.completed ? 'badge-completed' : 'badge-open' %>"><%= t.completed ? 'Done' : 'Open' %></span></td>
+      <td><%= t.name %></td>
+      <td><%= t.assignee_name || '—' %></td>
+      <td><%= t.due_on || '—' %></td>
+      <td style="color: #94A3B8; font-size: 13px;"><%= t.project_name || '—' %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
+
+<% if (it.enriched && it.enriched.ghlOpps.length) { %>
+<h2>Pipeline (<%= it.enriched.ghlOpps.length %>)</h2>
+<table class="compact">
+  <thead>
+    <tr><th>Deal</th><th>Value</th><th>Stage</th><th>Status</th><th>Contact</th><th>Created</th></tr>
+  </thead>
+  <tbody>
+    <% it.enriched.ghlOpps.forEach(o => { %>
+    <tr>
+      <td><%= o.name || '—' %></td>
+      <td>&pound;<%= (o.monetary_value || 0).toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+      <td><%= o.stage_name || '—' %></td>
+      <td><span class="badge badge-<%= o.status === 'won' ? 'completed' : o.status === 'lost' ? 'open' : 'active' %>"><%= o.status %></span></td>
+      <td><%= o.contact_name || '—' %></td>
+      <td><%= o.created_at ? o.created_at.slice(0, 10) : '—' %></td>
     </tr>
     <% }) %>
   </tbody>

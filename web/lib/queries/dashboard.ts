@@ -20,7 +20,9 @@ export interface DashboardStats {
 }
 
 export interface ClientRow {
+  id: number;
   name: string;
+  display_name: string | null;
   email: string | null;
   meeting_count: number;
   vertical: string | null;
@@ -88,7 +90,7 @@ export async function getActionsByAssignee(): Promise<AssigneeSummary[]> {
 
 export async function getClients(): Promise<ClientRow[]> {
   return rows<ClientRow>(`
-    SELECT name, email, meeting_count, vertical, status, source,
+    SELECT id, name, display_name, email, meeting_count, vertical, status, source,
            total_invoiced, outstanding, first_invoice_date, last_invoice_date,
            first_meeting_date, last_meeting_date
     FROM clients
@@ -99,7 +101,7 @@ export async function getClients(): Promise<ClientRow[]> {
 
 export async function getClientByName(name: string): Promise<{ client: ClientRow | null; meetings: MeetingRow[]; actions: ActionItemRow[] }> {
   const clients = await rows<ClientRow>(`
-    SELECT name, email, meeting_count, vertical, status, source,
+    SELECT id, name, display_name, email, meeting_count, vertical, status, source,
            total_invoiced, outstanding, first_invoice_date, last_invoice_date,
            first_meeting_date, last_meeting_date
     FROM clients WHERE name = ?

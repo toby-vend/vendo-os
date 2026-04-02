@@ -1,0 +1,59 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h1 style="margin: 0;">Client Hub <small style="color: #94A3B8; font-weight: 400;">(<%= it.clients.length %> clients)</small></h1>
+</div>
+
+<div style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.10);">
+        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Client</th>
+        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Xero Name</th>
+        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Vertical</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Status</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Meta Ads">Meta</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Google Ads">GAds</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Asana">Asana</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="GoHighLevel">GHL</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Harvest">Harvest</th>
+        <th style="text-align: right; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!it.clients.length) { %>
+      <tr><td colspan="10" style="padding: 2rem; text-align: center; color: #94A3B8;">No clients found. Run Xero sync first.</td></tr>
+      <% } %>
+      <% it.clients.forEach(c => { %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <td style="padding: 0.65rem 0.5rem; font-weight: 500;">
+          <a href="/admin/clients/<%= c.id %>" style="color: #E2E8F0; text-decoration: none;"><%= c.label %></a>
+        </td>
+        <td style="padding: 0.65rem 0.5rem; color: #94A3B8; font-size: 13px;">
+          <%= c.display_name && c.display_name !== c.name ? c.name : '' %>
+        </td>
+        <td style="padding: 0.65rem 0.5rem; color: #94A3B8;"><%= c.vertical || '—' %></td>
+        <td style="padding: 0.65rem 0.5rem; text-align: center;">
+          <span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+            background: <%= c.status === 'active' ? 'rgba(34,197,94,0.15)' : c.status === 'churned' ? 'rgba(239,68,68,0.15)' : 'rgba(148,163,184,0.15)' %>;
+            color: <%= c.status === 'active' ? '#22C55E' : c.status === 'churned' ? '#EF4444' : '#94A3B8' %>;">
+            <%= c.status %>
+          </span>
+        </td>
+        <% ['meta', 'gads', 'asana', 'ghl', 'harvest'].forEach(src => { %>
+        <td style="padding: 0.65rem 0.5rem; text-align: center;">
+          <% const count = c[src + '_count']; %>
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+            background: <%= count > 0 ? '#22C55E' : 'transparent' %>;
+            border: 1.5px solid <%= count > 0 ? '#22C55E' : 'rgba(148,163,184,0.3)' %>;"
+            title="<%= count > 0 ? count + ' linked' : 'Not linked' %>"></span>
+        </td>
+        <% }) %>
+        <td style="padding: 0.65rem 0.5rem; text-align: right;">
+          <a href="/admin/clients/<%= c.id %>" style="color: #22C55E; text-decoration: none; font-size: 13px;">Edit</a>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>

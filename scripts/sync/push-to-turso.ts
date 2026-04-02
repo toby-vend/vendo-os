@@ -76,6 +76,8 @@ async function main() {
     "ALTER TABLE brand_hub ADD COLUMN title TEXT NOT NULL DEFAULT ''",
     // Drive watch user_id column
     'ALTER TABLE drive_watch_channels ADD COLUMN user_id TEXT',
+    // Client hub display name
+    'ALTER TABLE clients ADD COLUMN display_name TEXT',
   ];
   for (const sql of migrations) {
     try { await remote.execute(sql); } catch { /* column already exists */ }

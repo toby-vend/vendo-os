@@ -1,0 +1,138 @@
+<% layout('/layouts/base') %>
+
+<p><a href="/admin/clients" style="color: #22C55E; text-decoration: none;">&laquo; Back to Client Hub</a></p>
+
+<h1 style="margin-bottom: 0.25rem;"><%= it.client.label %></h1>
+<% if (it.client.display_name && it.client.display_name !== it.client.name) { %>
+<p style="color: #94A3B8; margin-top: 0; font-size: 13px;">Xero name: <%= it.client.name %></p>
+<% } %>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+
+  <!-- Left: Edit form -->
+  <div style="background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.5rem;">
+    <h2 style="margin-top: 0; font-size: 16px; color: #E2E8F0;">Client Details</h2>
+    <form method="POST" action="/admin/clients/<%= it.client.id %>">
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Display Name</label>
+        <input type="text" name="display_name" value="<%= it.client.display_name || '' %>"
+          placeholder="<%= it.client.name %>"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+        <small style="color: #64748B; font-size: 11px;">Leave blank to use the Xero name (<%= it.client.name %>)</small>
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Vertical</label>
+        <input type="text" name="vertical" value="<%= it.client.vertical || '' %>"
+          placeholder="e.g. Health, Ecommerce, SaaS"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Status</label>
+        <select name="status"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+          <option value="active" <%= it.client.status === 'active' ? 'selected' : '' %>>Active</option>
+          <option value="inactive" <%= it.client.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+          <option value="churned" <%= it.client.status === 'churned' ? 'selected' : '' %>>Churned</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Aliases</label>
+        <textarea name="aliases" rows="2" placeholder="Alternative names, one per line"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box; resize: vertical;"><%= it.client.aliases || '' %></textarea>
+      </div>
+      <button type="submit"
+        style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+        Save Changes
+      </button>
+    </form>
+  </div>
+
+  <!-- Right: Quick stats -->
+  <div style="background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.5rem;">
+    <h2 style="margin-top: 0; font-size: 16px; color: #E2E8F0;">Summary</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+      <div style="padding: 0.75rem; background: #0B0B0B; border-radius: 6px;">
+        <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Invoiced</div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;">&pound;<%= (it.client.total_invoiced || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
+      </div>
+      <div style="padding: 0.75rem; background: #0B0B0B; border-radius: 6px;">
+        <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Outstanding</div>
+        <div style="color: <%= it.client.outstanding > 0 ? '#EF4444' : '#E2E8F0' %>; font-size: 18px; font-weight: 600;">&pound;<%= (it.client.outstanding || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
+      </div>
+      <div style="padding: 0.75rem; background: #0B0B0B; border-radius: 6px;">
+        <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Meetings</div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.client.meeting_count %></div>
+      </div>
+      <div style="padding: 0.75rem; background: #0B0B0B; border-radius: 6px;">
+        <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Email</div>
+        <div style="color: #E2E8F0; font-size: 14px; overflow: hidden; text-overflow: ellipsis;"><%= it.client.email || '—' %></div>
+      </div>
+    </div>
+    <div style="margin-top: 1rem;">
+      <a href="/clients/<%= encodeURIComponent(it.client.name) %>" style="color: #22C55E; text-decoration: none; font-size: 13px;">View client profile &raquo;</a>
+    </div>
+  </div>
+</div>
+
+<!-- Connected Sources -->
+<div style="margin-top: 2rem;">
+  <h2 style="font-size: 18px; color: #E2E8F0;">Connected Sources</h2>
+
+  <%
+    const sources = [
+      { key: 'meta', label: 'Meta Ads', colour: '#1877F2', unlinked: it.unlinkedMeta },
+      { key: 'gads', label: 'Google Ads', colour: '#FBBC05', unlinked: it.unlinkedGads },
+      { key: 'asana', label: 'Asana', colour: '#F06A6A', unlinked: it.unlinkedAsana },
+      { key: 'ghl', label: 'GoHighLevel', colour: '#4ADE80', unlinked: it.unlinkedGhl },
+    ];
+    const mappingsBySource = {};
+    it.mappings.forEach(m => {
+      if (!mappingsBySource[m.source]) mappingsBySource[m.source] = [];
+      mappingsBySource[m.source].push(m);
+    });
+  %>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+    <% sources.forEach(src => { %>
+    <div style="background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.25rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+        <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: <%= src.colour %>;"></span>
+        <strong style="color: #E2E8F0; font-size: 14px;"><%= src.label %></strong>
+      </div>
+
+      <!-- Linked accounts -->
+      <% const linked = mappingsBySource[src.key] || []; %>
+      <% if (linked.length) { %>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+        <% linked.forEach(m => { %>
+        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(255,255,255,0.06); border-radius: 999px; font-size: 12px; color: #E2E8F0;">
+          <span><%= m.external_name || m.external_id %></span>
+          <form method="POST" action="/admin/clients/<%= it.client.id %>/mappings/<%= m.id %>/delete" style="display: inline; margin: 0;">
+            <button type="submit" style="background: none; border: none; color: #EF4444; cursor: pointer; padding: 0; font-size: 14px; line-height: 1;" title="Unlink">&times;</button>
+          </form>
+        </div>
+        <% }) %>
+      </div>
+      <% } else { %>
+      <p style="color: #64748B; font-size: 13px; margin: 0 0 0.75rem 0;">No accounts linked</p>
+      <% } %>
+
+      <!-- Link new -->
+      <% if (src.unlinked.length) { %>
+      <form method="POST" action="/admin/clients/<%= it.client.id %>/mappings" style="display: flex; gap: 0.5rem; align-items: center;">
+        <input type="hidden" name="source" value="<%= src.key %>">
+        <select name="external_id" style="flex: 1; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px;"
+          onchange="this.form.external_name.value = this.options[this.selectedIndex].text">
+          <option value="">Select...</option>
+          <% src.unlinked.forEach(u => { %>
+          <option value="<%= u.external_id %>"><%= u.external_name || u.external_id %></option>
+          <% }) %>
+        </select>
+        <input type="hidden" name="external_name" value="">
+        <button type="submit" style="padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; cursor: pointer; font-size: 13px; white-space: nowrap;">Link</button>
+      </form>
+      <% } %>
+    </div>
+    <% }) %>
+  </div>
+</div>

@@ -3,6 +3,7 @@ config({ path: '.env.local' });
 
 import Fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
+import { md } from './lib/markdown.js';
 import { Eta } from 'eta';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -21,6 +22,7 @@ import { authRoutes } from './routes/auth.js';
 import { adminUsersRoutes } from './routes/admin/users.js';
 import { adminPermissionsRoutes } from './routes/admin/permissions.js';
 import { adminUsageRoutes } from './routes/admin/usage.js';
+import { adminClientsRoutes } from './routes/admin/clients.js';
 import { googleOAuthRoutes } from './routes/google-oauth.js';
 import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
@@ -57,6 +59,7 @@ app.decorateReply('render', function (template: string, data: Record<string, unk
     isHtmx,
     currentPath: this.request.url.split('?')[0],
     user,
+    md,
   });
   this.type('text/html').send(html);
 });
@@ -178,6 +181,7 @@ app.register(driveRoutes, { prefix: '/drive' });
 app.register(adminUsersRoutes, { prefix: '/admin/users' });
 app.register(adminPermissionsRoutes, { prefix: '/admin/permissions' });
 app.register(adminUsageRoutes, { prefix: '/admin/usage' });
+app.register(adminClientsRoutes, { prefix: '/admin/clients' });
 app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });
