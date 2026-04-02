@@ -62,6 +62,20 @@ async function main() {
     'ALTER TABLE clients ADD COLUMN outstanding REAL DEFAULT 0',
     'ALTER TABLE clients ADD COLUMN first_invoice_date TEXT',
     'ALTER TABLE clients ADD COLUMN last_invoice_date TEXT',
+    // Meetings waterfall matcher columns
+    'ALTER TABLE meetings ADD COLUMN match_method TEXT',
+    'ALTER TABLE meetings ADD COLUMN match_confidence TEXT',
+    'ALTER TABLE meetings ADD COLUMN calendar_invitees TEXT',
+    'ALTER TABLE meetings ADD COLUMN invitee_domains_type TEXT',
+    'ALTER TABLE meetings ADD COLUMN needs_review INTEGER DEFAULT 0',
+    // GHL lead scoring columns
+    'ALTER TABLE ghl_opportunities ADD COLUMN lead_score INTEGER',
+    'ALTER TABLE ghl_opportunities ADD COLUMN score_breakdown TEXT',
+    'ALTER TABLE ghl_opportunities ADD COLUMN scored_at TEXT',
+    // Brand hub title column
+    "ALTER TABLE brand_hub ADD COLUMN title TEXT NOT NULL DEFAULT ''",
+    // Drive watch user_id column
+    'ALTER TABLE drive_watch_channels ADD COLUMN user_id TEXT',
   ];
   for (const sql of migrations) {
     try { await remote.execute(sql); } catch { /* column already exists */ }
@@ -71,8 +85,10 @@ async function main() {
   const indexes = local.exec("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL");
   if (indexes.length) {
     for (const row of indexes[0].values) {
-      const sql = (row[0] as string).replace('CREATE INDEX', 'CREATE INDEX IF NOT EXISTS');
-      await remote.execute(sql);
+      const sql = (row[0] as string)
+        .replace('CREATE UNIQUE INDEX', 'CREATE UNIQUE INDEX IF NOT EXISTS')
+        .replace('CREATE INDEX', 'CREATE INDEX IF NOT EXISTS');
+      try { await remote.execute(sql); } catch { /* index may already exist */ }
     }
   }
 
