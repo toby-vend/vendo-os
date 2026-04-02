@@ -397,3 +397,39 @@ export async function getSkillsByVersion(channel: string, since: string): Promis
     [channel, since],
   );
 }
+
+// --- Skills Browser ---
+
+/**
+ * List all skills in a channel, ordered by skill_type then title.
+ * Used for the default browse view (no search query).
+ */
+export async function listSkillsByChannel(channel: string): Promise<SkillRow[]> {
+  return rows<SkillRow>(
+    `SELECT * FROM skills WHERE channel = ? ORDER BY skill_type ASC, title ASC`,
+    [channel],
+  );
+}
+
+/**
+ * Get a single skill record by its integer primary key.
+ * Used for the skill detail page.
+ */
+export async function getSkillById(id: number): Promise<SkillRow | null> {
+  const result = await rows<SkillRow>(
+    'SELECT * FROM skills WHERE id = ? LIMIT 1',
+    [id],
+  );
+  return result[0] ?? null;
+}
+
+/**
+ * Return distinct channel slugs present in the skills table, sorted alphabetically.
+ * Used to build channel tabs dynamically — new channels appear automatically.
+ */
+export async function listSkillChannels(): Promise<string[]> {
+  const result = await rows<{ channel: string }>(
+    'SELECT DISTINCT channel FROM skills ORDER BY channel ASC',
+  );
+  return result.map(r => r.channel);
+}

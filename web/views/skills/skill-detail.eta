@@ -1,0 +1,45 @@
+<% layout('/layouts/base') %>
+
+<%
+function channelLabel(slug) {
+  return slug.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+function skillTypeLabel(slug) {
+  if (slug === 'sop') return 'SOP';
+  return slug.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+const updatedDate = new Date(it.skill.drive_modified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+const hashShort = it.skill.content_hash ? it.skill.content_hash.slice(0, 12) : '—';
+%>
+
+<!-- Back link -->
+<div style="margin-bottom: 1.5rem;">
+  <a href="/skills?channel=<%= it.skill.channel %>" style="font-size: 13px; color: #64748B; text-decoration: none;">
+    &larr; Back to Skills Library
+  </a>
+</div>
+
+<!-- Title and metadata -->
+<div style="margin-bottom: 1.5rem;">
+  <h1 style="margin-bottom: 0.75rem;"><%= it.skill.title %></h1>
+  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+    <span style="padding: 3px 10px; font-size: 12px; font-weight: 500; background: rgba(99,102,241,0.1); color: #818CF8; border-radius: 4px; border: 1px solid rgba(99,102,241,0.2);">
+      <%= channelLabel(it.skill.channel) %>
+    </span>
+    <span style="padding: 3px 10px; font-size: 12px; font-weight: 500; background: rgba(34,197,94,0.1); color: #22C55E; border-radius: 4px; border: 1px solid rgba(34,197,94,0.2);">
+      <%= skillTypeLabel(it.skill.skill_type) %>
+    </span>
+    <span style="font-size: 12px; color: #64748B;">Updated <%= updatedDate %></span>
+    <span style="font-size: 12px; color: #334155; font-family: monospace;" title="Content hash: <%= it.skill.content_hash %>">
+      hash: <%= hashShort %>
+    </span>
+  </div>
+</div>
+
+<!-- SOP Content -->
+<div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 1.5rem;">
+  <div
+    class="skill-content"
+    style="white-space: pre-wrap; line-height: 1.7; font-size: 14px; color: #CBD5E1; font-family: 'DM Sans', sans-serif;"
+  ><%= it.skill.content %></div>
+</div>

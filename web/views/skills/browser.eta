@@ -1,0 +1,54 @@
+<% layout('/layouts/base') %>
+
+<%
+// Helper: convert a channel slug to a display label (paid_social -> Paid Social)
+function channelLabel(slug) {
+  return slug.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Count total skills across all groups
+const totalSkills = Object.values(it.grouped).reduce((sum, arr) => sum + arr.length, 0);
+%>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h1>Skills Library <small style="font-size: 0.6em; color: #64748B;">(<%= totalSkills %> skills)</small></h1>
+</div>
+
+<!-- Channel tabs -->
+<div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0;">
+  <% it.channels.forEach(ch => { %>
+  <a
+    href="/skills?channel=<%= ch %>"
+    hx-get="/skills/search?channel=<%= ch %>"
+    hx-target="#skills-results"
+    hx-push-url="/skills?channel=<%= ch %>"
+    style="padding: 8px 16px; font-size: 13px; font-weight: 500; text-decoration: none; border-radius: 6px 6px 0 0; border-bottom: 2px solid <%= ch === it.activeChannel ? '#22C55E' : 'transparent' %>; color: <%= ch === it.activeChannel ? '#22C55E' : '#94A3B8' %>; background: none; transition: color 0.15s;"
+  >
+    <%= channelLabel(ch) %>
+  </a>
+  <% }) %>
+</div>
+
+<!-- Search bar -->
+<div style="margin-bottom: 1.5rem;">
+  <input
+    type="search"
+    id="skills-search"
+    name="q"
+    value="<%= it.query %>"
+    placeholder="Search skills in this channel..."
+    autocomplete="off"
+    hx-get="/skills/search"
+    hx-trigger="keyup changed delay:300ms, search"
+    hx-target="#skills-results"
+    hx-include="[name='channel']"
+    style="width: 100%; max-width: 480px; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #E2E8F0; font-size: 14px;"
+  >
+  <!-- Hidden field carries the active channel into HTMX search requests -->
+  <input type="hidden" name="channel" value="<%= it.activeChannel %>">
+</div>
+
+<!-- Results container -->
+<div id="skills-results">
+  <%~ include('skills/skill-results', it) %>
+</div>
