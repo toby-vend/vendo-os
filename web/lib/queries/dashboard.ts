@@ -94,8 +94,8 @@ export async function getClients(): Promise<ClientRow[]> {
            total_invoiced, outstanding, first_invoice_date, last_invoice_date,
            first_meeting_date, last_meeting_date
     FROM clients
-    WHERE source = 'xero'
-    ORDER BY total_invoiced DESC, meeting_count DESC
+    WHERE display_name IS NOT NULL
+    ORDER BY display_name COLLATE NOCASE
   `);
 }
 
