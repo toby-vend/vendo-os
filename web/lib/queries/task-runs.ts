@@ -102,6 +102,34 @@ export async function updateTaskRunOutput(
 }
 
 /**
+ * Updates qa_score and qa_critique for a task run.
+ * The critique parameter is a pre-stringified JSON string — caller handles serialisation.
+ * This is a targeted QA-only update, separate from updateTaskRunOutput.
+ */
+export async function updateTaskRunQA(
+  id: number,
+  qa: { score: number; critique: string },
+): Promise<void> {
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `UPDATE task_runs SET qa_score = ?, qa_critique = ?, updated_at = ? WHERE id = ?`,
+    args: [qa.score, qa.critique, now, id],
+  });
+}
+
+/**
+ * Increments the attempts counter by 1 for a task run.
+ * Called once per QA cycle (generation + QA evaluation), not per Anthropic call.
+ */
+export async function incrementAttempts(id: number): Promise<void> {
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `UPDATE task_runs SET attempts = attempts + 1, updated_at = ? WHERE id = ?`,
+    args: [now, id],
+  });
+}
+
+/**
  * List task runs with optional filters for status and clientId.
  * Results ordered by created_at DESC, defaulting to 50 rows.
  */
