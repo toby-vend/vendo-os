@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: "Checkpoint reached: Task 2 human-verify in 10-am-interface-03-PLAN.md"
-last_updated: "2026-04-02T13:44:15.122Z"
+stopped_at: Completed 10-am-interface-02-PLAN.md
+last_updated: "2026-04-02T13:45:54.426Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 22
-  completed_plans: 21
+  completed_plans: 22
   percent: 0
 ---
 
@@ -71,6 +71,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 09-audit-and-traceability P02 | 176 | 2 tasks | 3 files |
 | Phase 10-am-interface P01 | 300 | 2 tasks | 5 files |
 | Phase 10-am-interface P03 | 167 | 1 tasks | 6 files |
+| Phase 10-am-interface P02 | 278 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,9 @@ Recent decisions affecting current work:
 - [Phase 10-am-interface]: Skills nav link uses canSee('drive') guard — skills are Drive-derived, same permission
 - [Phase 10-am-interface]: SkillForDisplay Pick<> type bridges SkillRow and SkillSearchResult so groupBySkillType works on both browse and search paths
 - [Phase 10-am-interface]: listSkillChannels() queries DISTINCT channel dynamically — tabs appear automatically when new channels are indexed
+- [Phase 10-am-interface]: POST /tasks/new forwards to app.inject('/api/tasks/runs') — reuses existing creation logic without duplication
+- [Phase 10-am-interface]: qa_critique merge uses spread pattern to add am_feedback key — never clobbers sop_issues or ahpra_violations
+- [Phase 10-am-interface]: getTaskTypesForChannel exported as named helper rather than exporting REGISTRY Map — cleaner API boundary
 
 ### Pending Todos
 
@@ -148,6 +152,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T13:44:15.121Z
-Stopped at: Checkpoint reached: Task 2 human-verify in 10-am-interface-03-PLAN.md
+Last session: 2026-04-02T13:45:54.424Z
+Stopped at: Completed 10-am-interface-02-PLAN.md
 Resume file: None

@@ -57,9 +57,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### AM Interface
 
-- [ ] **UI-01**: AM can submit a new task from the web dashboard (select client, channel, task type)
-- [ ] **UI-02**: AM can view generated draft with SOP attribution
-- [ ] **UI-03**: AM can approve a draft or request regeneration
+- [x] **UI-01**: AM can submit a new task from the web dashboard (select client, channel, task type)
+- [x] **UI-02**: AM can view generated draft with SOP attribution
+- [x] **UI-03**: AM can approve a draft or request regeneration
 - [x] **UI-04**: AM can browse and search indexed skills by channel and type
 - [x] **UI-05**: Task list shows all tasks with current status
 
@@ -144,9 +144,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUDT-01 | Phase 9 | Complete |
 | AUDT-02 | Phase 9 | Complete |
 | AUDT-03 | Phase 9 | Complete |
-| UI-01 | Phase 10 | Pending |
-| UI-02 | Phase 10 | Pending |
-| UI-03 | Phase 10 | Pending |
+| UI-01 | Phase 10 | Complete |
+| UI-02 | Phase 10 | Complete |
+| UI-03 | Phase 10 | Complete |
 | UI-04 | Phase 10 | Complete |
 | UI-05 | Phase 10 | Complete |
 

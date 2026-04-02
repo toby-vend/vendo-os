@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: Agent Execution** - Produce structured draft output per channel using retrieved context (completed 2026-04-02)
 - [x] **Phase 8: QA and Compliance** - Validate output against SOP criteria, AHPRA pre-flight, retry with critique (completed 2026-04-02)
 - [x] **Phase 9: Audit and Traceability** - Append-only generation log with SOP version attribution (completed 2026-04-02)
-- [ ] **Phase 10: AM Interface** - Task submission, status polling, draft review, approve and regenerate
+- [x] **Phase 10: AM Interface** - Task submission, status polling, draft review, approve and regenerate (completed 2026-04-02)
 
 ## Phase Details
 
@@ -170,7 +170,7 @@ Plans:
   2. The task list shows live status for all tasks — queued, generating, draft ready, approved, failed
   3. An AM can read a draft alongside the SOPs it was based on, then approve it or request regeneration with a single click
   4. An AM can browse and search the skills library by channel and skill type to understand what SOPs the system has available
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 10-01-PLAN.md — Foundation: rejected status, extended listTaskRuns filters, route prefix swap, badge CSS
@@ -193,4 +193,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Agent Execution | 2/2 | Complete   | 2026-04-02 |
 | 8. QA and Compliance | 2/2 | Complete   | 2026-04-02 |
 | 9. Audit and Traceability | 2/2 | Complete   | 2026-04-02 |
-| 10. AM Interface | 2/3 | In Progress|  |
+| 10. AM Interface | 3/3 | Complete   | 2026-04-02 |
