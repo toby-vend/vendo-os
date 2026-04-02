@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend, getRevenueByChannel, getROIByTreatment } from '../lib/queries/roi.js';
+import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend, getRevenueByChannel, getROIByTreatment, getGhlROI } from '../lib/queries/roi.js';
 import { getGA4Summary, getGA4TrafficSources, getOrganicTrend } from '../lib/queries/ga4.js';
 import { getGSCSummary, getTopQueries, getTopPages } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
@@ -163,12 +163,13 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [roi, treatmentROI, channelSpend, revenueByChannel, leadsByChannel, clientName] = await Promise.all([
+    const [roi, treatmentROI, channelSpend, revenueByChannel, leadsByChannel, ghlRoi, clientName] = await Promise.all([
       getROISummary(clientId, days),
       getROIByTreatment(clientId, days),
       getChannelSpend(clientId, days),
       getRevenueByChannel(clientId, days),
       getLeadsByChannel(clientId, days),
+      getGhlROI(clientId, days),
       getClientName(clientId),
     ]);
 
@@ -178,6 +179,7 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       channelSpend,
       revenueByChannel,
       leadsByChannel,
+      ghlRoi,
       clientName,
       days,
       pageTitle: 'ROI Breakdown',

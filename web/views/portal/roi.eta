@@ -2,7 +2,155 @@
 
 <div id="portal-roi-content">
 
-<!-- Headline ROI KPIs -->
+<% const g = it.ghlRoi; %>
+<% if (g && g.total_leads > 0) { %>
+
+<!-- GHL-based ROI KPIs -->
+<div class="portal-kpi-grid">
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= g.total_leads.toLocaleString() %></div>
+    <div class="kpi-label">Paid Leads</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= g.total_in_progress.toLocaleString() %></div>
+    <div class="kpi-label">In Progress</div>
+    <div class="kpi-sub">Booked / Follow-up</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value" style="color: var(--vendo-green);"><%= g.total_won.toLocaleString() %></div>
+    <div class="kpi-label">Won</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= g.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
+    <div class="kpi-label">Won Revenue</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= g.total_spend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
+    <div class="kpi-label">Ad Spend</div>
+  </div>
+  <div class="portal-kpi<%= g.roi_percent >= 0 ? ' kpi-positive' : ' kpi-negative' %>">
+    <div class="kpi-value"><%= g.roi_percent.toFixed(1) %>%</div>
+    <div class="kpi-label">ROI</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= g.cpl > 0 ? g.cpl.toFixed(2) : '0.00' %></div>
+    <div class="kpi-label">Cost Per Lead</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= g.conversion_rate.toFixed(1) %>%</div>
+    <div class="kpi-label">Win Rate</div>
+    <div class="kpi-sub"><%= g.total_won %> of <%= g.total_leads %> leads</div>
+  </div>
+</div>
+
+<!-- Channel Performance -->
+<div class="portal-section" style="margin-top: 1.5rem;">
+  <h2>Channel Performance</h2>
+  <% if (g.channels.length === 0) { %>
+    <div class="portal-empty">No channel data available.</div>
+  <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr>
+          <th>Channel</th>
+          <th style="text-align: right;">Leads</th>
+          <th style="text-align: right;">In Progress</th>
+          <th style="text-align: right;">Won</th>
+          <th style="text-align: right;">Revenue</th>
+          <th style="text-align: right;">Spend</th>
+          <th style="text-align: right;">CPL</th>
+          <th style="text-align: right;">ROI</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% g.channels.forEach(ch => { %>
+        <%
+          const chRoi = ch.spend > 0 ? ((ch.revenue - ch.spend) / ch.spend * 100) : (ch.revenue > 0 ? 100 : 0);
+          const chCpl = ch.leads > 0 ? ch.spend / ch.leads : 0;
+          const label = ch.channel === 'google' ? 'Google Ads' : ch.channel === 'facebook' ? 'Meta Ads' : ch.channel.replace(/\b\w/g, c => c.toUpperCase());
+          const chColour = ch.channel === 'google' ? '#FBBC05' : ch.channel === 'facebook' ? '#1877F2' : '#94A3B8';
+        %>
+        <tr>
+          <td>
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: <%= chColour %>; margin-right: 6px;"></span>
+            <%= label %>
+          </td>
+          <td style="text-align: right;"><%= ch.leads.toLocaleString() %></td>
+          <td style="text-align: right;"><%= ch.in_progress.toLocaleString() %></td>
+          <td style="text-align: right; color: var(--vendo-green);"><%= ch.won.toLocaleString() %></td>
+          <td style="text-align: right;">&pound;<%= ch.revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+          <td style="text-align: right;">&pound;<%= ch.spend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+          <td style="text-align: right;">&pound;<%= chCpl > 0 ? chCpl.toFixed(2) : '—' %></td>
+          <td style="text-align: right; color: <%= chRoi >= 0 ? 'var(--vendo-green)' : '#F87171' %>;"><%= ch.spend > 0 ? chRoi.toFixed(1) + '%' : '—' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+      <tfoot>
+        <tr style="border-top: 2px solid rgba(255,255,255,0.10); font-weight: 600;">
+          <td>Total</td>
+          <td style="text-align: right;"><%= g.total_leads.toLocaleString() %></td>
+          <td style="text-align: right;"><%= g.total_in_progress.toLocaleString() %></td>
+          <td style="text-align: right; color: var(--vendo-green);"><%= g.total_won.toLocaleString() %></td>
+          <td style="text-align: right;">&pound;<%= g.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+          <td style="text-align: right;">&pound;<%= g.total_spend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+          <td style="text-align: right;">&pound;<%= g.cpl > 0 ? g.cpl.toFixed(2) : '—' %></td>
+          <td style="text-align: right; color: <%= g.roi_percent >= 0 ? 'var(--vendo-green)' : '#F87171' %>;"><%= g.total_spend > 0 ? g.roi_percent.toFixed(1) + '%' : '—' %></td>
+        </tr>
+      </tfoot>
+    </table>
+  <% } %>
+</div>
+
+<!-- Treatment Performance -->
+<div class="portal-section" style="margin-top: 1.5rem;">
+  <h2>Treatment Performance</h2>
+  <% if (g.treatments.length === 0) { %>
+    <div class="portal-empty">No treatment data available.</div>
+  <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr>
+          <th>Treatment</th>
+          <th style="text-align: right;">Leads</th>
+          <th style="text-align: right;">In Progress</th>
+          <th style="text-align: right;">Won</th>
+          <th style="text-align: right;">Win Rate</th>
+          <th style="text-align: right;">Revenue</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% g.treatments.forEach(t => { %>
+        <%
+          const winRate = t.leads > 0 ? (t.won / t.leads * 100) : 0;
+          const label = t.treatment.replace(/\b\w/g, c => c.toUpperCase());
+        %>
+        <tr>
+          <td><%= label %></td>
+          <td style="text-align: right;"><%= t.leads.toLocaleString() %></td>
+          <td style="text-align: right;"><%= t.in_progress.toLocaleString() %></td>
+          <td style="text-align: right; color: var(--vendo-green);"><%= t.won.toLocaleString() %></td>
+          <td style="text-align: right;"><%= winRate.toFixed(1) %>%</td>
+          <td style="text-align: right;">&pound;<%= t.revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+      <tfoot>
+        <tr style="border-top: 2px solid rgba(255,255,255,0.10); font-weight: 600;">
+          <td>Total</td>
+          <td style="text-align: right;"><%= g.total_leads.toLocaleString() %></td>
+          <td style="text-align: right;"><%= g.total_in_progress.toLocaleString() %></td>
+          <td style="text-align: right; color: var(--vendo-green);"><%= g.total_won.toLocaleString() %></td>
+          <td style="text-align: right;"><%= g.conversion_rate.toFixed(1) %>%</td>
+          <td style="text-align: right;">&pound;<%= g.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        </tr>
+      </tfoot>
+    </table>
+  <% } %>
+</div>
+
+<% } else { %>
+
+<!-- Fallback: attributed_leads-based ROI (original) -->
 <div class="portal-kpi-grid">
   <div class="portal-kpi<%= it.roi.roi_percent >= 0 ? ' kpi-positive' : ' kpi-negative' %>">
     <div class="kpi-value"><%= it.roi.roi_percent.toFixed(1) %>%</div>
@@ -17,119 +165,12 @@
     <div class="kpi-label">Total Ad Spend</div>
   </div>
   <div class="portal-kpi">
-    <div class="kpi-value">&pound;<%= it.roi.cpl > 0 ? it.roi.cpl.toFixed(2) : '0.00' %></div>
-    <div class="kpi-label">Blended CPL</div>
-  </div>
-  <div class="portal-kpi">
     <div class="kpi-value"><%= it.roi.total_leads.toLocaleString() %></div>
     <div class="kpi-label">Total Leads</div>
   </div>
-  <div class="portal-kpi">
-    <div class="kpi-value"><%= it.roi.conversion_rate.toFixed(1) %>%</div>
-    <div class="kpi-label">Conversion Rate</div>
-    <div class="kpi-sub"><%= it.roi.converted_leads %> of <%= it.roi.total_leads %> leads</div>
-  </div>
 </div>
+<div class="portal-empty" style="margin-top: 1rem;">No pipeline data available for this period. Connect GHL to see full ROI breakdown.</div>
 
-<div class="portal-two-col">
-  <!-- ROI by Channel -->
-  <div class="portal-section">
-    <h2>ROI by Channel</h2>
-    <% if (it.channelSpend.length === 0 && it.revenueByChannel.length === 0) { %>
-      <div class="portal-empty">No channel data available.</div>
-    <% } else { %>
-      <table class="compact">
-        <thead>
-          <tr><th>Channel</th><th>Spend</th><th>Revenue</th><th>ROI</th><th>Converted</th></tr>
-        </thead>
-        <tbody>
-          <%
-            // Build a combined view of spend and revenue by channel
-            const channelMap = {};
-            it.channelSpend.forEach(c => {
-              channelMap[c.channel] = channelMap[c.channel] || { spend: 0, revenue: 0, converted: 0 };
-              channelMap[c.channel].spend += c.spend;
-            });
-            it.revenueByChannel.forEach(c => {
-              channelMap[c.channel] = channelMap[c.channel] || { spend: 0, revenue: 0, converted: 0 };
-              channelMap[c.channel].revenue += c.revenue;
-              channelMap[c.channel].converted += c.converted_count;
-            });
-          %>
-          <% Object.entries(channelMap).sort((a, b) => b[1].revenue - a[1].revenue).forEach(([channel, data]) => { %>
-            <%
-              const channelRoi = data.spend > 0 ? ((data.revenue - data.spend) / data.spend * 100) : (data.revenue > 0 ? 100 : 0);
-              const label = channel.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-            %>
-            <tr>
-              <td><%= label %></td>
-              <td>&pound;<%= data.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
-              <td>&pound;<%= data.revenue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
-              <td style="color: <%= channelRoi >= 0 ? 'var(--vendo-green)' : '#F87171' %>"><%= channelRoi.toFixed(1) %>%</td>
-              <td><%= data.converted %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    <% } %>
-  </div>
-
-  <!-- Cost Per Lead Comparison -->
-  <div class="portal-section">
-    <h2>Cost Per Lead by Channel</h2>
-    <% if (it.channelSpend.length === 0) { %>
-      <div class="portal-empty">No spend data available.</div>
-    <% } else { %>
-      <%
-        // Calculate CPL per channel using leads by channel data
-        const cplData = it.channelSpend.map(cs => {
-          const leadsForChannel = it.leadsByChannel.find(lc => lc.channel === cs.channel);
-          const leads = leadsForChannel ? leadsForChannel.lead_count : 0;
-          const cpl = leads > 0 ? cs.spend / leads : 0;
-          return { channel: cs.channel, spend: cs.spend, leads, cpl };
-        }).filter(d => d.leads > 0 || d.spend > 0);
-        const maxCpl = Math.max(...cplData.map(d => d.cpl), 1);
-      %>
-      <% cplData.forEach(d => { %>
-        <%
-          const pct = maxCpl > 0 ? Math.round((d.cpl / maxCpl) * 100) : 0;
-          const colourClass = d.channel === 'meta_ads' ? 'channel-meta' : d.channel === 'google_ads' ? 'channel-google' : 'channel-other';
-          const label = d.channel.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-        %>
-        <div class="channel-bar-wrap">
-          <div class="channel-bar-name"><%= label %></div>
-          <div class="channel-bar-track">
-            <div class="channel-bar-fill <%= colourClass %>" style="width: <%= pct %>%">&pound;<%= d.cpl.toFixed(2) %></div>
-          </div>
-        </div>
-      <% }) %>
-    <% } %>
-  </div>
-</div>
-
-<!-- ROI by Treatment Type -->
-<div class="portal-section">
-  <h2>Performance by Treatment Type</h2>
-  <% if (it.treatmentROI.length === 0) { %>
-    <div class="portal-empty">No treatment data available for this period.</div>
-  <% } else { %>
-    <table class="compact">
-      <thead>
-        <tr><th>Treatment</th><th>Leads</th><th>Converted</th><th>Conversion Rate</th><th>Revenue</th></tr>
-      </thead>
-      <tbody>
-        <% it.treatmentROI.forEach(t => { %>
-        <tr>
-          <td><%= t.treatment_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) %></td>
-          <td><%= t.lead_count.toLocaleString() %></td>
-          <td><%= t.converted_count.toLocaleString() %></td>
-          <td><%= t.conversion_rate.toFixed(1) %>%</td>
-          <td>&pound;<%= t.revenue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  <% } %>
-</div>
+<% } %>
 
 </div>
