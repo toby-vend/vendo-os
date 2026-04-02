@@ -1,19 +1,21 @@
 /**
- * Tests for generateDraft and assembleContext with full LLM generation.
+ * Tests for generateDraft and assembleContext with QA-aware generation flow.
  *
  * Uses mock.module to mock:
  *   - @anthropic-ai/sdk
  *   - ./task-types/index.js (loadTaskTypeConfig)
- *   - ./queries/task-runs.js (updateTaskRunOutput, updateTaskRunStatus)
+ *   - ./queries/task-runs.js (updateTaskRunOutput, updateTaskRunStatus, updateTaskRunQA, incrementAttempts)
  *   - ./queries/drive.js (searchSkills)
  *   - ./queries/brand.js (getBrandContext)
  *   - ./queries/base.js (scalar — for resolveClientSlug)
+ *   - ./qa-checker.js (runSOPCheck)
+ *   - ./ahpra-rules.js (checkAHPRACompliance)
  *
  * Run:
  *   node --test --experimental-test-module-mocks --import tsx/esm web/lib/task-matcher.test.ts
  */
 
-import { describe, it, before, beforeEach, mock } from 'node:test';
+import { describe, it, beforeEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 
 // ---------------------------------------------------------------------------
@@ -45,10 +47,14 @@ const anthropicHolder: {
 const taskRunsHolder: {
   updateOutputCalls: Array<{ id: number; output: string }>;
   updateStatusCalls: Array<{ id: number; status: string; extras?: unknown }>;
+  updateQACalls: Array<{ id: number; qa: { score: number; critique: string } }>;
+  incrementAttemptsCalls: number[];
   updateOutputError: Error | null;
 } = {
   updateOutputCalls: [],
   updateStatusCalls: [],
+  updateQACalls: [],
+  incrementAttemptsCalls: [],
   updateOutputError: null,
 };
 
@@ -103,6 +109,24 @@ const taskTypeHolder: {
   buildUserMessageResult: 'Generate ad copy for Test Client. ## Brand Context\nBrand guidelines content',
 };
 
+// QA checker holder — controls runSOPCheck behaviour
+const qaCheckerHolder: {
+  results: Array<{ pass: boolean; critique: string | null }>;
+  callCount: number;
+  error: Error | null;
+} = {
+  results: [{ pass: true, critique: null }],
+  callCount: 0,
+  error: null,
+};
+
+// AHPRA holder — controls checkAHPRACompliance behaviour
+const ahpraHolder: {
+  violations: Array<{ rule: string; violation: string; severity: string }>;
+} = {
+  violations: [],
+};
+
 // ---------------------------------------------------------------------------
 // Module mocks — must be called at top level before any imports
 // ---------------------------------------------------------------------------
@@ -142,6 +166,12 @@ mock.module('./queries/task-runs.js', {
     updateTaskRunStatus: async (id: number, status: string, extras?: unknown) => {
       taskRunsHolder.updateStatusCalls.push({ id, status, extras });
     },
+    updateTaskRunQA: async (id: number, qa: { score: number; critique: string }) => {
+      taskRunsHolder.updateQACalls.push({ id, qa });
+    },
+    incrementAttempts: async (id: number) => {
+      taskRunsHolder.incrementAttemptsCalls.push(id);
+    },
   },
 });
 
@@ -165,8 +195,6 @@ mock.module('./queries/brand.js', {
 mock.module('./queries/base.js', {
   namedExports: {
     scalar: async <T = string>(_sql: string, _args: unknown[]): Promise<T | null> => {
-      // resolveClientSlug queries brand_hub for client_slug by client_id
-      // Return 'test-client' to simulate a found slug
       return 'test-client' as unknown as T;
     },
     rows: async () => [],
@@ -174,9 +202,30 @@ mock.module('./queries/base.js', {
   },
 });
 
+mock.module('./qa-checker.js', {
+  namedExports: {
+    runSOPCheck: async (_draftText: string, _sopContent: string) => {
+      if (qaCheckerHolder.error) {
+        throw qaCheckerHolder.error;
+      }
+      const result = qaCheckerHolder.results[qaCheckerHolder.callCount] ??
+        qaCheckerHolder.results[qaCheckerHolder.results.length - 1];
+      qaCheckerHolder.callCount++;
+      return result;
+    },
+  },
+});
+
+mock.module('./ahpra-rules.js', {
+  namedExports: {
+    checkAHPRACompliance: (_text: string) => {
+      return ahpraHolder.violations;
+    },
+  },
+});
+
 // ---------------------------------------------------------------------------
 // Set a dummy API key so generateDraft doesn't throw before reaching the mock
-// (Test 7 explicitly deletes it to test the missing-key path)
 // ---------------------------------------------------------------------------
 
 process.env.ANTHROPIC_API_KEY = 'test-api-key-mock';
@@ -192,7 +241,6 @@ const { assembleContext } = await import('./task-matcher.js');
 // ---------------------------------------------------------------------------
 
 function resetHolders() {
-  // Ensure API key is set (Test 7 deletes it, this restores it between tests)
   process.env.ANTHROPIC_API_KEY = 'test-api-key-mock';
 
   // Reset anthropic
@@ -214,6 +262,8 @@ function resetHolders() {
   // Reset task runs
   taskRunsHolder.updateOutputCalls = [];
   taskRunsHolder.updateStatusCalls = [];
+  taskRunsHolder.updateQACalls = [];
+  taskRunsHolder.incrementAttemptsCalls = [];
   taskRunsHolder.updateOutputError = null;
 
   // Reset drive
@@ -242,217 +292,184 @@ function resetHolders() {
       indexed_at: '2026-01-01',
     },
   ];
+
+  // Reset QA checker — default: always pass
+  qaCheckerHolder.results = [{ pass: true, critique: null }];
+  qaCheckerHolder.callCount = 0;
+  qaCheckerHolder.error = null;
+
+  // Reset AHPRA
+  ahpraHolder.violations = [];
 }
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('generateDraft via assembleContext', () => {
+describe('generateDraft via assembleContext — QA flow', () => {
   beforeEach(() => {
     resetHolders();
   });
 
-  it('Test 1: successful generation stores output JSON and transitions to draft_ready', async () => {
-    // assembleContext calls generateDraft which calls Anthropic API and stores output
+  it('Test 1: successful generation passes SOP QA — qa_score=1, status=draft_ready', async () => {
+    // QA passes on first attempt, no AHPRA violations
+    qaCheckerHolder.results = [{ pass: true, critique: null }];
+
     await assembleContext(1, 42, 'paid_social', 'ad_copy');
 
-    // API was called
+    // API was called once
     assert.strictEqual(anthropicHolder.callCount, 1, 'Anthropic API should be called once');
+
+    // Status transitioned through qa_check
+    const qaCheckCall = taskRunsHolder.updateStatusCalls.find(c => c.status === 'qa_check');
+    assert.ok(qaCheckCall, 'Status should transition to qa_check');
+
+    // incrementAttempts called once
+    assert.strictEqual(taskRunsHolder.incrementAttemptsCalls.length, 1, 'incrementAttempts called once');
+
+    // QA score = 1
+    assert.strictEqual(taskRunsHolder.updateQACalls.length, 1, 'updateTaskRunQA should be called once');
+    assert.strictEqual(taskRunsHolder.updateQACalls[0].qa.score, 1, 'qa_score must be 1 on pass');
+
+    // qa_critique has sop_issues and ahpra_violations
+    const critique = JSON.parse(taskRunsHolder.updateQACalls[0].qa.critique);
+    assert.ok(Array.isArray(critique.sop_issues), 'qa_critique must have sop_issues');
+    assert.ok(Array.isArray(critique.ahpra_violations), 'qa_critique must have ahpra_violations');
+    assert.deepStrictEqual(critique.sop_issues, [], 'sop_issues should be empty on pass');
 
     // Output stored
     assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 1, 'updateTaskRunOutput should be called once');
-    const storedOutput = taskRunsHolder.updateOutputCalls[0];
-    assert.strictEqual(storedOutput.id, 1, 'Output stored for correct task run ID');
-
-    // Output is valid JSON with sources
-    const parsed = JSON.parse(storedOutput.output);
-    assert.ok(Array.isArray(parsed.sources), 'sources array must be in output');
-    assert.ok(parsed.sources.length > 0, 'sources array must be non-empty');
-
-    // Status transitions: first 'generating' (from assembleContext), then 'draft_ready' (from updateTaskRunOutput)
-    const statusCalls = taskRunsHolder.updateStatusCalls;
-    const generatingCall = statusCalls.find(c => c.status === 'generating');
-    assert.ok(generatingCall, 'Status should transition to generating before API call');
+    const parsed = JSON.parse(taskRunsHolder.updateOutputCalls[0].output);
+    assert.ok(Array.isArray(parsed.sources) && parsed.sources.length > 0, 'Output must have sources');
   });
 
-  it('Test 2: API failure on first attempt then retry succeeds — output stored', async () => {
-    let callCount = 0;
-    const originalResult = anthropicHolder.messagesCreateResult;
+  it('Test 2: AHPRA violations included in qa_critique JSON even when SOP QA passes', async () => {
+    qaCheckerHolder.results = [{ pass: true, critique: null }];
+    ahpraHolder.violations = [
+      { rule: 'AHPRA-T1', violation: 'testimonial found', severity: 'HIGH' },
+    ];
 
-    // First call fails, second succeeds
-    anthropicHolder.messagesCreateError = null;
-    const originalCreate = anthropicHolder.messagesCreateResult;
+    await assembleContext(2, 42, 'paid_social', 'ad_copy');
 
-    // Override via error on first call only
-    let failOnce = true;
-    // We need to intercept per-call — use the callCount approach
-    anthropicHolder.messagesCreateError = new Error('API timeout') as Error;
-    // But we want second call to succeed, so we use a counter trick:
-    // We'll set error to null after the first call is observed
-    // Since we can't change mid-test with current holder, use a different approach:
-    // Reset error after first throw by replacing the mock result timing
-
-    // Actually let's use the callCount directly in the mock — but the mock is already
-    // registered. Use a workaround: set messagesCreateError, then after one call, clear it.
-    // We can do this by making the error conditional on callCount.
-    // Re-implement: set to Error, then override with a proxy approach.
-    // Simplest: set error to throw only when callCount === 0 at call time — not directly possible.
-    // Use a different field: errorOnFirstCallOnly flag.
-
-    // Best approach: set error for first call, reset after
-    anthropicHolder.messagesCreateError = new Error('First call fails') as Error;
-
-    // We need the mock to clear the error after first throw.
-    // The mock reads from the holder each time, so we can set up:
-    //   1. Before assembleContext: set error
-    //   2. The mock will throw on first call
-    //   3. generateDraft retries after 1s delay
-    //   4. But we need to clear the error before the retry
-    // This is hard to orchestrate synchronously. Instead, test via a simple approach:
-    // just check that when error is cleared between calls, the second attempt works.
-    // We'll skip the timing and validate retry count by mocking properly.
-
-    // SIMPLIFIED: Clear the error immediately so both calls "see" the same mock,
-    // but use a counter-based approach with a fresh mock per call.
-    // Let's restructure: use a call counter in the mock and throw only on first call.
-    // The mock reads anthropicHolder.callCount (set before throw), so:
-    anthropicHolder.callCount = 0;
-    anthropicHolder.messagesCreateError = null;
-
-    // Create a stateful error that throws once then succeeds
-    let throwNext = true;
-    // Override the mock result to use our stateful logic
-    // We can't re-register mock.module, but we can make messagesCreateResult a signal...
-    // Use a workaround: use a special sentinal in the result that the mock reads per call.
-    // Actually the simplest fix: since generateDraft waits 1 second between retries,
-    // use a promise that resolves the error only for the first call.
-    // For tests, the real approach is: we need the mock to conditionally throw.
-    // The mock IS reading from anthropicHolder.messagesCreateError each call.
-    // So: set error before call, unset it inside a timer that fires before retry.
-
-    // Set error for first call only
-    anthropicHolder.messagesCreateError = new Error('First call API failure');
-    // Schedule clearing the error after 500ms (before the 1s retry delay)
-    const clearTimer = setTimeout(() => {
-      anthropicHolder.messagesCreateError = null;
-    }, 100);
-
-    try {
-      await assembleContext(2, 42, 'paid_social', 'ad_copy');
-    } finally {
-      clearTimeout(clearTimer);
-    }
-
-    assert.strictEqual(anthropicHolder.callCount, 2, 'API should be called twice (initial + retry)');
-    assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 1, 'Output should be stored after retry success');
-    const statusCalls = taskRunsHolder.updateStatusCalls;
-    assert.ok(!statusCalls.find(c => c.status === 'failed'), 'Status should not be failed when retry succeeds');
+    assert.strictEqual(taskRunsHolder.updateQACalls[0].qa.score, 1, 'qa_score=1 even with AHPRA violations');
+    const critique = JSON.parse(taskRunsHolder.updateQACalls[0].qa.critique);
+    assert.strictEqual(critique.ahpra_violations.length, 1, 'AHPRA violations included in critique');
+    assert.strictEqual(critique.ahpra_violations[0].rule, 'AHPRA-T1');
   });
 
-  it('Test 3: two consecutive API failures transition to failed, no output stored', async () => {
-    anthropicHolder.messagesCreateError = new Error('Persistent API failure');
+  it('Test 3: draft fails SOP QA once then passes on second attempt — qa_score=1, attempts=2', async () => {
+    // First call fails QA, second passes
+    qaCheckerHolder.results = [
+      { pass: false, critique: 'Tone is too promotional' },
+      { pass: true, critique: null },
+    ];
 
     await assembleContext(3, 42, 'paid_social', 'ad_copy');
 
-    assert.strictEqual(anthropicHolder.callCount, 2, 'API should be called twice (initial + one retry)');
-    assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 0, 'Output must NOT be stored on double failure');
-
-    const statusCalls = taskRunsHolder.updateStatusCalls;
-    const failedCall = statusCalls.find(c => c.status === 'failed');
-    assert.ok(failedCall, 'Status must transition to failed after two consecutive API failures');
+    // API called twice (initial + retry)
+    assert.strictEqual(anthropicHolder.callCount, 2, 'Anthropic called twice');
+    // incrementAttempts called twice
+    assert.strictEqual(taskRunsHolder.incrementAttemptsCalls.length, 2, 'incrementAttempts called twice');
+    // QA score = 1 on second pass
+    assert.strictEqual(taskRunsHolder.updateQACalls.length, 1, 'updateTaskRunQA called once (on final result)');
+    assert.strictEqual(taskRunsHolder.updateQACalls[0].qa.score, 1, 'qa_score=1 when eventually passes');
+    // Output stored once
+    assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 1, 'Output stored once');
   });
 
-  it('Test 4: JSON parse failure on first attempt triggers retry, second succeeds', async () => {
-    let firstCall = true;
-    // First call returns invalid JSON, second call returns valid JSON
-    // We do this by changing the result mid-test using the callCount
-    anthropicHolder.messagesCreateResult = {
-      content: [{ type: 'text', text: 'NOT VALID JSON {{{' }],
-    };
+  it('Test 4: retry message includes previous critique', async () => {
+    const firstCritique = 'Tone is too promotional';
+    qaCheckerHolder.results = [
+      { pass: false, critique: firstCritique },
+      { pass: true, critique: null },
+    ];
 
-    // Schedule switching to valid response after first call
-    let switched = false;
-    const originalCreate = anthropicHolder.messagesCreateResult;
+    await assembleContext(4, 42, 'paid_social', 'ad_copy');
 
-    // Use a hook: after callCount reaches 1, switch result
-    anthropicHolder.callCount = 0;
-    const validResult = {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            variants: [{ primary_text: 'Good copy', headline: 'Good headline', description: 'Good desc', cta: 'Sign Up' }],
-            sources: [{ id: 1, title: 'Ad copy SOP' }],
-          }),
-        },
-      ],
-    };
-
-    // We need the mock to return different values per call.
-    // Since we can't easily intercept per-call without re-registering the mock,
-    // use a timer approach similar to Test 2:
-    // The invalid JSON response will cause a parse error → retry after 1s.
-    // We switch the result to valid within 100ms.
-    const switchTimer = setTimeout(() => {
-      anthropicHolder.messagesCreateResult = validResult;
-    }, 100);
-
-    try {
-      await assembleContext(4, 42, 'paid_social', 'ad_copy');
-    } finally {
-      clearTimeout(switchTimer);
-    }
-
-    assert.strictEqual(anthropicHolder.callCount, 2, 'Should retry after JSON parse failure');
-    assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 1, 'Output stored on second (successful) attempt');
-    const parsed = JSON.parse(taskRunsHolder.updateOutputCalls[0].output);
-    assert.ok(Array.isArray(parsed.sources) && parsed.sources.length > 0, 'Output must have non-empty sources');
+    // Second API call's user message should include the critique
+    assert.strictEqual(anthropicHolder.callCount, 2, 'Two Anthropic calls made');
+    const lastMessages = anthropicHolder.lastCall?.messages as Array<{ role: string; content: string }> | undefined;
+    const userContent = lastMessages?.[0]?.content ?? '';
+    assert.ok(
+      userContent.includes(firstCritique),
+      `Retry message should contain previous critique. Got: ${userContent}`,
+    );
+    assert.ok(
+      userContent.includes('Previous attempt failed QA'),
+      'Retry message should start with QA failure prefix',
+    );
   });
 
-  it('Test 5: empty sources array in output triggers retry', async () => {
-    // First call returns sources=[], second returns valid sources
-    anthropicHolder.messagesCreateResult = {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            variants: [{ primary_text: 'Copy', headline: 'H', description: 'D', cta: 'Buy' }],
-            sources: [], // empty — should trigger retry
-          }),
-        },
-      ],
-    };
+  it('Test 5: after 3 total attempts all failing — qa_score=0, draft_ready with critique attached', async () => {
+    // All 3 attempts fail SOP QA
+    qaCheckerHolder.results = [
+      { pass: false, critique: 'Issue 1' },
+      { pass: false, critique: 'Issue 2' },
+      { pass: false, critique: 'Issue 3' },
+    ];
 
-    const validResult = {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            variants: [{ primary_text: 'Copy B', headline: 'H2', description: 'D2', cta: 'Shop' }],
-            sources: [{ id: 2, title: 'Creative brief' }],
-          }),
-        },
-      ],
-    };
+    await assembleContext(5, 42, 'paid_social', 'ad_copy');
 
-    const switchTimer = setTimeout(() => {
-      anthropicHolder.messagesCreateResult = validResult;
-    }, 100);
+    // API called 3 times (max attempts)
+    assert.strictEqual(anthropicHolder.callCount, 3, 'Anthropic called 3 times (max attempts)');
+    // incrementAttempts called 3 times
+    assert.strictEqual(taskRunsHolder.incrementAttemptsCalls.length, 3, 'incrementAttempts called 3 times');
+    // QA score = 0
+    assert.strictEqual(taskRunsHolder.updateQACalls.length, 1, 'updateTaskRunQA called once');
+    assert.strictEqual(taskRunsHolder.updateQACalls[0].qa.score, 0, 'qa_score=0 after exhausted attempts');
 
-    try {
-      await assembleContext(5, 42, 'paid_social', 'ad_copy');
-    } finally {
-      clearTimeout(switchTimer);
-    }
+    // critique contains sop_issues and ahpra_violations
+    const critique = JSON.parse(taskRunsHolder.updateQACalls[0].qa.critique);
+    assert.ok(Array.isArray(critique.sop_issues), 'sop_issues present in critique');
+    assert.ok(critique.sop_issues.length > 0, 'sop_issues non-empty after failure');
+    assert.ok(Array.isArray(critique.ahpra_violations), 'ahpra_violations present in critique');
 
-    assert.strictEqual(anthropicHolder.callCount, 2, 'Should retry when sources array is empty');
-    assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 1, 'Output stored on retry');
-    const parsed = JSON.parse(taskRunsHolder.updateOutputCalls[0].output);
-    assert.ok(parsed.sources.length > 0, 'Stored output must have non-empty sources');
+    // Output still stored (draft surfaces as draft_ready with qa_score=0)
+    assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 1, 'Output stored even after QA exhaustion');
   });
 
-  it('Test 6: SOP gap (gap=true) — status failed, no API call made', async () => {
+  it('Test 6: maximum 3 total attempts enforced — no 4th Anthropic call', async () => {
+    // All fail — verify cap
+    qaCheckerHolder.results = [
+      { pass: false, critique: 'Fail 1' },
+      { pass: false, critique: 'Fail 2' },
+      { pass: false, critique: 'Fail 3' },
+    ];
+
+    await assembleContext(6, 42, 'paid_social', 'ad_copy');
+
+    assert.ok(anthropicHolder.callCount <= 3, `Must not exceed 3 Anthropic calls, got ${anthropicHolder.callCount}`);
+  });
+
+  it('Test 7: draft fails SOP QA twice, passes on third — qa_score=1, attempts=3', async () => {
+    qaCheckerHolder.results = [
+      { pass: false, critique: 'Issue A' },
+      { pass: false, critique: 'Issue B' },
+      { pass: true, critique: null },
+    ];
+
+    await assembleContext(7, 42, 'paid_social', 'ad_copy');
+
+    assert.strictEqual(anthropicHolder.callCount, 3, 'Anthropic called 3 times');
+    assert.strictEqual(taskRunsHolder.updateQACalls[0].qa.score, 1, 'qa_score=1 on third pass');
+    assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 1, 'Output stored once');
+  });
+
+  it('Test 8: QA error transitions task to failed (not stuck at qa_check)', async () => {
+    qaCheckerHolder.error = new Error('Haiku service unavailable');
+
+    await assembleContext(8, 42, 'paid_social', 'ad_copy');
+
+    // Should not have stored any output
+    assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 0, 'No output stored on QA error');
+    // Should not have set QA score
+    assert.strictEqual(taskRunsHolder.updateQACalls.length, 0, 'No QA score written on QA error');
+    // Should have transitioned to failed (not stuck at qa_check)
+    const failedCall = taskRunsHolder.updateStatusCalls.find(c => c.status === 'failed');
+    assert.ok(failedCall, 'Status must transition to failed on QA error');
+  });
+
+  it('Test 9: SOP gap — status failed, no API call made', async () => {
     driveHolder.searchSkillsResult = {
       results: [],
       gap: true,
@@ -460,7 +477,7 @@ describe('generateDraft via assembleContext', () => {
       channel: 'paid_social',
     };
 
-    await assembleContext(6, 42, 'paid_social', 'ad_copy');
+    await assembleContext(9, 42, 'paid_social', 'ad_copy');
 
     assert.strictEqual(anthropicHolder.callCount, 0, 'Anthropic API must NOT be called when gap=true');
     assert.strictEqual(taskRunsHolder.updateOutputCalls.length, 0, 'No output stored when gap=true');
@@ -468,23 +485,19 @@ describe('generateDraft via assembleContext', () => {
     assert.ok(failedCall, 'Status must be failed when gap=true');
   });
 
-  it('Test 7: missing ANTHROPIC_API_KEY causes immediate throw without retry', async () => {
-    const originalKey = process.env.ANTHROPIC_API_KEY;
+  it('Test 10: missing ANTHROPIC_API_KEY causes immediate throw', async () => {
     delete process.env.ANTHROPIC_API_KEY;
 
     try {
-      // assembleContext should propagate the error (outer catch marks failed)
       await assert.rejects(
-        async () => assembleContext(7, 42, 'paid_social', 'ad_copy'),
+        async () => assembleContext(10, 42, 'paid_social', 'ad_copy'),
         (err: Error) => {
           assert.ok(err.message.includes('ANTHROPIC_API_KEY'), 'Error must mention missing API key');
           return true;
         },
       );
     } finally {
-      if (originalKey !== undefined) {
-        process.env.ANTHROPIC_API_KEY = originalKey;
-      }
+      process.env.ANTHROPIC_API_KEY = 'test-api-key-mock';
     }
 
     assert.strictEqual(anthropicHolder.callCount, 0, 'API must not be called without key');
