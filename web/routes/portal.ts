@@ -180,16 +180,20 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [roi, leadsByChannel, funnel] = await Promise.all([
+    const [roi, leadsByChannel, funnel, pipelineStages, recentOpps] = await Promise.all([
       getROISummary(clientId, days),
       getLeadsByChannel(clientId, days),
       getConversionFunnel(clientId, days),
+      getGhlPipelineSummary(clientId),
+      getGhlRecentOpportunities(clientId, 10),
     ]);
 
     reply.render('portal/dashboard', {
       roi,
       leadsByChannel,
       funnel,
+      pipelineStages,
+      recentOpps,
       clientName: '',
       days,
       pageTitle: 'Dashboard',
