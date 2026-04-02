@@ -170,7 +170,7 @@ Plans:
   2. The task list shows live status for all tasks — queued, generating, draft ready, approved, failed
   3. An AM can read a draft alongside the SOPs it was based on, then approve it or request regeneration with a single click
   4. An AM can browse and search the skills library by channel and skill type to understand what SOPs the system has available
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 10-01-PLAN.md — Foundation: rejected status, extended listTaskRuns filters, route prefix swap, badge CSS
@@ -193,4 +193,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Agent Execution | 2/2 | Complete   | 2026-04-02 |
 | 8. QA and Compliance | 2/2 | Complete   | 2026-04-02 |
 | 9. Audit and Traceability | 2/2 | Complete   | 2026-04-02 |
-| 10. AM Interface | 0/3 | Not started | - |
+| 10. AM Interface | 1/3 | In Progress|  |

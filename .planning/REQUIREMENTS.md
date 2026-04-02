@@ -61,7 +61,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **UI-02**: AM can view generated draft with SOP attribution
 - [ ] **UI-03**: AM can approve a draft or request regeneration
 - [ ] **UI-04**: AM can browse and search indexed skills by channel and type
-- [ ] **UI-05**: Task list shows all tasks with current status
+- [x] **UI-05**: Task list shows all tasks with current status
 
 ### Infrastructure
 
@@ -148,7 +148,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-02 | Phase 10 | Pending |
 | UI-03 | Phase 10 | Pending |
 | UI-04 | Phase 10 | Pending |
-| UI-05 | Phase 10 | Pending |
+| UI-05 | Phase 10 | Complete |
 
 **Coverage:**
 - v1 requirements: 38 total

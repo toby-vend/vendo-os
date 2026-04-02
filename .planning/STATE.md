@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 10 context gathered
-last_updated: "2026-04-02T13:08:32.306Z"
+stopped_at: Completed 10-am-interface-01-PLAN.md
+last_updated: "2026-04-02T13:38:42.635Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 9
-  total_plans: 19
-  completed_plans: 19
+  total_plans: 22
+  completed_plans: 20
   percent: 0
 ---
 
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 08-qa-and-compliance P02 | 329 | 2 tasks | 5 files |
 | Phase 09-audit-and-traceability P01 | 358 | 2 tasks | 4 files |
 | Phase 09-audit-and-traceability P02 | 176 | 2 tasks | 3 files |
+| Phase 10-am-interface P01 | 300 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,9 @@ Recent decisions affecting current work:
 - [Phase 09-audit-and-traceability]: parseSopsUsed returns null for old number[] rows (backward compat) — existing rows are not migrated
 - [Phase 09-audit-and-traceability]: BEFORE DELETE trigger wrapped in try/catch — Turso/libsql may not support DDL triggers; app-layer constraint is primary enforcer (AUDT-03)
 - [Phase 09-audit-and-traceability]: getAuditRecord replaces getTaskRun in GET /runs/:id — returns parsed SopSnapshot[] not raw JSON string (AUDT-02)
+- [Phase 10-am-interface]: TaskRunListRow extends TaskRunRow pattern used for query-specific row shapes with JOINs
+- [Phase 10-am-interface]: dateTo filter appends T23:59:59.999Z for full-day inclusion in listTaskRuns
+- [Phase 10-am-interface]: Skills nav link uses canSee('drive') guard — skills are Drive-derived, same permission
 
 ### Pending Todos
 
@@ -141,6 +145,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T13:08:32.304Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-am-interface/10-CONTEXT.md
+Last session: 2026-04-02T13:38:42.633Z
+Stopped at: Completed 10-am-interface-01-PLAN.md
+Resume file: None
