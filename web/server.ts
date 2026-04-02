@@ -6,6 +6,7 @@ import fastifyStatic from '@fastify/static';
 import { Eta } from 'eta';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { readdirSync, existsSync } from 'fs';
 
 import { dashboardRoutes } from './routes/dashboard.js';
 import { meetingsRoutes } from './routes/meetings.js';
@@ -185,6 +186,27 @@ app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(taskRunsUiRoutes, { prefix: '/tasks' });
 app.register(skillsBrowserRoutes, { prefix: '/skills' });
+
+// Debug: list views directory contents on Vercel
+app.get('/debug/views', async (_request, reply) => {
+  const viewsDir = resolve(__dirname, 'views');
+  const result: Record<string, string[]> = { __dirname, viewsDir, exists: String(existsSync(viewsDir)) as any };
+  if (existsSync(viewsDir)) {
+    const listDir = (dir: string): string[] => {
+      try {
+        const entries = readdirSync(dir, { withFileTypes: true });
+        const files: string[] = [];
+        for (const e of entries) {
+          if (e.isDirectory()) files.push(...listDir(resolve(dir, e.name)).map(f => `${e.name}/${f}`));
+          else files.push(e.name);
+        }
+        return files;
+      } catch { return ['ERROR_READING']; }
+    };
+    (result as any).files = listDir(viewsDir);
+  }
+  reply.send(result);
+});
 
 // Export for Vercel
 export default app;
