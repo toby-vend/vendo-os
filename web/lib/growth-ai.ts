@@ -37,13 +37,22 @@ async function callClaude(
 
 // --- LinkedIn Ideas ---
 
-export async function generateLinkedInIdeas(): Promise<{ pillar: string; topic: string; meetingId: string | null }[]> {
-  const meetings = await rows<{ id: string; title: string; summary: string }>(`
-    SELECT id, title, summary FROM meetings
-    WHERE summary IS NOT NULL AND date >= date('now', '-14 days')
-      AND category IN ('client_catchup', 'strategy', 'discovery_sales', 'internal')
-    ORDER BY date DESC LIMIT 10
-  `);
+export async function generateLinkedInIdeas(meetingId?: string): Promise<{ pillar: string; topic: string; meetingId: string | null }[]> {
+  let meetings: { id: string; title: string; summary: string }[];
+
+  if (meetingId) {
+    meetings = await rows<{ id: string; title: string; summary: string }>(
+      'SELECT id, title, summary FROM meetings WHERE id = ? AND summary IS NOT NULL',
+      [meetingId],
+    );
+  } else {
+    meetings = await rows<{ id: string; title: string; summary: string }>(`
+      SELECT id, title, summary FROM meetings
+      WHERE summary IS NOT NULL AND date >= date('now', '-14 days')
+        AND category IN ('client_catchup', 'strategy', 'discovery_sales', 'internal')
+      ORDER BY date DESC LIMIT 10
+    `);
+  }
 
   if (!meetings.length) {
     return [

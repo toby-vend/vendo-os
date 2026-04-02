@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import {
   getLinkedInPipeline, getLinkedInStats, getLinkedInPost,
+  getRecentMeetingsForLinkedIn, getMeetingSummaryForPost,
   insertLinkedInIdeas, updateLinkedInDraft, updateLinkedInStatus,
   getOutboundPipeline, getOutboundFunnel, getProspect,
   insertProspect, updateOutboundDraft, updateOutboundStatus, updateOutboundResponse,
@@ -20,7 +21,8 @@ import {
 // --- Helpers ---
 
 async function linkedinPartialData(extra: Record<string, unknown> = {}) {
-  return { linkedinPosts: await getLinkedInPipeline(), ...extra };
+  const [linkedinPosts, recentMeetings] = await Promise.all([getLinkedInPipeline(), getRecentMeetingsForLinkedIn()]);
+  return { linkedinPosts, recentMeetings, ...extra };
 }
 
 async function outboundPartialData(extra: Record<string, unknown> = {}) {
@@ -45,13 +47,13 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
   app.get('/', async (_request, reply) => {
     const [
-      linkedinStats, linkedinPosts,
+      linkedinStats, linkedinPosts, recentMeetings,
       outboundFunnel, outboundPipeline,
       caseStudyStats, caseStudies,
       referralStats, referrals,
       upsells,
     ] = await Promise.all([
-      getLinkedInStats(), getLinkedInPipeline(),
+      getLinkedInStats(), getLinkedInPipeline(), getRecentMeetingsForLinkedIn(),
       getOutboundFunnel(), getOutboundPipeline(),
       getCaseStudyStats(), getCaseStudies(),
       getReferralStats(), getReferrals(),
@@ -59,7 +61,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     ]);
 
     reply.render('growth/index', {
-      linkedinStats, linkedinPosts,
+      linkedinStats, linkedinPosts, recentMeetings,
       outboundFunnel, outboundPipeline,
       caseStudyStats, caseStudies,
       referralStats, referrals,
@@ -69,9 +71,11 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
   // ===== LINKEDIN =====
 
-  app.post('/linkedin/generate-ideas', async (_request, reply) => {
+  app.post('/linkedin/generate-ideas', async (request, reply) => {
     try {
-      const ideas = await generateLinkedInIdeas();
+      const body = request.body as Record<string, string> | undefined;
+      const meetingId = body?.meetingId || undefined;
+      const ideas = await generateLinkedInIdeas(meetingId);
       if (!ideas.length) {
         return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ error: 'No ideas generated — check meeting data.' }));
       }
@@ -120,7 +124,38 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     const body = request.body as Record<string, string>;
     await updateLinkedInStatus(id, body.status);
+    // If redirected from detail page, go back there
+    if (body._redirect) return reply.redirect(body._redirect);
     return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData());
+  });
+
+  // LinkedIn detail page
+  app.get<{ Params: { id: string } }>('/linkedin/:id', async (request, reply) => {
+    const id = parseInt((request.params as { id: string }).id, 10);
+    const post = await getLinkedInPost(id);
+    if (!post) return reply.code(404).send('Post not found');
+
+    let meeting: { title: string; summary: string; date: string; client_name: string | null } | null = null;
+    if (post.source_meeting_id) {
+      meeting = await getMeetingSummaryForPost(post.source_meeting_id);
+    }
+
+    reply.render('growth/linkedin-detail', { post, meeting });
+  });
+
+  // Draft from detail page (same logic, redirects back to detail)
+  app.post<{ Params: { id: string } }>('/linkedin/:id/draft-and-return', async (request, reply) => {
+    const id = parseInt((request.params as { id: string }).id, 10);
+    try {
+      const post = await getLinkedInPost(id);
+      if (!post) return reply.code(404).send('Post not found');
+
+      const draft = await draftLinkedInPost(post.pillar, post.topic);
+      await updateLinkedInDraft(id, draft);
+      return reply.redirect(`/growth/linkedin/${id}`);
+    } catch {
+      return reply.redirect(`/growth/linkedin/${id}?error=draft_failed`);
+    }
   });
 
   // ===== OUTBOUND =====

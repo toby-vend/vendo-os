@@ -9,6 +9,7 @@ export interface LinkedInPost {
   status: string;
   scheduled_date: string | null;
   draft: string | null;
+  source_meeting_id: string | null;
   engagement_likes: number;
   engagement_comments: number;
   engagement_reposts: number;
@@ -16,9 +17,28 @@ export interface LinkedInPost {
   created_at: string;
 }
 
+export interface RecentMeeting {
+  id: string;
+  title: string;
+  date: string;
+  client_name: string | null;
+  summary: string | null;
+  category: string | null;
+}
+
+export async function getRecentMeetingsForLinkedIn(): Promise<RecentMeeting[]> {
+  return rows<RecentMeeting>(`
+    SELECT id, title, date, client_name, summary, category
+    FROM meetings
+    WHERE summary IS NOT NULL AND date >= date('now', '-30 days')
+    ORDER BY date DESC
+    LIMIT 20
+  `);
+}
+
 export async function getLinkedInPipeline(): Promise<LinkedInPost[]> {
   return rows<LinkedInPost>(`
-    SELECT id, pillar, topic, status, scheduled_date, draft,
+    SELECT id, pillar, topic, status, scheduled_date, draft, source_meeting_id,
       engagement_likes, engagement_comments, engagement_reposts, engagement_impressions, created_at
     FROM linkedin_content
     WHERE status NOT IN ('cancelled')
@@ -220,8 +240,16 @@ export async function getUpsellOpportunities(): Promise<UpsellOpportunity[]> {
 
 export async function getLinkedInPost(id: number): Promise<LinkedInPost | null> {
   const r = await rows<LinkedInPost>(
-    'SELECT id, pillar, topic, status, scheduled_date, draft, engagement_likes, engagement_comments, engagement_reposts, engagement_impressions, created_at FROM linkedin_content WHERE id = ?',
+    'SELECT id, pillar, topic, status, scheduled_date, draft, source_meeting_id, engagement_likes, engagement_comments, engagement_reposts, engagement_impressions, created_at FROM linkedin_content WHERE id = ?',
     [id],
+  );
+  return r[0] ?? null;
+}
+
+export async function getMeetingSummaryForPost(meetingId: string): Promise<{ title: string; summary: string; date: string; client_name: string | null } | null> {
+  const r = await rows<{ title: string; summary: string; date: string; client_name: string | null }>(
+    'SELECT title, summary, date, client_name FROM meetings WHERE id = ?',
+    [meetingId],
   );
   return r[0] ?? null;
 }

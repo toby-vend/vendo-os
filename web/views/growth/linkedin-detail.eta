@@ -1,0 +1,85 @@
+<% layout('/layouts/base') %>
+
+<div style="margin-bottom: 1rem;">
+  <a href="/growth" style="color: #94A3B8; text-decoration: none; font-size: 13px;">&larr; Back to Growth</a>
+</div>
+
+<div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem;">
+  <span class="badge badge-<%= it.post.pillar === 'sell' ? 'warning' : it.post.pillar === 'teach' ? 'active' : it.post.pillar === 'trust' ? 'info' : 'default' %>" style="font-size: 13px; padding: 4px 12px;"><%= it.post.pillar %></span>
+  <span class="badge badge-<%= it.post.status === 'published' ? 'active' : it.post.status === 'drafted' ? 'info' : 'default' %>" style="font-size: 13px; padding: 4px 12px;"><%= it.post.status %></span>
+  <% if (it.post.scheduled_date) { %>
+  <span style="font-size: 13px; color: #94A3B8;">Scheduled: <%= it.post.scheduled_date.slice(0, 10) %></span>
+  <% } %>
+</div>
+
+<h1 style="font-size: 22px; margin-bottom: 1.5rem;"><%= it.post.topic %></h1>
+
+<% if (it.query?.error) { %>
+<div style="padding: 0.75rem 1rem; margin-bottom: 1rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-size: 13px; color: #EF4444;">Failed to generate draft. Please try again.</div>
+<% } %>
+
+<div class="two-col">
+  <div>
+    <!-- Meeting context -->
+    <h2>Source Meeting</h2>
+    <% if (it.meeting) { %>
+    <article style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+        <div>
+          <h3 style="margin: 0 0 0.25rem 0; font-size: 15px;"><%= it.meeting.title %></h3>
+          <span style="font-size: 12px; color: #94A3B8;"><%= it.meeting.date.slice(0, 10) %><%= it.meeting.client_name ? ' &middot; ' + it.meeting.client_name : '' %></span>
+        </div>
+        <a href="/meetings/<%= it.post.source_meeting_id %>" class="btn btn-sm" style="font-size: 11px;">View Meeting</a>
+      </div>
+      <div style="font-size: 14px; color: #CBD5E1; line-height: 1.6; white-space: pre-wrap;"><%= it.meeting.summary %></div>
+    </article>
+    <% } else { %>
+    <article style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem;">
+      <p style="color: #94A3B8; font-size: 14px; margin: 0;">No source meeting linked to this idea.</p>
+    </article>
+    <% } %>
+  </div>
+
+  <div>
+    <!-- LinkedIn Post -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+      <h2 style="margin: 0;">LinkedIn Post</h2>
+      <% if (!it.post.draft) { %>
+      <form method="POST" action="/growth/linkedin/<%= it.post.id %>/draft-and-return">
+        <button type="submit" class="btn btn-primary btn-sm">Generate Draft</button>
+      </form>
+      <% } %>
+    </div>
+
+    <% if (it.post.draft) { %>
+    <article style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1.25rem;">
+      <div style="font-size: 14px; color: #E2E8F0; line-height: 1.7; white-space: pre-wrap;"><%= it.post.draft %></div>
+      <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 0.5rem;">
+        <button onclick="navigator.clipboard.writeText(document.querySelector('#post-text').innerText); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy to clipboard', 2000);" class="btn btn-primary btn-sm">Copy to clipboard</button>
+        <form method="POST" action="/growth/linkedin/<%= it.post.id %>/draft-and-return" style="display: inline;">
+          <button type="submit" class="btn btn-sm">Regenerate</button>
+        </form>
+      </div>
+      <div id="post-text" style="display: none;"><%= it.post.draft %></div>
+    </article>
+    <% } else { %>
+    <article style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1.25rem;">
+      <p style="color: #94A3B8; font-size: 14px; margin: 0;">No draft yet. Click "Generate Draft" to create a LinkedIn post from the meeting context.</p>
+    </article>
+    <% } %>
+  </div>
+</div>
+
+<!-- Status control -->
+<div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+  <form method="POST" action="/growth/linkedin/<%= it.post.id %>/status" style="display: flex; gap: 0.75rem; align-items: center;">
+    <label style="font-size: 13px; color: #94A3B8;">Status:</label>
+    <select name="status" style="padding: 6px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+      <% ['idea', 'drafted', 'approved', 'published', 'cancelled'].forEach(s => { %>
+      <option value="<%= s %>" <%= it.post.status === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+      <% }) %>
+    </select>
+    <button type="submit" class="btn btn-sm">Update</button>
+    <input type="hidden" name="_redirect" value="/growth/linkedin/<%= it.post.id %>">
+  </form>
+</div>

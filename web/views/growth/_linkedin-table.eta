@@ -1,15 +1,22 @@
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; gap: 0.75rem; flex-wrap: wrap;">
   <h2 style="margin: 0;">LinkedIn Content</h2>
-  <button class="btn btn-primary btn-sm"
+  <form style="display: flex; gap: 0.5rem; align-items: center;"
     hx-post="/growth/linkedin/generate-ideas"
     hx-target="#linkedin-section"
     hx-swap="innerHTML"
-    hx-indicator="#linkedin-spinner"
-    hx-disabled-elt="this">
-    Generate Ideas from Meetings
-  </button>
+    hx-indicator="#linkedin-spinner">
+    <select name="meetingId" style="padding: 5px 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 12px; max-width: 250px;">
+      <option value="">All recent meetings</option>
+      <% if (it.recentMeetings && it.recentMeetings.length) { %>
+        <% it.recentMeetings.forEach(m => { %>
+        <option value="<%= m.id %>"><%= m.date.slice(0, 10) %> — <%= (m.title || '').slice(0, 40) %><%= m.client_name ? ' (' + m.client_name + ')' : '' %></option>
+        <% }) %>
+      <% } %>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm" hx-disabled-elt="this">Generate Ideas</button>
+  </form>
 </div>
-<div id="linkedin-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Generating ideas from recent meetings...</div>
+<div id="linkedin-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Generating ideas from meeting data...</div>
 
 <% if (it.message) { %>
 <div style="padding: 0.5rem 1rem; margin-bottom: 0.75rem; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; font-size: 13px; color: #22C55E;"><%= it.message %></div>
@@ -19,7 +26,7 @@
 <% } %>
 
 <% if (!it.linkedinPosts || !it.linkedinPosts.length) { %>
-  <article><p style="color: #94A3B8; font-size: 14px;">No content yet. Click "Generate Ideas" to create content ideas from your recent meetings.</p></article>
+  <article><p style="color: #94A3B8; font-size: 14px;">No content yet. Select a meeting and click "Generate Ideas" to create content ideas.</p></article>
 <% } else { %>
 <table class="compact">
   <thead>
@@ -32,7 +39,12 @@
       <td>
         <span class="badge badge-<%= p.pillar === 'sell' ? 'warning' : p.pillar === 'teach' ? 'active' : p.pillar === 'trust' ? 'info' : 'default' %>"><%= p.pillar %></span>
       </td>
-      <td title="<%= p.draft ? 'Has draft' : '' %>"><%= (p.topic || '').slice(0, 55) %></td>
+      <td>
+        <a href="/growth/linkedin/<%= p.id %>" style="color: #E2E8F0; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.15);">
+          <%= (p.topic || '').slice(0, 55) %>
+        </a>
+        <% if (p.draft) { %> <span style="color: #22C55E; font-size: 11px;" title="Draft ready">&#9679;</span><% } %>
+      </td>
       <td>
         <select style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 12px; padding: 3px 6px;"
           hx-post="/growth/linkedin/<%= p.id %>/status"
@@ -53,7 +65,7 @@
           hx-indicator="#linkedin-spinner"
           hx-disabled-elt="this">Draft</button>
         <% } else if (p.draft) { %>
-        <span title="<%= p.draft.slice(0, 200).replace(/"/g, '&quot;') %>" style="cursor: help; color: #22C55E; font-size: 12px;">Has draft</span>
+        <a href="/growth/linkedin/<%= p.id %>" class="btn btn-sm" style="font-size: 11px; padding: 2px 8px; text-decoration: none;">View</a>
         <% } %>
       </td>
     </tr>
