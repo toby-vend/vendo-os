@@ -72,6 +72,8 @@ async function main() {
     'ALTER TABLE ghl_opportunities ADD COLUMN lead_score INTEGER',
     'ALTER TABLE ghl_opportunities ADD COLUMN score_breakdown TEXT',
     'ALTER TABLE ghl_opportunities ADD COLUMN scored_at TEXT',
+    // GHL multi-location
+    'ALTER TABLE ghl_opportunities ADD COLUMN location_id TEXT',
     // Brand hub title column
     "ALTER TABLE brand_hub ADD COLUMN title TEXT NOT NULL DEFAULT ''",
     // Drive watch user_id column

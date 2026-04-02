@@ -210,9 +210,10 @@ export async function getClientEnrichedData(clientId: number): Promise<ClientDet
       FROM ghl_opportunities o
       LEFT JOIN ghl_stages s ON o.stage_id = s.id
       WHERE o.contact_company IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl')
+         OR o.location_id IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl')
       ORDER BY o.created_at DESC
       LIMIT 50
-    `, [clientId]),
+    `, [clientId, clientId]),
   ]);
 
   return {

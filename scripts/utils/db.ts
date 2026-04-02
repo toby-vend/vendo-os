@@ -439,6 +439,8 @@ export async function initSchema(): Promise<void> {
   try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN lead_score INTEGER'); } catch { /* already exists */ }
   try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN score_breakdown TEXT'); } catch { /* already exists */ }
   try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN scored_at TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN location_id TEXT'); } catch { /* already exists */ }
+  db.run('CREATE INDEX IF NOT EXISTS idx_ghl_opps_location ON ghl_opportunities(location_id)');
 
   // FTS4 virtual table for full-text search (sql.js includes FTS4, not FTS5)
   db.run(`

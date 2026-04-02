@@ -1,5 +1,8 @@
 /**
- * Sync GHL pipelines and opportunities into local SQLite database.
+ * Sync GHL pipelines and opportunities from all sub-accounts.
+ *
+ * Reads locations from the ghl_locations table (populated by discover-ghl-locations).
+ * Falls back to GHL_LOCATION_ID env var if no locations table exists.
  *
  * Usage:
  *   npm run sync:ghl
@@ -12,10 +15,9 @@ import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.j
 
 const BASE_URL = 'https://services.leadconnectorhq.com';
 const API_KEY = process.env.GHL_API_KEY!;
-const LOCATION_ID = process.env.GHL_LOCATION_ID!;
 
-if (!API_KEY || !LOCATION_ID) {
-  console.error('GHL_API_KEY and GHL_LOCATION_ID must be set in .env.local');
+if (!API_KEY) {
+  console.error('GHL_API_KEY must be set in .env.local');
   process.exit(1);
 }
 
@@ -72,13 +74,13 @@ interface GhlOpportunity {
   contact: GhlContact;
 }
 
-async function fetchAllOpportunities(pipelineId: string): Promise<GhlOpportunity[]> {
+async function fetchAllOpportunities(locationId: string, pipelineId: string): Promise<GhlOpportunity[]> {
   const all: GhlOpportunity[] = [];
   let startAfterId = '';
   let startAfter = '';
 
   while (true) {
-    let url = `${BASE_URL}/opportunities/search?location_id=${LOCATION_ID}&pipeline_id=${pipelineId}&limit=100`;
+    let url = `${BASE_URL}/opportunities/search?location_id=${locationId}&pipeline_id=${pipelineId}&limit=100`;
     if (startAfterId) {
       url += `&startAfterId=${startAfterId}&startAfter=${startAfter}`;
     }
@@ -89,7 +91,6 @@ async function fetchAllOpportunities(pipelineId: string): Promise<GhlOpportunity
     }>(url);
 
     all.push(...data.opportunities);
-    log('GHL', `  Fetched ${all.length}/${data.meta.total} opportunities`);
 
     if (!data.meta.startAfterId || data.opportunities.length === 0) break;
     startAfterId = data.meta.startAfterId;
@@ -99,25 +100,20 @@ async function fetchAllOpportunities(pipelineId: string): Promise<GhlOpportunity
   return all;
 }
 
-async function main() {
-  await initSchema();
-  const db = await getDb();
-  const now = new Date().toISOString();
+async function syncLocation(db: any, locationId: string, locationName: string, now: string): Promise<{ pipelines: number; opportunities: number }> {
+  let totalPipelines = 0;
+  let totalOpps = 0;
 
   try {
-    // 1. Fetch pipelines
-    log('GHL', 'Fetching pipelines...');
     const { pipelines } = await ghlFetch<{ pipelines: GhlPipeline[] }>(
-      `/opportunities/pipelines?locationId=${LOCATION_ID}`
+      `/opportunities/pipelines?locationId=${locationId}`
     );
 
-    // Upsert pipelines and stages
     for (const p of pipelines) {
       db.run(
         'INSERT OR REPLACE INTO ghl_pipelines (id, name, location_id, synced_at) VALUES (?, ?, ?, ?)',
         [p.id, p.name, p.locationId, now]
       );
-      log('GHL', `Pipeline: ${p.name} (${p.stages.length} stages)`);
 
       for (const s of p.stages) {
         db.run(
@@ -125,37 +121,95 @@ async function main() {
           [s.id, p.id, s.name, s.position, now]
         );
       }
+
+      totalPipelines++;
     }
 
-    // 2. Fetch opportunities from all pipelines
-    let totalOpps = 0;
     for (const p of pipelines) {
-      log('GHL', `Fetching opportunities for ${p.name}...`);
-      const opps = await fetchAllOpportunities(p.id);
+      const opps = await fetchAllOpportunities(locationId, p.id);
 
       for (const o of opps) {
         db.run(`
           INSERT OR REPLACE INTO ghl_opportunities
           (id, name, monetary_value, pipeline_id, stage_id, status, source,
            contact_id, contact_name, contact_company, contact_email, contact_phone, contact_tags,
-           created_at, updated_at, last_stage_change_at, synced_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           created_at, updated_at, last_stage_change_at, location_id, synced_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           o.id, o.name, o.monetaryValue || 0, o.pipelineId, o.pipelineStageId,
           o.status, o.source || null,
           o.contact?.id || null, o.contact?.name || null,
           o.contact?.companyName || null, o.contact?.email || null,
           o.contact?.phone || null, o.contact?.tags ? JSON.stringify(o.contact.tags) : null,
-          o.createdAt, o.updatedAt, o.lastStageChangeAt || null, now,
+          o.createdAt, o.updatedAt, o.lastStageChangeAt || null, locationId, now,
         ]);
       }
 
       totalOpps += opps.length;
-      log('GHL', `  Saved ${opps.length} opportunities from ${p.name}`);
+    }
+  } catch (err: any) {
+    // Log but don't fail the entire sync for one location
+    logError('GHL', `  Failed to sync ${locationName} (${locationId}): ${err.message?.slice(0, 150)}`);
+  }
+
+  return { pipelines: totalPipelines, opportunities: totalOpps };
+}
+
+async function main() {
+  await initSchema();
+  const db = await getDb();
+  const now = new Date().toISOString();
+
+  // Add location_id column if missing
+  try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN location_id TEXT'); } catch { /* already exists */ }
+
+  // Get locations: prefer ghl_locations table, fall back to env var
+  let locations: { id: string; name: string }[] = [];
+
+  try {
+    const result = db.exec('SELECT id, name FROM ghl_locations ORDER BY name');
+    if (result.length > 0) {
+      locations = result[0].values.map((row: any) => ({ id: row[0] as string, name: row[1] as string }));
+    }
+  } catch {
+    // Table doesn't exist
+  }
+
+  if (locations.length === 0) {
+    const fallbackId = process.env.GHL_LOCATION_ID;
+    if (!fallbackId) {
+      console.error('No ghl_locations table and no GHL_LOCATION_ID set. Run discover-ghl-locations first.');
+      process.exit(1);
+    }
+    locations = [{ id: fallbackId, name: 'Default Location' }];
+    log('GHL', 'No ghl_locations table found, using GHL_LOCATION_ID fallback');
+  }
+
+  log('GHL', `Syncing ${locations.length} locations...`);
+
+  let grandPipelines = 0;
+  let grandOpps = 0;
+  let successCount = 0;
+
+  try {
+    for (const loc of locations) {
+      log('GHL', `[${loc.name}] Syncing...`);
+      const { pipelines, opportunities } = await syncLocation(db, loc.id, loc.name, now);
+      grandPipelines += pipelines;
+      grandOpps += opportunities;
+      if (pipelines > 0 || opportunities > 0) {
+        log('GHL', `[${loc.name}] ${pipelines} pipelines, ${opportunities} opportunities`);
+        successCount++;
+      } else {
+        log('GHL', `[${loc.name}] No data`);
+      }
+
+      // Save periodically to avoid losing progress
+      if (successCount % 10 === 0) saveDb();
     }
 
     saveDb();
-    log('GHL', `Sync complete: ${pipelines.length} pipelines, ${totalOpps} opportunities`);
+    log('GHL', `Sync complete: ${successCount}/${locations.length} locations, ${grandPipelines} pipelines, ${grandOpps} opportunities`);
   } catch (err) {
     logError('GHL', 'Sync failed', err);
     process.exit(1);
