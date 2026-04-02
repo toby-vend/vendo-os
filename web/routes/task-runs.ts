@@ -5,7 +5,7 @@ import { assembleContext } from '../lib/task-matcher.js';
 const VALID_CHANNELS = ['paid_social', 'seo', 'paid_ads'] as const;
 type ValidChannel = typeof VALID_CHANNELS[number];
 
-const VALID_STATUSES: TaskRunStatus[] = ['queued', 'generating', 'qa_check', 'draft_ready', 'approved', 'failed'];
+const VALID_STATUSES: TaskRunStatus[] = ['queued', 'generating', 'qa_check', 'draft_ready', 'approved', 'failed', 'rejected'];
 
 function isValidStatus(value: unknown): value is TaskRunStatus {
   return typeof value === 'string' && (VALID_STATUSES as string[]).includes(value);
@@ -71,15 +71,16 @@ export const taskRunRoutes: FastifyPluginAsync = async (app) => {
   });
 
   // GET /runs — list task runs with optional filters
-  app.get<{ Querystring: { status?: string; clientId?: string } }>('/runs', async (request, reply) => {
-    const { status, clientId: rawClientId } = request.query;
+  app.get<{ Querystring: { status?: string; clientId?: string; channel?: string } }>('/runs', async (request, reply) => {
+    const { status, clientId: rawClientId, channel } = request.query;
 
-    const filters: { status?: TaskRunStatus; clientId?: number } = {};
+    const filters: { status?: TaskRunStatus; clientId?: number; channel?: string } = {};
     if (status && isValidStatus(status)) filters.status = status;
     if (rawClientId !== undefined) {
       const clientId = parseInt(rawClientId, 10);
       if (!Number.isNaN(clientId) && clientId > 0) filters.clientId = clientId;
     }
+    if (channel && isValidChannel(channel)) filters.channel = channel;
 
     const runs = await listTaskRuns(filters);
     return reply.code(200).send({ runs });

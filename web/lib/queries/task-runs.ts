@@ -40,7 +40,8 @@ export type TaskRunStatus =
   | 'qa_check'
   | 'draft_ready'
   | 'approved'
-  | 'failed';
+  | 'failed'
+  | 'rejected';
 
 export interface TaskRunRow {
   id: number;
@@ -57,6 +58,13 @@ export interface TaskRunRow {
   created_by: string;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * Extended row returned by listTaskRuns — includes client_name from brand_hub JOIN.
+ */
+export interface TaskRunListRow extends TaskRunRow {
+  client_name: string | null;
 }
 
 // --- Queries ---
@@ -187,33 +195,60 @@ export async function getAuditRecord(id: number): Promise<AuditRecord | null> {
 }
 
 /**
- * List task runs with optional filters for status and clientId.
+ * List task runs with optional filters for status, clientId, channel, date range, and pagination.
+ * Results include client_name via LEFT JOIN on brand_hub.
  * Results ordered by created_at DESC, defaulting to 50 rows.
  */
 export async function listTaskRuns(filters?: {
   status?: TaskRunStatus;
   clientId?: number;
+  channel?: string;
+  dateFrom?: string;   // ISO date string, inclusive
+  dateTo?: string;     // ISO date string, inclusive (full day)
   limit?: number;
-}): Promise<TaskRunRow[]> {
+  offset?: number;
+}): Promise<TaskRunListRow[]> {
   const conditions: string[] = [];
   const args: (string | number | null)[] = [];
 
   if (filters?.status !== undefined) {
-    conditions.push('status = ?');
+    conditions.push('t.status = ?');
     args.push(filters.status);
   }
 
   if (filters?.clientId !== undefined) {
-    conditions.push('client_id = ?');
+    conditions.push('t.client_id = ?');
     args.push(filters.clientId);
+  }
+
+  if (filters?.channel !== undefined) {
+    conditions.push('t.channel = ?');
+    args.push(filters.channel);
+  }
+
+  if (filters?.dateFrom !== undefined) {
+    conditions.push('t.created_at >= ?');
+    args.push(filters.dateFrom);
+  }
+
+  if (filters?.dateTo !== undefined) {
+    conditions.push('t.created_at <= ?');
+    args.push(`${filters.dateTo}T23:59:59.999Z`);
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
   const limit = filters?.limit ?? 50;
-  args.push(limit);
+  const offset = filters?.offset ?? 0;
+  args.push(limit, offset);
 
-  return rows<TaskRunRow>(
-    `SELECT * FROM task_runs ${where} ORDER BY created_at DESC LIMIT ?`,
+  return rows<TaskRunListRow>(
+    `SELECT t.*, bh.client_name
+     FROM task_runs t
+     LEFT JOIN (SELECT client_id, client_name FROM brand_hub GROUP BY client_id) bh
+       ON bh.client_id = t.client_id
+     ${where}
+     ORDER BY t.created_at DESC
+     LIMIT ? OFFSET ?`,
     args,
   );
 }
