@@ -740,6 +740,87 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_name)');
   db.run('CREATE INDEX IF NOT EXISTS idx_referrals_status ON referrals(status)');
 
+  // --- Roles table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS roles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL UNIQUE,
+      holder TEXT,
+      reports_to TEXT,
+      responsibilities TEXT NOT NULL,
+      kpis TEXT,
+      tools TEXT,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  // --- Hire onboarding table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS hire_onboarding (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      person_name TEXT NOT NULL,
+      role_title TEXT NOT NULL,
+      start_date TEXT NOT NULL,
+      buddy TEXT,
+      checklist TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_hire_onboarding_status ON hire_onboarding(status)');
+
+  // --- Leave requests table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS leave_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      person_name TEXT NOT NULL,
+      leave_start TEXT NOT NULL,
+      leave_end TEXT NOT NULL,
+      cover_person TEXT,
+      approval_status TEXT NOT NULL DEFAULT 'pending',
+      approved_by TEXT,
+      clients_notified INTEGER DEFAULT 0,
+      tasks_reassigned INTEGER DEFAULT 0,
+      brief_reconfigured INTEGER DEFAULT 0,
+      handback_complete INTEGER DEFAULT 0,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_leave_status ON leave_requests(approval_status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_leave_dates ON leave_requests(leave_start, leave_end)');
+
+  // --- Staff offboarding table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS staff_offboarding (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      person_name TEXT NOT NULL,
+      role_title TEXT,
+      exit_date TEXT NOT NULL,
+      exit_type TEXT NOT NULL DEFAULT 'resignation',
+      checklist TEXT NOT NULL,
+      clients_reassigned INTEGER DEFAULT 0,
+      access_revoked INTEGER DEFAULT 0,
+      exit_interview_done INTEGER DEFAULT 0,
+      final_payroll_done INTEGER DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_offboarding_status ON staff_offboarding(status)');
+
   // --- AI audit log table ---
 
   db.run(`

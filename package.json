@@ -69,7 +69,17 @@
     "casestudy:draft": "tsx scripts/functions/case-studies.ts --draft",
     "casestudy:status": "tsx scripts/functions/case-studies.ts --status",
     "referral": "tsx scripts/functions/referral-tracking.ts",
-    "referral:partners": "tsx scripts/functions/referral-tracking.ts --partners"
+    "referral:partners": "tsx scripts/functions/referral-tracking.ts --partners",
+    "roles": "tsx scripts/functions/role-registry.ts",
+    "roles:seed": "tsx scripts/functions/role-registry.ts --seed",
+    "roles:kpis": "tsx scripts/functions/role-registry.ts --kpis",
+    "hire:new": "tsx scripts/functions/hire-onboarding.ts",
+    "hire:status": "tsx scripts/functions/hire-onboarding.ts --status",
+    "hire:checkin": "tsx scripts/functions/hire-onboarding.ts --checkin",
+    "leave": "tsx scripts/functions/leave-cover.ts",
+    "leave:status": "tsx scripts/functions/leave-cover.ts --status",
+    "offboard": "tsx scripts/functions/staff-offboarding.ts",
+    "offboard:status": "tsx scripts/functions/staff-offboarding.ts --status"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
