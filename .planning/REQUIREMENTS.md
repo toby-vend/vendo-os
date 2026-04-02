@@ -51,9 +51,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Audit & Traceability
 
-- [ ] **AUDT-01**: Every generation is logged: AM who triggered, client, channel, SOPs used, SOP versions, QA score
-- [ ] **AUDT-02**: Each draft shows which SOPs were used ("based on: [SOP names]")
-- [ ] **AUDT-03**: Audit log is append-only — no records deleted
+- [x] **AUDT-01**: Every generation is logged: AM who triggered, client, channel, SOPs used, SOP versions, QA score
+- [x] **AUDT-02**: Each draft shows which SOPs were used ("based on: [SOP names]")
+- [x] **AUDT-03**: Audit log is append-only — no records deleted
 
 ### AM Interface
 
@@ -141,9 +141,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QA-03 | Phase 8 | Complete |
 | QA-04 | Phase 8 | Complete |
 | QA-05 | Phase 8 | Complete |
-| AUDT-01 | Phase 9 | Pending |
-| AUDT-02 | Phase 9 | Pending |
-| AUDT-03 | Phase 9 | Pending |
+| AUDT-01 | Phase 9 | Complete |
+| AUDT-02 | Phase 9 | Complete |
+| AUDT-03 | Phase 9 | Complete |
 | UI-01 | Phase 10 | Pending |
 | UI-02 | Phase 10 | Pending |
 | UI-03 | Phase 10 | Pending |

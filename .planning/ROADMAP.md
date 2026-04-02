@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Task Matching Engine** - Match task type and client to relevant SOPs and brand context, async queuing (completed 2026-04-01)
 - [x] **Phase 7: Agent Execution** - Produce structured draft output per channel using retrieved context (completed 2026-04-02)
 - [x] **Phase 8: QA and Compliance** - Validate output against SOP criteria, AHPRA pre-flight, retry with critique (completed 2026-04-02)
-- [ ] **Phase 9: Audit and Traceability** - Append-only generation log with SOP version attribution
+- [x] **Phase 9: Audit and Traceability** - Append-only generation log with SOP version attribution (completed 2026-04-02)
 - [ ] **Phase 10: AM Interface** - Task submission, status polling, draft review, approve and regenerate
 
 ## Phase Details
@@ -155,7 +155,7 @@ Plans:
   1. Every draft displayed to an AM shows which SOPs it was based on (names visible in the UI)
   2. The audit log contains a complete record for each generation: AM, client, channel, SOPs used, SOP versions, QA score
   3. Audit records cannot be deleted — the log is append-only at the database level
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 09-01-PLAN.md — SOP version snapshots in sops_used, getAuditRecord query, append-only policy
@@ -186,5 +186,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. Task Matching Engine | 2/2 | Complete   | 2026-04-01 |
 | 7. Agent Execution | 2/2 | Complete   | 2026-04-02 |
 | 8. QA and Compliance | 2/2 | Complete   | 2026-04-02 |
-| 9. Audit and Traceability | 0/1 | Not started | - |
+| 9. Audit and Traceability | 1/1 | Complete   | 2026-04-02 |
 | 10. AM Interface | 0/TBD | Not started | - |
