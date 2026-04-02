@@ -237,7 +237,6 @@ async function syncGoogleAds() {
 
         totalRows += rows.length;
         log('GADS', `    ${rows.length} rows`);
-        saveDb();
 
       } catch (err) {
         logError('GADS', `Failed to fetch spend for ${acct.descriptiveName}`, err);
@@ -245,6 +244,7 @@ async function syncGoogleAds() {
     }
 
     upsertSpend.free();
+    saveDb();
     log('GADS', `Sync complete: ${totalRows} rows across ${accounts.length} accounts`);
 
   } catch (err) {
