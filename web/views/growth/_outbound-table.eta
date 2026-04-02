@@ -1,0 +1,111 @@
+<h2>Outbound Pipeline</h2>
+
+<!-- Add Prospect form -->
+<form method="POST" action="/growth/outbound/add" style="display: flex; gap: 0.5rem; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap;">
+  <div>
+    <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Name *</label>
+    <input type="text" name="name" required placeholder="John Smith" style="width: 140px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+  </div>
+  <div>
+    <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Company</label>
+    <input type="text" name="company" placeholder="Acme Corp" style="width: 140px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+  </div>
+  <div>
+    <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Email</label>
+    <input type="email" name="email" placeholder="john@acme.com" style="width: 160px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+  </div>
+  <div>
+    <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Channel</label>
+    <select name="channel" style="padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+      <option value="email">Email</option>
+      <option value="linkedin">LinkedIn</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary btn-sm">Add Prospect</button>
+</form>
+
+<% if (it.message) { %>
+<div style="padding: 0.5rem 1rem; margin-bottom: 0.75rem; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; font-size: 13px; color: #22C55E;"><%= it.message %></div>
+<% } %>
+
+<!-- Funnel visualisation -->
+<% if (it.outboundFunnel && it.outboundFunnel.total > 0) { %>
+<div style="margin-bottom: 1.5rem;">
+  <% const funnel = it.outboundFunnel; const funnelMax = Math.max(funnel.total, 1); %>
+  <% const stages = [
+    { label: 'Total', count: funnel.total },
+    { label: 'Contacted', count: funnel.contacted },
+    { label: 'Responded', count: funnel.responded },
+    { label: 'Interested', count: funnel.interested },
+    { label: 'Meeting', count: funnel.meetings },
+    { label: 'Converted', count: funnel.converted },
+  ]; %>
+  <% stages.forEach(s => { %>
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+      <span style="width: 80px; font-size: 12px; color: #94A3B8; text-align: right;"><%= s.label %></span>
+      <div style="flex: 1; height: 22px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden;">
+        <div style="width: <%= Math.max((s.count / funnelMax) * 100, 2) %>%; height: 100%; background: #22C55E; border-radius: 4px; display: flex; align-items: center; padding-left: 8px;">
+          <span style="font-size: 11px; font-weight: 600; color: #0B0B0B;"><%= s.count %></span>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+</div>
+<% } %>
+
+<!-- Prospects table -->
+<% if (it.outboundPipeline && it.outboundPipeline.length) { %>
+<div id="outbound-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Generating outreach draft...</div>
+<table class="compact">
+  <thead>
+    <tr><th>Prospect</th><th>Company</th><th>ICP</th><th>Step</th><th>Status</th><th>Response</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+    <% it.outboundPipeline.slice(0, 15).forEach(p => { %>
+    <tr>
+      <td><%= p.prospect_name %></td>
+      <td><%= p.prospect_company || '&mdash;' %></td>
+      <td><strong><%= p.icp_match_score %></strong></td>
+      <td><%= p.sequence_step %></td>
+      <td>
+        <select style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 12px; padding: 3px 6px;"
+          hx-post="/growth/outbound/<%= p.id %>/status"
+          hx-target="#outbound-section"
+          hx-swap="innerHTML"
+          name="status">
+          <% ['queued', 'drafted', 'sent', 'responded', 'meeting_booked', 'converted', 'lost'].forEach(s => { %>
+          <option value="<%= s %>" <%= p.status === s ? 'selected' : '' %>><%= s.replace(/_/g, ' ') %></option>
+          <% }) %>
+        </select>
+      </td>
+      <td>
+        <% if (p.status === 'responded' || p.response_type) { %>
+        <select style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 12px; padding: 3px 6px;"
+          hx-post="/growth/outbound/<%= p.id %>/response"
+          hx-target="#outbound-section"
+          hx-swap="innerHTML"
+          name="response">
+          <option value="">—</option>
+          <% ['interested', 'not_now', 'not_interested'].forEach(r => { %>
+          <option value="<%= r %>" <%= p.response_type === r ? 'selected' : '' %>><%= r.replace(/_/g, ' ') %></option>
+          <% }) %>
+        </select>
+        <% } else { %>&mdash;<% } %>
+      </td>
+      <td>
+        <% if (p.sequence_step < 3 && !p.converted) { %>
+        <button class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;"
+          hx-post="/growth/outbound/<%= p.id %>/draft"
+          hx-target="#outbound-section"
+          hx-swap="innerHTML"
+          hx-indicator="#outbound-spinner"
+          hx-disabled-elt="this">Draft</button>
+        <% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } else { %>
+  <p style="color: #94A3B8; font-size: 14px;">No prospects yet. Use the form above to add your first prospect.</p>
+<% } %>

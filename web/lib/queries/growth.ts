@@ -1,4 +1,4 @@
-import { rows, scalar } from './base.js';
+import { db, rows, scalar } from './base.js';
 
 // --- LinkedIn Content ---
 
@@ -66,6 +66,7 @@ export interface OutboundProspect {
   response_type: string | null;
   meeting_booked: number;
   converted: number;
+  notes: string | null;
   updated_at: string;
 }
 
@@ -211,4 +212,183 @@ export async function getUpsellOpportunities(): Promise<UpsellOpportunity[]> {
     ORDER BY confidence DESC, created_at DESC
     LIMIT 20
   `);
+}
+
+// ===== MUTATIONS =====
+
+// --- LinkedIn mutations ---
+
+export async function getLinkedInPost(id: number): Promise<LinkedInPost | null> {
+  const r = await rows<LinkedInPost>(
+    'SELECT id, pillar, topic, status, scheduled_date, draft, engagement_likes, engagement_comments, engagement_reposts, engagement_impressions, created_at FROM linkedin_content WHERE id = ?',
+    [id],
+  );
+  return r[0] ?? null;
+}
+
+export async function insertLinkedInIdeas(ideas: { pillar: string; topic: string; scheduledDate: string | null; meetingId: string | null }[]): Promise<void> {
+  const now = new Date().toISOString();
+  for (const idea of ideas) {
+    await db.execute({
+      sql: 'INSERT INTO linkedin_content (pillar, topic, status, scheduled_date, source_meeting_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      args: [idea.pillar, idea.topic, 'idea', idea.scheduledDate, idea.meetingId, now, now],
+    });
+  }
+}
+
+export async function updateLinkedInDraft(id: number, draft: string): Promise<void> {
+  await db.execute({
+    sql: "UPDATE linkedin_content SET draft = ?, status = 'drafted', updated_at = ? WHERE id = ?",
+    args: [draft, new Date().toISOString(), id],
+  });
+}
+
+export async function updateLinkedInStatus(id: number, status: string): Promise<void> {
+  const now = new Date().toISOString();
+  const publishedAt = status === 'published' ? now : null;
+  await db.execute({
+    sql: 'UPDATE linkedin_content SET status = ?, published_at = COALESCE(?, published_at), updated_at = ? WHERE id = ?',
+    args: [status, publishedAt, now, id],
+  });
+}
+
+export async function updateLinkedInEngagement(id: number, data: { likes: number; comments: number; reposts: number; impressions: number }): Promise<void> {
+  await db.execute({
+    sql: 'UPDATE linkedin_content SET engagement_likes = ?, engagement_comments = ?, engagement_reposts = ?, engagement_impressions = ?, updated_at = ? WHERE id = ?',
+    args: [data.likes, data.comments, data.reposts, data.impressions, new Date().toISOString(), id],
+  });
+}
+
+// --- Outbound mutations ---
+
+export async function getProspect(id: number): Promise<OutboundProspect | null> {
+  const r = await rows<OutboundProspect>(
+    'SELECT id, prospect_name, prospect_company, prospect_email, icp_match_score, channel, sequence_step, status, response_type, meeting_booked, converted, notes, updated_at FROM outbound_campaigns WHERE id = ?',
+    [id],
+  );
+  return r[0] ?? null;
+}
+
+export async function insertProspect(data: { name: string; company: string | null; email: string | null; channel: string; notes: string | null; icpScore: number }): Promise<void> {
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: 'INSERT INTO outbound_campaigns (prospect_name, prospect_company, prospect_email, icp_match_score, channel, sequence_step, status, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?)',
+    args: [data.name, data.company, data.email, data.icpScore, data.channel, 'queued', data.notes, now, now],
+  });
+}
+
+export async function updateOutboundDraft(id: number, notes: string, step: number): Promise<void> {
+  await db.execute({
+    sql: "UPDATE outbound_campaigns SET notes = ?, sequence_step = ?, status = 'drafted', updated_at = ? WHERE id = ?",
+    args: [notes, step, new Date().toISOString(), id],
+  });
+}
+
+export async function updateOutboundStatus(id: number, status: string): Promise<void> {
+  const now = new Date().toISOString();
+  const meetingBooked = status === 'meeting_booked' ? 1 : null;
+  const converted = status === 'converted' ? 1 : null;
+  await db.execute({
+    sql: 'UPDATE outbound_campaigns SET status = ?, meeting_booked = COALESCE(?, meeting_booked), converted = COALESCE(?, converted), updated_at = ? WHERE id = ?',
+    args: [status, meetingBooked, converted, now, id],
+  });
+}
+
+export async function updateOutboundResponse(id: number, responseType: string): Promise<void> {
+  await db.execute({
+    sql: "UPDATE outbound_campaigns SET response_type = ?, status = 'responded', last_contact_at = ?, updated_at = ? WHERE id = ?",
+    args: [responseType, new Date().toISOString(), new Date().toISOString(), id],
+  });
+}
+
+// --- Case Study mutations ---
+
+export async function getCaseStudy(id: number): Promise<(CaseStudy & { draft?: string }) | null> {
+  const r = await rows<CaseStudy & { draft?: string }>(
+    'SELECT id, client_name, win_type, metric_highlight, client_approved, anonymous, status, draft, created_at FROM case_studies WHERE id = ?',
+    [id],
+  );
+  return r[0] ?? null;
+}
+
+export async function insertCaseStudies(wins: { clientName: string; winType: string; metric: string }[]): Promise<void> {
+  const now = new Date().toISOString();
+  for (const w of wins) {
+    await db.execute({
+      sql: "INSERT INTO case_studies (client_name, win_type, metric_highlight, status, created_at, updated_at) VALUES (?, ?, ?, 'identified', ?, ?)",
+      args: [w.clientName, w.winType, w.metric, now, now],
+    });
+  }
+}
+
+export async function updateCaseStudyDraft(id: number, draft: string, distribution: string): Promise<void> {
+  await db.execute({
+    sql: "UPDATE case_studies SET draft = ?, distribution = ?, status = 'drafted', updated_at = ? WHERE id = ?",
+    args: [draft, distribution, new Date().toISOString(), id],
+  });
+}
+
+export async function updateCaseStudyStatus(id: number, status: string): Promise<void> {
+  const publishedAt = status === 'published' ? new Date().toISOString() : null;
+  await db.execute({
+    sql: 'UPDATE case_studies SET status = ?, published_at = COALESCE(?, published_at), updated_at = ? WHERE id = ?',
+    args: [status, publishedAt, new Date().toISOString(), id],
+  });
+}
+
+export async function updateCaseStudyApproval(id: number, approved: boolean, anonymous: boolean): Promise<void> {
+  await db.execute({
+    sql: 'UPDATE case_studies SET client_approved = ?, anonymous = ?, updated_at = ? WHERE id = ?',
+    args: [approved ? 1 : 0, anonymous ? 1 : 0, new Date().toISOString(), id],
+  });
+}
+
+// --- Referral mutations ---
+
+export async function insertReferral(data: { referrerName: string; referrerType: string; referredName: string; referredCompany: string | null }): Promise<void> {
+  const rewardRules: Record<string, { type: string; amount: number }> = {
+    client: { type: 'invoice_credit', amount: 250 },
+    partner: { type: 'commission', amount: 500 },
+    employee: { type: 'bonus', amount: 100 },
+  };
+  const reward = rewardRules[data.referrerType] ?? rewardRules.client;
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: "INSERT INTO referrals (referrer_name, referrer_type, referred_name, referred_company, status, reward_type, reward_amount, created_at, updated_at) VALUES (?, ?, ?, ?, 'received', ?, ?, ?, ?)",
+    args: [data.referrerName, data.referrerType, data.referredName, data.referredCompany, reward.type, reward.amount, now, now],
+  });
+}
+
+export async function updateReferralStatus(id: number, status: string): Promise<void> {
+  const converted = status === 'converted' ? 1 : null;
+  await db.execute({
+    sql: 'UPDATE referrals SET status = ?, converted = COALESCE(?, converted), updated_at = ? WHERE id = ?',
+    args: [status, converted, new Date().toISOString(), id],
+  });
+}
+
+export async function markReferralPaid(id: number): Promise<void> {
+  await db.execute({
+    sql: 'UPDATE referrals SET reward_paid = 1, updated_at = ? WHERE id = ?',
+    args: [new Date().toISOString(), id],
+  });
+}
+
+// --- Upsell mutations ---
+
+export async function insertUpsellOpportunities(opps: { clientName: string; triggerType: string; signal: string; confidence: number; action: string }[]): Promise<void> {
+  const now = new Date().toISOString();
+  for (const o of opps) {
+    await db.execute({
+      sql: "INSERT INTO upsell_opportunities (client_name, trigger_type, signal, confidence, recommended_action, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'identified', ?, ?)",
+      args: [o.clientName, o.triggerType, o.signal, o.confidence, o.action, now, now],
+    });
+  }
+}
+
+export async function updateUpsellStatus(id: number, status: string, outcome?: string): Promise<void> {
+  await db.execute({
+    sql: 'UPDATE upsell_opportunities SET status = ?, outcome = COALESCE(?, outcome), updated_at = ? WHERE id = ?',
+    args: [status, outcome ?? null, new Date().toISOString(), id],
+  });
 }

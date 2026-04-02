@@ -1,0 +1,47 @@
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+  <h2 style="margin: 0;">Upsell Opportunities</h2>
+  <button class="btn btn-primary btn-sm"
+    hx-post="/growth/upsell/scan"
+    hx-target="#upsell-section"
+    hx-swap="innerHTML"
+    hx-indicator="#upsell-spinner"
+    hx-disabled-elt="this">
+    Scan for Opportunities
+  </button>
+</div>
+<div id="upsell-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Scanning performance data for upsell signals...</div>
+
+<% if (it.message) { %>
+<div style="padding: 0.5rem 1rem; margin-bottom: 0.75rem; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; font-size: 13px; color: #22C55E;"><%= it.message %></div>
+<% } %>
+
+<% if (!it.upsells || !it.upsells.length) { %>
+  <article><p style="color: #94A3B8; font-size: 14px;">No upsell opportunities detected. Click "Scan" to analyse your ad performance and meeting data.</p></article>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr><th>Client</th><th>Trigger</th><th>Confidence</th><th>Recommended Action</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <% it.upsells.forEach(u => { %>
+    <tr>
+      <td><strong><%= u.client_name %></strong></td>
+      <td><%= (u.trigger_type || '').replace(/_/g, ' ') %></td>
+      <td><strong><%= Math.round(u.confidence * 100) %>%</strong></td>
+      <td><%= (u.recommended_action || '').slice(0, 50) %></td>
+      <td>
+        <select style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 12px; padding: 3px 6px;"
+          hx-post="/growth/upsell/<%= u.id %>/status"
+          hx-target="#upsell-section"
+          hx-swap="innerHTML"
+          name="status">
+          <% ['identified', 'pitched', 'won', 'lost'].forEach(s => { %>
+          <option value="<%= s %>" <%= u.status === s ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

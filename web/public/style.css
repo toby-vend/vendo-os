@@ -786,7 +786,37 @@ mark {
   color: var(--vendo-green);
 }
 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--vendo-border-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vendo-text-muted);
+  font-size: 13px;
+  font-family: var(--vendo-sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:hover { border-color: var(--vendo-green); color: var(--vendo-green); }
+.btn:disabled, .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--vendo-green);
+  color: #0B0B0B;
+  border-color: var(--vendo-green);
+  font-weight: 600;
+}
+.btn-primary:hover { background: #1eb34e; }
+
 .btn-sm { padding: 0.375rem 0.75rem; font-size: 12px; }
+
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator { display: block; }
+.htmx-request.htmx-indicator { display: block; }
 
 .alert-error {
   padding: 1rem;

@@ -1,0 +1,73 @@
+<h2>Referrals</h2>
+
+<!-- Add Referral form -->
+<form method="POST" action="/growth/referrals/add" style="display: flex; gap: 0.5rem; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap;">
+  <div>
+    <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Referrer *</label>
+    <input type="text" name="referrerName" required placeholder="Existing Client" style="width: 140px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+  </div>
+  <div>
+    <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Type *</label>
+    <select name="referrerType" required style="padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+      <option value="client">Client</option>
+      <option value="partner">Partner</option>
+      <option value="employee">Employee</option>
+    </select>
+  </div>
+  <div>
+    <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Referred Name *</label>
+    <input type="text" name="referredName" required placeholder="New Lead" style="width: 140px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+  </div>
+  <div>
+    <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Company</label>
+    <input type="text" name="referredCompany" placeholder="Their Company" style="width: 140px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+  </div>
+  <button type="submit" class="btn btn-primary btn-sm">Add Referral</button>
+</form>
+
+<% if (it.message) { %>
+<div style="padding: 0.5rem 1rem; margin-bottom: 0.75rem; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; font-size: 13px; color: #22C55E;"><%= it.message %></div>
+<% } %>
+
+<% if (!it.referrals || !it.referrals.length) { %>
+  <p style="color: #94A3B8; font-size: 14px;">No referrals tracked yet. Use the form above to log a referral.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr><th>Referrer</th><th>Type</th><th>Referred</th><th>Status</th><th>Reward</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+    <% it.referrals.forEach(r => { %>
+    <tr>
+      <td><%= r.referrer_name %></td>
+      <td><span class="badge badge-default"><%= r.referrer_type %></span></td>
+      <td><%= r.referred_name %><% if (r.referred_company) { %> <small>(<%= r.referred_company %>)</small><% } %></td>
+      <td>
+        <select style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 12px; padding: 3px 6px;"
+          hx-post="/growth/referrals/<%= r.id %>/status"
+          hx-target="#referrals-section"
+          hx-swap="innerHTML"
+          name="status">
+          <% ['received', 'contacted', 'converted', 'lost'].forEach(s => { %>
+          <option value="<%= s %>" <%= r.status === s || (r.converted && s === 'converted') ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </td>
+      <td>
+        <% if (r.converted) { %>
+          &pound;<%= r.reward_amount %> <small><%= r.reward_paid ? '(paid)' : '(owing)' %></small>
+        <% } else { %>&mdash;<% } %>
+      </td>
+      <td>
+        <% if (r.converted && !r.reward_paid) { %>
+        <button class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;"
+          hx-post="/growth/referrals/<%= r.id %>/paid"
+          hx-target="#referrals-section"
+          hx-swap="innerHTML">Mark Paid</button>
+        <% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
