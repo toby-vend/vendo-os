@@ -227,13 +227,16 @@ describe('runSOPCheck', () => {
     assert.strictEqual(anthropicHolder.callCount, 1, 'Should make one call');
   });
 
-  it('Test 5: throws on Anthropic error', async () => {
-    anthropicHolder.error = new Error('Haiku API error');
+  it('Test 5: throws on Anthropic error (propagates from mock)', async () => {
+    anthropicHolder.error = new Error('Haiku API unavailable');
 
     await assert.rejects(
       async () => runSOPCheck('Draft', 'SOP'),
       (err: Error) => {
-        assert.ok(err.message.includes('Haiku API error'), 'Error should propagate');
+        assert.ok(
+          err.message.includes('Haiku API unavailable'),
+          `Error should propagate, got: ${err.message}`,
+        );
         return true;
       },
     );
