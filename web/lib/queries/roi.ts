@@ -160,8 +160,11 @@ export async function getROIByTreatment(clientId: number, days = 30): Promise<Tr
 
 // --- GHL-based ROI (derived from opportunity stages + tags) ---
 
-// Stage mapping: Booked Appointment / Follow Up (post appointment) = in_progress, Won status = won
+// Stage mapping:
+// Booked Appointment / Follow Up (post appointment) = in_progress
+// Won stage = won (note: GHL "Won" is a stage name, not the status field)
 const IN_PROGRESS_STAGES = ['Booked Appointment', 'Follow Up (post appointment)'];
+const WON_STAGES = ['Won'];
 
 function ghlLocationFilter(clientId: number): { clause: string; args: (string | number)[] } {
   return {
@@ -249,7 +252,7 @@ export async function getGhlROI(clientId: number, days = 30): Promise<GhlROISumm
 
   for (const opp of opps) {
     const isInProgress = IN_PROGRESS_STAGES.includes(opp.stage_name || '');
-    const isWon = opp.status === 'won';
+    const isWon = WON_STAGES.includes(opp.stage_name || '');
 
     // Determine channel from opportunity source field first, then fall back to tags
     let channels: string[] = [];
