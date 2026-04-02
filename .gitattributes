@@ -1,17 +1,3 @@
-# git-crypt: files matching these patterns are encrypted at rest in git
-# Only team members with a GPG key added via `git-crypt add-gpg-user` can decrypt
-
-# Financial data and KPIs
-context/current-data.md filter=git-crypt diff=git-crypt
-
-# Sensitive outputs
-outputs/briefs/**/*.md filter=git-crypt diff=git-crypt
-outputs/analyses/**/*.md filter=git-crypt diff=git-crypt
-outputs/decisions/**/*.md filter=git-crypt diff=git-crypt
-
-# Decision journal (contains strategic reasoning and financial context)
-data/decisions/**/*.md filter=git-crypt diff=git-crypt
-
 # Environment template with sensitive defaults (if any)
 .env.example !filter !diff
 
