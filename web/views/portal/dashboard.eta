@@ -1,0 +1,99 @@
+<% layout('/portal/layout') %>
+
+<div id="portal-dashboard-content">
+
+<div class="portal-kpi-grid">
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.roi.total_leads.toLocaleString() %></div>
+    <div class="kpi-label">Total Leads</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= it.roi.total_spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
+    <div class="kpi-label">Total Ad Spend</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= it.roi.cpl > 0 ? it.roi.cpl.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00' %></div>
+    <div class="kpi-label">Blended CPL</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.roi.conversion_rate.toFixed(1) %>%</div>
+    <div class="kpi-label">Conversion Rate</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= it.roi.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
+    <div class="kpi-label">Estimated Revenue</div>
+  </div>
+  <div class="portal-kpi<%= it.roi.roi_percent >= 0 ? ' kpi-positive' : ' kpi-negative' %>">
+    <div class="kpi-value"><%= it.roi.roi_percent.toFixed(1) %>%</div>
+    <div class="kpi-label">Blended ROI</div>
+  </div>
+</div>
+
+<div class="portal-two-col">
+  <!-- Channel Breakdown -->
+  <div class="portal-section">
+    <h2>Leads by Channel</h2>
+    <% if (it.leadsByChannel.length === 0) { %>
+      <div class="portal-empty">No lead data available for this period.</div>
+    <% } else { %>
+      <% const maxLeads = Math.max(...it.leadsByChannel.map(c => c.lead_count), 1); %>
+      <% it.leadsByChannel.forEach(ch => { %>
+        <%
+          const pct = Math.round((ch.lead_count / maxLeads) * 100);
+          const colourClass = ch.channel === 'meta_ads' ? 'channel-meta'
+            : ch.channel === 'google_ads' ? 'channel-google'
+            : ch.channel === 'organic' ? 'channel-organic'
+            : ch.channel === 'direct' ? 'channel-direct'
+            : ch.channel === 'referral' ? 'channel-referral'
+            : 'channel-other';
+          const label = ch.channel.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        %>
+        <div class="channel-bar-wrap">
+          <div class="channel-bar-name"><%= label %></div>
+          <div class="channel-bar-track">
+            <div class="channel-bar-fill <%= colourClass %>" style="width: <%= pct %>%"><%= ch.lead_count %></div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <!-- Conversion Funnel -->
+  <div class="portal-section">
+    <h2>Conversion Funnel</h2>
+    <% if (it.funnel.length === 0) { %>
+      <div class="portal-empty">No funnel data available for this period.</div>
+    <% } else { %>
+      <% const maxFunnel = Math.max(...it.funnel.map(f => f.count), 1); %>
+      <% const funnelOrder = ['lead', 'qualified', 'booked', 'attended', 'converted']; %>
+      <% funnelOrder.forEach(stage => { %>
+        <% const item = it.funnel.find(f => f.stage === stage); %>
+        <% if (item) { %>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar-label">
+              <span><%= stage %></span>
+              <span><%= item.count %></span>
+            </div>
+            <div class="funnel-bar-track">
+              <div class="funnel-bar-fill" style="width: <%= Math.round((item.count / maxFunnel) * 100) %>%"></div>
+            </div>
+          </div>
+        <% } %>
+      <% }) %>
+      <% const lostItem = it.funnel.find(f => f.stage === 'lost'); %>
+      <% if (lostItem) { %>
+        <div class="funnel-bar-wrap" style="margin-top: 0.5rem; opacity: 0.6;">
+          <div class="funnel-bar-label">
+            <span>Lost</span>
+            <span><%= lostItem.count %></span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width: <%= Math.round((lostItem.count / maxFunnel) * 100) %>%; background: #F87171;"></div>
+          </div>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+</div>
+
+</div>

@@ -1,0 +1,153 @@
+<% layout('/portal/layout') %>
+
+<div id="portal-seo-content">
+
+<% if (!it.gscSummary && it.ga4Summary.length === 0) { %>
+  <div class="portal-empty" style="margin-top: 2rem;">No SEO data available for this period. GA4 and Google Search Console data will appear here once synced.</div>
+<% } else { %>
+
+<!-- GSC Summary KPIs -->
+<% if (it.gscSummary) { %>
+<div class="portal-kpi-grid">
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.gscSummary.total_clicks.toLocaleString() %></div>
+    <div class="kpi-label">Search Clicks</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.gscSummary.total_impressions.toLocaleString() %></div>
+    <div class="kpi-label">Search Impressions</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.gscSummary.avg_ctr.toFixed(2) %>%</div>
+    <div class="kpi-label">Average CTR</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.gscSummary.avg_position ? it.gscSummary.avg_position.toFixed(1) : '—' %></div>
+    <div class="kpi-label">Average Position</div>
+  </div>
+</div>
+<% } %>
+
+<!-- Organic Sessions & GA4 -->
+<% if (it.ga4Summary.length > 0) { %>
+<%
+  const totalSessions = it.ga4Summary.reduce((s, d) => s + d.sessions, 0);
+  const totalUsers = it.ga4Summary.reduce((s, d) => s + d.users, 0);
+  const totalPageViews = it.ga4Summary.reduce((s, d) => s + d.page_views, 0);
+  const totalConversions = it.ga4Summary.reduce((s, d) => s + d.conversions, 0);
+%>
+<div class="portal-kpi-grid" style="margin-bottom: 1.5rem;">
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= totalSessions.toLocaleString() %></div>
+    <div class="kpi-label">Total Sessions</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= totalUsers.toLocaleString() %></div>
+    <div class="kpi-label">Total Users</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= totalPageViews.toLocaleString() %></div>
+    <div class="kpi-label">Page Views</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= totalConversions.toLocaleString() %></div>
+    <div class="kpi-label">Conversions</div>
+  </div>
+</div>
+<% } %>
+
+<!-- Organic Traffic Trend -->
+<% if (it.organicTrend.length > 0) { %>
+<div class="portal-section">
+  <h2>Organic Sessions Trend</h2>
+  <table class="compact">
+    <thead>
+      <tr><th>Date</th><th>Sessions</th><th>Users</th><th>Conversions</th></tr>
+    </thead>
+    <tbody>
+      <% it.organicTrend.forEach(d => { %>
+      <tr>
+        <td><%= d.date %></td>
+        <td><%= d.sessions.toLocaleString() %></td>
+        <td><%= d.users.toLocaleString() %></td>
+        <td><%= d.conversions.toLocaleString() %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<div class="portal-two-col">
+  <!-- Traffic Sources -->
+  <% if (it.trafficSources.length > 0) { %>
+  <div class="portal-section">
+    <h2>Traffic Sources</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Source</th><th>Medium</th><th>Sessions</th><th>Users</th><th>Conversions</th></tr>
+      </thead>
+      <tbody>
+        <% it.trafficSources.slice(0, 15).forEach(ts => { %>
+        <tr>
+          <td><%= ts.source || '(not set)' %></td>
+          <td><%= ts.medium || '(not set)' %></td>
+          <td><%= ts.sessions.toLocaleString() %></td>
+          <td><%= ts.users.toLocaleString() %></td>
+          <td><%= ts.conversions.toLocaleString() %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+
+  <!-- Top Keywords -->
+  <% if (it.topQueries.length > 0) { %>
+  <div class="portal-section">
+    <h2>Top Search Queries</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Query</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th></tr>
+      </thead>
+      <tbody>
+        <% it.topQueries.forEach(q => { %>
+        <tr>
+          <td><%= q.query %></td>
+          <td><%= q.clicks.toLocaleString() %></td>
+          <td><%= q.impressions.toLocaleString() %></td>
+          <td><%= q.ctr.toFixed(2) %>%</td>
+          <td><%= q.position.toFixed(1) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<!-- Top Pages -->
+<% if (it.topPages.length > 0) { %>
+<div class="portal-section">
+  <h2>Top Landing Pages</h2>
+  <table class="compact">
+    <thead>
+      <tr><th>Page</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th></tr>
+    </thead>
+    <tbody>
+      <% it.topPages.forEach(p => { %>
+      <tr>
+        <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= p.page %>"><%= p.page %></td>
+        <td><%= p.clicks.toLocaleString() %></td>
+        <td><%= p.impressions.toLocaleString() %></td>
+        <td><%= p.ctr.toFixed(2) %>%</td>
+        <td><%= p.position.toFixed(1) %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<% } %>
+</div>

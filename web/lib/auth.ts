@@ -7,16 +7,18 @@ export interface SessionUser {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'standard';
+  role: 'admin' | 'standard' | 'client';
   mustChangePassword: boolean;
   channels: string[];       // channel slugs
   allowedRoutes: string[];  // route slugs
   googleConnected: boolean;
+  clientId: number | null;  // set when role === 'client'
+  clientName: string | null;
 }
 
 export interface SessionPayload {
   userId: string;
-  role: 'admin' | 'standard';
+  role: 'admin' | 'standard' | 'client';
   iat: number;
 }
 

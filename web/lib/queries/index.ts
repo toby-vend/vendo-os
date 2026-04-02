@@ -9,3 +9,7 @@ export * from './drive.js';
 export * from './task-runs.js';
 export * from './growth.js';
 export * from './clients.js';
+export * from './roi.js';
+export * from './ga4.js';
+export * from './gsc.js';
+export * from './attribution.js';

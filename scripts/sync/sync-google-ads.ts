@@ -149,7 +149,9 @@ async function fetchCampaignSpend(customerId: string, dateFrom: string, dateTo: 
       campaign.status,
       metrics.cost_micros,
       metrics.impressions,
-      metrics.clicks
+      metrics.clicks,
+      metrics.conversions,
+      metrics.conversions_value
     FROM campaign
     WHERE segments.date BETWEEN '${dateFrom}' AND '${dateTo}'
     ORDER BY segments.date DESC
@@ -197,11 +199,12 @@ async function syncGoogleAds() {
     log('GADS', `Fetching campaign spend from ${dateFrom} to ${dateTo} (${days} days)`);
 
     const upsertSpend = db.prepare(
-      `INSERT INTO gads_campaign_spend (date, account_id, account_name, campaign_id, campaign_name, campaign_status, spend_micros, spend, impressions, clicks, synced_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO gads_campaign_spend (date, account_id, account_name, campaign_id, campaign_name, campaign_status, spend_micros, spend, impressions, clicks, conversions, conversion_value, cost_per_conversion, synced_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(date, account_id, campaign_id) DO UPDATE SET
          account_name=excluded.account_name, campaign_name=excluded.campaign_name, campaign_status=excluded.campaign_status,
-         spend_micros=excluded.spend_micros, spend=excluded.spend, impressions=excluded.impressions, clicks=excluded.clicks, synced_at=excluded.synced_at`
+         spend_micros=excluded.spend_micros, spend=excluded.spend, impressions=excluded.impressions, clicks=excluded.clicks,
+         conversions=excluded.conversions, conversion_value=excluded.conversion_value, cost_per_conversion=excluded.cost_per_conversion, synced_at=excluded.synced_at`
     );
 
     let totalRows = 0;
@@ -219,6 +222,9 @@ async function syncGoogleAds() {
         for (const row of rows) {
           const costMicros = Number(row.metrics?.costMicros || 0);
           const spend = costMicros / 1_000_000;
+          const conversions = Number(row.metrics?.conversions || 0);
+          const conversionValue = Number(row.metrics?.conversionsValue || 0);
+          const costPerConversion = conversions > 0 ? spend / conversions : 0;
 
           upsertSpend.run([
             row.segments.date,
@@ -231,6 +237,9 @@ async function syncGoogleAds() {
             spend,
             Number(row.metrics?.impressions || 0),
             Number(row.metrics?.clicks || 0),
+            conversions,
+            conversionValue,
+            costPerConversion,
             now,
           ]);
         }

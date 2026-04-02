@@ -1,0 +1,99 @@
+<% layout('/layouts/base') %>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600;">Portal Users</h2>
+  <button onclick="document.getElementById('create-form').style.display = document.getElementById('create-form').style.display === 'none' ? 'block' : 'none'"
+          style="padding: 8px 16px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;">
+    + New Portal User
+  </button>
+</div>
+
+<% if (it.error) { %>
+<div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #ef4444; font-size: 14px;">
+  <%= it.error %>
+</div>
+<% } %>
+
+<!-- Create Form -->
+<div id="create-form" style="display: none; margin-bottom: 1.5rem;">
+  <div class="card" style="padding: 1.5rem;">
+    <h3 style="margin-bottom: 1rem; font-size: 16px; font-weight: 600;">Create Client Portal User</h3>
+    <form method="POST" action="/admin/portal-users">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Name</label>
+          <input type="text" name="name" required placeholder="Contact name"
+                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Email</label>
+          <input type="email" name="email" required placeholder="client@example.com"
+                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Temporary Password</label>
+          <input type="text" name="password" required placeholder="They will change this on first login"
+                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Client</label>
+          <select name="client_id" id="portal-client-select" required
+                  onchange="var opt = this.options[this.selectedIndex]; document.getElementById('portal-client-name').value = opt.dataset.name || '';"
+                  style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+            <option value="">Select a client...</option>
+            <% (it.clients || []).forEach(c => { %>
+            <option value="<%= c.id %>" data-name="<%= c.label %>"><%= c.label %></option>
+            <% }) %>
+          </select>
+          <input type="hidden" name="client_name" id="portal-client-name" value="">
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="submit" style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;">Create Portal User</button>
+        <button type="button" onclick="document.getElementById('create-form').style.display='none'" style="padding: 8px 20px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Portal Users Table -->
+<div class="card" style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Name</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Email</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Client</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Created</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Status</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!it.portalUsers || it.portalUsers.length === 0) { %>
+      <tr><td colspan="6" style="padding: 2rem; text-align: center; color: #64748B;">No portal users yet. Create one above to give a client access to their dashboard.</td></tr>
+      <% } else { %>
+      <% it.portalUsers.forEach(u => { %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <td style="padding: 12px 16px; font-size: 14px; color: #E2E8F0; font-weight: 500;"><%= u.name %></td>
+        <td style="padding: 12px 16px; font-size: 14px; color: #94A3B8;"><%= u.email %></td>
+        <td style="padding: 12px 16px; font-size: 14px; color: #94A3B8;"><%= u.client_name || '—' %></td>
+        <td style="padding: 12px 16px; font-size: 13px; color: #64748B;"><%= u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—' %></td>
+        <td style="padding: 12px 16px;">
+          <% if (u.must_change_password) { %>
+          <span style="font-size: 12px; color: #F59E0B;">Pending</span>
+          <% } else { %>
+          <span style="font-size: 12px; color: #22C55E;">Active</span>
+          <% } %>
+        </td>
+        <td style="padding: 12px 16px; text-align: right;">
+          <button onclick="if(confirm('Delete portal user <%= u.name %>? This cannot be undone.')) document.getElementById('delete-<%= u.id %>').submit()"
+                  style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer;">Delete</button>
+          <form id="delete-<%= u.id %>" method="POST" action="/admin/portal-users/<%= u.id %>/delete" style="display:none;"></form>
+        </td>
+      </tr>
+      <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>

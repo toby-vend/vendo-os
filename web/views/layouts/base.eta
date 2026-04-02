@@ -133,6 +133,14 @@
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
             <span class="nav-label">Usage</span>
           </a>
+          <a href="/admin/client-mapping" class="nav-item<%= it.currentPath?.startsWith('/admin/client-mapping') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            <span class="nav-label">Mapping</span>
+          </a>
+          <a href="/admin/portal-users" class="nav-item<%= it.currentPath?.startsWith('/admin/portal-users') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <span class="nav-label">Portal Users</span>
+          </a>
         </div>
         <% } %>
       </nav>
@@ -156,7 +164,7 @@
           <button class="mobile-menu-btn" onclick="toggleSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Content Tasks', '/tasks/new': 'New Task', '/asana-tasks': 'Asana Tasks', '/skills': 'Skills Library', '/growth': 'Growth' }; if (it.currentPath?.startsWith('/growth/linkedin/')) pageNames[it.currentPath] = 'LinkedIn Post'; %>
+          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Content Tasks', '/tasks/new': 'New Task', '/asana-tasks': 'Asana Tasks', '/skills': 'Skills Library', '/growth': 'Growth', '/admin/clients': 'Client Hub', '/admin/client-mapping': 'Client Mapping', '/admin/portal-users': 'Portal Users' }; if (it.currentPath?.startsWith('/growth/linkedin/')) pageNames[it.currentPath] = 'LinkedIn Post'; %>
           <h1 class="topbar-title"><%= pageNames[it.currentPath] || 'Vendo OS' %></h1>
         </div>
         <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">

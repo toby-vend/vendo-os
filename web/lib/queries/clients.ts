@@ -222,3 +222,75 @@ export async function getClientEnrichedData(clientId: number): Promise<ClientDet
     ghlOpps,
   };
 }
+
+// --- Client-account mapping (client_account_map) ---
+
+export interface ClientAccountMapping {
+  id: number;
+  client_id: number;
+  client_name: string;
+  platform: string;
+  platform_account_id: string;
+  platform_account_name: string | null;
+  crm_type: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GhlLocationRow {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+}
+
+export async function getAllClientMappings(): Promise<ClientAccountMapping[]> {
+  return rows<ClientAccountMapping>(`
+    SELECT id, client_id, client_name, platform, platform_account_id,
+           platform_account_name, crm_type, created_at, updated_at
+    FROM client_account_map
+    ORDER BY client_name COLLATE NOCASE, platform
+  `);
+}
+
+export async function addClientMapping(mapping: {
+  client_id: number;
+  client_name: string;
+  platform: string;
+  platform_account_id: string;
+  platform_account_name: string;
+  crm_type: string;
+}): Promise<void> {
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `INSERT INTO client_account_map
+          (client_id, client_name, platform, platform_account_id, platform_account_name, crm_type, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      mapping.client_id,
+      mapping.client_name,
+      mapping.platform,
+      mapping.platform_account_id,
+      mapping.platform_account_name,
+      mapping.crm_type,
+      now,
+      now,
+    ],
+  });
+}
+
+export async function removeClientMapping(mappingId: number): Promise<void> {
+  await db.execute({ sql: 'DELETE FROM client_account_map WHERE id = ?', args: [mappingId] });
+}
+
+export async function getGhlLocations(): Promise<GhlLocationRow[]> {
+  try {
+    return await rows<GhlLocationRow>(
+      'SELECT id, name, email, phone, address FROM ghl_locations ORDER BY name COLLATE NOCASE',
+    );
+  } catch {
+    // Table may not exist yet if discover script hasn't run
+    return [];
+  }
+}

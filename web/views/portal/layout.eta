@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= it.pageTitle ? it.pageTitle + ' — Vendo Digital' : 'Vendo Digital — Client Portal' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+  <style>
+    /* Portal-specific overrides */
+    .portal-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+    }
+    .portal-brand-text {
+      font-family: var(--vendo-serif);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--vendo-text-heading);
+      letter-spacing: 0.02em;
+    }
+    .portal-brand-sub {
+      font-size: 11px;
+      color: var(--vendo-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .portal-client-name {
+      font-size: 13px;
+      color: var(--vendo-green);
+      font-weight: 500;
+      padding: 0.5rem 1.25rem;
+      border-bottom: 1px solid var(--vendo-border);
+    }
+    .portal-date-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .portal-date-selector select {
+      background: var(--vendo-surface);
+      color: var(--vendo-text);
+      border: 1px solid var(--vendo-border-strong);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 13px;
+      font-family: var(--vendo-sans);
+      cursor: pointer;
+    }
+    .portal-date-selector select:focus {
+      outline: none;
+      border-color: var(--vendo-green);
+    }
+    .portal-date-selector label {
+      font-size: 12px;
+      color: var(--vendo-text-muted);
+    }
+
+    /* KPI card enhancements for portal */
+    .portal-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .portal-kpi {
+      background: var(--vendo-surface);
+      border: 1px solid var(--vendo-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      transition: border-color 0.2s;
+    }
+    .portal-kpi:hover {
+      border-color: var(--vendo-border-strong);
+    }
+    .portal-kpi .kpi-value {
+      font-family: var(--vendo-serif);
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--vendo-text-heading);
+      line-height: 1.1;
+    }
+    .portal-kpi .kpi-label {
+      font-size: 12px;
+      color: var(--vendo-text-muted);
+      margin-top: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .portal-kpi .kpi-sub {
+      font-size: 12px;
+      color: var(--vendo-text-muted);
+      margin-top: 0.25rem;
+    }
+    .portal-kpi.kpi-positive .kpi-value { color: var(--vendo-green); }
+    .portal-kpi.kpi-negative .kpi-value { color: #F87171; }
+
+    /* Section card */
+    .portal-section {
+      background: var(--vendo-surface);
+      border: 1px solid var(--vendo-border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .portal-section h2 {
+      font-family: var(--vendo-serif);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--vendo-text-heading);
+      margin-bottom: 1rem;
+    }
+    .portal-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .portal-two-col { grid-template-columns: 1fr; }
+    }
+
+    /* Funnel styles */
+    .funnel-bar-wrap {
+      margin-bottom: 0.75rem;
+    }
+    .funnel-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 0.25rem;
+    }
+    .funnel-bar-label span:first-child {
+      text-transform: capitalize;
+      color: var(--vendo-text);
+    }
+    .funnel-bar-label span:last-child {
+      color: var(--vendo-text-muted);
+    }
+    .funnel-bar-track {
+      height: 8px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .funnel-bar-fill {
+      height: 100%;
+      background: var(--vendo-green);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* Channel breakdown bars */
+    .channel-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .channel-bar-name {
+      width: 100px;
+      font-size: 13px;
+      color: var(--vendo-text);
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .channel-bar-track {
+      flex: 1;
+      height: 24px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .channel-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 12px;
+      color: #0B0B0B;
+      font-weight: 600;
+      transition: width 0.4s ease;
+    }
+    .channel-meta { background: #3B82F6; }
+    .channel-google { background: var(--vendo-green); }
+    .channel-organic { background: #A78BFA; }
+    .channel-direct { background: #F59E0B; }
+    .channel-referral { background: #EC4899; }
+    .channel-other { background: #64748B; }
+
+    /* Filter bar for portal */
+    .portal-filters {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .portal-filters select,
+    .portal-filters input {
+      background: var(--vendo-surface);
+      color: var(--vendo-text);
+      border: 1px solid var(--vendo-border-strong);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-family: var(--vendo-sans);
+    }
+    .portal-filters label {
+      font-size: 12px;
+      color: var(--vendo-text-muted);
+    }
+
+    /* Pagination */
+    .portal-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      font-size: 13px;
+      color: var(--vendo-text-muted);
+    }
+    .portal-pagination a {
+      padding: 5px 12px;
+      background: var(--vendo-surface);
+      border: 1px solid var(--vendo-border-strong);
+      border-radius: 6px;
+      color: var(--vendo-text);
+      text-decoration: none;
+      font-size: 12px;
+    }
+    .portal-pagination a:hover {
+      border-color: var(--vendo-green);
+    }
+    .portal-pagination a.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* Empty state */
+    .portal-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--vendo-text-muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-icon">V</div>
+          <div class="logo-text">
+            <span class="portal-brand-text">Vendo Digital</span>
+            <span class="portal-brand-sub">Client Portal</span>
+          </div>
+        </div>
+      </div>
+
+      <% if (it.clientName) { %>
+      <div class="portal-client-name"><%= it.clientName %></div>
+      <% } %>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <span class="nav-section-label">Reports</span>
+          <a href="/portal" class="nav-item<%= it.currentPath === '/portal' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span class="nav-label">Dashboard</span>
+          </a>
+          <a href="/portal/seo" class="nav-item<%= it.currentPath === '/portal/seo' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span class="nav-label">SEO</span>
+          </a>
+          <a href="/portal/ads" class="nav-item<%= it.currentPath === '/portal/ads' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span class="nav-label">Ads</span>
+          </a>
+          <a href="/portal/leads" class="nav-item<%= it.currentPath === '/portal/leads' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            <span class="nav-label">Leads</span>
+          </a>
+          <a href="/portal/roi" class="nav-item<%= it.currentPath === '/portal/roi' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <span class="nav-label">ROI</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="/logout" class="nav-item">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span class="nav-label">Logout</span>
+        </a>
+        <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
+          <svg class="nav-icon toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
+          <span class="nav-label">Collapse</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <h1 class="topbar-title"><%= it.pageTitle || 'Dashboard' %></h1>
+        </div>
+        <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">
+          <div class="portal-date-selector">
+            <label for="portal-days">Period:</label>
+            <select id="portal-days" onchange="updatePortalPeriod(this.value)">
+              <option value="7" <%= it.days === 7 ? 'selected' : '' %>>Last 7 days</option>
+              <option value="30" <%= it.days === 30 ? 'selected' : '' %>>Last 30 days</option>
+              <option value="90" <%= it.days === 90 ? 'selected' : '' %>>Last 90 days</option>
+              <option value="180" <%= it.days === 180 ? 'selected' : '' %>>Last 6 months</option>
+              <option value="365" <%= it.days === 365 ? 'selected' : '' %>>Last 12 months</option>
+            </select>
+          </div>
+          <span class="topbar-date"><%= new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <%~ it.body %>
+      </main>
+    </div>
+  </div>
+
+  <script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const layout = document.querySelector('.app-layout');
+    sidebar.classList.toggle('collapsed');
+    layout.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+  }
+  if (localStorage.getItem('sidebarCollapsed') === 'true') {
+    document.getElementById('sidebar').classList.add('collapsed');
+    document.querySelector('.app-layout').classList.add('sidebar-collapsed');
+  }
+
+  function updatePortalPeriod(days) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('days', days);
+    window.location.href = url.toString();
+  }
+  </script>
+</body>
+</html>

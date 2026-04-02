@@ -1,0 +1,125 @@
+<% layout('/portal/layout') %>
+
+<div id="portal-ads-content">
+
+<% if (it.channelSpend.length === 0) { %>
+  <div class="portal-empty" style="margin-top: 2rem;">No advertising data available for this period.</div>
+<% } else { %>
+
+<!-- Spend KPIs -->
+<%
+  const totalSpend = it.channelSpend.reduce((s, c) => s + c.spend, 0);
+  const metaSpend = it.channelSpend.find(c => c.channel === 'meta_ads')?.spend || 0;
+  const gadsSpend = it.channelSpend.find(c => c.channel === 'google_ads')?.spend || 0;
+  const allCampaigns = [...it.metaCampaigns, ...it.gadsCampaigns];
+  const totalImpressions = allCampaigns.reduce((s, c) => s + c.impressions, 0);
+  const totalClicks = allCampaigns.reduce((s, c) => s + c.clicks, 0);
+  const totalConversions = allCampaigns.reduce((s, c) => s + c.conversions, 0);
+  const avgCpc = totalClicks > 0 ? totalSpend / totalClicks : 0;
+  const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+%>
+
+<div class="portal-kpi-grid">
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
+    <div class="kpi-label">Total Spend</div>
+    <div class="kpi-sub">
+      <% if (metaSpend > 0) { %>Meta &pound;<%= metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %><% } %>
+      <% if (metaSpend > 0 && gadsSpend > 0) { %> | <% } %>
+      <% if (gadsSpend > 0) { %>Google &pound;<%= gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %><% } %>
+    </div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= totalImpressions.toLocaleString() %></div>
+    <div class="kpi-label">Impressions</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= totalClicks.toLocaleString() %></div>
+    <div class="kpi-label">Clicks</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= avgCpc.toFixed(2) %></div>
+    <div class="kpi-label">Average CPC</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= avgCtr.toFixed(2) %>%</div>
+    <div class="kpi-label">Average CTR</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= totalConversions.toLocaleString() %></div>
+    <div class="kpi-label">Conversions</div>
+  </div>
+</div>
+
+<!-- Meta Ads Campaigns -->
+<% if (it.metaCampaigns.length > 0) { %>
+<div class="portal-section">
+  <h2>Meta Ads Campaigns</h2>
+  <table class="compact">
+    <thead>
+      <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CTR</th></tr>
+    </thead>
+    <tbody>
+      <% it.metaCampaigns.forEach(c => { %>
+      <tr>
+        <td><%= c.campaign_name || c.campaign_id %></td>
+        <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+        <td><%= c.impressions.toLocaleString() %></td>
+        <td><%= c.clicks.toLocaleString() %></td>
+        <td>&pound;<%= c.cpc.toFixed(2) %></td>
+        <td><%= c.ctr.toFixed(2) %>%</td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<!-- Google Ads Campaigns -->
+<% if (it.gadsCampaigns.length > 0) { %>
+<div class="portal-section">
+  <h2>Google Ads Campaigns</h2>
+  <table class="compact">
+    <thead>
+      <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CTR</th><th>Conversions</th></tr>
+    </thead>
+    <tbody>
+      <% it.gadsCampaigns.forEach(c => { %>
+      <tr>
+        <td><%= c.campaign_name || c.campaign_id %></td>
+        <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+        <td><%= c.impressions.toLocaleString() %></td>
+        <td><%= c.clicks.toLocaleString() %></td>
+        <td>&pound;<%= c.cpc.toFixed(2) %></td>
+        <td><%= c.ctr.toFixed(2) %>%</td>
+        <td><%= c.conversions.toLocaleString() %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<!-- Leads by Ad Channel -->
+<% if (it.adLeads.length > 0) { %>
+<div class="portal-section">
+  <h2>Leads by Ad Channel</h2>
+  <% const maxAdLeads = Math.max(...it.adLeads.map(c => c.lead_count), 1); %>
+  <% it.adLeads.forEach(ch => { %>
+    <%
+      const pct = Math.round((ch.lead_count / maxAdLeads) * 100);
+      const colourClass = ch.channel === 'meta_ads' ? 'channel-meta' : ch.channel === 'google_ads' ? 'channel-google' : 'channel-other';
+      const label = ch.channel.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    %>
+    <div class="channel-bar-wrap">
+      <div class="channel-bar-name"><%= label %></div>
+      <div class="channel-bar-track">
+        <div class="channel-bar-fill <%= colourClass %>" style="width: <%= pct %>%"><%= ch.lead_count %></div>
+      </div>
+    </div>
+  <% }) %>
+</div>
+<% } %>
+
+<% } %>
+</div>

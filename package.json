@@ -14,6 +14,7 @@
     "sync:xero": "tsx scripts/sync/sync-xero.ts",
     "sync:xero:backfill": "tsx scripts/sync/sync-xero.ts --backfill",
     "sync:ghl": "tsx scripts/sync/sync-ghl.ts",
+    "ghl:discover": "tsx scripts/functions/discover-ghl-locations.ts",
     "sync:meta": "tsx scripts/sync/sync-meta-ads.ts",
     "sync:meta:backfill": "tsx scripts/sync/sync-meta-ads.ts --backfill",
     "sync:meta:accounts": "tsx scripts/sync/sync-meta-ads.ts --accounts-only",
@@ -33,6 +34,10 @@
     "sync:gads": "tsx scripts/sync/sync-google-ads.ts",
     "sync:gads:backfill": "tsx scripts/sync/sync-google-ads.ts --backfill",
     "sync:gads:accounts": "tsx scripts/sync/sync-google-ads.ts --accounts-only",
+    "sync:ga4": "tsx scripts/sync/sync-ga4.ts",
+    "sync:ga4:backfill": "tsx scripts/sync/sync-ga4.ts --backfill",
+    "sync:gsc": "tsx scripts/sync/sync-gsc.ts",
+    "sync:gsc:backfill": "tsx scripts/sync/sync-gsc.ts --backfill",
     "brand:reindex": "tsx scripts/sync/sync-brands.ts",
     "leads:score": "tsx scripts/functions/lead-scoring.ts",
     "onboard:check": "tsx scripts/functions/client-onboarding.ts",
@@ -94,7 +99,11 @@
     "sop": "tsx scripts/functions/sop-management.ts",
     "sop:stale": "tsx scripts/functions/sop-management.ts --stale",
     "backup": "tsx scripts/functions/backup-recovery.ts --backup",
-    "backup:status": "tsx scripts/functions/backup-recovery.ts --status"
+    "backup:status": "tsx scripts/functions/backup-recovery.ts --status",
+    "seed:treatments": "tsx scripts/functions/seed-treatments.ts",
+    "leads:attribute": "tsx scripts/functions/lead-attribution.ts",
+    "leads:attribute:backfill": "tsx scripts/functions/lead-attribution.ts --backfill",
+    "leads:attribute:force": "tsx scripts/functions/lead-attribution.ts --backfill --force"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
@@ -105,6 +114,7 @@
     "dotenv": "^16.4.0",
     "eta": "^4.5.1",
     "fastify": "^5.8.4",
+    "marked": "^17.0.5",
     "sql.js": "^1.11.0"
   },
   "devDependencies": {

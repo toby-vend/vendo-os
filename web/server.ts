@@ -24,6 +24,7 @@ import { adminPermissionsRoutes } from './routes/admin/permissions.js';
 import { adminUsageRoutes } from './routes/admin/usage.js';
 import { adminClientsRoutes } from './routes/admin/clients.js';
 import { adminClientMappingRoutes } from './routes/admin/client-mapping.js';
+import { adminPortalUsersRoutes } from './routes/admin/portal-users.js';
 import { googleOAuthRoutes } from './routes/google-oauth.js';
 import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
@@ -33,13 +34,14 @@ import { driveCronRoutes } from './routes/drive-cron.js';
 import { taskRunRoutes } from './routes/task-runs.js';
 import { taskRunsUiRoutes } from './routes/task-runs-ui.js';
 import { skillsBrowserRoutes } from './routes/skills-browser.js';
+import { portalRoutes } from './routes/portal.js';
 import {
   parseCookies,
   verifySessionToken,
   getRouteSlug,
   type SessionUser,
 } from './lib/auth.js';
-import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, hasUserOAuthToken } from './lib/queries.js';
+import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, hasUserOAuthToken, getClientForUser } from './lib/queries.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -104,10 +106,11 @@ app.addHook('onRequest', async (request, reply) => {
     return;
   }
 
-  const [channels, allowedRoutes, googleConnected] = await Promise.all([
+  const [channels, allowedRoutes, googleConnected, clientMapping] = await Promise.all([
     getUserChannelSlugs(dbUser.id),
     dbUser.role === 'admin' ? Promise.resolve([]) : getUserAllowedRoutes(dbUser.id),
     hasUserOAuthToken(dbUser.id, 'google'),
+    dbUser.role === 'client' ? getClientForUser(dbUser.id) : Promise.resolve(null),
   ]);
 
   const user: SessionUser = {
@@ -119,6 +122,8 @@ app.addHook('onRequest', async (request, reply) => {
     channels,
     allowedRoutes,
     googleConnected,
+    clientId: clientMapping?.client_id ?? null,
+    clientName: clientMapping?.client_name ?? null,
   };
 
   (request as any).user = user;
@@ -127,6 +132,17 @@ app.addHook('onRequest', async (request, reply) => {
   if (user.mustChangePassword && path !== '/change-password' && path !== '/logout') {
     reply.redirect('/change-password');
     return;
+  }
+
+  // Client role — restrict to /portal/* routes only
+  if (user.role === 'client') {
+    const allowed = path.startsWith('/portal') || path === '/logout' || path === '/change-password';
+    if (!allowed) {
+      if (request.headers['hx-request']) { reply.code(403).send('Access denied'); return; }
+      reply.redirect('/portal');
+      return;
+    }
+    return; // skip further permission checks for client users
   }
 
   // Admin-only routes
@@ -184,6 +200,7 @@ app.register(adminPermissionsRoutes, { prefix: '/admin/permissions' });
 app.register(adminUsageRoutes, { prefix: '/admin/usage' });
 app.register(adminClientsRoutes, { prefix: '/admin/clients' });
 app.register(adminClientMappingRoutes, { prefix: '/admin/client-mapping' });
+app.register(adminPortalUsersRoutes, { prefix: '/admin/portal-users' });
 app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });
@@ -193,6 +210,7 @@ app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(taskRunsUiRoutes, { prefix: '/tasks' });
 app.register(skillsBrowserRoutes, { prefix: '/skills' });
+app.register(portalRoutes, { prefix: '/portal' });
 
 // Export for Vercel
 export default app;

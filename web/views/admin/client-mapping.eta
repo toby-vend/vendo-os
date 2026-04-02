@@ -1,0 +1,159 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h1 style="margin: 0;">Client Account Mapping <small style="color: #94A3B8; font-weight: 400;">(<%= it.mappings.length %> mappings)</small></h1>
+</div>
+
+<!-- Add Mapping Form -->
+<div style="background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+  <h2 style="margin-top: 0; font-size: 16px; color: #E2E8F0;">Add Mapping</h2>
+  <form method="POST" action="/admin/client-mapping">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+
+      <!-- Client -->
+      <div>
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Client</label>
+        <select name="client_id" required
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;"
+          onchange="this.form.client_name.value = this.options[this.selectedIndex].text">
+          <option value="">Select client...</option>
+          <% it.clients.forEach(c => { %>
+          <option value="<%= c.id %>"><%= c.label || c.name %></option>
+          <% }) %>
+        </select>
+        <input type="hidden" name="client_name" value="">
+      </div>
+
+      <!-- Platform -->
+      <div>
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Platform</label>
+        <select name="platform" required id="platform-select"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;"
+          onchange="toggleGhlPicker()">
+          <option value="">Select platform...</option>
+          <option value="ghl">GoHighLevel</option>
+          <option value="meta">Meta Ads</option>
+          <option value="gads">Google Ads</option>
+          <option value="ga4">GA4</option>
+          <option value="gsc">Google Search Console</option>
+        </select>
+      </div>
+
+      <!-- CRM Type -->
+      <div>
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">CRM Type</label>
+        <select name="crm_type"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+          <option value="ghl">GoHighLevel</option>
+          <option value="boxly">Boxly</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+
+      <!-- GHL Location Picker (shown when platform=ghl) -->
+      <div id="ghl-picker" style="display: none;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">GHL Location</label>
+        <select id="ghl-location-select"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;"
+          onchange="fillFromGhl(this)">
+          <option value="">Select location...</option>
+          <% it.ghlLocations.forEach(loc => { %>
+          <option value="<%= loc.id %>" data-name="<%= loc.name %>"><%= loc.name %> (<%= loc.id.slice(0, 8) %>...)</option>
+          <% }) %>
+        </select>
+        <% if (!it.ghlLocations.length) { %>
+        <small style="color: #64748B; font-size: 11px;">No GHL locations found. Run <code>npm run ghl:discover</code> first.</small>
+        <% } %>
+      </div>
+
+      <!-- Platform Account ID -->
+      <div id="manual-account-id">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Platform Account ID</label>
+        <input type="text" name="platform_account_id" required placeholder="e.g. location ID, ad account ID"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+      </div>
+
+      <!-- Platform Account Name -->
+      <div>
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Platform Account Name</label>
+        <input type="text" name="platform_account_name" placeholder="Friendly name"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+      </div>
+    </div>
+
+    <div style="margin-top: 1rem;">
+      <button type="submit"
+        style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">
+        Add Mapping
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Existing Mappings Table -->
+<div style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.10);">
+        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Client</th>
+        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Platform</th>
+        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Account ID</th>
+        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Account Name</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">CRM</th>
+        <th style="text-align: right; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Created</th>
+        <th style="text-align: right; padding: 0.75rem 0.5rem;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!it.mappings.length) { %>
+      <tr><td colspan="7" style="padding: 2rem; text-align: center; color: #94A3B8;">No mappings yet. Add one above.</td></tr>
+      <% } %>
+      <% const platformColours = { ghl: '#4ADE80', meta: '#1877F2', gads: '#FBBC05', ga4: '#E37400', gsc: '#4285F4' }; %>
+      <% it.mappings.forEach(m => { %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <td style="padding: 0.65rem 0.5rem; font-weight: 500; color: #E2E8F0;"><%= m.client_name %></td>
+        <td style="padding: 0.65rem 0.5rem;">
+          <span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+            background: rgba(255,255,255,0.06); color: <%= platformColours[m.platform] || '#94A3B8' %>;">
+            <%= m.platform %>
+          </span>
+        </td>
+        <td style="padding: 0.65rem 0.5rem; color: #94A3B8; font-size: 13px; font-family: monospace;"><%= m.platform_account_id %></td>
+        <td style="padding: 0.65rem 0.5rem; color: #E2E8F0;"><%= m.platform_account_name || '—' %></td>
+        <td style="padding: 0.65rem 0.5rem; text-align: center;">
+          <span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+            background: <%= m.crm_type === 'ghl' ? 'rgba(74,222,128,0.15)' : m.crm_type === 'boxly' ? 'rgba(96,165,250,0.15)' : 'rgba(148,163,184,0.15)' %>;
+            color: <%= m.crm_type === 'ghl' ? '#4ADE80' : m.crm_type === 'boxly' ? '#60A5FA' : '#94A3B8' %>;">
+            <%= m.crm_type %>
+          </span>
+        </td>
+        <td style="padding: 0.65rem 0.5rem; text-align: right; color: #94A3B8; font-size: 13px;"><%= m.created_at ? m.created_at.slice(0, 10) : '—' %></td>
+        <td style="padding: 0.65rem 0.5rem; text-align: right;">
+          <form method="POST" action="/admin/client-mapping/<%= m.id %>/delete" style="display: inline; margin: 0;">
+            <button type="submit" style="background: none; border: none; color: #EF4444; cursor: pointer; font-size: 13px;" title="Delete mapping">Delete</button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+function toggleGhlPicker() {
+  const platform = document.getElementById('platform-select').value;
+  const ghlPicker = document.getElementById('ghl-picker');
+  ghlPicker.style.display = platform === 'ghl' ? 'block' : 'none';
+}
+
+function fillFromGhl(select) {
+  const option = select.options[select.selectedIndex];
+  if (!option.value) return;
+  const form = select.closest('form');
+  form.platform_account_id.value = option.value;
+  form.platform_account_name.value = option.dataset.name || '';
+}
+</script>

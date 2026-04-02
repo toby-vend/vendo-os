@@ -1,0 +1,103 @@
+<% layout('/portal/layout') %>
+
+<div id="portal-leads-content">
+
+<!-- Filters -->
+<form class="portal-filters" method="GET" action="/portal/leads">
+  <input type="hidden" name="days" value="<%= it.days %>">
+  <div>
+    <label for="source">Source</label>
+    <select id="source" name="source" onchange="this.form.submit()">
+      <option value="">All Sources</option>
+      <% it.sources.forEach(s => { %>
+      <option value="<%= s.group %>" <%= it.filters.source === s.group ? 'selected' : '' %>><%= s.group.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) %> (<%= s.count %>)</option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="treatment">Treatment</label>
+    <select id="treatment" name="treatment" onchange="this.form.submit()">
+      <option value="">All Treatments</option>
+      <% it.treatments.forEach(t => { %>
+      <option value="<%= t.group %>" <%= it.filters.treatment === t.group ? 'selected' : '' %>><%= t.group.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) %> (<%= t.count %>)</option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="status">Status</label>
+    <select id="status" name="status" onchange="this.form.submit()">
+      <option value="">All Statuses</option>
+      <option value="lead" <%= it.filters.status === 'lead' ? 'selected' : '' %>>Lead</option>
+      <option value="qualified" <%= it.filters.status === 'qualified' ? 'selected' : '' %>>Qualified</option>
+      <option value="booked" <%= it.filters.status === 'booked' ? 'selected' : '' %>>Booked</option>
+      <option value="attended" <%= it.filters.status === 'attended' ? 'selected' : '' %>>Attended</option>
+      <option value="converted" <%= it.filters.status === 'converted' ? 'selected' : '' %>>Converted</option>
+      <option value="lost" <%= it.filters.status === 'lost' ? 'selected' : '' %>>Lost</option>
+    </select>
+  </div>
+</form>
+
+<div class="portal-section">
+  <h2>Leads <span style="font-size: 14px; font-family: var(--vendo-sans); color: var(--vendo-text-muted); font-weight: 400;">(<%= it.leadsResult.total.toLocaleString() %> total)</span></h2>
+
+  <% if (it.leadsResult.leads.length === 0) { %>
+    <div class="portal-empty">No leads match the selected filters.</div>
+  <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Name</th>
+          <th>Source</th>
+          <th>Treatment</th>
+          <th>Value</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% it.leadsResult.leads.forEach(l => { %>
+        <tr>
+          <td><%= l.lead_date %></td>
+          <td><%= l.contact_name || '—' %></td>
+          <td>
+            <%
+              const srcLabel = (l.attributed_source || 'unknown').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            %>
+            <%= srcLabel %>
+            <% if (l.attribution_confidence === 'low') { %>
+              <span style="font-size: 10px; color: #F59E0B;" title="Low confidence attribution">*</span>
+            <% } %>
+          </td>
+          <td><%= l.treatment_type ? l.treatment_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—' %></td>
+          <td><%= l.treatment_value ? '&pound;' + l.treatment_value.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—' %></td>
+          <td>
+            <%
+              const statusColours = { lead: '#94A3B8', qualified: '#3B82F6', booked: '#A78BFA', attended: '#F59E0B', converted: '#22C55E', lost: '#F87171' };
+              const colour = statusColours[l.conversion_status] || '#94A3B8';
+            %>
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; background: <%= colour %>22; color: <%= colour %>; text-transform: capitalize;"><%= l.conversion_status %></span>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <%
+      const totalPages = Math.ceil(it.leadsResult.total / it.pageSize);
+      const page = it.page;
+      const baseUrl = `/portal/leads?days=${it.days}&source=${it.filters.source || ''}&treatment=${it.filters.treatment || ''}&status=${it.filters.status || ''}`;
+    %>
+    <% if (totalPages > 1) { %>
+    <div class="portal-pagination">
+      <span>Page <%= page %> of <%= totalPages %></span>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="<%= baseUrl %>&page=<%= page - 1 %>" class="<%= page <= 1 ? 'disabled' : '' %>">Previous</a>
+        <a href="<%= baseUrl %>&page=<%= page + 1 %>" class="<%= page >= totalPages ? 'disabled' : '' %>">Next</a>
+      </div>
+    </div>
+    <% } %>
+  <% } %>
+</div>
+
+</div>
