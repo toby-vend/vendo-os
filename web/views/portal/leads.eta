@@ -138,7 +138,9 @@
       <tr>
         <th>Date</th>
         <th>Contact</th>
+        <th>Pipeline</th>
         <th>Stage</th>
+        <th>Source</th>
         <th>Tags</th>
         <th>Value</th>
         <th>Status</th>
@@ -154,7 +156,9 @@
           <div style="font-size: 11px; color: #64748B;"><%= l.contact_email %></div>
           <% } %>
         </td>
+        <td style="font-size: 12px; color: #94A3B8;"><%= l.pipeline_name || '—' %></td>
         <td><%= l.stage_name || '—' %></td>
+        <td style="font-size: 12px; color: #94A3B8;"><%= l.opp_source || '—' %></td>
         <td>
           <% if (l.tags) { try { const tags = JSON.parse(l.tags); tags.forEach(t => { %>
             <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(59,130,246,0.12); color: #60A5FA; margin: 1px 2px;"><%= t %></span>

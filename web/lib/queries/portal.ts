@@ -71,6 +71,7 @@ export interface PortalOpportunityRow {
   name: string | null;
   monetary_value: number;
   status: string;
+  pipeline_name: string | null;
   stage_name: string | null;
   contact_name: string | null;
   contact_email: string | null;
@@ -95,9 +96,11 @@ export async function getGhlPipelineSummary(clientId: number): Promise<PortalPip
 export async function getGhlRecentOpportunities(clientId: number, limit = 20): Promise<PortalOpportunityRow[]> {
   return rows<PortalOpportunityRow>(`
     SELECT o.id, o.name, o.monetary_value, o.status,
-           s.name as stage_name, o.contact_name, o.contact_email, o.created_at
+           p.name as pipeline_name, s.name as stage_name,
+           o.contact_name, o.contact_email, o.created_at
     FROM ghl_opportunities o
     LEFT JOIN ghl_stages s ON o.stage_id = s.id
+    LEFT JOIN ghl_pipelines p ON o.pipeline_id = p.id
     WHERE (o.location_id IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl')
            OR o.contact_company IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl'))
     ORDER BY o.created_at DESC
@@ -112,7 +115,9 @@ export interface GhlLeadRow {
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  pipeline_name: string | null;
   stage_name: string | null;
+  opp_source: string | null;
   monetary_value: number;
   status: string;
   tags: string | null;
@@ -154,10 +159,12 @@ export async function getGhlLeads(
   const [leads, total] = await Promise.all([
     rows<GhlLeadRow>(`
       SELECT o.id, o.contact_name, o.contact_email, o.contact_phone,
-             s.name as stage_name, o.monetary_value, o.status,
+             p.name as pipeline_name, s.name as stage_name,
+             o.source as opp_source, o.monetary_value, o.status,
              o.contact_tags as tags, o.created_at
       FROM ghl_opportunities o
       LEFT JOIN ghl_stages s ON o.stage_id = s.id
+      LEFT JOIN ghl_pipelines p ON o.pipeline_id = p.id
       WHERE ${whereClause}
       ORDER BY o.created_at DESC
       LIMIT ? OFFSET ?
