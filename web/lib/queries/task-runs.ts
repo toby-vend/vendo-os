@@ -87,6 +87,21 @@ export async function getTaskRun(id: number): Promise<TaskRunRow | null> {
 }
 
 /**
+ * Atomically sets status to draft_ready and writes the output JSON string.
+ * Caller must JSON.stringify the output before passing.
+ */
+export async function updateTaskRunOutput(
+  id: number,
+  output: string, // JSON string — caller must JSON.stringify before passing
+): Promise<void> {
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `UPDATE task_runs SET status = 'draft_ready', output = ?, updated_at = ? WHERE id = ?`,
+    args: [output, now, id],
+  });
+}
+
+/**
  * List task runs with optional filters for status and clientId.
  * Results ordered by created_at DESC, defaulting to 50 rows.
  */
