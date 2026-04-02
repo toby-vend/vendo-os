@@ -1,9 +1,16 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { searchSkills, type SkillSearchResult } from './queries/drive.js';
 import { getBrandContext, type BrandHubRow } from './queries/brand.js';
-import { updateTaskRunStatus, updateTaskRunOutput } from './queries/task-runs.js';
+import {
+  updateTaskRunStatus,
+  updateTaskRunOutput,
+  updateTaskRunQA,
+  incrementAttempts,
+} from './queries/task-runs.js';
 import { scalar } from './queries/base.js';
 import { loadTaskTypeConfig } from './task-types/index.js';
+import { runSOPCheck } from './qa-checker.js';
+import { checkAHPRACompliance } from './ahpra-rules.js';
 
 /**
  * Resolve the client_slug for a given client_id by querying brand_hub.
@@ -21,9 +28,24 @@ async function resolveClientSlug(clientId: number): Promise<string | null> {
 }
 
 /**
+ * Build a retry message that prepends the previous critique to the original
+ * user message content so the LLM can address the specific issues.
+ */
+function buildRetryMessage(originalUserMessage: string, critique: string): string {
+  return `Previous attempt failed QA. Issues:\n${critique}\n\nPlease regenerate addressing these issues.\n\n${originalUserMessage}`;
+}
+
+/**
  * Call the Anthropic API with assembled SOP + brand context to produce
- * a structured JSON draft. Retries once on failure. On second failure
- * transitions the task run to 'failed'.
+ * a structured JSON draft. Retries on QA failure up to MAX_ATTEMPTS total.
+ * SOP QA (Haiku) and AHPRA compliance run on every draft before draft_ready.
+ *
+ * Retry logic:
+ *   - Attempt 0..2 (3 total): generate → qa_check → runSOPCheck
+ *   - On SOP pass: run AHPRA, write qa_score=1, write output (draft_ready)
+ *   - On SOP fail + more attempts: prepend critique to retry message, continue
+ *   - On SOP fail + exhausted: run AHPRA, write qa_score=0, write output (draft_ready)
+ *   - On QA error: transition to failed (not stuck at qa_check)
  *
  * Not exported — called internally by assembleContext after status=generating.
  */
@@ -60,53 +82,88 @@ async function generateDraft(
 
   // Build prompts
   const systemPrompt = config.buildSystemPrompt(sopContent);
-  const userMessage = config.buildUserMessage(taskType, brandContent, clientName);
+  const baseUserMessage = config.buildUserMessage(taskType, brandContent, clientName);
 
   // Instantiate Anthropic client
   const client = new Anthropic({ apiKey });
 
-  const MAX_ATTEMPTS = 2;
+  const MAX_ATTEMPTS = 3;
+  let previousCritique: string | null = null;
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    // Build user message — on retry, prepend critique
+    const userMessage =
+      attempt === 0 || previousCritique === null
+        ? baseUserMessage
+        : buildRetryMessage(baseUserMessage, previousCritique);
+
+    let parsed: { sources?: unknown[] };
+
+    // Generation step — on API/parse error, throw (assembleContext catch handles failed transition)
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2048,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }],
+      // @ts-expect-error — output_config is not yet in the SDK types
+      output_config: { format: { type: 'json_schema', schema: config.schema } },
+    });
+
+    // Extract text block from response
+    const textBlock = response.content.find((b: { type: string }) => b.type === 'text') as { type: 'text'; text: string } | undefined;
+    if (!textBlock) {
+      throw new Error('No text block in Anthropic response');
+    }
+
+    // Parse JSON
+    parsed = JSON.parse(textBlock.text) as { sources?: unknown[] };
+
+    // Validate sources array is non-empty
+    if (!Array.isArray(parsed.sources) || parsed.sources.length === 0) {
+      throw new Error('Anthropic response is missing a non-empty sources array');
+    }
+
+    // Transition to qa_check and increment attempts counter
+    await updateTaskRunStatus(taskRunId, 'qa_check');
+    await incrementAttempts(taskRunId);
+
+    // QA check — wrap in try/catch to prevent stuck qa_check on unexpected error
     try {
-      const response = await client.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2048,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }],
-        // @ts-expect-error — output_config is not yet in the SDK types
-        output_config: { format: { type: 'json_schema', schema: config.schema } },
-      });
+      const sopCheckResult = await runSOPCheck(JSON.stringify(parsed), sopContent);
 
-      // Extract text block from response
-      const textBlock = response.content.find((b: { type: string }) => b.type === 'text') as { type: 'text'; text: string } | undefined;
-      if (!textBlock) {
-        throw new Error('No text block in Anthropic response');
+      if (sopCheckResult.pass) {
+        // SOP passed — run AHPRA and write result
+        const ahpraViolations = checkAHPRACompliance(JSON.stringify(parsed));
+        const critiqueObj = { sop_issues: [], ahpra_violations: ahpraViolations };
+        await updateTaskRunQA(taskRunId, { score: 1, critique: JSON.stringify(critiqueObj) });
+        await updateTaskRunOutput(taskRunId, JSON.stringify(parsed));
+        return;
       }
 
-      // Parse JSON
-      const parsed = JSON.parse(textBlock.text) as { sources?: unknown[] };
-
-      // Validate sources array is non-empty
-      if (!Array.isArray(parsed.sources) || parsed.sources.length === 0) {
-        throw new Error('Anthropic response is missing a non-empty sources array');
+      // SOP failed
+      if (attempt < MAX_ATTEMPTS - 1) {
+        // More attempts remain — store critique for next iteration
+        previousCritique = sopCheckResult.critique;
+        continue;
       }
 
-      // Success — store output and transition to draft_ready
+      // Exhausted attempts — surface as draft_ready with qa_score=0
+      const ahpraViolations = checkAHPRACompliance(JSON.stringify(parsed));
+      const sopIssues = sopCheckResult.critique
+        ? sopCheckResult.critique.split('\n').filter(Boolean)
+        : [];
+      const critiqueObj = { sop_issues: sopIssues, ahpra_violations: ahpraViolations };
+      await updateTaskRunQA(taskRunId, { score: 0, critique: JSON.stringify(critiqueObj) });
       await updateTaskRunOutput(taskRunId, JSON.stringify(parsed));
       return;
 
-    } catch (err) {
-      if (attempt < MAX_ATTEMPTS - 1) {
-        // First failure — wait 1 second then retry
-        console.warn(`[task-matcher] generateDraft attempt ${attempt + 1} failed for taskRunId=${taskRunId}: ${(err as Error).message}. Retrying in 1s.`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } else {
-        // Second failure — transition to failed
-        console.error(`[task-matcher] generateDraft failed after ${MAX_ATTEMPTS} attempts for taskRunId=${taskRunId}: ${(err as Error).message}`);
-        await updateTaskRunStatus(taskRunId, 'failed');
-        return;
-      }
+    } catch (qaErr) {
+      // QA infrastructure error — transition to failed, do not leave stuck at qa_check
+      console.error(
+        `[task-matcher] QA check error for taskRunId=${taskRunId} attempt=${attempt}: ${(qaErr as Error).message}`,
+      );
+      await updateTaskRunStatus(taskRunId, 'failed');
+      return;
     }
   }
 }
@@ -162,7 +219,7 @@ export async function assembleContext(
     // Step 5: Transition to generating with assembled context
     await updateTaskRunStatus(taskRunId, 'generating', { sopsUsed: sopIds, brandContextId });
 
-    // Step 6: Generate draft (Phase 7)
+    // Step 6: Generate draft with QA routing (Phase 8)
     await generateDraft(taskRunId, channel, taskType, skillResponse.results, brandFiles);
 
   } catch (err) {
