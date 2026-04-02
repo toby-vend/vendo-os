@@ -1,5 +1,10 @@
 <% layout('/layouts/base') %>
 
+<%
+  const penceToPounds = (p) => (Number(p) / 100).toFixed(2);
+  const penceToPoundsInput = (p) => p !== null ? (Number(p) / 100).toFixed(2) : '';
+%>
+
 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
   <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600;">API Usage</h2>
 </div>
@@ -21,19 +26,19 @@
 </div>
 
 <!-- Summary Cards -->
-<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
   <div class="card" style="padding: 1.25rem;">
-    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Input Tokens</div>
-    <div style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= Number(it.summary.total_input).toLocaleString() %></div>
-  </div>
-  <div class="card" style="padding: 1.25rem;">
-    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Output Tokens</div>
-    <div style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= Number(it.summary.total_output).toLocaleString() %></div>
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Total Tokens</div>
+    <div style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= (Number(it.summary.total_input) + Number(it.summary.total_output)).toLocaleString() %></div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;"><%= Number(it.summary.total_input).toLocaleString() %> in / <%= Number(it.summary.total_output).toLocaleString() %> out</div>
   </div>
   <div class="card" style="padding: 1.25rem;">
     <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Est. Cost</div>
-    <div style="font-size: 22px; font-weight: 700; color: #22C55E;">—</div>
-    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">See per-model breakdown</div>
+    <div style="font-size: 22px; font-weight: 700; color: #22C55E;">
+      <% let totalCostGbp = 0; it.byModel.forEach(m => { totalCostGbp += it.estimateCostGbp(m.model, Number(m.total_input), Number(m.total_output)); }); %>
+      &pound;<%= totalCostGbp.toFixed(2) %>
+    </div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">Estimated at current rates</div>
   </div>
   <div class="card" style="padding: 1.25rem;">
     <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">API Calls</div>
@@ -49,11 +54,11 @@
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
         <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">User</th>
         <th style="text-align: center; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Role</th>
-        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Tokens (Period)</th>
-        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Daily Used</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Daily Spend</th>
         <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Daily Limit</th>
-        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Monthly Used</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Monthly Spend</th>
         <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Monthly Limit</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Calls</th>
         <th style="text-align: center; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;"></th>
       </tr>
     </thead>
@@ -63,8 +68,8 @@
       <% } else { %>
       <% it.usersWithUsage.forEach(u => {
         const isAdmin = u.role === 'admin';
-        const dailyOver = !isAdmin && u.daily_token_limit !== null && Number(u.daily_used) >= u.daily_token_limit;
-        const monthlyOver = !isAdmin && u.monthly_token_limit !== null && Number(u.monthly_used) >= u.monthly_token_limit;
+        const dailyOver = !isAdmin && u.daily_limit_pence !== null && Number(u.daily_cost_pence) >= u.daily_limit_pence;
+        const monthlyOver = !isAdmin && u.monthly_limit_pence !== null && Number(u.monthly_cost_pence) >= u.monthly_limit_pence;
       %>
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
         <td style="padding: 12px 16px;">
@@ -76,32 +81,37 @@
             <%= isAdmin ? 'Admin' : 'Standard' %>
           </span>
         </td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;">
-          <%= (Number(u.total_input) + Number(u.total_output)).toLocaleString() %>
-          <% if (Number(u.total_calls) > 0) { %>
-          <div style="font-size: 11px; color: #64748B;"><%= Number(u.total_calls) %> calls</div>
-          <% } %>
-        </td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; color: <%= dailyOver ? '#EF4444' : '#94A3B8' %>; <%= dailyOver ? 'font-weight: 600;' : '' %>">
-          <%= Number(u.daily_used).toLocaleString() %>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; color: <%= dailyOver ? '#EF4444' : '#E2E8F0' %>; <%= dailyOver ? 'font-weight: 600;' : '' %>">
+          &pound;<%= penceToPounds(u.daily_cost_pence) %>
         </td>
         <% if (isAdmin) { %>
         <td style="padding: 12px 16px; text-align: right; font-size: 13px; color: #64748B;">Unlimited</td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; color: #94A3B8;"><%= Number(u.monthly_used).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; color: #E2E8F0;">&pound;<%= penceToPounds(u.monthly_cost_pence) %></td>
         <td style="padding: 12px 16px; text-align: right; font-size: 13px; color: #64748B;">Unlimited</td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #94A3B8;"><%= Number(u.total_calls).toLocaleString() %></td>
         <td style="padding: 12px 16px;"></td>
         <% } else { %>
-        <td style="padding: 12px 16px; text-align: right;" colspan="3">
+        <td style="padding: 12px 16px; text-align: right; font-size: 13px; color: <%= u.daily_limit_pence !== null ? '#E2E8F0' : '#64748B' %>;">
+          <%= u.daily_limit_pence !== null ? '£' + penceToPounds(u.daily_limit_pence) : 'Unlimited' %>
+        </td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; color: <%= monthlyOver ? '#EF4444' : '#E2E8F0' %>; <%= monthlyOver ? 'font-weight: 600;' : '' %>">
+          &pound;<%= penceToPounds(u.monthly_cost_pence) %>
+        </td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 13px; color: <%= u.monthly_limit_pence !== null ? '#E2E8F0' : '#64748B' %>;">
+          <%= u.monthly_limit_pence !== null ? '£' + penceToPounds(u.monthly_limit_pence) : 'Unlimited' %>
+        </td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #94A3B8;"><%= Number(u.total_calls).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right;">
           <form method="POST" action="/admin/usage/limits/<%= u.user_id %>" style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
-            <input type="number" name="daily_limit" placeholder="Unlimited" value="<%= u.daily_token_limit !== null ? u.daily_token_limit : '' %>" min="0"
-                   style="width: 100px; padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: right;">
-            <span style="font-size: 14px; font-variant-numeric: tabular-nums; color: <%= monthlyOver ? '#EF4444; font-weight: 600' : '#94A3B8' %>;"><%= Number(u.monthly_used).toLocaleString() %></span>
-            <input type="number" name="monthly_limit" placeholder="Unlimited" value="<%= u.monthly_token_limit !== null ? u.monthly_token_limit : '' %>" min="0"
-                   style="width: 100px; padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: right;">
+            <span style="font-size: 12px; color: #64748B;">Daily £</span>
+            <input type="number" name="daily_limit" placeholder="No limit" value="<%= penceToPoundsInput(u.daily_limit_pence) %>" min="0" step="0.01"
+                   style="width: 80px; padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: right;">
+            <span style="font-size: 12px; color: #64748B;">Monthly £</span>
+            <input type="number" name="monthly_limit" placeholder="No limit" value="<%= penceToPoundsInput(u.monthly_limit_pence) %>" min="0" step="0.01"
+                   style="width: 80px; padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: right;">
             <button type="submit" style="font-size: 11px; color: #22C55E; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 4px 10px; cursor: pointer; white-space: nowrap;">Save</button>
           </form>
         </td>
-        <td></td>
         <% } %>
       </tr>
       <% }) %>
@@ -133,7 +143,7 @@
         <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(m.total_input).toLocaleString() %></td>
         <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(m.total_output).toLocaleString() %></td>
         <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #94A3B8;"><%= Number(m.total_calls).toLocaleString() %></td>
-        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #22C55E; font-weight: 600;">$<%= it.estimateCost(m.model, Number(m.total_input), Number(m.total_output)).toFixed(4) %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #22C55E; font-weight: 600;">&pound;<%= it.estimateCostGbp(m.model, Number(m.total_input), Number(m.total_output)).toFixed(4) %></td>
       </tr>
       <% }) %>
       <% } %>

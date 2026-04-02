@@ -4,8 +4,8 @@ import {
   getUsageByModel,
   getUsageByFeature,
   getAllUsersWithUsage,
-  setUserTokenLimits,
-  estimateCost,
+  setUserCostLimits,
+  estimateCostGbp,
 } from '../../lib/queries/usage.js';
 
 const adminUsageRoutes: FastifyPluginAsync = async (app) => {
@@ -26,28 +26,28 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
       usersWithUsage,
       byModel,
       byFeature,
-      estimateCost,
+      estimateCostGbp,
       from: from || '',
       to: to || '',
     });
   });
 
-  // POST /limits/:userId — set or clear token limits
+  // POST /limits/:userId — set or clear cost limits (input in £, stored as pence)
   app.post<{ Params: { userId: string } }>('/limits/:userId', async (request, reply) => {
     const { userId } = request.params;
     const body = request.body as { monthly_limit?: string; daily_limit?: string };
 
-    const parseLimit = (val?: string): number | null => {
+    const poundsToNullablePence = (val?: string): number | null => {
       const trimmed = val?.trim();
       if (!trimmed || trimmed === '') return null;
-      const num = parseInt(trimmed, 10);
-      if (isNaN(num) || num < 0) return null;
-      return num;
+      const pounds = parseFloat(trimmed);
+      if (isNaN(pounds) || pounds < 0) return null;
+      return Math.round(pounds * 100);
     };
 
-    await setUserTokenLimits(userId, {
-      monthly: parseLimit(body.monthly_limit),
-      daily: parseLimit(body.daily_limit),
+    await setUserCostLimits(userId, {
+      monthlyPence: poundsToNullablePence(body.monthly_limit),
+      dailyPence: poundsToNullablePence(body.daily_limit),
     });
 
     reply.redirect('/admin/usage');
