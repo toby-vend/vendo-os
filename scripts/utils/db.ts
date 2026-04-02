@@ -740,6 +740,151 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_name)');
   db.run('CREATE INDEX IF NOT EXISTS idx_referrals_status ON referrals(status)');
 
+  // --- Client offboarding table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS client_offboarding (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      reason TEXT,
+      checklist TEXT NOT NULL,
+      final_invoice_sent INTEGER DEFAULT 0,
+      access_revoked INTEGER DEFAULT 0,
+      data_archived INTEGER DEFAULT 0,
+      exit_interview_done INTEGER DEFAULT 0,
+      learnings TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  // --- Upsell opportunities table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS upsell_opportunities (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      trigger_type TEXT NOT NULL,
+      signal TEXT NOT NULL,
+      confidence REAL DEFAULT 0,
+      recommended_action TEXT,
+      status TEXT NOT NULL DEFAULT 'identified',
+      outcome TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_upsell_client ON upsell_opportunities(client_name)');
+
+  // --- NPS responses table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS nps_responses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      score INTEGER NOT NULL,
+      feedback TEXT,
+      follow_up_action TEXT,
+      follow_up_done INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_nps_client ON nps_responses(client_name)');
+
+  // --- Escalations table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS escalations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      tier TEXT NOT NULL DEFAULT 'am',
+      description TEXT NOT NULL,
+      resolution TEXT,
+      resolution_minutes INTEGER,
+      post_mortem TEXT,
+      status TEXT NOT NULL DEFAULT 'open',
+      created_at TEXT NOT NULL,
+      resolved_at TEXT
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_escalations_status ON escalations(status)');
+
+  // --- Incidents table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS incidents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      platform TEXT NOT NULL,
+      description TEXT NOT NULL,
+      impact TEXT,
+      clients_affected TEXT,
+      client_comms_sent INTEGER DEFAULT 0,
+      resolution TEXT,
+      status TEXT NOT NULL DEFAULT 'detected',
+      created_at TEXT NOT NULL,
+      resolved_at TEXT
+    )
+  `);
+
+  // --- SOPs table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS sops (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL UNIQUE,
+      purpose TEXT,
+      owner TEXT,
+      steps TEXT NOT NULL,
+      last_reviewed TEXT,
+      review_due TEXT,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_sops_owner ON sops(owner)');
+
+  // --- Performance reviews table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS performance_reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      person_name TEXT NOT NULL,
+      period TEXT NOT NULL,
+      metrics TEXT,
+      self_assessment TEXT,
+      manager_assessment TEXT,
+      goals TEXT,
+      development_areas TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL,
+      UNIQUE(person_name, period)
+    )
+  `);
+
+  // --- Hiring pipeline table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS hiring_pipeline (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      role_title TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'open',
+      job_spec TEXT,
+      applications INTEGER DEFAULT 0,
+      shortlisted INTEGER DEFAULT 0,
+      interviewed INTEGER DEFAULT 0,
+      offered TEXT,
+      hired TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
   // --- Roles table ---
 
   db.run(`

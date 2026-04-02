@@ -79,7 +79,22 @@
     "leave": "tsx scripts/functions/leave-cover.ts",
     "leave:status": "tsx scripts/functions/leave-cover.ts --status",
     "offboard": "tsx scripts/functions/staff-offboarding.ts",
-    "offboard:status": "tsx scripts/functions/staff-offboarding.ts --status"
+    "offboard:status": "tsx scripts/functions/staff-offboarding.ts --status",
+    "client:offboard": "tsx scripts/functions/client-offboarding.ts",
+    "upsell": "tsx scripts/functions/upsell-detection.ts",
+    "upsell:status": "tsx scripts/functions/upsell-detection.ts --status",
+    "nps": "tsx scripts/functions/nps-tracking.ts",
+    "nps:detractors": "tsx scripts/functions/nps-tracking.ts --detractors",
+    "escalation": "tsx scripts/functions/escalation-management.ts",
+    "incident": "tsx scripts/functions/incident-management.ts",
+    "review:create": "tsx scripts/functions/performance-reviews.ts",
+    "review:status": "tsx scripts/functions/performance-reviews.ts --status",
+    "hiring": "tsx scripts/functions/hiring-pipeline.ts",
+    "hiring:status": "tsx scripts/functions/hiring-pipeline.ts --status",
+    "sop": "tsx scripts/functions/sop-management.ts",
+    "sop:stale": "tsx scripts/functions/sop-management.ts --stale",
+    "backup": "tsx scripts/functions/backup-recovery.ts --backup",
+    "backup:status": "tsx scripts/functions/backup-recovery.ts --status"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
