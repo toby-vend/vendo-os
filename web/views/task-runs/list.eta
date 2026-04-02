@@ -70,7 +70,7 @@
   hx-trigger="every 10s"
   hx-swap="innerHTML"
 >
-  <%~ include('task-runs/list-rows', it) %>
+  <%~ include('./list-rows', it) %>
 </div>
 
 <!-- Pagination -->

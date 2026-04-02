@@ -25,9 +25,9 @@ const CHANNEL_LABELS: Record<string, string> = {
 };
 
 const DRAFT_PARTIAL_MAP: Record<string, string> = {
-  'paid_social:ad_copy': 'task-runs/partials/draft-ad-copy',
-  'seo:content_brief': 'task-runs/partials/draft-content-brief',
-  'paid_ads:rsa_copy': 'task-runs/partials/draft-rsa-copy',
+  'paid_social:ad_copy': './partials/draft-ad-copy',
+  'seo:content_brief': './partials/draft-content-brief',
+  'paid_ads:rsa_copy': './partials/draft-rsa-copy',
 };
 
 export const taskRunsUiRoutes: FastifyPluginAsync = async (app) => {

@@ -50,5 +50,5 @@ const totalSkills = Object.values(it.grouped).reduce((sum, arr) => sum + arr.len
 
 <!-- Results container -->
 <div id="skills-results">
-  <%~ include('skills/skill-results', it) %>
+  <%~ include('./skill-results', it) %>
 </div>
