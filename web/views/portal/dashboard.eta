@@ -96,4 +96,51 @@
   </div>
 </div>
 
+<% if (it.pipelineStages && it.pipelineStages.length > 0) { %>
+<div class="portal-section" style="margin-top: 1.5rem;">
+  <h2>Pipeline</h2>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+    <% it.pipelineStages.forEach(s => { %>
+    <div style="padding: 0.75rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+      <div style="font-size: 20px; font-weight: 600; color: #E2E8F0;"><%= s.opp_count %></div>
+      <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;"><%= s.stage_name || 'Unknown' %></div>
+      <% if (s.total_value > 0) { %>
+      <div style="font-size: 11px; color: #64748B; margin-top: 2px;">&pound;<%= s.total_value.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
+      <% } %>
+    </div>
+    <% }) %>
+  </div>
+
+  <% if (it.recentOpps && it.recentOpps.length > 0) { %>
+  <h3 style="font-size: 14px; color: #94A3B8; margin-bottom: 0.5rem;">Recent Opportunities</h3>
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <th style="text-align: left; padding: 0.5rem 0.5rem; color: #64748B; font-weight: 500;">Contact</th>
+        <th style="text-align: left; padding: 0.5rem 0.5rem; color: #64748B; font-weight: 500;">Stage</th>
+        <th style="text-align: right; padding: 0.5rem 0.5rem; color: #64748B; font-weight: 500;">Value</th>
+        <th style="text-align: left; padding: 0.5rem 0.5rem; color: #64748B; font-weight: 500;">Status</th>
+        <th style="text-align: left; padding: 0.5rem 0.5rem; color: #64748B; font-weight: 500;">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.recentOpps.forEach(o => { %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <td style="padding: 0.4rem 0.5rem; color: #E2E8F0;"><%= o.contact_name || o.name || '—' %></td>
+        <td style="padding: 0.4rem 0.5rem; color: #94A3B8;"><%= o.stage_name || '—' %></td>
+        <td style="padding: 0.4rem 0.5rem; color: #E2E8F0; text-align: right;">&pound;<%= (o.monetary_value || 0).toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        <td style="padding: 0.4rem 0.5rem;">
+          <span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+            background: <%= o.status === 'won' ? 'rgba(34,197,94,0.15)' : o.status === 'lost' ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.15)' %>;
+            color: <%= o.status === 'won' ? '#22C55E' : o.status === 'lost' ? '#EF4444' : '#3B82F6' %>;"><%= o.status %></span>
+        </td>
+        <td style="padding: 0.4rem 0.5rem; color: #64748B;"><%= o.created_at ? o.created_at.slice(0, 10) : '—' %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+<% } %>
+
 </div>

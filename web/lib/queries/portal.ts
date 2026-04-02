@@ -58,6 +58,53 @@ export async function getGadsCampaignsForClient(clientId: number, days = 30): Pr
   `, [clientId, days]);
 }
 
+// --- GHL pipeline data ---
+
+export interface PortalPipelineStage {
+  stage_name: string;
+  opp_count: number;
+  total_value: number;
+}
+
+export interface PortalOpportunityRow {
+  id: string;
+  name: string | null;
+  monetary_value: number;
+  status: string;
+  stage_name: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  created_at: string | null;
+}
+
+export async function getGhlPipelineSummary(clientId: number): Promise<PortalPipelineStage[]> {
+  return rows<PortalPipelineStage>(`
+    SELECT s.name as stage_name,
+           COUNT(*) as opp_count,
+           COALESCE(SUM(o.monetary_value), 0) as total_value
+    FROM ghl_opportunities o
+    LEFT JOIN ghl_stages s ON o.stage_id = s.id
+    WHERE (o.location_id IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl')
+           OR o.contact_company IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl'))
+      AND o.status = 'open'
+    GROUP BY s.name
+    ORDER BY opp_count DESC
+  `, [clientId, clientId]);
+}
+
+export async function getGhlRecentOpportunities(clientId: number, limit = 20): Promise<PortalOpportunityRow[]> {
+  return rows<PortalOpportunityRow>(`
+    SELECT o.id, o.name, o.monetary_value, o.status,
+           s.name as stage_name, o.contact_name, o.contact_email, o.created_at
+    FROM ghl_opportunities o
+    LEFT JOIN ghl_stages s ON o.stage_id = s.id
+    WHERE (o.location_id IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl')
+           OR o.contact_company IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ghl'))
+    ORDER BY o.created_at DESC
+    LIMIT ?
+  `, [clientId, clientId, limit]);
+}
+
 // --- Client name lookup ---
 
 export async function getClientName(clientId: number): Promise<string> {
