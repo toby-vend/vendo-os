@@ -132,7 +132,11 @@ const {
   updateTaskRunStatus,
   updateTaskRunOutput,
   listTaskRuns,
+  getAuditRecord,
 } = await import('./task-runs.js');
+
+// Import type-only check via dynamic import for append-only policy test
+const taskRunsModule = await import('./task-runs.js');
 
 const { assembleContext } = await import('../task-matcher.js');
 
