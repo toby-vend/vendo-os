@@ -177,7 +177,7 @@ app.register(adminUsageRoutes, { prefix: '/admin/usage' });
 app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });
-app.register(tasksRoutes, { prefix: '/tasks' });
+app.register(tasksRoutes, { prefix: '/asana-tasks' });
 app.register(driveWebhookRoutes, { prefix: '/api/drive' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
