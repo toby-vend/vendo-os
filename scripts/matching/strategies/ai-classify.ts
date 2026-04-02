@@ -7,6 +7,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { MatchResult, MeetingData, MatchContext } from '../types.js';
 import { normaliseName } from '../build-match-context.js';
+import { trackUsage } from '../../../web/lib/usage-tracker.js';
 
 let anthropicClient: Anthropic | null = null;
 
@@ -36,6 +37,15 @@ export async function match(meeting: MeetingData, ctx: MatchContext): Promise<Ma
         role: 'user',
         content: `Title: ${meeting.title}\nSummary: ${summarySnippet}\n\nKnown clients:\n${ctx.allClientNames.join('\n')}`,
       }],
+    });
+
+    // Track token usage (system call — no user)
+    trackUsage({
+      userId: null,
+      model: 'claude-haiku-4-5-20251001',
+      feature: 'classification',
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
     });
 
     const text = response.content[0]?.type === 'text' ? response.content[0].text.trim() : '';

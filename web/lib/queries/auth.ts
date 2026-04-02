@@ -326,6 +326,27 @@ export async function initSchema(): Promise<void> {
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_asana_tasks_due ON asana_tasks(due_on)`, args: [] });
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_asana_tasks_completed ON asana_tasks(completed)`, args: [] });
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_asana_tasks_project ON asana_tasks(project_gid)`, args: [] });
+
+  // API usage tracking
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS api_usage (
+    id INTEGER PRIMARY KEY,
+    user_id TEXT,
+    model TEXT NOT NULL,
+    feature TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    created_at TEXT NOT NULL
+  )`, args: [] });
+
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_api_usage_user ON api_usage(user_id)`, args: [] });
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_api_usage_created ON api_usage(created_at)`, args: [] });
+
+  // Per-user token limits
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS user_token_limits (
+    user_id TEXT PRIMARY KEY,
+    monthly_token_limit INTEGER,
+    updated_at TEXT NOT NULL
+  )`, args: [] });
 }
 
 /** @deprecated Use initSchema instead */

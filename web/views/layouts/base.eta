@@ -109,6 +109,10 @@
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             <span class="nav-label">Permissions</span>
           </a>
+          <a href="/admin/usage" class="nav-item<%= it.currentPath?.startsWith('/admin/usage') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            <span class="nav-label">Usage</span>
+          </a>
         </div>
         <% } %>
       </nav>
@@ -132,7 +136,7 @@
           <button class="mobile-menu-btn" onclick="toggleSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Tasks', '/tasks/new': 'New Task' }; %>
+          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Tasks', '/tasks/new': 'New Task' }; %>
           <h1 class="topbar-title"><%= pageNames[it.currentPath] || 'Vendo OS' %></h1>
         </div>
         <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">

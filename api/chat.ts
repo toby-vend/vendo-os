@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
 import { parseCookies, verifySessionToken } from '../web/lib/auth.js';
 import { getSystemPrompt } from '../web/lib/chat-context.js';
+import { trackUsage, enforceLimit } from '../web/lib/usage-tracker.js';
 
 const MAX_HISTORY = 20;
 
@@ -14,8 +15,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Auth check
   const cookies = parseCookies(req.headers.cookie || '');
   const token = cookies['vendo_session'];
-  if (!token || !verifySessionToken(token)) {
+  const payload = token ? verifySessionToken(token) : null;
+  if (!payload) {
     res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  // Enforce token limit
+  const limitCheck = await enforceLimit(payload.userId);
+  if (!limitCheck.allowed) {
+    res.status(429).json({ error: 'limit_reached', message: limitCheck.message });
     return;
   }
 
@@ -53,6 +62,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
         res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`);
       }
+    }
+
+    // Track token usage after stream completes
+    try {
+      const finalMessage = await stream.finalMessage();
+      trackUsage({
+        userId: payload.userId,
+        model: 'claude-sonnet-4-5-20241022',
+        feature: 'chat',
+        inputTokens: finalMessage.usage.input_tokens,
+        outputTokens: finalMessage.usage.output_tokens,
+      });
+    } catch (trackErr) {
+      console.error('[chat] Failed to track usage:', trackErr);
     }
 
     res.write(`data: [DONE]\n\n`);

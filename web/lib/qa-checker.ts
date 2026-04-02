@@ -9,6 +9,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { trackUsage } from './usage-tracker.js';
 
 const SOP_CAP = 1500;
 
@@ -23,6 +24,7 @@ const SOP_CAP = 1500;
 export async function runSOPCheck(
   draftText: string,
   sopContent: string,
+  userId: string | null = null,
 ): Promise<{ pass: boolean; critique: string | null }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -94,6 +96,15 @@ If the draft fails any criteria, set "pass": false and list each issue.`;
         },
       },
     },
+  });
+
+  // Track token usage
+  trackUsage({
+    userId,
+    model: 'claude-haiku-4-5-20251001',
+    feature: 'qa_check',
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
   });
 
   const textBlock = response.content.find(

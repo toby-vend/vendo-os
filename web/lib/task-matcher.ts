@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { trackUsage, enforceLimit } from './usage-tracker.js';
 import { searchSkills, type SkillSearchResult } from './queries/drive.js';
 import { getBrandContext, type BrandHubRow } from './queries/brand.js';
 import {
@@ -56,6 +57,7 @@ async function generateDraft(
   taskType: string,
   skills: SkillSearchResult[],
   brandFiles: BrandHubRow[],
+  userId: string | null,
 ): Promise<void> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -110,6 +112,15 @@ async function generateDraft(
       output_config: { format: { type: 'json_schema', schema: config.schema } },
     });
 
+    // Track token usage
+    trackUsage({
+      userId,
+      model: 'claude-sonnet-4-6',
+      feature: 'task_generation',
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+    });
+
     // Extract text block from response
     const textBlock = response.content.find((b: { type: string }) => b.type === 'text') as { type: 'text'; text: string } | undefined;
     if (!textBlock) {
@@ -130,7 +141,7 @@ async function generateDraft(
 
     // QA check — wrap in try/catch to prevent stuck qa_check on unexpected error
     try {
-      const sopCheckResult = await runSOPCheck(JSON.stringify(parsed), sopContent);
+      const sopCheckResult = await runSOPCheck(JSON.stringify(parsed), sopContent, userId);
 
       if (sopCheckResult.pass) {
         // SOP passed — run AHPRA and write result
@@ -190,6 +201,7 @@ export async function assembleContext(
   clientId: number,
   channel: string,
   taskType: string,
+  userId: string | null = null,
 ): Promise<void> {
   try {
     // Step 1: Retrieve relevant SOPs
@@ -223,11 +235,19 @@ export async function assembleContext(
       }
     }
 
-    // Step 5: Transition to generating with assembled context (sopsUsed as enriched SopSnapshot[])
+    // Step 5: Enforce token limit before generation
+    const limitCheck = await enforceLimit(userId);
+    if (!limitCheck.allowed) {
+      console.warn(`[task-matcher] Token limit exceeded for userId=${userId}, taskRunId=${taskRunId}`);
+      await updateTaskRunStatus(taskRunId, 'failed');
+      return;
+    }
+
+    // Step 6: Transition to generating with assembled context (sopsUsed as enriched SopSnapshot[])
     await updateTaskRunStatus(taskRunId, 'generating', { sopsUsed: sopSnapshots, brandContextId });
 
-    // Step 6: Generate draft with QA routing (Phase 8)
-    await generateDraft(taskRunId, channel, taskType, skillResponse.results, brandFiles);
+    // Step 7: Generate draft with QA routing (Phase 8)
+    await generateDraft(taskRunId, channel, taskType, skillResponse.results, brandFiles, userId);
 
   } catch (err) {
     // On any error, mark as failed (fire-and-forget — do not mask the original error)

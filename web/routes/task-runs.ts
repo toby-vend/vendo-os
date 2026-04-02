@@ -49,7 +49,8 @@ export const taskRunRoutes: FastifyPluginAsync = async (app) => {
     reply.code(202).send({ id: taskRunId, status: 'queued' });
 
     // Fire-and-forget: assemble context in background after response is sent
-    assembleContext(taskRunId, clientId, channel, taskType).catch((err: unknown) => {
+    const userId = (request as any).user?.id ?? null;
+    assembleContext(taskRunId, clientId, channel, taskType, userId).catch((err: unknown) => {
       request.log.error({ taskRunId, err }, 'context assembly failed');
     });
   });

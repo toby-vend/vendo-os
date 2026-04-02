@@ -1,0 +1,170 @@
+<% layout('/layouts/base') %>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600;">API Usage</h2>
+</div>
+
+<!-- Date Filter -->
+<div class="card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+  <form method="GET" action="/admin/usage" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">From</label>
+    <input type="date" name="from" value="<%= it.from %>"
+           style="padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 13px;">
+    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">To</label>
+    <input type="date" name="to" value="<%= it.to %>"
+           style="padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 13px;">
+    <button type="submit" style="padding: 6px 16px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;">Filter</button>
+    <% if (it.from || it.to) { %>
+    <a href="/admin/usage" style="font-size: 13px; color: #94A3B8; text-decoration: none;">Clear</a>
+    <% } %>
+  </form>
+</div>
+
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="card" style="padding: 1.25rem;">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Input Tokens</div>
+    <div style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= Number(it.summary.total_input).toLocaleString() %></div>
+  </div>
+  <div class="card" style="padding: 1.25rem;">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Output Tokens</div>
+    <div style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= Number(it.summary.total_output).toLocaleString() %></div>
+  </div>
+  <div class="card" style="padding: 1.25rem;">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Est. Cost</div>
+    <div style="font-size: 22px; font-weight: 700; color: #22C55E;">—</div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">See per-model breakdown</div>
+  </div>
+  <div class="card" style="padding: 1.25rem;">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">API Calls</div>
+    <div style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= Number(it.summary.total_calls).toLocaleString() %></div>
+  </div>
+</div>
+
+<!-- Per-User Breakdown -->
+<h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.75rem; color: #E2E8F0;">Usage by User</h3>
+<div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">User</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Input Tokens</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Output Tokens</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Calls</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Monthly Limit</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Used This Month</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Set Limit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!it.byUser || it.byUser.length === 0) { %>
+      <tr><td colspan="7" style="padding: 2rem; text-align: center; color: #64748B;">No usage data yet.</td></tr>
+      <% } else { %>
+      <% it.byUser.forEach(u => {
+        const limitInfo = u.user_id ? it.limitsMap.get(u.user_id) : null;
+        const monthlyLimit = limitInfo?.monthly_token_limit ?? null;
+        const monthlyUsed = limitInfo?.monthly_used ?? 0;
+      %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <td style="padding: 12px 16px;">
+          <div style="font-size: 14px; color: #E2E8F0; font-weight: 500;"><%= u.user_name || 'System' %></div>
+          <div style="font-size: 12px; color: #64748B;"><%= u.user_email || 'Automated' %></div>
+        </td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(u.total_input).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(u.total_output).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #94A3B8;"><%= Number(u.total_calls).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: <%= monthlyLimit !== null ? '#E2E8F0' : '#64748B' %>;">
+          <%= monthlyLimit !== null ? Number(monthlyLimit).toLocaleString() : 'Unlimited' %>
+        </td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px;">
+          <% if (monthlyLimit !== null && Number(monthlyUsed) >= monthlyLimit) { %>
+          <span style="color: #EF4444; font-weight: 600;"><%= Number(monthlyUsed).toLocaleString() %></span>
+          <% } else { %>
+          <span style="color: #94A3B8;"><%= Number(monthlyUsed).toLocaleString() %></span>
+          <% } %>
+        </td>
+        <td style="padding: 12px 16px; text-align: right;">
+          <% if (u.user_id) { %>
+          <form method="POST" action="/admin/usage/limits/<%= u.user_id %>" style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+            <input type="number" name="monthly_limit" placeholder="Unlimited" value="<%= monthlyLimit !== null ? monthlyLimit : '' %>"
+                   style="width: 100px; padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: right;">
+            <button type="submit" style="font-size: 11px; color: #22C55E; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 4px 8px; cursor: pointer; white-space: nowrap;">Save</button>
+          </form>
+          <% } else { %>
+          <span style="font-size: 12px; color: #64748B;">N/A</span>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Per-Model Breakdown -->
+<h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.75rem; color: #E2E8F0;">Usage by Model</h3>
+<div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Model</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Input Tokens</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Output Tokens</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Calls</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Est. Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!it.byModel || it.byModel.length === 0) { %>
+      <tr><td colspan="5" style="padding: 2rem; text-align: center; color: #64748B;">No usage data yet.</td></tr>
+      <% } else { %>
+      <% it.byModel.forEach(m => { %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <td style="padding: 12px 16px; font-size: 14px; color: #E2E8F0; font-weight: 500;"><%= m.model %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(m.total_input).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(m.total_output).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #94A3B8;"><%= Number(m.total_calls).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #22C55E; font-weight: 600;">$<%= it.estimateCost(m.model, Number(m.total_input), Number(m.total_output)).toFixed(4) %></td>
+      </tr>
+      <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Per-Feature Breakdown -->
+<h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.75rem; color: #E2E8F0;">Usage by Feature</h3>
+<div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Feature</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Input Tokens</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Output Tokens</th>
+        <th style="text-align: right; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Calls</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!it.byFeature || it.byFeature.length === 0) { %>
+      <tr><td colspan="4" style="padding: 2rem; text-align: center; color: #64748B;">No usage data yet.</td></tr>
+      <% } else { %>
+      <%
+        const featureLabels = {
+          chat: 'AI Chat',
+          task_generation: 'Task Generation',
+          qa_check: 'QA Check',
+          classification: 'Meeting Classification',
+        };
+      %>
+      <% it.byFeature.forEach(f => { %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <td style="padding: 12px 16px; font-size: 14px; color: #E2E8F0; font-weight: 500;"><%= featureLabels[f.feature] || f.feature %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(f.total_input).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #E2E8F0; font-variant-numeric: tabular-nums;"><%= Number(f.total_output).toLocaleString() %></td>
+        <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #94A3B8;"><%= Number(f.total_calls).toLocaleString() %></td>
+      </tr>
+      <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>

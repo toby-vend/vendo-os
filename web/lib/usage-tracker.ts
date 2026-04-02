@@ -1,0 +1,26 @@
+import { recordUsage, checkUserWithinLimit } from './queries/usage.js';
+
+export async function trackUsage(params: {
+  userId: string | null;
+  model: string;
+  feature: 'chat' | 'task_generation' | 'qa_check' | 'classification';
+  inputTokens: number;
+  outputTokens: number;
+}): Promise<void> {
+  recordUsage(params).catch(err =>
+    console.error('[usage-tracker] Failed to record usage:', err),
+  );
+}
+
+export async function enforceLimit(userId: string | null): Promise<{ allowed: boolean; message?: string }> {
+  if (!userId) return { allowed: true };
+
+  const { allowed, used, limit } = await checkUserWithinLimit(userId);
+  if (!allowed) {
+    return {
+      allowed: false,
+      message: `Monthly token limit reached (${used.toLocaleString()} / ${limit!.toLocaleString()} tokens). Please contact an admin.`,
+    };
+  }
+  return { allowed: true };
+}
