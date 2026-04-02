@@ -67,6 +67,19 @@
 
 _Note: Comprehensive and Dominate include one upfront videography shoot. Any additional shoots beyond what's included in a package are charged at £750 + VAT per shoot across all clients and verticals._
 
+**Dental Pricing — Component Breakdown:**
+
+| Component | Lite | Comprehensive | Dominate |
+|-----------|------|---------------|----------|
+| Google Ads Management | £500 (up to £1,500 spend) | £625 (up to £2,000 spend) | £625 (up to £2,000 spend) |
+| Facebook Ads Management | — | £750 (up to £1,000 spend) | £750 (up to £1,000 spend) |
+| Local SEO | £600 | — | £600 |
+| CRM (GoHighLevel) | £125 | £125 | £125 |
+
+**Sliding scale for ad spend increases:** If a client increases spend, the management fee scales up. E.g. a client spending £3,000/mo on Google Ads alone = £750 management fee for Google. Other component prices remain unchanged.
+
+**Upsell path:** Lite → Comprehensive adds Facebook Ads (£750) and replaces Local SEO with broader service. Dominate adds full SEO on top. Natural upsell happens when clients increase ad spend and hit the next tier on the sliding scale. Full sliding scale in pricing document.
+
 **Website Only Packages (dental & other verticals):**
 
 | | Practice Essential (Option A) | Practice Pro (Option B) | Practice Prestige (Option C) |
@@ -82,6 +95,61 @@ _Note: Comprehensive and Dominate include one upfront videography shoot. Any add
 **Website bolt-ons:**
 - SEO-optimised content written: £50 per page
 - Additional developed pages: £75 per page
+
+**Paid Search / Google Ads Management — Sliding Scale:**
+
+| Ad Spend (Up To) | Retainer | % of Spend |
+|----------------:|--------:|-----------:|
+| £1,000 | £450 | 31% |
+| £1,500 | £500 | 25% |
+| £2,000 | £625 | 24% |
+| £3,000 | £750 | 20% |
+| £5,000 | £1,000 | 17% |
+| £7,500 | £1,250 | 14% |
+| £10,000 | £1,500 | 13% |
+| £15,000 | £2,000 | 12% |
+| £20,000 | £2,500 | 11% |
+| £25,000 | £3,000 | 11% |
+| £35,000 | £3,750 | 10% |
+| £50,000 | £4,500 | 8% |
+| £100,000 | £6,500 | 6% |
+| £200,000 | £10,000 | 5% |
+
+**Paid Social / Meta Ads Management — Sliding Scale:**
+
+| Ad Spend (Up To) | Retainer |
+|----------------:|--------:|
+| £1,000 | £750 |
+| £2,000 | £1,000 |
+| £3,500 | £1,500 |
+| £5,000 | £2,000 |
+| £7,500 | £2,500 |
+| £10,000 | £3,000 |
+| £15,000 | £3,500 |
+| £20,000 | £4,000 |
+| £50,000 | £6,000 |
+| £100,000 | £8,000 |
+| £200,000 | £12,000 |
+
+**SEO Packages — Sliding Scale:**
+
+| Package | Cost/mo | Backlinks | DA Authority | Features |
+|---------|--------:|-----------|-------------|----------|
+| Local SEO | £600 | — | 20-30 | Meta data & page speed |
+| Silver | £900 | 1 | 30-50 | All on-page + technical SEO |
+| Gold | £1,200 | 1 | 40-60 | All on-page + technical SEO |
+| Platinum | £1,500 | 2 | 40-60 | All on-page + technical SEO |
+| Diamond | £1,800 | 2 | 40-70 | All on-page + technical SEO |
+| Dominate | £2,500 | 2 | 40-70 | All on-page + technical SEO |
+
+**Paid Search Client Tier System:**
+
+| Tier | Level | Calls/mo | AM Hrs | CM Hrs | Typical Budget |
+|------|-------|---------|--------|--------|---------------|
+| 1 | Pro | 2 | 4–5 | 4–11 | £3,500–£25,000 |
+| 2 | Pro/Semi Pro | 1–2 | 2–4 | 2–4 | £2,000–£4,000 |
+| 3 | Semi Pro/Auto | 1 | 2 | 2–3 | £750–£2,000 |
+| 4 | Auto | 0–1 | 2 | 1–2 | £500–£1,500 |
 
 **Current state:** Growth phase. 40–50 active clients. 17 employees. Targeting £2M annual revenue at 25% profit margin.
 
@@ -110,6 +178,43 @@ _Note: Comprehensive and Dominate include one upfront videography shoot. Any add
 - Profit margin
 - Sales pipeline value
 - Close rate
+
+---
+
+---
+
+## Dental Market Size (UK — 2026)
+
+| Metric | Value |
+|--------|-------|
+| Total UK dental practices | ~12,040 |
+| NHS-only (excluded from TAM) | ~1,500–1,800 (12–15%) |
+| **Addressable TAM** | **~10,000–10,500 practices** |
+| Independent practices | ~8,000 (fragmented, core marketing TAM) |
+| DSOs / Corporate groups | ~2,000 (fewer buyers, higher contract value) |
+| UK dental industry revenue | ~£7.6bn |
+| Private dentistry market | ~£8bn+ |
+| Patients using private dentistry | ~32% (growing) |
+
+**Serviceable Available Market (SAM):**
+
+| Segment | Count | Notes |
+|---------|-------|-------|
+| Growth-focused clinics (SAM) | 2,000–4,000 | Practices actively investing in marketing |
+| High-value niche (best ICP) | 1,000–2,000 | Cosmetic, implants, Invisalign |
+
+**Revenue Ceiling at 20% Market Share:**
+
+| Scenario | Clients | Revenue/Client/Yr | Annual Revenue |
+|----------|---------|-------------------|---------------|
+| Conservative (lower SAM) | 400 | £16,500 | £6.6M |
+| Aggressive (upper SAM) | 800 | £16,500 | £13.2M |
+| With ARPU increase to £2k MRR | 800 | £24,000 | £19.2M |
+
+**Growth levers:**
+1. Increase ARPU (£1,375 → £2,000+ MRR) — biggest lever
+2. Move upmarket to DSOs (£3k–£10k/mo retainers)
+3. Expand services per client (ads + SEO + CRO + CRM + call handling)
 
 ---
 

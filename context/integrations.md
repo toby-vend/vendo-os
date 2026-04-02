@@ -47,7 +47,7 @@
 |---------|---------|----------------|--------|----------|
 | Meta Ads | Paid social campaign management | API | **Connected** | High |
 | Google Ads | Paid search campaign management | API | **Connected** | High |
-| Microsoft Ads | Paid search campaign management | API | Not connected | Medium |
+| Microsoft Ads | Paid search campaign management | API | **Not connected** | High |
 
 ### Reporting & Analytics
 
@@ -56,6 +56,18 @@
 | Looker Studio | Client dashboards, reporting | Manual | Not connected | Medium |
 | Agency Analytics | Client reporting platform | API | Not connected | Medium |
 | Triple Whale | Ecommerce attribution and analytics | API | Not connected | Medium |
+
+### Time Tracking
+
+| Service | Purpose | Connection Type | Status | Priority |
+|---------|---------|----------------|--------|----------|
+| Harvest | Time tracking, utilisation, client profitability | API | **Connected** | High |
+
+### HR & Performance
+
+| Service | Purpose | Connection Type | Status | Priority |
+|---------|---------|----------------|--------|----------|
+| BreatheHR | Performance reviews, 1-on-1s, OKRs/KPIs, salary bands | API | **Not connected** | High |
 
 ### AI & Productivity
 

@@ -62,6 +62,14 @@ Before recommending an action, the AI OS should ask:
 - Key hires made: creative, onboarding/CSM, sales
 - Client count grows while maintaining service quality
 
+## Operational Targets
+
+- **Client onboarding:** Reduce from 2–3 weeks to 4–7 days (onboarding call → kick-off call)
+- **NPS:** Roll out quarterly client satisfaction survey with referral fee programme
+- **Management & performance:** Build system for monthly 1-on-1s, KPI setting, OKR tracking. Sync with Asana for task reminders. Connect BreatheHR for HR data.
+- **Quote calculator:** Build admin tool for custom quote generation + automated proposal output
+- **CRM → ad platform feedback loop:** Feed production value from GHL into Meta/Google for conversion value / ROAS bidding
+
 ## Open Questions
 
 1. Best approach to onboarding the team onto connected AI tools — training, phased rollout, or dive in?
