@@ -1,3 +1,6 @@
+// APPEND-ONLY: This module must never export a DELETE function for task_runs.
+// Audit log integrity depends on this constraint. See AUDT-03.
+
 import { rows, scalar, db } from './base.js';
 
 // --- Types ---
