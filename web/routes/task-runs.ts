@@ -61,7 +61,7 @@ export const taskRunRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(400).send({ error: 'invalid_input', detail: 'id must be a positive integer' });
     }
 
-    const run = await getTaskRun(id);
+    const run = await getAuditRecord(id);
     if (run === null) {
       return reply.code(404).send({ error: 'not_found' });
     }
