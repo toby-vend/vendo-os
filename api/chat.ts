@@ -52,7 +52,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const stream = client.messages.stream({
-      model: 'claude-sonnet-4-5-20241022',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       system: systemPrompt,
       messages: trimmed,
@@ -69,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const finalMessage = await stream.finalMessage();
       trackUsage({
         userId: payload.userId,
-        model: 'claude-sonnet-4-5-20241022',
+        model: 'claude-sonnet-4-6',
         feature: 'chat',
         inputTokens: finalMessage.usage.input_tokens,
         outputTokens: finalMessage.usage.output_tokens,
