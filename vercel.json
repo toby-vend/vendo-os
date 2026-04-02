@@ -5,7 +5,7 @@
       "src": "api/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["web/views/**/*.eta", "web/public/**", "context/**"]
+        "includeFiles": ["../web/views/**", "../web/views/**/*", "../web/public/**", "../context/**"]
       }
     },
     {
