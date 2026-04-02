@@ -33,7 +33,21 @@
     "sync:gads": "tsx scripts/sync/sync-google-ads.ts",
     "sync:gads:backfill": "tsx scripts/sync/sync-google-ads.ts --backfill",
     "sync:gads:accounts": "tsx scripts/sync/sync-google-ads.ts --accounts-only",
-    "brand:reindex": "tsx scripts/sync/sync-brands.ts"
+    "brand:reindex": "tsx scripts/sync/sync-brands.ts",
+    "leads:score": "tsx scripts/functions/lead-scoring.ts",
+    "onboard:check": "tsx scripts/functions/client-onboarding.ts",
+    "sync:all": "tsx scripts/sync/run-all.ts",
+    "sync:all:no-push": "tsx scripts/sync/run-all.ts --no-push",
+    "health:score": "tsx scripts/functions/client-health.ts",
+    "report:client": "tsx scripts/functions/generate-client-report.ts",
+    "report:all": "tsx scripts/functions/generate-client-report.ts --all",
+    "ai:audit": "tsx scripts/utils/ai-wrapper.ts --audit",
+    "qa:grade": "tsx scripts/functions/qa-grading.ts",
+    "qa:stats": "tsx scripts/functions/qa-grading.ts --stats",
+    "campaign:check": "tsx scripts/functions/campaign-build.ts",
+    "campaign:status": "tsx scripts/functions/campaign-build.ts --status",
+    "creative:review": "tsx scripts/functions/creative-review.ts",
+    "creative:status": "tsx scripts/functions/creative-review.ts --status"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",

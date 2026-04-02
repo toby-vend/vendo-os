@@ -412,6 +412,11 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_ghl_opps_created ON ghl_opportunities(created_at)');
   db.run('CREATE INDEX IF NOT EXISTS idx_ghl_stages_pipeline ON ghl_stages(pipeline_id)');
 
+  // Migrate: lead scoring columns
+  try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN lead_score INTEGER'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN score_breakdown TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN scored_at TEXT'); } catch { /* already exists */ }
+
   // FTS4 virtual table for full-text search (sql.js includes FTS4, not FTS5)
   db.run(`
     CREATE VIRTUAL TABLE IF NOT EXISTS meetings_fts USING fts4(
@@ -569,6 +574,24 @@ export async function initSchema(): Promise<void> {
 
   db.run('CREATE INDEX IF NOT EXISTS idx_dsq_unprocessed ON drive_sync_queue(processed_at)');
 
+  // --- Sync errors table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS sync_errors (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source TEXT NOT NULL,
+      severity TEXT NOT NULL DEFAULT 'error',
+      message TEXT NOT NULL,
+      stack TEXT,
+      context TEXT,
+      resolved INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_sync_errors_created ON sync_errors(created_at)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_sync_errors_source ON sync_errors(source)');
+
   // --- Task runs table ---
 
   db.run(`
@@ -620,6 +643,98 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_due ON asana_tasks(due_on)');
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_completed ON asana_tasks(completed)');
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_project ON asana_tasks(project_gid)');
+
+  // --- AI audit log table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ai_audit_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      call_id TEXT NOT NULL UNIQUE,
+      source TEXT NOT NULL,
+      prompt_hash TEXT,
+      model TEXT NOT NULL,
+      input_tokens INTEGER,
+      output_tokens INTEGER,
+      duration_ms INTEGER,
+      quality_score REAL,
+      quality_flags TEXT,
+      status TEXT NOT NULL DEFAULT 'success',
+      error TEXT,
+      fallback_used INTEGER DEFAULT 0,
+      retry_count INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_ai_audit_created ON ai_audit_log(created_at)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ai_audit_source ON ai_audit_log(source)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_ai_audit_status ON ai_audit_log(status)');
+
+  // --- QA grades table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS qa_grades (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      deliverable_type TEXT NOT NULL,
+      deliverable_ref TEXT NOT NULL,
+      client_name TEXT,
+      grader TEXT NOT NULL DEFAULT 'ai',
+      grade TEXT NOT NULL,
+      score REAL,
+      criteria TEXT NOT NULL,
+      feedback TEXT,
+      team_member TEXT,
+      ai_call_id TEXT,
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_qa_grades_type ON qa_grades(deliverable_type)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_qa_grades_grade ON qa_grades(grade)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_qa_grades_member ON qa_grades(team_member)');
+
+  // --- Campaign builds table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS campaign_builds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      campaign_name TEXT NOT NULL,
+      platform TEXT,
+      asana_project_gid TEXT,
+      checklist TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'in_progress',
+      qa_grade_id INTEGER,
+      launched_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_campaign_builds_client ON campaign_builds(client_name)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_campaign_builds_status ON campaign_builds(status)');
+
+  // --- Creative reviews table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS creative_reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      asset_name TEXT NOT NULL,
+      asset_type TEXT NOT NULL,
+      asana_task_gid TEXT,
+      submitted_by TEXT,
+      reviewer TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      revision_count INTEGER DEFAULT 0,
+      feedback TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_creative_reviews_client ON creative_reviews(client_name)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_creative_reviews_status ON creative_reviews(status)');
 
   seedCategories(db);
   saveDb();
