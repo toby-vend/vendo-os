@@ -5,6 +5,35 @@ import { rows, scalar, db } from './base.js';
 
 // --- Types ---
 
+/**
+ * A point-in-time snapshot of an SOP at the moment a draft was generated.
+ * Stored as JSON in task_runs.sops_used for audit trail (AUDT-01).
+ */
+export interface SopSnapshot {
+  id: number;
+  title: string;
+  drive_modified_at: string;
+  content_hash: string;
+}
+
+/**
+ * Parsed audit view of a task run row.
+ * sops_used is parsed from raw JSON into SopSnapshot[] for typed consumption (AUDT-02).
+ */
+export interface AuditRecord {
+  id: number;
+  created_by: string;
+  client_id: number;
+  channel: string;
+  task_type: string;
+  sops_used: SopSnapshot[] | null;
+  qa_score: number | null;
+  qa_critique: string | null;
+  attempts: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export type TaskRunStatus =
   | 'queued'
   | 'generating'
