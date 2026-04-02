@@ -343,6 +343,38 @@ describe('generateDraft via assembleContext — QA flow', () => {
     assert.ok(Array.isArray(parsed.sources) && parsed.sources.length > 0, 'Output must have sources');
   });
 
+  it('Test 1b: assembleContext writes sops_used as SopSnapshot[] not bare IDs (AUDT-01)', async () => {
+    qaCheckerHolder.results = [{ pass: true, critique: null }];
+
+    await assembleContext(99, 42, 'paid_social', 'ad_copy');
+
+    // Find the 'generating' status call which carries sopsUsed
+    const generatingCall = taskRunsHolder.updateStatusCalls.find(c => c.status === 'generating');
+    assert.ok(generatingCall, 'Status must transition to generating');
+
+    const extras = generatingCall.extras as { sopsUsed?: unknown[] };
+    assert.ok(Array.isArray(extras?.sopsUsed), 'sopsUsed must be an array');
+    assert.ok(extras.sopsUsed!.length > 0, 'sopsUsed must be non-empty');
+
+    // Each entry must be an object with id, title, drive_modified_at, content_hash (not a number)
+    for (const entry of extras.sopsUsed!) {
+      assert.strictEqual(typeof entry, 'object', 'Each sopsUsed entry must be an object, not a bare ID');
+      assert.ok(entry !== null, 'sopsUsed entry must not be null');
+      const snap = entry as { id?: unknown; title?: unknown; drive_modified_at?: unknown; content_hash?: unknown };
+      assert.ok('id' in snap, 'SopSnapshot must have id field');
+      assert.ok('title' in snap, 'SopSnapshot must have title field');
+      assert.ok('drive_modified_at' in snap, 'SopSnapshot must have drive_modified_at field');
+      assert.ok('content_hash' in snap, 'SopSnapshot must have content_hash field');
+    }
+
+    // Verify values match the mock searchSkills results
+    const firstSnap = extras.sopsUsed![0] as { id: number; title: string; drive_modified_at: string; content_hash: string };
+    assert.strictEqual(firstSnap.id, 1, 'First SopSnapshot id must match first searchSkills result');
+    assert.strictEqual(firstSnap.title, 'Ad copy SOP', 'SopSnapshot title must come from searchSkills');
+    assert.strictEqual(firstSnap.drive_modified_at, '2026-01-01', 'SopSnapshot drive_modified_at must come from searchSkills');
+    assert.strictEqual(firstSnap.content_hash, 'h1', 'SopSnapshot content_hash must come from searchSkills');
+  });
+
   it('Test 2: AHPRA violations included in qa_critique JSON even when SOP QA passes', async () => {
     qaCheckerHolder.results = [{ pass: true, critique: null }];
     ahpraHolder.violations = [
