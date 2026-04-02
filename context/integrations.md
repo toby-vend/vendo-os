@@ -61,7 +61,7 @@
 
 | Service | Purpose | Connection Type | Status | Priority |
 |---------|---------|----------------|--------|----------|
-| Harvest | Time tracking, utilisation, client profitability | API | **Connected** | High |
+| Harvest | Time tracking, utilisation, client profitability | API + MCP | **Connected** — 22,612 entries, 85 clients, 311 projects synced | High |
 
 ### HR & Performance
 

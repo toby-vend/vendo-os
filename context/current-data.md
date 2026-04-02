@@ -401,6 +401,59 @@ _SEO team: CT=Chris Tomkins, HT=Holly Turner, YM=new outreach hire. CT handles A
 | Management staff | 60% |
 | Strategists / Execution / Designers / Developers | 80% |
 
+## Team Utilisation (Q1 2026 — from Harvest, 22,612 time entries)
+
+_Data covers Dec 2024 – Apr 2026. 21,295 total hours tracked, 13,033 billable (61.2% overall)._
+
+### March 2026 — Individual Billable %
+
+| Person | Role | Total Hrs | Billable Hrs | Billable % | Target | Status |
+|--------|------|----------:|------------:|-----------:|-------:|--------|
+| Helen Walker | Creative Strategist (mgmt) | 168.5 | 147.5 | 87.6% | 60% | Above |
+| Sam Franks | Client Success Manager | 158.6 | 113.9 | 71.8% | 80% | Below |
+| Faith Larkum | Content Production | 156.7 | 142.0 | 90.6% | 80% | Above |
+| Matthew Potter | Sr Paid Search Exec | 155.8 | 116.8 | 75.0% | 80% | Below |
+| Ben Dyer | Paid Media AM | 155.1 | 106.3 | 68.6% | 80% | Below |
+| Hope Smith | Creative Strategist | 154.3 | 138.4 | 89.7% | 80% | Above |
+| Holly Turner | SEO Executive | 154.0 | 110.1 | 71.5% | 80% | Below |
+| Charuka Shiran | Video Editor | 154.0 | 154.0 | 100.0% | 80% | Above |
+| Amya Casallas | Jr Creative Strategist | 153.7 | 131.9 | 85.8% | 80% | Above |
+| Chris Tomkins | SEO Team Lead (mgmt) | 153.3 | 102.3 | 66.7% | 60% | Above |
+| Dilith Nanayakkara | Lead Developer | 147.8 | 0.2 | 0.1% | 80% | Critical |
+| Selvin Mendes | Web Designer | 146.6 | 79.8 | 54.5% | 80% | Below |
+| Shamal Chathuranga | Web Developer | 141.0 | 113.6 | 80.6% | 80% | On target |
+| Benjamin Momodu | Website Project Lead | 125.7 | 59.1 | 47.0% | 80% | Below |
+| Jake Dennis | Paid Search Lead (mgmt) | 123.3 | 72.5 | 58.8% | 60% | Borderline |
+| Naveen Dilsara | Web Developer | 122.8 | 46.2 | 37.6% | 80% | Critical |
+
+**Key flags:**
+- **Dilith (0.1% billable):** Almost no time tagged as billable — likely CRM/internal dev work not categorised correctly, or genuinely non-billable infrastructure work
+- **Naveen (37.6% billable):** Significantly under 80% target
+- **Benjamin (47.0% billable):** Project management overhead eating into billable time
+- **Ben Dyer, Matthew Potter, Holly Turner, Sam Franks:** All in 68-75% range against 80% target — gap represents ~15-30 lost billable hours/mo each
+
+### Top 15 Clients by Hours (March 2026 — from Harvest)
+
+| Client | Total Hrs | Billable Hrs | Staff Cost |
+|--------|----------:|------------:|---------:|
+| A* New Website Projects | 307.5 | 307.5 | £5,523 |
+| Signature Smile | 133.5 | 133.5 | £1,140 |
+| Kana Health Group | 113.7 | 113.7 | £1,725 |
+| Thornbury Clinic | 111.1 | 111.1 | £1,853 |
+| MR Mouldings | 104.4 | 97.9 | £2,104 |
+| Bright Orthodontics | 100.8 | 100.8 | £1,935 |
+| Access Platform Sales | 96.6 | 76.5 | £1,875 |
+| Rothley Lodge Dental | 49.0 | 49.0 | £1,024 |
+| Abacus Lawrence Group | 47.3 | 47.3 | £981 |
+| R Dental | 45.3 | 45.3 | £497 |
+| The Sword Stall | 39.7 | 39.7 | £841 |
+| Zen House Dental | 38.5 | 38.5 | £770 |
+| Just Smile Dental | 30.3 | 30.3 | £422 |
+| Iconic Dent | 25.4 | 25.4 | £452 |
+| Avenue Dental | 23.8 | 23.8 | £453 |
+
+_Staff cost calculated from Harvest cost_rate × hours. "A* New Website Projects" is a catch-all for website builds, not a single client._
+
 ---
 
 ## Data Sources
@@ -413,10 +466,10 @@ _SEO team: CT=Chris Tomkins, HT=Holly Turner, YM=new outreach hire. CT handles A
 | Meeting intelligence | Fathom API | **Automated** — 444 meetings synced |
 | Google Ads performance | Google Ads API | **Connected** — synced to vendo.db |
 | Microsoft Ads performance | Not connected | **Needs API connection** |
-| Time tracking / utilisation | Harvest | **Connected** |
+| Time tracking / utilisation | Harvest | **Automated** — 22,612 entries synced to vendo.db |
 | HR / performance reviews | BreatheHR | **Needs API connection** |
-| Client profitability | Not available | Needs Harvest + salary data |
-| Team utilisation | Not available | Needs Harvest + deliverables trackers |
+| Client profitability | Harvest + Xero | **Available** — cost_rate × hours vs invoice revenue |
+| Team utilisation | Harvest | **Available** — 22,612 entries, billable % by person |
 | NPS / satisfaction | Not tracked | Quarterly rollout planned |
 
 ---
