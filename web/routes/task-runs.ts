@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { createTaskRun, getTaskRun, listTaskRuns, type TaskRunStatus } from '../lib/queries/task-runs.js';
+import { createTaskRun, getAuditRecord, getTaskRun, listTaskRuns, type TaskRunStatus } from '../lib/queries/task-runs.js';
 import { assembleContext } from '../lib/task-matcher.js';
 
 const VALID_CHANNELS = ['paid_social', 'seo', 'paid_ads'] as const;
