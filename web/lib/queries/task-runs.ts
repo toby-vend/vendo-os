@@ -162,6 +162,31 @@ export async function incrementAttempts(id: number): Promise<void> {
 }
 
 /**
+ * Parse the raw sops_used JSON column into a typed SopSnapshot array.
+ * Returns null if the value is absent, empty, or in the old number[] format
+ * (backward compatibility — rows written before Phase 9 stored bare IDs).
+ */
+function parseSopsUsed(raw: string | null): SopSnapshot[] | null {
+  if (!raw) return null;
+  const parsed = JSON.parse(raw) as unknown;
+  if (!Array.isArray(parsed) || parsed.length === 0) return null;
+  if (typeof parsed[0] === 'number') return null; // Old format: number[]
+  return parsed as SopSnapshot[];
+}
+
+/**
+ * Return a typed AuditRecord for a task run, with sops_used parsed into
+ * SopSnapshot[] (new format) or null (old number[] format / not set).
+ * Returns null when the task run does not exist.
+ * Used by Phase 10 audit UI (AUDT-02).
+ */
+export async function getAuditRecord(id: number): Promise<AuditRecord | null> {
+  const run = await getTaskRun(id);
+  if (!run) return null;
+  return { ...run, sops_used: parseSopsUsed(run.sops_used) };
+}
+
+/**
  * List task runs with optional filters for status and clientId.
  * Results ordered by created_at DESC, defaulting to 50 rows.
  */
