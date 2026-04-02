@@ -47,7 +47,17 @@
     "campaign:check": "tsx scripts/functions/campaign-build.ts",
     "campaign:status": "tsx scripts/functions/campaign-build.ts --status",
     "creative:review": "tsx scripts/functions/creative-review.ts",
-    "creative:status": "tsx scripts/functions/creative-review.ts --status"
+    "creative:status": "tsx scripts/functions/creative-review.ts --status",
+    "revenue": "tsx scripts/functions/revenue-finance.ts",
+    "revenue:overdue": "tsx scripts/functions/revenue-finance.ts --overdue",
+    "revenue:forecast": "tsx scripts/functions/revenue-finance.ts --forecast",
+    "profitability": "tsx scripts/functions/client-profitability.ts",
+    "profitability:alert": "tsx scripts/functions/client-profitability.ts --alert",
+    "expenses": "tsx scripts/functions/expense-tracking.ts",
+    "expenses:pnl": "tsx scripts/functions/expense-tracking.ts --pnl",
+    "expenses:pending": "tsx scripts/functions/expense-tracking.ts --pending",
+    "kpi": "tsx scripts/functions/kpi-dashboard.ts",
+    "kpi:json": "tsx scripts/functions/kpi-dashboard.ts --json"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
