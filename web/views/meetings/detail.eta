@@ -27,7 +27,7 @@
 
 <div id="tab-summary" class="tab-panel">
   <% if (it.meeting.summary) { %>
-    <div class="brief-content"><%~ it.meeting.summary.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') %></div>
+    <div class="brief-content md-content"><%~ it.md(it.meeting.summary) %></div>
   <% } else { %>
     <p>No summary available</p>
   <% } %>

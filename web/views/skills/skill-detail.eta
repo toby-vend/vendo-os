@@ -39,7 +39,6 @@ const hashShort = it.skill.content_hash ? it.skill.content_hash.slice(0, 12) : '
 <!-- SOP Content -->
 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 1.5rem;">
   <div
-    class="skill-content"
-    style="white-space: pre-wrap; line-height: 1.7; font-size: 14px; color: #CBD5E1; font-family: 'DM Sans', sans-serif;"
-  ><%= it.skill.content %></div>
+    class="skill-content md-content"
+  ><%~ it.md(it.skill.content) %></div>
 </div>

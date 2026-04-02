@@ -31,7 +31,7 @@
         </div>
         <a href="/meetings/<%= it.post.source_meeting_id %>" class="btn btn-sm" style="font-size: 11px;">View Meeting</a>
       </div>
-      <div style="font-size: 14px; color: #CBD5E1; line-height: 1.6; white-space: pre-wrap;"><%= it.meeting.summary %></div>
+      <div class="md-content"><%~ it.md(it.meeting.summary) %></div>
     </article>
     <% } else { %>
     <article style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem;">
@@ -53,7 +53,7 @@
 
     <% if (it.post.draft) { %>
     <article style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1.25rem;">
-      <div style="font-size: 14px; color: #E2E8F0; line-height: 1.7; white-space: pre-wrap;"><%= it.post.draft %></div>
+      <div class="md-content"><%~ it.md(it.post.draft) %></div>
       <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 0.5rem;">
         <button onclick="navigator.clipboard.writeText(document.querySelector('#post-text').innerText); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy to clipboard', 2000);" class="btn btn-primary btn-sm">Copy to clipboard</button>
         <form method="POST" action="/growth/linkedin/<%= it.post.id %>/draft-and-return" style="display: inline;">

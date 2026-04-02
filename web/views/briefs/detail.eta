@@ -4,6 +4,6 @@
 
 <h1>Brief — <%= it.date %></h1>
 
-<article class="brief-content">
-  <%~ it.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/^### (.+)$/gm, '<h3>$1</h3>').replace(/^## (.+)$/gm, '<h2>$1</h2>').replace(/^# (.+)$/gm, '<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n- /g, '\n<br>• ').replace(/\n/g, '<br>') %>
+<article class="brief-content md-content">
+  <%~ it.md(it.content) %>
 </article>
