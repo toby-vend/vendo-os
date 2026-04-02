@@ -104,6 +104,10 @@
     padding-left: 1.25rem;
   }
   .chat-bubble.assistant li { margin-bottom: 0.25rem; }
+  .chat-bubble.assistant hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 0.75rem 0; }
+  .chat-bubble.assistant table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; font-size: 13px; }
+  .chat-bubble.assistant th { text-align: left; padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.15); color: #94A3B8; font-weight: 600; }
+  .chat-bubble.assistant td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
 
   .typing-indicator {
     align-self: flex-start;
@@ -296,18 +300,101 @@
     if (el) el.remove();
   }
 
-  // Minimal markdown rendering
+  // Markdown → HTML rendering
   function renderMarkdown(text) {
+    // Escape HTML
+    let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Code blocks (before other processing)
+    html = html.replace(/```([\s\S]*?)```/g, (_, code) =>
+      '<pre><code>' + code.trim() + '</code></pre>');
+
+    // Split into lines for block-level processing
+    const lines = html.split('\n');
+    const out = [];
+    let inList = false;
+    let inTable = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+
+      // Horizontal rule
+      if (/^---+$/.test(line.trim())) {
+        if (inList) { out.push('</ul>'); inList = false; }
+        if (inTable) { out.push('</tbody></table>'); inTable = false; }
+        out.push('<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 0.75rem 0;">');
+        continue;
+      }
+
+      // Table row
+      if (/^\|(.+)\|$/.test(line.trim())) {
+        const cells = line.trim().slice(1, -1).split('|').map(c => c.trim());
+        // Skip separator row (|---|---|)
+        if (cells.every(c => /^-+$/.test(c))) continue;
+        if (!inTable) {
+          if (inList) { out.push('</ul>'); inList = false; }
+          out.push('<table style="width:100%; border-collapse:collapse; margin:0.5rem 0; font-size:13px;">');
+          out.push('<thead><tr>' + cells.map(c => '<th style="text-align:left; padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.15); color:#94A3B8; font-weight:600;">' + inlineFormat(c) + '</th>').join('') + '</tr></thead><tbody>');
+          inTable = true;
+        } else {
+          out.push('<tr>' + cells.map(c => '<td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.06);">' + inlineFormat(c) + '</td>').join('') + '</tr>');
+        }
+        continue;
+      }
+
+      // Close table if we hit a non-table line
+      if (inTable) { out.push('</tbody></table>'); inTable = false; }
+
+      // Headings
+      const hMatch = line.match(/^(#{1,3})\s+(.+)$/);
+      if (hMatch) {
+        if (inList) { out.push('</ul>'); inList = false; }
+        const level = hMatch[1].length;
+        const sizes = { 1: '18px', 2: '16px', 3: '14px' };
+        out.push('<div style="font-size:' + sizes[level] + '; font-weight:600; color:#fff; margin:0.75rem 0 0.35rem;">' + inlineFormat(hMatch[2]) + '</div>');
+        continue;
+      }
+
+      // List items (- or *)
+      const liMatch = line.match(/^[\-\*]\s+(.+)$/);
+      if (liMatch) {
+        if (!inList) { out.push('<ul>'); inList = true; }
+        out.push('<li>' + inlineFormat(liMatch[1]) + '</li>');
+        continue;
+      }
+
+      // Numbered list
+      const olMatch = line.match(/^\d+\.\s+(.+)$/);
+      if (olMatch) {
+        if (!inList) { out.push('<ul>'); inList = true; }
+        out.push('<li>' + inlineFormat(olMatch[1]) + '</li>');
+        continue;
+      }
+
+      // Close list if non-list line
+      if (inList) { out.push('</ul>'); inList = false; }
+
+      // Empty line = paragraph break
+      if (line.trim() === '') {
+        out.push('<div style="height:0.4rem;"></div>');
+        continue;
+      }
+
+      // Regular text
+      out.push('<p style="margin:0 0 0.25rem;">' + inlineFormat(line) + '</p>');
+    }
+
+    if (inList) out.push('</ul>');
+    if (inTable) out.push('</tbody></table>');
+
+    return out.join('');
+  }
+
+  function inlineFormat(text) {
     return text
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
       .replace(/`([^`]+)`/g, '<code>$1</code>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>')
-      .replace(/^/, '<p>').replace(/$/, '</p>')
-      .replace(/<p><\/p>/g, '');
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
   }
 
   async function send() {
