@@ -125,7 +125,11 @@ Plans:
   2. A SEO task produces output in the SEO channel structure (meta title, meta description, content brief)
   3. Every generated draft is grounded in at least one retrieved SOP — freeform generation without SOP context does not occur
   4. Agent output includes the names of the SOPs used to produce it
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Config-driven task type registry (schemas + prompt builders for 3 channels)
+- [ ] 07-02-PLAN.md — generateDraft function, Anthropic API integration, assembleContext wiring
 
 ### Phase 8: QA and Compliance
 **Goal**: Every draft is validated against SOP checklist criteria and AHPRA dental advertising rules before it reaches an AM — non-compliant output is flagged with specific rule violations, not silently surfaced or suppressed
@@ -173,7 +177,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 4. Skills Library | 2/2 | Complete    | 2026-04-01 |
 | 5. Brand Hub | 2/2 | Complete   | 2026-04-01 |
 | 6. Task Matching Engine | 2/2 | Complete   | 2026-04-01 |
-| 7. Agent Execution | 0/TBD | Not started | - |
+| 7. Agent Execution | 0/2 | Not started | - |
 | 8. QA and Compliance | 0/TBD | Not started | - |
 | 9. Audit and Traceability | 0/TBD | Not started | - |
 | 10. AM Interface | 0/TBD | Not started | - |
