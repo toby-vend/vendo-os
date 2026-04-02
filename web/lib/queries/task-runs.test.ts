@@ -483,7 +483,8 @@ describe('assembleContext', () => {
 
     const row = await getTaskRun(id);
     assert.ok(row !== null);
-    assert.strictEqual(row.status, 'generating', 'Status should still be generating even without brand context');
+    // Phase 7: generateDraft completes and transitions to draft_ready even without brand context
+    assert.strictEqual(row.status, 'draft_ready', 'Status should be draft_ready after generateDraft succeeds without brand context');
     assert.strictEqual(row.brand_context_id, null, 'brand_context_id should be null when no brand files');
   });
 
