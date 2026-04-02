@@ -133,6 +133,7 @@ function resetHolders() {
         text: JSON.stringify({ pass: true, issues: [] }),
       },
     ],
+    usage: { input_tokens: 50, output_tokens: 30 },
   };
   anthropicHolder.error = null;
   anthropicHolder.callCount = 0;
@@ -162,6 +163,7 @@ describe('runSOPCheck', () => {
           text: JSON.stringify({ pass: true, issues: [] }),
         },
       ],
+      usage: { input_tokens: 50, output_tokens: 30 },
     };
 
     const result = await runSOPCheck('Draft text here', 'SOP content here');
@@ -185,6 +187,7 @@ describe('runSOPCheck', () => {
           }),
         },
       ],
+      usage: { input_tokens: 50, output_tokens: 30 },
     };
 
     const result = await runSOPCheck('Bad draft text', 'SOP content here');
@@ -220,6 +223,7 @@ describe('runSOPCheck', () => {
     anthropicHolder.response = {
       model: 'captured',
       content: [{ type: 'text', text: JSON.stringify({ pass: true, issues: [] }) }],
+      usage: { input_tokens: 50, output_tokens: 30 },
     };
 
     // Re-test via checking system prompt exists (model is internal to qa-checker)

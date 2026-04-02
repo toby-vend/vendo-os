@@ -38,6 +38,7 @@ const anthropicHolder: {
         }),
       },
     ],
+    usage: { input_tokens: 100, output_tokens: 200 },
   },
   messagesCreateError: null,
   callCount: 0,
@@ -257,6 +258,7 @@ function resetHolders() {
         }),
       },
     ],
+    usage: { input_tokens: 100, output_tokens: 200 },
   };
 
   // Reset task runs

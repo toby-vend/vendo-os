@@ -105,6 +105,7 @@ mock.module('@anthropic-ai/sdk', {
             }),
           },
         ],
+        usage: { input_tokens: 100, output_tokens: 200 },
       }),
     };
   },
