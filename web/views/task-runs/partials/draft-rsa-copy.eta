@@ -1,0 +1,77 @@
+<%
+  const output = it.output || {};
+  const headlines = Array.isArray(output.headlines) ? output.headlines : [];
+  const descriptions = Array.isArray(output.descriptions) ? output.descriptions : [];
+  const rationale = output.rationale || '';
+  const sources = Array.isArray(output.sources) ? output.sources : [];
+%>
+
+<div class="card" style="padding: 1.25rem;">
+  <h3 style="margin: 0 0 1.25rem; font-size: 15px; font-weight: 600;">RSA Copy</h3>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+
+    <!-- Headlines (max 30 chars) -->
+    <div>
+      <div style="font-size: 12px; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+        Headlines <span style="font-size: 11px; font-weight: 400; color: #475569;">(max 30 chars)</span>
+      </div>
+      <% if (headlines.length === 0) { %>
+      <p style="font-size: 13px; color: #475569;">No headlines.</p>
+      <% } else { %>
+      <ol style="margin: 0; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+        <% headlines.forEach(function(h) { %>
+        <%
+          const hLen = typeof h === 'string' ? h.length : 0;
+          const hOver = hLen > 30;
+        %>
+        <li style="font-size: 13px;">
+          <span style="color: <%= hOver ? '#FCA5A5' : '#E2E8F0' %>;"><%= h %></span>
+          <span style="font-size: 11px; color: <%= hOver ? '#FCA5A5' : '#475569' %>; margin-left: 0.4rem;"><%= hLen %>/30</span>
+        </li>
+        <% }) %>
+      </ol>
+      <% } %>
+    </div>
+
+    <!-- Descriptions (max 90 chars) -->
+    <div>
+      <div style="font-size: 12px; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+        Descriptions <span style="font-size: 11px; font-weight: 400; color: #475569;">(max 90 chars)</span>
+      </div>
+      <% if (descriptions.length === 0) { %>
+      <p style="font-size: 13px; color: #475569;">No descriptions.</p>
+      <% } else { %>
+      <ol style="margin: 0; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+        <% descriptions.forEach(function(d) { %>
+        <%
+          const dLen = typeof d === 'string' ? d.length : 0;
+          const dOver = dLen > 90;
+        %>
+        <li style="font-size: 13px;">
+          <span style="color: <%= dOver ? '#FCA5A5' : '#E2E8F0' %>;"><%= d %></span>
+          <span style="font-size: 11px; color: <%= dOver ? '#FCA5A5' : '#475569' %>; margin-left: 0.4rem;"><%= dLen %>/90</span>
+        </li>
+        <% }) %>
+      </ol>
+      <% } %>
+    </div>
+
+  </div>
+
+  <% if (rationale) { %>
+  <div style="padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); margin-bottom: 1rem;">
+    <div style="font-size: 12px; font-weight: 600; color: #64748B; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em;">Rationale</div>
+    <p style="font-size: 13px; color: #94A3B8; margin: 0; line-height: 1.6;"><%= rationale %></p>
+  </div>
+  <% } %>
+
+  <% if (sources.length > 0) { %>
+  <div style="padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+    <div style="font-size: 11px; color: #475569; margin-bottom: 0.4rem;">Sources</div>
+    <ul style="margin: 0; padding-left: 1.25rem; font-size: 12px; color: #475569;">
+      <% sources.forEach(function(s) { %><li><%= s %></li><% }) %>
+    </ul>
+  </div>
+  <% } %>
+</div>

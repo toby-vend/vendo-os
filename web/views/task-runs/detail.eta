@@ -1,0 +1,207 @@
+<% layout('/layouts/base') %>
+
+<%
+  const run = it.run;
+  const output = it.output;
+  const qaCritique = it.qaCritique || {};
+  const sopsUsed = it.sopsUsed || [];
+  const ahpraViolations = Array.isArray(qaCritique.ahpra_violations) ? qaCritique.ahpra_violations : [];
+  const sopIssues = Array.isArray(qaCritique.sop_issues) ? qaCritique.sop_issues : [];
+  const amFeedback = qaCritique.am_feedback || null;
+  const isDraftReady = run.status === 'draft_ready';
+%>
+
+<div style="max-width: 780px; margin: 0 auto;">
+
+  <!-- Back link -->
+  <div style="margin-bottom: 1.25rem;">
+    <a href="/tasks" style="font-size: 13px; color: #64748B; text-decoration: none;">&larr; Back to Tasks</a>
+  </div>
+
+  <!-- Header -->
+  <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Task #<%= run.id %></h2>
+    <span class="badge badge-<%= run.status %>"><%= run.status.replace(/_/g, ' ') %></span>
+  </div>
+
+  <!-- Error banner -->
+  <% if (it.error === 'reason_required') { %>
+  <div style="padding: 0.75rem 1rem; margin-bottom: 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-size: 14px; color: #FCA5A5;">
+    Rejection reason is required.
+  </div>
+  <% } %>
+  <% if (it.error === 'invalid_status') { %>
+  <div style="padding: 0.75rem 1rem; margin-bottom: 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-size: 14px; color: #FCA5A5;">
+    This action is not available for the current task status.
+  </div>
+  <% } %>
+
+  <!-- Metadata -->
+  <div class="card" style="padding: 1.25rem; margin-bottom: 1.25rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
+    <div>
+      <div style="font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">Client</div>
+      <div style="font-size: 14px;"><%= run.client_name || ('ID ' + run.client_id) %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">Channel</div>
+      <div><span class="badge"><%= run.channel.replace(/_/g, ' ') %></span></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">Task Type</div>
+      <div style="font-size: 14px;"><%= run.task_type.replace(/_/g, ' ') %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">AM</div>
+      <div style="font-size: 14px;"><%= run.created_by %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">Created</div>
+      <div style="font-size: 14px;"><%= new Date(run.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">Attempts</div>
+      <div style="font-size: 14px;"><%= run.attempts %></div>
+    </div>
+  </div>
+
+  <!-- AHPRA violations banner (red) -->
+  <% if (ahpraViolations.length > 0) { %>
+  <div style="padding: 0.875rem 1rem; margin-bottom: 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px;">
+    <div style="font-size: 13px; font-weight: 600; color: #FCA5A5; margin-bottom: 0.5rem;">AHPRA Violations</div>
+    <ul style="margin: 0; padding-left: 1.25rem; font-size: 13px; color: #FCA5A5;">
+      <% ahpraViolations.forEach(function(v) { %>
+      <li><%= typeof v === 'string' ? v : (v.message || JSON.stringify(v)) %></li>
+      <% }) %>
+    </ul>
+  </div>
+  <% } %>
+
+  <!-- SOP issues banner (yellow) -->
+  <% if (sopIssues.length > 0) { %>
+  <div style="padding: 0.875rem 1rem; margin-bottom: 1rem; background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.3); border-radius: 8px;">
+    <div style="font-size: 13px; font-weight: 600; color: #FDE68A; margin-bottom: 0.5rem;">QA Warnings</div>
+    <ul style="margin: 0; padding-left: 1.25rem; font-size: 13px; color: #FDE68A;">
+      <% sopIssues.forEach(function(issue) { %>
+      <li><%= typeof issue === 'string' ? issue : (issue.message || JSON.stringify(issue)) %></li>
+      <% }) %>
+    </ul>
+  </div>
+  <% } %>
+
+  <!-- AM feedback (approved/rejected/regenerated) -->
+  <% if (amFeedback && !isDraftReady) { %>
+  <div style="padding: 0.875rem 1rem; margin-bottom: 1rem; background: rgba(148,163,184,0.06); border: 1px solid rgba(148,163,184,0.15); border-radius: 8px; font-size: 13px;">
+    <span style="color: #94A3B8; font-weight: 600;">Action taken:</span>
+    <span style="color: #CBD5E1; margin-left: 0.5rem;"><%= amFeedback.action %></span>
+    <% if (amFeedback.reason) { %><span style="color: #94A3B8;"> — </span><span style="color: #CBD5E1;"><%= amFeedback.reason %></span><% } %>
+    <% if (amFeedback.comment) { %><span style="color: #94A3B8;"> — </span><span style="color: #CBD5E1;"><%= amFeedback.comment %></span><% } %>
+  </div>
+  <% } %>
+
+  <!-- Draft content -->
+  <% if (output && it.draftPartial) { %>
+  <div id="draft-copy-target" style="margin-bottom: 1.25rem;">
+    <%~ include(it.draftPartial, { output: output }) %>
+  </div>
+  <% } else if (!output) { %>
+  <div class="card" style="padding: 1.25rem; margin-bottom: 1.25rem; color: #64748B; font-size: 14px; text-align: center;">
+    Draft not yet available. Current status: <strong style="color: #94A3B8;"><%= run.status.replace(/_/g, ' ') %></strong>
+  </div>
+  <% } %>
+
+  <!-- SOP attribution -->
+  <% if (sopsUsed && sopsUsed.length > 0) { %>
+  <details style="margin-bottom: 1.25rem;">
+    <summary style="cursor: pointer; font-size: 13px; color: #94A3B8; padding: 0.5rem 0; user-select: none;">Based on <%= sopsUsed.length %> SOP(s)</summary>
+    <ul style="margin: 0.5rem 0 0; padding-left: 1.25rem; font-size: 13px; color: #64748B;">
+      <% sopsUsed.forEach(function(sop) { %>
+      <li><%= sop.title %> <span style="color: #475569;">— v<%= sop.drive_modified_at ? sop.drive_modified_at.slice(0, 10) : 'unknown' %></span></li>
+      <% }) %>
+    </ul>
+  </details>
+  <% } %>
+
+  <!-- Action buttons (draft_ready only) -->
+  <% if (isDraftReady) { %>
+  <div class="card" style="padding: 1.25rem;">
+    <h3 style="margin: 0 0 1.25rem; font-size: 15px; font-weight: 600;">Review Actions</h3>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start;">
+
+      <!-- Approve -->
+      <form method="POST" action="/tasks/<%= run.id %>/approve">
+        <button type="submit" class="btn btn-primary" style="background: #22C55E; border-color: #22C55E;">
+          Approve
+        </button>
+      </form>
+
+      <!-- Copy to clipboard -->
+      <% if (output) { %>
+      <div>
+        <button type="button" onclick="copyDraft()" style="padding: 0.5rem 1rem; font-size: 13px; font-weight: 500; color: #94A3B8; background: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; cursor: pointer;">
+          Copy to Clipboard
+        </button>
+        <span id="copy-feedback" style="font-size: 12px; color: #22C55E; margin-left: 0.5rem; display: none;">Copied!</span>
+      </div>
+      <% } %>
+
+    </div>
+
+    <!-- Regenerate -->
+    <div style="margin-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.25rem;">
+      <form method="POST" action="/tasks/<%= run.id %>/regenerate" style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 440px;">
+        <label style="font-size: 13px; font-weight: 500; color: #94A3B8;">Regenerate</label>
+        <textarea name="comment" placeholder="Optional comment for regeneration…" rows="2" style="resize: vertical; font-size: 13px;"></textarea>
+        <div>
+          <button type="submit" style="padding: 0.4rem 0.9rem; font-size: 13px; color: #94A3B8; background: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; cursor: pointer;">
+            Regenerate Draft
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Reject -->
+    <div style="margin-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.25rem;">
+      <form method="POST" action="/tasks/<%= run.id %>/reject" style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 440px;">
+        <label style="font-size: 13px; font-weight: 500; color: #94A3B8;">Reject</label>
+        <textarea name="reason" placeholder="Reason for rejection (required)…" rows="2" required style="resize: vertical; font-size: 13px;"></textarea>
+        <div>
+          <button type="submit" style="padding: 0.4rem 0.9rem; font-size: 13px; color: #FCA5A5; background: none; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; cursor: pointer;">
+            Reject Draft
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+  <% } %>
+
+</div>
+
+<% if (output) { %>
+<script>
+function copyDraft() {
+  var target = document.getElementById('draft-copy-target');
+  var text = target ? target.innerText : '';
+  var feedback = document.getElementById('copy-feedback');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      if (feedback) { feedback.style.display = 'inline'; setTimeout(function() { feedback.style.display = 'none'; }, 2000); }
+    }).catch(function() { fallbackCopy(text, feedback); });
+  } else {
+    fallbackCopy(text, feedback);
+  }
+}
+function fallbackCopy(text, feedback) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); if (feedback) { feedback.style.display = 'inline'; setTimeout(function() { feedback.style.display = 'none'; }, 2000); } } catch(e) {}
+  document.body.removeChild(ta);
+}
+</script>
+<% } %>

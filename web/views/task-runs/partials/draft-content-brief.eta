@@ -1,0 +1,70 @@
+<%
+  const output = it.output || {};
+  const metaTitle = output.meta_title || '';
+  const metaDescription = output.meta_description || '';
+  const targetKeyword = output.target_keyword || '';
+  const contentSections = Array.isArray(output.content_sections) ? output.content_sections : [];
+  const rationale = output.rationale || '';
+  const sources = Array.isArray(output.sources) ? output.sources : [];
+%>
+
+<div class="card" style="padding: 1.25rem;">
+  <h3 style="margin: 0 0 1.25rem; font-size: 15px; font-weight: 600;">Content Brief</h3>
+
+  <!-- Meta fields -->
+  <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; padding: 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(255,255,255,0.02);">
+    <% if (metaTitle) { %>
+    <div>
+      <div style="font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Meta Title</div>
+      <div style="font-size: 14px; color: #E2E8F0;"><%= metaTitle %></div>
+    </div>
+    <% } %>
+    <% if (metaDescription) { %>
+    <div>
+      <div style="font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Meta Description</div>
+      <div style="font-size: 14px; color: #CBD5E1; line-height: 1.5;"><%= metaDescription %></div>
+    </div>
+    <% } %>
+    <% if (targetKeyword) { %>
+    <div>
+      <div style="font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Target Keyword</div>
+      <div style="font-size: 14px; font-weight: 600; color: #38BDF8;"><%= targetKeyword %></div>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Content sections -->
+  <% if (contentSections.length > 0) { %>
+  <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.25rem;">
+    <% contentSections.forEach(function(section, i) { %>
+    <div style="padding: 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+      <div style="font-size: 15px; font-weight: 600; color: #E2E8F0; margin-bottom: 0.5rem;"><%= section.heading %></div>
+      <% if (Array.isArray(section.key_points) && section.key_points.length > 0) { %>
+      <ul style="margin: 0 0 0.5rem; padding-left: 1.25rem; font-size: 13px; color: #CBD5E1; line-height: 1.7;">
+        <% section.key_points.forEach(function(kp) { %><li><%= kp %></li><% }) %>
+      </ul>
+      <% } %>
+      <% if (section.word_count_guidance) { %>
+      <div style="font-size: 12px; color: #64748B;">Word count guidance: <%= section.word_count_guidance %></div>
+      <% } %>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <% if (rationale) { %>
+  <div style="margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+    <div style="font-size: 12px; font-weight: 600; color: #64748B; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em;">Rationale</div>
+    <p style="font-size: 13px; color: #94A3B8; margin: 0; line-height: 1.6;"><%= rationale %></p>
+  </div>
+  <% } %>
+
+  <% if (sources.length > 0) { %>
+  <div style="padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+    <div style="font-size: 11px; color: #475569; margin-bottom: 0.4rem;">Sources</div>
+    <ul style="margin: 0; padding-left: 1.25rem; font-size: 12px; color: #475569;">
+      <% sources.forEach(function(s) { %><li><%= s %></li><% }) %>
+    </ul>
+  </div>
+  <% } %>
+</div>

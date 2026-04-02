@@ -1,0 +1,43 @@
+<%
+  const output = it.output || {};
+  const variants = Array.isArray(output.variants) ? output.variants : [];
+  const rationale = output.rationale || '';
+  const sources = Array.isArray(output.sources) ? output.sources : [];
+%>
+
+<div class="card" style="padding: 1.25rem;">
+  <h3 style="margin: 0 0 1.25rem; font-size: 15px; font-weight: 600;">Ad Copy Variants</h3>
+
+  <% if (variants.length === 0) { %>
+  <p style="color: #64748B; font-size: 14px;">No variants generated.</p>
+  <% } else { %>
+  <div style="display: flex; flex-direction: column; gap: 1rem;">
+    <% variants.forEach(function(v, i) { %>
+    <div style="padding: 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(255,255,255,0.02);">
+      <div style="font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Variant <%= i + 1 %></div>
+      <div style="font-size: 15px; font-weight: 600; color: #E2E8F0; margin-bottom: 0.5rem;"><%= v.headline %></div>
+      <div style="font-size: 14px; color: #CBD5E1; line-height: 1.6; margin-bottom: 0.5rem;"><%= v.body %></div>
+      <% if (v.cta) { %>
+      <div style="font-size: 13px; font-weight: 600; color: #38BDF8; padding: 0.35rem 0.75rem; display: inline-block; border: 1px solid rgba(56,189,248,0.3); border-radius: 20px;"><%= v.cta %></div>
+      <% } %>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <% if (rationale) { %>
+  <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.06);">
+    <div style="font-size: 12px; font-weight: 600; color: #64748B; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em;">Rationale</div>
+    <p style="font-size: 13px; color: #94A3B8; margin: 0; line-height: 1.6;"><%= rationale %></p>
+  </div>
+  <% } %>
+
+  <% if (sources.length > 0) { %>
+  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+    <div style="font-size: 11px; color: #475569; margin-bottom: 0.4rem;">Sources</div>
+    <ul style="margin: 0; padding-left: 1.25rem; font-size: 12px; color: #475569;">
+      <% sources.forEach(function(s) { %><li><%= s %></li><% }) %>
+    </ul>
+  </div>
+  <% } %>
+</div>
