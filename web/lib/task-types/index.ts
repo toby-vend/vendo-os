@@ -38,6 +38,21 @@ const REGISTRY = new Map<string, TaskTypeConfig>([
 // ---------------------------------------------------------------------------
 
 /**
+ * Returns all task type names registered for the given channel.
+ * E.g. getTaskTypesForChannel('paid_social') => ['ad_copy']
+ */
+export function getTaskTypesForChannel(channel: string): string[] {
+  const prefix = `${channel}:`;
+  const result: string[] = [];
+  for (const key of REGISTRY.keys()) {
+    if (key.startsWith(prefix)) {
+      result.push(key.slice(prefix.length));
+    }
+  }
+  return result;
+}
+
+/**
  * Returns the task type config for the given channel and task type.
  * Throws a descriptive error if no config is registered.
  */

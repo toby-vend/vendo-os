@@ -1,0 +1,87 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+  <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Content Tasks</h2>
+  <a href="/tasks/new" class="btn btn-primary" style="font-size: 13px; padding: 0.5rem 1rem;">+ New Task</a>
+</div>
+
+<!-- Filter bar -->
+<%
+  const q = it.query || {};
+  const buildQs = function(overrides) {
+    const p = Object.assign({}, q, overrides);
+    const parts = [];
+    if (p.status) parts.push('status=' + encodeURIComponent(p.status));
+    if (p.clientId) parts.push('clientId=' + encodeURIComponent(p.clientId));
+    if (p.channel) parts.push('channel=' + encodeURIComponent(p.channel));
+    if (p.dateFrom) parts.push('dateFrom=' + encodeURIComponent(p.dateFrom));
+    if (p.dateTo) parts.push('dateTo=' + encodeURIComponent(p.dateTo));
+    return parts.join('&');
+  };
+  const currentQs = buildQs({});
+%>
+
+<form method="GET" action="/tasks" style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: flex-end;">
+  <div>
+    <label style="display: block; font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">Status</label>
+    <select name="status" style="font-size: 13px; padding: 0.4rem 0.6rem;">
+      <option value="">All Statuses</option>
+      <% ['queued','generating','qa_check','draft_ready','approved','failed','rejected'].forEach(function(s) { %>
+      <option value="<%= s %>"<%= q.status === s ? ' selected' : '' %>><%= s.replace(/_/g,' ') %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label style="display: block; font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">Client</label>
+    <select name="clientId" style="font-size: 13px; padding: 0.4rem 0.6rem;">
+      <option value="">All Clients</option>
+      <% it.clients.forEach(function(c) { %>
+      <option value="<%= c.client_id %>"<%= String(q.clientId) === String(c.client_id) ? ' selected' : '' %>><%= c.client_name %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label style="display: block; font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">Channel</label>
+    <select name="channel" style="font-size: 13px; padding: 0.4rem 0.6rem;">
+      <option value="">All Channels</option>
+      <option value="paid_social"<%= q.channel === 'paid_social' ? ' selected' : '' %>>Paid Social</option>
+      <option value="seo"<%= q.channel === 'seo' ? ' selected' : '' %>>SEO</option>
+      <option value="paid_ads"<%= q.channel === 'paid_ads' ? ' selected' : '' %>>Paid Ads</option>
+    </select>
+  </div>
+  <div>
+    <label style="display: block; font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">From</label>
+    <input type="date" name="dateFrom" value="<%= q.dateFrom || '' %>" style="font-size: 13px; padding: 0.4rem 0.6rem;">
+  </div>
+  <div>
+    <label style="display: block; font-size: 11px; color: #64748B; margin-bottom: 0.25rem;">To</label>
+    <input type="date" name="dateTo" value="<%= q.dateTo || '' %>" style="font-size: 13px; padding: 0.4rem 0.6rem;">
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <button type="submit" class="btn btn-primary" style="font-size: 13px; padding: 0.4rem 0.9rem;">Filter</button>
+    <a href="/tasks" style="font-size: 13px; padding: 0.4rem 0.9rem; color: #64748B; text-decoration: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; display: inline-flex; align-items: center;">Clear</a>
+  </div>
+</form>
+
+<!-- Task rows with HTMX polling every 10s -->
+<div
+  id="task-rows"
+  hx-get="/tasks/rows<%= currentQs ? '?' + currentQs : '' %>"
+  hx-trigger="every 10s"
+  hx-swap="innerHTML"
+>
+  <%~ include('task-runs/list-rows', it) %>
+</div>
+
+<!-- Pagination -->
+<% if (it.totalPages > 1) { %>
+<div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem; font-size: 13px;">
+  <% if (it.page > 1) { %>
+  <a href="/tasks?<%= buildQs({ page: it.page - 1 }) %>" style="color: #64748B; text-decoration: none; padding: 0.4rem 0.8rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">&larr; Previous</a>
+  <% } %>
+  <span style="color: #94A3B8; padding: 0.4rem 0.5rem;">Page <%= it.page %></span>
+  <% if (it.page < it.totalPages) { %>
+  <a href="/tasks?<%= buildQs({ page: it.page + 1 }) %>" style="color: #64748B; text-decoration: none; padding: 0.4rem 0.8rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">Next &rarr;</a>
+  <% } %>
+</div>
+<% } %>

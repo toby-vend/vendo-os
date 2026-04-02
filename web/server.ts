@@ -27,6 +27,8 @@ import { tasksRoutes } from './routes/tasks.js';
 import { driveWebhookRoutes } from './routes/drive-webhook.js';
 import { driveCronRoutes } from './routes/drive-cron.js';
 import { taskRunRoutes } from './routes/task-runs.js';
+import { taskRunsUiRoutes } from './routes/task-runs-ui.js';
+import { skillsBrowserRoutes } from './routes/skills-browser.js';
 import {
   parseCookies,
   verifySessionToken,
@@ -181,6 +183,8 @@ app.register(tasksRoutes, { prefix: '/asana-tasks' });
 app.register(driveWebhookRoutes, { prefix: '/api/drive' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
+app.register(taskRunsUiRoutes, { prefix: '/tasks' });
+app.register(skillsBrowserRoutes, { prefix: '/skills' });
 
 // Export for Vercel
 export default app;

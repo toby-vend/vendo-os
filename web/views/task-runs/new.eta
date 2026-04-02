@@ -1,0 +1,89 @@
+<% layout('/layouts/base') %>
+
+<div style="max-width: 640px; margin: 0 auto;">
+  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+    <a href="/tasks" style="font-size: 13px; color: #64748B; text-decoration: none;">&larr; Back to Tasks</a>
+  </div>
+
+  <% if (it.error) { %>
+  <div style="padding: 0.75rem 1rem; margin-bottom: 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-size: 14px; color: #FCA5A5;">
+    <% const errorMessages = { invalid_client: 'Please select a valid client.', invalid_channel: 'Please select a valid channel.', invalid_task_type: 'Please select a task type.', submission_failed: 'Submission failed — please try again.' }; %>
+    <%= errorMessages[it.error] || 'An error occurred.' %>
+  </div>
+  <% } %>
+
+  <div class="card" style="padding: 1.5rem;">
+    <h2 style="margin: 0 0 1.5rem; font-size: 18px; font-weight: 600;">New Content Task</h2>
+
+    <form method="POST" action="/tasks/new" style="display: flex; flex-direction: column; gap: 1.25rem;">
+
+      <!-- Client -->
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: 500; color: #94A3B8; margin-bottom: 0.4rem;">Client</label>
+        <select name="clientId" required id="client-select" style="width: 100%;">
+          <option value="">Select a client…</option>
+          <% it.clients.forEach(function(c) { %>
+          <option value="<%= c.client_id %>"><%= c.client_name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Channel -->
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: 500; color: #94A3B8; margin-bottom: 0.4rem;">Channel</label>
+        <select
+          name="channel"
+          required
+          hx-get="/tasks/task-types"
+          hx-target="#task-type-container"
+          hx-trigger="change"
+          hx-include="[name='channel']"
+          style="width: 100%;"
+        >
+          <option value="">Select a channel…</option>
+          <option value="paid_social">Paid Social</option>
+          <option value="seo">SEO</option>
+          <option value="paid_ads">Paid Ads</option>
+        </select>
+      </div>
+
+      <!-- Task Type (HTMX swap target) -->
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: 500; color: #94A3B8; margin-bottom: 0.4rem;">Task Type</label>
+        <div id="task-type-container">
+          <select name="taskType" id="task-type-select" disabled style="width: 100%;">
+            <option value="">Select channel first</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Instructions (optional) -->
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: 500; color: #94A3B8; margin-bottom: 0.4rem;">
+          Additional Instructions <span style="font-weight: 400; color: #475569;">(optional)</span>
+        </label>
+        <textarea
+          name="instructions"
+          placeholder="Any specific requirements or context for this task…"
+          rows="3"
+          style="width: 100%; resize: vertical;"
+        ></textarea>
+      </div>
+
+      <div style="padding-top: 0.5rem;">
+        <button type="submit" class="btn btn-primary">Create Task</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+// Ensure task-type select style is updated on HTMX swap
+document.body.addEventListener('htmx:afterSwap', function(e) {
+  if (e.detail.target.id === 'task-type-container') {
+    var sel = document.getElementById('task-type-select');
+    if (sel) sel.style.width = '100%';
+  }
+});
+</script>
