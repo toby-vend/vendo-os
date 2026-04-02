@@ -81,13 +81,13 @@ export async function createTaskRun(data: {
 }
 
 /**
- * Update the status of a task run. Optionally writes sops_used (as JSON) and
- * brand_context_id when provided in extras.
+ * Update the status of a task run. Optionally writes sops_used (as JSON array of
+ * SopSnapshot objects) and brand_context_id when provided in extras.
  */
 export async function updateTaskRunStatus(
   id: number,
   status: TaskRunStatus,
-  extras?: { sopsUsed?: number[]; brandContextId?: number | null },
+  extras?: { sopsUsed?: SopSnapshot[]; brandContextId?: number | null },
 ): Promise<void> {
   const now = new Date().toISOString();
 
