@@ -291,23 +291,114 @@ describe('updateTaskRunStatus', () => {
     assert.strictEqual(row?.status, 'failed');
   });
 
-  it('writes sops_used as JSON when provided in extras', async () => {
+  it('writes sops_used as JSON when provided as SopSnapshot[] in extras', async () => {
+    const snapshots = [
+      { id: 1, title: 'SOP A', drive_modified_at: '2026-01-01T00:00:00Z', content_hash: 'abc' },
+      { id: 2, title: 'SOP B', drive_modified_at: '2026-02-01T00:00:00Z', content_hash: 'def' },
+      { id: 3, title: 'SOP C', drive_modified_at: '2026-03-01T00:00:00Z', content_hash: 'ghi' },
+    ];
     const id = await createTaskRun({ clientId: 7, channel: 'meta', taskType: 'ad_copy', createdBy: 'user-7' });
-    await updateTaskRunStatus(id, 'generating', { sopsUsed: [1, 2, 3] });
+    await updateTaskRunStatus(id, 'generating', { sopsUsed: snapshots });
 
     const row = await getTaskRun(id);
     assert.ok(row !== null);
-    assert.strictEqual(row.sops_used, JSON.stringify([1, 2, 3]));
+    assert.strictEqual(row.sops_used, JSON.stringify(snapshots));
   });
 
   it('writes brand_context_id when provided in extras', async () => {
+    const snapshots = [
+      { id: 4, title: 'SOP D', drive_modified_at: '2026-01-01T00:00:00Z', content_hash: 'jkl' },
+      { id: 5, title: 'SOP E', drive_modified_at: '2026-01-01T00:00:00Z', content_hash: 'mno' },
+    ];
     const id = await createTaskRun({ clientId: 8, channel: 'meta', taskType: 'ad_copy', createdBy: 'user-8' });
-    await updateTaskRunStatus(id, 'generating', { sopsUsed: [4, 5], brandContextId: 99 });
+    await updateTaskRunStatus(id, 'generating', { sopsUsed: snapshots, brandContextId: 99 });
 
     const row = await getTaskRun(id);
     assert.ok(row !== null);
     assert.strictEqual(row.brand_context_id, 99);
-    assert.strictEqual(row.sops_used, JSON.stringify([4, 5]));
+    assert.strictEqual(row.sops_used, JSON.stringify(snapshots));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getAuditRecord tests (AUDT-01, AUDT-02)
+// ---------------------------------------------------------------------------
+
+describe('getAuditRecord', () => {
+  it('returns null when task run does not exist', async () => {
+    const record = await getAuditRecord(888888);
+    assert.strictEqual(record, null);
+  });
+
+  it('returns parsed SopSnapshot[] for new enriched-format rows', async () => {
+    const snapshots = [
+      { id: 10, title: 'Enriched SOP', drive_modified_at: '2026-03-15T00:00:00Z', content_hash: 'hash-enriched' },
+    ];
+    const id = await createTaskRun({ clientId: 20, channel: 'meta', taskType: 'ad_copy', createdBy: 'audit-test' });
+    await updateTaskRunStatus(id, 'generating', { sopsUsed: snapshots });
+
+    const record = await getAuditRecord(id);
+    assert.ok(record !== null, 'AuditRecord should not be null');
+    assert.ok(Array.isArray(record.sops_used), 'sops_used should be an array');
+    assert.strictEqual(record.sops_used?.length, 1);
+    assert.strictEqual(record.sops_used?.[0].id, 10);
+    assert.strictEqual(record.sops_used?.[0].title, 'Enriched SOP');
+    assert.strictEqual(record.sops_used?.[0].drive_modified_at, '2026-03-15T00:00:00Z');
+    assert.strictEqual(record.sops_used?.[0].content_hash, 'hash-enriched');
+  });
+
+  it('returns null for sops_used when row has old number[] format (backward compat)', async () => {
+    const id = await createTaskRun({ clientId: 21, channel: 'meta', taskType: 'ad_copy', createdBy: 'audit-compat-test' });
+    // Write old-format number[] directly into the DB to simulate legacy rows
+    await testDb.execute({
+      sql: `UPDATE task_runs SET sops_used = ? WHERE id = ?`,
+      args: [JSON.stringify([1, 2, 3]), id],
+    });
+
+    const record = await getAuditRecord(id);
+    assert.ok(record !== null, 'AuditRecord itself should not be null');
+    assert.strictEqual(record.sops_used, null, 'sops_used should be null for old number[] format');
+  });
+
+  it('returns null for sops_used when column is null', async () => {
+    const id = await createTaskRun({ clientId: 22, channel: 'meta', taskType: 'ad_copy', createdBy: 'audit-null-test' });
+    // sops_used stays null (no updateTaskRunStatus with sopsUsed)
+
+    const record = await getAuditRecord(id);
+    assert.ok(record !== null);
+    assert.strictEqual(record.sops_used, null);
+  });
+
+  it('AuditRecord includes all expected fields', async () => {
+    const id = await createTaskRun({ clientId: 23, channel: 'tiktok', taskType: 'video_brief', createdBy: 'audit-fields-test' });
+
+    const record = await getAuditRecord(id);
+    assert.ok(record !== null);
+    assert.strictEqual(record.id, id);
+    assert.strictEqual(record.client_id, 23);
+    assert.strictEqual(record.channel, 'tiktok');
+    assert.strictEqual(record.task_type, 'video_brief');
+    assert.strictEqual(record.created_by, 'audit-fields-test');
+    assert.ok(typeof record.created_at === 'string');
+    assert.ok(typeof record.updated_at === 'string');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Append-only policy test (AUDT-03)
+// ---------------------------------------------------------------------------
+
+describe('Append-only policy', () => {
+  it('task-runs module exports no delete function', async () => {
+    const exportNames = Object.keys(taskRunsModule);
+    const deleteExports = exportNames.filter(name =>
+      /delete/i.test(name) || /remove.*task/i.test(name)
+    );
+    assert.deepStrictEqual(
+      deleteExports,
+      [],
+      `task-runs.ts must not export any delete function. Found: ${deleteExports.join(', ')}`,
+    );
   });
 });
 
