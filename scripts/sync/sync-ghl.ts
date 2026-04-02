@@ -1,11 +1,12 @@
 /**
  * Sync GHL pipelines and opportunities from all sub-accounts.
  *
- * Reads locations from the ghl_locations table (populated by discover-ghl-locations).
- * Falls back to GHL_LOCATION_ID env var if no locations table exists.
+ * Each sub-account needs its own Private Integration API key stored in
+ * the ghl_locations table (api_key column). Locations without a key are skipped.
  *
  * Usage:
- *   npm run sync:ghl
+ *   npm run sync:ghl                     # Sync all locations with keys
+ *   npm run sync:ghl -- --location=ID    # Sync a single location
  */
 
 import { config } from 'dotenv';
@@ -14,22 +15,27 @@ config({ path: '.env.local' });
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
 
 const BASE_URL = 'https://services.leadconnectorhq.com';
-const API_KEY = process.env.GHL_API_KEY!;
 
-if (!API_KEY) {
-  console.error('GHL_API_KEY must be set in .env.local');
-  process.exit(1);
+interface GhlStage { id: string; name: string; position: number; }
+interface GhlPipeline { id: string; name: string; locationId: string; stages: GhlStage[]; }
+interface GhlContact { id: string; name: string; companyName: string; email: string; phone: string; tags: string[]; }
+interface GhlOpportunity {
+  id: string; name: string; monetaryValue: number; pipelineId: string; pipelineStageId: string;
+  status: string; source: string; createdAt: string; updatedAt: string; lastStageChangeAt: string;
+  contactId: string; contact: GhlContact;
 }
 
-const headers: Record<string, string> = {
-  'Authorization': `Bearer ${API_KEY}`,
-  'Version': '2021-07-28',
-  'Content-Type': 'application/json',
-};
+function makeHeaders(apiKey: string): Record<string, string> {
+  return {
+    'Authorization': `Bearer ${apiKey}`,
+    'Version': '2021-07-28',
+    'Content-Type': 'application/json',
+  };
+}
 
-async function ghlFetch<T>(path: string): Promise<T> {
+async function ghlFetch<T>(path: string, apiKey: string): Promise<T> {
   const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
-  const resp = await fetch(url, { headers });
+  const resp = await fetch(url, { headers: makeHeaders(apiKey) });
   if (!resp.ok) {
     const body = await resp.text().catch(() => '');
     throw new Error(`GHL ${resp.status}: ${body.slice(0, 300)}`);
@@ -37,44 +43,7 @@ async function ghlFetch<T>(path: string): Promise<T> {
   return resp.json() as Promise<T>;
 }
 
-interface GhlStage {
-  id: string;
-  name: string;
-  position: number;
-}
-
-interface GhlPipeline {
-  id: string;
-  name: string;
-  locationId: string;
-  stages: GhlStage[];
-}
-
-interface GhlContact {
-  id: string;
-  name: string;
-  companyName: string;
-  email: string;
-  phone: string;
-  tags: string[];
-}
-
-interface GhlOpportunity {
-  id: string;
-  name: string;
-  monetaryValue: number;
-  pipelineId: string;
-  pipelineStageId: string;
-  status: string;
-  source: string;
-  createdAt: string;
-  updatedAt: string;
-  lastStageChangeAt: string;
-  contactId: string;
-  contact: GhlContact;
-}
-
-async function fetchAllOpportunities(locationId: string, pipelineId: string): Promise<GhlOpportunity[]> {
+async function fetchAllOpportunities(locationId: string, pipelineId: string, apiKey: string): Promise<GhlOpportunity[]> {
   const all: GhlOpportunity[] = [];
   let startAfterId = '';
   let startAfter = '';
@@ -88,7 +57,7 @@ async function fetchAllOpportunities(locationId: string, pipelineId: string): Pr
     const data = await ghlFetch<{
       opportunities: GhlOpportunity[];
       meta: { startAfterId?: string; startAfter?: number; total: number };
-    }>(url);
+    }>(url, apiKey);
 
     all.push(...data.opportunities);
 
@@ -100,13 +69,13 @@ async function fetchAllOpportunities(locationId: string, pipelineId: string): Pr
   return all;
 }
 
-async function syncLocation(db: any, locationId: string, locationName: string, now: string): Promise<{ pipelines: number; opportunities: number }> {
+async function syncLocation(db: any, locationId: string, locationName: string, apiKey: string, now: string): Promise<{ pipelines: number; opportunities: number }> {
   let totalPipelines = 0;
   let totalOpps = 0;
 
   try {
     const { pipelines } = await ghlFetch<{ pipelines: GhlPipeline[] }>(
-      `/opportunities/pipelines?locationId=${locationId}`
+      `/opportunities/pipelines?locationId=${locationId}`, apiKey
     );
 
     for (const p of pipelines) {
@@ -126,7 +95,7 @@ async function syncLocation(db: any, locationId: string, locationName: string, n
     }
 
     for (const p of pipelines) {
-      const opps = await fetchAllOpportunities(locationId, p.id);
+      const opps = await fetchAllOpportunities(locationId, p.id, apiKey);
 
       for (const o of opps) {
         db.run(`
@@ -148,7 +117,6 @@ async function syncLocation(db: any, locationId: string, locationName: string, n
       totalOpps += opps.length;
     }
   } catch (err: any) {
-    // Log but don't fail the entire sync for one location
     logError('GHL', `  Failed to sync ${locationName} (${locationId}): ${err.message?.slice(0, 150)}`);
   }
 
@@ -163,29 +131,41 @@ async function main() {
   // Add location_id column if missing
   try { db.run('ALTER TABLE ghl_opportunities ADD COLUMN location_id TEXT'); } catch { /* already exists */ }
 
-  // Get locations: prefer ghl_locations table, fall back to env var
-  let locations: { id: string; name: string }[] = [];
+  // Add api_key column to ghl_locations if missing
+  try { db.run('ALTER TABLE ghl_locations ADD COLUMN api_key TEXT'); } catch { /* already exists */ }
+
+  // Parse CLI args
+  const args = process.argv.slice(2);
+  const locationArg = args.find(a => a.startsWith('--location='))?.split('=')[1];
+
+  // Get locations with API keys
+  let locations: { id: string; name: string; api_key: string }[] = [];
 
   try {
-    const result = db.exec('SELECT id, name FROM ghl_locations ORDER BY name');
+    const query = locationArg
+      ? 'SELECT id, name, api_key FROM ghl_locations WHERE id = ? AND api_key IS NOT NULL'
+      : 'SELECT id, name, api_key FROM ghl_locations WHERE api_key IS NOT NULL ORDER BY name';
+    const queryArgs = locationArg ? [locationArg] : [];
+
+    const result = db.exec(query, queryArgs);
     if (result.length > 0) {
-      locations = result[0].values.map((row: any) => ({ id: row[0] as string, name: row[1] as string }));
+      locations = result[0].values.map((row: any) => ({
+        id: row[0] as string,
+        name: row[1] as string,
+        api_key: row[2] as string,
+      }));
     }
   } catch {
     // Table doesn't exist
   }
 
   if (locations.length === 0) {
-    const fallbackId = process.env.GHL_LOCATION_ID;
-    if (!fallbackId) {
-      console.error('No ghl_locations table and no GHL_LOCATION_ID set. Run discover-ghl-locations first.');
-      process.exit(1);
-    }
-    locations = [{ id: fallbackId, name: 'Default Location' }];
-    log('GHL', 'No ghl_locations table found, using GHL_LOCATION_ID fallback');
+    console.error('No GHL locations with API keys found.');
+    console.error('Add keys with: UPDATE ghl_locations SET api_key = "pit-..." WHERE id = "LOCATION_ID"');
+    process.exit(1);
   }
 
-  log('GHL', `Syncing ${locations.length} locations...`);
+  log('GHL', `Syncing ${locations.length} locations with API keys...`);
 
   let grandPipelines = 0;
   let grandOpps = 0;
@@ -194,7 +174,7 @@ async function main() {
   try {
     for (const loc of locations) {
       log('GHL', `[${loc.name}] Syncing...`);
-      const { pipelines, opportunities } = await syncLocation(db, loc.id, loc.name, now);
+      const { pipelines, opportunities } = await syncLocation(db, loc.id, loc.name, loc.api_key, now);
       grandPipelines += pipelines;
       grandOpps += opportunities;
       if (pipelines > 0 || opportunities > 0) {
@@ -204,7 +184,7 @@ async function main() {
         log('GHL', `[${loc.name}] No data`);
       }
 
-      // Save periodically to avoid losing progress
+      // Save periodically
       if (successCount % 10 === 0) saveDb();
     }
 
