@@ -192,6 +192,9 @@ const { assembleContext } = await import('./task-matcher.js');
 // ---------------------------------------------------------------------------
 
 function resetHolders() {
+  // Ensure API key is set (Test 7 deletes it, this restores it between tests)
+  process.env.ANTHROPIC_API_KEY = 'test-api-key-mock';
+
   // Reset anthropic
   anthropicHolder.messagesCreateError = null;
   anthropicHolder.callCount = 0;
