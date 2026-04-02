@@ -1,0 +1,191 @@
+<% layout('/layouts/base') %>
+
+<!-- Stat cards -->
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value"><%= it.linkedinStats.total %></p>
+    <p class="stat-label">Content Ideas</p>
+    <p class="stat-detail"><%= it.linkedinStats.drafted %> drafted &middot; <%= it.linkedinStats.published %> published</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.outboundFunnel.total %></p>
+    <p class="stat-label">Outbound Prospects</p>
+    <p class="stat-detail"><%= it.outboundFunnel.meetings %> meetings &middot; <%= it.outboundFunnel.converted %> converted</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.caseStudyStats.total %></p>
+    <p class="stat-label">Case Studies</p>
+    <p class="stat-detail"><%= it.caseStudyStats.drafted %> drafted &middot; <%= it.caseStudyStats.published %> published</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.referralStats.total %></p>
+    <p class="stat-label">Referrals</p>
+    <p class="stat-detail"><%= it.referralStats.convRate %>% conversion &middot; &pound;<%= it.referralStats.totalOwing %> owing</p>
+  </article>
+</div>
+
+<div class="two-col">
+  <div>
+
+    <!-- LinkedIn Content Pipeline -->
+    <h2>LinkedIn Content</h2>
+    <% if (!it.linkedinPosts.length) { %>
+      <article><p>No content yet. Run <code>npm run linkedin</code> to generate ideas from meeting insights.</p></article>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Date</th><th>Pillar</th><th>Topic</th><th>Status</th><th>Engagement</th></tr>
+      </thead>
+      <tbody>
+        <% it.linkedinPosts.forEach(p => { %>
+        <tr>
+          <td><%= p.scheduled_date ? p.scheduled_date.slice(0, 10) : '&mdash;' %></td>
+          <td>
+            <span class="badge badge-<%= p.pillar === 'sell' ? 'warning' : p.pillar === 'teach' ? 'active' : p.pillar === 'trust' ? 'info' : 'default' %>"><%= p.pillar %></span>
+          </td>
+          <td><%= (p.topic || '').slice(0, 60) %></td>
+          <td>
+            <span class="badge badge-<%= p.status === 'published' ? 'active' : p.status === 'drafted' ? 'info' : 'default' %>"><%= p.status %></span>
+          </td>
+          <td>
+            <% if (p.engagement_impressions > 0) { %>
+              <%= p.engagement_impressions %> views &middot; <%= p.engagement_likes %> likes
+            <% } else { %>
+              &mdash;
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+
+    <!-- Case Studies -->
+    <h2>Case Studies</h2>
+    <% if (!it.caseStudies.length) { %>
+      <article><p>No case studies yet. Run <code>npm run casestudy</code> to identify wins from performance data.</p></article>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Client</th><th>Win Type</th><th>Metric</th><th>Status</th><th>Approved</th></tr>
+      </thead>
+      <tbody>
+        <% it.caseStudies.forEach(cs => { %>
+        <tr>
+          <td><strong><%= cs.client_name %></strong></td>
+          <td><%= (cs.win_type || '').replace(/_/g, ' ') %></td>
+          <td><%= (cs.metric_highlight || '').slice(0, 50) %></td>
+          <td><span class="badge badge-<%= cs.status === 'published' ? 'active' : cs.status === 'drafted' ? 'info' : 'default' %>"><%= cs.status %></span></td>
+          <td><%= cs.client_approved ? 'Yes' : cs.anonymous ? 'Anon' : 'Pending' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+
+  </div>
+  <div>
+
+    <!-- Outbound Funnel -->
+    <h2>Outbound Funnel</h2>
+    <div style="margin-bottom: 1.5rem;">
+      <% const funnel = it.outboundFunnel; const funnelMax = Math.max(funnel.total, 1); %>
+      <% const stages = [
+        { label: 'Total', count: funnel.total },
+        { label: 'Contacted', count: funnel.contacted },
+        { label: 'Responded', count: funnel.responded },
+        { label: 'Interested', count: funnel.interested },
+        { label: 'Meeting', count: funnel.meetings },
+        { label: 'Converted', count: funnel.converted },
+      ]; %>
+      <% stages.forEach(s => { %>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+          <span style="width: 80px; font-size: 12px; color: #94A3B8; text-align: right;"><%= s.label %></span>
+          <div style="flex: 1; height: 22px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden;">
+            <div style="width: <%= Math.max((s.count / funnelMax) * 100, 2) %>%; height: 100%; background: #22C55E; border-radius: 4px; display: flex; align-items: center; padding-left: 8px;">
+              <span style="font-size: 11px; font-weight: 600; color: #0B0B0B;"><%= s.count %></span>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- Outbound Pipeline -->
+    <% if (it.outboundPipeline.length) { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Prospect</th><th>Company</th><th>ICP</th><th>Step</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <% it.outboundPipeline.slice(0, 10).forEach(p => { %>
+        <tr>
+          <td><%= p.prospect_name %></td>
+          <td><%= p.prospect_company || '&mdash;' %></td>
+          <td><strong><%= p.icp_match_score %></strong></td>
+          <td><%= p.sequence_step %></td>
+          <td>
+            <span class="badge badge-<%= p.converted ? 'active' : p.meeting_booked ? 'warning' : p.status === 'responded' ? 'info' : 'default' %>">
+              <%= p.converted ? 'WON' : p.meeting_booked ? 'MTG' : p.status %>
+            </span>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } else { %>
+      <article><p>No outbound prospects yet. Run <code>npm run outbound --add "Name" "Company" "email"</code> to start.</p></article>
+    <% } %>
+
+    <!-- Referrals -->
+    <h2>Referrals</h2>
+    <% if (!it.referrals.length) { %>
+      <article><p>No referrals tracked yet. Run <code>npm run referral --add</code> to log a referral.</p></article>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Referrer</th><th>Type</th><th>Referred</th><th>Status</th><th>Reward</th></tr>
+      </thead>
+      <tbody>
+        <% it.referrals.forEach(r => { %>
+        <tr>
+          <td><%= r.referrer_name %></td>
+          <td><span class="badge badge-default"><%= r.referrer_type %></span></td>
+          <td><%= r.referred_name %><% if (r.referred_company) { %> <small>(<%= r.referred_company %>)</small><% } %></td>
+          <td>
+            <span class="badge badge-<%= r.converted ? 'active' : r.status === 'contacted' ? 'info' : 'default' %>">
+              <%= r.converted ? 'converted' : r.status %>
+            </span>
+          </td>
+          <td>
+            <% if (r.converted) { %>
+              &pound;<%= r.reward_amount %> <small><%= r.reward_paid ? '(paid)' : '(owing)' %></small>
+            <% } else { %>&mdash;<% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+
+    <!-- Upsell Opportunities -->
+    <% if (it.upsells.length) { %>
+    <h2>Upsell Opportunities</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Client</th><th>Trigger</th><th>Confidence</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <% it.upsells.forEach(u => { %>
+        <tr>
+          <td><strong><%= u.client_name %></strong></td>
+          <td><%= (u.trigger_type || '').replace(/_/g, ' ') %></td>
+          <td><strong><%= Math.round(u.confidence * 100) %>%</strong></td>
+          <td><%= (u.recommended_action || '').slice(0, 50) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+
+  </div>
+</div>
