@@ -6,6 +6,7 @@ import {
   updateTaskRunOutput,
   updateTaskRunQA,
   incrementAttempts,
+  type SopSnapshot,
 } from './queries/task-runs.js';
 import { scalar } from './queries/base.js';
 import { loadTaskTypeConfig } from './task-types/index.js';
