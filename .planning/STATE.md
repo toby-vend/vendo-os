@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 09-audit-and-traceability 09-01-PLAN.md
-last_updated: "2026-04-02T12:24:48.524Z"
+stopped_at: Completed 09-audit-and-traceability 09-02-PLAN.md
+last_updated: "2026-04-02T12:39:20.220Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
   completed_phases: 9
-  total_plans: 18
-  completed_plans: 18
+  total_plans: 19
+  completed_plans: 19
   percent: 0
 ---
 
@@ -68,6 +68,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 08-qa-and-compliance P01 | 140 | 1 tasks | 2 files |
 | Phase 08-qa-and-compliance P02 | 329 | 2 tasks | 5 files |
 | Phase 09-audit-and-traceability P01 | 358 | 2 tasks | 4 files |
+| Phase 09-audit-and-traceability P02 | 176 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -125,6 +126,8 @@ Recent decisions affecting current work:
 - [Phase 08-qa-and-compliance]: MAX_ATTEMPTS=3 for QA retries (initial + 2); on QA error transition to failed not stuck at qa_check; qa_critique always contains both sop_issues and ahpra_violations
 - [Phase 09-audit-and-traceability]: SopSnapshot stored inline at generation time — no extra DB lookup required (SkillSearchResult already has all fields)
 - [Phase 09-audit-and-traceability]: parseSopsUsed returns null for old number[] rows (backward compat) — existing rows are not migrated
+- [Phase 09-audit-and-traceability]: BEFORE DELETE trigger wrapped in try/catch — Turso/libsql may not support DDL triggers; app-layer constraint is primary enforcer (AUDT-03)
+- [Phase 09-audit-and-traceability]: getAuditRecord replaces getTaskRun in GET /runs/:id — returns parsed SopSnapshot[] not raw JSON string (AUDT-02)
 
 ### Pending Todos
 
@@ -138,6 +141,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T12:24:48.522Z
-Stopped at: Completed 09-audit-and-traceability 09-01-PLAN.md
+Last session: 2026-04-02T12:39:20.218Z
+Stopped at: Completed 09-audit-and-traceability 09-02-PLAN.md
 Resume file: None

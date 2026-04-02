@@ -155,7 +155,7 @@ Plans:
   1. Every draft displayed to an AM shows which SOPs it was based on (names visible in the UI)
   2. The audit log contains a complete record for each generation: AM, client, channel, SOPs used, SOP versions, QA score
   3. Audit records cannot be deleted — the log is append-only at the database level
-**Plans:** 2 plans (1 complete, 1 gap closure)
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 09-01-PLAN.md — SOP version snapshots in sops_used, getAuditRecord query, append-only policy
@@ -187,5 +187,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. Task Matching Engine | 2/2 | Complete   | 2026-04-01 |
 | 7. Agent Execution | 2/2 | Complete   | 2026-04-02 |
 | 8. QA and Compliance | 2/2 | Complete   | 2026-04-02 |
-| 9. Audit and Traceability | 1/2 | Gap closure | 2026-04-02 |
+| 9. Audit and Traceability | 2/2 | Complete   | 2026-04-02 |
 | 10. AM Interface | 0/TBD | Not started | - |
