@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 08-qa-and-compliance 08-01-PLAN.md
-last_updated: "2026-04-02T09:44:36.030Z"
+stopped_at: Completed 08-qa-and-compliance 08-02-PLAN.md
+last_updated: "2026-04-02T09:53:05.995Z"
 last_activity: 2026-04-01 — Roadmap created
 progress:
   total_phases: 10
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 17
-  completed_plans: 16
+  completed_plans: 17
   percent: 0
 ---
 
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 07-agent-execution P01 | 124 | 1 tasks | 5 files |
 | Phase 07-agent-execution P02 | 440 | 2 tasks | 4 files |
 | Phase 08-qa-and-compliance P01 | 140 | 1 tasks | 2 files |
+| Phase 08-qa-and-compliance P02 | 329 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 08-qa-and-compliance]: AHPRA-Q1 'specialises in' uses negative lookbehind to exclude explicitly allowed 'special interest in' phrase
 - [Phase 08-qa-and-compliance]: checkAHPRACompliance emits at most one violation per rule (first pattern match wins) — consistent with rule-level reporting model
 - [Phase 08-qa-and-compliance]: AHPRA checker receives full serialised draft text string — no field-by-field JSON parsing required
+- [Phase 08-qa-and-compliance]: runSOPCheck is only export from qa-checker.ts — retry loop and AHPRA wiring live in task-matcher.ts
+- [Phase 08-qa-and-compliance]: MAX_ATTEMPTS=3 for QA retries (initial + 2); on QA error transition to failed not stuck at qa_check; qa_critique always contains both sop_issues and ahpra_violations
 
 ### Pending Todos
 
@@ -132,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T09:44:36.027Z
-Stopped at: Completed 08-qa-and-compliance 08-01-PLAN.md
+Last session: 2026-04-02T09:53:05.992Z
+Stopped at: Completed 08-qa-and-compliance 08-02-PLAN.md
 Resume file: None

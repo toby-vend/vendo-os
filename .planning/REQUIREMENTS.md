@@ -43,9 +43,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### QA & Compliance
 
-- [ ] **QA-01**: Agent output is validated against SOP checklist criteria after generation
-- [ ] **QA-02**: On QA failure, agent receives critique and regenerates (retry-with-critique, max 2 retries)
-- [ ] **QA-03**: After max retries, task escalates to human review with critique attached
+- [x] **QA-01**: Agent output is validated against SOP checklist criteria after generation
+- [x] **QA-02**: On QA failure, agent receives critique and regenerates (retry-with-critique, max 2 retries)
+- [x] **QA-03**: After max retries, task escalates to human review with critique attached
 - [x] **QA-04**: AHPRA/dental compliance pre-flight runs on all output before surfacing to AM
 - [x] **QA-05**: Compliance check flags non-compliant content with specific rule violations, does not silently suppress
 
@@ -136,9 +136,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TASK-07 | Phase 6 | Complete |
 | TASK-04 | Phase 7 | Complete |
 | TASK-05 | Phase 7 | Complete |
-| QA-01 | Phase 8 | Pending |
-| QA-02 | Phase 8 | Pending |
-| QA-03 | Phase 8 | Pending |
+| QA-01 | Phase 8 | Complete |
+| QA-02 | Phase 8 | Complete |
+| QA-03 | Phase 8 | Complete |
 | QA-04 | Phase 8 | Complete |
 | QA-05 | Phase 8 | Complete |
 | AUDT-01 | Phase 9 | Pending |

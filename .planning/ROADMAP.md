@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Brand Hub** - Per-client brand context ingested from Drive and queryable in isolation (completed 2026-04-01)
 - [x] **Phase 6: Task Matching Engine** - Match task type and client to relevant SOPs and brand context, async queuing (completed 2026-04-01)
 - [x] **Phase 7: Agent Execution** - Produce structured draft output per channel using retrieved context (completed 2026-04-02)
-- [ ] **Phase 8: QA and Compliance** - Validate output against SOP criteria, AHPRA pre-flight, retry with critique
+- [x] **Phase 8: QA and Compliance** - Validate output against SOP criteria, AHPRA pre-flight, retry with critique (completed 2026-04-02)
 - [ ] **Phase 9: Audit and Traceability** - Append-only generation log with SOP version attribution
 - [ ] **Phase 10: AM Interface** - Task submission, status polling, draft review, approve and regenerate
 
@@ -141,7 +141,7 @@ Plans:
   3. Output containing a prohibited AHPRA claim is flagged with the specific rule violated
   4. AHPRA compliance check runs on every draft before status moves to draft_ready — it cannot be bypassed
   5. QA failures never loop indefinitely — maximum three total attempts (initial + 2 retries) is enforced
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 08-01-PLAN.md — AHPRA dental advertising compliance checker (deterministic rule-based module)
@@ -182,6 +182,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Brand Hub | 2/2 | Complete   | 2026-04-01 |
 | 6. Task Matching Engine | 2/2 | Complete   | 2026-04-01 |
 | 7. Agent Execution | 2/2 | Complete   | 2026-04-02 |
-| 8. QA and Compliance | 1/2 | In Progress|  |
+| 8. QA and Compliance | 2/2 | Complete   | 2026-04-02 |
 | 9. Audit and Traceability | 0/TBD | Not started | - |
 | 10. AM Interface | 0/TBD | Not started | - |
