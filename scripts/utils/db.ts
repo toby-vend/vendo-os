@@ -621,6 +621,51 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_completed ON asana_tasks(completed)');
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_project ON asana_tasks(project_gid)');
 
+  // --- Harvest tables ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS harvest_users (
+      id INTEGER PRIMARY KEY,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      email TEXT,
+      is_active INTEGER DEFAULT 1,
+      weekly_capacity_hours REAL DEFAULT 0,
+      roles TEXT,
+      created_at TEXT,
+      updated_at TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS harvest_time_entries (
+      id INTEGER PRIMARY KEY,
+      spent_date TEXT NOT NULL,
+      hours REAL DEFAULT 0,
+      notes TEXT,
+      is_running INTEGER DEFAULT 0,
+      billable INTEGER DEFAULT 0,
+      billable_rate REAL,
+      user_id INTEGER NOT NULL,
+      user_name TEXT,
+      client_id INTEGER,
+      client_name TEXT,
+      project_id INTEGER,
+      project_name TEXT,
+      task_id INTEGER,
+      task_name TEXT,
+      created_at TEXT,
+      updated_at TEXT,
+      synced_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_entries_date ON harvest_time_entries(spent_date)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_entries_user ON harvest_time_entries(user_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_entries_project ON harvest_time_entries(project_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_harvest_entries_client ON harvest_time_entries(client_name)');
+
   seedCategories(db);
   saveDb();
 }

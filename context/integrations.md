@@ -28,6 +28,12 @@
 |---------|---------|----------------|--------|----------|
 | Asana | Task management, team workload | MCP | **Connected** | Medium |
 
+### Time Tracking
+
+| Service | Purpose | Connection Type | Status | Priority |
+|---------|---------|----------------|--------|----------|
+| Harvest | Timesheets, team utilisation, project hours | API | **Connected** | Medium |
+
 ### Communication
 
 | Service | Purpose | Connection Type | Status | Priority |
@@ -105,6 +111,10 @@ Store API keys in `.env.local` (gitignored, never committed):
 # Finance
 XERO_CLIENT_ID=
 XERO_CLIENT_SECRET=
+
+# Time Tracking
+HARVEST_ACCESS_TOKEN=
+HARVEST_ACCOUNT_ID=
 
 # CRM
 GHL_API_KEY=
