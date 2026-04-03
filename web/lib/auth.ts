@@ -114,6 +114,8 @@ const ROUTE_MAP: [string, string][] = [
   ['/skills', 'skills'],
   ['/asana-tasks', 'asana-tasks'],
   ['/client-database', 'client-database'],
+  ['/operations', 'operations'],
+  ['/skills-library', 'skills-library'],
 ];
 
 export function getRouteSlug(url: string): string | null {

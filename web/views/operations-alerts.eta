@@ -1,0 +1,26 @@
+<% if (!it.alerts || it.alerts.length === 0) { %>
+<p style="color: var(--text-secondary); padding: 1rem 0;">No alerts recorded yet. Run a monitor to generate alerts.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Monitor</th>
+      <th>Client / Entity</th>
+      <th>Alert</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.alerts.forEach(a => { %>
+    <tr>
+      <td><%= a.created_at ? new Date(a.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—' %></td>
+      <td><span class="badge"><%= a.monitor %></span></td>
+      <td><%= a.entity %></td>
+      <td><%= a.alert_type %></td>
+      <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= a.message %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

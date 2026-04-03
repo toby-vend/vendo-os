@@ -1,0 +1,78 @@
+<% layout('/layouts/base') %>
+
+<h2>Operations Hub</h2>
+
+<div class="stat-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.total %></p>
+    <p class="stat-label">Alerts (7 days)</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.critical %></p>
+    <p class="stat-label">Critical</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.monitors.length %></p>
+    <p class="stat-label">Monitors</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.lastRun ? new Date(it.stats.lastRun).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—' %></p>
+    <p class="stat-label">Last Alert</p>
+  </article>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+  <!-- Left: Monitor & Automation controls -->
+  <div>
+    <h3>Monitors</h3>
+    <div class="card-list">
+      <% it.monitors.forEach(m => { %>
+      <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem;">
+        <div>
+          <strong><%= m.label %></strong>
+          <small style="display: block; color: var(--text-secondary);"><%= m.name %></small>
+        </div>
+        <button hx-post="/operations/run/<%= m.name %>"
+                hx-vals='{"_csrf":"<%= it.csrfToken %>"}'
+                hx-swap="none"
+                hx-on::after-request="this.textContent='Running...'; setTimeout(() => this.textContent='Run', 3000)"
+                class="btn btn-sm">Run</button>
+      </div>
+      <% }) %>
+    </div>
+
+    <h3 style="margin-top: 1.5rem;">Automation</h3>
+    <div class="card-list">
+      <% it.automations.forEach(a => { %>
+      <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; margin-bottom: 0.5rem;">
+        <div>
+          <strong><%= a.label %></strong>
+          <small style="display: block; color: var(--text-secondary);"><%= a.name %></small>
+        </div>
+        <button hx-post="/operations/run/<%= a.name %>"
+                hx-vals='{"_csrf":"<%= it.csrfToken %>"}'
+                hx-swap="none"
+                hx-on::after-request="this.textContent='Running...'; setTimeout(() => this.textContent='Run', 3000)"
+                class="btn btn-sm">Run</button>
+      </div>
+      <% }) %>
+    </div>
+
+    <button hx-post="/operations/run/monitor-all"
+            hx-vals='{"_csrf":"<%= it.csrfToken %>"}'
+            hx-swap="none"
+            hx-on::after-request="this.textContent='Running All...'; setTimeout(() => this.textContent='Run All Monitors', 5000)"
+            class="btn" style="margin-top: 1rem; width: 100%;">Run All Monitors</button>
+  </div>
+
+  <!-- Right: Alert feed -->
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3>Alert Feed</h3>
+      <button hx-get="/operations/alerts" hx-target="#alert-feed" class="btn btn-sm">Refresh</button>
+    </div>
+    <div id="alert-feed">
+      <%~ include('operations-alerts', { alerts: it.alerts }) %>
+    </div>
+  </div>
+</div>

@@ -99,9 +99,21 @@
           </a>
           <% } %>
           <% if (canSee('drive')) { %>
-          <a href="/skills" class="nav-item<%= it.currentPath?.startsWith('/skills') ? ' active' : '' %>">
+          <a href="/skills" class="nav-item<%= it.currentPath?.startsWith('/skills') && !it.currentPath?.startsWith('/skills-library') ? ' active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
             <span class="nav-label">Skills</span>
+          </a>
+          <% } %>
+          <% if (canSee('operations')) { %>
+          <a href="/operations" class="nav-item<%= it.currentPath?.startsWith('/operations') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="nav-label">Operations</span>
+          </a>
+          <% } %>
+          <% if (canSee('skills-library')) { %>
+          <a href="/skills-library" class="nav-item<%= it.currentPath?.startsWith('/skills-library') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M12 6l4 4-4 4"/></svg>
+            <span class="nav-label">Skills Library</span>
           </a>
           <% } %>
           <% if (canSee('chat')) { %>
@@ -217,7 +229,7 @@
           <button class="mobile-menu-btn" onclick="toggleSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Content Tasks', '/tasks/new': 'New Task', '/asana-tasks': 'Asana Tasks', '/skills': 'Skills Library', '/growth': 'Growth', '/admin/clients': 'Client Hub', '/admin/client-mapping': 'Client Mapping', '/admin/portal-users': 'Portal Users' }; if (it.currentPath?.startsWith('/growth/linkedin/')) pageNames[it.currentPath] = 'LinkedIn Post'; pageNames['/dashboards/meta-dental'] = 'Meta Ads — Dental'; pageNames['/dashboards/gads-dental'] = 'Google Ads — Dental'; pageNames['/dashboards/reporting-hub'] = 'Client Reporting Hub'; pageNames['/dashboards/client-mer'] = 'Client MER / ROAS'; pageNames['/dashboards/finance'] = 'Financial Dashboard'; pageNames['/dashboards/time-tracking'] = 'Time Tracking'; pageNames['/dashboards/capacity'] = 'Capacity Modelling'; pageNames['/dashboards/gads-ecom'] = 'Google Ads — Ecom'; pageNames['/dashboards/profitability'] = 'Client Profitability'; pageNames['/dashboards/pipeline'] = 'Pipeline Tracker'; pageNames['/dashboards/reviews'] = 'Performance Reviews'; pageNames['/client-database'] = 'Client Database'; %>
+          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Content Tasks', '/tasks/new': 'New Task', '/asana-tasks': 'Asana Tasks', '/skills': 'Skills Library', '/growth': 'Growth', '/admin/clients': 'Client Hub', '/admin/client-mapping': 'Client Mapping', '/admin/portal-users': 'Portal Users' }; if (it.currentPath?.startsWith('/growth/linkedin/')) pageNames[it.currentPath] = 'LinkedIn Post'; pageNames['/dashboards/meta-dental'] = 'Meta Ads — Dental'; pageNames['/dashboards/gads-dental'] = 'Google Ads — Dental'; pageNames['/dashboards/reporting-hub'] = 'Client Reporting Hub'; pageNames['/dashboards/client-mer'] = 'Client MER / ROAS'; pageNames['/dashboards/finance'] = 'Financial Dashboard'; pageNames['/dashboards/time-tracking'] = 'Time Tracking'; pageNames['/dashboards/capacity'] = 'Capacity Modelling'; pageNames['/dashboards/gads-ecom'] = 'Google Ads — Ecom'; pageNames['/dashboards/profitability'] = 'Client Profitability'; pageNames['/dashboards/pipeline'] = 'Pipeline Tracker'; pageNames['/dashboards/reviews'] = 'Performance Reviews'; pageNames['/client-database'] = 'Client Database'; pageNames['/operations'] = 'Operations Hub'; pageNames['/skills-library'] = 'Skills Library'; %>
           <h1 class="topbar-title"><%= pageNames[it.currentPath] || 'Vendo OS' %></h1>
         </div>
         <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">
