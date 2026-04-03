@@ -409,7 +409,7 @@ export async function getClientMER(clientId: number, months = 6): Promise<Client
 
 export async function getFinanceOverview(): Promise<FinanceOverview> {
   const [mrrRow, cashRow, invoicedRow, paidRow, outstandingRow, overdueRow] = await Promise.all([
-    scalar<number>(`SELECT COALESCE(SUM(total_invoiced), 0) / NULLIF(
+    scalar<number>(`SELECT COALESCE(SUM(total), 0) / NULLIF(
       (SELECT COUNT(DISTINCT strftime('%Y-%m', date)) FROM xero_invoices WHERE type = 'ACCREC' AND status IN ('PAID','AUTHORISED')), 0
     ) FROM xero_invoices WHERE type = 'ACCREC' AND status IN ('PAID','AUTHORISED')`),
     scalar<number>(`SELECT COALESCE(SUM(closing_balance), 0) FROM xero_bank_summary`),

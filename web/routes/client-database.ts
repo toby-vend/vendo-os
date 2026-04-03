@@ -49,7 +49,7 @@ export const clientDatabaseRoutes: FastifyPluginAsync = async (app) => {
     }
 
     if (amFilter) {
-      conditions.push('c.am = ?');
+      conditions.push('c.vertical = ?');
       args.push(amFilter);
     }
 
@@ -65,11 +65,11 @@ export const clientDatabaseRoutes: FastifyPluginAsync = async (app) => {
              COALESCE(c.display_name, c.name) as label,
              COALESCE(c.status, 'active') as status,
              c.vertical,
-             c.am,
-             c.cm,
-             c.services,
-             c.mrr,
-             c.contract_end,
+             NULL as am,
+             NULL as cm,
+             NULL as services,
+             c.total_invoiced as mrr,
+             NULL as contract_end,
              c.last_meeting_date,
              ch.score as health_score,
              CASE
@@ -95,9 +95,9 @@ export const clientDatabaseRoutes: FastifyPluginAsync = async (app) => {
       ORDER BY COALESCE(c.display_name, c.name) COLLATE NOCASE
     `, args);
 
-    // Get distinct AMs for filter dropdown
+    // Get distinct verticals for filter dropdown
     const ams = await rows<{ am: string }>(`
-      SELECT DISTINCT am FROM clients WHERE am IS NOT NULL AND am != '' ORDER BY am COLLATE NOCASE
+      SELECT DISTINCT vertical as am FROM clients WHERE vertical IS NOT NULL AND vertical != '' ORDER BY vertical COLLATE NOCASE
     `);
 
     const isPartial = request.headers['hx-request'] === 'true';
