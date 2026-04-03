@@ -3,7 +3,7 @@ config({ path: '.env.local' });
 
 import Fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
-import { md } from './lib/markdown.js';
+import { md, sanitiseHtml } from './lib/markdown.js';
 import { Eta } from 'eta';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -81,6 +81,7 @@ app.decorateReply('render', function (template: string, data: Record<string, unk
     user,
     csrfToken,
     md,
+    sanitiseHtml,
   });
   this.type('text/html').send(html);
 });
@@ -103,13 +104,15 @@ app.addHook('onRequest', async (request, reply) => {
   // Cron routes — validate Vercel cron secret
   if (path.startsWith('/api/cron/')) {
     const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret) {
-      const auth = request.headers['authorization'];
-      const token = auth?.startsWith('Bearer ') ? auth.slice(7) : '';
-      if (!token || !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(cronSecret))) {
-        reply.code(401).send({ error: 'Unauthorised' });
-        return;
-      }
+    if (!cronSecret) {
+      reply.code(401).send({ error: 'Cron secret not configured' });
+      return;
+    }
+    const auth = request.headers['authorization'];
+    const token = auth?.startsWith('Bearer ') ? auth.slice(7) : '';
+    if (!token || !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(cronSecret))) {
+      reply.code(401).send({ error: 'Unauthorised' });
+      return;
     }
     return;
   }
@@ -185,10 +188,11 @@ app.addHook('onRequest', async (request, reply) => {
     return;
   }
 
-  // Channel-based route permission check for standard users
+  // Channel-based route permission check for standard users (deny-by-default)
   if (user.role === 'standard') {
     const routeSlug = getRouteSlug(path);
-    if (routeSlug && !user.allowedRoutes.includes(routeSlug)) {
+    // If no route slug mapping exists, deny access (unmapped routes are admin-only)
+    if (!routeSlug || !user.allowedRoutes.includes(routeSlug)) {
       if (request.headers['hx-request']) { reply.code(403).send('Access denied'); return; }
       const html = eta.render('403', { user });
       reply.code(403).type('text/html').send(html);
@@ -253,6 +257,23 @@ app.addHook('preHandler', async (request, reply) => {
   if (!verifyCsrfToken(sessionToken, csrfToken)) {
     reply.code(403).send('CSRF token invalid');
     return;
+  }
+});
+
+// Global error handler — prevent leaking internal details
+app.setErrorHandler((error, request, reply) => {
+  if (process.env.VERCEL) {
+    console.error(`[error] ${request.method} ${request.url}:`, error);
+  } else {
+    request.log.error(error);
+  }
+  const statusCode = (error as any).statusCode ?? 500;
+  if (request.headers['hx-request']) {
+    reply.code(statusCode).send('Something went wrong');
+  } else {
+    reply.code(statusCode).type('text/html').send(
+      eta.render('error', { user: (request as any).user, statusCode }),
+    );
   }
 });
 

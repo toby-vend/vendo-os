@@ -99,8 +99,8 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
       return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ message: `${ideas.length} content ideas generated.` }));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ error: `Failed to generate ideas: ${msg}` }));
+      console.error('[growth] Failed to generate ideas:', err);
+      return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ error: 'Failed to generate ideas. Please try again.' }));
     }
   });
 
@@ -115,8 +115,8 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
       return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ message: 'Draft created.' }));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ error: `Draft failed: ${msg}` }));
+      console.error('[growth] LinkedIn draft failed:', err);
+      return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
 
@@ -125,7 +125,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const body = request.body as Record<string, string>;
     await updateLinkedInStatus(id, body.status);
     // If redirected from detail page, go back there
-    if (body._redirect) return reply.redirect(body._redirect);
+    if (body._redirect && body._redirect.startsWith('/') && !body._redirect.startsWith('//')) return reply.redirect(body._redirect);
     return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData());
   });
 
@@ -191,8 +191,8 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
       return reply.type('text/html').render('growth/_outbound-table', await outboundPartialData({ message: 'Outreach draft generated.' }));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      return reply.type('text/html').render('growth/_outbound-table', await outboundPartialData({ error: `Draft failed: ${msg}` }));
+      console.error('[growth] Outbound draft failed:', err);
+      return reply.type('text/html').render('growth/_outbound-table', await outboundPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
 
@@ -222,8 +222,8 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       await insertCaseStudies(wins.map((w) => ({ clientName: w.clientName, winType: w.winType, metric: w.metric })));
       return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ message: `${wins.length} win(s) identified.` }));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ error: `Scan failed: ${msg}` }));
+      console.error('[growth] Case study scan failed:', err);
+      return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ error: 'Scan failed. Please try again.' }));
     }
   });
 
@@ -242,8 +242,8 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       await updateCaseStudyDraft(id, draft, distribution);
       return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ message: 'Case study drafted.' }));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ error: `Draft failed: ${msg}` }));
+      console.error('[growth] Case study draft failed:', err);
+      return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
 
@@ -306,8 +306,8 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       await insertUpsellOpportunities(opps);
       return reply.type('text/html').render('growth/_upsell-table', await upsellPartialData({ message: `${opps.length} opportunity(ies) identified.` }));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      return reply.type('text/html').render('growth/_upsell-table', await upsellPartialData({ error: `Scan failed: ${msg}` }));
+      console.error('[growth] Upsell scan failed:', err);
+      return reply.type('text/html').render('growth/_upsell-table', await upsellPartialData({ error: 'Scan failed. Please try again.' }));
     }
   });
 

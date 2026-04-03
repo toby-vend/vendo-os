@@ -8,6 +8,7 @@
  */
 
 import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
 
 // Configure marked for safe, clean output
 marked.setOptions({
@@ -15,13 +16,29 @@ marked.setOptions({
   gfm: true,          // GitHub Flavoured Markdown
 });
 
+// Allowlist for sanitise-html — permits standard Markdown output, strips scripts
+const SANITIZE_OPTS: sanitizeHtml.IOptions = {
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'mark', 'del', 'ins']),
+  allowedAttributes: {
+    ...sanitizeHtml.defaults.allowedAttributes,
+    img: ['src', 'alt', 'title', 'width', 'height'],
+  },
+  allowedSchemes: ['http', 'https', 'mailto'],
+};
+
 /**
  * Render markdown string to sanitised HTML.
  * Returns empty string for null/undefined input.
  */
 export function md(input: string | null | undefined): string {
   if (!input) return '';
-  // marked.parse can return string or Promise — we use synchronous mode
   const html = marked.parse(input) as string;
-  return html;
+  return sanitizeHtml(html, SANITIZE_OPTS);
+}
+
+/**
+ * Sanitise pre-rendered HTML (e.g. FTS snippets with <mark> tags).
+ */
+export function sanitiseHtml(input: string): string {
+  return sanitizeHtml(input, SANITIZE_OPTS);
 }

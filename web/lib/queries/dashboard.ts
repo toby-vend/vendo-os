@@ -165,7 +165,9 @@ export function listBriefs(): { date: string; filename: string }[] {
 }
 
 export function getBriefContent(date: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   const filepath = resolve(BRIEFS_DIR, `${date}.md`);
+  if (!filepath.startsWith(BRIEFS_DIR)) return null;
   if (!existsSync(filepath)) return null;
   return readFileSync(filepath, 'utf-8');
 }

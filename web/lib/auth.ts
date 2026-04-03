@@ -38,12 +38,13 @@ export function verifyPassword(password: string, hash: string): boolean {
 
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
-function getSessionSecret(): string {
-  const secret = process.env.SESSION_SECRET || process.env.DASHBOARD_PASSWORD;
+export function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
   if (!secret) {
     if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
       throw new Error('SESSION_SECRET environment variable is required in production');
     }
+    console.warn('[SECURITY] Using hardcoded session secret — set SESSION_SECRET in .env.local');
     return 'vendo-dev';
   }
   return secret;
@@ -108,6 +109,11 @@ const ROUTE_MAP: [string, string][] = [
   ['/settings', 'settings'],
   ['/chat', 'chat'],
   ['/tasks', 'tasks'],
+  ['/growth', 'growth'],
+  ['/dashboards', 'dashboards'],
+  ['/skills', 'skills'],
+  ['/asana-tasks', 'asana-tasks'],
+  ['/client-database', 'client-database'],
 ];
 
 export function getRouteSlug(url: string): string | null {
@@ -147,6 +153,16 @@ export function verifyCsrfToken(sessionToken: string, csrfToken: string): boolea
   const expected = generateCsrfToken(sessionToken);
   if (expected.length !== csrfToken.length) return false;
   return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(csrfToken, 'hex'));
+}
+
+// --- Password complexity ---
+
+export function validatePasswordComplexity(password: string): string | null {
+  if (password.length < 8) return 'Password must be at least 8 characters';
+  if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter';
+  if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter';
+  if (!/[0-9]/.test(password)) return 'Password must contain at least one digit';
+  return null;
 }
 
 // --- UUID helper ---

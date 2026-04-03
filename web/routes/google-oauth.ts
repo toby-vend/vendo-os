@@ -2,7 +2,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import crypto from 'crypto';
 import { upsertUserOAuthToken, deleteUserOAuthToken, getUserOAuthToken } from '../lib/queries.js';
 import { encryptToken, decryptToken } from '../lib/crypto.js';
-import { parseCookies, type SessionUser } from '../lib/auth.js';
+import { parseCookies, getSessionSecret, type SessionUser } from '../lib/auth.js';
 
 const SCOPES = [
   'openid',
@@ -22,7 +22,7 @@ function getRedirectUri(request: { protocol: string; hostname: string; headers: 
 
 function generateState(userId: string): string {
   const timestamp = Date.now().toString();
-  const secret = process.env.SESSION_SECRET || 'vendo-dev';
+  const secret = getSessionSecret();
   const hmac = crypto.createHmac('sha256', secret);
   hmac.update(userId + timestamp);
   return `${timestamp}.${hmac.digest('hex')}`;
@@ -52,7 +52,8 @@ export const googleOAuthRoutes: FastifyPluginAsync = async (app) => {
     const redirectUri = getRedirectUri(request);
 
     // Store state in a short-lived cookie for CSRF validation
-    reply.header('Set-Cookie', `google_oauth_state=${state}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`);
+    const secure = process.env.VERCEL || process.env.NODE_ENV === 'production' ? '; Secure' : '';
+    reply.header('Set-Cookie', `google_oauth_state=${state}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600${secure}`);
 
     const params = new URLSearchParams({
       client_id: clientId,
