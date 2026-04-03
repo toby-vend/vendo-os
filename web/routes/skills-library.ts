@@ -5,7 +5,10 @@ import { fileURLToPath } from 'url';
 import { marked } from 'marked';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SKILLS_DIR = resolve(__dirname, '../../.claude/commands/skills');
+// On Vercel, use __dirname relative path; locally use cwd
+const SKILLS_DIR = process.env.VERCEL
+  ? resolve(__dirname, '../../.claude/commands/skills')
+  : resolve(process.cwd(), '.claude/commands/skills');
 
 interface SkillSummary {
   slug: string;
