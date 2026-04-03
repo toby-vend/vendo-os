@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { searchTasks, getTaskAssignees, getTaskProjects, getTaskStats, upsertAsanaTask } from '../lib/queries.js';
+import { searchTasks, getTaskAssignees, getTaskProjects, getTaskStats, upsertAsanaTask, getAllClientsAdmin } from '../lib/queries.js';
 
 const ASANA_API_KEY = process.env.ASANA_API_KEY || '';
 const ASANA_WORKSPACE_GID = process.env.ASANA_WORKSPACE_GID || '';
@@ -43,9 +43,10 @@ export const tasksRoutes: FastifyPluginAsync = async (app) => {
 
   // --- Create task form ---
   app.get('/new', async (request, reply) => {
-    const [assignees, projects] = await Promise.all([
+    const [assignees, projects, clients] = await Promise.all([
       getTaskAssignees(),
       getTaskProjects(),
+      getAllClientsAdmin(),
     ]);
 
     // Also fetch workspace users from Asana for the assignee dropdown
@@ -80,6 +81,7 @@ export const tasksRoutes: FastifyPluginAsync = async (app) => {
       assignees,
       projects: asanaProjects.length ? asanaProjects : projects,
       workspaceUsers,
+      clients,
     });
   });
 

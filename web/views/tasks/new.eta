@@ -32,6 +32,16 @@
     </div>
 
     <div>
+      <label for="client" style="display: block; font-size: 13px; color: #94A3B8; margin-bottom: 4px;">Client</label>
+      <select id="client" name="client" style="width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #E2E8F0; font-size: 14px;">
+        <option value="">No client</option>
+        <% if (it.clients) { it.clients.forEach(c => { %>
+          <option value="<%= c.id %>"><%= c.label || c.display_name || c.name %></option>
+        <% }) } %>
+      </select>
+    </div>
+
+    <div>
       <label for="assignee" style="display: block; font-size: 13px; color: #94A3B8; margin-bottom: 4px;">Assignee</label>
       <select id="assignee" name="assignee" style="width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #E2E8F0; font-size: 14px;">
         <option value="">Unassigned</option>
