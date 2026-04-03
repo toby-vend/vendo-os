@@ -1,0 +1,51 @@
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Client</th>
+      <th>AM</th>
+      <th>CM</th>
+      <th>Services</th>
+      <th>MRR</th>
+      <th>Contract End</th>
+      <th>Last Meeting</th>
+      <th>Health Score</th>
+      <th>Invoices</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (!it.clients.length) { %>
+    <tr><td colspan="9" style="text-align: center; color: #94A3B8;">No clients match the current filters.</td></tr>
+    <% } %>
+    <% it.clients.forEach(c => { %>
+    <tr>
+      <td><a href="/clients/<%= encodeURIComponent(c.name) %>"><%= c.label %></a></td>
+      <td><%= c.am || '\u2014' %></td>
+      <td><%= c.cm || '\u2014' %></td>
+      <td><%= c.services || '\u2014' %></td>
+      <td><%= c.mrr != null ? '\u00a3' + Number(c.mrr).toLocaleString('en-GB') : '\u2014' %></td>
+      <td><%= c.contract_end ? c.contract_end.slice(0, 10) : '\u2014' %></td>
+      <td><%= c.last_meeting_date ? c.last_meeting_date.slice(0, 10) : '\u2014' %></td>
+      <td>
+        <% if (c.health_score != null) { %>
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 10px; height: 10px; border-radius: 50%; background: <%= c.health_score >= 70 ? '#22C55E' : c.health_score >= 40 ? '#F59E0B' : '#EF4444' %>;"></span>
+          <%= c.health_score %>/100
+        </span>
+        <% } else { %>
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 10px; height: 10px; border-radius: 50%; background: #6B7280;"></span>
+          <span style="color: #94A3B8;">\u2014</span>
+        </span>
+        <% } %>
+      </td>
+      <td>
+        <% if (c.overdue_invoices > 0) { %>
+        <span style="color: #EF4444; font-weight: 600;"><%= c.overdue_invoices %> overdue</span>
+        <% } else { %>
+        <span style="color: #22C55E;">Clear</span>
+        <% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

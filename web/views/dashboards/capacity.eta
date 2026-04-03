@@ -1,0 +1,75 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+  <h2 style="margin: 0;">Capacity Modelling</h2>
+  <form method="GET" action="/dashboards/capacity" style="display: flex; gap: 0.75rem; align-items: center;">
+    <select name="days" onchange="this.form.submit()">
+      <option value="7" <%= it.days === 7 ? 'selected' : '' %>>7 days</option>
+      <option value="14" <%= it.days === 14 ? 'selected' : '' %>>14 days</option>
+      <option value="30" <%= it.days === 30 ? 'selected' : '' %>>30 days</option>
+      <option value="90" <%= it.days === 90 ? 'selected' : '' %>>90 days</option>
+    </select>
+  </form>
+</div>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value" style="<%= it.companyUtilisation > 80 ? 'color: #EF4444;' : it.companyUtilisation < 60 ? 'color: #F59E0B;' : 'color: #22C55E;' %>"><%= it.companyUtilisation %>%</p>
+    <p class="stat-label">Company Utilisation</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.totalHours.toFixed(1) %>h</p>
+    <p class="stat-label">Total Hours Logged</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.totalCapacity.toFixed(1) %>h</p>
+    <p class="stat-label">Total Capacity</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.data.length %></p>
+    <p class="stat-label">Active Team Members</p>
+  </article>
+</div>
+
+<% if (!it.data.length) { %>
+  <p>No capacity data available. Ensure Harvest sync is running and users have weekly capacity set.</p>
+<% } else { %>
+
+<% for (const [dept, members] of it.departments) {
+  const deptHours = members.reduce((s, m) => s + m.hours_logged, 0);
+  const deptCap = members.reduce((s, m) => s + m.weekly_capacity, 0);
+  const deptUtil = deptCap > 0 ? (deptHours / deptCap * 100).toFixed(1) : 0;
+%>
+  <h3 style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+    <%= dept %>
+    <span style="font-size: 13px; font-weight: 400; color: <%= deptUtil > 80 ? '#EF4444' : deptUtil < 60 ? '#F59E0B' : '#22C55E' %>;">
+      (<%= deptUtil %>% utilisation)
+    </span>
+  </h3>
+
+  <table class="compact">
+    <thead>
+      <tr><th>Person</th><th>Hours Logged</th><th>Capacity</th><th>Utilisation</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <% members.forEach(m => {
+        let status = '';
+        let statusColour = '';
+        if (m.utilisation_pct > 100) { status = 'Overloaded'; statusColour = '#EF4444'; }
+        else if (m.utilisation_pct > 80) { status = 'Consider hiring'; statusColour = '#F59E0B'; }
+        else if (m.utilisation_pct < 60) { status = 'Review workload'; statusColour = '#F59E0B'; }
+        else { status = 'Healthy'; statusColour = '#22C55E'; }
+      %>
+      <tr>
+        <td><%= m.user_name %></td>
+        <td><%= m.hours_logged %></td>
+        <td><%= m.weekly_capacity %>h</td>
+        <td style="color: <%= statusColour %>; font-weight: 600;"><%= m.utilisation_pct %>%</td>
+        <td style="color: <%= statusColour %>; font-size: 12px;"><%= status %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<% } %>

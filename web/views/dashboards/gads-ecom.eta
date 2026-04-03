@@ -1,0 +1,71 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+  <h2 style="margin: 0;">Google Ads &mdash; Ecom</h2>
+  <form method="GET" action="/dashboards/gads-ecom" style="display: flex; gap: 0.75rem; align-items: center;">
+    <select name="client" onchange="this.form.submit()" style="min-width: 180px;">
+      <option value="">All Clients</option>
+      <% it.clients.forEach(c => { %>
+        <option value="<%= c.id %>" <%= it.query.client == c.id ? 'selected' : '' %>><%= c.name %></option>
+      <% }) %>
+    </select>
+    <select name="days" onchange="this.form.submit()">
+      <option value="7" <%= it.days === 7 ? 'selected' : '' %>>7 days</option>
+      <option value="14" <%= it.days === 14 ? 'selected' : '' %>>14 days</option>
+      <option value="30" <%= it.days === 30 ? 'selected' : '' %>>30 days</option>
+      <option value="90" <%= it.days === 90 ? 'selected' : '' %>>90 days</option>
+    </select>
+  </form>
+</div>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></p>
+    <p class="stat-label">Total Spend</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.totalRevenue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></p>
+    <p class="stat-label">Conversion Value</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.blendedROAS %>x</p>
+    <p class="stat-label">Blended ROAS</p>
+  </article>
+</div>
+
+<% if (!it.data.length) { %>
+  <p>No Google Ads data for ecom clients in this period.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Client</th>
+      <th>Spend</th>
+      <th>Conv. Value</th>
+      <th>ROAS</th>
+      <th>Conversions</th>
+      <th>CPA</th>
+      <th>WoW CPA Change</th>
+      <th>Clicks</th>
+      <th>CTR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.data.forEach(r => { const w = it.wow.get(r.client_id); %>
+    <tr>
+      <td><%= r.client_name %></td>
+      <td>&pound;<%= r.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td>&pound;<%= r.conversion_value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td><%= r.roas.toFixed(2) %>x</td>
+      <td><%= r.conversions.toLocaleString() %></td>
+      <td>&pound;<%= r.cpa.toFixed(2) %></td>
+      <td style="<%= w && w.cpa_change_pct > 50 ? 'color: #EF4444; font-weight: 600;' : w && w.cpa_change_pct < 0 ? 'color: #22C55E;' : '' %>">
+        <%= w ? (w.cpa_change_pct > 0 ? '+' : '') + w.cpa_change_pct.toFixed(1) + '%' : '&mdash;' %>
+      </td>
+      <td><%= r.clicks.toLocaleString() %></td>
+      <td><%= r.ctr.toFixed(2) %>%</td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

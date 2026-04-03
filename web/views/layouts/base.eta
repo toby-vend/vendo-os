@@ -52,6 +52,12 @@
             <span class="nav-label">Clients</span>
           </a>
           <% } %>
+          <% if (canSee('clients')) { %>
+          <a href="/client-database" class="nav-item<%= it.currentPath?.startsWith('/client-database') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/></svg>
+            <span class="nav-label">Client Database</span>
+          </a>
+          <% } %>
           <% if (canSee('pipeline')) { %>
           <a href="/pipeline" class="nav-item<%= it.currentPath?.startsWith('/pipeline') ? ' active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8l-4 4-4-4"/><path d="M12 12v4"/></svg>
@@ -104,6 +110,53 @@
             <span class="nav-label">Chat</span>
           </a>
           <% } %>
+        </div>
+        <div class="nav-section">
+          <span class="nav-section-label">Dashboards</span>
+          <a href="/dashboards/meta-dental" class="nav-item<%= it.currentPath?.startsWith('/dashboards/meta-dental') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span class="nav-label">Meta — Dental</span>
+          </a>
+          <a href="/dashboards/gads-dental" class="nav-item<%= it.currentPath?.startsWith('/dashboards/gads-dental') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span class="nav-label">Google — Dental</span>
+          </a>
+          <a href="/dashboards/gads-ecom" class="nav-item<%= it.currentPath?.startsWith('/dashboards/gads-ecom') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span class="nav-label">Google — Ecom</span>
+          </a>
+          <a href="/dashboards/reporting-hub" class="nav-item<%= it.currentPath?.startsWith('/dashboards/reporting-hub') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            <span class="nav-label">Reporting Hub</span>
+          </a>
+          <a href="/dashboards/client-mer" class="nav-item<%= it.currentPath?.startsWith('/dashboards/client-mer') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <span class="nav-label">Client MER</span>
+          </a>
+          <a href="/dashboards/finance" class="nav-item<%= it.currentPath?.startsWith('/dashboards/finance') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            <span class="nav-label">Finance</span>
+          </a>
+          <a href="/dashboards/profitability" class="nav-item<%= it.currentPath?.startsWith('/dashboards/profitability') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span class="nav-label">Profitability</span>
+          </a>
+          <a href="/dashboards/time-tracking" class="nav-item<%= it.currentPath?.startsWith('/dashboards/time-tracking') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="nav-label">Time Tracking</span>
+          </a>
+          <a href="/dashboards/capacity" class="nav-item<%= it.currentPath?.startsWith('/dashboards/capacity') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            <span class="nav-label">Capacity</span>
+          </a>
+          <a href="/dashboards/pipeline" class="nav-item<%= it.currentPath?.startsWith('/dashboards/pipeline') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8l-4 4-4-4"/><path d="M12 12v4"/></svg>
+            <span class="nav-label">Pipeline Tracker</span>
+          </a>
+          <a href="/dashboards/reviews" class="nav-item<%= it.currentPath?.startsWith('/dashboards/reviews') ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+            <span class="nav-label">Reviews</span>
+          </a>
         </div>
         <div class="nav-section">
           <span class="nav-section-label">System</span>
@@ -164,7 +217,7 @@
           <button class="mobile-menu-btn" onclick="toggleSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Content Tasks', '/tasks/new': 'New Task', '/asana-tasks': 'Asana Tasks', '/skills': 'Skills Library', '/growth': 'Growth', '/admin/clients': 'Client Hub', '/admin/client-mapping': 'Client Mapping', '/admin/portal-users': 'Portal Users' }; if (it.currentPath?.startsWith('/growth/linkedin/')) pageNames[it.currentPath] = 'LinkedIn Post'; %>
+          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Content Tasks', '/tasks/new': 'New Task', '/asana-tasks': 'Asana Tasks', '/skills': 'Skills Library', '/growth': 'Growth', '/admin/clients': 'Client Hub', '/admin/client-mapping': 'Client Mapping', '/admin/portal-users': 'Portal Users' }; if (it.currentPath?.startsWith('/growth/linkedin/')) pageNames[it.currentPath] = 'LinkedIn Post'; pageNames['/dashboards/meta-dental'] = 'Meta Ads — Dental'; pageNames['/dashboards/gads-dental'] = 'Google Ads — Dental'; pageNames['/dashboards/reporting-hub'] = 'Client Reporting Hub'; pageNames['/dashboards/client-mer'] = 'Client MER / ROAS'; pageNames['/dashboards/finance'] = 'Financial Dashboard'; pageNames['/dashboards/time-tracking'] = 'Time Tracking'; pageNames['/dashboards/capacity'] = 'Capacity Modelling'; pageNames['/dashboards/gads-ecom'] = 'Google Ads — Ecom'; pageNames['/dashboards/profitability'] = 'Client Profitability'; pageNames['/dashboards/pipeline'] = 'Pipeline Tracker'; pageNames['/dashboards/reviews'] = 'Performance Reviews'; pageNames['/client-database'] = 'Client Database'; %>
           <h1 class="topbar-title"><%= pageNames[it.currentPath] || 'Vendo OS' %></h1>
         </div>
         <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">

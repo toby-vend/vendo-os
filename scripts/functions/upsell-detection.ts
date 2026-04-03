@@ -12,6 +12,38 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { sendSlackAlert } from '../utils/slack-alert.js';
+
+const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || '';
+
+async function notifyUpsellOpportunity(
+  clientName: string,
+  triggerType: string,
+  signal: string,
+  recommendedAction: string,
+): Promise<void> {
+  // Look up current services from client source mappings
+  const db = await getDb();
+  const servicesResult = db.exec(
+    "SELECT DISTINCT source FROM client_source_mappings WHERE client_id IN (SELECT id FROM clients WHERE name = ? OR display_name = ?)",
+    [clientName, clientName],
+  );
+  const currentServices = servicesResult.length && servicesResult[0].values.length
+    ? servicesResult[0].values.map((r: unknown[]) => r[0] as string).join(', ')
+    : 'Unknown';
+
+  const suggestedService = triggerType === 'high_performance' ? 'Budget increase / new channel'
+    : triggerType === 'meeting_signal' ? 'Expansion package (see meeting notes)'
+    : 'Premium services / additional channels';
+
+  const message = `:chart_with_upwards_trend: *Upsell Opportunity — ${clientName}*\n` +
+    `*Current Services:* ${currentServices}\n` +
+    `*Suggested:* ${suggestedService}\n` +
+    `*Evidence:* ${signal}\n` +
+    `*Recommended Action:* ${recommendedAction}`;
+
+  await sendSlackAlert('upsell-detection', message, 'warning');
+}
 
 async function scanForOpportunities(): Promise<void> {
   const db = await getDb();
@@ -36,11 +68,13 @@ async function scanForOpportunities(): Promise<void> {
       );
       if (exists.length && exists[0].values.length) continue;
 
+      const highPerfSignal = `£${spend} spend, ${clicks} clicks in 90 days — strong performance suggests room to scale`;
       db.run(`
         INSERT INTO upsell_opportunities (client_name, trigger_type, signal, confidence, recommended_action, status, created_at, updated_at)
         VALUES (?, 'high_performance', ?, 0.7, 'Propose budget increase or new channel expansion', 'identified', ?, ?)
-      `, [name, `£${spend} spend, ${clicks} clicks in 90 days — strong performance suggests room to scale`, now, now]);
+      `, [name, highPerfSignal, now, now]);
       found++;
+      await notifyUpsellOpportunity(name, 'high_performance', highPerfSignal, 'Propose budget increase or new channel expansion');
     }
   }
 
@@ -69,6 +103,7 @@ async function scanForOpportunities(): Promise<void> {
         VALUES (?, 'meeting_signal', 'Expansion language detected in recent meeting', 0.6, 'Review meeting notes and propose tailored expansion package', 'identified', ?, ?)
       `, [name, now, now]);
       found++;
+      await notifyUpsellOpportunity(name, 'meeting_signal', 'Expansion language detected in recent meeting', 'Review meeting notes and propose tailored expansion package');
     }
   }
 
@@ -89,11 +124,13 @@ async function scanForOpportunities(): Promise<void> {
       );
       if (exists.length && exists[0].values.length) continue;
 
+      const marginSignal = `${margin}% margin — capacity to deliver more value`;
       db.run(`
         INSERT INTO upsell_opportunities (client_name, trigger_type, signal, confidence, recommended_action, status, created_at, updated_at)
         VALUES (?, 'high_margin', ?, 0.5, 'Healthy margin — consider offering premium services or new channels', 'identified', ?, ?)
-      `, [name, `${margin}% margin — capacity to deliver more value`, now, now]);
+      `, [name, marginSignal, now, now]);
       found++;
+      await notifyUpsellOpportunity(name, 'high_margin', marginSignal, 'Healthy margin — consider offering premium services or new channels');
     }
   }
 

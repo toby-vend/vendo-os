@@ -1,0 +1,76 @@
+<% layout('/layouts/base') %>
+
+<h2>Financial Dashboard &mdash; Vendo</h2>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.overview.mrr.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Avg Monthly Revenue</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.overview.cashPosition.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></p>
+    <p class="stat-label">Cash Position</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.overview.invoiced.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Invoiced (30d)</p>
+    <p class="stat-breakdown">Paid: &pound;<%= it.overview.paid.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="<%= it.overview.overdueTotal > 0 ? 'color: #EF4444;' : '' %>">&pound;<%= it.overview.outstanding.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Outstanding</p>
+    <% if (it.overview.overdueCount > 0) { %>
+      <p class="stat-breakdown" style="color: #EF4444;"><%= it.overview.overdueCount %> overdue (&pound;<%= it.overview.overdueTotal.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %>)</p>
+    <% } %>
+  </article>
+</div>
+
+<div class="two-col">
+  <div>
+    <h3>Revenue Trend</h3>
+    <% if (!it.trend.length) { %>
+      <p>No P&amp;L data available. Run the Xero sync to populate.</p>
+    <% } else { %>
+      <% const maxIncome = Math.max(...it.trend.map(t => t.income), 1); %>
+      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+        <% it.trend.forEach(t => { %>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 13px;">
+          <span style="width: 70px; flex-shrink: 0;"><%= t.period.slice(0, 7) %></span>
+          <div style="flex: 1; display: flex; gap: 2px; height: 18px;">
+            <div style="width: <%= (t.income / maxIncome * 100).toFixed(1) %>%; background: #22C55E; border-radius: 3px; min-width: 2px;" title="Income: &pound;<%= t.income.toLocaleString() %>"></div>
+            <div style="width: <%= (t.expenses / maxIncome * 100).toFixed(1) %>%; background: #EF4444; border-radius: 3px; min-width: 2px;" title="Expenses: &pound;<%= t.expenses.toLocaleString() %>"></div>
+          </div>
+          <span style="width: 80px; text-align: right; color: <%= t.net >= 0 ? '#22C55E' : '#EF4444' %>;">&pound;<%= (t.net / 1000).toFixed(1) %>k</span>
+        </div>
+        <% }) %>
+      </div>
+      <div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 12px; color: #94A3B8;">
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: #22C55E; border-radius: 2px;"></span> Income</span>
+        <span><span style="display: inline-block; width: 10px; height: 10px; background: #EF4444; border-radius: 2px;"></span> Expenses</span>
+      </div>
+    <% } %>
+  </div>
+
+  <div>
+    <h3>Overdue Invoices</h3>
+    <% if (!it.overdue.length) { %>
+      <p style="color: #22C55E;">No overdue invoices.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Client</th><th>Invoice</th><th>Amount Due</th><th>Days Overdue</th></tr>
+      </thead>
+      <tbody>
+        <% it.overdue.forEach(inv => { %>
+        <tr>
+          <td><%= inv.contact_name %></td>
+          <td><%= inv.invoice_number %></td>
+          <td>&pound;<%= inv.amount_due.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+          <td style="color: #EF4444;"><%= inv.days_overdue %>d</td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>

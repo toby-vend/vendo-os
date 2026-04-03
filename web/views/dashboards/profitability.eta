@@ -1,0 +1,71 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+  <h2 style="margin: 0;">Client Profitability</h2>
+  <form method="GET" action="/dashboards/profitability" style="display: flex; gap: 0.75rem; align-items: center;">
+    <label style="font-size: 13px; color: #94A3B8;">Cost Rate &pound;</label>
+    <input type="number" name="costRate" value="<%= it.costRate %>" step="5" min="0" max="200" style="width: 70px;" onchange="this.form.submit()">
+    <span style="font-size: 12px; color: #64748B;">/hr</span>
+  </form>
+</div>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.totalMRR.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Total Monthly Revenue</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.totalCost.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Total Cost (30d)</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="color: <%= it.totalMargin >= 0 ? '#22C55E' : '#EF4444' %>;">&pound;<%= it.totalMargin.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Total Margin</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.avgMarginPct %>%</p>
+    <p class="stat-label">Avg Margin %</p>
+  </article>
+  <% if (it.lossMaking > 0) { %>
+  <article class="stat-card" style="border-color: rgba(239,68,68,0.3);">
+    <p class="stat-value" style="color: #EF4444;"><%= it.lossMaking %></p>
+    <p class="stat-label">Loss-Making Clients</p>
+  </article>
+  <% } %>
+</div>
+
+<% if (!it.data.length) { %>
+  <p>No profitability data available. Ensure clients have invoicing data and Harvest time entries are synced.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Client</th>
+      <th>Monthly Revenue</th>
+      <th>Hours (30d)</th>
+      <th>Cost (30d)</th>
+      <th>Margin</th>
+      <th>Margin %</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.data.forEach(r => {
+      let colour = '#22C55E';
+      if (r.margin_pct < 20) colour = '#EF4444';
+      else if (r.margin_pct < 40) colour = '#F59E0B';
+    %>
+    <tr style="<%= r.margin < 0 ? 'background: rgba(239,68,68,0.06);' : '' %>">
+      <td><%= r.client_name %></td>
+      <td>&pound;<%= r.mrr.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
+      <td><%= r.hours %></td>
+      <td>&pound;<%= r.cost.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
+      <td style="color: <%= r.margin >= 0 ? '#22C55E' : '#EF4444' %>;">&pound;<%= r.margin.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
+      <td>
+        <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: <%= colour %>; margin-right: 4px;"></span>
+        <%= r.margin_pct %>%
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
