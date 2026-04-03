@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import type { FastifyPluginAsync } from 'fastify';
 import { getDriveWatchChannel, insertDriveSyncQueueItem } from '../lib/queries/drive.js';
 
@@ -7,9 +8,11 @@ export const driveWebhookRoutes: FastifyPluginAsync = async (app) => {
     const resourceState = request.headers['x-goog-resource-state'] as string | undefined;
     const channelToken = request.headers['x-goog-channel-token'] as string | undefined;
 
-    // Validate token against DRIVE_WEBHOOK_SECRET
+    // Validate token against DRIVE_WEBHOOK_SECRET (timing-safe comparison)
     const secret = process.env.DRIVE_WEBHOOK_SECRET;
-    if (!secret || channelToken !== secret) {
+    if (!secret || !channelToken
+        || secret.length !== channelToken.length
+        || !crypto.timingSafeEqual(Buffer.from(channelToken), Buffer.from(secret))) {
       return reply.code(403).send({ error: 'Forbidden' });
     }
 

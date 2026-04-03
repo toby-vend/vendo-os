@@ -19,6 +19,7 @@
   <div class="card" style="padding: 1.5rem;">
     <h3 style="margin-bottom: 1rem; font-size: 16px; font-weight: 600;">Create Client Portal User</h3>
     <form method="POST" action="/admin/portal-users">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
         <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Name</label>
@@ -89,7 +90,7 @@
         <td style="padding: 12px 16px; text-align: right;">
           <button onclick="if(confirm('Delete portal user <%= u.name %>? This cannot be undone.')) document.getElementById('delete-<%= u.id %>').submit()"
                   style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer;">Delete</button>
-          <form id="delete-<%= u.id %>" method="POST" action="/admin/portal-users/<%= u.id %>/delete" style="display:none;"></form>
+          <form id="delete-<%= u.id %>" method="POST" action="/admin/portal-users/<%= u.id %>/delete" style="display:none;"><input type="hidden" name="_csrf" value="<%= it.csrfToken %>" /></form>
         </td>
       </tr>
       <% }) %>

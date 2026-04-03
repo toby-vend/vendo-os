@@ -46,6 +46,7 @@
       <h2 style="margin: 0;">LinkedIn Post</h2>
       <% if (!it.post.draft) { %>
       <form method="POST" action="/growth/linkedin/<%= it.post.id %>/draft-and-return">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
         <button type="submit" class="btn btn-primary btn-sm">Generate Draft</button>
       </form>
       <% } %>
@@ -57,6 +58,7 @@
       <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 0.5rem;">
         <button onclick="navigator.clipboard.writeText(document.querySelector('#post-text').innerText); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy to clipboard', 2000);" class="btn btn-primary btn-sm">Copy to clipboard</button>
         <form method="POST" action="/growth/linkedin/<%= it.post.id %>/draft-and-return" style="display: inline;">
+          <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
           <button type="submit" class="btn btn-sm">Regenerate</button>
         </form>
       </div>
@@ -73,6 +75,7 @@
 <!-- Status control -->
 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
   <form method="POST" action="/growth/linkedin/<%= it.post.id %>/status" style="display: flex; gap: 0.75rem; align-items: center;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
     <label style="font-size: 13px; color: #94A3B8;">Status:</label>
     <select name="status" style="padding: 6px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
       <% ['idea', 'drafted', 'approved', 'published', 'cancelled'].forEach(s => { %>

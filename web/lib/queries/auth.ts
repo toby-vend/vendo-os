@@ -586,6 +586,20 @@ export async function initSchema(): Promise<void> {
 
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_cum_client ON client_user_map(client_id)`, args: [] });
 
+  // --- Audit log table ---
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY,
+    event_type TEXT NOT NULL,
+    user_id TEXT,
+    ip_address TEXT,
+    details TEXT,
+    created_at TEXT NOT NULL
+  )`, args: [] });
+
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_audit_log_event ON audit_log(event_type)`, args: [] });
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_audit_log_user ON audit_log(user_id)`, args: [] });
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_audit_log_created ON audit_log(created_at)`, args: [] });
+
   // Migrate: add conversion columns to gads_campaign_spend
   try {
     await db.execute({ sql: 'ALTER TABLE gads_campaign_spend ADD COLUMN conversions REAL DEFAULT 0', args: [] });
@@ -656,4 +670,20 @@ export async function updateUserOAuthAccessToken(userId: string, provider: strin
 
 export async function deleteUserOAuthToken(userId: string, provider = 'google'): Promise<void> {
   await db.execute({ sql: 'DELETE FROM user_oauth_tokens WHERE user_id = ? AND provider = ?', args: [userId, provider] });
+}
+
+// --- Audit Log ---
+
+export type AuditEventType = 'login_success' | 'login_failed' | 'password_changed' | 'user_created' | 'user_deleted' | 'oauth_connected' | 'oauth_disconnected';
+
+export async function logAuditEvent(event: {
+  eventType: AuditEventType;
+  userId?: string;
+  ipAddress?: string;
+  details?: string;
+}): Promise<void> {
+  await db.execute({
+    sql: 'INSERT INTO audit_log (event_type, user_id, ip_address, details, created_at) VALUES (?, ?, ?, ?, ?)',
+    args: [event.eventType, event.userId ?? null, event.ipAddress ?? null, event.details ?? null, new Date().toISOString()],
+  });
 }

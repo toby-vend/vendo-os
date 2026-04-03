@@ -13,6 +13,7 @@
   <div style="background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.5rem;">
     <h2 style="margin-top: 0; font-size: 16px; color: #E2E8F0;">Client Details</h2>
     <form method="POST" action="/admin/clients/<%= it.client.id %>">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
       <div style="margin-bottom: 1rem;">
         <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Display Name</label>
         <input type="text" name="display_name" value="<%= it.client.display_name || '' %>"
@@ -108,6 +109,7 @@
         <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(255,255,255,0.06); border-radius: 999px; font-size: 12px; color: #E2E8F0;">
           <span><%= m.external_name || m.external_id %></span>
           <form method="POST" action="/admin/clients/<%= it.client.id %>/mappings/<%= m.id %>/delete" style="display: inline; margin: 0;">
+            <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
             <button type="submit" style="background: none; border: none; color: #EF4444; cursor: pointer; padding: 0; font-size: 14px; line-height: 1;" title="Unlink">&times;</button>
           </form>
         </div>
@@ -120,6 +122,7 @@
       <!-- Link new -->
       <% if (src.unlinked.length) { %>
       <form method="POST" action="/admin/clients/<%= it.client.id %>/mappings" style="display: flex; gap: 0.5rem; align-items: center;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
         <input type="hidden" name="source" value="<%= src.key %>">
         <select name="external_id" style="flex: 1; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px;"
           onchange="this.form.external_name.value = this.options[this.selectedIndex].text">

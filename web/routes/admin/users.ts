@@ -55,7 +55,6 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     sendInviteNotifications({
       name,
       email,
-      password,
       role,
       invitedBy: currentUser.name,
     }).catch(e => console.error('[notify] Invite notification error:', e));

@@ -35,10 +35,25 @@ import { taskRunRoutes } from './routes/task-runs.js';
 import { taskRunsUiRoutes } from './routes/task-runs-ui.js';
 import { skillsBrowserRoutes } from './routes/skills-browser.js';
 import { portalRoutes } from './routes/portal.js';
+import { metaDentalRoutes } from './routes/dashboards/meta-dental.js';
+import { gadsDentalRoutes } from './routes/dashboards/gads-dental.js';
+import { reportingHubRoutes } from './routes/dashboards/reporting-hub.js';
+import { clientMerRoutes } from './routes/dashboards/client-mer.js';
+import { financeRoutes } from './routes/dashboards/finance.js';
+import { timeTrackingRoutes } from './routes/dashboards/time-tracking.js';
+import { capacityRoutes } from './routes/dashboards/capacity.js';
+import { gadsEcomRoutes } from './routes/dashboards/gads-ecom.js';
+import { profitabilityRoutes } from './routes/dashboards/profitability.js';
+import { pipelineTrackerRoutes } from './routes/dashboards/pipeline.js';
+import { reviewsRoutes } from './routes/dashboards/reviews.js';
+import { clientDatabaseRoutes } from './routes/client-database.js';
+import crypto from 'crypto';
 import {
   parseCookies,
   verifySessionToken,
   getRouteSlug,
+  generateCsrfToken,
+  verifyCsrfToken,
   type SessionUser,
 } from './lib/auth.js';
 import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, hasUserOAuthToken, getClientForUser } from './lib/queries.js';
@@ -57,11 +72,14 @@ app.decorateRequest('user', null);
 app.decorateReply('render', function (template: string, data: Record<string, unknown> = {}) {
   const isHtmx = this.request.headers['hx-request'] === 'true';
   const user = (this.request as any).user as SessionUser | null;
+  const sessionToken = (this.request as any)._sessionToken as string | undefined;
+  const csrfToken = sessionToken ? generateCsrfToken(sessionToken) : '';
   const html = eta.render(template, {
     ...data,
     isHtmx,
     currentPath: this.request.url.split('?')[0],
     user,
+    csrfToken,
     md,
   });
   this.type('text/html').send(html);
@@ -80,7 +98,21 @@ app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
   // Public routes (no session required)
-  if (path.startsWith('/assets/') || path === '/login' || path === '/api/drive/webhook' || path.startsWith('/api/cron/')) return;
+  if (path.startsWith('/assets/') || path === '/login' || path === '/api/drive/webhook') return;
+
+  // Cron routes — validate Vercel cron secret
+  if (path.startsWith('/api/cron/')) {
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret) {
+      const auth = request.headers['authorization'];
+      const token = auth?.startsWith('Bearer ') ? auth.slice(7) : '';
+      if (!token || !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(cronSecret))) {
+        reply.code(401).send({ error: 'Unauthorised' });
+        return;
+      }
+    }
+    return;
+  }
 
   const cookies = parseCookies(request.headers.cookie || '');
   const token = cookies['vendo_session'];
@@ -127,6 +159,7 @@ app.addHook('onRequest', async (request, reply) => {
   };
 
   (request as any).user = user;
+  (request as any)._sessionToken = token;
 
   // Force password change
   if (user.mustChangePassword && path !== '/change-password' && path !== '/logout') {
@@ -164,6 +197,26 @@ app.addHook('onRequest', async (request, reply) => {
   }
 });
 
+// Security headers
+app.addHook('onSend', async (_request, reply) => {
+  reply.header('X-Content-Type-Options', 'nosniff');
+  reply.header('X-Frame-Options', 'DENY');
+  reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  reply.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  reply.header('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",  // HTMX requires inline scripts
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+  ].join('; '));
+});
+
 // Form body parser — supports multi-value fields (e.g. checkboxes with same name)
 app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (_req, body, done) => {
   const parsed: Record<string, string[]> = {};
@@ -181,6 +234,26 @@ app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string
     flat[k] = v.length === 1 ? v[0] : v;
   }
   done(null, flat);
+});
+
+// CSRF validation for form POST requests
+app.addHook('preHandler', async (request, reply) => {
+  if (request.method !== 'POST') return;
+
+  const path = request.url.split('?')[0];
+
+  // Skip CSRF for API endpoints, webhooks, login (no session token yet), and OAuth callbacks
+  if (path.startsWith('/api/') || path === '/login' || path.startsWith('/auth/google/')) return;
+
+  const sessionToken = (request as any)._sessionToken as string | undefined;
+  if (!sessionToken) return; // no session = not authenticated, auth hook will handle
+
+  const body = request.body as Record<string, string | string[]> | undefined;
+  const csrfToken = typeof body?._csrf === 'string' ? body._csrf : '';
+  if (!verifyCsrfToken(sessionToken, csrfToken)) {
+    reply.code(403).send('CSRF token invalid');
+    return;
+  }
 });
 
 // Register routes
@@ -211,6 +284,20 @@ app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(taskRunsUiRoutes, { prefix: '/tasks' });
 app.register(skillsBrowserRoutes, { prefix: '/skills' });
 app.register(portalRoutes, { prefix: '/portal' });
+app.register(clientDatabaseRoutes, { prefix: '/client-database' });
+
+// Dashboard modules
+app.register(metaDentalRoutes, { prefix: '/dashboards/meta-dental' });
+app.register(gadsDentalRoutes, { prefix: '/dashboards/gads-dental' });
+app.register(reportingHubRoutes, { prefix: '/dashboards/reporting-hub' });
+app.register(clientMerRoutes, { prefix: '/dashboards/client-mer' });
+app.register(financeRoutes, { prefix: '/dashboards/finance' });
+app.register(timeTrackingRoutes, { prefix: '/dashboards/time-tracking' });
+app.register(capacityRoutes, { prefix: '/dashboards/capacity' });
+app.register(gadsEcomRoutes, { prefix: '/dashboards/gads-ecom' });
+app.register(profitabilityRoutes, { prefix: '/dashboards/profitability' });
+app.register(pipelineTrackerRoutes, { prefix: '/dashboards/pipeline' });
+app.register(reviewsRoutes, { prefix: '/dashboards/reviews' });
 
 // Export for Vercel
 export default app;

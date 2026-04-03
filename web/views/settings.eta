@@ -62,6 +62,7 @@
       <div>
         <% if (it.googleConnected) { %>
         <form method="POST" action="/auth/google/disconnect" style="display: inline;">
+          <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
           <button type="submit" onclick="return confirm('Disconnect your Google account?')"
                   style="padding: 6px 14px; font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif;">
             Disconnect

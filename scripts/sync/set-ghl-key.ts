@@ -7,6 +7,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getDb, initSchema, saveDb, closeDb } from '../utils/db.js';
+import { encryptToken } from '../../web/lib/crypto.js';
 
 async function main() {
   const [locationId, apiKey] = process.argv.slice(2);
@@ -21,7 +22,8 @@ async function main() {
 
   try { db.run('ALTER TABLE ghl_locations ADD COLUMN api_key TEXT'); } catch { /* exists */ }
 
-  db.run('UPDATE ghl_locations SET api_key = ? WHERE id = ?', [apiKey, locationId]);
+  const encryptedKey = encryptToken(apiKey);
+  db.run('UPDATE ghl_locations SET api_key = ? WHERE id = ?', [encryptedKey, locationId]);
 
   const result = db.exec('SELECT id, name FROM ghl_locations WHERE id = ?', [locationId]);
   if (result.length > 0 && result[0].values.length > 0) {

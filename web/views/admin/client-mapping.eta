@@ -8,6 +8,7 @@
 <div style="background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
   <h2 style="margin-top: 0; font-size: 16px; color: #E2E8F0;">Add Mapping</h2>
   <form method="POST" action="/admin/client-mapping">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
 
       <!-- Client -->
@@ -133,6 +134,7 @@
         <td style="padding: 0.65rem 0.5rem; text-align: right; color: #94A3B8; font-size: 13px;"><%= m.created_at ? m.created_at.slice(0, 10) : '—' %></td>
         <td style="padding: 0.65rem 0.5rem; text-align: right;">
           <form method="POST" action="/admin/client-mapping/<%= m.id %>/delete" style="display: inline; margin: 0;">
+            <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
             <button type="submit" style="background: none; border: none; color: #EF4444; cursor: pointer; font-size: 13px;" title="Delete mapping">Delete</button>
           </form>
         </td>
