@@ -16,6 +16,7 @@
     <h2 style="margin: 0 0 1.5rem; font-size: 18px; font-weight: 600;">New Content Task</h2>
 
     <form method="POST" action="/tasks/new" style="display: flex; flex-direction: column; gap: 1.25rem;">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
 
       <!-- Client -->
       <div>

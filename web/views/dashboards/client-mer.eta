@@ -1,0 +1,78 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+  <h2 style="margin: 0;">Client MER / ROAS</h2>
+  <form method="GET" action="/dashboards/client-mer" style="display: flex; gap: 0.75rem; align-items: center;">
+    <select name="client" onchange="this.form.submit()" style="min-width: 220px;">
+      <option value="">Select a client&hellip;</option>
+      <% it.clients.forEach(c => { %>
+        <option value="<%= c.id %>" <%= it.query.client == c.id ? 'selected' : '' %>><%= c.name %></option>
+      <% }) %>
+    </select>
+    <select name="months" onchange="this.form.submit()">
+      <option value="3" <%= it.months === 3 ? 'selected' : '' %>>3 months</option>
+      <option value="6" <%= it.months === 6 ? 'selected' : '' %>>6 months</option>
+      <option value="12" <%= it.months === 12 ? 'selected' : '' %>>12 months</option>
+    </select>
+  </form>
+</div>
+
+<% if (!it.selectedClient) { %>
+  <p>Select a client above to view their MER (Marketing Efficiency Ratio) data.</p>
+<% } else if (!it.merData.length) { %>
+  <p>No data found for <strong><%= it.selectedClient.name %></strong> in the selected period.</p>
+<% } else { %>
+
+<% const totalRev = it.merData.reduce((s, r) => s + r.revenue, 0);
+   const totalSpend = it.merData.reduce((s, r) => s + r.ad_spend, 0);
+   const overallMER = totalSpend > 0 ? (totalRev / totalSpend).toFixed(2) : '0';
+%>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= totalRev.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Total Revenue</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Total Ad Spend</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= overallMER %>x</p>
+    <p class="stat-label">MER (Revenue / Spend)</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= overallMER %>x</p>
+    <p class="stat-label">Blended ROAS</p>
+  </article>
+</div>
+
+<h3>Monthly Breakdown &mdash; <%= it.selectedClient.name %></h3>
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Month</th>
+      <th>Revenue</th>
+      <th>Ad Spend</th>
+      <th>MER</th>
+      <th>ROAS</th>
+      <th>Growth</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.merData.forEach((r, i) => {
+      const prevRev = i > 0 ? it.merData[i - 1].revenue : 0;
+      const growth = prevRev > 0 ? ((r.revenue - prevRev) / prevRev * 100).toFixed(1) : '&mdash;';
+    %>
+    <tr>
+      <td><%= r.month %></td>
+      <td>&pound;<%= r.revenue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td>&pound;<%= r.ad_spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td><%= r.mer.toFixed(2) %>x</td>
+      <td><%= r.roas.toFixed(2) %>x</td>
+      <td><%= typeof growth === 'string' ? growth : (growth > 0 ? '+' : '') + growth + '%' %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

@@ -1,0 +1,86 @@
+<% layout('/layouts/base') %>
+
+<h2>Performance Review Tracker</h2>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value"><%= it.schedule.length %></p>
+    <p class="stat-label">Team Members</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.completionRate %>%</p>
+    <p class="stat-label">Completion Rate</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.completedCount %></p>
+    <p class="stat-label">Reviews Completed</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="<%= it.overdueCount > 0 ? 'color: #EF4444;' : 'color: #22C55E;' %>"><%= it.overdueCount %></p>
+    <p class="stat-label">Overdue</p>
+  </article>
+</div>
+
+<h3>Review Schedule</h3>
+<% if (!it.schedule.length) { %>
+  <p>No team members found. Ensure Harvest users are synced.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Person</th>
+      <th>Last Review</th>
+      <th>Status</th>
+      <th>Next Due</th>
+      <th>State</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.schedule.forEach(s => { %>
+    <tr>
+      <td><%= s.person_name %></td>
+      <td><%= s.last_review_period || 'Never' %></td>
+      <td><%= s.last_review_status || '&mdash;' %></td>
+      <td><%= s.next_review_due %></td>
+      <td>
+        <% if (s.overdue) { %>
+          <span style="color: #EF4444; font-weight: 600;">Overdue</span>
+        <% } else { %>
+          <% const daysUntil = Math.ceil((new Date(s.next_review_due) - new Date()) / 86400000); %>
+          <% if (daysUntil <= 14) { %>
+            <span style="color: #F59E0B;">Due in <%= daysUntil %>d</span>
+          <% } else { %>
+            <span style="color: #22C55E;">Upcoming</span>
+          <% } %>
+        <% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
+
+<h3>Recent Reviews</h3>
+<% if (!it.reviews.length) { %>
+  <p>No reviews logged yet.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr><th>Person</th><th>Period</th><th>Status</th><th>Created</th></tr>
+  </thead>
+  <tbody>
+    <% it.reviews.forEach(r => { %>
+    <tr>
+      <td><%= r.person_name %></td>
+      <td><%= r.period %></td>
+      <td>
+        <span style="color: <%= r.status === 'completed' ? '#22C55E' : r.status === 'pending' ? '#F59E0B' : '#94A3B8' %>;">
+          <%= r.status %>
+        </span>
+      </td>
+      <td><%= r.created_at ? r.created_at.slice(0, 10) : '&mdash;' %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

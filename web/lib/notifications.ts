@@ -13,7 +13,6 @@ const GDRIVE_OAUTH_PATH = process.env.GDRIVE_OAUTH_PATH || '';
 interface InviteDetails {
   name: string;
   email: string;
-  password: string;
   role: string;
   invitedBy: string;
 }
@@ -149,10 +148,9 @@ export async function sendInviteNotifications(details: InviteDetails): Promise<{
     '',
     `🔗 *Login:* ${loginUrl}`,
     `📧 *Email:* ${details.email}`,
-    `🔑 *Temporary password:* \`${details.password}\``,
     `👤 *Role:* ${details.role}`,
     '',
-    `You'll be asked to change your password on first login.`,
+    `Your temporary password will be shared with you directly. You'll be asked to change it on first login.`,
   ].join('\n');
 
   const emailHtml = `
@@ -165,8 +163,8 @@ export async function sendInviteNotifications(details: InviteDetails): Promise<{
       <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0;">
         <p style="margin: 0 0 8px; font-size: 13px; color: #888;">YOUR LOGIN DETAILS</p>
         <p style="margin: 4px 0; font-size: 15px;"><strong>Email:</strong> ${details.email}</p>
-        <p style="margin: 4px 0; font-size: 15px;"><strong>Temporary password:</strong> <code style="background: #e9ecef; padding: 2px 8px; border-radius: 4px;">${details.password}</code></p>
         <p style="margin: 4px 0; font-size: 15px;"><strong>Role:</strong> ${details.role}</p>
+        <p style="margin: 4px 0; font-size: 13px; color: #888;">Your temporary password will be shared with you directly by ${details.invitedBy}.</p>
       </div>
       <a href="${loginUrl}" style="display: inline-block; padding: 12px 28px; background: #22C55E; color: #0B0B0B; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; margin: 8px 0;">Log in to Vendo OS</a>
       <p style="color: #999; font-size: 13px; margin-top: 24px;">You'll be asked to set a new password on your first login.</p>

@@ -1,0 +1,106 @@
+<% layout('/layouts/base') %>
+
+<h2>Pipeline Tracker</h2>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value"><%= it.totalDeals %></p>
+    <p class="stat-label">Open Deals</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.totalPipelineValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Pipeline Value</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.totalWeightedValue.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Weighted Forecast</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.wonDeals.length %></p>
+    <p class="stat-label">Won (Last 30d)</p>
+  </article>
+</div>
+
+<h3>Pipeline Stages</h3>
+<% if (!it.stages.length) { %>
+  <p>No open deals in the pipeline.</p>
+<% } else { %>
+
+<!-- Stage bar visualisation -->
+<div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+  <% it.stages.forEach(s => {
+    const widthPct = it.totalDeals > 0 ? Math.max(8, s.count / it.totalDeals * 100) : 0;
+  %>
+  <div style="flex: <%= widthPct %>; min-width: 80px; padding: 0.75rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="font-size: 12px; color: #94A3B8; margin-bottom: 0.25rem;"><%= s.stage_name %></div>
+    <div style="font-size: 20px; font-weight: 600;"><%= s.count %></div>
+    <div style="font-size: 11px; color: #64748B;">&pound;<%= (s.value / 1000).toFixed(1) %>k</div>
+    <div style="font-size: 11px; color: #64748B;"><%= s.probability %>% prob</div>
+  </div>
+  <% }) %>
+</div>
+
+<table class="compact">
+  <thead>
+    <tr><th>Stage</th><th>Deals</th><th>Value</th><th>Probability</th><th>Weighted Value</th></tr>
+  </thead>
+  <tbody>
+    <% it.stages.forEach(s => { %>
+    <tr>
+      <td><%= s.stage_name %></td>
+      <td><%= s.count %></td>
+      <td>&pound;<%= s.value.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
+      <td><%= s.probability %>%</td>
+      <td>&pound;<%= s.weighted_value.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
+
+<div class="two-col">
+  <div>
+    <h3>Won Deals (Last 30 Days)</h3>
+    <% if (!it.wonDeals.length) { %>
+      <p>No deals won in the last 30 days.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Deal</th><th>Contact</th><th>Value</th><th>Won Date</th></tr>
+      </thead>
+      <tbody>
+        <% it.wonDeals.forEach(d => { %>
+        <tr>
+          <td><%= d.name || '&mdash;' %></td>
+          <td><%= d.contact_name || '&mdash;' %></td>
+          <td>&pound;<%= d.value.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
+          <td><%= d.won_date ? d.won_date.slice(0, 10) : '&mdash;' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+  <div>
+    <h3>Monthly Forecast</h3>
+    <% if (!it.forecast.length) { %>
+      <p>No forecast data.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Month</th><th>Deals</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <% it.forecast.forEach(f => { %>
+        <tr>
+          <td><%= f.month %></td>
+          <td><%= f.deal_count %></td>
+          <td>&pound;<%= f.weighted_value.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>

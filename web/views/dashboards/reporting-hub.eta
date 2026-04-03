@@ -1,0 +1,81 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+  <h2 style="margin: 0;">Client Reporting Hub</h2>
+  <form method="GET" action="/dashboards/reporting-hub" style="display: flex; gap: 0.75rem; align-items: center;">
+    <select name="client" onchange="this.form.submit()" style="min-width: 220px;">
+      <option value="">Select a client&hellip;</option>
+      <% it.clients.forEach(c => { %>
+        <option value="<%= c.id %>" <%= it.query.client == c.id ? 'selected' : '' %>><%= c.name %></option>
+      <% }) %>
+    </select>
+    <select name="days" onchange="this.form.submit()">
+      <option value="7" <%= it.days === 7 ? 'selected' : '' %>>7 days</option>
+      <option value="14" <%= it.days === 14 ? 'selected' : '' %>>14 days</option>
+      <option value="30" <%= it.days === 30 ? 'selected' : '' %>>30 days</option>
+      <option value="90" <%= it.days === 90 ? 'selected' : '' %>>90 days</option>
+    </select>
+  </form>
+</div>
+
+<% if (!it.report) { %>
+  <p>Select a client above to view their report.</p>
+<% } else { const r = it.report; %>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= r.totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></p>
+    <p class="stat-label">Total Ad Spend</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= r.totalLeads.toLocaleString() %></p>
+    <p class="stat-label">Total Leads / Conversions</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= r.blendedCPA.toFixed(2) %></p>
+    <p class="stat-label">Blended CPA</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= r.mrr.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Total Invoiced</p>
+  </article>
+  <% if (r.healthScore !== null) { %>
+  <article class="stat-card">
+    <p class="stat-value"><%= r.healthScore %></p>
+    <p class="stat-label">Health Score (<%= r.healthTier %>)</p>
+  </article>
+  <% } %>
+</div>
+
+<h3>Channel Breakdown</h3>
+<table class="compact">
+  <thead>
+    <tr><th>Channel</th><th>Spend</th><th>Leads / Conversions</th><th>CPL / CPA</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Meta Ads</td>
+      <td>&pound;<%= r.metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td><%= r.metaLeads.toLocaleString() %></td>
+      <td>&pound;<%= r.metaCPL.toFixed(2) %></td>
+    </tr>
+    <tr>
+      <td>Google Ads</td>
+      <td>&pound;<%= r.gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td><%= r.gadsConversions.toLocaleString() %></td>
+      <td>&pound;<%= r.gadsCPA.toFixed(2) %></td>
+    </tr>
+    <tr style="font-weight: 600;">
+      <td>Total</td>
+      <td>&pound;<%= r.totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td><%= r.totalLeads.toLocaleString() %></td>
+      <td>&pound;<%= r.blendedCPA.toFixed(2) %></td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="margin-top: 1.5rem;">
+  <button onclick="window.print()" class="outline">Export PDF (Print)</button>
+</div>
+
+<% } %>

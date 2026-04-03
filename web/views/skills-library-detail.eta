@@ -1,0 +1,12 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+  <a href="/skills" class="btn btn-sm">Back</a>
+  <h2 style="margin: 0;"><%= it.skill.title %></h2>
+</div>
+<div style="max-width: 800px;">
+  <div class="markdown-body"><%~ it.html %></div>
+</div>
+<div style="margin-top: 2rem; padding: 1rem; border-radius: 8px; background: var(--bg-card);">
+  <p style="margin: 0;"><strong>Usage:</strong> Run <code>/skills:<%= it.skill.slug %></code> in Claude Code to use this skill.</p>
+</div>

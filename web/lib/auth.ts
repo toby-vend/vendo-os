@@ -24,7 +24,7 @@ export interface SessionPayload {
 
 // --- Password hashing ---
 
-const BCRYPT_ROUNDS = 10;
+const BCRYPT_ROUNDS = 12;
 
 export function hashPassword(password: string): string {
   return bcrypt.hashSync(password, BCRYPT_ROUNDS);
@@ -36,10 +36,18 @@ export function verifyPassword(password: string, hash: string): boolean {
 
 // --- Session tokens ---
 
-const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
-function getSessionSecret(): string {
-  return process.env.SESSION_SECRET || process.env.DASHBOARD_PASSWORD || 'vendo-dev';
+export function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      throw new Error('SESSION_SECRET environment variable is required in production');
+    }
+    console.warn('[SECURITY] Using hardcoded session secret — set SESSION_SECRET in .env.local');
+    return 'vendo-dev';
+  }
+  return secret;
 }
 
 export function createSessionToken(payload: SessionPayload): string {
@@ -78,11 +86,13 @@ export function verifySessionToken(token: string): SessionPayload | null {
 
 export function sessionCookie(token: string): string {
   const maxAge = Math.floor(SESSION_DURATION / 1000);
-  return `vendo_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`;
+  const secure = process.env.VERCEL || process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  return `vendo_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
 }
 
 export function clearSessionCookie(): string {
-  return 'vendo_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
+  const secure = process.env.VERCEL || process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  return `vendo_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`;
 }
 
 // --- Route slug mapping ---
@@ -99,6 +109,13 @@ const ROUTE_MAP: [string, string][] = [
   ['/settings', 'settings'],
   ['/chat', 'chat'],
   ['/tasks', 'tasks'],
+  ['/growth', 'growth'],
+  ['/dashboards', 'dashboards'],
+  ['/skills', 'skills'],
+  ['/asana-tasks', 'asana-tasks'],
+  ['/client-database', 'client-database'],
+  ['/operations', 'operations'],
+  ['/skills', 'skills'],
 ];
 
 export function getRouteSlug(url: string): string | null {
@@ -124,6 +141,30 @@ export function parseCookies(cookieStr: string): Record<string, string> {
     if (key && val) cookies[key] = decodeURIComponent(val);
   });
   return cookies;
+}
+
+// --- CSRF token ---
+
+export function generateCsrfToken(sessionToken: string): string {
+  const hmac = crypto.createHmac('sha256', getSessionSecret());
+  hmac.update('csrf:' + sessionToken);
+  return hmac.digest('hex');
+}
+
+export function verifyCsrfToken(sessionToken: string, csrfToken: string): boolean {
+  const expected = generateCsrfToken(sessionToken);
+  if (expected.length !== csrfToken.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(csrfToken, 'hex'));
+}
+
+// --- Password complexity ---
+
+export function validatePasswordComplexity(password: string): string | null {
+  if (password.length < 8) return 'Password must be at least 8 characters';
+  if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter';
+  if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter';
+  if (!/[0-9]/.test(password)) return 'Password must contain at least one digit';
+  return null;
 }
 
 // --- UUID helper ---

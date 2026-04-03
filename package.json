@@ -105,7 +105,18 @@
     "seed:treatments": "tsx scripts/functions/seed-treatments.ts",
     "leads:attribute": "tsx scripts/functions/lead-attribution.ts",
     "leads:attribute:backfill": "tsx scripts/functions/lead-attribution.ts --backfill",
-    "leads:attribute:force": "tsx scripts/functions/lead-attribution.ts --backfill --force"
+    "leads:attribute:force": "tsx scripts/functions/lead-attribution.ts --backfill --force",
+    "monitor:asana-overdue": "tsx scripts/monitors/asana-overdue.ts",
+    "monitor:meta-cpl": "tsx scripts/monitors/meta-cpl-alert.ts",
+    "monitor:meta-roas": "tsx scripts/monitors/meta-roas-alert.ts",
+    "monitor:gads-cpa": "tsx scripts/monitors/gads-cpa-alert.ts",
+    "monitor:fathom-failsafe": "tsx scripts/monitors/fathom-failsafe.ts",
+    "monitor:ad-pacing": "tsx scripts/monitors/ad-spend-pacing.ts",
+    "monitor:contract-renewal": "tsx scripts/monitors/contract-renewal.ts",
+    "monitor:all": "tsx scripts/monitors/run-all-monitors.ts",
+    "auto:fathom-asana": "tsx scripts/automation/fathom-to-asana.ts",
+    "auto:traffic-light": "tsx scripts/automation/traffic-light-alerts.ts",
+    "auto:daily-brief": "tsx scripts/automation/daily-slack-brief.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
@@ -117,11 +128,13 @@
     "eta": "^4.5.1",
     "fastify": "^5.8.4",
     "marked": "^17.0.5",
+    "sanitize-html": "^2.17.2",
     "sql.js": "^1.11.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.0.0",
+    "@types/sanitize-html": "^2.16.1",
     "@vercel/node": "^5.6.22",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"

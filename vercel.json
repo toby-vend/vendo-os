@@ -5,7 +5,7 @@
       "src": "api/index.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["web/views/**", "web/public/**", "context/**"]
+        "includeFiles": ["web/views/**", "web/public/**", "context/**", ".claude/commands/skills/**"]
       }
     },
     {
@@ -24,6 +24,14 @@
     {
       "path": "/api/cron/renew-drive-channels",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/monitors",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/daily-brief",
+      "schedule": "30 7 * * 1-5"
     }
   ],
   "routes": [

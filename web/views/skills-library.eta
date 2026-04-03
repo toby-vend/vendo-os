@@ -1,0 +1,24 @@
+<% layout('/layouts/base') %>
+
+<h2>Skills Library</h2>
+<p style="color: var(--text-secondary); margin-bottom: 2rem;">AI-powered tools for your team. Use these via <code>/skills:&lt;name&gt;</code> in Claude Code.</p>
+
+<% if (!it.skills || it.skills.length === 0) { %>
+<p style="color: var(--text-secondary);">No skills found. Add skill files to <code>.claude/commands/skills/</code>.</p>
+<% } else { %>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+  <% it.skills.forEach(s => { %>
+  <a href="/skills/<%= s.slug %>" class="card" style="padding: 1.5rem; text-decoration: none; color: inherit;">
+    <h3 style="margin: 0 0 0.5rem;"><%= s.title %></h3>
+    <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;"><%= s.description %></p>
+    <% if (s.inputs && s.inputs.length > 0) { %>
+    <div style="margin-top: 1rem;">
+      <% s.inputs.forEach(i => { %>
+      <span class="badge" style="margin-right: 0.25rem; margin-bottom: 0.25rem;"><%= i %></span>
+      <% }) %>
+    </div>
+    <% } %>
+  </a>
+  <% }) %>
+</div>
+<% } %>

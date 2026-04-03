@@ -103,6 +103,7 @@
         <td style="padding: 12px 16px; text-align: right; font-size: 14px; color: #94A3B8;"><%= Number(u.total_calls).toLocaleString() %></td>
         <td style="padding: 12px 16px; text-align: right;">
           <form method="POST" action="/admin/usage/limits/<%= u.user_id %>" style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+            <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
             <span style="font-size: 12px; color: #64748B;">Daily £</span>
             <input type="number" name="daily_limit" placeholder="No limit" value="<%= penceToPoundsInput(u.daily_limit_pence) %>" min="0" step="0.01"
                    style="width: 80px; padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 12px; text-align: right;">

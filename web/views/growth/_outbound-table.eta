@@ -2,6 +2,7 @@
 
 <!-- Add Prospect form -->
 <form method="POST" action="/growth/outbound/add" style="display: flex; gap: 0.5rem; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap;">
+  <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
   <div>
     <label style="font-size: 11px; color: #94A3B8; display: block; margin-bottom: 2px;">Name *</label>
     <input type="text" name="name" required placeholder="John Smith" style="width: 140px; padding: 6px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #E2E8F0; font-size: 13px;">

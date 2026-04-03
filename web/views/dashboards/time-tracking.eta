@@ -1,0 +1,96 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+  <h2 style="margin: 0;">Time Tracking</h2>
+  <form method="GET" action="/dashboards/time-tracking" style="display: flex; gap: 0.75rem; align-items: center;">
+    <select name="user" onchange="this.form.submit()" style="min-width: 180px;">
+      <option value="">All Team Members</option>
+      <% it.users.forEach(u => { %>
+        <option value="<%= u.id %>" <%= it.query.user == u.id ? 'selected' : '' %>><%= u.name %></option>
+      <% }) %>
+    </select>
+    <select name="days" onchange="this.form.submit()">
+      <option value="7" <%= it.days === 7 ? 'selected' : '' %>>7 days</option>
+      <option value="14" <%= it.days === 14 ? 'selected' : '' %>>14 days</option>
+      <option value="30" <%= it.days === 30 ? 'selected' : '' %>>30 days</option>
+      <option value="90" <%= it.days === 90 ? 'selected' : '' %>>90 days</option>
+    </select>
+  </form>
+</div>
+
+<div class="two-col">
+  <div>
+    <h3>Team Utilisation</h3>
+    <% if (!it.utilisation.length) { %>
+      <p>No Harvest data available.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Person</th><th>Hours Logged</th><th>Capacity</th><th>Utilisation</th></tr>
+      </thead>
+      <tbody>
+        <% it.utilisation.forEach(u => { %>
+        <tr>
+          <td><%= u.user_name %></td>
+          <td><%= u.hours_logged %></td>
+          <td><%= u.weekly_capacity %>h</td>
+          <td style="<%= u.utilisation_pct > 100 ? 'color: #EF4444; font-weight: 600;' : u.utilisation_pct < 60 ? 'color: #F59E0B;' : 'color: #22C55E;' %>">
+            <%= u.utilisation_pct %>%
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+  <div>
+    <h3>Project Budget Status</h3>
+    <% if (!it.budgets.length) { %>
+      <p>No active project budgets.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Project</th><th>Client</th><th>Hours Used</th><th>Budget</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <% it.budgets.forEach(b => {
+          const pct = b.budget_hours && b.budget_hours > 0 ? (b.hours_used / b.budget_hours * 100).toFixed(0) : null;
+          const over = pct && pct > 100;
+        %>
+        <tr>
+          <td><%= b.project_name %></td>
+          <td><%= b.client_name || '&mdash;' %></td>
+          <td><%= b.hours_used %>h</td>
+          <td><%= b.budget_hours ? b.budget_hours + 'h' : '&mdash;' %></td>
+          <td style="<%= over ? 'color: #EF4444; font-weight: 600;' : pct && pct > 80 ? 'color: #F59E0B;' : '' %>">
+            <%= pct ? pct + '%' : '&mdash;' %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</div>
+
+<h3>Hours by Person &amp; Project</h3>
+<% if (!it.timeData.length) { %>
+  <p>No time entries for the selected period.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr><th>Person</th><th>Project</th><th>Client</th><th>Hours</th></tr>
+  </thead>
+  <tbody>
+    <% it.timeData.forEach(t => { %>
+    <tr>
+      <td><%= t.user_name %></td>
+      <td><%= t.project_name %></td>
+      <td><%= t.client_name || '&mdash;' %></td>
+      <td><%= t.hours %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

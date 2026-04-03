@@ -130,6 +130,7 @@
 
       <!-- Approve -->
       <form method="POST" action="/tasks/<%= run.id %>/approve">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
         <button type="submit" class="btn btn-primary" style="background: #22C55E; border-color: #22C55E;">
           Approve
         </button>
@@ -150,6 +151,7 @@
     <!-- Regenerate -->
     <div style="margin-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.25rem;">
       <form method="POST" action="/tasks/<%= run.id %>/regenerate" style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 440px;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
         <label style="font-size: 13px; font-weight: 500; color: #94A3B8;">Regenerate</label>
         <textarea name="comment" placeholder="Optional comment for regeneration…" rows="2" style="resize: vertical; font-size: 13px;"></textarea>
         <div>
@@ -163,6 +165,7 @@
     <!-- Reject -->
     <div style="margin-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.25rem;">
       <form method="POST" action="/tasks/<%= run.id %>/reject" style="display: flex; flex-direction: column; gap: 0.75rem; max-width: 440px;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
         <label style="font-size: 13px; font-weight: 500; color: #94A3B8;">Reject</label>
         <textarea name="reason" placeholder="Reason for rejection (required)…" rows="2" required style="resize: vertical; font-size: 13px;"></textarea>
         <div>

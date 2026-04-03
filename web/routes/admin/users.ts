@@ -10,7 +10,7 @@ import {
   getUserById,
   getUserByEmail,
 } from '../../lib/queries.js';
-import { hashPassword, generateId, type SessionUser } from '../../lib/auth.js';
+import { hashPassword, generateId, validatePasswordComplexity, type SessionUser } from '../../lib/auth.js';
 import { sendInviteNotifications } from '../../lib/notifications.js';
 
 export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
@@ -25,7 +25,9 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     const body = request.body as Record<string, string | string[]>;
     const email = (typeof body.email === 'string' ? body.email : '').trim().toLowerCase();
     const name = (typeof body.name === 'string' ? body.name : '').trim();
-    const role = (typeof body.role === 'string' ? body.role : 'standard') as 'admin' | 'standard';
+    const VALID_ROLES = ['admin', 'standard', 'client'] as const;
+    const rawRole = typeof body.role === 'string' ? body.role : 'standard';
+    const role = (VALID_ROLES as readonly string[]).includes(rawRole) ? rawRole as 'admin' | 'standard' | 'client' : 'standard';
     const password = (typeof body.password === 'string' ? body.password : '').trim();
     const channelIds = Array.isArray(body.channels) ? body.channels : (body.channels ? [body.channels] : []);
 
@@ -55,7 +57,6 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     sendInviteNotifications({
       name,
       email,
-      password,
       role,
       invitedBy: currentUser.name,
     }).catch(e => console.error('[notify] Invite notification error:', e));
@@ -84,7 +85,9 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     const { id } = request.params as { id: string };
     const body = request.body as Record<string, string | string[]>;
     const name = (typeof body.name === 'string' ? body.name : '').trim();
-    const role = (typeof body.role === 'string' ? body.role : 'standard');
+    const VALID_ROLES = ['admin', 'standard', 'client'] as const;
+    const rawRole = typeof body.role === 'string' ? body.role : 'standard';
+    const role = (VALID_ROLES as readonly string[]).includes(rawRole) ? rawRole : 'standard';
     const email = (typeof body.email === 'string' ? body.email : '').trim().toLowerCase();
     const channelIds = Array.isArray(body.channels) ? body.channels : (body.channels ? [body.channels] : []);
 
@@ -124,6 +127,13 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
 
     if (!password) {
       reply.redirect('/admin/users');
+      return;
+    }
+
+    const complexityError = validatePasswordComplexity(password);
+    if (complexityError) {
+      const [users, channels] = await Promise.all([getAllUsers(), getChannels()]);
+      reply.render('admin/users', { users, channels, error: complexityError });
       return;
     }
 

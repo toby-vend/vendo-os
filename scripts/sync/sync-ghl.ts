@@ -13,6 +13,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { decryptToken } from '../../web/lib/crypto.js';
 
 const BASE_URL = 'https://services.leadconnectorhq.com';
 
@@ -149,11 +150,12 @@ async function main() {
 
     const result = db.exec(query, queryArgs);
     if (result.length > 0) {
-      locations = result[0].values.map((row: any) => ({
-        id: row[0] as string,
-        name: row[1] as string,
-        api_key: row[2] as string,
-      }));
+      locations = result[0].values.map((row: any) => {
+        const rawKey = row[2] as string;
+        // Decrypt if encrypted (v1: prefix), otherwise use as-is (legacy plaintext)
+        const apiKey = rawKey.startsWith('v1:') ? decryptToken(rawKey) : rawKey;
+        return { id: row[0] as string, name: row[1] as string, api_key: apiKey };
+      });
     }
   } catch {
     // Table doesn't exist

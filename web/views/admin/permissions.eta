@@ -6,6 +6,7 @@
 </div>
 
 <form method="POST" action="/admin/permissions">
+  <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
   <div class="card" style="overflow-x: auto; padding: 0;">
     <table style="width: 100%; border-collapse: collapse;">
       <thead>

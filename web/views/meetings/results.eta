@@ -12,7 +12,7 @@
       <td>
         <a href="/meetings/<%= m.id %>"><%= m.title %></a>
         <% if (m.excerpt) { %>
-          <br><small><%~ m.excerpt %></small>
+          <br><small><%~ it.sanitiseHtml(m.excerpt) %></small>
         <% } %>
       </td>
       <td><%= m.client_name || '—' %></td>

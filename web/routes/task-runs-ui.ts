@@ -8,6 +8,7 @@ import {
   type TaskRunStatus,
 } from '../lib/queries/task-runs.js';
 import { listBrandClients } from '../lib/queries/brand.js';
+import { getAllClientsAdmin } from '../lib/queries/clients.js';
 import { getTaskTypesForChannel } from '../lib/task-types/index.js';
 import { assembleContext } from '../lib/task-matcher.js';
 
@@ -84,7 +85,12 @@ export const taskRunsUiRoutes: FastifyPluginAsync = async (app) => {
 
   // GET /new — Task submission form
   app.get('/new', async (request, reply) => {
-    const clients = await listBrandClients();
+    const allClients = await getAllClientsAdmin();
+    const clients = allClients.map(c => ({
+      client_id: c.id,
+      client_name: c.display_name || c.name,
+      client_slug: c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    }));
     const query = request.query as Record<string, string>;
     return reply.render('task-runs/new', { clients, error: query.error });
   });
