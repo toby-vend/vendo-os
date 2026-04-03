@@ -306,11 +306,11 @@ app.register(driveWebhookRoutes, { prefix: '/api/drive' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(taskRunsUiRoutes, { prefix: '/tasks' });
-app.register(skillsBrowserRoutes, { prefix: '/skills' });
+app.register(skillsBrowserRoutes, { prefix: '/skills-drive' });
 app.register(portalRoutes, { prefix: '/portal' });
 app.register(clientDatabaseRoutes, { prefix: '/client-database' });
 app.register(operationsRoutes, { prefix: '/operations' });
-app.register(skillsLibraryRoutes, { prefix: '/skills-library' });
+app.register(skillsLibraryRoutes, { prefix: '/skills' });
 app.register(cronRoutes, { prefix: '/api/cron' });
 
 // Dashboard modules

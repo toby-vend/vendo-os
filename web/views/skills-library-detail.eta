@@ -1,7 +1,7 @@
 <% layout('/layouts/base') %>
 
 <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-  <a href="/skills-library" class="btn btn-sm">Back</a>
+  <a href="/skills" class="btn btn-sm">Back</a>
   <h2 style="margin: 0;"><%= it.skill.title %></h2>
 </div>
 <div style="max-width: 800px;">
