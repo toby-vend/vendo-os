@@ -699,7 +699,128 @@ export async function getPipelineMonthlyForecast(): Promise<MonthlyForecastRow[]
 }
 
 // ============================================================
-// 11. Performance Reviews
+// 11. Unified Ads Dashboard
+// ============================================================
+
+export interface UnifiedAdsRow {
+  client_id: number;
+  client_name: string;
+  platform: 'meta' | 'google';
+  spend: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  conversion_value: number;
+  cpa: number;
+  ctr: number;
+  roas: number;
+  wow_cpa_change: number | null;
+}
+
+export async function getUnifiedAdsData(
+  days = 30,
+  platform?: 'meta' | 'google',
+  clientId?: number,
+): Promise<UnifiedAdsRow[]> {
+  const results: UnifiedAdsRow[] = [];
+
+  // Meta data
+  if (!platform || platform === 'meta') {
+    const metaFilter = clientId ? 'AND c.id = ?' : '';
+    const metaArgs: (string | number)[] = clientId ? [days, clientId] : [days];
+    const meta = await rows<{
+      client_id: number; client_name: string; spend: number;
+      impressions: number; clicks: number; conversions: number; cpa: number; ctr: number;
+    }>(`
+      SELECT c.id as client_id, COALESCE(c.display_name, c.name) as client_name,
+             COALESCE(SUM(m.spend), 0) as spend,
+             COALESCE(SUM(m.impressions), 0) as impressions,
+             COALESCE(SUM(m.clicks), 0) as clicks,
+             COALESCE(SUM(m.conversions), 0) as conversions,
+             CASE WHEN COALESCE(SUM(m.conversions), 0) > 0
+                  THEN ROUND(SUM(m.spend) / SUM(m.conversions), 2) ELSE 0 END as cpa,
+             CASE WHEN COALESCE(SUM(m.impressions), 0) > 0
+                  THEN ROUND(CAST(SUM(m.clicks) AS REAL) / SUM(m.impressions) * 100, 2) ELSE 0 END as ctr
+      FROM clients c
+      JOIN client_source_mappings csm ON csm.client_id = c.id AND csm.source = 'meta'
+      JOIN meta_insights m ON m.account_id = csm.external_id
+        AND m.date >= date('now', '-' || ? || ' days')
+        AND m.level = 'campaign'
+      WHERE c.status = 'active' ${metaFilter}
+      GROUP BY c.id
+      ORDER BY spend DESC
+    `, metaArgs);
+    for (const r of meta) {
+      results.push({ ...r, platform: 'meta', conversion_value: 0, roas: 0, wow_cpa_change: null });
+    }
+  }
+
+  // Google Ads data
+  if (!platform || platform === 'google') {
+    const gadsFilter = clientId ? 'AND c.id = ?' : '';
+    const gadsArgs: (string | number)[] = clientId ? [days, clientId] : [days];
+    const gads = await rows<{
+      client_id: number; client_name: string; spend: number;
+      impressions: number; clicks: number; conversions: number;
+      conversion_value: number; cpa: number; ctr: number; roas: number;
+    }>(`
+      SELECT c.id as client_id, COALESCE(c.display_name, c.name) as client_name,
+             COALESCE(SUM(g.spend), 0) as spend,
+             COALESCE(SUM(g.impressions), 0) as impressions,
+             COALESCE(SUM(g.clicks), 0) as clicks,
+             COALESCE(SUM(g.conversions), 0) as conversions,
+             COALESCE(SUM(g.conversion_value), 0) as conversion_value,
+             CASE WHEN COALESCE(SUM(g.conversions), 0) > 0
+                  THEN ROUND(SUM(g.spend) / SUM(g.conversions), 2) ELSE 0 END as cpa,
+             CASE WHEN COALESCE(SUM(g.impressions), 0) > 0
+                  THEN ROUND(CAST(SUM(g.clicks) AS REAL) / SUM(g.impressions) * 100, 2) ELSE 0 END as ctr,
+             CASE WHEN COALESCE(SUM(g.spend), 0) > 0
+                  THEN ROUND(SUM(g.conversion_value) / SUM(g.spend), 2) ELSE 0 END as roas
+      FROM clients c
+      JOIN client_source_mappings csm ON csm.client_id = c.id AND csm.source = 'gads'
+      JOIN gads_campaign_spend g ON g.account_id = csm.external_id
+        AND g.date >= date('now', '-' || ? || ' days')
+      WHERE c.status = 'active' ${gadsFilter}
+      GROUP BY c.id
+      ORDER BY spend DESC
+    `, gadsArgs);
+
+    // WoW CPA data for Google Ads
+    const wowFilter = clientId ? 'AND c.id = ?' : '';
+    const wowArgs: (string | number)[] = clientId ? [clientId] : [];
+    const wow = await rows<{ client_id: number; cpa_change_pct: number }>(`
+      SELECT c.id as client_id,
+        CASE
+          WHEN COALESCE(lw.conversions, 0) > 0 AND COALESCE(tw.conversions, 0) > 0
+          THEN ROUND(((tw.spend / tw.conversions) - (lw.spend / lw.conversions)) / (lw.spend / lw.conversions) * 100, 1)
+          ELSE 0
+        END as cpa_change_pct
+      FROM clients c
+      JOIN client_source_mappings csm ON csm.client_id = c.id AND csm.source = 'gads'
+      LEFT JOIN (
+        SELECT account_id, SUM(spend) as spend, SUM(conversions) as conversions
+        FROM gads_campaign_spend WHERE date >= date('now', '-7 days')
+        GROUP BY account_id
+      ) tw ON tw.account_id = csm.external_id
+      LEFT JOIN (
+        SELECT account_id, SUM(spend) as spend, SUM(conversions) as conversions
+        FROM gads_campaign_spend WHERE date >= date('now', '-14 days') AND date < date('now', '-7 days')
+        GROUP BY account_id
+      ) lw ON lw.account_id = csm.external_id
+      WHERE c.status = 'active' ${wowFilter}
+    `, wowArgs);
+    const wowMap = new Map(wow.map(w => [w.client_id, w.cpa_change_pct]));
+
+    for (const r of gads) {
+      results.push({ ...r, platform: 'google', wow_cpa_change: wowMap.get(r.client_id) ?? null });
+    }
+  }
+
+  return results;
+}
+
+// ============================================================
+// 12. Performance Reviews
 // ============================================================
 
 export async function getReviewData(): Promise<ReviewRow[]> {

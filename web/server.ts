@@ -43,6 +43,7 @@ import { financeRoutes } from './routes/dashboards/finance.js';
 import { timeTrackingRoutes } from './routes/dashboards/time-tracking.js';
 import { capacityRoutes } from './routes/dashboards/capacity.js';
 import { gadsEcomRoutes } from './routes/dashboards/gads-ecom.js';
+import { unifiedAdsRoutes } from './routes/dashboards/ads.js';
 import { profitabilityRoutes } from './routes/dashboards/profitability.js';
 import { pipelineTrackerRoutes } from './routes/dashboards/pipeline.js';
 import { reviewsRoutes } from './routes/dashboards/reviews.js';
@@ -316,6 +317,7 @@ app.register(cronRoutes, { prefix: '/api/cron' });
 app.register(skillsApiRoutes, { prefix: '/api/skills' });
 
 // Dashboard modules
+app.register(unifiedAdsRoutes, { prefix: '/dashboards/ads' });
 app.register(metaDentalRoutes, { prefix: '/dashboards/meta-dental' });
 app.register(gadsDentalRoutes, { prefix: '/dashboards/gads-dental' });
 app.register(reportingHubRoutes, { prefix: '/dashboards/reporting-hub' });

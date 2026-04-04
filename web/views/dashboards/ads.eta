@@ -1,0 +1,93 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+  <h2 style="margin: 0;">Ads Dashboard</h2>
+  <form method="GET" action="/dashboards/ads" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+    <select name="platform" onchange="this.form.submit()">
+      <option value="">All Platforms</option>
+      <option value="meta" <%= it.query.platform === 'meta' ? 'selected' : '' %>>Meta</option>
+      <option value="google" <%= it.query.platform === 'google' ? 'selected' : '' %>>Google Ads</option>
+    </select>
+    <select name="client" onchange="this.form.submit()" style="min-width: 180px;">
+      <option value="">All Clients</option>
+      <% it.clients.forEach(c => { %>
+        <option value="<%= c.id %>" <%= it.query.client == c.id ? 'selected' : '' %>><%= c.name %></option>
+      <% }) %>
+    </select>
+    <select name="days" onchange="this.form.submit()">
+      <option value="7" <%= it.days === 7 ? 'selected' : '' %>>7 days</option>
+      <option value="14" <%= it.days === 14 ? 'selected' : '' %>>14 days</option>
+      <option value="30" <%= it.days === 30 ? 'selected' : '' %>>30 days</option>
+      <option value="90" <%= it.days === 90 ? 'selected' : '' %>>90 days</option>
+    </select>
+  </form>
+</div>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></p>
+    <p class="stat-label">Total Spend</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.totalConversions.toLocaleString() %></p>
+    <p class="stat-label">Conversions</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= it.avgCPA.toFixed(2) %></p>
+    <p class="stat-label">Avg CPA</p>
+  </article>
+  <% if (!it.platform || it.platform === 'google') { %>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.blendedROAS %>x</p>
+    <p class="stat-label">ROAS</p>
+  </article>
+  <% } %>
+</div>
+
+<% if (!it.data.length) { %>
+  <p>No ads data for this period. Check client source mappings.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Client</th>
+      <th>Platform</th>
+      <th>Spend</th>
+      <th>Conversions</th>
+      <th>CPA</th>
+      <th>WoW CPA</th>
+      <% if (!it.platform || it.platform !== 'meta') { %>
+      <th>Conv. Value</th>
+      <th>ROAS</th>
+      <% } %>
+      <th>Clicks</th>
+      <th>CTR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.data.forEach(r => { %>
+    <tr>
+      <td><%= r.client_name %></td>
+      <td>
+        <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+          background: <%= r.platform === 'meta' ? 'rgba(59,130,246,0.15); color: #60A5FA' : 'rgba(234,179,8,0.15); color: #FACC15' %>;">
+          <%= r.platform === 'meta' ? 'Meta' : 'Google' %>
+        </span>
+      </td>
+      <td>&pound;<%= r.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+      <td><%= r.conversions.toLocaleString() %></td>
+      <td style="<%= r.cpa > 100 ? 'color: #EF4444; font-weight: 600;' : '' %>">&pound;<%= r.cpa.toFixed(2) %></td>
+      <td style="<%= r.wow_cpa_change !== null && r.wow_cpa_change > 50 ? 'color: #EF4444; font-weight: 600;' : r.wow_cpa_change !== null && r.wow_cpa_change < 0 ? 'color: #22C55E;' : '' %>">
+        <%= r.wow_cpa_change !== null ? (r.wow_cpa_change > 0 ? '+' : '') + r.wow_cpa_change.toFixed(1) + '%' : '&mdash;' %>
+      </td>
+      <% if (!it.platform || it.platform !== 'meta') { %>
+      <td><%= r.conversion_value > 0 ? '&pound;' + r.conversion_value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '&mdash;' %></td>
+      <td><%= r.roas > 0 ? r.roas.toFixed(2) + 'x' : '&mdash;' %></td>
+      <% } %>
+      <td><%= r.clicks.toLocaleString() %></td>
+      <td><%= r.ctr.toFixed(2) %>%</td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>

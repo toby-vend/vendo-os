@@ -191,6 +191,56 @@ body {
   padding: 0.625rem;
 }
 
+/* === Nav Groups (collapsible) === */
+
+.nav-group {
+  margin-bottom: 0.25rem;
+}
+
+.nav-group-toggle {
+  position: relative;
+}
+
+.nav-group-toggle .nav-chevron {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  margin-left: auto;
+  transition: transform 0.2s ease;
+  opacity: 0.5;
+}
+
+.nav-group.open > .nav-group-toggle .nav-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-group-children {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.nav-group.open > .nav-group-children {
+  max-height: 500px;
+}
+
+.nav-child {
+  padding-left: 2.75rem;
+  font-size: 13px;
+}
+
+.sidebar.collapsed .nav-chevron {
+  display: none;
+}
+
+.sidebar.collapsed .nav-group-children {
+  display: none;
+}
+
+.sidebar.collapsed .nav-child {
+  padding-left: 0.625rem;
+}
+
 /* === Sidebar Footer === */
 
 .sidebar-footer {
