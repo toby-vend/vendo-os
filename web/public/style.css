@@ -237,39 +237,36 @@ body {
   gap: 10px;
   padding: 0 1rem;
   margin-bottom: 8px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.35);
-  cursor: pointer;
   border: none;
   background: none;
   width: 100%;
   text-align: left;
   white-space: nowrap;
   min-height: 0;
+  cursor: pointer;
   font-family: var(--vendo-sans);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .nav-group-label:hover {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.nav-group-label .nav-icon {
-  display: none;
-}
-
-.nav-group-label .nav-chevron {
-  width: 14px;
-  height: 14px;
-  min-width: 14px;
+.nav-group-label svg {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
   margin-left: auto;
   transition: transform 0.15s ease;
   opacity: 0.4;
+  flex-shrink: 0;
 }
 
-.nav-group.open > .nav-group-label .nav-chevron {
+.nav-group.open > .nav-group-label svg {
   transform: rotate(90deg);
 }
 
@@ -329,7 +326,6 @@ body {
 }
 
 /* Collapsed sidebar overrides */
-.sidebar.collapsed .nav-chevron,
 .sidebar.collapsed .nav-group-label {
   display: none;
 }

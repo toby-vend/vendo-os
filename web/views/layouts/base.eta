@@ -45,7 +45,7 @@
         <div class="nav-group<%= isInGroup(['/clients', '/client-database', '/pipeline', '/dashboards/client-mer', '/dashboards/reviews']) ? ' open' : '' %>">
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
             <span class="nav-label">Clients</span>
-            <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,6 15,12 9,18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
           </button>
           <div class="nav-group-children">
             <% if (canSee('clients')) { %>
@@ -78,7 +78,7 @@
         <div class="nav-group<%= isInGroup(['/dashboards/ads', '/dashboards/reporting-hub', '/ads']) ? ' open' : '' %>">
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
             <span class="nav-label">Performance</span>
-            <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,6 15,12 9,18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
           </button>
           <div class="nav-group-children">
             <% if (canSee('dashboards')) { %>
@@ -103,7 +103,7 @@
         <div class="nav-group<%= isInGroup(['/dashboards/finance', '/dashboards/profitability', '/dashboards/pipeline']) ? ' open' : '' %>">
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
             <span class="nav-label">Finance</span>
-            <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,6 15,12 9,18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
           </button>
           <div class="nav-group-children">
             <a href="/dashboards/finance" class="nav-item nav-child<%= p.startsWith('/dashboards/finance') ? ' active' : '' %>">
@@ -124,7 +124,7 @@
         <div class="nav-group<%= isInGroup(['/action-items', '/asana-tasks', '/tasks', '/dashboards/time-tracking', '/dashboards/capacity']) ? ' open' : '' %>">
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
             <span class="nav-label">Work</span>
-            <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,6 15,12 9,18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
           </button>
           <div class="nav-group-children">
             <% if (canSee('action-items')) { %>
@@ -169,7 +169,7 @@
         <div class="nav-group<%= isInGroup(['/skills', '/chat', '/briefs', '/growth', '/drive']) ? ' open' : '' %>">
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
             <span class="nav-label">Tools</span>
-            <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,6 15,12 9,18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
           </button>
           <div class="nav-group-children">
             <a href="/skills" class="nav-item nav-child<%= p.startsWith('/skills') ? ' active' : '' %>">
@@ -214,7 +214,7 @@
         <div class="nav-group<%= isInGroup(['/admin', '/sync-status']) ? ' open' : '' %>">
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
             <span class="nav-label">Admin</span>
-            <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,6 15,12 9,18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
           </button>
           <div class="nav-group-children">
             <a href="/admin/users" class="nav-item nav-child<%= p.startsWith('/admin/users') ? ' active' : '' %>">
