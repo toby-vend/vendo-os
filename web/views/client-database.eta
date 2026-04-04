@@ -11,11 +11,13 @@
 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;">
   <select name="status" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"
     hx-get="/client-database" hx-target="#client-table" hx-include="[name='tier'],[name='am'],[name='q']" hx-push-url="true">
-    <option value="">All Statuses</option>
-    <option value="active" <%= it.statusFilter === 'active' ? 'selected' : '' %>>Active</option>
+    <option value="" <%= !it.statusFilter ? 'selected' : '' %>>Active</option>
+    <option value="all" <%= it.statusFilter === 'all' ? 'selected' : '' %>>All Statuses</option>
+    <option value="inactive" <%= it.statusFilter === 'inactive' ? 'selected' : '' %>>Inactive</option>
     <option value="churned" <%= it.statusFilter === 'churned' ? 'selected' : '' %>>Churned</option>
     <option value="onboarding" <%= it.statusFilter === 'onboarding' ? 'selected' : '' %>>Onboarding</option>
     <option value="paused" <%= it.statusFilter === 'paused' ? 'selected' : '' %>>Paused</option>
+    <option value="pending" <%= it.statusFilter === 'pending' ? 'selected' : '' %>>Pending</option>
   </select>
 
   <select name="tier" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"

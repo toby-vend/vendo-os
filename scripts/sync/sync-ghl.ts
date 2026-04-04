@@ -13,6 +13,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { resolveClientBatch } from '../utils/resolve-client.js';
 import { decryptToken } from '../../web/lib/crypto.js';
 
 const BASE_URL = 'https://services.leadconnectorhq.com';
@@ -192,6 +193,13 @@ async function main() {
 
     saveDb();
     log('GHL', `Sync complete: ${successCount}/${locations.length} locations, ${grandPipelines} pipelines, ${grandOpps} opportunities`);
+
+    // Auto-resolve GHL locations to canonical clients
+    const ghlLocs = db.exec('SELECT id, name FROM ghl_locations WHERE name IS NOT NULL');
+    if (ghlLocs.length && ghlLocs[0].values.length) {
+      await resolveClientBatch('ghl', ghlLocs[0].values.map((r: unknown[]) => ({ id: r[0] as string, name: r[1] as string })));
+    }
+
   } catch (err) {
     logError('GHL', 'Sync failed', err);
     process.exit(1);

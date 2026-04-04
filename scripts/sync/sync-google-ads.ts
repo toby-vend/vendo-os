@@ -10,6 +10,7 @@ config({ path: '.env.local', override: true });
 
 import { readFileSync } from 'fs';
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { resolveClientBatch } from '../utils/resolve-client.js';
 
 const BACKFILL = process.argv.includes('--backfill');
 const ACCOUNTS_ONLY = process.argv.includes('--accounts-only');
@@ -255,6 +256,12 @@ async function syncGoogleAds() {
     upsertSpend.free();
     saveDb();
     log('GADS', `Sync complete: ${totalRows} rows across ${accounts.length} accounts`);
+
+    // Auto-resolve Google Ads accounts to canonical clients
+    const gadsAccounts = db.exec('SELECT DISTINCT account_id, account_name FROM gads_campaign_spend WHERE account_name IS NOT NULL');
+    if (gadsAccounts.length && gadsAccounts[0].values.length) {
+      await resolveClientBatch('gads', gadsAccounts[0].values.map((r: unknown[]) => ({ id: r[0] as string, name: r[1] as string })));
+    }
 
   } catch (err) {
     logError('GADS', 'Sync failed', err);

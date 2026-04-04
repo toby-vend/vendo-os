@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { resolveClientBatch } from '../utils/resolve-client.js';
 import { MetaClient, type MetaInsightRow } from '../utils/meta-client.js';
 
 const BACKFILL = process.argv.includes('--backfill');
@@ -102,6 +103,12 @@ async function syncMetaAds() {
     }
 
     log('META', `Sync complete: ${totalRows} insight rows across ${activeAccounts.length} accounts`);
+
+    // Auto-resolve Meta accounts to canonical clients
+    const metaAccounts = db.exec('SELECT DISTINCT account_id, account_name FROM meta_insights WHERE account_name IS NOT NULL');
+    if (metaAccounts.length && metaAccounts[0].values.length) {
+      await resolveClientBatch('meta', metaAccounts[0].values.map((r: unknown[]) => ({ id: r[0] as string, name: r[1] as string })));
+    }
 
   } catch (err) {
     logError('META', 'Sync failed', err);

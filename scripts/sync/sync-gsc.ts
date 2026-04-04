@@ -9,6 +9,7 @@ config({ path: '.env.local', override: true });
 
 import { readFileSync } from 'fs';
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { resolveClientBatch } from '../utils/resolve-client.js';
 
 const BACKFILL = process.argv.includes('--backfill');
 const DEFAULT_DAYS = 7;
@@ -283,6 +284,12 @@ async function syncGsc() {
     saveDb();
 
     log('GSC', `Sync complete: ${totalDaily} daily, ${totalQueries} query, ${totalPages} page rows across ${SITE_URLS.length} site(s)`);
+
+    // Auto-resolve GSC sites to canonical clients (site_id is the URL, used as both ID and name)
+    const gscSites = db.exec('SELECT id, id FROM gsc_sites');
+    if (gscSites.length && gscSites[0].values.length) {
+      await resolveClientBatch('gsc', gscSites[0].values.map((r: unknown[]) => ({ id: r[0] as string, name: r[1] as string })));
+    }
 
   } catch (err) {
     logError('GSC', 'Sync failed', err);

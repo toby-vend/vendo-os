@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { resolveClientBatch } from '../utils/resolve-client.js';
 
 const WORKSPACE_GID = process.env.ASANA_WORKSPACE_GID || '';
 const API_KEY = process.env.ASANA_API_KEY || '';
@@ -222,6 +223,12 @@ async function syncAsana() {
     upsert.free();
     saveDb();
     log('ASANA', `Synced ${allTasks.length} tasks successfully`);
+
+    // Auto-resolve Asana projects to canonical clients
+    const asanaProjects = db.exec('SELECT DISTINCT project_gid, project_name FROM asana_tasks WHERE project_gid IS NOT NULL AND project_name IS NOT NULL');
+    if (asanaProjects.length && asanaProjects[0].values.length) {
+      await resolveClientBatch('asana', asanaProjects[0].values.map((r: unknown[]) => ({ id: r[0] as string, name: r[1] as string })));
+    }
 
   } catch (err) {
     logError('ASANA', 'Sync failed', err);

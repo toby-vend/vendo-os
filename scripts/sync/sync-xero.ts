@@ -325,8 +325,8 @@ async function syncClientsFromXero(): Promise<number> {
     const stats = invoiceMap.get(xeroId);
 
     db.run(`
-      INSERT INTO clients (name, xero_contact_id, email, source, total_invoiced, outstanding, first_invoice_date, last_invoice_date)
-      VALUES (?, ?, ?, 'xero', ?, ?, ?, ?)
+      INSERT INTO clients (name, xero_contact_id, email, source, status, total_invoiced, outstanding, first_invoice_date, last_invoice_date)
+      VALUES (?, ?, ?, 'xero', 'pending', ?, ?, ?, ?)
       ON CONFLICT(name) DO UPDATE SET
         xero_contact_id = excluded.xero_contact_id,
         email = COALESCE(excluded.email, clients.email),
