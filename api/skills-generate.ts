@@ -16,8 +16,6 @@ interface ClientRow {
   name: string;
   display_name: string | null;
   vertical: string | null;
-  services: string | null;
-  am: string | null;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -70,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let client: ClientRow;
   try {
     const clientRows = await rows<ClientRow>(
-      'SELECT id, COALESCE(display_name, name) as name, display_name, vertical, services, am FROM clients WHERE id = ?',
+      'SELECT id, COALESCE(display_name, name) as name, display_name, vertical FROM clients WHERE id = ?',
       [client_id],
     );
     if (!clientRows.length) {
@@ -95,9 +93,7 @@ ${skillRow.content}
 === CLIENT CONTEXT ===
 
 Client: ${client.name}
-Vertical: ${client.vertical || 'Not specified'}
-Services: ${client.services || 'Not specified'}
-Account Manager: ${client.am || 'Not specified'}`;
+Vertical: ${client.vertical || 'Not specified'}`;
 
   // Build user message from inputs
   const inputLines = Object.entries(inputs)
