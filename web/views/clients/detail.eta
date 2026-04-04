@@ -131,7 +131,7 @@
 (function() {
   <% if (it.client && it.client.id) { %>
   const clientId = <%= it.client.id %>;
-  fetch('/api/skills-outputs?client_id=' + clientId)
+  fetch('/api/skills/outputs?client_id=' + clientId)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data.outputs || data.outputs.length === 0) return;

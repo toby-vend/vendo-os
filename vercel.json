@@ -52,9 +52,9 @@
   "routes": [
     { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
     { "src": "/api/chat", "dest": "/api/chat.ts", "methods": ["POST"] },
-    { "src": "/api/skills-generate", "dest": "/api/skills-generate.ts", "methods": ["POST"] },
-    { "src": "/api/skills-save", "dest": "/api/skills-save.ts", "methods": ["POST"] },
-    { "src": "/api/skills-outputs", "dest": "/api/skills-outputs.ts", "methods": ["GET"] },
+    { "src": "/api/skills/generate", "dest": "/api/skills-generate.ts", "methods": ["POST"] },
+    { "src": "/api/skills/save", "dest": "/api/skills-save.ts", "methods": ["POST"] },
+    { "src": "/api/skills/outputs", "dest": "/api/skills-outputs.ts", "methods": ["GET"] },
     { "src": "/(.*)", "dest": "/api/index.ts" }
   ]
 }

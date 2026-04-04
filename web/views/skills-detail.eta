@@ -109,7 +109,7 @@
     generatedOutput = '';
 
     try {
-      const res = await fetch('/api/skills-generate', {
+      const res = await fetch('/api/skills/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -181,7 +181,7 @@
     btn.disabled = true;
 
     try {
-      const res = await fetch('/api/skills-save', {
+      const res = await fetch('/api/skills/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -223,7 +223,7 @@
 
     try {
       const skillSlug = form.querySelector('input[name="skill"]').value;
-      const res = await fetch('/api/skills-outputs?client_id=' + clientId + '&skill_slug=' + skillSlug);
+      const res = await fetch('/api/skills/outputs?client_id=' + clientId + '&skill_slug=' + skillSlug);
       const data = await res.json();
 
       if (!data.outputs || data.outputs.length === 0) {
