@@ -196,10 +196,11 @@ body {
 .nav-group {
   margin-bottom: 0.25rem;
   padding-top: 0.5rem;
-  border-top: 1px solid var(--vendo-border);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.nav-group:first-child {
+.nav-group:first-child,
+.sidebar-nav > .nav-section + .nav-group {
   border-top: none;
   padding-top: 0;
 }
