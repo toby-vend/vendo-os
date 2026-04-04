@@ -307,3 +307,59 @@ If this is your first session:
 4. Start logging decisions with `/decide` immediately
 
 The Context layer is your foundation. Everything else is built on top of it. Start there.
+
+
+---
+
+## RuFlo V3 — Multi-Agent Orchestration
+
+RuFlo is initialised in this project. It provides multi-agent swarm coordination, self-learning hooks, and 99+ specialised agents.
+
+### Key Config Files
+
+| File | Purpose |
+|------|---------|
+| `.claude/settings.json` | Hooks, permissions, agent config |
+| `.claude/agents/` | 99 agent definitions |
+| `.claude/skills/` | 30 skills |
+| `.claude-flow/config.yaml` | Runtime config |
+| `.mcp.json` | MCP server config |
+
+### Swarm Orchestration
+
+- Use hierarchical topology for coding swarms
+- Keep maxAgents at 6-8 for tight coordination
+- Use specialised strategy for clear role boundaries
+- Use `raft` consensus for hive-mind coordination
+
+### CLI Quick Reference
+
+```bash
+# Daemon
+npx @claude-flow/cli@latest daemon start
+
+# Swarm
+npx @claude-flow/cli@latest swarm init --topology hierarchical --max-agents 8 --strategy specialized
+
+# Memory
+npx @claude-flow/cli@latest memory search --query "pattern"
+npx @claude-flow/cli@latest memory store --key "key" --value "value" --namespace ns
+
+# Health check
+npx @claude-flow/cli@latest doctor --fix
+```
+
+### 3-Tier Model Routing
+
+| Tier | Handler | Use Cases |
+|------|---------|-----------|
+| 1 | Agent Booster (WASM) | Simple transforms — skip LLM |
+| 2 | Haiku | Simple tasks, low complexity (<30%) |
+| 3 | Sonnet/Opus | Complex reasoning, architecture (>30%) |
+
+### Execution Rules
+
+- Use `run_in_background: true` for agent Task calls
+- Put ALL agent Task calls in ONE message for parallel execution
+- After spawning, STOP — do not poll or check status
+- Review ALL results before proceeding

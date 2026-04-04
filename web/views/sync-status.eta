@@ -1,27 +1,33 @@
 <% layout('/layouts/base') %>
 
-<h1>Sync Status</h1>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+  <h1 style="margin: 0;">Sync Status</h1>
+  <% if (it.isAdmin) { %>
+  <div>
+    <button class="btn"
+            hx-post="/sync-status/run-all"
+            hx-vals='{"_csrf":"<%= it.csrfToken %>"}'
+            hx-swap="none"
+            hx-disabled-elt="this"
+            hx-indicator="#spinner-all">
+      Refresh All
+    </button>
+    <span id="spinner-all" class="htmx-indicator" style="font-size: 12px; color: #94A3B8;">Syncing all...</span>
+  </div>
+  <% } %>
+</div>
 
 <table class="compact">
   <thead>
-    <tr><th>Source</th><th>Last Sync</th><th>Rows</th><th>Status</th></tr>
-  </thead>
-  <tbody>
-    <% it.sources.forEach(s => { %>
     <tr>
-      <td><%= s.source %></td>
-      <td><%= s.lastSync ? s.lastSync.slice(0, 19).replace('T', ' ') : '—' %></td>
-      <td><%= s.rowCount.toLocaleString() %></td>
-      <td>
-        <% if (!s.lastSync) { %>
-          <span class="sync-none">Not synced</span>
-        <% } else if ((Date.now() - new Date(s.lastSync).getTime()) < 86400000) { %>
-          <span class="sync-ok">OK</span>
-        <% } else { %>
-          <span class="sync-stale">Stale</span>
-        <% } %>
-      </td>
+      <th>Source</th>
+      <th>Last Sync</th>
+      <th>Rows</th>
+      <th>Status</th>
+      <% if (it.isAdmin) { %><th>Actions</th><% } %>
     </tr>
-    <% }) %>
+  </thead>
+  <tbody id="sync-table-body" hx-get="/sync-status/table" hx-trigger="every 10s" hx-swap="innerHTML">
+    <%~ include('/sync-status-rows', it) %>
   </tbody>
 </table>
