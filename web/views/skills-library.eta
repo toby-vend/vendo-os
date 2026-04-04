@@ -1,7 +1,7 @@
 <% layout('/layouts/base') %>
 
 <h2>Skills Library</h2>
-<p style="color: var(--text-secondary); margin-bottom: 2rem;">AI-powered tools for your team. Use these via <code>/skills:&lt;name&gt;</code> in Claude Code.</p>
+<p style="color: var(--text-secondary); margin-bottom: 2rem;">AI-powered content generation tools. Select a skill, choose a client, and generate content in real time.</p>
 
 <% if (!it.skills || it.skills.length === 0) { %>
 <p style="color: var(--text-secondary);">No skills found. Add skill files to <code>.claude/commands/skills/</code>.</p>

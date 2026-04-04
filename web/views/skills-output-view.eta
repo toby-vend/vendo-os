@@ -1,0 +1,36 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+  <a href="/skills/<%= it.output.skill_slug %>" style="padding: 6px 14px; font-size: 13px; color: #E2E8F0; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; text-decoration: none;">&larr; Back to Skill</a>
+  <h2 style="margin: 0;"><%= it.output.skill_title %></h2>
+</div>
+
+<div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; font-size: 13px; color: #94A3B8;">
+  <span><strong>Client:</strong> <%= it.output.client_name %></span>
+  <span><strong>Created:</strong> <%= new Date(it.output.created_at + 'Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %></span>
+  <% if (it.output.created_by) { %>
+  <span><strong>By:</strong> <%= it.output.created_by %></span>
+  <% } %>
+</div>
+
+<% const inputKeys = Object.keys(it.parsedInputs).filter(k => k !== 'skill' && k !== 'client_id'); %>
+<% if (inputKeys.length > 0) { %>
+<div class="card" style="padding: 1rem; margin-bottom: 1.5rem;">
+  <h4 style="margin: 0 0 0.5rem; font-size: 14px; color: #94A3B8;">Inputs Used</h4>
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.5rem; font-size: 13px;">
+    <% inputKeys.forEach(key => { %>
+    <div>
+      <span style="color: #64748B;"><%= key.replace(/_/g, ' ') %>:</span>
+      <span style="color: #E2E8F0;"><%= it.parsedInputs[key] %></span>
+    </div>
+    <% }) %>
+  </div>
+</div>
+<% } %>
+
+<div class="card" style="padding: 1.5rem;">
+  <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+    <button onclick="navigator.clipboard.writeText(document.getElementById('output-content').textContent)" style="padding: 6px 14px; font-size: 12px; color: #E2E8F0; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer;">Copy</button>
+  </div>
+  <div id="output-content" style="white-space: pre-wrap; font-size: 14px; line-height: 1.7; color: #E2E8F0;"><%= it.output.output %></div>
+</div>

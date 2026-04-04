@@ -104,7 +104,7 @@
 </table>
 <% } %>
 
-<% if (it.enriched && it.enriched.ghlOpps.length) { %>
+<% if (it.enriched && it.enriched.ghlOpps.length > 0) { %>
 <h2>Pipeline (<%= it.enriched.ghlOpps.length %>)</h2>
 <table class="compact">
   <thead>
@@ -124,3 +124,34 @@
   </tbody>
 </table>
 <% } %>
+
+<!-- Generated Content (from Skills) -->
+<div id="skill-outputs-section"></div>
+<script>
+(function() {
+  <% if (it.client && it.client.id) { %>
+  const clientId = <%= it.client.id %>;
+  fetch('/api/skills-outputs?client_id=' + clientId)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.outputs || data.outputs.length === 0) return;
+      const section = document.getElementById('skill-outputs-section');
+      let html = '<h2>Generated Content (' + data.outputs.length + ')</h2>';
+      html += '<table class="compact"><thead><tr><th>Skill</th><th>Date</th><th>By</th><th>Preview</th></tr></thead><tbody>';
+      data.outputs.forEach(function(o) {
+        const date = new Date(o.created_at + 'Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const preview = (o.output || '').substring(0, 80).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '...';
+        html += '<tr>';
+        html += '<td><a href="/skills/outputs/' + o.id + '">' + o.skill_title + '</a></td>';
+        html += '<td>' + date + '</td>';
+        html += '<td>' + (o.created_by || '\u2014') + '</td>';
+        html += '<td style="color: #94A3B8; font-size: 13px;">' + preview + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      section.innerHTML = html;
+    })
+    .catch(function() {});
+  <% } %>
+})();
+</script>
