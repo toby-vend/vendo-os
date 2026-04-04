@@ -201,17 +201,23 @@ body {
   position: relative;
 }
 
-.nav-group-toggle .nav-chevron {
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
+.nav-chevron {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
   margin-left: auto;
   transition: transform 0.2s ease;
-  opacity: 0.5;
+  opacity: 0.35;
+  color: var(--vendo-text-muted) !important;
+}
+
+.nav-group-toggle:hover .nav-chevron {
+  opacity: 0.6;
 }
 
 .nav-group.open > .nav-group-toggle .nav-chevron {
   transform: rotate(180deg);
+  opacity: 0.5;
 }
 
 .nav-group-children {
