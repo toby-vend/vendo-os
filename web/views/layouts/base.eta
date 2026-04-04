@@ -152,7 +152,7 @@
 
         <!-- Meetings (top-level) -->
         <% if (canSee('meetings')) { %>
-        <div class="nav-section" style="margin-bottom: 0;">
+        <div class="nav-group nav-group-single">
           <a href="/meetings" class="nav-item<%= p.startsWith('/meetings') ? ' active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
             <span class="nav-label">Meetings</span>
@@ -196,7 +196,7 @@
 
         <!-- Operations (top-level) -->
         <% if (canSee('operations')) { %>
-        <div class="nav-section" style="margin-bottom: 0;">
+        <div class="nav-group nav-group-single">
           <a href="/operations" class="nav-item<%= p.startsWith('/operations') ? ' active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
             <span class="nav-label">Operations</span>

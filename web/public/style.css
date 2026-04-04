@@ -195,10 +195,45 @@ body {
 
 .nav-group {
   margin-bottom: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--vendo-border);
+}
+
+.nav-group:first-child {
+  border-top: none;
+  padding-top: 0;
 }
 
 .nav-group-toggle {
   position: relative;
+}
+
+.nav-group-toggle .nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--vendo-text-muted);
+}
+
+.nav-group-toggle .nav-icon {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  color: var(--vendo-text-muted);
+  opacity: 0.6;
+}
+
+.nav-group-toggle,
+.nav-group-toggle:hover {
+  color: var(--vendo-text-muted) !important;
+  background: none !important;
+  cursor: pointer;
+}
+
+.nav-group-toggle.active {
+  color: var(--vendo-text-muted) !important;
+  background: none !important;
 }
 
 .nav-chevron {
@@ -233,6 +268,10 @@ body {
 .nav-child {
   padding-left: 2.75rem;
   font-size: 13px;
+}
+
+.nav-group-single {
+  margin-bottom: 0.25rem;
 }
 
 .sidebar.collapsed .nav-chevron {
