@@ -10,7 +10,12 @@ export const capacityRoutes: FastifyPluginAsync = async (app) => {
     // Group by role/department
     const departments = new Map<string, typeof data>();
     for (const row of data) {
-      const dept = row.roles || 'Unassigned';
+      // roles comes from Harvest as JSON array e.g. '["Content Marketing Executive"]'
+      let dept = 'Unassigned';
+      if (row.roles) {
+        try { const parsed = JSON.parse(row.roles); dept = Array.isArray(parsed) ? parsed[0] || 'Unassigned' : String(parsed); }
+        catch { dept = row.roles.replace(/[\[\]"]/g, '').trim() || 'Unassigned'; }
+      }
       const existing = departments.get(dept) || [];
       existing.push(row);
       departments.set(dept, existing);
