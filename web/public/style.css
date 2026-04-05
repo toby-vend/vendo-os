@@ -531,15 +531,19 @@ p { margin-bottom: 0.75rem; }
 }
 
 .stat-card {
-  background: var(--vendo-surface);
-  border: 1px solid var(--vendo-border);
-  border-radius: 14px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
   padding: 1.5rem;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
-  border-color: var(--vendo-border-strong);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .stat-card .stat-value {
@@ -579,9 +583,12 @@ p { margin-bottom: 0.75rem; }
 /* === Cards / Articles === */
 
 article {
-  background: var(--vendo-surface);
-  border: 1px solid var(--vendo-border);
-  border-radius: 14px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
   padding: 1.5rem;
   margin-bottom: 1rem;
 }
@@ -598,14 +605,17 @@ table {
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
-  background: var(--vendo-surface);
-  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid var(--vendo-border);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   margin-bottom: 1rem;
 }
 
-thead { background: rgba(255, 255, 255, 0.02); }
+thead { background: rgba(255, 255, 255, 0.03); }
 
 th {
   font-family: var(--vendo-font);
@@ -621,14 +631,14 @@ th {
 
 td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   font-size: 13px;
   color: var(--vendo-text);
   vertical-align: middle;
 }
 
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(255, 255, 255, 0.015); }
+tr:hover td { background: rgba(255, 255, 255, 0.03); }
 
 td a { color: var(--vendo-text-heading); font-weight: 500; }
 td a:hover { color: var(--vendo-green); }
@@ -672,9 +682,12 @@ table.compact th, table.compact td {
   align-items: end;
   margin-bottom: 1.5rem;
   padding: 1.25rem;
-  background: var(--vendo-surface);
-  border: 1px solid var(--vendo-border);
-  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
 }
 
 .filter-bar label {
@@ -696,10 +709,10 @@ table.compact th, table.compact td {
 
 select, input[type="text"], input[type="search"],
 input[type="password"], input[type="date"] {
-  background: var(--vendo-bg);
-  border: 1px solid var(--vendo-border-strong);
+  background: rgba(11, 11, 11, 0.6);
+  border: 1px solid var(--glass-border);
   color: var(--vendo-text);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 0.5rem 0.75rem;
   font-family: var(--vendo-font);
   font-size: 13px;
@@ -740,18 +753,21 @@ button, [type="submit"] {
 
 button:hover, [type="submit"]:hover {
   background: var(--vendo-green-hover);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
   transform: scale(1.02);
 }
 
 button.outline, button.secondary {
-  background: transparent;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--vendo-text);
-  border: 1px solid var(--vendo-border-strong);
+  border: 1px solid var(--glass-border);
 }
 
 button.outline:hover, button.secondary:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
   color: var(--vendo-text-heading);
   transform: none;
 }
@@ -761,7 +777,7 @@ button.outline:hover, button.secondary:hover {
 .tabs {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--vendo-border);
+  border-bottom: 1px solid var(--glass-border);
   margin-bottom: 1.5rem;
 }
 
@@ -806,9 +822,11 @@ button.outline:hover, button.secondary:hover {
   max-height: 600px;
   overflow-y: auto;
   padding: 1.25rem;
-  background: var(--vendo-bg);
-  border: 1px solid var(--vendo-border);
-  border-radius: 10px;
+  background: rgba(11, 11, 11, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
   color: var(--vendo-text);
 }
 
@@ -818,9 +836,11 @@ button.outline:hover, button.secondary:hover {
   line-height: 1.7;
   color: var(--vendo-text);
   padding: 1.25rem;
-  background: var(--vendo-surface);
-  border: 1px solid var(--vendo-border);
-  border-radius: 10px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
 }
 
 .brief-content h1 { font-size: 1.4rem; color: var(--vendo-text-heading); display: block; }
@@ -854,8 +874,8 @@ button.outline:hover, button.secondary:hover {
 
 .pagination a {
   padding: 0.35rem 0.875rem;
-  background: var(--vendo-surface);
-  border: 1px solid var(--vendo-border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
   color: var(--vendo-text);
   font-size: 12px;
@@ -863,8 +883,8 @@ button.outline:hover, button.secondary:hover {
 }
 
 .pagination a:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: var(--vendo-border-strong);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
   text-decoration: none;
 }
 
@@ -995,9 +1015,11 @@ mark {
   align-items: center;
   gap: 0.375rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--vendo-border-strong);
-  border-radius: 6px;
-  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--vendo-text-muted);
   font-size: 13px;
   font-family: var(--vendo-font);
@@ -1016,9 +1038,11 @@ mark {
   align-items: center;
   gap: 0.375rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--vendo-border-strong);
-  border-radius: 6px;
-  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--vendo-text-muted);
   font-size: 13px;
   font-family: var(--vendo-font);
@@ -1034,8 +1058,10 @@ mark {
   color: #0B0B0B;
   border-color: var(--vendo-green);
   font-weight: 600;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
-.btn-primary:hover { background: #1eb34e; }
+.btn-primary:hover { background: #1eb34e; box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
 
 .btn-sm { padding: 0.375rem 0.75rem; font-size: 12px; }
 
@@ -1065,9 +1091,11 @@ mark {
 
 .alert-error {
   padding: 1rem;
-  border-radius: 8px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 14px;
+  background: rgba(239, 68, 68, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(239, 68, 68, 0.15);
   color: #F87171;
   font-size: 13px;
 }
