@@ -31,9 +31,14 @@ export const clientDatabaseRoutes: FastifyPluginAsync = async (app) => {
     const conditions: string[] = [];
     const args: (string | number | null)[] = [];
 
-    if (statusFilter) {
+    if (statusFilter === 'all') {
+      // No filter — show everything
+    } else if (statusFilter) {
       conditions.push('c.status = ?');
       args.push(statusFilter);
+    } else {
+      // Default: show only active (canonical) clients
+      conditions.push("c.status = 'active'");
     }
 
     if (tierFilter) {
