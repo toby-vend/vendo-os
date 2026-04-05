@@ -1,0 +1,42 @@
+<!-- Case Study Result Panel -->
+<div class="result-panel-content">
+  <div class="result-panel-header">
+    <span class="badge badge-<%= it.cs.status === 'published' ? 'active' : it.cs.status === 'drafted' ? 'info' : 'default' %>"><%= it.cs.status %></span>
+    <span class="badge badge-<%= it.cs.client_approved ? 'active' : it.cs.anonymous ? 'warning' : 'default' %>">
+      <%= it.cs.client_approved ? 'Client Approved' : it.cs.anonymous ? 'Anonymous' : 'Approval Pending' %>
+    </span>
+  </div>
+
+  <h3 style="font-size: 15px; margin: 0.75rem 0 0.25rem;"><%= it.cs.client_name %></h3>
+  <p style="font-size: 13px; color: #94A3B8; margin: 0 0 0.5rem;">
+    <%= (it.cs.win_type || '').replace(/_/g, ' ') %> &middot; <%= it.cs.metric_highlight %>
+  </p>
+
+  <% if (it.cs.draft) { %>
+  <div class="result-panel-draft">
+    <div class="result-panel-draft-label">Case Study Draft</div>
+    <div class="md-content" id="cs-draft-text"><%~ it.md(it.cs.draft) %></div>
+    <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06);">
+      <button onclick="navigator.clipboard.writeText(document.querySelector('#cs-raw-text').innerText);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000);" class="btn btn-primary btn-sm" style="font-size: 11px;">Copy</button>
+    </div>
+    <div id="cs-raw-text" style="display:none;"><%= it.cs.draft %></div>
+  </div>
+
+  <% if (it.cs.distribution) { %>
+  <div class="result-panel-section">
+    <div class="result-panel-draft-label">Distribution Checklist</div>
+    <% try { const channels = JSON.parse(it.cs.distribution); channels.forEach(ch => { %>
+    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; font-size: 13px;">
+      <span style="color: <%= ch.done ? '#22C55E' : '#94A3B8' %>; font-size: 16px;"><%= ch.done ? '&#10003;' : '&#9675;' %></span>
+      <span><%= ch.channel %></span>
+    </div>
+    <% }) } catch { } %>
+  </div>
+  <% } %>
+
+  <% } else { %>
+  <div style="padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; color: #94A3B8; font-size: 13px;">
+    No draft yet. Click "Draft" in the table to generate a case study from the win data.
+  </div>
+  <% } %>
+</div>

@@ -9,8 +9,9 @@ import {
   insertCaseStudies, updateCaseStudyDraft, updateCaseStudyStatus, updateCaseStudyApproval,
   getReferrals, getReferralStats,
   insertReferral, updateReferralStatus, markReferralPaid,
-  getUpsellOpportunities,
+  getUpsellOpportunities, getUpsellStats,
   insertUpsellOpportunities, updateUpsellStatus,
+  insertGrowthLog, getGrowthLog,
 } from '../lib/queries.js';
 import {
   generateLinkedInIdeas, draftLinkedInPost,
@@ -21,24 +22,32 @@ import {
 // --- Helpers ---
 
 async function linkedinPartialData(extra: Record<string, unknown> = {}) {
-  const [linkedinPosts, recentMeetings] = await Promise.all([getLinkedInPipeline(), getRecentMeetingsForLinkedIn()]);
-  return { linkedinPosts, recentMeetings, ...extra };
+  const [linkedinPosts, recentMeetings, taskLog] = await Promise.all([
+    getLinkedInPipeline(), getRecentMeetingsForLinkedIn(), getGrowthLog('linkedin', 10),
+  ]);
+  return { linkedinPosts, recentMeetings, taskLog, ...extra };
 }
 
 async function outboundPartialData(extra: Record<string, unknown> = {}) {
-  return { outboundFunnel: await getOutboundFunnel(), outboundPipeline: await getOutboundPipeline(), ...extra };
+  const [outboundFunnel, outboundPipeline, taskLog] = await Promise.all([
+    getOutboundFunnel(), getOutboundPipeline(), getGrowthLog('outbound', 10),
+  ]);
+  return { outboundFunnel, outboundPipeline, taskLog, ...extra };
 }
 
 async function casestudiesPartialData(extra: Record<string, unknown> = {}) {
-  return { caseStudies: await getCaseStudies(), ...extra };
+  const [caseStudies, taskLog] = await Promise.all([getCaseStudies(), getGrowthLog('casestudies', 10)]);
+  return { caseStudies, taskLog, ...extra };
 }
 
 async function referralsPartialData(extra: Record<string, unknown> = {}) {
-  return { referrals: await getReferrals(), ...extra };
+  const [referrals, taskLog] = await Promise.all([getReferrals(), getGrowthLog('referrals', 10)]);
+  return { referrals, taskLog, ...extra };
 }
 
 async function upsellPartialData(extra: Record<string, unknown> = {}) {
-  return { upsells: await getUpsellOpportunities(), ...extra };
+  const [upsells, taskLog] = await Promise.all([getUpsellOpportunities(), getGrowthLog('upsells', 10)]);
+  return { upsells, taskLog, ...extra };
 }
 
 export const growthRoutes: FastifyPluginAsync = async (app) => {
@@ -51,13 +60,15 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       outboundFunnel, outboundPipeline,
       caseStudyStats, caseStudies,
       referralStats, referrals,
-      upsells,
+      upsellStats, upsells,
+      taskLog,
     ] = await Promise.all([
       getLinkedInStats(), getLinkedInPipeline(), getRecentMeetingsForLinkedIn(),
       getOutboundFunnel(), getOutboundPipeline(),
       getCaseStudyStats(), getCaseStudies(),
       getReferralStats(), getReferrals(),
-      getUpsellOpportunities(),
+      getUpsellStats(), getUpsellOpportunities(),
+      getGrowthLog('linkedin', 10),
     ]);
 
     reply.render('growth/index', {
@@ -65,8 +76,71 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       outboundFunnel, outboundPipeline,
       caseStudyStats, caseStudies,
       referralStats, referrals,
-      upsells,
+      upsellStats, upsells,
+      taskLog,
+      activeTab: 'linkedin',
     });
+  });
+
+  // ===== TAB LOADING =====
+
+  app.get<{ Params: { section: string } }>('/tab/:section', async (request, reply) => {
+    const section = (request.params as { section: string }).section;
+    switch (section) {
+      case 'linkedin':
+        return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData());
+      case 'outbound':
+        return reply.type('text/html').render('growth/_tab-outbound', await outboundPartialData());
+      case 'casestudies':
+        return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData());
+      case 'referrals':
+        return reply.type('text/html').render('growth/_tab-referrals', await referralsPartialData());
+      case 'upsells':
+        return reply.type('text/html').render('growth/_tab-upsells', await upsellPartialData());
+      default:
+        return reply.code(404).send('Unknown section');
+    }
+  });
+
+  // ===== RESULT PANELS =====
+
+  app.get<{ Params: { id: string } }>('/linkedin/:id/result', async (request, reply) => {
+    const id = parseInt((request.params as { id: string }).id, 10);
+    const post = await getLinkedInPost(id);
+    if (!post) return reply.code(404).send('Not found');
+    let meeting: { title: string; summary: string; date: string; client_name: string | null } | null = null;
+    if (post.source_meeting_id) meeting = await getMeetingSummaryForPost(post.source_meeting_id);
+    return reply.type('text/html').render('growth/_result-linkedin', { post, meeting });
+  });
+
+  app.get<{ Params: { id: string } }>('/outbound/:id/result', async (request, reply) => {
+    const id = parseInt((request.params as { id: string }).id, 10);
+    const prospect = await getProspect(id);
+    if (!prospect) return reply.code(404).send('Not found');
+    return reply.type('text/html').render('growth/_result-outbound', { prospect });
+  });
+
+  app.get<{ Params: { id: string } }>('/casestudies/:id/result', async (request, reply) => {
+    const id = parseInt((request.params as { id: string }).id, 10);
+    const cs = await getCaseStudy(id);
+    if (!cs) return reply.code(404).send('Not found');
+    return reply.type('text/html').render('growth/_result-casestudy', { cs });
+  });
+
+  app.get<{ Params: { id: string } }>('/referrals/:id/result', async (request, reply) => {
+    const id = parseInt((request.params as { id: string }).id, 10);
+    const r = await getReferrals();
+    const referral = r.find((ref) => ref.id === id);
+    if (!referral) return reply.code(404).send('Not found');
+    return reply.type('text/html').render('growth/_result-referral', { referral });
+  });
+
+  app.get<{ Params: { id: string } }>('/upsells/:id/result', async (request, reply) => {
+    const id = parseInt((request.params as { id: string }).id, 10);
+    const upsells = await getUpsellOpportunities();
+    const upsell = upsells.find((u) => u.id === id);
+    if (!upsell) return reply.code(404).send('Not found');
+    return reply.type('text/html').render('growth/_result-upsell', { upsell });
   });
 
   // ===== LINKEDIN =====
@@ -77,7 +151,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       const meetingId = body?.meetingId || undefined;
       const ideas = await generateLinkedInIdeas(meetingId);
       if (!ideas.length) {
-        return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ error: 'No ideas generated — check meeting data.' }));
+        return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({ error: 'No ideas generated — check meeting data.' }));
       }
 
       // Schedule Mon-Thu next week
@@ -97,10 +171,12 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
         meetingId: idea.meetingId,
       })));
 
-      return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ message: `${ideas.length} content ideas generated.` }));
+      await insertGrowthLog('linkedin', 'generate_ideas', `Generated ${ideas.length} content ideas`, ideas.length);
+
+      return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({ message: `${ideas.length} content ideas generated.` }));
     } catch (err) {
       console.error('[growth] Failed to generate ideas:', err);
-      return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ error: 'Failed to generate ideas. Please try again.' }));
+      return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({ error: 'Failed to generate ideas. Please try again.' }));
     }
   });
 
@@ -113,10 +189,12 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       const draft = await draftLinkedInPost(post.pillar, post.topic);
       await updateLinkedInDraft(id, draft);
 
-      return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ message: 'Draft created.' }));
+      await insertGrowthLog('linkedin', 'draft', `Drafted "${post.topic.slice(0, 50)}"`, 1);
+
+      return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({ message: 'Draft created.', selectedId: id }));
     } catch (err) {
       console.error('[growth] LinkedIn draft failed:', err);
-      return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData({ error: 'Draft failed. Please try again.' }));
+      return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
 
@@ -124,12 +202,11 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     const body = request.body as Record<string, string>;
     await updateLinkedInStatus(id, body.status);
-    // If redirected from detail page, go back there
     if (body._redirect && body._redirect.startsWith('/') && !body._redirect.startsWith('//')) return reply.redirect(body._redirect);
-    return reply.type('text/html').render('growth/_linkedin-table', await linkedinPartialData());
+    return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData());
   });
 
-  // LinkedIn detail page
+  // LinkedIn detail page (kept for direct links)
   app.get<{ Params: { id: string } }>('/linkedin/:id', async (request, reply) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     const post = await getLinkedInPost(id);
@@ -143,7 +220,6 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     reply.render('growth/linkedin-detail', { post, meeting });
   });
 
-  // Draft from detail page (same logic, redirects back to detail)
   app.post<{ Params: { id: string } }>('/linkedin/:id/draft-and-return', async (request, reply) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     try {
@@ -152,6 +228,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
       const draft = await draftLinkedInPost(post.pillar, post.topic);
       await updateLinkedInDraft(id, draft);
+      await insertGrowthLog('linkedin', 'draft', `Drafted "${post.topic.slice(0, 50)}"`, 1);
       return reply.redirect(`/growth/linkedin/${id}`);
     } catch {
       return reply.redirect(`/growth/linkedin/${id}?error=draft_failed`);
@@ -175,6 +252,8 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       icpScore,
     });
 
+    await insertGrowthLog('outbound', 'add_prospect', `Added prospect: ${name}`, 1);
+
     return reply.redirect('/growth');
   });
 
@@ -189,10 +268,12 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       const newNotes = existingNotes ? existingNotes + '\n\n' : '';
       await updateOutboundDraft(id, newNotes + `[Step ${prospect.sequence_step + 1} draft]\n${draft}`, prospect.sequence_step + 1);
 
-      return reply.type('text/html').render('growth/_outbound-table', await outboundPartialData({ message: 'Outreach draft generated.' }));
+      await insertGrowthLog('outbound', 'draft', `Drafted outreach for ${prospect.prospect_name} (Step ${prospect.sequence_step + 1})`, 1);
+
+      return reply.type('text/html').render('growth/_tab-outbound', await outboundPartialData({ message: 'Outreach draft generated.', selectedId: id }));
     } catch (err) {
       console.error('[growth] Outbound draft failed:', err);
-      return reply.type('text/html').render('growth/_outbound-table', await outboundPartialData({ error: 'Draft failed. Please try again.' }));
+      return reply.type('text/html').render('growth/_tab-outbound', await outboundPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
 
@@ -200,14 +281,14 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     const body = request.body as Record<string, string>;
     await updateOutboundStatus(id, body.status);
-    return reply.type('text/html').render('growth/_outbound-table', await outboundPartialData());
+    return reply.type('text/html').render('growth/_tab-outbound', await outboundPartialData());
   });
 
   app.post<{ Params: { id: string } }>('/outbound/:id/response', async (request, reply) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     const body = request.body as Record<string, string>;
     if (body.response) await updateOutboundResponse(id, body.response);
-    return reply.type('text/html').render('growth/_outbound-table', await outboundPartialData());
+    return reply.type('text/html').render('growth/_tab-outbound', await outboundPartialData());
   });
 
   // ===== CASE STUDIES =====
@@ -216,14 +297,16 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     try {
       const wins = await scanForCaseStudyWins();
       if (!wins.length) {
-        return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ message: 'No new wins detected this period.' }));
+        await insertGrowthLog('casestudies', 'scan', 'Scanned for wins — none found', 0);
+        return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData({ message: 'No new wins detected this period.' }));
       }
 
       await insertCaseStudies(wins.map((w) => ({ clientName: w.clientName, winType: w.winType, metric: w.metric })));
-      return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ message: `${wins.length} win(s) identified.` }));
+      await insertGrowthLog('casestudies', 'scan', `Scanned for wins — ${wins.length} found`, wins.length);
+      return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData({ message: `${wins.length} win(s) identified.` }));
     } catch (err) {
       console.error('[growth] Case study scan failed:', err);
-      return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ error: 'Scan failed. Please try again.' }));
+      return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData({ error: 'Scan failed. Please try again.' }));
     }
   });
 
@@ -240,10 +323,11 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       ].map((ch) => ({ channel: ch, done: false })));
 
       await updateCaseStudyDraft(id, draft, distribution);
-      return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ message: 'Case study drafted.' }));
+      await insertGrowthLog('casestudies', 'draft', `Drafted case study for ${cs.client_name}`, 1);
+      return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData({ message: 'Case study drafted.', selectedId: id }));
     } catch (err) {
       console.error('[growth] Case study draft failed:', err);
-      return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData({ error: 'Draft failed. Please try again.' }));
+      return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
 
@@ -251,7 +335,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     const body = request.body as Record<string, string>;
     await updateCaseStudyStatus(id, body.status);
-    return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData());
+    return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData());
   });
 
   app.post<{ Params: { id: string } }>('/casestudies/:id/approval', async (request, reply) => {
@@ -260,7 +344,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const approved = body.approval === 'approved';
     const anonymous = body.approval === 'anonymous';
     await updateCaseStudyApproval(id, approved, anonymous);
-    return reply.type('text/html').render('growth/_casestudies-table', await casestudiesPartialData());
+    return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData());
   });
 
   // ===== REFERRALS =====
@@ -278,6 +362,8 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
       referredCompany: body.referredCompany?.trim() || null,
     });
 
+    await insertGrowthLog('referrals', 'add_referral', `Added referral: ${referredName} from ${referrerName}`, 1);
+
     return reply.redirect('/growth');
   });
 
@@ -285,13 +371,13 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     const body = request.body as Record<string, string>;
     await updateReferralStatus(id, body.status);
-    return reply.type('text/html').render('growth/_referrals-table', await referralsPartialData());
+    return reply.type('text/html').render('growth/_tab-referrals', await referralsPartialData());
   });
 
   app.post<{ Params: { id: string } }>('/referrals/:id/paid', async (request, reply) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     await markReferralPaid(id);
-    return reply.type('text/html').render('growth/_referrals-table', await referralsPartialData());
+    return reply.type('text/html').render('growth/_tab-referrals', await referralsPartialData());
   });
 
   // ===== UPSELL =====
@@ -300,14 +386,16 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     try {
       const opps = await scanForUpsells();
       if (!opps.length) {
-        return reply.type('text/html').render('growth/_upsell-table', await upsellPartialData({ message: 'No new opportunities detected.' }));
+        await insertGrowthLog('upsells', 'scan', 'Scanned for upsell opportunities — none found', 0);
+        return reply.type('text/html').render('growth/_tab-upsells', await upsellPartialData({ message: 'No new opportunities detected.' }));
       }
 
       await insertUpsellOpportunities(opps);
-      return reply.type('text/html').render('growth/_upsell-table', await upsellPartialData({ message: `${opps.length} opportunity(ies) identified.` }));
+      await insertGrowthLog('upsells', 'scan', `Scanned for upsells — ${opps.length} found`, opps.length);
+      return reply.type('text/html').render('growth/_tab-upsells', await upsellPartialData({ message: `${opps.length} opportunity(ies) identified.` }));
     } catch (err) {
       console.error('[growth] Upsell scan failed:', err);
-      return reply.type('text/html').render('growth/_upsell-table', await upsellPartialData({ error: 'Scan failed. Please try again.' }));
+      return reply.type('text/html').render('growth/_tab-upsells', await upsellPartialData({ error: 'Scan failed. Please try again.' }));
     }
   });
 
@@ -315,6 +403,6 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const id = parseInt((request.params as { id: string }).id, 10);
     const body = request.body as Record<string, string>;
     await updateUpsellStatus(id, body.status);
-    return reply.type('text/html').render('growth/_upsell-table', await upsellPartialData());
+    return reply.type('text/html').render('growth/_tab-upsells', await upsellPartialData());
   });
 };

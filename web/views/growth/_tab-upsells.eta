@@ -1,0 +1,72 @@
+<!-- Upsell Opportunities Tab -->
+<div class="growth-section-header">
+  <h2 style="margin: 0;">Upsell Opportunities</h2>
+  <button class="btn btn-primary btn-sm"
+    hx-post="/growth/upsell/scan"
+    hx-target="#growth-tab-content"
+    hx-swap="innerHTML"
+    hx-indicator="#upsell-spinner"
+    hx-disabled-elt="this">
+    Scan for Opportunities
+  </button>
+</div>
+<div id="upsell-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Scanning performance data for upsell signals...</div>
+
+<% if (it.message) { %>
+<div class="growth-alert growth-alert-success"><%= it.message %></div>
+<% } %>
+<% if (it.error) { %>
+<div class="growth-alert growth-alert-error"><%= it.error %></div>
+<% } %>
+
+<div class="growth-split">
+  <!-- Pipeline table -->
+  <div class="growth-table-col">
+    <% if (!it.upsells || !it.upsells.length) { %>
+      <p style="color: #94A3B8; font-size: 14px; padding: 1rem;">No upsell opportunities detected. Click "Scan" to analyse your ad performance and meeting data.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Client</th><th>Trigger</th><th>Signal</th><th>Confidence</th><th>Action</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <% it.upsells.forEach(u => { %>
+        <tr class="row-selectable"
+          hx-get="/growth/upsells/<%= u.id %>/result"
+          hx-target="#growth-result-panel"
+          hx-swap="innerHTML"
+          style="cursor: pointer;"
+          onclick="document.querySelectorAll('.row-selectable').forEach(r=>r.classList.remove('row-selected'));this.classList.add('row-selected');">
+          <td><strong><%= u.client_name %></strong></td>
+          <td><%= (u.trigger_type || '').replace(/_/g, ' ') %></td>
+          <td><%= (u.signal || '').slice(0, 40) %></td>
+          <td><strong><%= Math.round(u.confidence * 100) %>%</strong></td>
+          <td><%= (u.recommended_action || '').slice(0, 40) %></td>
+          <td>
+            <select class="growth-select-inline" onclick="event.stopPropagation();"
+              hx-post="/growth/upsell/<%= u.id %>/status"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              name="status">
+              <% ['identified', 'pitched', 'won', 'lost'].forEach(s => { %>
+              <option value="<%= s %>" <%= u.status === s ? 'selected' : '' %>><%= s %></option>
+              <% }) %>
+            </select>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+  <!-- Result panel -->
+  <div class="result-panel" id="growth-result-panel">
+    <div class="result-panel-empty">
+      <p>Select an opportunity to view signal details and recommended actions</p>
+    </div>
+  </div>
+</div>
+
+<!-- Task log -->
+<%~ include('/growth/_task-log', { taskLog: it.taskLog || [] }) %>

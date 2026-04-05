@@ -420,3 +420,52 @@ export async function updateUpsellStatus(id: number, status: string, outcome?: s
     args: [status, outcome ?? null, new Date().toISOString(), id],
   });
 }
+
+export async function getUpsellStats(): Promise<{
+  total: number; identified: number; pitched: number; won: number;
+}> {
+  const r = await rows<Record<string, number>>(`
+    SELECT
+      COUNT(*) as total,
+      SUM(CASE WHEN status = 'identified' THEN 1 ELSE 0 END) as identified,
+      SUM(CASE WHEN status = 'pitched' THEN 1 ELSE 0 END) as pitched,
+      SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) as won
+    FROM upsell_opportunities
+  `);
+  const row = r[0] || {};
+  return {
+    total: row.total ?? 0, identified: row.identified ?? 0,
+    pitched: row.pitched ?? 0, won: row.won ?? 0,
+  };
+}
+
+// ===== GROWTH TASK LOG =====
+
+export interface GrowthTaskLogEntry {
+  id: number;
+  section: string;
+  action: string;
+  summary: string;
+  item_count: number;
+  created_at: string;
+}
+
+export async function insertGrowthLog(section: string, action: string, summary: string, itemCount = 0): Promise<void> {
+  await db.execute({
+    sql: 'INSERT INTO growth_task_log (section, action, summary, item_count, created_at) VALUES (?, ?, ?, ?, ?)',
+    args: [section, action, summary, itemCount, new Date().toISOString()],
+  });
+}
+
+export async function getGrowthLog(section?: string, limit = 20): Promise<GrowthTaskLogEntry[]> {
+  if (section) {
+    return rows<GrowthTaskLogEntry>(
+      'SELECT id, section, action, summary, item_count, created_at FROM growth_task_log WHERE section = ? ORDER BY created_at DESC LIMIT ?',
+      [section, limit],
+    );
+  }
+  return rows<GrowthTaskLogEntry>(
+    'SELECT id, section, action, summary, item_count, created_at FROM growth_task_log ORDER BY created_at DESC LIMIT ?',
+    [limit],
+  );
+}

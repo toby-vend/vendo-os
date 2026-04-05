@@ -1,0 +1,98 @@
+<!-- LinkedIn Content Tab -->
+<div class="growth-section-header">
+  <h2 style="margin: 0;">LinkedIn Content</h2>
+  <form style="display: flex; gap: 0.5rem; align-items: center;"
+    hx-post="/growth/linkedin/generate-ideas"
+    hx-target="#growth-tab-content"
+    hx-swap="innerHTML"
+    hx-indicator="#linkedin-spinner">
+    <select name="meetingId" class="growth-select">
+      <option value="">All recent meetings</option>
+      <% if (it.recentMeetings && it.recentMeetings.length) { %>
+        <% it.recentMeetings.forEach(m => { %>
+        <option value="<%= m.id %>"><%= m.date.slice(0, 10) %> — <%= (m.title || '').slice(0, 40) %><%= m.client_name ? ' (' + m.client_name + ')' : '' %></option>
+        <% }) %>
+      <% } %>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm" hx-disabled-elt="this">Generate Ideas</button>
+  </form>
+</div>
+<div id="linkedin-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Generating ideas from meeting data...</div>
+
+<% if (it.message) { %>
+<div class="growth-alert growth-alert-success"><%= it.message %></div>
+<% } %>
+<% if (it.error) { %>
+<div class="growth-alert growth-alert-error"><%= it.error %></div>
+<% } %>
+
+<div class="growth-split">
+  <!-- Pipeline table -->
+  <div class="growth-table-col">
+    <% if (!it.linkedinPosts || !it.linkedinPosts.length) { %>
+      <p style="color: #94A3B8; font-size: 14px; padding: 1rem;">No content yet. Select a meeting and click "Generate Ideas" to start.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Date</th><th>Pillar</th><th>Topic</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <% it.linkedinPosts.forEach(p => { %>
+        <tr class="row-selectable <%= it.selectedId === p.id ? 'row-selected' : '' %>"
+          hx-get="/growth/linkedin/<%= p.id %>/result"
+          hx-target="#growth-result-panel"
+          hx-swap="innerHTML"
+          style="cursor: pointer;"
+          onclick="document.querySelectorAll('.row-selectable').forEach(r=>r.classList.remove('row-selected'));this.classList.add('row-selected');">
+          <td><%= p.scheduled_date ? p.scheduled_date.slice(0, 10) : '&mdash;' %></td>
+          <td>
+            <span class="badge badge-<%= p.pillar === 'sell' ? 'warning' : p.pillar === 'teach' ? 'active' : p.pillar === 'trust' ? 'info' : 'default' %>"><%= p.pillar %></span>
+          </td>
+          <td>
+            <%= (p.topic || '').slice(0, 55) %>
+            <% if (p.draft) { %> <span style="color: #22C55E; font-size: 11px;" title="Draft ready">&#9679;</span><% } %>
+          </td>
+          <td>
+            <select class="growth-select-inline" onclick="event.stopPropagation();"
+              hx-post="/growth/linkedin/<%= p.id %>/status"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              name="status">
+              <% ['idea', 'drafted', 'approved', 'published', 'cancelled'].forEach(s => { %>
+              <option value="<%= s %>" <%= p.status === s ? 'selected' : '' %>><%= s %></option>
+              <% }) %>
+            </select>
+          </td>
+          <td onclick="event.stopPropagation();">
+            <% if (!p.draft && (p.status === 'idea')) { %>
+            <button class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;"
+              hx-post="/growth/linkedin/<%= p.id %>/draft"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              hx-indicator="#linkedin-spinner"
+              hx-disabled-elt="this">Draft</button>
+            <% } else if (p.draft) { %>
+            <a href="/growth/linkedin/<%= p.id %>" class="btn btn-sm" style="font-size: 11px; padding: 2px 8px; text-decoration: none;">Open</a>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+  <!-- Result panel -->
+  <div class="result-panel" id="growth-result-panel">
+    <% if (it.selectedId) { %>
+      <div style="text-align: center; color: #94A3B8; padding: 2rem;">Loading...</div>
+    <% } else { %>
+    <div class="result-panel-empty">
+      <p>Select a content idea to view its draft and details</p>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Task log -->
+<%~ include('/growth/_task-log', { taskLog: it.taskLog || [] }) %>

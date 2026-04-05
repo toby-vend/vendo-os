@@ -1,7 +1,7 @@
 <% layout('/layouts/base') %>
 
 <!-- Stat cards -->
-<div class="stat-grid">
+<div class="stat-grid" style="grid-template-columns: repeat(5, 1fr);">
   <article class="stat-card">
     <p class="stat-value"><%= it.linkedinStats.total %></p>
     <p class="stat-label">Content Ideas</p>
@@ -22,29 +22,43 @@
     <p class="stat-label">Referrals</p>
     <p class="stat-detail"><%= it.referralStats.convRate %>% conversion &middot; &pound;<%= it.referralStats.totalOwing %> owing</p>
   </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.upsellStats.total %></p>
+    <p class="stat-label">Upsell Opps</p>
+    <p class="stat-detail"><%= it.upsellStats.pitched %> pitched &middot; <%= it.upsellStats.won %> won</p>
+  </article>
 </div>
 
-<div class="two-col">
-  <div>
-    <div id="linkedin-section">
-      <%~ include('/growth/_linkedin-table', it) %>
-    </div>
+<!-- Tab bar -->
+<div class="growth-tabs">
+  <button class="growth-tab active"
+    hx-get="/growth/tab/linkedin" hx-target="#growth-tab-content" hx-swap="innerHTML"
+    onclick="document.querySelectorAll('.growth-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');">
+    LinkedIn
+  </button>
+  <button class="growth-tab"
+    hx-get="/growth/tab/outbound" hx-target="#growth-tab-content" hx-swap="innerHTML"
+    onclick="document.querySelectorAll('.growth-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');">
+    Outbound
+  </button>
+  <button class="growth-tab"
+    hx-get="/growth/tab/casestudies" hx-target="#growth-tab-content" hx-swap="innerHTML"
+    onclick="document.querySelectorAll('.growth-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');">
+    Case Studies
+  </button>
+  <button class="growth-tab"
+    hx-get="/growth/tab/referrals" hx-target="#growth-tab-content" hx-swap="innerHTML"
+    onclick="document.querySelectorAll('.growth-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');">
+    Referrals
+  </button>
+  <button class="growth-tab"
+    hx-get="/growth/tab/upsells" hx-target="#growth-tab-content" hx-swap="innerHTML"
+    onclick="document.querySelectorAll('.growth-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');">
+    Upsells
+  </button>
+</div>
 
-    <div id="casestudies-section" style="margin-top: 1.5rem;">
-      <%~ include('/growth/_casestudies-table', it) %>
-    </div>
-  </div>
-  <div>
-    <div id="outbound-section">
-      <%~ include('/growth/_outbound-table', it) %>
-    </div>
-
-    <div id="referrals-section" style="margin-top: 1.5rem;">
-      <%~ include('/growth/_referrals-table', it) %>
-    </div>
-
-    <div id="upsell-section" style="margin-top: 1.5rem;">
-      <%~ include('/growth/_upsell-table', it) %>
-    </div>
-  </div>
+<!-- Tab content — LinkedIn loaded by default -->
+<div id="growth-tab-content">
+  <%~ include('/growth/_tab-linkedin', it) %>
 </div>

@@ -1,0 +1,20 @@
+<!-- Task Log -->
+<% if (it.taskLog && it.taskLog.length) { %>
+<details class="task-log">
+  <summary class="task-log-toggle">
+    Activity Log <span style="color: #94A3B8; font-weight: 400;">(<%= it.taskLog.length %> recent)</span>
+  </summary>
+  <div class="task-log-entries">
+    <% it.taskLog.forEach(entry => { %>
+    <div class="task-log-entry">
+      <span class="task-log-time"><%= entry.created_at ? entry.created_at.slice(0, 16).replace('T', ' ') : '' %></span>
+      <span class="task-log-action"><%= entry.action.replace(/_/g, ' ') %></span>
+      <span class="task-log-summary"><%= entry.summary %></span>
+      <% if (entry.item_count > 0) { %>
+      <span class="task-log-count"><%= entry.item_count %></span>
+      <% } %>
+    </div>
+    <% }) %>
+  </div>
+</details>
+<% } %>
