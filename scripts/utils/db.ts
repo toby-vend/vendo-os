@@ -803,6 +803,20 @@ export async function initSchema(): Promise<void> {
 
   db.run('CREATE INDEX IF NOT EXISTS idx_upsell_client ON upsell_opportunities(client_name)');
 
+  // --- Growth task log table ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS growth_task_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      section TEXT NOT NULL,
+      action TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      item_count INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_growth_log_section ON growth_task_log(section)');
+
   // --- NPS responses table ---
 
   db.run(`

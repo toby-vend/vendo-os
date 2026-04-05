@@ -1,0 +1,71 @@
+<!-- Referral Result Panel -->
+<div class="result-panel-content">
+  <div class="result-panel-header">
+    <span class="badge badge-<%= it.referral.converted ? 'active' : it.referral.status === 'contacted' ? 'info' : 'default' %>"><%= it.referral.status %></span>
+    <span class="badge badge-default"><%= it.referral.referrer_type %></span>
+  </div>
+
+  <h3 style="font-size: 15px; margin: 0.75rem 0 0.25rem;"><%= it.referral.referred_name %></h3>
+  <% if (it.referral.referred_company) { %>
+  <p style="font-size: 13px; color: #94A3B8; margin: 0 0 0.75rem;"><%= it.referral.referred_company %></p>
+  <% } %>
+
+  <div class="result-panel-section">
+    <div class="result-panel-draft-label">Referral Details</div>
+    <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1rem; font-size: 13px;">
+      <span style="color: #94A3B8;">Referred by:</span>
+      <span><%= it.referral.referrer_name %></span>
+      <span style="color: #94A3B8;">Referrer type:</span>
+      <span><%= it.referral.referrer_type %></span>
+      <span style="color: #94A3B8;">Received:</span>
+      <span><%= it.referral.created_at ? it.referral.created_at.slice(0, 10) : '&mdash;' %></span>
+      <span style="color: #94A3B8;">Status:</span>
+      <span><%= it.referral.status %></span>
+    </div>
+  </div>
+
+  <% if (it.referral.converted) { %>
+  <div class="result-panel-section">
+    <div class="result-panel-draft-label">Reward</div>
+    <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1rem; font-size: 13px;">
+      <span style="color: #94A3B8;">Type:</span>
+      <span><%= (it.referral.reward_type || '').replace(/_/g, ' ') %></span>
+      <span style="color: #94A3B8;">Amount:</span>
+      <span>&pound;<%= it.referral.reward_amount %></span>
+      <span style="color: #94A3B8;">Status:</span>
+      <span class="badge badge-<%= it.referral.reward_paid ? 'active' : 'warning' %>" style="font-size: 11px;">
+        <%= it.referral.reward_paid ? 'Paid' : 'Owing' %>
+      </span>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Timeline -->
+  <div class="result-panel-section">
+    <div class="result-panel-draft-label">Timeline</div>
+    <div style="font-size: 12px; color: #94A3B8; border-left: 2px solid rgba(255,255,255,0.08); padding-left: 1rem;">
+      <div style="margin-bottom: 0.5rem; position: relative;">
+        <span style="position: absolute; left: -1.35rem; color: #22C55E;">&#9679;</span>
+        Received <span style="color: #E2E8F0;"><%= it.referral.created_at ? it.referral.created_at.slice(0, 10) : '' %></span>
+      </div>
+      <% if (it.referral.status !== 'received') { %>
+      <div style="margin-bottom: 0.5rem; position: relative;">
+        <span style="position: absolute; left: -1.35rem; color: #22C55E;">&#9679;</span>
+        Contacted
+      </div>
+      <% } %>
+      <% if (it.referral.converted) { %>
+      <div style="margin-bottom: 0.5rem; position: relative;">
+        <span style="position: absolute; left: -1.35rem; color: #22C55E;">&#9679;</span>
+        Converted
+      </div>
+      <% } %>
+      <% if (it.referral.status === 'lost') { %>
+      <div style="position: relative;">
+        <span style="position: absolute; left: -1.35rem; color: #EF4444;">&#9679;</span>
+        Lost
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>

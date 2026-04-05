@@ -1,0 +1,124 @@
+<!-- Outbound Pipeline Tab -->
+<div class="growth-section-header">
+  <h2 style="margin: 0;">Outbound Pipeline</h2>
+</div>
+
+<!-- Add Prospect form -->
+<form method="POST" action="/growth/outbound/add" class="growth-action-bar">
+  <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+  <div>
+    <label class="growth-label">Name *</label>
+    <input type="text" name="name" required placeholder="John Smith" class="growth-input" style="width: 140px;">
+  </div>
+  <div>
+    <label class="growth-label">Company</label>
+    <input type="text" name="company" placeholder="Acme Corp" class="growth-input" style="width: 140px;">
+  </div>
+  <div>
+    <label class="growth-label">Email</label>
+    <input type="email" name="email" placeholder="john@acme.com" class="growth-input" style="width: 160px;">
+  </div>
+  <div>
+    <label class="growth-label">Channel</label>
+    <select name="channel" class="growth-input">
+      <option value="email">Email</option>
+      <option value="linkedin">LinkedIn</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary btn-sm" style="align-self: flex-end;">Add Prospect</button>
+</form>
+
+<% if (it.message) { %>
+<div class="growth-alert growth-alert-success"><%= it.message %></div>
+<% } %>
+<% if (it.error) { %>
+<div class="growth-alert growth-alert-error"><%= it.error %></div>
+<% } %>
+
+<!-- Funnel visualisation -->
+<% if (it.outboundFunnel && it.outboundFunnel.total > 0) { %>
+<div style="margin-bottom: 1.5rem;">
+  <% const funnel = it.outboundFunnel; const funnelMax = Math.max(funnel.total, 1); %>
+  <% const stages = [
+    { label: 'Total', count: funnel.total },
+    { label: 'Contacted', count: funnel.contacted },
+    { label: 'Responded', count: funnel.responded },
+    { label: 'Interested', count: funnel.interested },
+    { label: 'Meeting', count: funnel.meetings },
+    { label: 'Converted', count: funnel.converted },
+  ]; %>
+  <% stages.forEach(s => { %>
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+      <span style="width: 80px; font-size: 12px; color: #94A3B8; text-align: right;"><%= s.label %></span>
+      <div style="flex: 1; height: 22px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden;">
+        <div style="width: <%= Math.max((s.count / funnelMax) * 100, 2) %>%; height: 100%; background: #22C55E; border-radius: 4px; display: flex; align-items: center; padding-left: 8px;">
+          <span style="font-size: 11px; font-weight: 600; color: #0B0B0B;"><%= s.count %></span>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+</div>
+<% } %>
+
+<div id="outbound-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Generating outreach draft...</div>
+
+<div class="growth-split">
+  <!-- Pipeline table -->
+  <div class="growth-table-col">
+    <% if (it.outboundPipeline && it.outboundPipeline.length) { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Prospect</th><th>Company</th><th>ICP</th><th>Step</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <% it.outboundPipeline.slice(0, 20).forEach(p => { %>
+        <tr class="row-selectable <%= it.selectedId === p.id ? 'row-selected' : '' %>"
+          hx-get="/growth/outbound/<%= p.id %>/result"
+          hx-target="#growth-result-panel"
+          hx-swap="innerHTML"
+          style="cursor: pointer;"
+          onclick="document.querySelectorAll('.row-selectable').forEach(r=>r.classList.remove('row-selected'));this.classList.add('row-selected');">
+          <td><%= p.prospect_name %></td>
+          <td><%= p.prospect_company || '&mdash;' %></td>
+          <td><strong><%= p.icp_match_score %></strong></td>
+          <td><%= p.sequence_step %></td>
+          <td>
+            <select class="growth-select-inline" onclick="event.stopPropagation();"
+              hx-post="/growth/outbound/<%= p.id %>/status"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              name="status">
+              <% ['queued', 'drafted', 'sent', 'responded', 'meeting_booked', 'converted', 'lost'].forEach(s => { %>
+              <option value="<%= s %>" <%= p.status === s ? 'selected' : '' %>><%= s.replace(/_/g, ' ') %></option>
+              <% }) %>
+            </select>
+          </td>
+          <td onclick="event.stopPropagation();">
+            <% if (p.sequence_step < 3 && !p.converted) { %>
+            <button class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;"
+              hx-post="/growth/outbound/<%= p.id %>/draft"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              hx-indicator="#outbound-spinner"
+              hx-disabled-elt="this">Draft</button>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } else { %>
+      <p style="color: #94A3B8; font-size: 14px; padding: 1rem;">No prospects yet. Use the form above to add your first prospect.</p>
+    <% } %>
+  </div>
+
+  <!-- Result panel -->
+  <div class="result-panel" id="growth-result-panel">
+    <div class="result-panel-empty">
+      <p>Select a prospect to view their outreach drafts and details</p>
+    </div>
+  </div>
+</div>
+
+<!-- Task log -->
+<%~ include('/growth/_task-log', { taskLog: it.taskLog || [] }) %>

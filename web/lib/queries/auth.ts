@@ -645,6 +645,17 @@ export async function initSchema(): Promise<void> {
     // Column already exists
   }
 
+  // Growth task log
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS growth_task_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    section TEXT NOT NULL,
+    action TEXT NOT NULL,
+    summary TEXT NOT NULL,
+    item_count INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`, args: [] });
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_growth_log_section ON growth_task_log(section)`, args: [] });
+
   // Sidebar config
   const { initSidebarSchema } = await import('./sidebar.js');
   await initSidebarSchema();

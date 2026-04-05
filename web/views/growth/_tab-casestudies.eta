@@ -1,0 +1,91 @@
+<!-- Case Studies Tab -->
+<div class="growth-section-header">
+  <h2 style="margin: 0;">Case Studies</h2>
+  <button class="btn btn-primary btn-sm"
+    hx-post="/growth/casestudies/scan"
+    hx-target="#growth-tab-content"
+    hx-swap="innerHTML"
+    hx-indicator="#casestudies-spinner"
+    hx-disabled-elt="this">
+    Scan for Wins
+  </button>
+</div>
+<div id="casestudies-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Scanning ad performance for wins...</div>
+
+<% if (it.message) { %>
+<div class="growth-alert growth-alert-success"><%= it.message %></div>
+<% } %>
+<% if (it.error) { %>
+<div class="growth-alert growth-alert-error"><%= it.error %></div>
+<% } %>
+
+<div class="growth-split">
+  <!-- Pipeline table -->
+  <div class="growth-table-col">
+    <% if (!it.caseStudies || !it.caseStudies.length) { %>
+      <p style="color: #94A3B8; font-size: 14px; padding: 1rem;">No case studies yet. Click "Scan for Wins" to identify high-performing clients.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Client</th><th>Win Type</th><th>Metric</th><th>Status</th><th>Approved</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <% it.caseStudies.forEach(cs => { %>
+        <tr class="row-selectable <%= it.selectedId === cs.id ? 'row-selected' : '' %>"
+          hx-get="/growth/casestudies/<%= cs.id %>/result"
+          hx-target="#growth-result-panel"
+          hx-swap="innerHTML"
+          style="cursor: pointer;"
+          onclick="document.querySelectorAll('.row-selectable').forEach(r=>r.classList.remove('row-selected'));this.classList.add('row-selected');">
+          <td><strong><%= cs.client_name %></strong></td>
+          <td><%= (cs.win_type || '').replace(/_/g, ' ') %></td>
+          <td><%= (cs.metric_highlight || '').slice(0, 40) %></td>
+          <td>
+            <select class="growth-select-inline" onclick="event.stopPropagation();"
+              hx-post="/growth/casestudies/<%= cs.id %>/status"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              name="status">
+              <% ['identified', 'drafted', 'approved', 'published'].forEach(s => { %>
+              <option value="<%= s %>" <%= cs.status === s ? 'selected' : '' %>><%= s %></option>
+              <% }) %>
+            </select>
+          </td>
+          <td onclick="event.stopPropagation();">
+            <select class="growth-select-inline"
+              hx-post="/growth/casestudies/<%= cs.id %>/approval"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              name="approval">
+              <option value="pending" <%= !cs.client_approved && !cs.anonymous ? 'selected' : '' %>>Pending</option>
+              <option value="approved" <%= cs.client_approved ? 'selected' : '' %>>Approved</option>
+              <option value="anonymous" <%= cs.anonymous ? 'selected' : '' %>>Anonymous</option>
+            </select>
+          </td>
+          <td onclick="event.stopPropagation();">
+            <% if (cs.status === 'identified' || cs.status === 'approved') { %>
+            <button class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;"
+              hx-post="/growth/casestudies/<%= cs.id %>/draft"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              hx-indicator="#casestudies-spinner"
+              hx-disabled-elt="this">Draft</button>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+  <!-- Result panel -->
+  <div class="result-panel" id="growth-result-panel">
+    <div class="result-panel-empty">
+      <p>Select a case study to view the draft and distribution plan</p>
+    </div>
+  </div>
+</div>
+
+<!-- Task log -->
+<%~ include('/growth/_task-log', { taskLog: it.taskLog || [] }) %>

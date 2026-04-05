@@ -1,0 +1,97 @@
+<!-- Referrals Tab -->
+<div class="growth-section-header">
+  <h2 style="margin: 0;">Referrals</h2>
+</div>
+
+<!-- Add Referral form -->
+<form method="POST" action="/growth/referrals/add" class="growth-action-bar">
+  <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+  <div>
+    <label class="growth-label">Referrer *</label>
+    <input type="text" name="referrerName" required placeholder="Existing Client" class="growth-input" style="width: 140px;">
+  </div>
+  <div>
+    <label class="growth-label">Type *</label>
+    <select name="referrerType" required class="growth-input">
+      <option value="client">Client</option>
+      <option value="partner">Partner</option>
+      <option value="employee">Employee</option>
+    </select>
+  </div>
+  <div>
+    <label class="growth-label">Referred Name *</label>
+    <input type="text" name="referredName" required placeholder="New Lead" class="growth-input" style="width: 140px;">
+  </div>
+  <div>
+    <label class="growth-label">Company</label>
+    <input type="text" name="referredCompany" placeholder="Their Company" class="growth-input" style="width: 140px;">
+  </div>
+  <button type="submit" class="btn btn-primary btn-sm" style="align-self: flex-end;">Add Referral</button>
+</form>
+
+<% if (it.message) { %>
+<div class="growth-alert growth-alert-success"><%= it.message %></div>
+<% } %>
+
+<div class="growth-split">
+  <!-- Pipeline table -->
+  <div class="growth-table-col">
+    <% if (!it.referrals || !it.referrals.length) { %>
+      <p style="color: #94A3B8; font-size: 14px; padding: 1rem;">No referrals tracked yet. Use the form above to log a referral.</p>
+    <% } else { %>
+    <table class="compact">
+      <thead>
+        <tr><th>Referrer</th><th>Type</th><th>Referred</th><th>Status</th><th>Reward</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <% it.referrals.forEach(r => { %>
+        <tr class="row-selectable"
+          hx-get="/growth/referrals/<%= r.id %>/result"
+          hx-target="#growth-result-panel"
+          hx-swap="innerHTML"
+          style="cursor: pointer;"
+          onclick="document.querySelectorAll('.row-selectable').forEach(r=>r.classList.remove('row-selected'));this.classList.add('row-selected');">
+          <td><%= r.referrer_name %></td>
+          <td><span class="badge badge-default"><%= r.referrer_type %></span></td>
+          <td><%= r.referred_name %><% if (r.referred_company) { %> <small>(<%= r.referred_company %>)</small><% } %></td>
+          <td>
+            <select class="growth-select-inline" onclick="event.stopPropagation();"
+              hx-post="/growth/referrals/<%= r.id %>/status"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML"
+              name="status">
+              <% ['received', 'contacted', 'converted', 'lost'].forEach(s => { %>
+              <option value="<%= s %>" <%= r.status === s || (r.converted && s === 'converted') ? 'selected' : '' %>><%= s %></option>
+              <% }) %>
+            </select>
+          </td>
+          <td>
+            <% if (r.converted) { %>
+              &pound;<%= r.reward_amount %> <small><%= r.reward_paid ? '(paid)' : '(owing)' %></small>
+            <% } else { %>&mdash;<% } %>
+          </td>
+          <td onclick="event.stopPropagation();">
+            <% if (r.converted && !r.reward_paid) { %>
+            <button class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;"
+              hx-post="/growth/referrals/<%= r.id %>/paid"
+              hx-target="#growth-tab-content"
+              hx-swap="innerHTML">Mark Paid</button>
+            <% } %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+  <!-- Result panel -->
+  <div class="result-panel" id="growth-result-panel">
+    <div class="result-panel-empty">
+      <p>Select a referral to view details and conversion timeline</p>
+    </div>
+  </div>
+</div>
+
+<!-- Task log -->
+<%~ include('/growth/_task-log', { taskLog: it.taskLog || [] }) %>
