@@ -268,6 +268,7 @@
 </head>
 <body>
   <div class="app-layout">
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
@@ -350,19 +351,39 @@
   </div>
 
   <script>
+  var isMobile = window.innerWidth <= 768;
+
   function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const layout = document.querySelector('.app-layout');
+    var sidebar = document.getElementById('sidebar');
+    var layout = document.querySelector('.app-layout');
+    var backdrop = document.getElementById('sidebar-backdrop');
     sidebar.classList.toggle('collapsed');
     layout.classList.toggle('sidebar-collapsed');
-    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    if (isMobile) {
+      var isOpen = !sidebar.classList.contains('collapsed');
+      backdrop.classList.toggle('visible', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+    if (!isMobile) localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
   }
-  if (localStorage.getItem('sidebarCollapsed') === 'true') {
+
+  function closeSidebar() {
+    var sidebar = document.getElementById('sidebar');
+    var backdrop = document.getElementById('sidebar-backdrop');
+    sidebar.classList.add('collapsed');
+    backdrop.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+
+  if (!isMobile && localStorage.getItem('sidebarCollapsed') === 'true') {
     document.getElementById('sidebar').classList.add('collapsed');
     document.querySelector('.app-layout').classList.add('sidebar-collapsed');
   }
 
-  // Period selector now uses pill links
+  window.addEventListener('resize', function() {
+    isMobile = window.innerWidth <= 768;
+    if (!isMobile) closeSidebar();
+  });
   </script>
 </body>
 </html>
