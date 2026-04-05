@@ -80,12 +80,26 @@ async function main() {
     'ALTER TABLE drive_watch_channels ADD COLUMN user_id TEXT',
     // Client hub display name
     'ALTER TABLE clients ADD COLUMN display_name TEXT',
-    // Harvest user rate columns
+    // Harvest columns
     'ALTER TABLE harvest_users ADD COLUMN default_hourly_rate REAL',
     'ALTER TABLE harvest_users ADD COLUMN cost_rate REAL',
+    'ALTER TABLE harvest_time_entries ADD COLUMN cost_rate REAL',
   ];
   for (const sql of migrations) {
     try { await remote.execute(sql); } catch { /* column already exists */ }
+  }
+
+  // Auto-detect missing columns: compare local schema to remote
+  for (const row of tables[0].values) {
+    const tableName = row[0] as string;
+    const localCols = local.exec(`PRAGMA table_info(${tableName})`);
+    if (!localCols.length) continue;
+    for (const col of localCols[0].values) {
+      const colName = col[1] as string;
+      const colType = (col[2] as string) || 'TEXT';
+      const sql = `ALTER TABLE ${tableName} ADD COLUMN ${colName} ${colType}`;
+      try { await remote.execute(sql); } catch { /* already exists */ }
+    }
   }
 
   // Create indexes
