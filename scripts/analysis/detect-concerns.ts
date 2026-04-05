@@ -15,10 +15,28 @@ config({ path: '.env.local' });
 import type { Database } from 'sql.js';
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
 import { aiCall } from '../utils/ai-wrapper.js';
-import { sendSlackMessage } from '../utils/slack-alert.js';
 
 const MONITOR_NAME = 'concern-ai';
-const SLACK_CHANNEL = '#claude-client-issues';
+
+async function sendConcernAlert(text: string): Promise<void> {
+  const webhookUrl = process.env.SLACK_WEBHOOK_CONCERNS;
+  if (!webhookUrl) {
+    log('CONCERNS', 'SLACK_WEBHOOK_CONCERNS not set — skipping Slack alert');
+    return;
+  }
+  try {
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) {
+      logError('CONCERNS', `Slack webhook returned ${res.status}: ${await res.text()}`);
+    }
+  } catch (err) {
+    logError('CONCERNS', 'Failed to send Slack alert', err);
+  }
+}
 const EXCLUDED_CATEGORIES = ['interview', 'internal', 'onboarding'];
 const TRANSCRIPT_LIMIT = 3000; // chars — keeps Haiku costs low
 
@@ -183,7 +201,7 @@ export async function run(options?: { reprocess?: boolean }): Promise<{ checked:
           const excerpt = result.excerpts[0] ? `\n\n> ${result.excerpts[0]}` : '';
           const fathomLink = fathomUrl ? `\n<${fathomUrl}|View in Fathom>` : '';
 
-          await sendSlackMessage(SLACK_CHANNEL,
+          await sendConcernAlert(
             `:warning: *Client Concern Detected*\n` +
             `*Client:* ${clientName}\n` +
             `*Meeting:* ${title}\n` +
