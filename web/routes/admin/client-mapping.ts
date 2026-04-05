@@ -3,6 +3,7 @@ import {
   getAllClientMappings,
   addClientMapping,
   removeClientMapping,
+  removeExistingMapping,
   getGhlLocations,
   getAllClientsAdmin,
 } from '../../lib/queries.js';
@@ -27,11 +28,14 @@ export const adminClientMappingRoutes: FastifyPluginAsync = async (app) => {
     const external_name = (body.platform_account_name || body.external_name || '').trim();
 
     if (!client_id || !source || !external_id) {
-      reply.redirect('/admin/client-mapping');
+      reply.redirect('/admin/client-mapping?error=missing');
       return;
     }
 
     try {
+      // Remove any existing mapping for this source+external_id first (allows reassignment)
+      await removeExistingMapping(source, external_id);
+
       await addClientMapping({
         client_id,
         source,
@@ -39,7 +43,8 @@ export const adminClientMappingRoutes: FastifyPluginAsync = async (app) => {
         external_name: external_name || external_id,
       });
     } catch {
-      // UNIQUE constraint — already mapped
+      reply.redirect('/admin/client-mapping?error=duplicate');
+      return;
     }
     reply.redirect('/admin/client-mapping');
   });

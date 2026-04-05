@@ -386,6 +386,10 @@ export async function removeClientMapping(mappingId: number): Promise<void> {
   await db.execute({ sql: 'DELETE FROM client_source_mappings WHERE id = ?', args: [mappingId] });
 }
 
+export async function removeExistingMapping(source: string, externalId: string): Promise<void> {
+  await db.execute({ sql: 'DELETE FROM client_source_mappings WHERE source = ? AND external_id = ?', args: [source, externalId] });
+}
+
 export async function getGhlLocations(): Promise<GhlLocationRow[]> {
   try {
     return await rows<GhlLocationRow>(
