@@ -1,0 +1,134 @@
+<% layout('/portal/layout') %>
+
+<div id="portal-google-content">
+
+<%
+  const cpl = it.totalConversions > 0 ? it.gadsSpend / it.totalConversions : 0;
+  const ctr = it.totalImpressions > 0 ? (it.totalClicks / it.totalImpressions * 100) : 0;
+  const totalConvValue = it.gadsCampaigns.reduce((s, c) => s + (c.conversion_value || 0), 0);
+  const roas = it.gadsSpend > 0 ? totalConvValue / it.gadsSpend : 0;
+%>
+
+<!-- KPIs -->
+<div class="portal-kpi-grid">
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= it.gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></div>
+    <div class="kpi-label">Google Ad Spend</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= cpl > 0 ? cpl.toFixed(2) : '0.00' %></div>
+    <div class="kpi-label">Cost Per Lead</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.totalConversions.toLocaleString() %></div>
+    <div class="kpi-label">Conversions</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.totalClicks.toLocaleString() %></div>
+    <div class="kpi-label">Clicks</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= ctr.toFixed(2) %>%</div>
+    <div class="kpi-label">Click-Through Rate</div>
+  </div>
+  <% if (roas > 0) { %>
+  <div class="portal-kpi kpi-positive">
+    <div class="kpi-value"><%= roas.toFixed(2) %>x</div>
+    <div class="kpi-label">ROAS</div>
+  </div>
+  <% } %>
+</div>
+
+<!-- Top Campaigns Chart -->
+<% if (it.gadsCampaigns.length > 1) { %>
+<div class="chart-card">
+  <h3>Spend by Campaign</h3>
+  <div class="chart-wrap">
+    <canvas id="gadsSpendChart"></canvas>
+  </div>
+</div>
+<script>
+(function() {
+  var campaigns = <%~ JSON.stringify(it.gadsCampaigns.slice(0, 8).map(c => ({ name: (c.campaign_name || c.campaign_id).slice(0, 30), spend: c.spend, conversions: c.conversions }))) %>;
+  new Chart(document.getElementById('gadsSpendChart'), {
+    type: 'bar',
+    data: {
+      labels: campaigns.map(function(c) { return c.name; }),
+      datasets: [
+        { label: 'Spend', data: campaigns.map(function(c) { return c.spend; }), backgroundColor: 'rgba(251, 191, 36, 0.5)', borderColor: '#FBBF24', borderWidth: 1 },
+        { label: 'Conversions', data: campaigns.map(function(c) { return c.conversions; }), backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#22C55E', borderWidth: 1, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        y: { beginAtZero: true, position: 'left', ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } } },
+        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Conversions' } }
+      }
+    }
+  });
+})();
+</script>
+<% } %>
+
+<!-- Top Converting Keywords -->
+<% if (it.topKeywords && it.topKeywords.length > 0) { %>
+<div class="portal-section">
+  <h2>Top Converting Keywords</h2>
+  <table class="compact">
+    <thead>
+      <tr><th>Keyword</th><th>Match</th><th>Clicks</th><th>Conversions</th><th>Spend</th><th>CPC</th><th>CTR</th></tr>
+    </thead>
+    <tbody>
+      <% it.topKeywords.forEach(kw => { %>
+      <tr>
+        <td><%= kw.keyword_text %></td>
+        <td style="font-size: 11px; color: var(--vendo-text-muted);"><%= kw.match_type ? kw.match_type.toLowerCase().replace('_', ' ') : '—' %></td>
+        <td><%= kw.clicks.toLocaleString() %></td>
+        <td style="color: var(--vendo-green); font-weight: 600;"><%= kw.conversions %></td>
+        <td>&pound;<%= kw.spend.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td>
+        <td>&pound;<%= kw.cpc.toFixed(2) %></td>
+        <td><%= kw.ctr.toFixed(2) %>%</td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } else { %>
+<div class="portal-section">
+  <h2>Top Converting Keywords</h2>
+  <div class="portal-empty">Keyword data will appear here after the next Google Ads sync.</div>
+</div>
+<% } %>
+
+<!-- Campaign Breakdown -->
+<% if (it.gadsCampaigns.length > 0) { %>
+<div class="portal-section">
+  <h2>Campaign Breakdown</h2>
+  <table class="compact">
+    <thead>
+      <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CTR</th><th>Conversions</th></tr>
+    </thead>
+    <tbody>
+      <% it.gadsCampaigns.forEach(c => { %>
+      <tr>
+        <td><%= c.campaign_name || c.campaign_id %></td>
+        <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td>
+        <td><%= c.impressions.toLocaleString() %></td>
+        <td><%= c.clicks.toLocaleString() %></td>
+        <td>&pound;<%= c.cpc.toFixed(2) %></td>
+        <td><%= c.ctr.toFixed(2) %>%</td>
+        <td><%= c.conversions.toLocaleString() %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<% if (!it.gadsCampaigns.length) { %>
+<div class="portal-empty">No Google Ads data available for this period.</div>
+<% } %>
+
+</div>

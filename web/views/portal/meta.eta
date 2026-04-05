@@ -1,0 +1,120 @@
+<% layout('/portal/layout') %>
+
+<div id="portal-meta-content">
+
+<%
+  const e = it.engagement;
+  const totalLeads = it.metaCampaigns.reduce((s, c) => s + c.conversions, 0);
+  const cpl = totalLeads > 0 ? it.metaSpend / totalLeads : 0;
+%>
+
+<!-- KPIs -->
+<div class="portal-kpi-grid">
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= it.metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></div>
+    <div class="kpi-label">Meta Ad Spend</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= cpl > 0 ? cpl.toFixed(2) : '0.00' %></div>
+    <div class="kpi-label">Cost Per Lead</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.totalClicks.toLocaleString() %></div>
+    <div class="kpi-label">Clicks</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= e.total_reach.toLocaleString() %></div>
+    <div class="kpi-label">People Reached</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= e.avg_frequency.toFixed(1) %></div>
+    <div class="kpi-label">Avg Frequency</div>
+    <div class="kpi-sub">Times each person saw your ads</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= it.totalImpressions > 0 ? (it.totalClicks / it.totalImpressions * 100).toFixed(2) : '0.00' %>%</div>
+    <div class="kpi-label">Click-Through Rate</div>
+  </div>
+</div>
+
+<!-- Reach & Engagement Chart -->
+<% if (it.metaCampaigns.length > 1) { %>
+<div class="chart-card">
+  <h3>Spend by Campaign</h3>
+  <div class="chart-wrap">
+    <canvas id="metaSpendChart"></canvas>
+  </div>
+</div>
+<script>
+(function() {
+  var campaigns = <%~ JSON.stringify(it.metaCampaigns.slice(0, 8).map(c => ({ name: (c.campaign_name || c.campaign_id).slice(0, 30), spend: c.spend, clicks: c.clicks }))) %>;
+  new Chart(document.getElementById('metaSpendChart'), {
+    type: 'bar',
+    data: {
+      labels: campaigns.map(function(c) { return c.name; }),
+      datasets: [{ label: 'Spend', data: campaigns.map(function(c) { return c.spend; }), backgroundColor: 'rgba(59, 130, 246, 0.6)', borderColor: '#3B82F6', borderWidth: 1 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } } } }
+    }
+  });
+})();
+</script>
+<% } %>
+
+<!-- Top Performing Ads -->
+<% if (it.topAds && it.topAds.length > 0) { %>
+<div class="portal-section">
+  <h2>Top Performing Ads</h2>
+  <table class="compact">
+    <thead>
+      <tr><th>Ad</th><th>Campaign</th><th>Spend</th><th>Clicks</th><th>CTR</th><th>CPC</th><th>Reach</th></tr>
+    </thead>
+    <tbody>
+      <% it.topAds.forEach(ad => { %>
+      <tr>
+        <td><%= ad.ad_name || ad.ad_id %></td>
+        <td style="color: var(--vendo-text-muted); font-size: 12px;"><%= ad.campaign_name || '—' %></td>
+        <td>&pound;<%= ad.spend.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td>
+        <td><%= ad.clicks.toLocaleString() %></td>
+        <td><%= ad.ctr.toFixed(2) %>%</td>
+        <td>&pound;<%= ad.cpc.toFixed(2) %></td>
+        <td><%= ad.reach.toLocaleString() %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<!-- Campaign Breakdown -->
+<% if (it.metaCampaigns.length > 0) { %>
+<div class="portal-section">
+  <h2>Campaign Breakdown</h2>
+  <table class="compact">
+    <thead>
+      <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CTR</th></tr>
+    </thead>
+    <tbody>
+      <% it.metaCampaigns.forEach(c => { %>
+      <tr>
+        <td><%= c.campaign_name || c.campaign_id %></td>
+        <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td>
+        <td><%= c.impressions.toLocaleString() %></td>
+        <td><%= c.clicks.toLocaleString() %></td>
+        <td>&pound;<%= c.cpc.toFixed(2) %></td>
+        <td><%= c.ctr.toFixed(2) %>%</td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<% if (!it.metaCampaigns.length) { %>
+<div class="portal-empty">No Meta Ads data available for this period.</div>
+<% } %>
+
+</div>

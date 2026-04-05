@@ -214,3 +214,99 @@ export async function getClientName(clientId: number): Promise<string> {
   );
   return result[0]?.name ?? `Client ${clientId}`;
 }
+
+// --- Meta Ads: top performing ads (ad-level data) ---
+
+export interface MetaAdRow {
+  ad_id: string;
+  ad_name: string | null;
+  campaign_name: string | null;
+  impressions: number;
+  clicks: number;
+  spend: number;
+  cpc: number;
+  ctr: number;
+  reach: number;
+  frequency: number;
+}
+
+export async function getMetaTopAds(clientId: number, days = 30, limit = 10): Promise<MetaAdRow[]> {
+  return rows<MetaAdRow>(`
+    SELECT mi.ad_id, mi.ad_name, mi.campaign_name,
+           SUM(mi.impressions) as impressions,
+           SUM(mi.clicks) as clicks,
+           SUM(mi.spend) as spend,
+           CASE WHEN SUM(mi.clicks) > 0 THEN ROUND(SUM(mi.spend) / SUM(mi.clicks), 2) ELSE 0 END as cpc,
+           CASE WHEN SUM(mi.impressions) > 0 THEN ROUND(CAST(SUM(mi.clicks) AS REAL) / SUM(mi.impressions) * 100, 2) ELSE 0 END as ctr,
+           COALESCE(SUM(mi.reach), 0) as reach,
+           CASE WHEN SUM(mi.reach) > 0 THEN ROUND(CAST(SUM(mi.impressions) AS REAL) / SUM(mi.reach), 2) ELSE 0 END as frequency
+    FROM meta_insights mi
+    JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source = 'meta'
+    WHERE csm.client_id = ?
+      AND mi.date >= date('now', '-' || ? || ' days')
+      AND mi.level = 'ad'
+      AND mi.ad_id IS NOT NULL
+    GROUP BY mi.ad_id, mi.ad_name
+    ORDER BY spend DESC
+    LIMIT ?
+  `, [clientId, days, limit]);
+}
+
+// --- Meta Ads: reach & engagement summary ---
+
+export interface MetaEngagementSummary {
+  total_reach: number;
+  avg_frequency: number;
+  total_impressions: number;
+  total_clicks: number;
+}
+
+export async function getMetaEngagement(clientId: number, days = 30): Promise<MetaEngagementSummary> {
+  const result = await rows<MetaEngagementSummary>(`
+    SELECT COALESCE(SUM(mi.reach), 0) as total_reach,
+           CASE WHEN SUM(mi.reach) > 0 THEN ROUND(CAST(SUM(mi.impressions) AS REAL) / SUM(mi.reach), 2) ELSE 0 END as avg_frequency,
+           COALESCE(SUM(mi.impressions), 0) as total_impressions,
+           COALESCE(SUM(mi.clicks), 0) as total_clicks
+    FROM meta_insights mi
+    JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source = 'meta'
+    WHERE csm.client_id = ?
+      AND mi.date >= date('now', '-' || ? || ' days')
+      AND mi.level = 'campaign'
+  `, [clientId, days]);
+  return result[0] || { total_reach: 0, avg_frequency: 0, total_impressions: 0, total_clicks: 0 };
+}
+
+// --- Google Ads: top converting keywords ---
+
+export interface GadsKeywordRow {
+  keyword_text: string;
+  match_type: string | null;
+  campaign_name: string | null;
+  impressions: number;
+  clicks: number;
+  spend: number;
+  conversions: number;
+  conversion_value: number;
+  cpc: number;
+  ctr: number;
+}
+
+export async function getGadsTopKeywords(clientId: number, days = 30, limit = 15): Promise<GadsKeywordRow[]> {
+  return rows<GadsKeywordRow>(`
+    SELECT kw.keyword_text, kw.match_type, kw.campaign_name,
+           SUM(kw.impressions) as impressions,
+           SUM(kw.clicks) as clicks,
+           SUM(kw.spend) as spend,
+           COALESCE(SUM(kw.conversions), 0) as conversions,
+           COALESCE(SUM(kw.conversion_value), 0) as conversion_value,
+           CASE WHEN SUM(kw.clicks) > 0 THEN ROUND(SUM(kw.spend) / SUM(kw.clicks), 2) ELSE 0 END as cpc,
+           CASE WHEN SUM(kw.impressions) > 0 THEN ROUND(CAST(SUM(kw.clicks) AS REAL) / SUM(kw.impressions) * 100, 2) ELSE 0 END as ctr
+    FROM gads_keyword_stats kw
+    JOIN client_source_mappings csm ON csm.external_id = kw.account_id AND csm.source = 'gads'
+    WHERE csm.client_id = ?
+      AND kw.date >= date('now', '-' || ? || ' days')
+    GROUP BY kw.keyword_text
+    ORDER BY conversions DESC, spend DESC
+    LIMIT ?
+  `, [clientId, days, limit]);
+}

@@ -161,6 +161,34 @@ async function fetchCampaignSpend(customerId: string, dateFrom: string, dateTo: 
   return gadsQuery(customerId, query);
 }
 
+// --- Fetch keyword stats ---
+
+async function fetchKeywordStats(customerId: string, dateFrom: string, dateTo: string) {
+  const query = `
+    SELECT
+      segments.date,
+      customer.id,
+      campaign.id,
+      campaign.name,
+      ad_group.id,
+      ad_group.name,
+      ad_group_criterion.keyword.text,
+      ad_group_criterion.keyword.match_type,
+      metrics.cost_micros,
+      metrics.impressions,
+      metrics.clicks,
+      metrics.conversions,
+      metrics.conversions_value
+    FROM keyword_view
+    WHERE segments.date BETWEEN '${dateFrom}' AND '${dateTo}'
+      AND ad_group_criterion.status = 'ENABLED'
+    ORDER BY metrics.cost_micros DESC
+    LIMIT 500
+  `;
+
+  return gadsQuery(customerId, query);
+}
+
 // --- Main ---
 
 async function syncGoogleAds() {
@@ -255,7 +283,77 @@ async function syncGoogleAds() {
 
     upsertSpend.free();
     saveDb();
-    log('GADS', `Sync complete: ${totalRows} rows across ${accounts.length} accounts`);
+    log('GADS', `Campaign sync: ${totalRows} rows across ${accounts.length} accounts`);
+
+    // 3. Fetch keyword stats for each account
+    log('GADS', `Fetching keyword stats...`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS gads_keyword_stats (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      account_id TEXT NOT NULL,
+      campaign_id TEXT,
+      campaign_name TEXT,
+      ad_group_id TEXT,
+      ad_group_name TEXT,
+      keyword_text TEXT NOT NULL,
+      match_type TEXT,
+      spend REAL DEFAULT 0,
+      impressions INTEGER DEFAULT 0,
+      clicks INTEGER DEFAULT 0,
+      conversions REAL DEFAULT 0,
+      conversion_value REAL DEFAULT 0,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, account_id, campaign_id, ad_group_id, keyword_text)
+    )`);
+    db.run('CREATE INDEX IF NOT EXISTS idx_gads_kw_account ON gads_keyword_stats(account_id)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_gads_kw_date ON gads_keyword_stats(date)');
+
+    const upsertKeyword = db.prepare(
+      `INSERT INTO gads_keyword_stats (date, account_id, campaign_id, campaign_name, ad_group_id, ad_group_name, keyword_text, match_type, spend, impressions, clicks, conversions, conversion_value, synced_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(date, account_id, campaign_id, ad_group_id, keyword_text) DO UPDATE SET
+         campaign_name=excluded.campaign_name, ad_group_name=excluded.ad_group_name, match_type=excluded.match_type,
+         spend=excluded.spend, impressions=excluded.impressions, clicks=excluded.clicks,
+         conversions=excluded.conversions, conversion_value=excluded.conversion_value, synced_at=excluded.synced_at`
+    );
+
+    let kwTotal = 0;
+    for (const acct of accounts) {
+      try {
+        const kwRows = await fetchKeywordStats(acct.id, dateFrom, dateTo);
+        if (kwRows.length === 0) continue;
+
+        for (const row of kwRows) {
+          const costMicros = Number(row.metrics?.costMicros || 0);
+          upsertKeyword.run([
+            row.segments.date,
+            String(row.customer.id),
+            String(row.campaign?.id || ''),
+            row.campaign?.name || null,
+            String(row.adGroup?.id || ''),
+            row.adGroup?.name || null,
+            row.adGroupCriterion?.keyword?.text || 'Unknown',
+            row.adGroupCriterion?.keyword?.matchType || null,
+            costMicros / 1_000_000,
+            Number(row.metrics?.impressions || 0),
+            Number(row.metrics?.clicks || 0),
+            Number(row.metrics?.conversions || 0),
+            Number(row.metrics?.conversionsValue || 0),
+            now,
+          ]);
+        }
+        kwTotal += kwRows.length;
+        log('GADS', `  ${acct.descriptiveName}: ${kwRows.length} keywords`);
+      } catch (err) {
+        // Keyword view may not be available for all campaign types — non-fatal
+        log('GADS', `  ${acct.descriptiveName}: keyword fetch skipped (${(err as Error).message?.slice(0, 60)})`);
+      }
+    }
+
+    upsertKeyword.free();
+    saveDb();
+    log('GADS', `Sync complete: ${totalRows} campaign rows + ${kwTotal} keyword rows`);
 
     // Auto-resolve Google Ads accounts to canonical clients
     const gadsAccounts = db.exec('SELECT DISTINCT account_id, account_name FROM gads_campaign_spend WHERE account_name IS NOT NULL');

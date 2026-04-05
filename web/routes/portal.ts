@@ -3,7 +3,7 @@ import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend,
 import { getGA4Summary, getGA4TrafficSources, getOrganicTrend } from '../lib/queries/ga4.js';
 import { getGSCSummary, getTopQueries, getTopPages } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
-import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags } from '../lib/queries/portal.js';
+import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags, getMetaTopAds, getMetaEngagement, getGadsTopKeywords } from '../lib/queries/portal.js';
 
 // --- Helpers ---
 
@@ -152,6 +152,68 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       clientName,
       days,
       pageTitle: 'Lead Generation',
+    });
+  });
+
+  // GET /portal/meta — Meta Ads (Paid Social)
+  app.get('/meta', async (request, reply) => {
+    const q = request.query as Record<string, string>;
+    const days = parseDays(q);
+    const clientId = getClientId(request);
+
+    const [metaCampaigns, topAds, engagement, channelSpend, clientName] = await Promise.all([
+      getMetaCampaignsForClient(clientId, days),
+      getMetaTopAds(clientId, days, 10).catch(() => []),
+      getMetaEngagement(clientId, days).catch(() => ({ total_reach: 0, avg_frequency: 0, total_impressions: 0, total_clicks: 0 })),
+      getChannelSpend(clientId, days).catch(() => []),
+      getClientName(clientId),
+    ]);
+
+    const metaSpend = channelSpend.find((c: any) => c.channel === 'meta_ads')?.spend || 0;
+    const totalClicks = metaCampaigns.reduce((s: number, c: any) => s + c.clicks, 0);
+    const totalImpressions = metaCampaigns.reduce((s: number, c: any) => s + c.impressions, 0);
+
+    reply.render('portal/meta', {
+      metaCampaigns,
+      topAds,
+      engagement,
+      metaSpend,
+      totalClicks,
+      totalImpressions,
+      clientName,
+      days,
+      pageTitle: 'Meta Ads',
+    });
+  });
+
+  // GET /portal/google — Google Ads (Paid Search)
+  app.get('/google', async (request, reply) => {
+    const q = request.query as Record<string, string>;
+    const days = parseDays(q);
+    const clientId = getClientId(request);
+
+    const [gadsCampaigns, topKeywords, channelSpend, clientName] = await Promise.all([
+      getGadsCampaignsForClient(clientId, days),
+      getGadsTopKeywords(clientId, days, 15).catch(() => []),
+      getChannelSpend(clientId, days).catch(() => []),
+      getClientName(clientId),
+    ]);
+
+    const gadsSpend = channelSpend.find((c: any) => c.channel === 'google_ads')?.spend || 0;
+    const totalConversions = gadsCampaigns.reduce((s: number, c: any) => s + c.conversions, 0);
+    const totalClicks = gadsCampaigns.reduce((s: number, c: any) => s + c.clicks, 0);
+    const totalImpressions = gadsCampaigns.reduce((s: number, c: any) => s + c.impressions, 0);
+
+    reply.render('portal/google', {
+      gadsCampaigns,
+      topKeywords,
+      gadsSpend,
+      totalConversions,
+      totalClicks,
+      totalImpressions,
+      clientName,
+      days,
+      pageTitle: 'Google Ads',
     });
   });
 
