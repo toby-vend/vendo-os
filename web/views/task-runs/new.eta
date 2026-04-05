@@ -38,7 +38,7 @@
           hx-get="/tasks/task-types"
           hx-target="#task-type-container"
           hx-trigger="change"
-          hx-include="[name='channel']"
+          hx-swap="innerHTML"
           style="width: 100%;"
         >
           <option value="">Select a channel…</option>
