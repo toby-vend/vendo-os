@@ -28,25 +28,22 @@ export const adminClientMappingRoutes: FastifyPluginAsync = async (app) => {
     const external_name = (body.platform_account_name || body.external_name || '').trim();
 
     if (!client_id || !source || !external_id) {
-      reply.redirect('/admin/client-mapping?error=missing');
+      reply.type('text/html').send(`<pre>DEBUG: validation failed\nclient_id: ${client_id}\nsource: "${source}"\nexternal_id: "${external_id}"\nbody keys: ${JSON.stringify(Object.keys(body))}\nbody: ${JSON.stringify(body, null, 2)}</pre><a href="/admin/client-mapping">Back</a>`);
       return;
     }
 
     try {
-      // Remove any existing mapping for this source+external_id first (allows reassignment)
       await removeExistingMapping(source, external_id);
-
       await addClientMapping({
         client_id,
         source,
         external_id,
         external_name: external_name || external_id,
       });
-    } catch {
-      reply.redirect('/admin/client-mapping?error=duplicate');
-      return;
+      reply.redirect('/admin/client-mapping');
+    } catch (err: any) {
+      reply.type('text/html').send(`<pre>DEBUG: insert failed\nerror: ${err?.message || err}\nclient_id: ${client_id}\nsource: "${source}"\nexternal_id: "${external_id}"</pre><a href="/admin/client-mapping">Back</a>`);
     }
-    reply.redirect('/admin/client-mapping');
   });
 
   // Delete a mapping
