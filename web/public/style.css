@@ -1275,64 +1275,9 @@ mark {
 
 /* === Funnel Chart === */
 
-.funnel-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.funnel-row {
-  position: relative;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 10px;
-  min-height: 52px;
-  display: flex;
-  align-items: stretch;
-}
-
-.funnel-bar {
-  border-radius: 10px;
-  min-height: 52px;
-  min-width: 120px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  transition: filter 0.2s ease, width 0.4s ease;
-  cursor: pointer;
-}
-
-.funnel-bar:hover {
-  filter: brightness(1.15);
-}
-
-.funnel-bar-label {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.funnel-bar-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  line-height: 1.3;
-}
-
-.funnel-bar-value {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
-  line-height: 1.3;
-}
-
-.funnel-conv {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--vendo-text-muted);
+.funnel-svg-wrap {
+  width: 100%;
+  overflow: hidden;
 }
 
 /* === Stat Card with Icon === */
