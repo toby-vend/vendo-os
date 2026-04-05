@@ -123,21 +123,25 @@
       <% } %>
 
       <!-- Link new -->
-      <% if (src.unlinked.length) { %>
-      <form method="POST" action="/admin/clients/<%= it.client.id %>/mappings" style="display: flex; gap: 0.5rem; align-items: center;">
+      <form method="POST" action="/admin/clients/<%= it.client.id %>/mappings" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
         <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
         <input type="hidden" name="source" value="<%= src.key %>">
-        <select name="external_id" style="flex: 1; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px;"
+        <% if (src.unlinked.length) { %>
+        <select name="external_id" style="flex: 1; min-width: 150px; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px;"
           onchange="this.form.external_name.value = this.options[this.selectedIndex].text">
           <option value="">Select...</option>
           <% src.unlinked.forEach(u => { %>
           <option value="<%= u.external_id %>"><%= u.external_name || u.external_id %></option>
           <% }) %>
         </select>
-        <input type="hidden" name="external_name" value="">
+        <% } else { %>
+        <input type="text" name="external_id" required placeholder="<%= src.key === 'ga4' ? 'e.g. properties/123456789' : src.key === 'gsc' ? 'e.g. https://example.com/' : 'Account ID' %>"
+          style="flex: 1; min-width: 150px; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px; box-sizing: border-box;">
+        <% } %>
+        <input type="<%= src.unlinked.length ? 'hidden' : 'text' %>" name="external_name" value="" placeholder="Name"
+          style="<%= src.unlinked.length ? '' : 'width: 120px; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px; box-sizing: border-box;' %>">
         <button type="submit" style="padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; cursor: pointer; font-size: 13px; white-space: nowrap;">Link</button>
       </form>
-      <% } %>
     </div>
     <% }) %>
   </div>
