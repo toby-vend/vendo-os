@@ -102,6 +102,13 @@ async function main() {
   // Push data table by table
   const tableNames = tables[0].values.map(r => r[0] as string);
 
+  // Clear tables where stale rows must be removed (local is source of truth)
+  // Order: child tables first to respect foreign key constraints
+  for (const tbl of ['client_source_mappings', 'clients']) {
+    console.log(`\nClearing remote ${tbl} before push...`);
+    await remote.execute(`DELETE FROM ${tbl}`);
+  }
+
   for (const tableName of tableNames) {
     console.log(`\nPushing ${tableName}...`);
 
