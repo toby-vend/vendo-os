@@ -30,217 +30,40 @@
         const isInGroup = (paths) => paths.some(x => p === x || p.startsWith(x + '/'));
       %>
       <nav class="sidebar-nav">
-        <!-- Home -->
-        <div class="nav-group" style="padding-top: 0.25rem;">
-          <% if (canSee('dashboard')) { %>
-          <a href="/" class="nav-item<%= p === '/' ? ' active' : '' %>" style="margin: 0 0.5rem; width: calc(100% - 1rem);">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            <span class="nav-label">Home</span>
-          </a>
-          <% } %>
-        </div>
-
-        <!-- Clients -->
-        <% if (canSee('clients') || canSee('pipeline')) { %>
-        <div class="nav-group<%= isInGroup(['/clients', '/client-database', '/pipeline', '/dashboards/client-mer', '/dashboards/reviews']) ? ' open' : '' %>">
-          <button class="nav-group-label" onclick="toggleNavGroup(this)">
-            <span class="nav-label">Clients</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
-          </button>
-          <div class="nav-group-children">
-            <% if (canSee('clients')) { %>
-            <a href="/clients" class="nav-item nav-child<%= p.startsWith('/clients') ? ' active' : '' %>">
-              <span class="nav-label">Overview</span>
-            </a>
-            <a href="/client-database" class="nav-item nav-child<%= p.startsWith('/client-database') ? ' active' : '' %>">
-              <span class="nav-label">Database</span>
-            </a>
-            <% } %>
-            <% if (canSee('pipeline')) { %>
-            <a href="/pipeline" class="nav-item nav-child<%= p.startsWith('/pipeline') ? ' active' : '' %>">
-              <span class="nav-label">Pipeline</span>
-            </a>
-            <% } %>
-            <% if (canSee('dashboards')) { %>
-            <a href="/dashboards/client-mer" class="nav-item nav-child<%= p.startsWith('/dashboards/client-mer') ? ' active' : '' %>">
-              <span class="nav-label">Client MER</span>
-            </a>
-            <a href="/dashboards/reviews" class="nav-item nav-child<%= p.startsWith('/dashboards/reviews') ? ' active' : '' %>">
-              <span class="nav-label">Reviews</span>
-            </a>
-            <% } %>
-          </div>
-        </div>
-        <% } %>
-
-        <!-- Performance -->
-        <% if (canSee('dashboards') || canSee('ads')) { %>
-        <div class="nav-group<%= isInGroup(['/dashboards/ads', '/dashboards/reporting-hub', '/ads']) ? ' open' : '' %>">
-          <button class="nav-group-label" onclick="toggleNavGroup(this)">
-            <span class="nav-label">Performance</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
-          </button>
-          <div class="nav-group-children">
-            <% if (canSee('dashboards')) { %>
-            <a href="/dashboards/ads" class="nav-item nav-child<%= p.startsWith('/dashboards/ads') ? ' active' : '' %>">
-              <span class="nav-label">Ads Dashboard</span>
-            </a>
-            <a href="/dashboards/reporting-hub" class="nav-item nav-child<%= p.startsWith('/dashboards/reporting-hub') ? ' active' : '' %>">
-              <span class="nav-label">Reporting Hub</span>
-            </a>
-            <% } %>
-            <% if (canSee('ads')) { %>
-            <a href="/ads" class="nav-item nav-child<%= p.startsWith('/ads') ? ' active' : '' %>">
-              <span class="nav-label">Ads Manager</span>
-            </a>
-            <% } %>
-          </div>
-        </div>
-        <% } %>
-
-        <!-- Finance -->
-        <% if (canSee('dashboards')) { %>
-        <div class="nav-group<%= isInGroup(['/dashboards/finance', '/dashboards/profitability', '/dashboards/pipeline']) ? ' open' : '' %>">
-          <button class="nav-group-label" onclick="toggleNavGroup(this)">
-            <span class="nav-label">Finance</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
-          </button>
-          <div class="nav-group-children">
-            <a href="/dashboards/finance" class="nav-item nav-child<%= p.startsWith('/dashboards/finance') ? ' active' : '' %>">
-              <span class="nav-label">Finance</span>
-            </a>
-            <a href="/dashboards/profitability" class="nav-item nav-child<%= p.startsWith('/dashboards/profitability') ? ' active' : '' %>">
-              <span class="nav-label">Profitability</span>
-            </a>
-            <a href="/dashboards/pipeline" class="nav-item nav-child<%= p.startsWith('/dashboards/pipeline') ? ' active' : '' %>">
-              <span class="nav-label">Pipeline Tracker</span>
-            </a>
-          </div>
-        </div>
-        <% } %>
-
-        <!-- Work -->
-        <% if (canSee('action-items') || canSee('tasks') || canSee('asana-tasks') || canSee('dashboards')) { %>
-        <div class="nav-group<%= isInGroup(['/action-items', '/asana-tasks', '/tasks', '/dashboards/time-tracking', '/dashboards/capacity']) ? ' open' : '' %>">
-          <button class="nav-group-label" onclick="toggleNavGroup(this)">
-            <span class="nav-label">Work</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
-          </button>
-          <div class="nav-group-children">
-            <% if (canSee('action-items')) { %>
-            <a href="/action-items" class="nav-item nav-child<%= p.startsWith('/action-items') ? ' active' : '' %>">
-              <span class="nav-label">Action Items</span>
-            </a>
-            <% } %>
-            <% if (canSee('asana-tasks')) { %>
-            <a href="/asana-tasks" class="nav-item nav-child<%= p.startsWith('/asana-tasks') ? ' active' : '' %>">
-              <span class="nav-label">Asana Tasks</span>
-            </a>
-            <% } %>
-            <% if (canSee('tasks')) { %>
-            <a href="/tasks" class="nav-item nav-child<%= p.startsWith('/tasks') && !p.startsWith('/asana-tasks') ? ' active' : '' %>">
-              <span class="nav-label">Content Tasks</span>
-            </a>
-            <% } %>
-            <% if (canSee('dashboards')) { %>
-            <a href="/dashboards/time-tracking" class="nav-item nav-child<%= p.startsWith('/dashboards/time-tracking') ? ' active' : '' %>">
-              <span class="nav-label">Time Tracking</span>
-            </a>
-            <a href="/dashboards/capacity" class="nav-item nav-child<%= p.startsWith('/dashboards/capacity') ? ' active' : '' %>">
-              <span class="nav-label">Capacity</span>
-            </a>
-            <% } %>
-          </div>
-        </div>
-        <% } %>
-
-        <!-- Meetings -->
-        <% if (canSee('meetings')) { %>
-        <div class="nav-group nav-group-single">
-          <a href="/meetings" class="nav-item<%= p.startsWith('/meetings') ? ' active' : '' %>">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-            <span class="nav-label">Meetings</span>
+        <% (it.sidebarConfig || []).forEach(function(group) {
+          if (group.adminOnly && it.user?.role !== 'admin') return;
+          const visibleItems = group.items.filter(function(item) {
+            if (item.hidden) return false;
+            if (!item.permission) return true;
+            return canSee(item.permission);
+          });
+          if (visibleItems.length === 0) return;
+          const hrefs = visibleItems.map(function(item) { return item.href; });
+          const isSingle = visibleItems.length === 1 && group.icon;
+        %>
+        <% if (isSingle) { %>
+        <div class="nav-group nav-group-single"<%= group.id === 'home' ? ' style="padding-top: 0.25rem;"' : '' %>>
+          <a href="<%= visibleItems[0].href %>" class="nav-item<%= (visibleItems[0].href === '/' ? p === '/' : p.startsWith(visibleItems[0].href)) ? ' active' : '' %>"<%= group.id === 'home' ? ' style="margin: 0 0.5rem; width: calc(100% - 1rem);"' : '' %>>
+            <%~ group.icon %>
+            <span class="nav-label"><%= visibleItems[0].label %></span>
           </a>
         </div>
-        <% } %>
-
-        <!-- Tools -->
-        <% if (canSee('skills') || canSee('chat') || canSee('briefs') || canSee('growth') || canSee('drive')) { %>
-        <div class="nav-group<%= isInGroup(['/skills', '/chat', '/briefs', '/growth', '/drive']) ? ' open' : '' %>">
+        <% } else { %>
+        <div class="nav-group<%= isInGroup(hrefs) ? ' open' : '' %>">
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
-            <span class="nav-label">Tools</span>
+            <span class="nav-label"><%= group.label %></span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
           </button>
           <div class="nav-group-children">
-            <a href="/skills" class="nav-item nav-child<%= p.startsWith('/skills') ? ' active' : '' %>">
-              <span class="nav-label">Skills</span>
+            <% visibleItems.forEach(function(item) { %>
+            <a href="<%= item.href %>" class="nav-item nav-child<%= (item.href === '/' ? p === '/' : p.startsWith(item.href)) ? ' active' : '' %>">
+              <span class="nav-label"><%= item.label %></span>
             </a>
-            <% if (canSee('chat')) { %>
-            <a href="/chat" class="nav-item nav-child<%= p.startsWith('/chat') ? ' active' : '' %>">
-              <span class="nav-label">Chat</span>
-            </a>
-            <% } %>
-            <% if (canSee('briefs')) { %>
-            <a href="/briefs" class="nav-item nav-child<%= p.startsWith('/briefs') ? ' active' : '' %>">
-              <span class="nav-label">Briefs</span>
-            </a>
-            <% } %>
-            <% if (canSee('growth')) { %>
-            <a href="/growth" class="nav-item nav-child<%= p.startsWith('/growth') ? ' active' : '' %>">
-              <span class="nav-label">Growth</span>
-            </a>
-            <% } %>
-            <% if (canSee('drive')) { %>
-            <a href="/drive" class="nav-item nav-child<%= p.startsWith('/drive') ? ' active' : '' %>">
-              <span class="nav-label">Drive</span>
-            </a>
-            <% } %>
+            <% }); %>
           </div>
         </div>
         <% } %>
-
-        <!-- Operations -->
-        <% if (canSee('operations')) { %>
-        <div class="nav-group nav-group-single">
-          <a href="/operations" class="nav-item<%= p.startsWith('/operations') ? ' active' : '' %>">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-            <span class="nav-label">Operations</span>
-          </a>
-        </div>
-        <% } %>
-
-        <!-- Admin -->
-        <% if (it.user?.role === 'admin') { %>
-        <div class="nav-group<%= isInGroup(['/admin', '/sync-status']) ? ' open' : '' %>">
-          <button class="nav-group-label" onclick="toggleNavGroup(this)">
-            <span class="nav-label">Admin</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
-          </button>
-          <div class="nav-group-children">
-            <a href="/admin/users" class="nav-item nav-child<%= p.startsWith('/admin/users') ? ' active' : '' %>">
-              <span class="nav-label">Users</span>
-            </a>
-            <a href="/admin/permissions" class="nav-item nav-child<%= p.startsWith('/admin/permissions') ? ' active' : '' %>">
-              <span class="nav-label">Permissions</span>
-            </a>
-            <a href="/admin/client-mapping" class="nav-item nav-child<%= p.startsWith('/admin/client-mapping') ? ' active' : '' %>">
-              <span class="nav-label">Client Mapping</span>
-            </a>
-            <a href="/admin/portal-users" class="nav-item nav-child<%= p.startsWith('/admin/portal-users') ? ' active' : '' %>">
-              <span class="nav-label">Portal Users</span>
-            </a>
-            <a href="/admin/onboarding" class="nav-item nav-child<%= p.startsWith('/admin/onboarding') ? ' active' : '' %>">
-              <span class="nav-label">Onboarding</span>
-            </a>
-            <a href="/admin/usage" class="nav-item nav-child<%= p.startsWith('/admin/usage') ? ' active' : '' %>">
-              <span class="nav-label">Usage</span>
-            </a>
-            <a href="/sync-status" class="nav-item nav-child<%= p.startsWith('/sync-status') ? ' active' : '' %>">
-              <span class="nav-label">Sync Status</span>
-            </a>
-          </div>
-        </div>
-        <% } %>
+        <% }); %>
       </nav>
 
       <div class="sidebar-footer">
@@ -261,7 +84,7 @@
           <button class="mobile-menu-btn" onclick="toggleSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Content Tasks', '/tasks/new': 'New Task', '/asana-tasks': 'Asana Tasks', '/skills': 'Skills Library', '/growth': 'Growth', '/admin/clients': 'Client Hub', '/admin/client-mapping': 'Client Mapping', '/admin/portal-users': 'Portal Users', '/admin/onboarding': 'Client Onboarding' }; if (it.currentPath?.startsWith('/growth/linkedin/')) pageNames[it.currentPath] = 'LinkedIn Post'; pageNames['/dashboards/ads'] = 'Ads Dashboard'; pageNames['/dashboards/meta-dental'] = 'Meta Ads — Dental'; pageNames['/dashboards/gads-dental'] = 'Google Ads — Dental'; pageNames['/dashboards/reporting-hub'] = 'Client Reporting Hub'; pageNames['/dashboards/client-mer'] = 'Client MER / ROAS'; pageNames['/dashboards/finance'] = 'Financial Dashboard'; pageNames['/dashboards/time-tracking'] = 'Time Tracking'; pageNames['/dashboards/capacity'] = 'Capacity Modelling'; pageNames['/dashboards/gads-ecom'] = 'Google Ads — Ecom'; pageNames['/dashboards/profitability'] = 'Client Profitability'; pageNames['/dashboards/pipeline'] = 'Pipeline Tracker'; pageNames['/dashboards/reviews'] = 'Performance Reviews'; pageNames['/client-database'] = 'Client Database'; pageNames['/operations'] = 'Operations Hub'; pageNames['/skills-library'] = 'Skills Library'; if (it.currentPath?.startsWith('/skills/outputs/')) pageNames[it.currentPath] = 'Saved Output'; else if (it.currentPath?.startsWith('/skills/') && it.currentPath !== '/skills') pageNames[it.currentPath] = 'Skills Library'; %>
+          <% const pageNames = { '/': 'Dashboard', '/meetings': 'Meetings', '/action-items': 'Action Items', '/clients': 'Clients', '/pipeline': 'Pipeline', '/ads': 'Ad Performance', '/briefs': 'Daily Briefs', '/drive': 'Google Drive', '/sync-status': 'Sync Status', '/admin/users': 'User Management', '/admin/permissions': 'Channel Permissions', '/admin/usage': 'API Usage', '/change-password': 'Change Password', '/settings': 'Account Settings', '/chat': 'AI Chat', '/tasks': 'Content Tasks', '/tasks/new': 'New Task', '/asana-tasks': 'Asana Tasks', '/skills': 'Skills Library', '/growth': 'Growth', '/admin/clients': 'Client Hub', '/admin/client-mapping': 'Client Mapping', '/admin/portal-users': 'Portal Users', '/admin/onboarding': 'Client Onboarding', '/admin/sidebar': 'Sidebar Menu' }; if (it.currentPath?.startsWith('/growth/linkedin/')) pageNames[it.currentPath] = 'LinkedIn Post'; pageNames['/dashboards/ads'] = 'Ads Dashboard'; pageNames['/dashboards/meta-dental'] = 'Meta Ads — Dental'; pageNames['/dashboards/gads-dental'] = 'Google Ads — Dental'; pageNames['/dashboards/reporting-hub'] = 'Client Reporting Hub'; pageNames['/dashboards/client-mer'] = 'Client MER / ROAS'; pageNames['/dashboards/finance'] = 'Financial Dashboard'; pageNames['/dashboards/time-tracking'] = 'Time Tracking'; pageNames['/dashboards/capacity'] = 'Capacity Modelling'; pageNames['/dashboards/gads-ecom'] = 'Google Ads — Ecom'; pageNames['/dashboards/profitability'] = 'Client Profitability'; pageNames['/dashboards/pipeline'] = 'Pipeline Tracker'; pageNames['/dashboards/reviews'] = 'Performance Reviews'; pageNames['/client-database'] = 'Client Database'; pageNames['/operations'] = 'Operations Hub'; pageNames['/skills-library'] = 'Skills Library'; if (it.currentPath?.startsWith('/skills/outputs/')) pageNames[it.currentPath] = 'Saved Output'; else if (it.currentPath?.startsWith('/skills/') && it.currentPath !== '/skills') pageNames[it.currentPath] = 'Skills Library'; %>
           <h1 class="topbar-title"><%= pageNames[it.currentPath] || 'Vendo OS' %></h1>
         </div>
         <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">

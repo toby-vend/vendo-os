@@ -14,3 +14,4 @@ export * from './ga4.js';
 export * from './gsc.js';
 export * from './attribution.js';
 export * from './dashboards.js';
+export * from './sidebar.js';
