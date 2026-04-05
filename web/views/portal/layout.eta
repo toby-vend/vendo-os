@@ -30,7 +30,8 @@
     Chart.defaults.elements.point.radius = 0;
     Chart.defaults.elements.point.hoverRadius = 5;
     Chart.defaults.elements.bar.borderRadius = 6;
-    Chart.defaults.scale.grid = { color: 'rgba(255, 255, 255, 0.04)', drawBorder: false };
+    Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.04)';
+    Chart.defaults.scale.border = { display: false };
   })();
   </script>
   <style>

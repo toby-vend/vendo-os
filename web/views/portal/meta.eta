@@ -56,17 +56,30 @@
 </div>
 <script>
 (function() {
-  var campaigns = <%~ JSON.stringify(chartCampaigns) %>;
+  var raw = <%~ JSON.stringify(chartCampaigns) %>;
+  var labels = []; var spendData = []; var convData = [];
+  for (var i = 0; i < raw.length; i++) {
+    labels.push(raw[i].name);
+    spendData.push(Number(raw[i].spend) || 0);
+    convData.push(Number(raw[i].conversions) || 0);
+  }
   new Chart(document.getElementById('metaSpendChart'), {
     type: 'bar',
     data: {
-      labels: campaigns.map(function(c) { return c.name; }),
-      datasets: [{ label: 'Spend', data: campaigns.map(function(c) { return c.spend; }), backgroundColor: 'rgba(59, 130, 246, 0.6)', borderColor: '#3B82F6', borderWidth: 1 }]
+      labels: labels,
+      datasets: [
+        { label: 'Spend', data: spendData, backgroundColor: 'rgba(59, 130, 246, 0.6)', borderColor: '#3B82F6', borderWidth: 1, yAxisID: 'y' },
+        { label: 'Conversions', data: convData, backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#22C55E', borderWidth: 1, yAxisID: 'y1' }
+      ]
     },
     options: {
-      indexAxis: 'y', responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { x: { beginAtZero: true, ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } } } }
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        y: { beginAtZero: true, position: 'left', ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } } },
+        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Conversions' } }
+      },
+      plugins: { legend: { position: 'bottom' } }
     }
   });
 })();
