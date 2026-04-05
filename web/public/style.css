@@ -242,7 +242,7 @@ body {
 
 .nav-group {
   margin: 0;
-  padding: 12px 0 4px;
+  padding: 14px 0 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -338,7 +338,7 @@ body {
 
 /* Standalone top-level items between groups */
 .nav-group-single {
-  padding: 8px 0 4px;
+  padding: 12px 0 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
