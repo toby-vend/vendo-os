@@ -26,30 +26,30 @@ function getClientId(request: any): number {
 
 export const portalRoutes: FastifyPluginAsync = async (app) => {
 
-  // GET /portal — Executive dashboard
+  // GET /portal — Home: Executive Summary
   app.get('/', async (request, reply) => {
     const q = request.query as Record<string, string>;
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [roi, leadsByChannel, funnel, pipelineStages, recentOpps, clientName] = await Promise.all([
-      getROISummary(clientId, days),
-      getLeadsByChannel(clientId, days),
-      getConversionFunnel(clientId, days),
-      getGhlPipelineSummary(clientId),
-      getGhlRecentOpportunities(clientId, 10),
+    const emptyGhl = { total_leads: 0, total_in_progress: 0, total_won: 0, total_revenue: 0, total_spend: 0, roi_percent: 0, cpl: 0, conversion_rate: 0, channels: [] as any[], treatments: [] as any[] };
+
+    const [ghlRoi, channelSpend, monthlyTrend, pipelineStages, clientName] = await Promise.all([
+      getGhlROI(clientId, days).catch(() => emptyGhl),
+      getChannelSpend(clientId, days).catch(() => []),
+      getMonthlyAdTrend(clientId).catch(() => []),
+      getGhlPipelineSummary(clientId).catch(() => []),
       getClientName(clientId),
     ]);
 
     reply.render('portal/dashboard', {
-      roi,
-      leadsByChannel,
-      funnel,
+      ghlRoi,
+      channelSpend,
+      monthlyTrend,
       pipelineStages,
-      recentOpps,
       clientName,
       days,
-      pageTitle: 'Dashboard',
+      pageTitle: 'Executive Summary',
     });
   });
 
@@ -117,50 +117,66 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     });
   });
 
-  // GET /portal/leads — Lead attribution
+  // GET /portal/leads — Lead Generation Overview
   app.get('/leads', async (request, reply) => {
     const q = request.query as Record<string, string>;
     const days = parseDays(q);
     const clientId = getClientId(request);
-    const page = Math.max(1, parseInt(q.page || '1', 10));
-    const pageSize = 50;
 
-    const filters = {
-      source: q.source || undefined,
-      treatment: q.treatment || undefined,
-      status: q.status || undefined,
-      page,
-      pageSize,
-    };
+    const emptyGhl = { total_leads: 0, total_in_progress: 0, total_won: 0, total_revenue: 0, total_spend: 0, roi_percent: 0, cpl: 0, conversion_rate: 0, channels: [] as any[], treatments: [] as any[] };
 
-    const ghlFilters = {
-      status: q.ghl_status || undefined,
-      tag: q.tag || undefined,
-      page,
-      pageSize,
-    };
-
-    const [leadsResult, sources, treatments, ghlResult, ghlTags, clientName] = await Promise.all([
-      getAttributedLeads(clientId, days, filters),
-      getLeadsBySource(clientId, days),
-      getLeadsByTreatment(clientId, days),
-      getGhlLeads(clientId, days, ghlFilters),
-      getGhlLeadTags(clientId, days),
+    const [ghlRoi, leadsBySource, leadsByTreatment, funnel, channelSpend, clientName] = await Promise.all([
+      getGhlROI(clientId, days).catch(() => emptyGhl),
+      getLeadsBySource(clientId, days).catch(() => []),
+      getLeadsByTreatment(clientId, days).catch(() => []),
+      getConversionFunnel(clientId, days).catch(() => []),
+      getChannelSpend(clientId, days).catch(() => []),
       getClientName(clientId),
     ]);
 
+    // Diagnostic flags
+    const totalSpend = channelSpend.reduce((s: number, c: any) => s + c.spend, 0);
+    const diagnostics = {
+      lowVolume: ghlRoi.total_leads < 10 && totalSpend > 500,
+      lowBookingRate: ghlRoi.total_leads > 0 && ghlRoi.total_in_progress > 0 ? false : ghlRoi.total_leads > 5,
+      lowWinRate: ghlRoi.total_leads > 5 && ghlRoi.conversion_rate < 30,
+    };
+
     reply.render('portal/leads', {
-      leadsResult,
-      sources,
-      treatments,
-      ghlResult,
-      ghlTags,
-      filters: { source: q.source || '', treatment: q.treatment || '', status: q.status || '', ghl_status: q.ghl_status || '', tag: q.tag || '' },
-      page,
-      pageSize,
+      ghlRoi,
+      leadsBySource,
+      leadsByTreatment,
+      funnel,
+      channelSpend,
+      diagnostics,
       clientName,
       days,
-      pageTitle: 'Lead Attribution',
+      pageTitle: 'Lead Generation',
+    });
+  });
+
+  // GET /portal/pipeline — CRM & Pipeline
+  app.get('/pipeline', async (request, reply) => {
+    const q = request.query as Record<string, string>;
+    const days = parseDays(q);
+    const clientId = getClientId(request);
+
+    const emptyGhl = { total_leads: 0, total_in_progress: 0, total_won: 0, total_revenue: 0, total_spend: 0, roi_percent: 0, cpl: 0, conversion_rate: 0, channels: [] as any[], treatments: [] as any[] };
+
+    const [ghlRoi, pipelineStages, recentOpps, clientName] = await Promise.all([
+      getGhlROI(clientId, days).catch(() => emptyGhl),
+      getGhlPipelineSummary(clientId).catch(() => []),
+      getGhlRecentOpportunities(clientId, 30).catch(() => []),
+      getClientName(clientId),
+    ]);
+
+    reply.render('portal/pipeline', {
+      ghlRoi,
+      pipelineStages,
+      recentOpps,
+      clientName,
+      days,
+      pageTitle: 'CRM & Pipeline',
     });
   });
 

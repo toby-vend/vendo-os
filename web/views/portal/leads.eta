@@ -2,195 +2,176 @@
 
 <div id="portal-leads-content">
 
-<!-- Filters -->
-<form class="portal-filters" method="GET" action="/portal/leads">
-  <input type="hidden" name="days" value="<%= it.days %>">
-  <div>
-    <label for="source">Source</label>
-    <select id="source" name="source" onchange="this.form.submit()">
-      <option value="">All Sources</option>
-      <% it.sources.forEach(s => { %>
-      <option value="<%= s.group %>" <%= it.filters.source === s.group ? 'selected' : '' %>><%= s.group.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) %> (<%= s.count %>)</option>
-      <% }) %>
-    </select>
-  </div>
-  <div>
-    <label for="treatment">Treatment</label>
-    <select id="treatment" name="treatment" onchange="this.form.submit()">
-      <option value="">All Treatments</option>
-      <% it.treatments.forEach(t => { %>
-      <option value="<%= t.group %>" <%= it.filters.treatment === t.group ? 'selected' : '' %>><%= t.group.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) %> (<%= t.count %>)</option>
-      <% }) %>
-    </select>
-  </div>
-  <div>
-    <label for="status">Status</label>
-    <select id="status" name="status" onchange="this.form.submit()">
-      <option value="">All Statuses</option>
-      <option value="lead" <%= it.filters.status === 'lead' ? 'selected' : '' %>>Lead</option>
-      <option value="qualified" <%= it.filters.status === 'qualified' ? 'selected' : '' %>>Qualified</option>
-      <option value="booked" <%= it.filters.status === 'booked' ? 'selected' : '' %>>Booked</option>
-      <option value="attended" <%= it.filters.status === 'attended' ? 'selected' : '' %>>Attended</option>
-      <option value="converted" <%= it.filters.status === 'converted' ? 'selected' : '' %>>Converted</option>
-      <option value="lost" <%= it.filters.status === 'lost' ? 'selected' : '' %>>Lost</option>
-    </select>
-  </div>
-</form>
+<%
+  const g = it.ghlRoi;
+  const hasGhl = g && g.total_leads > 0;
+  const totalSpend = it.channelSpend.reduce((s, c) => s + c.spend, 0);
+  const d = it.diagnostics;
+%>
 
+<!-- ===== Headline KPIs ===== -->
+
+<div class="portal-kpi-grid">
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= hasGhl ? g.total_leads : 0 %></div>
+    <div class="kpi-label">Total Leads</div>
+    <div class="kpi-sub">This period</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value">&pound;<%= hasGhl && g.cpl > 0 ? g.cpl.toFixed(2) : '0.00' %></div>
+    <div class="kpi-label">Blended Cost Per Lead</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= hasGhl ? g.total_won : 0 %></div>
+    <div class="kpi-label">Patients Won</div>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= hasGhl ? g.conversion_rate.toFixed(1) : '0.0' %>%</div>
+    <div class="kpi-label">Lead-to-Patient Rate</div>
+  </div>
+</div>
+
+<!-- ===== Leads by Source + Leads by Treatment ===== -->
+
+<div class="chart-row">
+  <% if (it.leadsBySource && it.leadsBySource.length > 0) { %>
+  <div class="chart-card">
+    <h3>Leads by Source</h3>
+    <div class="chart-wrap" style="max-width: 280px; margin: 0 auto;">
+      <canvas id="leadsBySourceChart"></canvas>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (it.leadsByTreatment && it.leadsByTreatment.length > 0) { %>
+  <div class="chart-card">
+    <h3>Leads by Treatment Type</h3>
+    <div class="chart-wrap">
+      <canvas id="leadsByTreatmentChart"></canvas>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<% if (it.leadsBySource.length > 0 || it.leadsByTreatment.length > 0) { %>
+<script>
+(function() {
+  var sourceColours = {
+    'google_ads': { bg: 'rgba(251, 191, 36, 0.6)', border: '#FBBF24' },
+    'meta_ads': { bg: 'rgba(59, 130, 246, 0.6)', border: '#3B82F6' },
+    'organic': { bg: 'rgba(167, 139, 250, 0.6)', border: '#A78BFA' },
+    'direct': { bg: 'rgba(245, 158, 11, 0.6)', border: '#F59E0B' },
+    'referral': { bg: 'rgba(236, 72, 153, 0.6)', border: '#EC4899' }
+  };
+  var fallback = { bg: 'rgba(148, 163, 184, 0.5)', border: '#94A3B8' };
+
+  <% if (it.leadsBySource.length > 0) { %>
+  var sources = <%~ JSON.stringify(it.leadsBySource) %>;
+  new Chart(document.getElementById('leadsBySourceChart'), {
+    type: 'doughnut',
+    data: {
+      labels: sources.map(function(s) { return s.group.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }); }),
+      datasets: [{
+        data: sources.map(function(s) { return s.count; }),
+        backgroundColor: sources.map(function(s) { return (sourceColours[s.group] || fallback).bg; }),
+        borderColor: sources.map(function(s) { return (sourceColours[s.group] || fallback).border; }),
+        borderWidth: 1, hoverOffset: 6
+      }]
+    },
+    options: { responsive: true, cutout: '60%', plugins: { legend: { position: 'bottom' } } }
+  });
+  <% } %>
+
+  <% if (it.leadsByTreatment.length > 0) { %>
+  var treatments = <%~ JSON.stringify(it.leadsByTreatment) %>;
+  var treatColours = ['rgba(34, 197, 94, 0.6)', 'rgba(59, 130, 246, 0.6)', 'rgba(167, 139, 250, 0.6)', 'rgba(251, 191, 36, 0.6)', 'rgba(236, 72, 153, 0.6)', 'rgba(148, 163, 184, 0.5)'];
+  new Chart(document.getElementById('leadsByTreatmentChart'), {
+    type: 'bar',
+    data: {
+      labels: treatments.map(function(t) { return t.group.replace(/\b\w/g, function(c) { return c.toUpperCase(); }); }),
+      datasets: [{ data: treatments.map(function(t) { return t.count; }), backgroundColor: treatments.map(function(t, i) { return treatColours[i % treatColours.length]; }), borderWidth: 0 }]
+    },
+    options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } }
+  });
+  <% } %>
+})();
+</script>
+<% } %>
+
+<!-- ===== Conversion Funnel ===== -->
+
+<% if (it.funnel && it.funnel.length > 0) { %>
+<div class="chart-card">
+  <h3>Conversion Funnel</h3>
+  <div class="chart-wrap">
+    <canvas id="leadsFunnelChart"></canvas>
+  </div>
+</div>
+<script>
+(function() {
+  var funnel = <%~ JSON.stringify(it.funnel) %>;
+  var funnelMap = {};
+  funnel.forEach(function(f) { funnelMap[f.stage] = f.count; });
+  var stages = ['lead', 'qualified', 'booked', 'attended', 'converted'];
+  var labels = ['Enquiries', 'Qualified', 'Booked', 'Attended', 'Patients'];
+  var data = stages.map(function(s) { return funnelMap[s] || 0; });
+  var colours = ['rgba(148, 163, 184, 0.6)', 'rgba(59, 130, 246, 0.6)', 'rgba(139, 92, 246, 0.6)', 'rgba(251, 191, 36, 0.6)', 'rgba(34, 197, 94, 0.7)'];
+
+  new Chart(document.getElementById('leadsFunnelChart'), {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ data: data, backgroundColor: colours, borderWidth: 0 }] },
+    options: {
+      indexAxis: 'y', responsive: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: function(ctx) {
+        if (ctx.dataIndex === 0 || data[ctx.dataIndex - 1] === 0) return '';
+        return (data[ctx.dataIndex] / data[ctx.dataIndex - 1] * 100).toFixed(1) + '% from ' + labels[ctx.dataIndex - 1].toLowerCase();
+      }}}},
+      scales: { x: { beginAtZero: true } }
+    }
+  });
+})();
+</script>
+<% } %>
+
+<!-- ===== Diagnostic Flags ===== -->
+
+<% if (hasGhl && (d.lowVolume || d.lowBookingRate || d.lowWinRate)) { %>
 <div class="portal-section">
-  <h2>Leads <span style="font-size: 14px; font-family: var(--vendo-font); color: var(--vendo-text-muted); font-weight: 400;">(<%= it.leadsResult.total.toLocaleString() %> total)</span></h2>
-
-  <% if (it.leadsResult.leads.length === 0) { %>
-    <div class="portal-empty">No leads match the selected filters.</div>
-  <% } else { %>
-    <table class="compact">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Name</th>
-          <th>Source</th>
-          <th>Treatment</th>
-          <th>Value</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% it.leadsResult.leads.forEach(l => { %>
-        <tr>
-          <td><%= l.lead_date %></td>
-          <td><%= l.contact_name || '—' %></td>
-          <td>
-            <%
-              const srcLabel = (l.attributed_source || 'unknown').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-            %>
-            <%= srcLabel %>
-            <% if (l.attribution_confidence === 'low') { %>
-              <span style="font-size: 10px; color: #F59E0B;" title="Low confidence attribution">*</span>
-            <% } %>
-          </td>
-          <td><%= l.treatment_type ? l.treatment_type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '—' %></td>
-          <td><%= l.treatment_value ? '&pound;' + l.treatment_value.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '—' %></td>
-          <td>
-            <%
-              const statusColours = { lead: '#94A3B8', qualified: '#3B82F6', booked: '#A78BFA', attended: '#F59E0B', converted: '#22C55E', lost: '#F87171' };
-              const colour = statusColours[l.conversion_status] || '#94A3B8';
-            %>
-            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; background: <%= colour %>22; color: <%= colour %>; text-transform: capitalize;"><%= l.conversion_status %></span>
-          </td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
-
-    <!-- Pagination -->
-    <%
-      const totalPages = Math.ceil(it.leadsResult.total / it.pageSize);
-      const page = it.page;
-      const baseUrl = `/portal/leads?days=${it.days}&source=${it.filters.source || ''}&treatment=${it.filters.treatment || ''}&status=${it.filters.status || ''}`;
-    %>
-    <% if (totalPages > 1) { %>
-    <div class="portal-pagination">
-      <span>Page <%= page %> of <%= totalPages %></span>
-      <div style="display: flex; gap: 0.5rem;">
-        <a href="<%= baseUrl %>&page=<%= page - 1 %>" class="<%= page <= 1 ? 'disabled' : '' %>">Previous</a>
-        <a href="<%= baseUrl %>&page=<%= page + 1 %>" class="<%= page >= totalPages ? 'disabled' : '' %>">Next</a>
+  <h2>Performance Diagnostics</h2>
+  <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+    <% if (d.lowVolume) { %>
+    <div class="diagnostic-flag diagnostic-warning">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>
+        <strong>Low lead volume</strong>
+        <p style="margin: 0.25rem 0 0; color: var(--vendo-text-muted); font-size: 13px;">Only <%= g.total_leads %> leads with &pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %> spend. Creative strategy and targeting should be reviewed.</p>
       </div>
     </div>
     <% } %>
-  <% } %>
-</div>
-
-<% if (it.ghlResult && it.ghlResult.total > 0) { %>
-<div class="portal-section" style="margin-top: 1.5rem;">
-  <h2>Pipeline Leads <span style="font-size: 14px; font-family: var(--vendo-font); color: var(--vendo-text-muted); font-weight: 400;">(<%= it.ghlResult.total.toLocaleString() %> total)</span></h2>
-
-  <!-- Tag + Status Filters -->
-  <form class="portal-filters" method="GET" action="/portal/leads" style="margin-bottom: 1rem;">
-    <input type="hidden" name="days" value="<%= it.days %>">
-    <% if (it.filters.source) { %><input type="hidden" name="source" value="<%= it.filters.source %>"><% } %>
-    <% if (it.filters.treatment) { %><input type="hidden" name="treatment" value="<%= it.filters.treatment %>"><% } %>
-    <% if (it.filters.status) { %><input type="hidden" name="status" value="<%= it.filters.status %>"><% } %>
-    <div>
-      <label for="ghl_status">Status</label>
-      <select id="ghl_status" name="ghl_status" onchange="this.form.submit()">
-        <option value="">All</option>
-        <option value="open" <%= it.filters.ghl_status === 'open' ? 'selected' : '' %>>Open</option>
-        <option value="won" <%= it.filters.ghl_status === 'won' ? 'selected' : '' %>>Won</option>
-        <option value="lost" <%= it.filters.ghl_status === 'lost' ? 'selected' : '' %>>Lost</option>
-        <option value="abandoned" <%= it.filters.ghl_status === 'abandoned' ? 'selected' : '' %>>Abandoned</option>
-      </select>
-    </div>
-    <% if (it.ghlTags && it.ghlTags.length > 0) { %>
-    <div>
-      <label for="tag">Tag</label>
-      <select id="tag" name="tag" onchange="this.form.submit()">
-        <option value="">All Tags</option>
-        <% it.ghlTags.forEach(t => { %>
-        <option value="<%= t.tag %>" <%= it.filters.tag === t.tag ? 'selected' : '' %>><%= t.tag %> (<%= t.count %>)</option>
-        <% }) %>
-      </select>
+    <% if (d.lowBookingRate) { %>
+    <div class="diagnostic-flag diagnostic-amber">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <div>
+        <strong>Leads not converting to bookings</strong>
+        <p style="margin: 0.25rem 0 0; color: var(--vendo-text-muted); font-size: 13px;">Follow-up process and response times should be reviewed.</p>
+      </div>
     </div>
     <% } %>
-  </form>
-
-  <table class="compact">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Contact</th>
-        <th>Pipeline</th>
-        <th>Stage</th>
-        <th>Source</th>
-        <th>Tags</th>
-        <th>Value</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% it.ghlResult.leads.forEach(l => { %>
-      <tr>
-        <td><%= l.created_at ? l.created_at.slice(0, 10) : '—' %></td>
-        <td>
-          <%= l.contact_name || '—' %>
-          <% if (l.contact_email) { %>
-          <div style="font-size: 11px; color: #64748B;"><%= l.contact_email %></div>
-          <% } %>
-        </td>
-        <td style="font-size: 12px; color: #94A3B8;"><%= l.pipeline_name || '—' %></td>
-        <td><%= l.stage_name || '—' %></td>
-        <td style="font-size: 12px; color: #94A3B8;"><%= l.opp_source || '—' %></td>
-        <td>
-          <% if (l.tags) { try { const tags = JSON.parse(l.tags); tags.forEach(t => { %>
-            <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: rgba(59,130,246,0.12); color: #60A5FA; margin: 1px 2px;"><%= t %></span>
-          <% }); } catch {} } else { %>—<% } %>
-        </td>
-        <td><%= l.monetary_value ? '&pound;' + l.monetary_value.toLocaleString('en-GB', { minimumFractionDigits: 0 }) : '—' %></td>
-        <td>
-          <%
-            const ghlColours = { open: '#3B82F6', won: '#22C55E', lost: '#F87171', abandoned: '#94A3B8' };
-            const gc = ghlColours[l.status] || '#94A3B8';
-          %>
-          <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; background: <%= gc %>22; color: <%= gc %>; text-transform: capitalize;"><%= l.status %></span>
-        </td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
-
-  <%
-    const ghlPages = Math.ceil(it.ghlResult.total / it.pageSize);
-    const ghlBase = `/portal/leads?days=${it.days}&ghl_status=${it.filters.ghl_status || ''}&tag=${it.filters.tag || ''}`;
-  %>
-  <% if (ghlPages > 1) { %>
-  <div class="portal-pagination">
-    <span>Page <%= it.page %> of <%= ghlPages %></span>
-    <div style="display: flex; gap: 0.5rem;">
-      <a href="<%= ghlBase %>&page=<%= it.page - 1 %>" class="<%= it.page <= 1 ? 'disabled' : '' %>">Previous</a>
-      <a href="<%= ghlBase %>&page=<%= it.page + 1 %>" class="<%= it.page >= ghlPages ? 'disabled' : '' %>">Next</a>
+    <% if (d.lowWinRate) { %>
+    <div class="diagnostic-flag diagnostic-red">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <div>
+        <strong>Low patient conversion (<%= g.conversion_rate.toFixed(1) %>%)</strong>
+        <p style="margin: 0.25rem 0 0; color: var(--vendo-text-muted); font-size: 13px;">Only <%= g.total_won %> of <%= g.total_leads %> leads converted. Sales process and front desk handling should be reviewed.</p>
+      </div>
     </div>
+    <% } %>
   </div>
-  <% } %>
 </div>
+<% } %>
+
+<% if (!hasGhl && (!it.leadsBySource || it.leadsBySource.length === 0)) { %>
+<div class="portal-empty">No lead data available for this period.</div>
 <% } %>
 
 </div>

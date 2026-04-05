@@ -290,19 +290,23 @@
           <span class="nav-section-label">Reports</span>
           <a href="/portal" class="nav-item<%= it.currentPath === '/portal' ? ' active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            <span class="nav-label">Dashboard</span>
+            <span class="nav-label">Home</span>
           </a>
-          <a href="/portal/seo" class="nav-item<%= it.currentPath === '/portal/seo' ? ' active' : '' %>">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span class="nav-label">SEO</span>
+          <a href="/portal/leads" class="nav-item<%= it.currentPath === '/portal/leads' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            <span class="nav-label">Lead Generation</span>
           </a>
           <a href="/portal/ads" class="nav-item<%= it.currentPath === '/portal/ads' ? ' active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
             <span class="nav-label">Ad Performance</span>
           </a>
-          <a href="/portal/leads" class="nav-item<%= it.currentPath === '/portal/leads' ? ' active' : '' %>">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-            <span class="nav-label">Leads</span>
+          <a href="/portal/pipeline" class="nav-item<%= it.currentPath === '/portal/pipeline' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <span class="nav-label">CRM & Pipeline</span>
+          </a>
+          <a href="/portal/seo" class="nav-item<%= it.currentPath === '/portal/seo' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span class="nav-label">SEO</span>
           </a>
         </div>
       </nav>

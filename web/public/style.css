@@ -1427,3 +1427,112 @@ details.portal-section[open] summary {
   border-bottom: 1px solid var(--glass-border);
   color: var(--vendo-text);
 }
+
+/* === Portal Nav Cards (Home page) === */
+
+.portal-nav-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.portal-nav-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.portal-nav-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.portal-nav-card strong {
+  display: block;
+  color: var(--vendo-text-heading);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.portal-nav-card span {
+  font-size: 12px;
+  color: var(--vendo-text-muted);
+}
+
+.portal-nav-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* === Diagnostic Flags === */
+
+.diagnostic-flag {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.diagnostic-flag svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.diagnostic-flag strong {
+  color: var(--vendo-text-heading);
+}
+
+.diagnostic-warning {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+  color: #FBBF24;
+}
+
+.diagnostic-amber {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+}
+
+.diagnostic-red {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+}
+
+/* === Pipeline Stage Cards === */
+
+.pipeline-stage-card {
+  padding: 1rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.pipeline-stage-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
