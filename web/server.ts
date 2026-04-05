@@ -272,6 +272,15 @@ app.addHook('preHandler', async (request, reply) => {
   }
 });
 
+// 404 handler
+app.setNotFoundHandler((request, reply) => {
+  if (request.headers['hx-request']) {
+    reply.code(404).send('Not found');
+  } else {
+    reply.code(404).type('text/html').send(eta.render('404', {}));
+  }
+});
+
 // Global error handler — prevent leaking internal details
 app.setErrorHandler((error, request, reply) => {
   if (process.env.VERCEL) {
