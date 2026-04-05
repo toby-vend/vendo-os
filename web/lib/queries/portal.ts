@@ -18,7 +18,7 @@ export interface PortalCampaignRow {
 // --- Client-scoped campaign breakdowns ---
 
 export async function getMetaCampaignsForClient(clientId: number, days = 30): Promise<PortalCampaignRow[]> {
-  return rows<PortalCampaignRow>(`
+  const rawRows = await rows<PortalCampaignRow & { actions_json: string | null }>(`
     SELECT mi.campaign_id, mi.campaign_name,
            'meta_ads' as platform,
            SUM(mi.impressions) as impressions,
@@ -27,7 +27,7 @@ export async function getMetaCampaignsForClient(clientId: number, days = 30): Pr
            CASE WHEN SUM(mi.clicks) > 0 THEN ROUND(SUM(mi.spend) / SUM(mi.clicks), 2) ELSE 0 END as cpc,
            CASE WHEN SUM(mi.impressions) > 0 THEN ROUND(SUM(mi.spend) / SUM(mi.impressions) * 1000, 2) ELSE 0 END as cpm,
            CASE WHEN SUM(mi.impressions) > 0 THEN ROUND(CAST(SUM(mi.clicks) AS REAL) / SUM(mi.impressions) * 100, 2) ELSE 0 END as ctr,
-           0 as conversions
+           GROUP_CONCAT(mi.actions, '|||') as actions_json
     FROM meta_insights mi
     JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source ='meta'
     WHERE csm.client_id = ?
@@ -36,6 +36,16 @@ export async function getMetaCampaignsForClient(clientId: number, days = 30): Pr
     GROUP BY mi.campaign_id, mi.campaign_name
     ORDER BY spend DESC
   `, [clientId, days]);
+
+  return rawRows.map(r => {
+    let conversions = 0;
+    if (r.actions_json) {
+      for (const chunk of String(r.actions_json).split('|||')) {
+        conversions += extractMetaConversions(chunk);
+      }
+    }
+    return { ...r, conversions, actions_json: undefined } as PortalCampaignRow;
+  });
 }
 
 export async function getGadsCampaignsForClient(clientId: number, days = 30): Promise<PortalCampaignRow[]> {
@@ -228,18 +238,36 @@ export interface MetaAdRow {
   ctr: number;
   reach: number;
   frequency: number;
+  thumbnail_url: string | null;
+  conversions: number;
+}
+
+/** Extract dental conversions (View Content + Instant Form/Lead) from Meta actions JSON */
+function extractMetaConversions(actionsJson: string | null): number {
+  if (!actionsJson) return 0;
+  try {
+    const actions: Array<{ action_type: string; value: string }> = JSON.parse(actionsJson);
+    let total = 0;
+    for (const a of actions) {
+      if (a.action_type.includes('view_content') || a.action_type === 'lead' || a.action_type.includes('lead_grouped') || a.action_type === 'onsite_conversion.messaging_first_reply') {
+        total += parseInt(a.value, 10) || 0;
+      }
+    }
+    return total;
+  } catch { return 0; }
 }
 
 export async function getMetaTopAds(clientId: number, days = 30, limit = 10): Promise<MetaAdRow[]> {
-  return rows<MetaAdRow>(`
-    SELECT mi.ad_id, mi.ad_name, mi.campaign_name,
+  const rawRows = await rows<MetaAdRow & { actions_json: string | null }>(`
+    SELECT mi.ad_id, mi.ad_name, mi.campaign_name, MAX(mi.thumbnail_url) as thumbnail_url,
            SUM(mi.impressions) as impressions,
            SUM(mi.clicks) as clicks,
            SUM(mi.spend) as spend,
            CASE WHEN SUM(mi.clicks) > 0 THEN ROUND(SUM(mi.spend) / SUM(mi.clicks), 2) ELSE 0 END as cpc,
            CASE WHEN SUM(mi.impressions) > 0 THEN ROUND(CAST(SUM(mi.clicks) AS REAL) / SUM(mi.impressions) * 100, 2) ELSE 0 END as ctr,
            COALESCE(SUM(mi.reach), 0) as reach,
-           CASE WHEN SUM(mi.reach) > 0 THEN ROUND(CAST(SUM(mi.impressions) AS REAL) / SUM(mi.reach), 2) ELSE 0 END as frequency
+           CASE WHEN SUM(mi.reach) > 0 THEN ROUND(CAST(SUM(mi.impressions) AS REAL) / SUM(mi.reach), 2) ELSE 0 END as frequency,
+           GROUP_CONCAT(mi.actions, '|||') as actions_json
     FROM meta_insights mi
     JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source = 'meta'
     WHERE csm.client_id = ?
@@ -250,6 +278,17 @@ export async function getMetaTopAds(clientId: number, days = 30, limit = 10): Pr
     ORDER BY spend DESC
     LIMIT ?
   `, [clientId, days, limit]);
+
+  return rawRows.map(r => {
+    // Parse concatenated actions JSON arrays
+    let conversions = 0;
+    if (r.actions_json) {
+      for (const chunk of String(r.actions_json).split('|||')) {
+        conversions += extractMetaConversions(chunk);
+      }
+    }
+    return { ...r, conversions, actions_json: undefined } as MetaAdRow;
+  });
 }
 
 // --- Meta Ads: reach & engagement summary ---

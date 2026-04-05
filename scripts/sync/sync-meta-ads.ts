@@ -102,6 +102,45 @@ async function syncMetaAds() {
       }
     }
 
+    // 3. Fetch ad creative thumbnails for ad-level records missing them
+    log('META', 'Fetching ad creative thumbnails...');
+
+    // Add column if it doesn't exist (migration-safe)
+    try { db.run('ALTER TABLE meta_insights ADD COLUMN thumbnail_url TEXT'); } catch { /* already exists */ }
+
+    const adsNeedingThumbnail = db.exec(
+      `SELECT DISTINCT ad_id FROM meta_insights WHERE level = 'ad' AND ad_id IS NOT NULL AND thumbnail_url IS NULL LIMIT 50`
+    );
+
+    if (adsNeedingThumbnail.length && adsNeedingThumbnail[0].values.length) {
+      const updateThumb = db.prepare('UPDATE meta_insights SET thumbnail_url = ? WHERE ad_id = ?');
+      let thumbCount = 0;
+
+      for (const [adId] of adsNeedingThumbnail[0].values) {
+        try {
+          const resp = await fetch(
+            `https://graph.facebook.com/v21.0/${adId}?fields=creative{thumbnail_url,image_url}&access_token=${process.env.META_ACCESS_TOKEN}`
+          );
+          if (resp.ok) {
+            const adData = await resp.json();
+            const thumbUrl = adData?.creative?.thumbnail_url || adData?.creative?.image_url || null;
+            if (thumbUrl) {
+              updateThumb.run([thumbUrl, adId as string]);
+              thumbCount++;
+            }
+          }
+        } catch {
+          // Non-fatal — some ads may not have creatives
+        }
+      }
+
+      updateThumb.free();
+      if (thumbCount > 0) {
+        saveDb();
+        log('META', `  Fetched ${thumbCount} thumbnails`);
+      }
+    }
+
     log('META', `Sync complete: ${totalRows} insight rows across ${activeAccounts.length} accounts`);
 
     // Auto-resolve Meta accounts to canonical clients

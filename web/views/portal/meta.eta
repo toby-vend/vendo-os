@@ -4,8 +4,8 @@
 
 <%
   const e = it.engagement;
-  const totalLeads = it.metaCampaigns.reduce((s, c) => s + c.conversions, 0);
-  const cpl = totalLeads > 0 ? it.metaSpend / totalLeads : 0;
+  const totalConversions = it.metaCampaigns.reduce((s, c) => s + c.conversions, 0);
+  const cpl = totalConversions > 0 ? it.metaSpend / totalConversions : 0;
 %>
 
 <!-- KPIs -->
@@ -19,8 +19,9 @@
     <div class="kpi-label">Cost Per Lead</div>
   </div>
   <div class="portal-kpi">
-    <div class="kpi-value"><%= it.totalClicks.toLocaleString() %></div>
-    <div class="kpi-label">Clicks</div>
+    <div class="kpi-value"><%= totalConversions.toLocaleString() %></div>
+    <div class="kpi-label">Conversions</div>
+    <div class="kpi-sub">View Content + Leads</div>
   </div>
   <div class="portal-kpi">
     <div class="kpi-value"><%= e.total_reach.toLocaleString() %></div>
@@ -68,24 +69,30 @@
 <% if (it.topAds && it.topAds.length > 0) { %>
 <div class="portal-section">
   <h2>Top Performing Ads</h2>
-  <table class="compact">
-    <thead>
-      <tr><th>Ad</th><th>Campaign</th><th>Spend</th><th>Clicks</th><th>CTR</th><th>CPC</th><th>Reach</th></tr>
-    </thead>
-    <tbody>
-      <% it.topAds.forEach(ad => { %>
-      <tr>
-        <td><%= ad.ad_name || ad.ad_id %></td>
-        <td style="color: var(--vendo-text-muted); font-size: 12px;"><%= ad.campaign_name || '—' %></td>
-        <td>&pound;<%= ad.spend.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td>
-        <td><%= ad.clicks.toLocaleString() %></td>
-        <td><%= ad.ctr.toFixed(2) %>%</td>
-        <td>&pound;<%= ad.cpc.toFixed(2) %></td>
-        <td><%= ad.reach.toLocaleString() %></td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
+  <div class="top-ads-grid">
+    <% it.topAds.slice(0, 6).forEach(ad => { %>
+    <div class="top-ad-card">
+      <% if (ad.thumbnail_url) { %>
+      <div class="top-ad-thumb">
+        <img src="<%= ad.thumbnail_url %>" alt="<%= ad.ad_name || 'Ad creative' %>" loading="lazy" />
+      </div>
+      <% } else { %>
+      <div class="top-ad-thumb top-ad-thumb-empty">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <% } %>
+      <div class="top-ad-info">
+        <div class="top-ad-name"><%= ad.ad_name || ad.ad_id %></div>
+        <div class="top-ad-campaign"><%= ad.campaign_name || '—' %></div>
+        <div class="top-ad-stats">
+          <span>&pound;<%= ad.spend.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %> spent</span>
+          <span><%= ad.clicks.toLocaleString() %> clicks</span>
+          <% if (ad.conversions > 0) { %><span style="color: var(--vendo-green); font-weight: 600;"><%= ad.conversions %> conversions</span><% } else { %><span><%= ad.ctr.toFixed(2) %>% CTR</span><% } %>
+        </div>
+      </div>
+    </div>
+    <% }) %>
+  </div>
 </div>
 <% } %>
 
@@ -95,7 +102,7 @@
   <h2>Campaign Breakdown</h2>
   <table class="compact">
     <thead>
-      <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CTR</th></tr>
+      <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CTR</th><th>Conversions</th></tr>
     </thead>
     <tbody>
       <% it.metaCampaigns.forEach(c => { %>
@@ -106,6 +113,7 @@
         <td><%= c.clicks.toLocaleString() %></td>
         <td>&pound;<%= c.cpc.toFixed(2) %></td>
         <td><%= c.ctr.toFixed(2) %>%</td>
+        <td><%= c.conversions %></td>
       </tr>
       <% }) %>
     </tbody>
