@@ -6,8 +6,8 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-const PAT = process.env.ASANA_PAT;
-const WORKSPACE_ID = process.env.ASANA_WORKSPACE_ID;
+const PAT = process.env.ASANA_PAT || process.env.ASANA_API_KEY;
+const WORKSPACE_ID = process.env.ASANA_WORKSPACE_ID || process.env.ASANA_WORKSPACE_GID;
 const BASE_URL = 'https://app.asana.com/api/1.0';
 
 interface AsanaTaskResult {
