@@ -33,6 +33,153 @@
   </article>
 </div>
 
+<!-- Sales Funnel -->
+<div class="chart-card">
+  <h3>Sales Funnel</h3>
+  <div class="funnel-container" id="funnel-<%= pipe.pipeline_id %>"></div>
+</div>
+
+<script>
+(function() {
+  var allStages = <%~ JSON.stringify(pipe.stages) %>;
+  var stages = allStages.filter(function(s) {
+    return s.name.toLowerCase().indexOf('lost') === -1;
+  });
+  if (!stages.length) return;
+
+  var colours = [
+    'rgba(59, 130, 246, 0.65)',
+    'rgba(139, 92, 246, 0.65)',
+    'rgba(251, 191, 36, 0.65)',
+    'rgba(34, 197, 94, 0.65)',
+    'rgba(34, 197, 94, 0.9)'
+  ];
+  var hoverColours = [
+    'rgba(59, 130, 246, 0.9)',
+    'rgba(139, 92, 246, 0.9)',
+    'rgba(251, 191, 36, 0.9)',
+    'rgba(34, 197, 94, 0.9)',
+    'rgba(34, 197, 94, 1)'
+  ];
+
+  var container = document.getElementById('funnel-<%= pipe.pipeline_id %>');
+  if (!container) return;
+
+  var W = 560, H = 60 + stages.length * 72;
+  var pad = 30, gap = 4, centerX = W / 2;
+  var usableH = H - pad * 2;
+  var segH = (usableH - (stages.length - 1) * gap) / stages.length;
+  var maxCount = Math.max.apply(null, stages.map(function(s) { return s.count; })) || 1;
+
+  // Build SVG
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+  // Tooltip
+  var tooltip = document.createElement('div');
+  tooltip.className = 'funnel-tooltip';
+  container.appendChild(tooltip);
+
+  function showTip(evt, stage, i) {
+    var rect = container.getBoundingClientRect();
+    var x = evt.clientX - rect.left + 12;
+    var y = evt.clientY - rect.top - 10;
+    var conv = '';
+    if (i > 0 && stages[i - 1].count > 0) {
+      conv = '<div class="tt-row">' + (stages[i].count / stages[i - 1].count * 100).toFixed(1) + '% from ' + stages[i - 1].name + '</div>';
+    }
+    tooltip.innerHTML = '<div class="tt-title">' + stage.name + '</div>' +
+      '<div class="tt-row">' + stage.count + ' deal' + (stage.count !== 1 ? 's' : '') + '</div>' +
+      '<div class="tt-row">&pound;' + Math.round(stage.value).toLocaleString() + '</div>' + conv;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+    tooltip.classList.add('visible');
+  }
+
+  function hideTip() { tooltip.classList.remove('visible'); }
+
+  stages.forEach(function(stage, i) {
+    var ratio = Math.max(stage.count / maxCount, 0.22);
+    var nextRatio;
+    if (i < stages.length - 1) {
+      nextRatio = Math.max(stages[i + 1].count / maxCount, 0.22);
+    } else {
+      nextRatio = ratio * 0.55;
+    }
+
+    var topW = ratio * (W - pad * 2);
+    var botW = nextRatio * (W - pad * 2);
+    var y1 = pad + i * (segH + gap);
+    var y2 = y1 + segH;
+
+    // Trapezoid path
+    var d = 'M' + (centerX - topW / 2) + ' ' + y1 +
+            'L' + (centerX + topW / 2) + ' ' + y1 +
+            'L' + (centerX + botW / 2) + ' ' + y2 +
+            'L' + (centerX - botW / 2) + ' ' + y2 + 'Z';
+
+    var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'funnel-segment');
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', colours[i % colours.length]);
+    path.setAttribute('stroke', 'rgba(255,255,255,0.06)');
+    path.setAttribute('stroke-width', '1');
+    g.appendChild(path);
+
+    // Stage label
+    var midY = (y1 + y2) / 2;
+    var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', centerX);
+    label.setAttribute('y', midY - 6);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('class', 'funnel-label');
+    label.textContent = stage.name;
+    g.appendChild(label);
+
+    // Sub-label: count + value
+    var sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    sub.setAttribute('x', centerX);
+    sub.setAttribute('y', midY + 12);
+    sub.setAttribute('text-anchor', 'middle');
+    sub.setAttribute('class', 'funnel-sublabel');
+    sub.textContent = stage.count + ' deal' + (stage.count !== 1 ? 's' : '') +
+      '  \u00B7  \u00A3' + Math.round(stage.value).toLocaleString();
+    g.appendChild(sub);
+
+    // Hover events
+    g.addEventListener('mouseenter', function(e) {
+      path.setAttribute('fill', hoverColours[i % hoverColours.length]);
+      showTip(e, stage, i);
+    });
+    g.addEventListener('mousemove', function(e) { showTip(e, stage, i); });
+    g.addEventListener('mouseleave', function() {
+      path.setAttribute('fill', colours[i % colours.length]);
+      hideTip();
+    });
+    g.addEventListener('click', function(e) { showTip(e, stage, i); });
+
+    svg.appendChild(g);
+
+    // Conversion rate between segments
+    if (i > 0 && stages[i - 1].count > 0) {
+      var convRate = (stage.count / stages[i - 1].count * 100).toFixed(0);
+      var convText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      convText.setAttribute('x', W - pad + 4);
+      convText.setAttribute('y', y1 + 3);
+      convText.setAttribute('text-anchor', 'start');
+      convText.setAttribute('class', 'funnel-conversion');
+      convText.textContent = '\u2193 ' + convRate + '%';
+      svg.appendChild(convText);
+    }
+  });
+
+  container.appendChild(svg);
+})();
+</script>
+
 <!-- Stage breakdown -->
 <h3>Stages</h3>
 <table class="compact">
