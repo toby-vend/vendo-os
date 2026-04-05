@@ -12,17 +12,19 @@
         <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Xero Name</th>
         <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Vertical</th>
         <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Status</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="GoHighLevel">GHL</th>
         <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Meta Ads">Meta</th>
         <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Google Ads">GAds</th>
-        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Asana">Asana</th>
-        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="GoHighLevel">GHL</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="GA4 Analytics">GA4</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Search Console">GSC</th>
         <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Harvest">Harvest</th>
+        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;" title="Asana">Asana</th>
         <th style="text-align: right; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;"></th>
       </tr>
     </thead>
     <tbody>
       <% if (!it.clients.length) { %>
-      <tr><td colspan="10" style="padding: 2rem; text-align: center; color: #94A3B8;">No clients found. Run Xero sync first.</td></tr>
+      <tr><td colspan="12" style="padding: 2rem; text-align: center; color: #94A3B8;">No clients found. Run Xero sync first.</td></tr>
       <% } %>
       <% it.clients.forEach(c => { %>
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
@@ -40,7 +42,7 @@
             <%= c.status %>
           </span>
         </td>
-        <% ['meta', 'gads', 'asana', 'ghl', 'harvest'].forEach(src => { %>
+        <% ['ghl', 'meta', 'gads', 'ga4', 'gsc', 'harvest', 'asana'].forEach(src => { %>
         <td style="padding: 0.65rem 0.5rem; text-align: center;">
           <% const count = c[src + '_count']; %>
           <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%;

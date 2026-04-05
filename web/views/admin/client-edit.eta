@@ -81,10 +81,13 @@
 
   <%
     const sources = [
+      { key: 'ghl', label: 'GoHighLevel', colour: '#4ADE80', unlinked: it.unlinkedGhl },
       { key: 'meta', label: 'Meta Ads', colour: '#1877F2', unlinked: it.unlinkedMeta },
       { key: 'gads', label: 'Google Ads', colour: '#FBBC05', unlinked: it.unlinkedGads },
+      { key: 'ga4', label: 'GA4', colour: '#E37400', unlinked: it.unlinkedGa4 || [] },
+      { key: 'gsc', label: 'Search Console', colour: '#4285F4', unlinked: it.unlinkedGsc || [] },
+      { key: 'harvest', label: 'Harvest', colour: '#F36C00', unlinked: it.unlinkedHarvest || [] },
       { key: 'asana', label: 'Asana', colour: '#F06A6A', unlinked: it.unlinkedAsana },
-      { key: 'ghl', label: 'GoHighLevel', colour: '#4ADE80', unlinked: it.unlinkedGhl },
     ];
     const mappingsBySource = {};
     it.mappings.forEach(m => {

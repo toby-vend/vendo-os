@@ -9,6 +9,9 @@ import {
   getUnlinkedGadsAccounts,
   getUnlinkedAsanaProjects,
   getUnlinkedGhlCompanies,
+  getUnlinkedHarvestClients,
+  getUnlinkedGa4Properties,
+  getUnlinkedGscSites,
 } from '../../lib/queries.js';
 
 export const adminClientsRoutes: FastifyPluginAsync = async (app) => {
@@ -24,11 +27,14 @@ export const adminClientsRoutes: FastifyPluginAsync = async (app) => {
     const data = await getAdminClientDetail(Number(id));
     if (!data.client) { reply.code(404).send('Client not found'); return; }
 
-    const [unlinkedMeta, unlinkedGads, unlinkedAsana, unlinkedGhl] = await Promise.all([
+    const [unlinkedMeta, unlinkedGads, unlinkedAsana, unlinkedGhl, unlinkedHarvest, unlinkedGa4, unlinkedGsc] = await Promise.all([
       getUnlinkedMetaAccounts(),
       getUnlinkedGadsAccounts(),
       getUnlinkedAsanaProjects(),
       getUnlinkedGhlCompanies(),
+      getUnlinkedHarvestClients(),
+      getUnlinkedGa4Properties(),
+      getUnlinkedGscSites(),
     ]);
 
     reply.render('admin/client-edit', {
@@ -37,6 +43,9 @@ export const adminClientsRoutes: FastifyPluginAsync = async (app) => {
       unlinkedGads,
       unlinkedAsana,
       unlinkedGhl,
+      unlinkedHarvest,
+      unlinkedGa4,
+      unlinkedGsc,
     });
   });
 

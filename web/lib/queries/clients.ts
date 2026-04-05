@@ -19,6 +19,8 @@ export interface AdminClientRow {
   asana_count: number;
   ghl_count: number;
   harvest_count: number;
+  ga4_count: number;
+  gsc_count: number;
 }
 
 export interface SourceMapping {
@@ -47,7 +49,9 @@ export async function getAllClientsAdmin(): Promise<AdminClientRow[]> {
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'gads') as gads_count,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'asana') as asana_count,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'ghl') as ghl_count,
-           (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'harvest') as harvest_count
+           (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'harvest') as harvest_count,
+           (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'ga4') as ga4_count,
+           (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'gsc') as gsc_count
     FROM clients c
     ORDER BY COALESCE(c.display_name, c.name) COLLATE NOCASE
   `);
@@ -63,7 +67,9 @@ export async function getAdminClientDetail(clientId: number): Promise<{ client: 
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'gads') as gads_count,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'asana') as asana_count,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'ghl') as ghl_count,
-           (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'harvest') as harvest_count
+           (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'harvest') as harvest_count,
+           (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'ga4') as ga4_count,
+           (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'gsc') as gsc_count
     FROM clients c WHERE c.id = ?
   `, [clientId]);
   const client = clients[0] ?? null;
