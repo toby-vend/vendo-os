@@ -1,7 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend, getRevenueByChannel, getROIByTreatment, getGhlROI, getMonthlyAdTrend } from '../lib/queries/roi.js';
-import { getGA4Summary, getGA4TrafficSources, getOrganicTrend } from '../lib/queries/ga4.js';
-import { getGSCSummary, getTopQueries, getTopPages } from '../lib/queries/gsc.js';
+import { getGA4Summary, getGA4TrafficSources, getOrganicTrend, getGA4EngagementSummary, getGA4EngagementSummaryPrior } from '../lib/queries/ga4.js';
+import { getGSCSummary, getTopQueries, getTopPages, getGSCDailyTrend, getGSCSummaryPrior, getPositionDistribution, getCTROpportunities, getPositionMovers } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
 import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags, getMetaTopAds, getMetaEngagement, getGadsTopKeywords } from '../lib/queries/portal.js';
 
@@ -59,13 +59,27 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [ga4Summary, trafficSources, organicTrend, gscSummary, topQueries, topPages, clientName] = await Promise.all([
+    const [
+      ga4Summary, trafficSources, organicTrend,
+      gscSummary, gscPrior, gscTrend,
+      topQueries, topPages,
+      positionDist, ctrOpportunities, positionMovers,
+      ga4Engagement, ga4EngagementPrior,
+      clientName,
+    ] = await Promise.all([
       getGA4Summary(clientId, days),
       getGA4TrafficSources(clientId, days),
       getOrganicTrend(clientId, days),
       getGSCSummary(clientId, days),
+      getGSCSummaryPrior(clientId, days),
+      getGSCDailyTrend(clientId, days),
       getTopQueries(clientId, days, 20),
       getTopPages(clientId, days, 20),
+      getPositionDistribution(clientId, days),
+      getCTROpportunities(clientId, days, 10),
+      getPositionMovers(clientId, days, 10),
+      getGA4EngagementSummary(clientId, days),
+      getGA4EngagementSummaryPrior(clientId, days),
       getClientName(clientId),
     ]);
 
@@ -74,8 +88,15 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       trafficSources,
       organicTrend,
       gscSummary,
+      gscPrior,
+      gscTrend,
       topQueries,
       topPages,
+      positionDist,
+      ctrOpportunities,
+      positionMovers,
+      ga4Engagement,
+      ga4EngagementPrior,
       clientName,
       days,
       pageTitle: 'SEO Performance',
@@ -281,13 +302,26 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [ga4Summary, trafficSources, organicTrend, gscSummary, topQueries, topPages] = await Promise.all([
+    const [
+      ga4Summary, trafficSources, organicTrend,
+      gscSummary, gscPrior, gscTrend,
+      topQueries, topPages,
+      positionDist, ctrOpportunities, positionMovers,
+      ga4Engagement, ga4EngagementPrior,
+    ] = await Promise.all([
       getGA4Summary(clientId, days),
       getGA4TrafficSources(clientId, days),
       getOrganicTrend(clientId, days),
       getGSCSummary(clientId, days),
+      getGSCSummaryPrior(clientId, days),
+      getGSCDailyTrend(clientId, days),
       getTopQueries(clientId, days, 20),
       getTopPages(clientId, days, 20),
+      getPositionDistribution(clientId, days),
+      getCTROpportunities(clientId, days, 10),
+      getPositionMovers(clientId, days, 10),
+      getGA4EngagementSummary(clientId, days),
+      getGA4EngagementSummaryPrior(clientId, days),
     ]);
 
     reply.render('portal/seo', {
@@ -295,8 +329,15 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       trafficSources,
       organicTrend,
       gscSummary,
+      gscPrior,
+      gscTrend,
       topQueries,
       topPages,
+      positionDist,
+      ctrOpportunities,
+      positionMovers,
+      ga4Engagement,
+      ga4EngagementPrior,
       clientName: '',
       days,
       pageTitle: 'SEO Performance',

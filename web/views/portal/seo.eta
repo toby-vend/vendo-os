@@ -2,99 +2,301 @@
 
 <div id="portal-seo-content">
 
-<% if (!it.gscSummary && it.ga4Summary.length === 0) { %>
+<%
+  const gsc = it.gscSummary;
+  const gscP = it.gscPrior;
+  const ga4 = it.ga4Engagement;
+  const ga4P = it.ga4EngagementPrior;
+  const hasGsc = gsc && gsc.total_impressions > 0;
+  const hasGa4 = ga4 && ga4.total_sessions > 0;
+
+  function pctChange(current, previous) {
+    if (!previous || previous === 0) return null;
+    return Math.round((current - previous) / previous * 100);
+  }
+
+  function changeHtml(current, previous, inverse) {
+    const pct = pctChange(current, previous);
+    if (pct === null) return '';
+    const isGood = inverse ? pct < 0 : pct > 0;
+    const arrow = pct > 0 ? '&#9650;' : pct < 0 ? '&#9660;' : '';
+    const colour = pct === 0 ? 'var(--vendo-text-muted)' : isGood ? 'var(--vendo-green)' : '#F87171';
+    return '<div class="kpi-sub" style="color: ' + colour + ';">' + arrow + ' ' + Math.abs(pct) + '% vs prior period</div>';
+  }
+%>
+
+<% if (!hasGsc && !hasGa4) { %>
   <div class="portal-empty" style="margin-top: 2rem;">No SEO data available for this period. GA4 and Google Search Console data will appear here once synced.</div>
 <% } else { %>
 
-<!-- GSC Summary KPIs -->
-<% if (it.gscSummary) { %>
+<!-- ===== Section 1: Search Visibility KPIs ===== -->
+
+<% if (hasGsc) { %>
 <div class="portal-kpi-grid">
   <div class="portal-kpi">
-    <div class="kpi-value"><%= it.gscSummary.total_clicks.toLocaleString() %></div>
+    <div class="kpi-value"><%= gsc.total_clicks.toLocaleString() %></div>
     <div class="kpi-label">Search Clicks</div>
+    <%~ changeHtml(gsc.total_clicks, gscP?.total_clicks) %>
   </div>
   <div class="portal-kpi">
-    <div class="kpi-value"><%= it.gscSummary.total_impressions.toLocaleString() %></div>
-    <div class="kpi-label">Search Impressions</div>
+    <div class="kpi-value"><%= gsc.total_impressions.toLocaleString() %></div>
+    <div class="kpi-label">Impressions</div>
+    <%~ changeHtml(gsc.total_impressions, gscP?.total_impressions) %>
   </div>
   <div class="portal-kpi">
-    <div class="kpi-value"><%= it.gscSummary.avg_ctr.toFixed(2) %>%</div>
+    <div class="kpi-value"><%= gsc.avg_ctr.toFixed(2) %>%</div>
     <div class="kpi-label">Average CTR</div>
+    <%~ changeHtml(gsc.avg_ctr, gscP?.avg_ctr) %>
   </div>
   <div class="portal-kpi">
-    <div class="kpi-value"><%= it.gscSummary.avg_position ? it.gscSummary.avg_position.toFixed(1) : '—' %></div>
+    <div class="kpi-value"><%= gsc.avg_position ? gsc.avg_position.toFixed(1) : '—' %></div>
     <div class="kpi-label">Average Position</div>
+    <%~ changeHtml(gsc.avg_position, gscP?.avg_position, true) %>
   </div>
 </div>
 <% } %>
 
-<!-- Organic Sessions & GA4 -->
-<% if (it.ga4Summary.length > 0) { %>
-<%
-  const totalSessions = it.ga4Summary.reduce((s, d) => s + d.sessions, 0);
-  const totalUsers = it.ga4Summary.reduce((s, d) => s + d.users, 0);
-  const totalPageViews = it.ga4Summary.reduce((s, d) => s + d.page_views, 0);
-  const totalConversions = it.ga4Summary.reduce((s, d) => s + d.conversions, 0);
-%>
-<div class="portal-kpi-grid" style="margin-bottom: 1.5rem;">
+<!-- ===== Section 2: Site Engagement KPIs ===== -->
+
+<% if (hasGa4) { %>
+<div class="portal-kpi-grid">
   <div class="portal-kpi">
-    <div class="kpi-value"><%= totalSessions.toLocaleString() %></div>
+    <div class="kpi-value"><%= ga4.total_sessions.toLocaleString() %></div>
     <div class="kpi-label">Total Sessions</div>
+    <%~ changeHtml(ga4.total_sessions, ga4P?.total_sessions) %>
   </div>
   <div class="portal-kpi">
-    <div class="kpi-value"><%= totalUsers.toLocaleString() %></div>
+    <div class="kpi-value"><%= ga4.total_users.toLocaleString() %></div>
     <div class="kpi-label">Total Users</div>
+    <%~ changeHtml(ga4.total_users, ga4P?.total_users) %>
   </div>
   <div class="portal-kpi">
-    <div class="kpi-value"><%= totalPageViews.toLocaleString() %></div>
+    <div class="kpi-value"><%= ga4.engagement_rate !== null ? ga4.engagement_rate.toFixed(1) + '%' : '—' %></div>
+    <div class="kpi-label">Engagement Rate</div>
+    <%~ changeHtml(ga4.engagement_rate, ga4P?.engagement_rate) %>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= ga4.avg_session_duration !== null ? Math.round(ga4.avg_session_duration) + 's' : '—' %></div>
+    <div class="kpi-label">Avg Session Duration</div>
+    <%~ changeHtml(ga4.avg_session_duration, ga4P?.avg_session_duration) %>
+  </div>
+  <div class="portal-kpi">
+    <div class="kpi-value"><%= ga4.total_page_views.toLocaleString() %></div>
     <div class="kpi-label">Page Views</div>
+    <%~ changeHtml(ga4.total_page_views, ga4P?.total_page_views) %>
   </div>
   <div class="portal-kpi">
-    <div class="kpi-value"><%= totalConversions.toLocaleString() %></div>
+    <div class="kpi-value"><%= ga4.total_conversions.toLocaleString() %></div>
     <div class="kpi-label">Conversions</div>
+    <%~ changeHtml(ga4.total_conversions, ga4P?.total_conversions) %>
   </div>
 </div>
 <% } %>
 
-<!-- Organic Traffic Trend -->
-<% if (it.organicTrend.length > 0) { %>
-<div class="portal-section">
-  <h2>Organic Sessions Trend</h2>
-  <table class="compact">
-    <thead>
-      <tr><th>Date</th><th>Sessions</th><th>Users</th><th>Conversions</th></tr>
-    </thead>
-    <tbody>
-      <% it.organicTrend.forEach(d => { %>
-      <tr>
-        <td><%= d.date %></td>
-        <td><%= d.sessions.toLocaleString() %></td>
-        <td><%= d.users.toLocaleString() %></td>
-        <td><%= d.conversions.toLocaleString() %></td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</div>
-<% } %>
+<!-- ===== Section 3: Search Visibility + Organic Traffic Charts ===== -->
 
-<div class="portal-two-col">
-  <!-- Traffic Sources -->
-  <% if (it.trafficSources.length > 0) { %>
+<div class="chart-row">
+  <% if (it.gscTrend && it.gscTrend.length > 1) { %>
+  <div class="chart-card">
+    <h3>Search Visibility</h3>
+    <div class="chart-wrap">
+      <canvas id="seoGscTrendChart"></canvas>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (it.organicTrend && it.organicTrend.length > 1) { %>
+  <div class="chart-card">
+    <h3>Organic Sessions</h3>
+    <div class="chart-wrap">
+      <canvas id="seoOrganicChart"></canvas>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<script>
+(function() {
+  // --- Search Visibility Chart (Clicks + Impressions with dual axis) ---
+  var gscTrend = <%~ JSON.stringify(it.gscTrend || []) %>;
+  if (gscTrend.length > 1) {
+    new Chart(document.getElementById('seoGscTrendChart'), {
+      type: 'line',
+      data: {
+        labels: gscTrend.map(function(d) { return d.date.slice(5); }),
+        datasets: [
+          {
+            label: 'Clicks',
+            data: gscTrend.map(function(d) { return d.clicks; }),
+            borderColor: '#22C55E',
+            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            fill: true,
+            yAxisID: 'y',
+            tension: 0.3,
+            pointRadius: 0
+          },
+          {
+            label: 'Impressions',
+            data: gscTrend.map(function(d) { return d.impressions; }),
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+            fill: false,
+            yAxisID: 'y1',
+            tension: 0.3,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Clicks' } },
+          y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Impressions' } }
+        },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+  }
+
+  // --- Organic Sessions Chart ---
+  var organic = <%~ JSON.stringify(it.organicTrend || []) %>;
+  if (organic.length > 1) {
+    new Chart(document.getElementById('seoOrganicChart'), {
+      type: 'line',
+      data: {
+        labels: organic.map(function(d) { return d.date.slice(5); }),
+        datasets: [
+          {
+            label: 'Sessions',
+            data: organic.map(function(d) { return d.sessions; }),
+            borderColor: '#22C55E',
+            backgroundColor: 'rgba(34, 197, 94, 0.15)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0
+          },
+          {
+            label: 'Conversions',
+            data: organic.map(function(d) { return d.conversions; }),
+            borderColor: '#FBBF24',
+            backgroundColor: 'rgba(251, 191, 36, 0.05)',
+            fill: false,
+            tension: 0.3,
+            pointRadius: 0,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Sessions' } },
+          y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Conversions' } }
+        },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+  }
+})();
+</script>
+
+<!-- ===== Section 4: Position Distribution + CTR Opportunities ===== -->
+
+<div class="chart-row">
+  <% if (it.positionDist && it.positionDist.length > 0) { %>
+  <div class="chart-card">
+    <h3>Keyword Position Distribution</h3>
+    <div class="chart-wrap">
+      <canvas id="seoPositionDistChart"></canvas>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (it.ctrOpportunities && it.ctrOpportunities.length > 0) { %>
   <div class="portal-section">
-    <h2>Traffic Sources</h2>
+    <h2>CTR Opportunities</h2>
+    <p style="color: var(--vendo-text-muted); font-size: 13px; margin-bottom: 1rem;">High-impression queries with low CTR — quick wins for title/description improvements.</p>
     <table class="compact">
       <thead>
-        <tr><th>Source</th><th>Medium</th><th>Sessions</th><th>Users</th><th>Conversions</th></tr>
+        <tr><th>Query</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Position</th></tr>
       </thead>
       <tbody>
-        <% it.trafficSources.slice(0, 15).forEach(ts => { %>
+        <% it.ctrOpportunities.forEach(q => { %>
         <tr>
-          <td><%= ts.source || '(not set)' %></td>
-          <td><%= ts.medium || '(not set)' %></td>
-          <td><%= ts.sessions.toLocaleString() %></td>
-          <td><%= ts.users.toLocaleString() %></td>
-          <td><%= ts.conversions.toLocaleString() %></td>
+          <td><%= q.query %></td>
+          <td><%= q.impressions.toLocaleString() %></td>
+          <td><%= q.clicks.toLocaleString() %></td>
+          <td><%= q.ctr.toFixed(2) %>%</td>
+          <td><%= q.position.toFixed(1) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+
+<% if (it.positionDist && it.positionDist.length > 0) { %>
+<script>
+(function() {
+  var dist = <%~ JSON.stringify(it.positionDist) %>;
+  var colours = {
+    '1-3': 'rgba(34, 197, 94, 0.7)',
+    '4-10': 'rgba(59, 130, 246, 0.7)',
+    '11-20': 'rgba(251, 191, 36, 0.7)',
+    '20+': 'rgba(239, 68, 68, 0.5)'
+  };
+
+  new Chart(document.getElementById('seoPositionDistChart'), {
+    type: 'doughnut',
+    data: {
+      labels: dist.map(function(d) { return 'Position ' + d.bucket; }),
+      datasets: [{
+        data: dist.map(function(d) { return d.count; }),
+        backgroundColor: dist.map(function(d) { return colours[d.bucket] || 'rgba(148, 163, 184, 0.5)'; }),
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'right' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+              var pct = total > 0 ? (ctx.parsed / total * 100).toFixed(1) : 0;
+              return ctx.label + ': ' + ctx.parsed + ' queries (' + pct + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+})();
+</script>
+<% } %>
+
+<!-- ===== Section 5: Position Movers ===== -->
+
+<% if (it.positionMovers && (it.positionMovers.improved.length > 0 || it.positionMovers.declined.length > 0)) { %>
+<div class="portal-two-col">
+  <% if (it.positionMovers.improved.length > 0) { %>
+  <div class="portal-section">
+    <h2 style="color: var(--vendo-green);">Biggest Gainers</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Query</th><th>Position</th><th>Change</th><th>Clicks</th></tr>
+      </thead>
+      <tbody>
+        <% it.positionMovers.improved.forEach(m => { %>
+        <tr>
+          <td><%= m.query %></td>
+          <td><%= m.current_position.toFixed(1) %></td>
+          <td style="color: var(--vendo-green);">&#9650; <%= m.change.toFixed(1) %></td>
+          <td><%= m.clicks.toLocaleString() %></td>
         </tr>
         <% }) %>
       </tbody>
@@ -102,7 +304,32 @@
   </div>
   <% } %>
 
-  <!-- Top Keywords -->
+  <% if (it.positionMovers.declined.length > 0) { %>
+  <div class="portal-section">
+    <h2 style="color: #F87171;">Biggest Declines</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Query</th><th>Position</th><th>Change</th><th>Clicks</th></tr>
+      </thead>
+      <tbody>
+        <% it.positionMovers.declined.forEach(m => { %>
+        <tr>
+          <td><%= m.query %></td>
+          <td><%= m.current_position.toFixed(1) %></td>
+          <td style="color: #F87171;">&#9660; <%= Math.abs(m.change).toFixed(1) %></td>
+          <td><%= m.clicks.toLocaleString() %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+<% } %>
+
+<!-- ===== Section 6: Top Search Queries + Top Landing Pages ===== -->
+
+<div class="portal-two-col">
   <% if (it.topQueries.length > 0) { %>
   <div class="portal-section">
     <h2>Top Search Queries</h2>
@@ -124,29 +351,52 @@
     </table>
   </div>
   <% } %>
+
+  <% if (it.topPages.length > 0) { %>
+  <div class="portal-section">
+    <h2>Top Landing Pages</h2>
+    <table class="compact">
+      <thead>
+        <tr><th>Page</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th></tr>
+      </thead>
+      <tbody>
+        <% it.topPages.forEach(p => { %>
+        <tr>
+          <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= p.page %>"><%= p.page.replace(/^https?:\/\/[^/]+/, '') %></td>
+          <td><%= p.clicks.toLocaleString() %></td>
+          <td><%= p.impressions.toLocaleString() %></td>
+          <td><%= p.ctr.toFixed(2) %>%</td>
+          <td><%= p.position.toFixed(1) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
 </div>
 
-<!-- Top Pages -->
-<% if (it.topPages.length > 0) { %>
-<div class="portal-section">
-  <h2>Top Landing Pages</h2>
-  <table class="compact">
+<!-- ===== Section 7: Traffic Sources (collapsed detail) ===== -->
+
+<% if (it.trafficSources.length > 0) { %>
+<details class="portal-section campaign-details">
+  <summary>Show All Traffic Sources</summary>
+  <table class="compact" style="margin-top: 1rem;">
     <thead>
-      <tr><th>Page</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th></tr>
+      <tr><th>Source</th><th>Medium</th><th>Sessions</th><th>Users</th><th>Conversions</th></tr>
     </thead>
     <tbody>
-      <% it.topPages.forEach(p => { %>
+      <% it.trafficSources.slice(0, 20).forEach(ts => { %>
       <tr>
-        <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= p.page %>"><%= p.page %></td>
-        <td><%= p.clicks.toLocaleString() %></td>
-        <td><%= p.impressions.toLocaleString() %></td>
-        <td><%= p.ctr.toFixed(2) %>%</td>
-        <td><%= p.position.toFixed(1) %></td>
+        <td><%= ts.source || '(not set)' %></td>
+        <td><%= ts.medium || '(not set)' %></td>
+        <td><%= ts.sessions.toLocaleString() %></td>
+        <td><%= ts.users.toLocaleString() %></td>
+        <td><%= ts.conversions.toLocaleString() %></td>
       </tr>
       <% }) %>
     </tbody>
   </table>
-</div>
+</details>
 <% } %>
 
 <% } %>
