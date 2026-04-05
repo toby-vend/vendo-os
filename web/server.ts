@@ -50,7 +50,7 @@ import { unifiedAdsRoutes } from './routes/dashboards/ads.js';
 import { profitabilityRoutes } from './routes/dashboards/profitability.js';
 import { pipelineTrackerRoutes } from './routes/dashboards/pipeline.js';
 import { reviewsRoutes } from './routes/dashboards/reviews.js';
-import { clientDatabaseRoutes } from './routes/client-database.js';
+// client-database merged into /clients — see routes/clients.ts
 import { operationsRoutes } from './routes/operations.js';
 import { skillsLibraryRoutes } from './routes/skills-library.js';
 import { cronRoutes } from './routes/api/cron.js';
@@ -320,7 +320,7 @@ app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(taskRunsUiRoutes, { prefix: '/tasks' });
 app.register(skillsBrowserRoutes, { prefix: '/skills-drive' });
 app.register(portalRoutes, { prefix: '/portal' });
-app.register(clientDatabaseRoutes, { prefix: '/client-database' });
+// client-database removed — unified into /clients
 app.register(operationsRoutes, { prefix: '/operations' });
 app.register(skillsLibraryRoutes, { prefix: '/skills' });
 app.register(cronRoutes, { prefix: '/api/cron' });

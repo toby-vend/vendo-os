@@ -199,6 +199,72 @@ export async function getUnlinkedGscSites(): Promise<UnlinkedAccount[]> {
   } catch { return []; }
 }
 
+// --- Client health for detail page ---
+
+export interface ClientHealthDetail {
+  score: number;
+  performance_score: number;
+  relationship_score: number;
+  financial_score: number;
+  breakdown: {
+    adSpend: number;
+    ctr: number;
+    spendConsistency: number;
+    recentMeeting: number;
+    actionsResolved: number;
+    noOverdue: number;
+    paidOnTime: number;
+  };
+  period: string;
+  prev_score: number | null;
+  trend: 'up' | 'down' | 'flat' | null;
+}
+
+export async function getClientHealth(clientName: string): Promise<ClientHealthDetail | null> {
+  const current = await rows<{
+    score: number;
+    performance_score: number;
+    relationship_score: number;
+    financial_score: number;
+    breakdown: string;
+    period: string;
+  }>(`
+    SELECT score, performance_score, relationship_score, financial_score, breakdown, period
+    FROM client_health
+    WHERE client_name = ? AND period = (SELECT MAX(period) FROM client_health)
+  `, [clientName]);
+
+  if (!current.length) return null;
+
+  const c = current[0];
+  const prev = await rows<{ score: number }>(`
+    SELECT score FROM client_health
+    WHERE client_name = ? AND period = (
+      SELECT MAX(period) FROM client_health
+      WHERE period < (SELECT MAX(period) FROM client_health)
+    )
+  `, [clientName]);
+
+  const prevScore = prev[0]?.score ?? null;
+  let trend: 'up' | 'down' | 'flat' | null = null;
+  if (prevScore !== null) {
+    if (c.score > prevScore + 5) trend = 'up';
+    else if (c.score < prevScore - 5) trend = 'down';
+    else trend = 'flat';
+  }
+
+  return {
+    score: c.score,
+    performance_score: c.performance_score,
+    relationship_score: c.relationship_score,
+    financial_score: c.financial_score,
+    breakdown: JSON.parse(c.breakdown),
+    period: c.period,
+    prev_score: prevScore,
+    trend,
+  };
+}
+
 // --- Enriched detail (cross-source data for public detail page) ---
 
 interface MetaSpendRow { total_spend: number; impressions: number; clicks: number; }

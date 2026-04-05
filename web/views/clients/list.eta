@@ -1,25 +1,53 @@
 <% layout('/layouts/base') %>
 
-<h1>Clients <small>(<%= it.clients.length %> total)</small></h1>
+<div style="margin-bottom: 1.5rem;">
+  <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+    <h1 style="margin: 0;">Clients</h1>
+    <span style="font-size: 13px; color: #94A3B8;">(<%= it.clients.length %> clients)</span>
+  </div>
+</div>
 
-<table class="compact">
-  <thead>
-    <tr><th>Client</th><th>Total Invoiced</th><th>Outstanding</th><th>Meetings</th><th>Vertical</th><th>Last Invoice</th><th>Last Meeting</th></tr>
-  </thead>
-  <tbody>
-    <% if (!it.clients.length) { %>
-    <tr><td colspan="7">No clients found. Run Xero sync first.</td></tr>
+<!-- Filter bar -->
+<div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;">
+  <select name="status" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"
+    hx-get="/clients" hx-target="#client-table" hx-include="[name='tier'],[name='am'],[name='q']" hx-push-url="true">
+    <option value="" <%= !it.statusFilter ? 'selected' : '' %>>Active</option>
+    <option value="all" <%= it.statusFilter === 'all' ? 'selected' : '' %>>All Statuses</option>
+    <option value="inactive" <%= it.statusFilter === 'inactive' ? 'selected' : '' %>>Inactive</option>
+    <option value="churned" <%= it.statusFilter === 'churned' ? 'selected' : '' %>>Churned</option>
+    <option value="onboarding" <%= it.statusFilter === 'onboarding' ? 'selected' : '' %>>Onboarding</option>
+    <option value="paused" <%= it.statusFilter === 'paused' ? 'selected' : '' %>>Paused</option>
+    <option value="pending" <%= it.statusFilter === 'pending' ? 'selected' : '' %>>Pending</option>
+  </select>
+
+  <select name="tier" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"
+    hx-get="/clients" hx-target="#client-table" hx-include="[name='status'],[name='am'],[name='q']" hx-push-url="true">
+    <option value="">All Health Tiers</option>
+    <% if (it.isAdmin) { %>
+    <option value="healthy" <%= it.tierFilter === 'healthy' ? 'selected' : '' %>>Healthy (&gt;70)</option>
+    <option value="at-risk" <%= it.tierFilter === 'at-risk' ? 'selected' : '' %>>At-Risk (40-70)</option>
+    <option value="critical" <%= it.tierFilter === 'critical' ? 'selected' : '' %>>Critical (&lt;40)</option>
+    <option value="no-score" <%= it.tierFilter === 'no-score' ? 'selected' : '' %>>No Score</option>
+    <% } else { %>
+    <option value="healthy" <%= it.tierFilter === 'healthy' ? 'selected' : '' %>>Healthy</option>
+    <option value="at-risk" <%= it.tierFilter === 'at-risk' ? 'selected' : '' %>>At-Risk</option>
+    <option value="critical" <%= it.tierFilter === 'critical' ? 'selected' : '' %>>Critical</option>
     <% } %>
-    <% it.clients.forEach(c => { %>
-    <tr>
-      <td><a href="/clients/<%= encodeURIComponent(c.name) %>"><%= c.display_name || c.name %></a></td>
-      <td>&pound;<%= (c.total_invoiced || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></td>
-      <td><%= c.outstanding > 0 ? '£' + c.outstanding.toLocaleString('en-GB', { minimumFractionDigits: 2 }) : '—' %></td>
-      <td><%= c.meeting_count %></td>
-      <td><%= c.vertical || '—' %></td>
-      <td><%= c.last_invoice_date ? c.last_invoice_date.slice(0, 10) : '—' %></td>
-      <td><%= c.last_meeting_date ? c.last_meeting_date.slice(0, 10) : '—' %></td>
-    </tr>
+  </select>
+
+  <select name="am" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"
+    hx-get="/clients" hx-target="#client-table" hx-include="[name='status'],[name='tier'],[name='q']" hx-push-url="true">
+    <option value="">All Verticals</option>
+    <% (it.ams || []).forEach(am => { %>
+    <option value="<%= am %>" <%= it.amFilter === am ? 'selected' : '' %>><%= am %></option>
     <% }) %>
-  </tbody>
-</table>
+  </select>
+
+  <input type="search" name="q" placeholder="Search clients..." value="<%= it.searchTerm || '' %>"
+    style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; min-width: 200px;"
+    hx-get="/clients" hx-target="#client-table" hx-include="[name='status'],[name='tier'],[name='am']" hx-trigger="keyup changed delay:300ms" hx-push-url="true">
+</div>
+
+<div id="client-table">
+  <%~ include('/clients/list-table', it) %>
+</div>

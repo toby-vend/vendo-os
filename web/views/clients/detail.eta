@@ -15,7 +15,96 @@
   <% if (it.client.first_meeting_date) { %> | <strong>Since:</strong> <%= it.client.first_meeting_date.slice(0, 10) %><% } %>
 </p>
 
-<% if (it.client.total_invoiced > 0 || it.client.outstanding > 0) { %>
+<% /* ---- Health Score (admin: full breakdown, staff: dot + tier only) ---- */ %>
+<% if (it.health) { %>
+<%
+  const h = it.health;
+  const tierColour = h.score >= 70 ? '#22C55E' : h.score >= 40 ? '#F59E0B' : '#EF4444';
+  const tierLabel = h.score >= 70 ? 'Healthy' : h.score >= 40 ? 'At-Risk' : 'Critical';
+%>
+<% if (it.isAdmin) { %>
+<h2>Health Score</h2>
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;">
+  <span style="width: 14px; height: 14px; border-radius: 50%; background: <%= tierColour %>;"></span>
+  <span style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= h.score %>/100</span>
+  <span class="badge" style="background: <%= tierColour %>20; color: <%= tierColour %>; border: 1px solid <%= tierColour %>40;"><%= tierLabel %></span>
+  <% if (h.trend === 'up') { %>
+  <span style="color: #22C55E; font-size: 13px;">&#9650; up from <%= h.prev_score %></span>
+  <% } else if (h.trend === 'down') { %>
+  <span style="color: #EF4444; font-size: 13px;">&#9660; down from <%= h.prev_score %></span>
+  <% } else if (h.trend === 'flat') { %>
+  <span style="color: #94A3B8; font-size: 13px;">&#8594; stable (<%= h.prev_score %>)</span>
+  <% } %>
+  <span style="color: #64748B; font-size: 12px; margin-left: auto;">Period: <%= h.period %></span>
+</div>
+
+<!-- Sub-scores -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; max-width: 700px; margin-bottom: 1.5rem;">
+  <%
+    const bars = [
+      { label: 'Performance', score: h.performance_score, max: 40, items: [
+        { label: 'Ad Spend / Organic', pts: h.breakdown.adSpend, max: 20 },
+        { label: 'CTR / Engagement', pts: h.breakdown.ctr, max: 10 },
+        { label: 'Consistency', pts: h.breakdown.spendConsistency, max: 10 },
+      ]},
+      { label: 'Relationship', score: h.relationship_score, max: 30, items: [
+        { label: 'Meeting Recency', pts: h.breakdown.recentMeeting, max: 15 },
+        { label: 'Actions Resolved', pts: h.breakdown.actionsResolved, max: 15 },
+      ]},
+      { label: 'Financial', score: h.financial_score, max: 30, items: [
+        { label: 'No Overdue Invoices', pts: h.breakdown.noOverdue, max: 15 },
+        { label: 'Paid On Time', pts: h.breakdown.paidOnTime, max: 15 },
+      ]},
+    ];
+  %>
+  <% bars.forEach(b => { %>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+      <span style="color: #E2E8F0; font-weight: 600; font-size: 13px;"><%= b.label %></span>
+      <span style="color: #94A3B8; font-size: 13px;"><%= b.score %>/<%= b.max %></span>
+    </div>
+    <div style="background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; margin-bottom: 8px;">
+      <div style="background: <%= (b.score / b.max) >= 0.7 ? '#22C55E' : (b.score / b.max) >= 0.4 ? '#F59E0B' : '#EF4444' %>; height: 100%; border-radius: 4px; width: <%= Math.round((b.score / b.max) * 100) %>%;"></div>
+    </div>
+    <% b.items.forEach(item => { %>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #64748B; margin-bottom: 2px;">
+      <span><%= item.label %></span>
+      <span><%= item.pts %>/<%= item.max %></span>
+    </div>
+    <% }) %>
+  </div>
+  <% }) %>
+</div>
+
+<%
+  // Build plain-English issues
+  const issues = [];
+  if (h.breakdown.adSpend === 0) issues.push('No ad spend or organic traffic in last 30 days');
+  if (h.breakdown.recentMeeting < 8) issues.push('Meeting overdue or not recent enough');
+  if (h.breakdown.actionsResolved < 8) issues.push('Outstanding action items need resolving');
+  if (h.breakdown.noOverdue === 0) issues.push('Overdue invoices');
+  if (h.breakdown.paidOnTime === 0) issues.push('Last invoice not paid on time');
+%>
+<% if (issues.length) { %>
+<div style="padding: 0.75rem 1rem; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); border-radius: 8px; max-width: 700px; margin-bottom: 1.5rem;">
+  <div style="color: #EF4444; font-weight: 600; font-size: 13px; margin-bottom: 4px;">Issues to address</div>
+  <% issues.forEach(issue => { %>
+  <div style="color: #F87171; font-size: 13px;">&bull; <%= issue %></div>
+  <% }) %>
+</div>
+<% } %>
+
+<% } else { %>
+<!-- Staff view: dot + tier only -->
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
+  <span style="width: 12px; height: 12px; border-radius: 50%; background: <%= tierColour %>;"></span>
+  <span style="color: #E2E8F0; font-weight: 600;"><%= tierLabel %></span>
+</div>
+<% } %>
+<% } %>
+
+<% /* ---- Financials (admin only) ---- */ %>
+<% if (it.isAdmin && (it.client.total_invoiced > 0 || it.client.outstanding > 0)) { %>
 <h2>Financials</h2>
 <table class="compact" style="max-width: 400px">
   <tr><td><strong>Total Invoiced</strong></td><td>&pound;<%= it.client.total_invoiced.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td></tr>

@@ -1,0 +1,56 @@
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Client</th>
+      <th>Vertical</th>
+      <th><%= it.isAdmin ? 'Health Score' : 'Health' %></th>
+      <% if (it.isAdmin) { %><th>MRR</th><% } %>
+      <% if (it.isAdmin) { %><th>Outstanding</th><% } %>
+      <% if (it.isAdmin) { %><th>Last Meeting</th><% } %>
+      <% if (it.isAdmin) { %><th>Invoices</th><% } %>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (!it.clients.length) { %>
+    <tr><td colspan="<%= it.isAdmin ? 7 : 3 %>" style="text-align: center; color: #94A3B8;">No clients match the current filters.</td></tr>
+    <% } %>
+    <% it.clients.forEach(c => { %>
+    <tr>
+      <td><a href="/clients/<%= encodeURIComponent(c.name) %>"><%= c.label %></a></td>
+      <td><%= c.vertical || '\u2014' %></td>
+      <td>
+        <% if (c.health_score != null) { %>
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 10px; height: 10px; border-radius: 50%; background: <%= c.health_score >= 70 ? '#22C55E' : c.health_score >= 40 ? '#F59E0B' : '#EF4444' %>;" title="<%= c.health_tier %>"></span>
+          <% if (it.isAdmin) { %>
+          <%= c.health_score %>/100
+          <% if (c.health_trend === 'up') { %>
+          <span style="color: #22C55E; font-size: 0.75rem;" title="Up from <%= c.health_prev_score %>">&#9650;</span>
+          <% } else if (c.health_trend === 'down') { %>
+          <span style="color: #EF4444; font-size: 0.75rem;" title="Down from <%= c.health_prev_score %>">&#9660;</span>
+          <% } %>
+          <% } %>
+        </span>
+        <% } else { %>
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 10px; height: 10px; border-radius: 50%; background: #6B7280;"></span>
+          <% if (it.isAdmin) { %><span style="color: #94A3B8;">&mdash;</span><% } %>
+        </span>
+        <% } %>
+      </td>
+      <% if (it.isAdmin) { %>
+      <td><%= c.total_invoiced ? '\u00a3' + Number(c.total_invoiced).toLocaleString('en-GB') : '\u2014' %></td>
+      <td><%= c.outstanding > 0 ? '\u00a3' + Number(c.outstanding).toLocaleString('en-GB', { minimumFractionDigits: 2 }) : '\u2014' %></td>
+      <td><%= c.last_meeting_date ? c.last_meeting_date.slice(0, 10) : '\u2014' %></td>
+      <td>
+        <% if (c.overdue_invoices > 0) { %>
+        <span style="color: #EF4444; font-weight: 600;"><%= c.overdue_invoices %> overdue</span>
+        <% } else { %>
+        <span style="color: #22C55E;">Clear</span>
+        <% } %>
+      </td>
+      <% } %>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
