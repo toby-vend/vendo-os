@@ -258,26 +258,39 @@ function extractMetaConversions(actionsJson: string | null): number {
 }
 
 export async function getMetaTopAds(clientId: number, days = 30, limit = 10): Promise<MetaAdRow[]> {
-  const rawRows = await rows<MetaAdRow & { actions_json: string | null }>(`
-    SELECT mi.ad_id, mi.ad_name, mi.campaign_name, MAX(mi.thumbnail_url) as thumbnail_url,
-           SUM(mi.impressions) as impressions,
-           SUM(mi.clicks) as clicks,
-           SUM(mi.spend) as spend,
-           CASE WHEN SUM(mi.clicks) > 0 THEN ROUND(SUM(mi.spend) / SUM(mi.clicks), 2) ELSE 0 END as cpc,
-           CASE WHEN SUM(mi.impressions) > 0 THEN ROUND(CAST(SUM(mi.clicks) AS REAL) / SUM(mi.impressions) * 100, 2) ELSE 0 END as ctr,
-           COALESCE(SUM(mi.reach), 0) as reach,
-           CASE WHEN SUM(mi.reach) > 0 THEN ROUND(CAST(SUM(mi.impressions) AS REAL) / SUM(mi.reach), 2) ELSE 0 END as frequency,
-           GROUP_CONCAT(mi.actions, '|||') as actions_json
-    FROM meta_insights mi
-    JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source = 'meta'
-    WHERE csm.client_id = ?
-      AND mi.date >= date('now', '-' || ? || ' days')
-      AND mi.level = 'ad'
-      AND mi.ad_id IS NOT NULL
-    GROUP BY mi.ad_id, mi.ad_name
-    ORDER BY spend DESC
-    LIMIT ?
-  `, [clientId, days, limit]);
+  // Try with thumbnail_url column, fall back to NULL if column doesn't exist yet
+  let rawRows: Array<MetaAdRow & { actions_json: string | null }>;
+  try {
+    rawRows = await rows<MetaAdRow & { actions_json: string | null }>(`
+      SELECT mi.ad_id, mi.ad_name, mi.campaign_name, MAX(mi.thumbnail_url) as thumbnail_url,
+             SUM(mi.impressions) as impressions,
+             SUM(mi.clicks) as clicks, SUM(mi.spend) as spend,
+             CASE WHEN SUM(mi.clicks) > 0 THEN ROUND(SUM(mi.spend) / SUM(mi.clicks), 2) ELSE 0 END as cpc,
+             CASE WHEN SUM(mi.impressions) > 0 THEN ROUND(CAST(SUM(mi.clicks) AS REAL) / SUM(mi.impressions) * 100, 2) ELSE 0 END as ctr,
+             COALESCE(SUM(mi.reach), 0) as reach,
+             CASE WHEN SUM(mi.reach) > 0 THEN ROUND(CAST(SUM(mi.impressions) AS REAL) / SUM(mi.reach), 2) ELSE 0 END as frequency,
+             GROUP_CONCAT(mi.actions, '|||') as actions_json
+      FROM meta_insights mi
+      JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source = 'meta'
+      WHERE csm.client_id = ? AND mi.date >= date('now', '-' || ? || ' days') AND mi.level = 'ad' AND mi.ad_id IS NOT NULL
+      GROUP BY mi.ad_id, mi.ad_name ORDER BY spend DESC LIMIT ?
+    `, [clientId, days, limit]);
+  } catch {
+    // Fallback: thumbnail_url column doesn't exist yet
+    rawRows = await rows<MetaAdRow & { actions_json: string | null }>(`
+      SELECT mi.ad_id, mi.ad_name, mi.campaign_name, NULL as thumbnail_url,
+             SUM(mi.impressions) as impressions, SUM(mi.clicks) as clicks, SUM(mi.spend) as spend,
+             CASE WHEN SUM(mi.clicks) > 0 THEN ROUND(SUM(mi.spend) / SUM(mi.clicks), 2) ELSE 0 END as cpc,
+             CASE WHEN SUM(mi.impressions) > 0 THEN ROUND(CAST(SUM(mi.clicks) AS REAL) / SUM(mi.impressions) * 100, 2) ELSE 0 END as ctr,
+             COALESCE(SUM(mi.reach), 0) as reach,
+             CASE WHEN SUM(mi.reach) > 0 THEN ROUND(CAST(SUM(mi.impressions) AS REAL) / SUM(mi.reach), 2) ELSE 0 END as frequency,
+             GROUP_CONCAT(mi.actions, '|||') as actions_json
+      FROM meta_insights mi
+      JOIN client_source_mappings csm ON csm.external_id = mi.account_id AND csm.source = 'meta'
+      WHERE csm.client_id = ? AND mi.date >= date('now', '-' || ? || ' days') AND mi.level = 'ad' AND mi.ad_id IS NOT NULL
+      GROUP BY mi.ad_id, mi.ad_name ORDER BY spend DESC LIMIT ?
+    `, [clientId, days, limit]);
+  }
 
   return rawRows.map(r => {
     // Parse concatenated actions JSON arrays

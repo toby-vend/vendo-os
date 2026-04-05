@@ -40,7 +40,14 @@
 </div>
 
 <!-- Top Campaigns Chart -->
-<% if (it.gadsCampaigns.length > 1) { %>
+<%
+  const gadsChartData = it.gadsCampaigns.slice(0, 8).map(c => ({
+    name: (c.campaign_name || c.campaign_id).slice(0, 30),
+    spend: c.spend,
+    conversions: c.conversions
+  }));
+%>
+<% if (gadsChartData.length > 1) { %>
 <div class="chart-card">
   <h3>Spend by Campaign</h3>
   <div class="chart-wrap">
@@ -49,7 +56,7 @@
 </div>
 <script>
 (function() {
-  var campaigns = <%~ JSON.stringify(it.gadsCampaigns.slice(0, 8).map(c => ({ name: (c.campaign_name || c.campaign_id).slice(0, 30), spend: c.spend, conversions: c.conversions }))) %>;
+  var campaigns = <%~ JSON.stringify(gadsChartData) %>;
   new Chart(document.getElementById('gadsSpendChart'), {
     type: 'bar',
     data: {
