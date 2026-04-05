@@ -95,4 +95,52 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       });
     }
   });
+
+  /**
+   * GET /health-score — Run client health scoring (Vercel Cron — 1st of month)
+   */
+  app.get('/health-score', async (_request, reply) => {
+    const scriptPath = resolve(PROJECT_ROOT, 'scripts/functions/client-health.ts');
+
+    try {
+      const { stdout } = await runScript(scriptPath);
+      return reply.send({
+        ok: true,
+        message: 'Health scoring completed',
+        output: stdout.slice(-2000),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/health-score] Failed:', msg);
+      return reply.code(500).send({
+        ok: false,
+        message: 'Health scoring failed',
+        error: msg,
+      });
+    }
+  });
+
+  /**
+   * GET /traffic-light — Run traffic light alerts (Vercel Cron — 1st of month, after scoring)
+   */
+  app.get('/traffic-light', async (_request, reply) => {
+    const scriptPath = resolve(PROJECT_ROOT, 'scripts/automation/traffic-light-alerts.ts');
+
+    try {
+      const { stdout } = await runScript(scriptPath);
+      return reply.send({
+        ok: true,
+        message: 'Traffic light alerts completed',
+        output: stdout.slice(-2000),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/traffic-light] Failed:', msg);
+      return reply.code(500).send({
+        ok: false,
+        message: 'Traffic light alerts failed',
+        error: msg,
+      });
+    }
+  });
 };

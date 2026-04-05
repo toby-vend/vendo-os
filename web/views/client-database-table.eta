@@ -30,6 +30,11 @@
         <span style="display: inline-flex; align-items: center; gap: 6px;">
           <span style="width: 10px; height: 10px; border-radius: 50%; background: <%= c.health_score >= 70 ? '#22C55E' : c.health_score >= 40 ? '#F59E0B' : '#EF4444' %>;"></span>
           <%= c.health_score %>/100
+          <% if (c.health_trend === 'up') { %>
+          <span style="color: #22C55E; font-size: 0.75rem;" title="Up from <%= c.health_prev_score %>">&#9650;</span>
+          <% } else if (c.health_trend === 'down') { %>
+          <span style="color: #EF4444; font-size: 0.75rem;" title="Down from <%= c.health_prev_score %>">&#9660;</span>
+          <% } %>
         </span>
         <% } else { %>
         <span style="display: inline-flex; align-items: center; gap: 6px;">

@@ -2,14 +2,18 @@
  * Client health scoring — monthly health check for all active clients.
  *
  * Scoring dimensions (max 100):
- *   Performance (40):   ad spend (20), CTR >1% (10), spend consistency (10)
- *   Relationship (30):  recent meeting (15), action items resolved (15)
+ *   Performance (40):   ad spend (20), CTR (10), spend consistency (10)
+ *                       — OR for SEO-only clients: sessions (20), engagement (10), consistency (10)
+ *   Relationship (30):  meeting recency (15), action items resolved (15)
  *   Financial (30):     no overdue invoices (15), last invoice paid (15)
  *
  * Tiers:
  *   Healthy  >70   — on track
  *   At-risk  40-70 — needs attention
  *   Critical <40   — immediate intervention
+ *
+ * Scoring is graduated (linear interpolation), not binary.
+ * Client-to-account matching uses client_source_mappings, not LIKE.
  *
  * Usage:
  *   npx tsx scripts/functions/client-health.ts
@@ -34,6 +38,20 @@ interface ClientResult {
   name: string;
   score: number;
   tier: 'healthy' | 'at-risk' | 'critical';
+}
+
+/** Linearly interpolate a value within [min, max] to [0, maxPoints]. Clamped. */
+function graduated(value: number, min: number, max: number, maxPoints: number): number {
+  if (value <= min) return 0;
+  if (value >= max) return maxPoints;
+  return Math.round(((value - min) / (max - min)) * maxPoints);
+}
+
+/** Inverse interpolation — higher value = fewer points (e.g. days since meeting). */
+function graduatedInverse(value: number, best: number, worst: number, maxPoints: number): number {
+  if (value <= best) return maxPoints;
+  if (value >= worst) return 0;
+  return Math.round(((worst - value) / (worst - best)) * maxPoints);
 }
 
 async function ensureHealthSchema(): Promise<void> {
@@ -75,6 +93,144 @@ function queryScalar(db: Database, sql: string, params: unknown[] = []): unknown
   return result[0].values[0][0];
 }
 
+/** Check if a client has ad accounts linked (meta or gads). */
+function hasAdAccounts(db: Database, clientId: number): boolean {
+  const count = (queryScalar(db,
+    "SELECT COUNT(*) FROM client_source_mappings WHERE client_id = ? AND source_type IN ('meta', 'gads')",
+    [clientId],
+  ) as number) || 0;
+  return count > 0;
+}
+
+/** Check if a client has GA4/GSC linked (SEO). */
+function hasSeoAccounts(db: Database, clientId: number): boolean {
+  const count = (queryScalar(db,
+    "SELECT COUNT(*) FROM client_source_mappings WHERE client_id = ? AND source_type IN ('ga4', 'gsc')",
+    [clientId],
+  ) as number) || 0;
+  return count > 0;
+}
+
+/** Score Performance for ad-based clients (Meta + Google Ads). */
+function scoreAdsPerformance(db: Database, clientId: number, thirtyDaysAgo: string): Pick<HealthBreakdown, 'adSpend' | 'ctr' | 'spendConsistency'> {
+  // Ad spend across Meta + Google Ads via client_source_mappings
+  const metaSpend = (queryScalar(db, `
+    SELECT COALESCE(SUM(mi.spend), 0)
+    FROM meta_insights mi
+    JOIN client_source_mappings csm ON mi.account_id = csm.source_id AND csm.source_type = 'meta'
+    WHERE csm.client_id = ? AND mi.date >= ?
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  const gadsSpend = (queryScalar(db, `
+    SELECT COALESCE(SUM(gs.spend), 0)
+    FROM gads_campaign_spend gs
+    JOIN client_source_mappings csm ON gs.account_id = csm.source_id AND csm.source_type = 'gads'
+    WHERE csm.client_id = ? AND gs.date >= ?
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  const totalSpend = metaSpend + gadsSpend;
+  // Graduated: 0–5000 maps to 0–20
+  const adSpend = graduated(totalSpend, 0, 5000, 20);
+
+  // CTR across both Meta and Google Ads
+  const metaClicks = (queryScalar(db, `
+    SELECT COALESCE(SUM(mi.clicks), 0)
+    FROM meta_insights mi
+    JOIN client_source_mappings csm ON mi.account_id = csm.source_id AND csm.source_type = 'meta'
+    WHERE csm.client_id = ? AND mi.date >= ?
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  const metaImpressions = (queryScalar(db, `
+    SELECT COALESCE(SUM(mi.impressions), 0)
+    FROM meta_insights mi
+    JOIN client_source_mappings csm ON mi.account_id = csm.source_id AND csm.source_type = 'meta'
+    WHERE csm.client_id = ? AND mi.date >= ?
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  const gadsClicks = (queryScalar(db, `
+    SELECT COALESCE(SUM(gs.clicks), 0)
+    FROM gads_campaign_spend gs
+    JOIN client_source_mappings csm ON gs.account_id = csm.source_id AND csm.source_type = 'gads'
+    WHERE csm.client_id = ? AND gs.date >= ?
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  const gadsImpressions = (queryScalar(db, `
+    SELECT COALESCE(SUM(gs.impressions), 0)
+    FROM gads_campaign_spend gs
+    JOIN client_source_mappings csm ON gs.account_id = csm.source_id AND csm.source_type = 'gads'
+    WHERE csm.client_id = ? AND gs.date >= ?
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  const totalClicks = metaClicks + gadsClicks;
+  const totalImpressions = metaImpressions + gadsImpressions;
+  const ctrPct = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+  // Graduated: 0–2% CTR maps to 0–10
+  const ctr = graduated(ctrPct, 0, 2, 10);
+
+  // Spend consistency — days with any spend in last 30 days (Meta + Google combined)
+  const metaDays = (queryScalar(db, `
+    SELECT COUNT(DISTINCT mi.date)
+    FROM meta_insights mi
+    JOIN client_source_mappings csm ON mi.account_id = csm.source_id AND csm.source_type = 'meta'
+    WHERE csm.client_id = ? AND mi.date >= ? AND mi.spend > 0
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  const gadsDays = (queryScalar(db, `
+    SELECT COUNT(DISTINCT gs.date)
+    FROM gads_campaign_spend gs
+    JOIN client_source_mappings csm ON gs.account_id = csm.source_id AND csm.source_type = 'gads'
+    WHERE csm.client_id = ? AND gs.date >= ? AND gs.spend > 0
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  // Use the higher of the two — if either platform is running consistently, that counts
+  const bestDays = Math.max(metaDays, gadsDays);
+  // Graduated: 0–25 days maps to 0–10
+  const spendConsistency = graduated(bestDays, 0, 25, 10);
+
+  return { adSpend, ctr, spendConsistency };
+}
+
+/** Score Performance for SEO-only clients (GA4 organic traffic). */
+function scoreSeoPerformance(db: Database, clientId: number, thirtyDaysAgo: string): Pick<HealthBreakdown, 'adSpend' | 'ctr' | 'spendConsistency'> {
+  // For SEO clients, re-use the same breakdown keys but with different meaning:
+  // adSpend → organic sessions (20 pts), ctr → engagement rate (10 pts), spendConsistency → traffic consistency (10 pts)
+
+  // Organic sessions via GA4 traffic sources (medium = 'organic')
+  const organicSessions = (queryScalar(db, `
+    SELECT COALESCE(SUM(ts.sessions), 0)
+    FROM ga4_traffic_sources ts
+    JOIN client_source_mappings csm ON ts.property_id = csm.source_id AND csm.source_type = 'ga4'
+    WHERE csm.client_id = ? AND ts.date >= ? AND ts.medium = 'organic'
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  // Graduated: 0–2000 organic sessions maps to 0–20
+  const adSpend = graduated(organicSessions, 0, 2000, 20);
+
+  // Engagement rate from GA4 daily
+  const avgEngagement = (queryScalar(db, `
+    SELECT AVG(d.engagement_rate)
+    FROM ga4_daily d
+    JOIN client_source_mappings csm ON d.property_id = csm.source_id AND csm.source_type = 'ga4'
+    WHERE csm.client_id = ? AND d.date >= ?
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  // Graduated: 0–0.7 (70%) engagement rate maps to 0–10
+  const ctr = graduated(avgEngagement, 0, 0.7, 10);
+
+  // Traffic consistency — days with sessions in last 30 days
+  const trafficDays = (queryScalar(db, `
+    SELECT COUNT(DISTINCT d.date)
+    FROM ga4_daily d
+    JOIN client_source_mappings csm ON d.property_id = csm.source_id AND csm.source_type = 'ga4'
+    WHERE csm.client_id = ? AND d.date >= ? AND d.sessions > 0
+  `, [clientId, thirtyDaysAgo]) as number) || 0;
+
+  // Graduated: 0–25 days maps to 0–10
+  const spendConsistency = graduated(trafficDays, 0, 25, 10);
+
+  return { adSpend, ctr, spendConsistency };
+}
+
 async function main() {
   await initSchema();
   await ensureHealthSchema();
@@ -87,27 +243,21 @@ async function main() {
     .toISOString()
     .split('T')[0];
 
-  // Fetch active clients
-  const clientResult = db.exec("SELECT name FROM clients WHERE status = 'active'");
-  if (!clientResult.length || !clientResult[0].values.length) {
+  // Fetch active clients with their IDs
+  const clientRows = queryRows(db, "SELECT id, name FROM clients WHERE status = 'active'");
+  if (!clientRows.length) {
     log('HEALTH', 'No active clients found');
     closeDb();
     return;
   }
 
-  const cols = clientResult[0].columns;
-  const clients = clientResult[0].values.map((row: unknown[]) => {
-    const obj: Record<string, unknown> = {};
-    cols.forEach((c: string, i: number) => obj[c] = row[i]);
-    return obj;
-  });
-
-  log('HEALTH', `Scoring ${clients.length} active clients for period ${period}...`);
+  log('HEALTH', `Scoring ${clientRows.length} active clients for period ${period}...`);
 
   const results: ClientResult[] = [];
   const overdueAlerts: string[] = [];
 
-  for (const client of clients) {
+  for (const client of clientRows) {
+    const clientId = client.id as number;
     const name = client.name as string;
     const breakdown: HealthBreakdown = {
       adSpend: 0,
@@ -120,55 +270,39 @@ async function main() {
     };
 
     // --- Performance (40 pts max) ---
+    // Choose scoring path: ads if they have ad accounts, SEO if they have GA4/GSC, else zero
+    const hasAds = hasAdAccounts(db, clientId);
+    const hasSeo = hasSeoAccounts(db, clientId);
 
-    // Ad spend across Meta + Google Ads (matched by account_name containing client name)
-    const metaSpend = (queryScalar(db,
-      'SELECT COALESCE(SUM(spend), 0) FROM meta_insights WHERE date >= ? AND account_name LIKE ?',
-      [thirtyDaysAgo, `%${name}%`],
-    ) as number) || 0;
-
-    const gadsSpend = (queryScalar(db,
-      'SELECT COALESCE(SUM(spend), 0) FROM gads_campaign_spend WHERE date >= ? AND account_name LIKE ?',
-      [thirtyDaysAgo, `%${name}%`],
-    ) as number) || 0;
-
-    const totalSpend = metaSpend + gadsSpend;
-    if (totalSpend > 1000) breakdown.adSpend = 20;
-    else if (totalSpend > 0) breakdown.adSpend = 10;
-
-    // CTR (Meta only — has impressions/clicks at account level)
-    const metaClicks = (queryScalar(db,
-      'SELECT COALESCE(SUM(clicks), 0) FROM meta_insights WHERE date >= ? AND account_name LIKE ?',
-      [thirtyDaysAgo, `%${name}%`],
-    ) as number) || 0;
-
-    const metaImpressions = (queryScalar(db,
-      'SELECT COALESCE(SUM(impressions), 0) FROM meta_insights WHERE date >= ? AND account_name LIKE ?',
-      [thirtyDaysAgo, `%${name}%`],
-    ) as number) || 0;
-
-    const ctr = metaImpressions > 0 ? (metaClicks / metaImpressions) * 100 : 0;
-    if (ctr > 1) breakdown.ctr = 10;
-
-    // Spend consistency — no gaps >7 days means spending on most days
-    const spendDays = (queryScalar(db,
-      'SELECT COUNT(DISTINCT date) FROM meta_insights WHERE date >= ? AND account_name LIKE ? AND spend > 0',
-      [thirtyDaysAgo, `%${name}%`],
-    ) as number) || 0;
-
-    if (spendDays >= 20) breakdown.spendConsistency = 10;
+    if (hasAds) {
+      const perfScores = scoreAdsPerformance(db, clientId, thirtyDaysAgo);
+      breakdown.adSpend = perfScores.adSpend;
+      breakdown.ctr = perfScores.ctr;
+      breakdown.spendConsistency = perfScores.spendConsistency;
+    } else if (hasSeo) {
+      const perfScores = scoreSeoPerformance(db, clientId, thirtyDaysAgo);
+      breakdown.adSpend = perfScores.adSpend;
+      breakdown.ctr = perfScores.ctr;
+      breakdown.spendConsistency = perfScores.spendConsistency;
+    }
+    // Clients with neither ads nor SEO accounts get 0/40 for performance
 
     // --- Relationship (30 pts max) ---
 
-    // Recent meeting within 30 days
-    const recentMeetingCount = (queryScalar(db,
-      'SELECT COUNT(*) FROM meetings WHERE client_name = ? AND date >= ?',
-      [name, thirtyDaysAgo],
-    ) as number) || 0;
+    // Meeting recency — graduated: 0 days ago = 15 pts, 45+ days ago = 0 pts
+    const lastMeetingDate = queryScalar(db,
+      'SELECT MAX(date) FROM meetings WHERE client_name = ? AND date >= ?',
+      [name, new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]],
+    ) as string | null;
 
-    if (recentMeetingCount > 0) breakdown.recentMeeting = 15;
+    if (lastMeetingDate) {
+      const daysSinceMeeting = Math.floor(
+        (now.getTime() - new Date(lastMeetingDate).getTime()) / (24 * 60 * 60 * 1000)
+      );
+      breakdown.recentMeeting = graduatedInverse(daysSinceMeeting, 0, 45, 15);
+    }
 
-    // Action items completion rate (>50% completed = full marks; zero actions = full marks)
+    // Action items completion rate — graduated: 0–100% maps to 0–15
     const totalActions = (queryScalar(db,
       'SELECT COUNT(*) FROM action_items ai JOIN meetings m ON ai.meeting_id = m.id WHERE m.client_name = ?',
       [name],
@@ -179,16 +313,20 @@ async function main() {
       [name],
     ) as number) || 0;
 
-    if (totalActions === 0 || (completedActions / totalActions) > 0.5) {
+    if (totalActions === 0) {
+      // No action items = full marks (nothing outstanding)
       breakdown.actionsResolved = 15;
+    } else {
+      const completionRate = completedActions / totalActions;
+      breakdown.actionsResolved = graduated(completionRate, 0, 1, 15);
     }
 
-    // --- Financial (30 pts max) ---
+    // --- Financial (30 pts max) — stays binary ---
 
     // Overdue invoices (AUTHORISED with amount_due > 0 past due_date)
     const overdueCount = (queryScalar(db,
-      "SELECT COUNT(*) FROM xero_invoices WHERE contact_name = ? AND status = 'AUTHORISED' AND due_date < ? AND amount_due > 0",
-      [name, nowIso],
+      "SELECT COUNT(*) FROM xero_invoices WHERE contact_name = ? AND status = 'AUTHORISED' AND due_date < date('now') AND amount_due > 0",
+      [name],
     ) as number) || 0;
 
     if (overdueCount === 0) {

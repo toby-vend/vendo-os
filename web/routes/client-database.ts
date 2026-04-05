@@ -16,6 +16,8 @@ interface ClientDatabaseRow {
   last_meeting_date: string | null;
   health_score: number | null;
   health_tier: string | null;
+  health_prev_score: number | null;
+  health_trend: 'up' | 'down' | 'flat' | null;
   overdue_invoices: number;
 }
 
@@ -83,6 +85,13 @@ export const clientDatabaseRoutes: FastifyPluginAsync = async (app) => {
                WHEN ch.score >= 40 THEN 'at-risk'
                ELSE 'critical'
              END as health_tier,
+             prev.score as health_prev_score,
+             CASE
+               WHEN ch.score IS NULL OR prev.score IS NULL THEN NULL
+               WHEN ch.score > prev.score + 5 THEN 'up'
+               WHEN ch.score < prev.score - 5 THEN 'down'
+               ELSE 'flat'
+             END as health_trend,
              COALESCE(inv.overdue_count, 0) as overdue_invoices
       FROM clients c
       LEFT JOIN (
@@ -90,6 +99,14 @@ export const clientDatabaseRoutes: FastifyPluginAsync = async (app) => {
         FROM client_health
         WHERE period = (SELECT MAX(period) FROM client_health)
       ) ch ON ch.client_name = c.name
+      LEFT JOIN (
+        SELECT client_name, score
+        FROM client_health
+        WHERE period = (
+          SELECT MAX(period) FROM client_health
+          WHERE period < (SELECT MAX(period) FROM client_health)
+        )
+      ) prev ON prev.client_name = c.name
       LEFT JOIN (
         SELECT contact_name, COUNT(*) as overdue_count
         FROM xero_invoices

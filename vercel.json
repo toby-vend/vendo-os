@@ -51,6 +51,14 @@
     {
       "path": "/api/cron/sync-actions-to-asana",
       "schedule": "45 7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/health-score",
+      "schedule": "0 1 1 * *"
+    },
+    {
+      "path": "/api/cron/traffic-light",
+      "schedule": "0 2 1 * *"
     }
   ],
   "routes": [

@@ -455,13 +455,14 @@ async function gatherActionItems(): Promise<ActionItemData> {
 
 interface ClientHealthData {
   atRisk: { name: string; score: number }[];
+  declining: { name: string; score: number; prev: number }[];
   offboardings: string[];
   staleClients: string[];
 }
 
 async function gatherClientHealth(): Promise<ClientHealthData> {
   const db = await getDb();
-  const data: ClientHealthData = { atRisk: [], offboardings: [], staleClients: [] };
+  const data: ClientHealthData = { atRisk: [], declining: [], offboardings: [], staleClients: [] };
 
   // At-risk clients (score < 40)
   const healthResult = db.exec(
@@ -471,6 +472,26 @@ async function gatherClientHealth(): Promise<ClientHealthData> {
   );
   if (healthResult.length && healthResult[0].values.length) {
     data.atRisk = healthResult[0].values.map(r => ({ name: r[0] as string, score: r[1] as number }));
+  }
+
+  // Declining clients — still healthy (>=70) but dropped >5 pts from prior period
+  const decliningResult = db.exec(`
+    SELECT cur.client_name, cur.score, prev.score as prev_score
+    FROM client_health cur
+    JOIN client_health prev ON prev.client_name = cur.client_name
+    WHERE cur.period = (SELECT MAX(period) FROM client_health)
+      AND prev.period = (SELECT MAX(period) FROM client_health WHERE period < (SELECT MAX(period) FROM client_health))
+      AND cur.score >= 70
+      AND prev.score - cur.score > 5
+    ORDER BY (prev.score - cur.score) DESC
+    LIMIT 5
+  `);
+  if (decliningResult.length && decliningResult[0].values.length) {
+    data.declining = decliningResult[0].values.map(r => ({
+      name: r[0] as string,
+      score: r[1] as number,
+      prev: r[2] as number,
+    }));
   }
 
   // Active offboardings
@@ -623,6 +644,11 @@ async function buildMondayBrief(): Promise<Block[]> {
       priorityLines.push(`RED client: ${c.name} (score ${c.score}/100)`);
     }
   }
+  if (health.declining.length) {
+    for (const c of health.declining) {
+      priorityLines.push(`Declining: ${c.name} (${c.prev} → ${c.score})`);
+    }
+  }
   if (health.offboardings.length) {
     priorityLines.push(`Active offboardings: ${health.offboardings.join(', ')}`);
   }
@@ -748,6 +774,7 @@ async function buildFridayBrief(): Promise<Block[]> {
   if (actions.totalOpen > 0) carryLines.push(`${actions.totalOpen} open action items`);
   if (pipeline.stalledDeals.length) carryLines.push(`${pipeline.stalledDeals.length} stalled pipeline deals`);
   if (health.atRisk.length) carryLines.push(`At-risk clients: ${health.atRisk.map(c => c.name).join(', ')}`);
+  if (health.declining.length) carryLines.push(`Declining: ${health.declining.map(c => `${c.name} (${c.prev}→${c.score})`).join(', ')}`);
   if (health.offboardings.length) carryLines.push(`Active offboardings: ${health.offboardings.join(', ')}`);
   if (health.staleClients.length) carryLines.push(`No contact 30+ days: ${health.staleClients.slice(0, 5).join(', ')}`);
   if (fin.overdueInvoices.length) carryLines.push(`${fin.overdueInvoices.length} overdue invoice(s) — £${fmt(fin.overdueInvoices.reduce((s, i) => s + i.amount, 0))}`);
@@ -783,6 +810,11 @@ async function buildMidweekBrief(): Promise<Block[]> {
   if (health.atRisk.length) {
     for (const c of health.atRisk) {
       priorityLines.push(`RED client: ${c.name} (score ${c.score}/100)`);
+    }
+  }
+  if (health.declining.length) {
+    for (const c of health.declining) {
+      priorityLines.push(`Declining: ${c.name} (${c.prev} → ${c.score})`);
     }
   }
   if (health.offboardings.length) {
@@ -1028,9 +1060,10 @@ async function buildMonthStartBrief(): Promise<Block[]> {
   ]);
 
   // At-risk clients
-  if (health.atRisk.length || health.offboardings.length) {
+  if (health.atRisk.length || health.declining.length || health.offboardings.length) {
     const riskLines: string[] = [];
     for (const c of health.atRisk) riskLines.push(`RED: ${c.name} (score ${c.score}/100)`);
+    for (const c of health.declining) riskLines.push(`Declining: ${c.name} (${c.prev} → ${c.score})`);
     if (health.offboardings.length) riskLines.push(`Active offboardings: ${health.offboardings.join(', ')}`);
     addSection(blocks, 'Client Risk Watch', riskLines);
   }
@@ -1116,9 +1149,10 @@ async function buildMonthEndBrief(): Promise<Block[]> {
   addSection(blocks, 'Client Movement', clientLines);
 
   // Client health
-  if (health.atRisk.length || health.offboardings.length || health.staleClients.length) {
+  if (health.atRisk.length || health.declining.length || health.offboardings.length || health.staleClients.length) {
     const riskLines: string[] = [];
     for (const c of health.atRisk) riskLines.push(`RED: ${c.name} (score ${c.score}/100)`);
+    for (const c of health.declining) riskLines.push(`Declining: ${c.name} (${c.prev} → ${c.score})`);
     if (health.offboardings.length) riskLines.push(`Active offboardings: ${health.offboardings.join(', ')}`);
     if (health.staleClients.length) riskLines.push(`No meeting 30+ days: ${health.staleClients.slice(0, 6).join(', ')}`);
     addSection(blocks, 'Client Health Watch', riskLines);
