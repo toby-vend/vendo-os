@@ -5,7 +5,8 @@
  *      npm run sync:ga4:backfill    (last 90 days)
  *
  * Uses the same Google OAuth tokens as Google Ads (shared credentials).
- * Requires GA4_PROPERTY_IDS in .env.local (comma-separated).
+ * Property IDs are read from client_account_map (platform = 'ga4').
+ * GA4_PROPERTY_IDS env var is supported as an optional override.
  */
 import { config } from 'dotenv';
 config({ path: '.env.local', override: true });
@@ -24,7 +25,7 @@ const GA4_API_BASE = 'https://analyticsdata.googleapis.com/v1beta';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GA4_PROPERTY_IDS = process.env.GA4_PROPERTY_IDS?.split(',').map(s => s.trim()).filter(Boolean);
+const GA4_PROPERTY_IDS_ENV = process.env.GA4_PROPERTY_IDS?.split(',').map(s => s.trim()).filter(Boolean);
 
 let tokens: { access_token: string; refresh_token: string };
 try {
@@ -39,8 +40,35 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
   process.exit(1);
 }
 
-if (!GA4_PROPERTY_IDS || GA4_PROPERTY_IDS.length === 0) {
-  logError('GA4', 'GA4_PROPERTY_IDS must be set in .env.local (comma-separated property IDs)');
+/**
+ * Resolve GA4 property IDs from env var (override) or client_account_map table.
+ * Must be called after initSchema().
+ */
+async function resolveGA4PropertyIds(): Promise<string[]> {
+  if (GA4_PROPERTY_IDS_ENV && GA4_PROPERTY_IDS_ENV.length > 0) {
+    log('GA4', `Using GA4 properties from env (${GA4_PROPERTY_IDS_ENV.length} properties)`);
+    return GA4_PROPERTY_IDS_ENV;
+  }
+
+  const db = await getDb();
+  const result = db.exec(
+    `SELECT DISTINCT platform_account_id FROM client_account_map WHERE platform = 'ga4'`
+  );
+
+  const ids: string[] = [];
+  if (result.length > 0 && result[0].values.length > 0) {
+    for (const row of result[0].values) {
+      const id = row[0] as string;
+      if (id) ids.push(id);
+    }
+  }
+
+  if (ids.length > 0) {
+    log('GA4', `Using GA4 properties from client_account_map (${ids.length} properties)`);
+    return ids;
+  }
+
+  logError('GA4', 'No GA4 properties found. Set GA4_PROPERTY_IDS in .env.local or add rows to client_account_map with platform = \'ga4\'');
   process.exit(1);
 }
 
@@ -165,11 +193,12 @@ function ga4DateToISO(d: string): string {
 async function syncGA4() {
   await initSchema();
   const db = await getDb();
+  const GA4_PROPERTY_IDS = await resolveGA4PropertyIds();
 
   try {
     const now = new Date().toISOString();
     const days = BACKFILL ? BACKFILL_DAYS : DEFAULT_DAYS;
-    log('GA4', `Syncing ${GA4_PROPERTY_IDS!.length} properties (${days} days)`);
+    log('GA4', `Syncing ${GA4_PROPERTY_IDS.length} properties (${days} days)`);
 
     // Upsert property record
     const upsertProperty = db.prepare(
@@ -200,7 +229,7 @@ async function syncGA4() {
     let totalDaily = 0;
     let totalTraffic = 0;
 
-    for (const propertyId of GA4_PROPERTY_IDS!) {
+    for (const propertyId of GA4_PROPERTY_IDS) {
       try {
         log('GA4', `  Property ${propertyId}...`);
 
@@ -272,7 +301,7 @@ async function syncGA4() {
     upsertTraffic.free();
     saveDb();
 
-    log('GA4', `Sync complete: ${totalDaily} daily rows, ${totalTraffic} traffic rows across ${GA4_PROPERTY_IDS!.length} properties`);
+    log('GA4', `Sync complete: ${totalDaily} daily rows, ${totalTraffic} traffic rows across ${GA4_PROPERTY_IDS.length} properties`);
 
     // Auto-resolve GA4 properties to canonical clients
     const ga4Props = db.exec('SELECT id, display_name FROM ga4_properties WHERE display_name IS NOT NULL');

@@ -600,6 +600,34 @@ export async function initSchema(): Promise<void> {
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_audit_log_user ON audit_log(user_id)`, args: [] });
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_audit_log_created ON audit_log(created_at)`, args: [] });
 
+  // --- Sync jobs table ---
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS sync_jobs (
+    id INTEGER PRIMARY KEY,
+    client_id INTEGER NOT NULL,
+    client_name TEXT NOT NULL,
+    job_type TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TEXT NOT NULL,
+    started_at TEXT,
+    completed_at TEXT,
+    error TEXT
+  )`, args: [] });
+
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_sync_jobs_client ON sync_jobs(client_id)`, args: [] });
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_sync_jobs_status ON sync_jobs(status)`, args: [] });
+
+  // --- Client treatment values table ---
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS client_treatment_values (
+    id INTEGER PRIMARY KEY,
+    client_id INTEGER NOT NULL,
+    treatment_type_id INTEGER NOT NULL,
+    custom_value REAL NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE(client_id, treatment_type_id)
+  )`, args: [] });
+
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_ctv_client ON client_treatment_values(client_id)`, args: [] });
+
   // Migrate: add conversion columns to gads_campaign_spend
   try {
     await db.execute({ sql: 'ALTER TABLE gads_campaign_spend ADD COLUMN conversions REAL DEFAULT 0', args: [] });
@@ -616,6 +644,10 @@ export async function initSchema(): Promise<void> {
   } catch {
     // Column already exists
   }
+
+  // Sidebar config
+  const { initSidebarSchema } = await import('./sidebar.js');
+  await initSidebarSchema();
 }
 
 /** @deprecated Use initSchema instead */

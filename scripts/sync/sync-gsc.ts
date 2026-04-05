@@ -3,6 +3,9 @@
  *
  * Run: npm run sync:gsc             (last 7 days)
  *      npm run sync:gsc:backfill    (last 90 days)
+ *
+ * Site URLs are read from client_account_map (platform = 'gsc').
+ * GSC_SITE_URLS env var is supported as an optional override.
  */
 import { config } from 'dotenv';
 config({ path: '.env.local', override: true });
@@ -23,7 +26,7 @@ const BASE_URL = 'https://www.googleapis.com/webmasters/v3';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const SITE_URLS_RAW = process.env.GSC_SITE_URLS;
+const SITE_URLS_ENV = process.env.GSC_SITE_URLS?.split(',').map(s => s.trim()).filter(Boolean);
 
 let tokens: { access_token: string; refresh_token: string };
 try {
@@ -38,12 +41,37 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
   process.exit(1);
 }
 
-if (!SITE_URLS_RAW) {
-  logError('GSC', 'GSC_SITE_URLS must be set in .env.local (comma-separated, e.g. "sc-domain:example.com,sc-domain:example2.com")');
+/**
+ * Resolve GSC site URLs from env var (override) or client_account_map table.
+ * Must be called after initSchema().
+ */
+async function resolveGscSiteUrls(): Promise<string[]> {
+  if (SITE_URLS_ENV && SITE_URLS_ENV.length > 0) {
+    log('GSC', `Using GSC site URLs from env (${SITE_URLS_ENV.length} sites)`);
+    return SITE_URLS_ENV;
+  }
+
+  const db = await getDb();
+  const result = db.exec(
+    `SELECT DISTINCT platform_account_id FROM client_account_map WHERE platform = 'gsc'`
+  );
+
+  const urls: string[] = [];
+  if (result.length > 0 && result[0].values.length > 0) {
+    for (const row of result[0].values) {
+      const url = row[0] as string;
+      if (url) urls.push(url);
+    }
+  }
+
+  if (urls.length > 0) {
+    log('GSC', `Using GSC site URLs from client_account_map (${urls.length} sites)`);
+    return urls;
+  }
+
+  logError('GSC', 'No GSC site URLs found. Set GSC_SITE_URLS in .env.local or add rows to client_account_map with platform = \'gsc\'');
   process.exit(1);
 }
-
-const SITE_URLS = SITE_URLS_RAW.split(',').map(s => s.trim()).filter(Boolean);
 
 // --- Token refresh ---
 
@@ -139,6 +167,7 @@ async function gscQuery(
 async function syncGsc() {
   await initSchema();
   const db = await getDb();
+  const SITE_URLS = await resolveGscSiteUrls();
 
   try {
     const now = new Date().toISOString();

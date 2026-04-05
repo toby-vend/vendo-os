@@ -25,6 +25,8 @@ import { adminUsageRoutes } from './routes/admin/usage.js';
 import { adminClientsRoutes } from './routes/admin/clients.js';
 import { adminClientMappingRoutes } from './routes/admin/client-mapping.js';
 import { adminPortalUsersRoutes } from './routes/admin/portal-users.js';
+import { adminOnboardingRoutes } from './routes/admin/onboarding.js';
+import { adminSidebarRoutes } from './routes/admin/sidebar.js';
 import { googleOAuthRoutes } from './routes/google-oauth.js';
 import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
@@ -87,6 +89,7 @@ app.decorateReply('render', function (template: string, data: Record<string, unk
     csrfToken,
     md,
     sanitiseHtml,
+    sidebarConfig: (this.request as any)._sidebarConfig,
   });
   this.type('text/html').send(html);
 });
@@ -146,12 +149,15 @@ app.addHook('onRequest', async (request, reply) => {
     return;
   }
 
-  const [channels, allowedRoutes, googleConnected, clientMapping] = await Promise.all([
+  const { getSidebarConfig } = await import('./lib/queries/sidebar.js');
+  const [channels, allowedRoutes, googleConnected, clientMapping, sidebarConfig] = await Promise.all([
     getUserChannelSlugs(dbUser.id),
     dbUser.role === 'admin' ? Promise.resolve([]) : getUserAllowedRoutes(dbUser.id),
     hasUserOAuthToken(dbUser.id, 'google'),
     dbUser.role === 'client' ? getClientForUser(dbUser.id) : Promise.resolve(null),
+    getSidebarConfig(),
   ]);
+  (request as any)._sidebarConfig = sidebarConfig;
 
   const user: SessionUser = {
     id: dbUser.id,
@@ -300,6 +306,8 @@ app.register(adminUsageRoutes, { prefix: '/admin/usage' });
 app.register(adminClientsRoutes, { prefix: '/admin/clients' });
 app.register(adminClientMappingRoutes, { prefix: '/admin/client-mapping' });
 app.register(adminPortalUsersRoutes, { prefix: '/admin/portal-users' });
+app.register(adminOnboardingRoutes, { prefix: '/admin/onboarding' });
+app.register(adminSidebarRoutes, { prefix: '/admin/sidebar' });
 app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });
