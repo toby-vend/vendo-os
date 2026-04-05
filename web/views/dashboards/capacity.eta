@@ -1,8 +1,36 @@
 <% layout('/layouts/base') %>
 
-<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-  <h2 style="margin: 0;">Capacity Modelling</h2>
-  <form method="GET" action="/dashboards/capacity" style="display: flex; gap: 0.75rem; align-items: center;">
+<style>
+  .cap-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .cap-header h2 { margin: 0; }
+  .cap-header select { padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: var(--vendo-text); border: 1px solid var(--glass-border); border-radius: 8px; font-family: var(--vendo-font); }
+
+  .cap-dept { background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: var(--glass-radius); box-shadow: var(--glass-shadow); padding: 1.25rem; margin-bottom: 1rem; }
+  .cap-dept-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .cap-dept-title { font-size: 15px; font-weight: 700; color: var(--vendo-text-heading); margin: 0; }
+  .cap-dept-util { font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  .cap-person { display: flex; align-items: center; gap: 1rem; padding: 0.625rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .cap-person:last-child { border-bottom: none; }
+  .cap-person-name { flex: 0 0 180px; font-size: 13px; font-weight: 500; color: var(--vendo-text); }
+  .cap-person-bar { flex: 1; min-width: 0; }
+  .cap-bar-track { background: rgba(255,255,255,0.06); border-radius: 4px; height: 8px; position: relative; overflow: hidden; }
+  .cap-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .cap-person-meta { flex: 0 0 220px; display: flex; align-items: center; gap: 1rem; justify-content: flex-end; }
+  .cap-person-hours { font-size: 12px; color: var(--vendo-text-muted); min-width: 90px; text-align: right; }
+  .cap-person-pct { font-size: 13px; font-weight: 700; min-width: 48px; text-align: right; }
+  .cap-person-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; min-width: 90px; text-align: center; }
+
+  @media (max-width: 768px) {
+    .cap-person { flex-wrap: wrap; gap: 0.5rem; }
+    .cap-person-name { flex: 1 1 100%; }
+    .cap-person-meta { flex: 1 1 100%; justify-content: flex-start; }
+  }
+</style>
+
+<div class="cap-header">
+  <h2>Capacity Modelling</h2>
+  <form method="GET" action="/dashboards/capacity">
     <select name="days" onchange="this.form.submit()">
       <option value="7" <%= it.days === 7 ? 'selected' : '' %>>7 days</option>
       <option value="14" <%= it.days === 14 ? 'selected' : '' %>>14 days</option>
@@ -12,6 +40,7 @@
   </form>
 </div>
 
+<!-- Summary stats -->
 <div class="stat-grid">
   <article class="stat-card">
     <p class="stat-value" style="<%= it.companyUtilisation > 80 ? 'color: #EF4444;' : it.companyUtilisation < 60 ? 'color: #F59E0B;' : 'color: #22C55E;' %>"><%= it.companyUtilisation %>%</p>
@@ -32,44 +61,47 @@
 </div>
 
 <% if (!it.data.length) { %>
-  <p>No capacity data available. Ensure Harvest sync is running and users have weekly capacity set.</p>
+  <p style="color: var(--vendo-text-muted);">No capacity data available. Ensure Harvest sync is running and users have weekly capacity set.</p>
 <% } else { %>
 
 <% for (const [dept, members] of it.departments) {
   const deptHours = members.reduce((s, m) => s + m.hours_logged, 0);
   const deptCap = members.reduce((s, m) => s + m.weekly_capacity, 0);
   const deptUtil = deptCap > 0 ? (deptHours / deptCap * 100).toFixed(1) : 0;
+  const deptColour = deptUtil > 80 ? '#EF4444' : deptUtil < 60 ? '#F59E0B' : '#22C55E';
 %>
-  <h3 style="margin-top: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
-    <%= dept %>
-    <span style="font-size: 13px; font-weight: 400; color: <%= deptUtil > 80 ? '#EF4444' : deptUtil < 60 ? '#F59E0B' : '#22C55E' %>;">
-      (<%= deptUtil %>% utilisation)
+
+<div class="cap-dept">
+  <div class="cap-dept-header">
+    <h3 class="cap-dept-title"><%= dept %></h3>
+    <span class="cap-dept-util" style="background: <%= deptColour %>15; color: <%= deptColour %>;">
+      <%= deptUtil %>% utilisation
     </span>
-  </h3>
+  </div>
 
-  <table class="compact">
-    <thead>
-      <tr><th>Person</th><th>Hours Logged</th><th>Capacity</th><th>Utilisation</th><th>Status</th></tr>
-    </thead>
-    <tbody>
-      <% members.forEach(m => {
-        let status = '';
-        let statusColour = '';
-        if (m.utilisation_pct > 100) { status = 'Overloaded'; statusColour = '#EF4444'; }
-        else if (m.utilisation_pct > 80) { status = 'Consider hiring'; statusColour = '#F59E0B'; }
-        else if (m.utilisation_pct < 60) { status = 'Review workload'; statusColour = '#F59E0B'; }
-        else { status = 'Healthy'; statusColour = '#22C55E'; }
-      %>
-      <tr>
-        <td><%= m.user_name %></td>
-        <td><%= m.hours_logged %></td>
-        <td><%= m.weekly_capacity %>h</td>
-        <td style="color: <%= statusColour %>; font-weight: 600;"><%= m.utilisation_pct %>%</td>
-        <td style="color: <%= statusColour %>; font-size: 12px;"><%= status %></td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
+  <% members.forEach(m => {
+    let status, statusColour, statusBg;
+    if (m.utilisation_pct > 100) { status = 'Overloaded'; statusColour = '#EF4444'; statusBg = 'rgba(239,68,68,0.12)'; }
+    else if (m.utilisation_pct > 80) { status = 'Consider hiring'; statusColour = '#F59E0B'; statusBg = 'rgba(245,158,11,0.12)'; }
+    else if (m.utilisation_pct < 60) { status = 'Review workload'; statusColour = '#F59E0B'; statusBg = 'rgba(245,158,11,0.12)'; }
+    else { status = 'Healthy'; statusColour = '#22C55E'; statusBg = 'rgba(34,197,94,0.10)'; }
+    const barWidth = Math.min(m.utilisation_pct, 120);
+  %>
+  <div class="cap-person">
+    <div class="cap-person-name"><%= m.user_name %></div>
+    <div class="cap-person-bar">
+      <div class="cap-bar-track">
+        <div class="cap-bar-fill" style="background: <%= statusColour %>; width: <%= (barWidth / 120 * 100).toFixed(1) %>%;"></div>
+      </div>
+    </div>
+    <div class="cap-person-meta">
+      <span class="cap-person-hours"><%= m.hours_logged %>h / <%= m.weekly_capacity %>h</span>
+      <span class="cap-person-pct" style="color: <%= statusColour %>;"><%= m.utilisation_pct %>%</span>
+      <span class="cap-person-status" style="background: <%= statusBg %>; color: <%= statusColour %>;"><%= status %></span>
+    </div>
+  </div>
+  <% }) %>
+</div>
+
 <% } %>
-
 <% } %>
