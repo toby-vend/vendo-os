@@ -43,6 +43,62 @@
   </div>
 </div>
 
+<% if (g.channels.length > 0) { %>
+<div class="chart-row" style="margin-top: 1.5rem;">
+  <div class="chart-card">
+    <h3>Revenue vs Spend by Channel</h3>
+    <div class="chart-wrap">
+      <canvas id="roiChannelChart"></canvas>
+    </div>
+  </div>
+  <div class="chart-card">
+    <h3>Lead Funnel</h3>
+    <div class="chart-wrap">
+      <canvas id="roiFunnelChart"></canvas>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  var channels = <%~ JSON.stringify(g.channels.map(function(ch) { return { channel: ch.channel === 'google' ? 'Google Ads' : ch.channel === 'facebook' ? 'Meta Ads' : ch.channel, spend: ch.spend, revenue: ch.revenue }; })) %>;
+  new Chart(document.getElementById('roiChannelChart'), {
+    type: 'bar',
+    data: {
+      labels: channels.map(function(c) { return c.channel; }),
+      datasets: [
+        { label: 'Spend', data: channels.map(function(c) { return c.spend; }), backgroundColor: 'rgba(239, 68, 68, 0.5)', borderColor: '#EF4444', borderWidth: 1 },
+        { label: 'Revenue', data: channels.map(function(c) { return c.revenue; }), backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#22C55E', borderWidth: 1 }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } } } },
+      plugins: { tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': \u00A3' + ctx.parsed.y.toLocaleString(); } } } }
+    }
+  });
+
+  new Chart(document.getElementById('roiFunnelChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Total Leads', 'In Progress', 'Won'],
+      datasets: [{
+        label: 'Count',
+        data: [<%= g.total_leads %>, <%= g.total_in_progress %>, <%= g.total_won %>],
+        backgroundColor: ['rgba(148, 163, 184, 0.5)', 'rgba(59, 130, 246, 0.6)', 'rgba(34, 197, 94, 0.6)'],
+        borderColor: ['#94A3B8', '#3B82F6', '#22C55E'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+})();
+</script>
+<% } %>
+
 <!-- Channel Performance -->
 <div class="portal-section" style="margin-top: 1.5rem;">
   <h2>Channel Performance</h2>

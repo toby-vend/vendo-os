@@ -1109,3 +1109,41 @@ mark {
   color: var(--vendo-text-muted);
   text-align: center;
 }
+
+/* === Charts === */
+
+.chart-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-card h3 {
+  margin: 0 0 1rem;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.chart-wrap canvas {
+  max-height: 300px;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .chart-row { grid-template-columns: 1fr; }
+}

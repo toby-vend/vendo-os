@@ -819,6 +819,54 @@ export async function getUnifiedAdsData(
   return results;
 }
 
+// --- Daily ad spend trend (for charts) ---
+interface DailyAdSpendRow {
+  date: string;
+  meta_spend: number;
+  google_spend: number;
+}
+
+export async function getDailyAdSpend(days = 30, clientId?: number): Promise<DailyAdSpendRow[]> {
+  const clientFilter = clientId ? 'AND c.id = ?' : '';
+  const baseArgs: (string | number)[] = clientId ? [days, clientId] : [days];
+
+  const [metaDaily, gadsDaily] = await Promise.all([
+    rows<{ date: string; spend: number }>(`
+      SELECT m.date, COALESCE(SUM(m.spend), 0) as spend
+      FROM meta_insights m
+      JOIN client_source_mappings csm ON csm.external_id = m.account_id AND csm.source = 'meta'
+      JOIN clients c ON c.id = csm.client_id
+      WHERE m.date >= date('now', '-' || ? || ' days')
+        AND m.level = 'campaign'
+        AND c.status = 'active' ${clientFilter}
+      GROUP BY m.date ORDER BY m.date
+    `, baseArgs),
+    rows<{ date: string; spend: number }>(`
+      SELECT g.date, COALESCE(SUM(g.spend), 0) as spend
+      FROM gads_campaign_spend g
+      JOIN client_source_mappings csm ON csm.external_id = g.account_id AND csm.source = 'gads'
+      JOIN clients c ON c.id = csm.client_id
+      WHERE g.date >= date('now', '-' || ? || ' days')
+        AND c.status = 'active' ${clientFilter}
+      GROUP BY g.date ORDER BY g.date
+    `, baseArgs),
+  ]);
+
+  const map = new Map<string, DailyAdSpendRow>();
+  for (const r of metaDaily) {
+    map.set(r.date, { date: r.date, meta_spend: r.spend, google_spend: 0 });
+  }
+  for (const r of gadsDaily) {
+    const existing = map.get(r.date);
+    if (existing) {
+      existing.google_spend = r.spend;
+    } else {
+      map.set(r.date, { date: r.date, meta_spend: 0, google_spend: r.spend });
+    }
+  }
+  return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
 // ============================================================
 // 12. Performance Reviews
 // ============================================================
