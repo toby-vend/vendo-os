@@ -4,6 +4,8 @@ import {
   verifyPassword,
   hashPassword,
   createSessionToken,
+  verifySessionToken,
+  parseCookies,
   sessionCookie,
   clearSessionCookie,
   validatePasswordComplexity,
@@ -35,7 +37,13 @@ setInterval(() => {
 }, 5 * 60_000).unref();
 
 export const authRoutes: FastifyPluginAsync = async (app) => {
-  app.get('/login', async (_request, reply) => {
+  app.get('/login', async (request, reply) => {
+    const cookies = parseCookies(request.headers.cookie || '');
+    const token = cookies['vendo_session'];
+    if (token && verifySessionToken(token)) {
+      reply.redirect('/');
+      return;
+    }
     reply.render('login', {});
   });
 
