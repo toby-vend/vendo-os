@@ -450,22 +450,55 @@ export interface GrowthTaskLogEntry {
   created_at: string;
 }
 
+export async function ensureGrowthLogTable(): Promise<void> {
+  try {
+    await db.execute({
+      sql: `CREATE TABLE IF NOT EXISTS growth_task_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        section TEXT NOT NULL,
+        action TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        item_count INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
+      args: [],
+    });
+  } catch {
+    // Table may already exist
+  }
+}
+
 export async function insertGrowthLog(section: string, action: string, summary: string, itemCount = 0): Promise<void> {
-  await db.execute({
-    sql: 'INSERT INTO growth_task_log (section, action, summary, item_count, created_at) VALUES (?, ?, ?, ?, ?)',
-    args: [section, action, summary, itemCount, new Date().toISOString()],
-  });
+  try {
+    await db.execute({
+      sql: 'INSERT INTO growth_task_log (section, action, summary, item_count, created_at) VALUES (?, ?, ?, ?, ?)',
+      args: [section, action, summary, itemCount, new Date().toISOString()],
+    });
+  } catch {
+    // Table may not exist yet — create it and retry
+    await ensureGrowthLogTable();
+    await db.execute({
+      sql: 'INSERT INTO growth_task_log (section, action, summary, item_count, created_at) VALUES (?, ?, ?, ?, ?)',
+      args: [section, action, summary, itemCount, new Date().toISOString()],
+    });
+  }
 }
 
 export async function getGrowthLog(section?: string, limit = 20): Promise<GrowthTaskLogEntry[]> {
-  if (section) {
-    return rows<GrowthTaskLogEntry>(
-      'SELECT id, section, action, summary, item_count, created_at FROM growth_task_log WHERE section = ? ORDER BY created_at DESC LIMIT ?',
-      [section, limit],
+  try {
+    if (section) {
+      return await rows<GrowthTaskLogEntry>(
+        'SELECT id, section, action, summary, item_count, created_at FROM growth_task_log WHERE section = ? ORDER BY created_at DESC LIMIT ?',
+        [section, limit],
+      );
+    }
+    return await rows<GrowthTaskLogEntry>(
+      'SELECT id, section, action, summary, item_count, created_at FROM growth_task_log ORDER BY created_at DESC LIMIT ?',
+      [limit],
     );
+  } catch {
+    // Table may not exist yet — create it for next time
+    await ensureGrowthLogTable();
+    return [];
   }
-  return rows<GrowthTaskLogEntry>(
-    'SELECT id, section, action, summary, item_count, created_at FROM growth_task_log ORDER BY created_at DESC LIMIT ?',
-    [limit],
-  );
 }
