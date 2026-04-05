@@ -1017,6 +1017,28 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_ai_audit_source ON ai_audit_log(source)');
   db.run('CREATE INDEX IF NOT EXISTS idx_ai_audit_status ON ai_audit_log(status)');
 
+  // --- Meeting concerns table (AI concern detection) ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS meeting_concerns (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      meeting_id TEXT NOT NULL UNIQUE REFERENCES meetings(id),
+      concern_detected INTEGER NOT NULL DEFAULT 0,
+      severity TEXT,
+      category TEXT,
+      ai_summary TEXT,
+      excerpts TEXT,
+      quality_score REAL,
+      ai_call_id TEXT,
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_mc_meeting ON meeting_concerns(meeting_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_mc_concern ON meeting_concerns(concern_detected)');
+
+  try { db.run('ALTER TABLE meetings ADD COLUMN concern_analysed_at TEXT'); } catch { /* already exists */ }
+
   // --- QA grades table ---
 
   db.run(`

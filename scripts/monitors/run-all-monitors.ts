@@ -33,6 +33,7 @@ async function main() {
     { name: 'fathom-failsafe', importPath: './fathom-failsafe.js' },
     { name: 'ad-spend-pacing', importPath: './ad-spend-pacing.js' },
     { name: 'contract-renewal', importPath: './contract-renewal.js' },
+    { name: 'concern-detection', importPath: '../analysis/detect-concerns.js' },
   ];
 
   for (const monitor of monitors) {

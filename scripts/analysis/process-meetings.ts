@@ -245,6 +245,13 @@ async function processMeetings() {
   log('PROCESS', `Done: ${categorised} categorised, ${clientsMatched} matched to clients, ${actionsParsed} action items, ${decisionsExtracted} decisions, ${domainsLearned} domains learned`);
   log('PROCESS', `Match methods: ${Object.entries(methodCounts).map(([k, v]) => `${k}=${v}`).join(', ')}`);
 
+  // AI concern detection (runs after all meetings have client_name populated)
+  if (!SKIP_AI) {
+    const { run: runConcerns } = await import('./detect-concerns.js');
+    const r = await runConcerns();
+    log('PROCESS', `Concerns: ${r.checked} analysed, ${r.flagged} flagged`);
+  }
+
   await generateReport();
   closeDb();
 }
