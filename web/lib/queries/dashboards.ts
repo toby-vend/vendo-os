@@ -654,17 +654,24 @@ const STAGE_PROBABILITIES: Record<string, number> = {
   'Lost': 0,
 };
 
+const VENDO_LOCATION_ID = process.env.GHL_VENDO_LOCATION_ID || '';
+
 export async function getPipelineStages(): Promise<PipelineStageRow[]> {
+  const locationFilter = VENDO_LOCATION_ID
+    ? 'AND o.pipeline_id IN (SELECT id FROM ghl_pipelines WHERE location_id = ?)'
+    : '';
+  const args = VENDO_LOCATION_ID ? [VENDO_LOCATION_ID] : [];
+
   const stageRows = await rows<{ stage_name: string; count: number; value: number }>(`
     SELECT COALESCE(s.name, 'Unknown') as stage_name,
            COUNT(o.id) as count,
            COALESCE(SUM(o.monetary_value), 0) as value
     FROM ghl_opportunities o
     LEFT JOIN ghl_stages s ON o.stage_id = s.id
-    WHERE o.status = 'open'
+    WHERE o.status = 'open' ${locationFilter}
     GROUP BY s.name
     ORDER BY s.position
-  `);
+  `, args);
   return stageRows.map(s => {
     const prob = STAGE_PROBABILITIES[s.stage_name] ?? 25;
     return {
@@ -676,26 +683,36 @@ export async function getPipelineStages(): Promise<PipelineStageRow[]> {
 }
 
 export async function getPipelineWonDeals(days = 30): Promise<WonDealRow[]> {
+  const locationFilter = VENDO_LOCATION_ID
+    ? 'AND o.pipeline_id IN (SELECT id FROM ghl_pipelines WHERE location_id = ?)'
+    : '';
+  const args: (string | number)[] = VENDO_LOCATION_ID ? [days, VENDO_LOCATION_ID] : [days];
+
   return rows<WonDealRow>(`
     SELECT o.id, o.name, o.contact_name, o.monetary_value as value,
            o.updated_at as won_date
     FROM ghl_opportunities o
-    WHERE o.status = 'won' AND o.updated_at >= date('now', '-' || ? || ' days')
+    WHERE o.status = 'won' AND o.updated_at >= date('now', '-' || ? || ' days') ${locationFilter}
     ORDER BY o.updated_at DESC
-  `, [days]);
+  `, args);
 }
 
 export async function getPipelineMonthlyForecast(): Promise<MonthlyForecastRow[]> {
+  const locationFilter = VENDO_LOCATION_ID
+    ? 'AND o.pipeline_id IN (SELECT id FROM ghl_pipelines WHERE location_id = ?)'
+    : '';
+  const args = VENDO_LOCATION_ID ? [VENDO_LOCATION_ID] : [];
+
   return rows<MonthlyForecastRow>(`
     SELECT strftime('%Y-%m', o.created_at) as month,
            COUNT(*) as deal_count,
            COALESCE(SUM(o.monetary_value), 0) as weighted_value
     FROM ghl_opportunities o
-    WHERE o.status = 'open'
+    WHERE o.status = 'open' ${locationFilter}
     GROUP BY month
     ORDER BY month DESC
     LIMIT 6
-  `);
+  `, args);
 }
 
 // ============================================================

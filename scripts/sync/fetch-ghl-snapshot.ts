@@ -10,10 +10,10 @@ const PROJECT_ROOT = resolve(__dirname, '../..');
 
 const BASE_URL = 'https://services.leadconnectorhq.com';
 const API_KEY = process.env.GHL_API_KEY!;
-const LOCATION_ID = process.env.GHL_LOCATION_ID!;
+const LOCATION_ID = process.env.GHL_VENDO_LOCATION_ID || process.env.GHL_LOCATION_ID!;
 
 if (!API_KEY || !LOCATION_ID) {
-  console.error('GHL_API_KEY and GHL_LOCATION_ID must be set in .env.local');
+  console.error('GHL_API_KEY and GHL_VENDO_LOCATION_ID (or GHL_LOCATION_ID) must be set in .env.local');
   process.exit(1);
 }
 

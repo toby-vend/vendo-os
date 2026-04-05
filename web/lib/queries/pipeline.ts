@@ -1,5 +1,7 @@
 import { rows, scalar } from './base.js';
 
+const VENDO_LOCATION_ID = process.env.GHL_VENDO_LOCATION_ID || '';
+
 // --- Interfaces ---
 
 export interface PipelineOverview {
@@ -37,12 +39,21 @@ export interface OpportunityRow {
 // --- Pipeline ---
 
 export async function getPipelineOverview(pipelineId?: string): Promise<PipelineOverview[]> {
-  const pipelines = await rows<{ id: string; name: string }>(
-    pipelineId
-      ? 'SELECT id, name FROM ghl_pipelines WHERE id = ?'
-      : 'SELECT id, name FROM ghl_pipelines ORDER BY name',
-    pipelineId ? [pipelineId] : []
-  );
+  let sql: string;
+  let args: string[];
+
+  if (pipelineId) {
+    sql = 'SELECT id, name FROM ghl_pipelines WHERE id = ?';
+    args = [pipelineId];
+  } else if (VENDO_LOCATION_ID) {
+    sql = 'SELECT id, name FROM ghl_pipelines WHERE location_id = ? ORDER BY name';
+    args = [VENDO_LOCATION_ID];
+  } else {
+    sql = 'SELECT id, name FROM ghl_pipelines ORDER BY name';
+    args = [];
+  }
+
+  const pipelines = await rows<{ id: string; name: string }>(sql, args);
 
   const overviews: PipelineOverview[] = [];
 
@@ -141,5 +152,8 @@ export async function getOpportunityDetail(id: string): Promise<OpportunityRow |
 }
 
 export async function getPipelineNames(): Promise<{ id: string; name: string }[]> {
+  if (VENDO_LOCATION_ID) {
+    return rows<{ id: string; name: string }>('SELECT id, name FROM ghl_pipelines WHERE location_id = ? ORDER BY name', [VENDO_LOCATION_ID]);
+  }
   return rows<{ id: string; name: string }>('SELECT id, name FROM ghl_pipelines ORDER BY name');
 }

@@ -13,7 +13,7 @@ const PROJECT_ROOT = resolve(__dirname, '../..');
 // --- Config ---
 const GHL_BASE_URL = 'https://services.leadconnectorhq.com';
 const GHL_API_KEY = process.env.GHL_API_KEY!;
-const GHL_LOCATION_ID = process.env.GHL_LOCATION_ID!;
+const GHL_LOCATION_ID = process.env.GHL_VENDO_LOCATION_ID || process.env.GHL_LOCATION_ID!;
 const FATHOM_API_KEY = process.env.FATHOM_API_KEY!;
 
 // --- Helpers ---
