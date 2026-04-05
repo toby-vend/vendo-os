@@ -32,6 +32,7 @@ import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
 import { tasksRoutes } from './routes/tasks.js';
 import { driveWebhookRoutes } from './routes/drive-webhook.js';
+import { fathomWebhookRoutes } from './routes/fathom-webhook.js';
 import { driveCronRoutes } from './routes/drive-cron.js';
 import { taskRunRoutes } from './routes/task-runs.js';
 import { taskRunsUiRoutes } from './routes/task-runs-ui.js';
@@ -107,7 +108,7 @@ app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
   // Public routes (no session required)
-  if (path.startsWith('/assets/') || path === '/login' || path === '/api/drive/webhook') return;
+  if (path.startsWith('/assets/') || path === '/login' || path === '/api/drive/webhook' || path === '/api/fathom/webhook') return;
 
   // Cron routes — validate Vercel cron secret
   if (path.startsWith('/api/cron/')) {
@@ -313,6 +314,7 @@ app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });
 app.register(tasksRoutes, { prefix: '/asana-tasks' });
 app.register(driveWebhookRoutes, { prefix: '/api/drive' });
+app.register(fathomWebhookRoutes, { prefix: '/api/fathom' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(taskRunsUiRoutes, { prefix: '/tasks' });
