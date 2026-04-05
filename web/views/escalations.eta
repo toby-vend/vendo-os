@@ -1,0 +1,91 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h1 style="margin: 0;">Escalations</h1>
+  <div style="display: flex; gap: 0.5rem;">
+    <a href="/escalations" style="padding: 4px 10px; border-radius: 6px; font-size: 12px; text-decoration: none; color: <%= !it.statusFilter ? '#0B0B0B' : '#94A3B8' %>; background: <%= !it.statusFilter ? '#22C55E' : 'rgba(255,255,255,0.06)' %>;">All</a>
+    <a href="/escalations?status=open" style="padding: 4px 10px; border-radius: 6px; font-size: 12px; text-decoration: none; color: <%= it.statusFilter === 'open' ? '#0B0B0B' : '#94A3B8' %>; background: <%= it.statusFilter === 'open' ? '#EF4444' : 'rgba(255,255,255,0.06)' %>;">Open</a>
+    <a href="/escalations?status=resolved" style="padding: 4px 10px; border-radius: 6px; font-size: 12px; text-decoration: none; color: <%= it.statusFilter === 'resolved' ? '#0B0B0B' : '#94A3B8' %>; background: <%= it.statusFilter === 'resolved' ? '#22C55E' : 'rgba(255,255,255,0.06)' %>;">Resolved</a>
+  </div>
+</div>
+
+<!-- Stats -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; max-width: 500px;">
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="color: #E2E8F0; font-size: 24px; font-weight: 600;"><%= it.stats.total %></div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">Total</div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; text-align: center;">
+    <div style="color: #EF4444; font-size: 24px; font-weight: 600;"><%= it.stats.open %></div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">Open</div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="color: #22C55E; font-size: 24px; font-weight: 600;"><%= it.stats.resolved %></div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">Resolved</div>
+  </div>
+  <% if (it.stats.avg_resolution_mins != null) { %>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="color: #E2E8F0; font-size: 24px; font-weight: 600;"><%= Math.round(it.stats.avg_resolution_mins / 60) %>h</div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">Avg Resolution</div>
+  </div>
+  <% } %>
+</div>
+
+<!-- Raise form -->
+<div style="background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; max-width: 700px;">
+  <h3 style="margin: 0 0 0.75rem; font-size: 14px; color: #E2E8F0;">Raise Escalation</h3>
+  <form method="POST" action="/escalations/raise" style="display: grid; grid-template-columns: 1fr auto 2fr auto; gap: 0.5rem; align-items: end;">
+    <div>
+      <label style="display: block; color: #94A3B8; font-size: 12px; margin-bottom: 4px;">Client</label>
+      <input type="text" name="client_name" required placeholder="Client name"
+        style="width: 100%; padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px; box-sizing: border-box;">
+    </div>
+    <div>
+      <label style="display: block; color: #94A3B8; font-size: 12px; margin-bottom: 4px;">Tier</label>
+      <select name="tier" style="padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+        <option value="am">AM</option>
+        <option value="founder">Founder</option>
+        <option value="emergency">Emergency</option>
+      </select>
+    </div>
+    <div>
+      <label style="display: block; color: #94A3B8; font-size: 12px; margin-bottom: 4px;">Description</label>
+      <input type="text" name="description" required placeholder="What happened?"
+        style="width: 100%; padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px; box-sizing: border-box;">
+    </div>
+    <button type="submit" style="padding: 6px 16px; background: #EF4444; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px;">Raise</button>
+  </form>
+</div>
+
+<!-- Escalations table -->
+<table class="compact">
+  <thead>
+    <tr><th>Status</th><th>Client</th><th>Tier</th><th>Description</th><th>Resolution</th><th>Raised</th><th>Action</th></tr>
+  </thead>
+  <tbody>
+    <% if (!it.escalations.length) { %>
+    <tr><td colspan="7" style="text-align: center; color: #94A3B8;">No escalations recorded.</td></tr>
+    <% } %>
+    <% it.escalations.forEach(e => { %>
+    <tr>
+      <td><span class="badge badge-<%= e.status === 'open' ? 'open' : 'completed' %>"><%= e.status %></span></td>
+      <td><%= e.client_name %></td>
+      <td><span style="text-transform: uppercase; font-size: 11px; font-weight: 600; color: <%= e.tier === 'emergency' ? '#EF4444' : e.tier === 'founder' ? '#F59E0B' : '#94A3B8' %>;"><%= e.tier %></span></td>
+      <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= e.description %></td>
+      <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= e.resolution || '—' %></td>
+      <td style="color: #64748B; font-size: 12px;"><%= e.created_at ? e.created_at.slice(0, 10) : '' %></td>
+      <td>
+        <% if (e.status === 'open') { %>
+        <form method="POST" action="/escalations/<%= e.id %>/resolve" style="display: flex; gap: 4px;">
+          <input type="text" name="resolution" placeholder="Resolution" required
+            style="width: 120px; padding: 3px 6px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 4px; color: #E2E8F0; font-size: 12px;">
+          <button type="submit" style="padding: 3px 8px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">Resolve</button>
+        </form>
+        <% } else { %>
+        —
+        <% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

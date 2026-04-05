@@ -1,0 +1,64 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <div>
+    <h1 style="margin: 0;">Morning Checklist</h1>
+    <p style="color: #94A3B8; font-size: 13px; margin: 0.25rem 0 0;">Clients that need attention today</p>
+  </div>
+  <div>
+    <select onchange="window.location.href = '/checklist' + (this.value ? '?am=' + encodeURIComponent(this.value) : '')"
+      style="padding: 6px 12px; background: #141414; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+      <option value="">All AMs</option>
+      <% it.ams.forEach(am => { %>
+      <option value="<%= am %>" <%= it.amFilter === am ? 'selected' : '' %>><%= am %></option>
+      <% }) %>
+    </select>
+  </div>
+</div>
+
+<% if (!it.clients.length) { %>
+<div style="text-align: center; padding: 3rem; color: #64748B; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40" style="margin-bottom: 0.5rem; color: #22C55E;"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <p style="font-size: 15px; color: #E2E8F0; margin: 0.5rem 0 0;">All clear — no clients need immediate attention.</p>
+</div>
+<% } else { %>
+
+<p style="color: #94A3B8; font-size: 13px; margin-bottom: 1rem;"><%= it.clients.length %> client<%= it.clients.length > 1 ? 's' : '' %> need attention</p>
+
+<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+  <% it.clients.forEach(c => { %>
+  <div style="background: #141414; border: 1px solid <%= c.health_tier === 'critical' ? 'rgba(239,68,68,0.3)' : c.health_tier === 'at-risk' ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.08)' %>; border-radius: 10px; padding: 1rem 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+      <div>
+        <a href="/clients/<%= encodeURIComponent(c.name) %>" style="color: #E2E8F0; font-weight: 600; font-size: 15px; text-decoration: none;"><%= c.label %></a>
+        <% if (c.am) { %>
+        <span style="color: #64748B; font-size: 12px; margin-left: 0.5rem;">AM: <%= c.am %></span>
+        <% } %>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <% if (c.health_score != null) { %>
+        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
+          background: <%= c.health_score >= 70 ? 'rgba(34,197,94,0.15)' : c.health_score >= 40 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)' %>;
+          color: <%= c.health_score >= 70 ? '#22C55E' : c.health_score >= 40 ? '#F59E0B' : '#EF4444' %>;">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+          <%= c.health_score %>/100
+        </span>
+        <% } %>
+      </div>
+    </div>
+    <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+      <% c.attention_reasons.split(', ').forEach(reason => { %>
+      <% if (reason) { %>
+      <span style="padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500;
+        background: <%= reason.includes('Critical') || reason.includes('expired') ? 'rgba(239,68,68,0.12)' : reason.includes('overdue') ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.06)' %>;
+        color: <%= reason.includes('Critical') || reason.includes('expired') ? '#F87171' : reason.includes('overdue') ? '#FBBF24' : '#94A3B8' %>;">
+        <%= reason %>
+      </span>
+      <% } %>
+      <% }) %>
+    </div>
+  </div>
+  <% }) %>
+</div>
+
+<% } %>

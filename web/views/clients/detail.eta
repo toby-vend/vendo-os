@@ -15,6 +15,43 @@
   <% if (it.client.first_meeting_date) { %> | <strong>Since:</strong> <%= it.client.first_meeting_date.slice(0, 10) %><% } %>
 </p>
 
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; max-width: 800px;">
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Account Manager</div>
+    <div style="color: #E2E8F0; font-size: 14px; font-weight: 500; margin-top: 2px;"><%= it.client.am || '—' %></div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Client Manager</div>
+    <div style="color: #E2E8F0; font-size: 14px; font-weight: 500; margin-top: 2px;"><%= it.client.cm || '—' %></div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Services</div>
+    <div style="color: #E2E8F0; font-size: 14px; font-weight: 500; margin-top: 2px;"><%= it.client.services || '—' %></div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">MRR</div>
+    <div style="color: #E2E8F0; font-size: 14px; font-weight: 500; margin-top: 2px;"><%= it.client.mrr != null ? '\u00a3' + Number(it.client.mrr).toLocaleString('en-GB') : '—' %></div>
+  </div>
+  <% if (it.client.contract_start || it.client.contract_end) { %>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Contract</div>
+    <div style="color: #E2E8F0; font-size: 14px; font-weight: 500; margin-top: 2px;">
+      <%= it.client.contract_start ? it.client.contract_start.slice(0, 10) : '—' %> &rarr; <%= it.client.contract_end ? it.client.contract_end.slice(0, 10) : '—' %>
+    </div>
+    <% if (it.client.contract_end) { %>
+      <% const daysLeft = Math.ceil((new Date(it.client.contract_end) - new Date()) / 86400000); %>
+      <% if (daysLeft < 0) { %>
+        <div style="color: #EF4444; font-size: 12px; margin-top: 2px; font-weight: 600;">Expired</div>
+      <% } else if (daysLeft <= 30) { %>
+        <div style="color: #F59E0B; font-size: 12px; margin-top: 2px; font-weight: 600;">Renews in <%= daysLeft %> days</div>
+      <% } else if (daysLeft <= 90) { %>
+        <div style="color: #94A3B8; font-size: 12px; margin-top: 2px;"><%= daysLeft %> days remaining</div>
+      <% } %>
+    <% } %>
+  </div>
+  <% } %>
+</div>
+
 <% if (it.client.total_invoiced > 0 || it.client.outstanding > 0) { %>
 <h2>Financials</h2>
 <table class="compact" style="max-width: 400px">
@@ -42,6 +79,91 @@
     <div style="color: #64748B; font-size: 12px;"><%= it.enriched.gadsSpend.impressions.toLocaleString() %> impr &middot; <%= it.enriched.gadsSpend.clicks.toLocaleString() %> clicks</div>
   </div>
   <% } %>
+</div>
+<% } %>
+
+<% if (it.enriched && (it.enriched.harvestSummary || it.enriched.ga4Summary || it.enriched.gscSummary)) { %>
+<h2>Performance</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+
+  <% if (it.enriched.harvestSummary) { %>
+  <div style="padding: 1rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem;">Harvest — Last 90 Days</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.harvestSummary.total_hours.toFixed(1) %></div>
+        <div style="color: #64748B; font-size: 11px;">Total hrs</div>
+      </div>
+      <div>
+        <div style="color: #22C55E; font-size: 18px; font-weight: 600;"><%= it.enriched.harvestSummary.billable_hours.toFixed(1) %></div>
+        <div style="color: #64748B; font-size: 11px;">Billable hrs</div>
+      </div>
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.harvestSummary.user_count %></div>
+        <div style="color: #64748B; font-size: 11px;">Team members</div>
+      </div>
+    </div>
+    <% if (it.enriched.harvestByUser.length) { %>
+    <div style="font-size: 12px; color: #94A3B8;">
+      <% it.enriched.harvestByUser.forEach(u => { %>
+      <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+        <span><%= u.user_name %></span>
+        <span><%= u.hours %>h (<%= u.billable_hours %>h billable)</span>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% if (it.enriched.ga4Summary) { %>
+  <div style="padding: 1rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem;">GA4 — Last 30 Days</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.ga4Summary.sessions.toLocaleString() %></div>
+        <div style="color: #64748B; font-size: 11px;">Sessions</div>
+      </div>
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.ga4Summary.users.toLocaleString() %></div>
+        <div style="color: #64748B; font-size: 11px;">Users</div>
+      </div>
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.ga4Summary.page_views.toLocaleString() %></div>
+        <div style="color: #64748B; font-size: 11px;">Page views</div>
+      </div>
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.ga4Summary.engagement_rate %>%</div>
+        <div style="color: #64748B; font-size: 11px;">Engagement</div>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (it.enriched.gscSummary) { %>
+  <div style="padding: 1rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem;">Search Console — Last 30 Days</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.gscSummary.clicks.toLocaleString() %></div>
+        <div style="color: #64748B; font-size: 11px;">Clicks</div>
+      </div>
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.gscSummary.impressions.toLocaleString() %></div>
+        <div style="color: #64748B; font-size: 11px;">Impressions</div>
+      </div>
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.gscSummary.ctr %>%</div>
+        <div style="color: #64748B; font-size: 11px;">CTR</div>
+      </div>
+      <div>
+        <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;"><%= it.enriched.gscSummary.avg_position %></div>
+        <div style="color: #64748B; font-size: 11px;">Avg. position</div>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
 </div>
 <% } %>
 
@@ -123,6 +245,26 @@
     <% }) %>
   </tbody>
 </table>
+<% } %>
+
+<% if (it.timeline && it.timeline.length) { %>
+<h2>Activity Timeline (<%= it.timeline.length %>)</h2>
+<div style="position: relative; padding-left: 1.5rem; border-left: 2px solid rgba(255,255,255,0.06); margin-bottom: 2rem;">
+  <% it.timeline.forEach(e => { %>
+  <div style="position: relative; padding: 0.5rem 0 0.75rem; font-size: 13px;">
+    <span style="position: absolute; left: -1.75rem; top: 0.65rem; width: 10px; height: 10px; border-radius: 50%;
+      background: <%= e.type === 'meeting' ? '#3B82F6' : e.type === 'action' ? '#22C55E' : e.type === 'pipeline' ? '#F59E0B' : '#64748B' %>;"></span>
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <div>
+        <% if (e.link) { %><a href="<%= e.link %>" style="color: #E2E8F0; text-decoration: none;"><%= e.title %></a>
+        <% } else { %><span style="color: #E2E8F0;"><%= e.title %></span><% } %>
+        <% if (e.detail) { %><span style="color: #64748B; margin-left: 0.5rem;"><%= e.detail %></span><% } %>
+      </div>
+      <span style="color: #64748B; font-size: 12px; flex-shrink: 0; margin-left: 1rem;"><%= e.date ? e.date.slice(0, 10) : '' %></span>
+    </div>
+  </div>
+  <% }) %>
+</div>
 <% } %>
 
 <!-- Generated Content (from Skills) -->

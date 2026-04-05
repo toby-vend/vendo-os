@@ -105,6 +105,14 @@ export async function initSchema(): Promise<void> {
   try { db.run('ALTER TABLE clients ADD COLUMN last_invoice_date TEXT'); } catch { /* already exists */ }
   try { db.run('ALTER TABLE clients ADD COLUMN display_name TEXT'); } catch { /* already exists */ }
 
+  // Migrate: AM/CM assignment, services, contract dates, MRR
+  try { db.run('ALTER TABLE clients ADD COLUMN am TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN cm TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN services TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN contract_start TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN contract_end TEXT'); } catch { /* already exists */ }
+  try { db.run('ALTER TABLE clients ADD COLUMN mrr REAL'); } catch { /* already exists */ }
+
   // --- Client source mappings (links external system IDs to a client) ---
 
   db.run(`
@@ -1366,6 +1374,40 @@ export async function initSchema(): Promise<void> {
   `);
 
   db.run('CREATE INDEX IF NOT EXISTS idx_harvest_projects_client ON harvest_projects(client_id)');
+
+  // --- Notifications ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT,
+      link TEXT,
+      read INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read)');
+
+  // --- Client Feedback (portal submissions) ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS client_feedback (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_id INTEGER NOT NULL,
+      type TEXT NOT NULL DEFAULT 'general',
+      message TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'new',
+      created_at TEXT NOT NULL
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_client_feedback_client ON client_feedback(client_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at)');
 
   seedCategories(db);
   saveDb();

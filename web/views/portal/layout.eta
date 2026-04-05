@@ -269,6 +269,22 @@
       <div class="portal-client-name"><%= it.clientName %></div>
       <% } %>
 
+      <% if (it.clientAm || it.clientCm) { %>
+      <div style="padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--vendo-border); font-size: 12px;">
+        <div style="color: var(--vendo-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; font-size: 10px;">Your Team</div>
+        <% if (it.clientAm) { %>
+        <div style="color: var(--vendo-text); margin-bottom: 0.25rem;">
+          <span style="color: var(--vendo-text-muted);">AM:</span> <%= it.clientAm %>
+        </div>
+        <% } %>
+        <% if (it.clientCm) { %>
+        <div style="color: var(--vendo-text);">
+          <span style="color: var(--vendo-text-muted);">CM:</span> <%= it.clientCm %>
+        </div>
+        <% } %>
+      </div>
+      <% } %>
+
       <nav class="sidebar-nav">
         <div class="nav-section">
           <span class="nav-section-label">Reports</span>
@@ -291,6 +307,10 @@
           <a href="/portal/roi" class="nav-item<%= it.currentPath === '/portal/roi' ? ' active' : '' %>">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             <span class="nav-label">ROI</span>
+          </a>
+          <a href="/portal/feedback" class="nav-item<%= it.currentPath === '/portal/feedback' ? ' active' : '' %>">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span class="nav-label">Feedback</span>
           </a>
         </div>
       </nav>

@@ -34,6 +34,12 @@ export interface ClientRow {
   last_invoice_date: string | null;
   first_meeting_date: string | null;
   last_meeting_date: string | null;
+  am: string | null;
+  cm: string | null;
+  services: string | null;
+  contract_start: string | null;
+  contract_end: string | null;
+  mrr: number | null;
 }
 
 export interface SyncLogRow {
@@ -92,7 +98,8 @@ export async function getClients(): Promise<ClientRow[]> {
   return rows<ClientRow>(`
     SELECT id, name, display_name, email, meeting_count, vertical, status, source,
            total_invoiced, outstanding, first_invoice_date, last_invoice_date,
-           first_meeting_date, last_meeting_date
+           first_meeting_date, last_meeting_date,
+           am, cm, services, contract_start, contract_end, mrr
     FROM clients
     WHERE display_name IS NOT NULL
     ORDER BY display_name COLLATE NOCASE
@@ -103,7 +110,8 @@ export async function getClientByName(name: string): Promise<{ client: ClientRow
   const clients = await rows<ClientRow>(`
     SELECT id, name, display_name, email, meeting_count, vertical, status, source,
            total_invoiced, outstanding, first_invoice_date, last_invoice_date,
-           first_meeting_date, last_meeting_date
+           first_meeting_date, last_meeting_date,
+           am, cm, services, contract_start, contract_end, mrr
     FROM clients WHERE name = ?
   `, [name]);
   const cl = clients[0] ?? null;

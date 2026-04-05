@@ -71,4 +71,58 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       });
     }
   });
+
+  /**
+   * GET /generate-brief — Collect raw data for the daily brief (Vercel Cron)
+   * Saves a -data.md file in outputs/briefs/ for later synthesis.
+   */
+  app.get('/generate-brief', async (_request, reply) => {
+    const scriptPath = resolve(PROJECT_ROOT, 'scripts/functions/generate-daily-brief.ts');
+
+    try {
+      const { stdout } = await runScript(scriptPath);
+      return reply.send({
+        ok: true,
+        message: 'Brief data generated',
+        output: stdout.slice(-2000),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/generate-brief] Failed:', msg);
+      return reply.code(500).send({
+        ok: false,
+        message: 'Brief generation failed',
+        error: msg,
+      });
+    }
+  });
+
+  /**
+   * GET /full-brief — Generate data + Slack brief + save synthesised markdown (Vercel Cron)
+   * Runs both the data collection and the Slack posting.
+   */
+  app.get('/full-brief', async (_request, reply) => {
+    const dataScript = resolve(PROJECT_ROOT, 'scripts/functions/generate-daily-brief.ts');
+    const slackScript = resolve(PROJECT_ROOT, 'scripts/automation/daily-slack-brief.ts');
+
+    try {
+      // Collect data first, then post to Slack
+      const { stdout: dataOut } = await runScript(dataScript);
+      const { stdout: slackOut } = await runScript(slackScript);
+      return reply.send({
+        ok: true,
+        message: 'Full brief pipeline completed',
+        dataOutput: dataOut.slice(-1000),
+        slackOutput: slackOut.slice(-1000),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/full-brief] Failed:', msg);
+      return reply.code(500).send({
+        ok: false,
+        message: 'Full brief pipeline failed',
+        error: msg,
+      });
+    }
+  });
 };

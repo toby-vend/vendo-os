@@ -45,6 +45,10 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/generate-brief",
+      "schedule": "20 7 * * 1-5"
+    },
+    {
       "path": "/api/cron/daily-brief",
       "schedule": "30 7 * * 1-5"
     }

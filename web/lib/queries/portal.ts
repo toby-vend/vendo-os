@@ -214,3 +214,19 @@ export async function getClientName(clientId: number): Promise<string> {
   );
   return result[0]?.name ?? `Client ${clientId}`;
 }
+
+export interface ClientPortalInfo {
+  name: string;
+  am: string | null;
+  am_email: string | null;
+  cm: string | null;
+}
+
+export async function getClientPortalInfo(clientId: number): Promise<ClientPortalInfo> {
+  const result = await rows<ClientPortalInfo>(
+    `SELECT COALESCE(display_name, name) as name, am, email as am_email, cm
+     FROM clients WHERE id = ? LIMIT 1`,
+    [clientId],
+  );
+  return result[0] ?? { name: `Client ${clientId}`, am: null, am_email: null, cm: null };
+}

@@ -84,6 +84,15 @@ async function main() {
     'ALTER TABLE harvest_users ADD COLUMN default_hourly_rate REAL',
     'ALTER TABLE harvest_users ADD COLUMN cost_rate REAL',
     'ALTER TABLE harvest_time_entries ADD COLUMN cost_rate REAL',
+    // Client AM/CM, services, contract, MRR
+    'ALTER TABLE clients ADD COLUMN am TEXT',
+    'ALTER TABLE clients ADD COLUMN cm TEXT',
+    'ALTER TABLE clients ADD COLUMN services TEXT',
+    'ALTER TABLE clients ADD COLUMN contract_start TEXT',
+    'ALTER TABLE clients ADD COLUMN contract_end TEXT',
+    'ALTER TABLE clients ADD COLUMN mrr REAL',
+    // Notifications table columns auto-detected
+    // Client feedback table columns auto-detected
   ];
   for (const sql of migrations) {
     try { await remote.execute(sql); } catch { /* column already exists */ }

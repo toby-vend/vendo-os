@@ -55,6 +55,9 @@
             <a href="/client-database" class="nav-item nav-child<%= p.startsWith('/client-database') ? ' active' : '' %>">
               <span class="nav-label">Database</span>
             </a>
+            <a href="/checklist" class="nav-item nav-child<%= p.startsWith('/checklist') ? ' active' : '' %>">
+              <span class="nav-label">Morning Checklist</span>
+            </a>
             <% } %>
             <% if (canSee('pipeline')) { %>
             <a href="/pipeline" class="nav-item nav-child<%= p.startsWith('/pipeline') ? ' active' : '' %>">
@@ -201,11 +204,22 @@
 
         <!-- Operations -->
         <% if (canSee('operations')) { %>
-        <div class="nav-group nav-group-single">
-          <a href="/operations" class="nav-item<%= p.startsWith('/operations') ? ' active' : '' %>">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="nav-group<%= isInGroup(['/operations', '/nps', '/escalations']) ? ' open' : '' %>">
+          <button class="nav-group-label" onclick="toggleNavGroup(this)">
             <span class="nav-label">Operations</span>
-          </a>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
+          </button>
+          <div class="nav-group-children">
+            <a href="/operations" class="nav-item nav-child<%= p.startsWith('/operations') ? ' active' : '' %>">
+              <span class="nav-label">Monitors</span>
+            </a>
+            <a href="/nps" class="nav-item nav-child<%= p.startsWith('/nps') ? ' active' : '' %>">
+              <span class="nav-label">NPS</span>
+            </a>
+            <a href="/escalations" class="nav-item nav-child<%= p.startsWith('/escalations') ? ' active' : '' %>">
+              <span class="nav-label">Escalations</span>
+            </a>
+          </div>
         </div>
         <% } %>
 
@@ -264,6 +278,19 @@
         <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">
           <span class="topbar-date"><%= new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></span>
           <% if (it.user) { %>
+          <!-- Notification bell -->
+          <div id="notif-bell" style="position: relative; cursor: pointer;" onclick="toggleNotifPanel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="color: #94A3B8;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span id="notif-badge" style="display: none; position: absolute; top: -4px; right: -4px; background: #EF4444; color: #fff; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 999px; text-align: center; line-height: 16px;"></span>
+          </div>
+          <!-- Notification dropdown -->
+          <div id="notif-panel" style="display: none; position: absolute; top: 48px; right: 1rem; width: 360px; max-height: 420px; overflow-y: auto; background: #141414; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 999; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <strong style="color: #E2E8F0;">Notifications</strong>
+              <button onclick="markAllNotifRead()" style="background: none; border: none; color: #22C55E; cursor: pointer; font-size: 12px;">Mark all read</button>
+            </div>
+            <div id="notif-list" style="padding: 0.5rem;"></div>
+          </div>
           <span style="font-size: 13px; color: #94A3B8;"><%= it.user.name %></span>
           <a href="/logout" style="font-size: 12px; color: #64748B; text-decoration: none; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">Logout</a>
           <% } %>
@@ -334,6 +361,67 @@
       var link = e.target.closest('.sidebar-nav a');
       if (link) sessionStorage.setItem('sidebarScroll', nav.scrollTop);
     });
+  })();
+
+  // --- Notifications ---
+  var notifPanelOpen = false;
+  function toggleNotifPanel() {
+    notifPanelOpen = !notifPanelOpen;
+    document.getElementById('notif-panel').style.display = notifPanelOpen ? 'block' : 'none';
+    if (notifPanelOpen) loadNotifications();
+  }
+  document.addEventListener('click', function(e) {
+    var bell = document.getElementById('notif-bell');
+    var panel = document.getElementById('notif-panel');
+    if (bell && panel && !bell.contains(e.target) && !panel.contains(e.target)) {
+      notifPanelOpen = false;
+      panel.style.display = 'none';
+    }
+  });
+  function loadNotifications() {
+    fetch('/api/notifications').then(function(r) { return r.json(); }).then(function(data) {
+      var badge = document.getElementById('notif-badge');
+      if (data.unread > 0) { badge.style.display = 'block'; badge.textContent = data.unread; }
+      else { badge.style.display = 'none'; }
+      var list = document.getElementById('notif-list');
+      if (!data.notifications || data.notifications.length === 0) {
+        list.innerHTML = '<div style="text-align: center; padding: 1.5rem; color: #64748B;">No notifications</div>';
+        return;
+      }
+      list.innerHTML = data.notifications.map(function(n) {
+        var bg = n.read ? 'transparent' : 'rgba(34,197,94,0.06)';
+        var time = new Date(n.created_at + 'Z').toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        var linkStart = n.link ? '<a href="' + n.link + '" style="text-decoration: none; color: inherit;">' : '';
+        var linkEnd = n.link ? '</a>' : '';
+        return linkStart + '<div style="padding: 0.6rem 0.75rem; background: ' + bg + '; border-radius: 6px; margin-bottom: 2px;" onclick="markNotifRead(' + n.id + ', this)">'
+          + '<div style="color: #E2E8F0; font-weight: ' + (n.read ? '400' : '500') + ';">' + n.title + '</div>'
+          + (n.body ? '<div style="color: #94A3B8; font-size: 12px; margin-top: 2px;">' + n.body + '</div>' : '')
+          + '<div style="color: #64748B; font-size: 11px; margin-top: 2px;">' + time + '</div>'
+          + '</div>' + linkEnd;
+      }).join('');
+    }).catch(function() {});
+  }
+  function markNotifRead(id, el) {
+    fetch('/api/notifications/' + id + '/read', { method: 'POST' });
+    if (el) el.style.background = 'transparent';
+  }
+  function markAllNotifRead() {
+    fetch('/api/notifications/read-all', { method: 'POST' }).then(function() {
+      loadNotifications();
+      var badge = document.getElementById('notif-badge');
+      if (badge) badge.style.display = 'none';
+    });
+  }
+  // Poll for unread count every 60s
+  (function pollNotifs() {
+    fetch('/api/notifications/count').then(function(r) { return r.json(); }).then(function(data) {
+      var badge = document.getElementById('notif-badge');
+      if (badge) {
+        if (data.unread > 0) { badge.style.display = 'block'; badge.textContent = data.unread; }
+        else { badge.style.display = 'none'; }
+      }
+    }).catch(function() {});
+    setTimeout(pollNotifs, 60000);
   })();
   </script>
 </body>

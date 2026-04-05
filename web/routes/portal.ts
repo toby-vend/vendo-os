@@ -3,7 +3,8 @@ import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend,
 import { getGA4Summary, getGA4TrafficSources, getOrganicTrend } from '../lib/queries/ga4.js';
 import { getGSCSummary, getTopQueries, getTopPages } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
-import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags } from '../lib/queries/portal.js';
+import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getClientPortalInfo, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags } from '../lib/queries/portal.js';
+import { getClientFeedback, addClientFeedback } from '../lib/queries/tracking.js';
 
 // --- Helpers ---
 
@@ -32,13 +33,13 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [roi, leadsByChannel, funnel, pipelineStages, recentOpps, clientName] = await Promise.all([
+    const [roi, leadsByChannel, funnel, pipelineStages, recentOpps, clientInfo] = await Promise.all([
       getROISummary(clientId, days),
       getLeadsByChannel(clientId, days),
       getConversionFunnel(clientId, days),
       getGhlPipelineSummary(clientId),
       getGhlRecentOpportunities(clientId, 10),
-      getClientName(clientId),
+      getClientPortalInfo(clientId),
     ]);
 
     reply.render('portal/dashboard', {
@@ -47,7 +48,9 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       funnel,
       pipelineStages,
       recentOpps,
-      clientName,
+      clientName: clientInfo.name,
+      clientAm: clientInfo.am,
+      clientCm: clientInfo.cm,
       days,
       pageTitle: 'Dashboard',
     });
@@ -59,14 +62,14 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [ga4Summary, trafficSources, organicTrend, gscSummary, topQueries, topPages, clientName] = await Promise.all([
+    const [ga4Summary, trafficSources, organicTrend, gscSummary, topQueries, topPages, clientInfo] = await Promise.all([
       getGA4Summary(clientId, days),
       getGA4TrafficSources(clientId, days),
       getOrganicTrend(clientId, days),
       getGSCSummary(clientId, days),
       getTopQueries(clientId, days, 20),
       getTopPages(clientId, days, 20),
-      getClientName(clientId),
+      getClientPortalInfo(clientId),
     ]);
 
     reply.render('portal/seo', {
@@ -76,7 +79,9 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       gscSummary,
       topQueries,
       topPages,
-      clientName,
+      clientName: clientInfo.name,
+      clientAm: clientInfo.am,
+      clientCm: clientInfo.cm,
       days,
       pageTitle: 'SEO Performance',
     });
@@ -88,12 +93,12 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [channelSpend, leadsByChannel, metaCampaigns, gadsCampaigns, clientName] = await Promise.all([
+    const [channelSpend, leadsByChannel, metaCampaigns, gadsCampaigns, clientInfo] = await Promise.all([
       getChannelSpend(clientId, days),
       getLeadsByChannel(clientId, days),
       getMetaCampaignsForClient(clientId, days),
       getGadsCampaignsForClient(clientId, days),
-      getClientName(clientId),
+      getClientPortalInfo(clientId),
     ]);
 
     // Filter leads to ad channels only
@@ -104,7 +109,9 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       adLeads,
       metaCampaigns,
       gadsCampaigns,
-      clientName,
+      clientName: clientInfo.name,
+      clientAm: clientInfo.am,
+      clientCm: clientInfo.cm,
       days,
       pageTitle: 'Ad Performance',
     });
@@ -133,13 +140,13 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       pageSize,
     };
 
-    const [leadsResult, sources, treatments, ghlResult, ghlTags, clientName] = await Promise.all([
+    const [leadsResult, sources, treatments, ghlResult, ghlTags, clientInfo] = await Promise.all([
       getAttributedLeads(clientId, days, filters),
       getLeadsBySource(clientId, days),
       getLeadsByTreatment(clientId, days),
       getGhlLeads(clientId, days, ghlFilters),
       getGhlLeadTags(clientId, days),
-      getClientName(clientId),
+      getClientPortalInfo(clientId),
     ]);
 
     reply.render('portal/leads', {
@@ -151,7 +158,9 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       filters: { source: q.source || '', treatment: q.treatment || '', status: q.status || '', ghl_status: q.ghl_status || '', tag: q.tag || '' },
       page,
       pageSize,
-      clientName,
+      clientName: clientInfo.name,
+      clientAm: clientInfo.am,
+      clientCm: clientInfo.cm,
       days,
       pageTitle: 'Lead Attribution',
     });
@@ -163,14 +172,14 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [roi, treatmentROI, channelSpend, revenueByChannel, leadsByChannel, ghlRoi, clientName] = await Promise.all([
+    const [roi, treatmentROI, channelSpend, revenueByChannel, leadsByChannel, ghlRoi, clientInfo] = await Promise.all([
       getROISummary(clientId, days),
       getROIByTreatment(clientId, days),
       getChannelSpend(clientId, days),
       getRevenueByChannel(clientId, days),
       getLeadsByChannel(clientId, days),
       getGhlROI(clientId, days),
-      getClientName(clientId),
+      getClientPortalInfo(clientId),
     ]);
 
     reply.render('portal/roi', {
@@ -180,10 +189,44 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       revenueByChannel,
       leadsByChannel,
       ghlRoi,
-      clientName,
+      clientName: clientInfo.name,
+      clientAm: clientInfo.am,
+      clientCm: clientInfo.cm,
       days,
       pageTitle: 'ROI Breakdown',
     });
+  });
+
+  // GET /portal/feedback — Client feedback & requests
+  app.get('/feedback', async (request, reply) => {
+    const clientId = getClientId(request);
+    const [feedback, clientInfo] = await Promise.all([
+      getClientFeedback(clientId),
+      getClientPortalInfo(clientId),
+    ]);
+
+    reply.render('portal/feedback', {
+      feedback,
+      clientName: clientInfo.name,
+      clientAm: clientInfo.am,
+      clientCm: clientInfo.cm,
+      days: 30,
+      pageTitle: 'Feedback & Requests',
+    });
+  });
+
+  // POST /portal/feedback — Submit feedback
+  app.post('/feedback', async (request, reply) => {
+    const clientId = getClientId(request);
+    const body = request.body as Record<string, string>;
+    const type = body.type || 'general';
+    const message = (body.message || '').trim();
+
+    if (message) {
+      await addClientFeedback(clientId, type, message);
+    }
+
+    return reply.redirect('/portal/feedback');
   });
 
   // --- HTMX Partials ---

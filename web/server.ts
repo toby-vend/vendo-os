@@ -51,7 +51,11 @@ import { clientDatabaseRoutes } from './routes/client-database.js';
 import { operationsRoutes } from './routes/operations.js';
 import { skillsLibraryRoutes } from './routes/skills-library.js';
 import { cronRoutes } from './routes/api/cron.js';
+import { notificationRoutes } from './routes/api/notifications.js';
 import { skillsApiRoutes } from './routes/api/skills.js';
+import { checklistRoutes } from './routes/checklist.js';
+import { npsRoutes } from './routes/nps.js';
+import { escalationsRoutes } from './routes/escalations.js';
 import crypto from 'crypto';
 import {
   parseCookies,
@@ -312,8 +316,12 @@ app.register(skillsBrowserRoutes, { prefix: '/skills-drive' });
 app.register(portalRoutes, { prefix: '/portal' });
 app.register(clientDatabaseRoutes, { prefix: '/client-database' });
 app.register(operationsRoutes, { prefix: '/operations' });
+app.register(checklistRoutes, { prefix: '/checklist' });
+app.register(npsRoutes, { prefix: '/nps' });
+app.register(escalationsRoutes, { prefix: '/escalations' });
 app.register(skillsLibraryRoutes, { prefix: '/skills' });
 app.register(cronRoutes, { prefix: '/api/cron' });
+app.register(notificationRoutes, { prefix: '/api/notifications' });
 app.register(skillsApiRoutes, { prefix: '/api/skills' });
 
 // Dashboard modules

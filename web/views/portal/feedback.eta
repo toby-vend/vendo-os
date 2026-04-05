@@ -1,0 +1,46 @@
+<% layout('/portal/layout') %>
+
+<div style="max-width: 700px;">
+
+<div class="portal-section">
+  <h2>Submit Feedback or Request</h2>
+  <form method="POST" action="/portal/feedback">
+    <div style="margin-bottom: 1rem;">
+      <label style="display: block; color: var(--vendo-text-muted); font-size: 12px; margin-bottom: 4px;">Type</label>
+      <select name="type" style="width: 100%; padding: 8px 12px; background: var(--vendo-bg); border: 1px solid var(--vendo-border-strong); border-radius: 6px; color: var(--vendo-text); font-size: 14px; font-family: var(--vendo-sans);">
+        <option value="general">General Feedback</option>
+        <option value="request">Work Request</option>
+        <option value="issue">Report an Issue</option>
+        <option value="question">Question</option>
+      </select>
+    </div>
+    <div style="margin-bottom: 1rem;">
+      <label style="display: block; color: var(--vendo-text-muted); font-size: 12px; margin-bottom: 4px;">Message</label>
+      <textarea name="message" rows="4" required placeholder="Tell us what you need..."
+        style="width: 100%; padding: 8px 12px; background: var(--vendo-bg); border: 1px solid var(--vendo-border-strong); border-radius: 6px; color: var(--vendo-text); font-size: 14px; font-family: var(--vendo-sans); resize: vertical; box-sizing: border-box;"></textarea>
+    </div>
+    <button type="submit" style="padding: 8px 20px; background: var(--vendo-green); color: #0B0B0B; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">Submit</button>
+  </form>
+</div>
+
+<% if (it.feedback && it.feedback.length) { %>
+<div class="portal-section" style="margin-top: 1.5rem;">
+  <h2>Previous Submissions</h2>
+  <% it.feedback.forEach(f => { %>
+  <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 0.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+      <span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; text-transform: capitalize;
+        background: <%= f.type === 'issue' ? 'rgba(239,68,68,0.12)' : f.type === 'request' ? 'rgba(59,130,246,0.12)' : 'rgba(255,255,255,0.06)' %>;
+        color: <%= f.type === 'issue' ? '#F87171' : f.type === 'request' ? '#60A5FA' : '#94A3B8' %>;"><%= f.type %></span>
+      <span style="font-size: 11px; color: var(--vendo-text-muted);"><%= f.created_at ? f.created_at.slice(0, 10) : '' %></span>
+    </div>
+    <p style="color: var(--vendo-text); font-size: 13px; margin: 0.25rem 0 0;"><%= f.message %></p>
+    <div style="margin-top: 0.25rem; font-size: 11px; color: var(--vendo-text-muted);">
+      Status: <span style="color: <%= f.status === 'new' ? '#F59E0B' : f.status === 'in_progress' ? '#3B82F6' : '#22C55E' %>;"><%= f.status %></span>
+    </div>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+</div>

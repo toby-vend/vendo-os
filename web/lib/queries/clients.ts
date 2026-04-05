@@ -19,6 +19,12 @@ export interface AdminClientRow {
   asana_count: number;
   ghl_count: number;
   harvest_count: number;
+  am: string | null;
+  cm: string | null;
+  services: string | null;
+  contract_start: string | null;
+  contract_end: string | null;
+  mrr: number | null;
 }
 
 export interface SourceMapping {
@@ -43,6 +49,7 @@ export async function getAllClientsAdmin(): Promise<AdminClientRow[]> {
            COALESCE(c.display_name, c.name) as label,
            c.email, c.vertical, c.status, c.aliases,
            c.total_invoiced, c.outstanding, c.meeting_count,
+           c.am, c.cm, c.services, c.contract_start, c.contract_end, c.mrr,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'meta') as meta_count,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'gads') as gads_count,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'asana') as asana_count,
@@ -59,6 +66,7 @@ export async function getAdminClientDetail(clientId: number): Promise<{ client: 
            COALESCE(c.display_name, c.name) as label,
            c.email, c.vertical, c.status, c.aliases,
            c.total_invoiced, c.outstanding, c.meeting_count,
+           c.am, c.cm, c.services, c.contract_start, c.contract_end, c.mrr,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'meta') as meta_count,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'gads') as gads_count,
            (SELECT COUNT(*) FROM client_source_mappings WHERE client_id = c.id AND source = 'asana') as asana_count,
@@ -79,7 +87,10 @@ export async function getAdminClientDetail(clientId: number): Promise<{ client: 
 
 export async function updateClientDisplay(
   clientId: number,
-  fields: { display_name?: string; vertical?: string; status?: string; aliases?: string },
+  fields: {
+    display_name?: string; vertical?: string; status?: string; aliases?: string;
+    am?: string; cm?: string; services?: string; contract_start?: string; contract_end?: string; mrr?: number | null;
+  },
 ): Promise<void> {
   const sets: string[] = [];
   const args: (string | number | null)[] = [];
@@ -99,6 +110,30 @@ export async function updateClientDisplay(
   if (fields.aliases !== undefined) {
     sets.push('aliases = ?');
     args.push(fields.aliases || null);
+  }
+  if (fields.am !== undefined) {
+    sets.push('am = ?');
+    args.push(fields.am || null);
+  }
+  if (fields.cm !== undefined) {
+    sets.push('cm = ?');
+    args.push(fields.cm || null);
+  }
+  if (fields.services !== undefined) {
+    sets.push('services = ?');
+    args.push(fields.services || null);
+  }
+  if (fields.contract_start !== undefined) {
+    sets.push('contract_start = ?');
+    args.push(fields.contract_start || null);
+  }
+  if (fields.contract_end !== undefined) {
+    sets.push('contract_end = ?');
+    args.push(fields.contract_end || null);
+  }
+  if (fields.mrr !== undefined) {
+    sets.push('mrr = ?');
+    args.push(fields.mrr ?? null);
   }
 
   if (sets.length === 0) return;
@@ -205,16 +240,29 @@ interface MetaSpendRow { total_spend: number; impressions: number; clicks: numbe
 interface GadsSpendRow { total_spend: number; impressions: number; clicks: number; }
 interface AsanaTaskRow { gid: string; name: string; assignee_name: string | null; due_on: string | null; completed: number; section_name: string | null; project_name: string | null; }
 interface GhlOppRow { id: string; name: string | null; monetary_value: number; status: string; stage_name: string | null; contact_name: string | null; created_at: string | null; }
+interface HarvestSummaryRow { total_hours: number; billable_hours: number; user_count: number; }
+interface HarvestByUserRow { user_name: string; hours: number; billable_hours: number; }
+interface GA4SummaryRow { sessions: number; users: number; page_views: number; engagement_rate: number; }
+interface GSCSummaryRow { clicks: number; impressions: number; ctr: number; avg_position: number; }
 
 export interface ClientDetailEnriched {
   metaSpend: MetaSpendRow | null;
   gadsSpend: GadsSpendRow | null;
   asanaTasks: AsanaTaskRow[];
   ghlOpps: GhlOppRow[];
+  harvestSummary: HarvestSummaryRow | null;
+  harvestByUser: HarvestByUserRow[];
+  ga4Summary: GA4SummaryRow | null;
+  gscSummary: GSCSummaryRow | null;
 }
 
 export async function getClientEnrichedData(clientId: number): Promise<ClientDetailEnriched> {
-  const [metaSpend, gadsSpend, asanaTasks, ghlOpps] = await Promise.all([
+  // Helper: safe query that returns [] if table doesn't exist
+  async function safeRows<T>(sql: string, args: (string | number | null)[] = []): Promise<T[]> {
+    try { return await rows<T>(sql, args); } catch { return []; }
+  }
+
+  const [metaSpend, gadsSpend, asanaTasks, ghlOpps, harvestSummary, harvestByUser, ga4Summary, gscSummary] = await Promise.all([
     rows<MetaSpendRow>(`
       SELECT COALESCE(SUM(spend), 0) as total_spend,
              COALESCE(SUM(impressions), 0) as impressions,
@@ -249,6 +297,48 @@ export async function getClientEnrichedData(clientId: number): Promise<ClientDet
       ORDER BY o.created_at DESC
       LIMIT 50
     `, [clientId, clientId]),
+
+    // Harvest: total hours last 90 days
+    safeRows<HarvestSummaryRow>(`
+      SELECT COALESCE(SUM(hours), 0) as total_hours,
+             COALESCE(SUM(CASE WHEN billable = 1 THEN hours ELSE 0 END), 0) as billable_hours,
+             COUNT(DISTINCT user_id) as user_count
+      FROM harvest_time_entries
+      WHERE CAST(client_id AS TEXT) IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'harvest')
+        AND spent_date >= date('now', '-90 days')
+    `, [clientId]),
+
+    // Harvest: hours by user last 90 days
+    safeRows<HarvestByUserRow>(`
+      SELECT user_name, ROUND(SUM(hours), 1) as hours,
+             ROUND(SUM(CASE WHEN billable = 1 THEN hours ELSE 0 END), 1) as billable_hours
+      FROM harvest_time_entries
+      WHERE CAST(client_id AS TEXT) IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'harvest')
+        AND spent_date >= date('now', '-90 days')
+      GROUP BY user_name ORDER BY hours DESC LIMIT 10
+    `, [clientId]),
+
+    // GA4: last 30 days summary
+    safeRows<GA4SummaryRow>(`
+      SELECT COALESCE(SUM(sessions), 0) as sessions,
+             COALESCE(SUM(users), 0) as users,
+             COALESCE(SUM(page_views), 0) as page_views,
+             CASE WHEN SUM(sessions) > 0 THEN ROUND(CAST(SUM(engaged_sessions) AS REAL) / SUM(sessions) * 100, 1) ELSE 0 END as engagement_rate
+      FROM ga4_daily
+      WHERE property_id IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'ga4')
+        AND date >= date('now', '-30 days')
+    `, [clientId]),
+
+    // GSC: last 30 days summary
+    safeRows<GSCSummaryRow>(`
+      SELECT COALESCE(SUM(clicks), 0) as clicks,
+             COALESCE(SUM(impressions), 0) as impressions,
+             CASE WHEN SUM(impressions) > 0 THEN ROUND(CAST(SUM(clicks) AS REAL) / SUM(impressions) * 100, 2) ELSE 0 END as ctr,
+             ROUND(AVG(avg_position), 1) as avg_position
+      FROM gsc_daily
+      WHERE site_id IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'gsc')
+        AND date >= date('now', '-30 days')
+    `, [clientId]),
   ]);
 
   return {
@@ -256,6 +346,10 @@ export async function getClientEnrichedData(clientId: number): Promise<ClientDet
     gadsSpend: gadsSpend[0]?.total_spend ? gadsSpend[0] : null,
     asanaTasks,
     ghlOpps,
+    harvestSummary: harvestSummary[0]?.total_hours ? harvestSummary[0] : null,
+    harvestByUser,
+    ga4Summary: ga4Summary[0]?.sessions ? ga4Summary[0] : null,
+    gscSummary: gscSummary[0]?.clicks ? gscSummary[0] : null,
   };
 }
 

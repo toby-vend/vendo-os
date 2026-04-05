@@ -37,6 +37,44 @@
         </select>
       </div>
       <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Account Manager (AM)</label>
+        <input type="text" name="am" value="<%= it.client.am || '' %>"
+          placeholder="e.g. Toby Mellor"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Client Manager (CM)</label>
+        <input type="text" name="cm" value="<%= it.client.cm || '' %>"
+          placeholder="e.g. Sam Franks"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Services</label>
+        <input type="text" name="services" value="<%= it.client.services || '' %>"
+          placeholder="e.g. PPC, SEO, Web, Social"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+        <small style="color: #64748B; font-size: 11px;">Comma-separated list of services this client pays for</small>
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">MRR (&pound;)</label>
+        <input type="number" name="mrr" value="<%= it.client.mrr != null ? it.client.mrr : '' %>"
+          placeholder="e.g. 2500" step="0.01"
+          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+        <small style="color: #64748B; font-size: 11px;">Monthly recurring revenue for this client</small>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div>
+          <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Contract Start</label>
+          <input type="date" name="contract_start" value="<%= it.client.contract_start || '' %>"
+            style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Contract End</label>
+          <input type="date" name="contract_end" value="<%= it.client.contract_end || '' %>"
+            style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
+        </div>
+      </div>
+      <div style="margin-bottom: 1rem;">
         <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">Aliases</label>
         <textarea name="aliases" rows="2" placeholder="Alternative names, one per line"
           style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box; resize: vertical;"><%= it.client.aliases || '' %></textarea>

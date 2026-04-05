@@ -1,0 +1,87 @@
+<% layout('/layouts/base') %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <h1 style="margin: 0;">NPS Tracking</h1>
+</div>
+
+<!-- Stats -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; max-width: 700px;">
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="color: <%= it.stats.nps >= 50 ? '#22C55E' : it.stats.nps >= 0 ? '#F59E0B' : '#EF4444' %>; font-size: 24px; font-weight: 600;"><%= it.stats.nps %></div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">NPS Score</div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="color: #E2E8F0; font-size: 24px; font-weight: 600;"><%= it.stats.avg_score %></div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">Avg Score</div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="color: #22C55E; font-size: 24px; font-weight: 600;"><%= it.stats.promoters %></div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">Promoters</div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="color: #F59E0B; font-size: 24px; font-weight: 600;"><%= it.stats.passives %></div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">Passives</div>
+  </div>
+  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center;">
+    <div style="color: #EF4444; font-size: 24px; font-weight: 600;"><%= it.stats.detractors %></div>
+    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase;">Detractors</div>
+  </div>
+</div>
+
+<!-- Add form -->
+<div style="background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; max-width: 600px;">
+  <h3 style="margin: 0 0 0.75rem; font-size: 14px; color: #E2E8F0;">Record NPS Response</h3>
+  <form method="POST" action="/nps/add" style="display: grid; grid-template-columns: 1fr auto 1fr auto; gap: 0.5rem; align-items: end;">
+    <div>
+      <label style="display: block; color: #94A3B8; font-size: 12px; margin-bottom: 4px;">Client</label>
+      <input type="text" name="client_name" required placeholder="Client name"
+        style="width: 100%; padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px; box-sizing: border-box;">
+    </div>
+    <div>
+      <label style="display: block; color: #94A3B8; font-size: 12px; margin-bottom: 4px;">Score</label>
+      <input type="number" name="score" required min="0" max="10" placeholder="0-10"
+        style="width: 60px; padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+    </div>
+    <div>
+      <label style="display: block; color: #94A3B8; font-size: 12px; margin-bottom: 4px;">Feedback</label>
+      <input type="text" name="feedback" placeholder="Optional feedback"
+        style="width: 100%; padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px; box-sizing: border-box;">
+    </div>
+    <button type="submit" style="padding: 6px 16px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px;">Add</button>
+  </form>
+</div>
+
+<!-- Responses table -->
+<table class="compact">
+  <thead>
+    <tr><th>Client</th><th>Score</th><th>Category</th><th>Feedback</th><th>Follow-up</th><th>Date</th></tr>
+  </thead>
+  <tbody>
+    <% if (!it.responses.length) { %>
+    <tr><td colspan="6" style="text-align: center; color: #94A3B8;">No NPS responses recorded yet.</td></tr>
+    <% } %>
+    <% it.responses.forEach(r => { %>
+    <% const cat = r.score >= 9 ? 'Promoter' : r.score >= 7 ? 'Passive' : 'Detractor'; %>
+    <tr>
+      <td><%= r.client_name %></td>
+      <td style="font-weight: 600; color: <%= r.score >= 9 ? '#22C55E' : r.score >= 7 ? '#F59E0B' : '#EF4444' %>;"><%= r.score %>/10</td>
+      <td><span class="badge badge-<%= cat === 'Promoter' ? 'completed' : cat === 'Passive' ? 'active' : 'open' %>"><%= cat %></span></td>
+      <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= r.feedback || '—' %></td>
+      <td>
+        <% if (r.follow_up_done) { %>
+          <span style="color: #22C55E; font-size: 12px;">Done</span>
+        <% } else if (r.score < 7) { %>
+          <form method="POST" action="/nps/<%= r.id %>/follow-up" style="display: inline;">
+            <input type="hidden" name="done" value="1">
+            <input type="hidden" name="action" value="Followed up">
+            <button type="submit" style="padding: 2px 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 4px; color: #E2E8F0; cursor: pointer; font-size: 11px;">Mark done</button>
+          </form>
+        <% } else { %>
+          —
+        <% } %>
+      </td>
+      <td style="color: #64748B; font-size: 12px;"><%= r.created_at ? r.created_at.slice(0, 10) : '' %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

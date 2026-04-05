@@ -48,8 +48,15 @@ export const adminClientsRoutes: FastifyPluginAsync = async (app) => {
     const vertical = (body.vertical || '').trim();
     const status = body.status || 'active';
     const aliases = (body.aliases || '').trim();
+    const am = (body.am || '').trim();
+    const cm = (body.cm || '').trim();
+    const services = (body.services || '').trim();
+    const contract_start = (body.contract_start || '').trim();
+    const contract_end = (body.contract_end || '').trim();
+    const mrrRaw = parseFloat(body.mrr);
+    const mrr = isNaN(mrrRaw) ? null : mrrRaw;
 
-    await updateClientDisplay(Number(id), { display_name, vertical, status, aliases });
+    await updateClientDisplay(Number(id), { display_name, vertical, status, aliases, am, cm, services, contract_start, contract_end, mrr });
     reply.redirect(`/admin/clients/${id}`);
   });
 
