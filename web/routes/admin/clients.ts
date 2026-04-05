@@ -5,6 +5,7 @@ import {
   updateClientDisplay,
   addSourceMapping,
   removeSourceMapping,
+  removeExistingMapping,
   getUnlinkedMetaAccounts,
   getUnlinkedGadsAccounts,
   getUnlinkedAsanaProjects,
@@ -76,9 +77,10 @@ export const adminClientsRoutes: FastifyPluginAsync = async (app) => {
     }
 
     try {
+      await removeExistingMapping(source, external_id);
       await addSourceMapping(Number(id), source, external_id, external_name);
     } catch {
-      // UNIQUE constraint — already mapped
+      // Unexpected error — skip
     }
     reply.redirect(`/admin/clients/${id}`);
   });
