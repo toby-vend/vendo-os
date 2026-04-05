@@ -20,6 +20,9 @@ import { getDb, initSchema, closeDb, log, logError } from '../utils/db.js';
 
 const WEBHOOK_URL = process.env.SLACK_BRIEF_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL || '';
 
+// Vendo's own GHL location — filters out client sub-accounts
+const VENDO_GHL_LOCATION = 'IqXxEPhxyRi8uv1SvjN8';
+
 // ─── Date helpers ────────────────────────────────────────────────
 
 function today(): string {
@@ -53,11 +56,58 @@ function monthStart(): string {
   return today().slice(0, 7) + '-01';
 }
 
-type DayType = 'monday' | 'friday' | 'midweek';
+function lastMonthRange(): { start: string; end: string; label: string } {
+  const d = new Date();
+  d.setDate(1); // first of this month
+  const end = new Date(d);
+  end.setDate(end.getDate() - 1); // last day of prev month
+  const start = new Date(end.getFullYear(), end.getMonth(), 1);
+  const label = start.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10), label };
+}
+
+function thisMonthLabel(): string {
+  return new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+}
+
+function isFirstWeekdayOfMonth(): boolean {
+  const d = new Date();
+  const dayOfMonth = d.getDate();
+  const dayOfWeek = d.getDay();
+  // It's the 1st-3rd AND a weekday, AND no earlier weekday this month
+  if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+  // Walk back to find if there's an earlier weekday
+  for (let i = 1; i < dayOfMonth; i++) {
+    const check = new Date(d.getFullYear(), d.getMonth(), i);
+    const dow = check.getDay();
+    if (dow >= 1 && dow <= 5) return false; // earlier weekday exists
+  }
+  return true;
+}
+
+function isLastWeekdayOfMonth(): boolean {
+  const d = new Date();
+  const dayOfWeek = d.getDay();
+  if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  // Walk forward to find if there's a later weekday
+  for (let i = d.getDate() + 1; i <= lastDay; i++) {
+    const check = new Date(d.getFullYear(), d.getMonth(), i);
+    const dow = check.getDay();
+    if (dow >= 1 && dow <= 5) return false; // later weekday exists
+  }
+  return true;
+}
+
+type DayType = 'month-start' | 'month-end' | 'monday' | 'friday' | 'midweek';
 
 function getDayType(): DayType {
   const override = process.env.DAY_OVERRIDE?.toLowerCase();
-  if (override === 'monday' || override === 'friday' || override === 'midweek') return override;
+  if (override === 'month-start' || override === 'month-end' ||
+      override === 'monday' || override === 'friday' || override === 'midweek') return override as DayType;
+  // Month boundaries take priority
+  if (isFirstWeekdayOfMonth()) return 'month-start';
+  if (isLastWeekdayOfMonth()) return 'month-end';
   const day = new Date().getDay();
   if (day === 1) return 'monday';
   if (day === 5) return 'friday';
@@ -200,7 +250,8 @@ async function gatherPipeline(): Promise<PipelineData> {
   // Active deals
   const activeResult = db.exec(
     `SELECT COUNT(*), COALESCE(SUM(monetary_value), 0)
-     FROM ghl_opportunities WHERE status = 'open'`
+     FROM ghl_opportunities WHERE status = 'open' AND location_id = ?`,
+    [VENDO_GHL_LOCATION]
   );
   if (activeResult.length && activeResult[0].values.length) {
     data.activeDeals = activeResult[0].values[0][0] as number;
@@ -209,8 +260,8 @@ async function gatherPipeline(): Promise<PipelineData> {
 
   // New leads (7 days)
   const newResult = db.exec(
-    `SELECT COUNT(*) FROM ghl_opportunities WHERE created_at >= ?`,
-    [daysAgo(7)]
+    `SELECT COUNT(*) FROM ghl_opportunities WHERE created_at >= ? AND location_id = ?`,
+    [daysAgo(7), VENDO_GHL_LOCATION]
   );
   if (newResult.length && newResult[0].values.length) {
     data.newLeads7d = newResult[0].values[0][0] as number;
@@ -219,8 +270,8 @@ async function gatherPipeline(): Promise<PipelineData> {
   // Won this month
   const wonResult = db.exec(
     `SELECT COUNT(*), COALESCE(SUM(monetary_value), 0) FROM ghl_opportunities
-     WHERE status = 'won' AND updated_at >= ?`,
-    [monthStart()]
+     WHERE status = 'won' AND updated_at >= ? AND location_id = ?`,
+    [monthStart(), VENDO_GHL_LOCATION]
   );
   if (wonResult.length && wonResult[0].values.length) {
     data.wonThisMonth = wonResult[0].values[0][0] as number;
@@ -229,8 +280,8 @@ async function gatherPipeline(): Promise<PipelineData> {
 
   // Lost this month
   const lostResult = db.exec(
-    `SELECT COUNT(*) FROM ghl_opportunities WHERE status = 'lost' AND updated_at >= ?`,
-    [monthStart()]
+    `SELECT COUNT(*) FROM ghl_opportunities WHERE status = 'lost' AND updated_at >= ? AND location_id = ?`,
+    [monthStart(), VENDO_GHL_LOCATION]
   );
   if (lostResult.length && lostResult[0].values.length) {
     data.lostThisMonth = lostResult[0].values[0][0] as number;
@@ -240,9 +291,9 @@ async function gatherPipeline(): Promise<PipelineData> {
   const stalledResult = db.exec(
     `SELECT contact_company, contact_name, stage_id, last_stage_change_at, monetary_value
      FROM ghl_opportunities
-     WHERE status = 'open' AND last_stage_change_at IS NOT NULL AND last_stage_change_at < ?
+     WHERE status = 'open' AND last_stage_change_at IS NOT NULL AND last_stage_change_at < ? AND location_id = ?
      ORDER BY monetary_value DESC LIMIT 8`,
-    [daysAgo(14)]
+    [daysAgo(14), VENDO_GHL_LOCATION]
   );
   if (stalledResult.length && stalledResult[0].values.length) {
     data.stalledDeals = stalledResult[0].values.map(r => ({
@@ -256,8 +307,9 @@ async function gatherPipeline(): Promise<PipelineData> {
   // By stage breakdown
   const stageResult = db.exec(
     `SELECT stage_id, COUNT(*), COALESCE(SUM(monetary_value), 0)
-     FROM ghl_opportunities WHERE status = 'open'
-     GROUP BY stage_id ORDER BY COUNT(*) DESC`
+     FROM ghl_opportunities WHERE status = 'open' AND location_id = ?
+     GROUP BY stage_id ORDER BY COUNT(*) DESC`,
+    [VENDO_GHL_LOCATION]
   );
   if (stageResult.length && stageResult[0].values.length) {
     data.byStage = stageResult[0].values.map(r => ({
@@ -274,8 +326,8 @@ async function gatherPipeline(): Promise<PipelineData> {
   if (proposalStageIds.length) {
     const placeholders = proposalStageIds.map(() => '?').join(',');
     const propResult = db.exec(
-      `SELECT COUNT(*) FROM ghl_opportunities WHERE status = 'open' AND stage_id IN (${placeholders})`,
-      proposalStageIds
+      `SELECT COUNT(*) FROM ghl_opportunities WHERE status = 'open' AND location_id = ? AND stage_id IN (${placeholders})`,
+      [VENDO_GHL_LOCATION, ...proposalStageIds]
     );
     if (propResult.length && propResult[0].values.length) {
       data.proposalsSent = propResult[0].values[0][0] as number;
@@ -465,8 +517,8 @@ async function gatherWeekWins(): Promise<WeekWinsData> {
 
   const wonResult = db.exec(
     `SELECT COUNT(*), COALESCE(SUM(monetary_value), 0) FROM ghl_opportunities
-     WHERE status = 'won' AND updated_at >= ?`,
-    [weekStart]
+     WHERE status = 'won' AND updated_at >= ? AND location_id = ?`,
+    [weekStart, VENDO_GHL_LOCATION]
   );
   if (wonResult.length && wonResult[0].values.length) {
     data.dealsWon = wonResult[0].values[0][0] as number;
@@ -480,8 +532,8 @@ async function gatherWeekWins(): Promise<WeekWinsData> {
   if (meetResult.length && meetResult[0].values.length) data.meetingsHeld = meetResult[0].values[0][0] as number;
 
   const leadResult = db.exec(
-    `SELECT COUNT(*) FROM ghl_opportunities WHERE created_at >= ?`,
-    [weekStart]
+    `SELECT COUNT(*) FROM ghl_opportunities WHERE created_at >= ? AND location_id = ?`,
+    [weekStart, VENDO_GHL_LOCATION]
   );
   if (leadResult.length && leadResult[0].values.length) data.newLeads = leadResult[0].values[0][0] as number;
 
@@ -806,6 +858,284 @@ async function buildMidweekBrief(): Promise<Block[]> {
   return blocks;
 }
 
+// ─── Monthly data gatherers ──────────────────────────────────────
+
+interface MonthlyPnL {
+  income: number;
+  cogs: number;
+  grossProfit: number;
+  expenses: number;
+  netProfit: number;
+  margin: number;
+}
+
+async function gatherMonthlyPnL(periodStart: string): Promise<MonthlyPnL | null> {
+  const db = await getDb();
+  const result = db.exec(
+    `SELECT total_income, total_cost_of_sales, gross_profit, total_expenses, net_profit
+     FROM xero_pnl_monthly WHERE period_start = ? LIMIT 1`,
+    [periodStart]
+  );
+  if (!result.length || !result[0].values.length) return null;
+  const [income, cogs, grossProfit, expenses, netProfit] = result[0].values[0] as number[];
+  return {
+    income, cogs, grossProfit, expenses, netProfit,
+    margin: income > 0 ? Math.round((netProfit / income) * 100) : 0,
+  };
+}
+
+interface MonthlyPipelineStats {
+  won: number;
+  wonValue: number;
+  lost: number;
+  newLeads: number;
+}
+
+async function gatherMonthlyPipeline(since: string, until: string): Promise<MonthlyPipelineStats> {
+  const db = await getDb();
+  const data: MonthlyPipelineStats = { won: 0, wonValue: 0, lost: 0, newLeads: 0 };
+
+  const wonResult = db.exec(
+    `SELECT COUNT(*), COALESCE(SUM(monetary_value), 0) FROM ghl_opportunities
+     WHERE status = 'won' AND updated_at >= ? AND updated_at < ? AND location_id = ?`,
+    [since, until, VENDO_GHL_LOCATION]
+  );
+  if (wonResult.length && wonResult[0].values.length) {
+    data.won = wonResult[0].values[0][0] as number;
+    data.wonValue = wonResult[0].values[0][1] as number;
+  }
+
+  const lostResult = db.exec(
+    `SELECT COUNT(*) FROM ghl_opportunities
+     WHERE status = 'lost' AND updated_at >= ? AND updated_at < ? AND location_id = ?`,
+    [since, until, VENDO_GHL_LOCATION]
+  );
+  if (lostResult.length && lostResult[0].values.length) {
+    data.lost = lostResult[0].values[0][0] as number;
+  }
+
+  const leadResult = db.exec(
+    `SELECT COUNT(*) FROM ghl_opportunities
+     WHERE created_at >= ? AND created_at < ? AND location_id = ?`,
+    [since, until, VENDO_GHL_LOCATION]
+  );
+  if (leadResult.length && leadResult[0].values.length) {
+    data.newLeads = leadResult[0].values[0][0] as number;
+  }
+
+  return data;
+}
+
+interface MonthlyClientMovement {
+  newClients: string[];
+  churnedClients: string[];
+  activeCount: number;
+}
+
+async function gatherClientMovement(since: string): Promise<MonthlyClientMovement> {
+  const db = await getDb();
+  const data: MonthlyClientMovement = { newClients: [], churnedClients: [], activeCount: 0 };
+
+  const newResult = db.exec(
+    `SELECT name FROM clients WHERE first_invoice_date >= ? AND status = 'active' ORDER BY name LIMIT 15`,
+    [since]
+  );
+  if (newResult.length && newResult[0].values.length) {
+    data.newClients = newResult[0].values.map(r => r[0] as string);
+  }
+
+  const churnResult = db.exec(
+    `SELECT client_name FROM client_offboarding WHERE created_at >= ? ORDER BY created_at DESC LIMIT 10`,
+    [since]
+  );
+  if (churnResult.length && churnResult[0].values.length) {
+    data.churnedClients = churnResult[0].values.map(r => r[0] as string);
+  }
+
+  const countResult = db.exec(`SELECT COUNT(*) FROM clients WHERE status = 'active'`);
+  if (countResult.length && countResult[0].values.length) {
+    data.activeCount = countResult[0].values[0][0] as number;
+  }
+
+  return data;
+}
+
+// ─── Month-start brief (first weekday) ──────────────────────────
+
+async function buildMonthStartBrief(): Promise<Block[]> {
+  const lastMonth = lastMonthRange();
+  const [fin, pipeline, lastPnL, lastPipeline, util, actions, health, clients] = await Promise.all([
+    gatherFinancials(),
+    gatherPipeline(),
+    gatherMonthlyPnL(lastMonth.start),
+    gatherMonthlyPipeline(lastMonth.start, monthStart()),
+    gatherTeamUtilisation(lastMonth.start),
+    gatherActionItems(),
+    gatherClientHealth(),
+    gatherClientMovement(lastMonth.start),
+  ]);
+
+  const blocks: Block[] = [];
+  blocks.push(headerBlock(`Month Kickoff — ${thisMonthLabel()}`));
+  blocks.push(divider());
+
+  // Last month recap
+  if (lastPnL) {
+    addSection(blocks, `${lastMonth.label} — Financial Summary`, [
+      `Revenue: *£${fmt(lastPnL.income)}*`,
+      `COGS: £${fmt(lastPnL.cogs)} | Gross Profit: £${fmt(lastPnL.grossProfit)}`,
+      `Operating Expenses: £${fmt(lastPnL.expenses)}`,
+      `*Net Profit: £${fmt(lastPnL.netProfit)} (${lastPnL.margin}% margin)*`,
+    ]);
+  }
+
+  // Last month pipeline
+  addSection(blocks, `${lastMonth.label} — Pipeline Results`, [
+    `Deals won: ${lastPipeline.won} — £${fmt(lastPipeline.wonValue)}`,
+    `Deals lost: ${lastPipeline.lost}`,
+    `New leads entered: ${lastPipeline.newLeads}`,
+  ]);
+
+  // Last month utilisation (top-level summary)
+  if (util.length) {
+    const totalHrs = util.reduce((s, u) => s + u.totalHours, 0);
+    const billHrs = util.reduce((s, u) => s + u.billableHours, 0);
+    const avgPct = totalHrs > 0 ? Math.round((billHrs / totalHrs) * 100) : 0;
+    const belowTarget = util.filter(u => u.billablePct < u.target);
+    addSection(blocks, `${lastMonth.label} — Team Utilisation`, [
+      `Overall: ${fmt(billHrs)}h billable / ${fmt(totalHrs)}h total — *${avgPct}%*`,
+      ...(belowTarget.length
+        ? [`*Below target (${belowTarget.length}):*`,
+           ...belowTarget.slice(0, 8).map(u => `  ${u.name}: ${pctBar(u.billablePct, u.target)}`)]
+        : ['All staff on or above target']),
+    ]);
+  }
+
+  // Client movement
+  const clientLines: string[] = [`Active clients: *${clients.activeCount}*`];
+  if (clients.newClients.length) clientLines.push(`New last month: ${clients.newClients.join(', ')}`);
+  if (clients.churnedClients.length) clientLines.push(`Offboarded: ${clients.churnedClients.join(', ')}`);
+  addSection(blocks, 'Client Movement', clientLines);
+
+  // Entering this month
+  addSection(blocks, `Entering ${thisMonthLabel()}`, [
+    `Active pipeline: *${pipeline.activeDeals} deals* — *£${fmt(pipeline.activeValue)}*`,
+    `Outstanding receivables: *£${fmt(fin.outstandingReceivables)}*`,
+    `Open action items: ${actions.totalOpen}`,
+    ...(fin.overdueInvoices.length
+      ? [`Overdue invoices: ${fin.overdueInvoices.length} — £${fmt(fin.overdueInvoices.reduce((s, i) => s + i.amount, 0))}`]
+      : []),
+  ]);
+
+  // At-risk clients
+  if (health.atRisk.length || health.offboardings.length) {
+    const riskLines: string[] = [];
+    for (const c of health.atRisk) riskLines.push(`RED: ${c.name} (score ${c.score}/100)`);
+    if (health.offboardings.length) riskLines.push(`Active offboardings: ${health.offboardings.join(', ')}`);
+    addSection(blocks, 'Client Risk Watch', riskLines);
+  }
+
+  // Pipeline by stage
+  if (pipeline.byStage.length) {
+    addSection(blocks, 'Pipeline by Stage', pipeline.byStage.map(s =>
+      `${s.stage}: ${s.count} deals — £${fmt(s.value)}`
+    ));
+  }
+
+  blocks.push(contextBlock(`Generated by Vendo OS — ${thisMonthLabel()} Kickoff`));
+  return blocks;
+}
+
+// ─── Month-end brief (last weekday) ─────────────────────────────
+
+async function buildMonthEndBrief(): Promise<Block[]> {
+  const [fin, pipeline, thisPnL, thisPipeline, util, actions, health, clients] = await Promise.all([
+    gatherFinancials(),
+    gatherPipeline(),
+    gatherMonthlyPnL(monthStart()),
+    gatherMonthlyPipeline(monthStart(), today()),
+    gatherTeamUtilisation(monthStart()),
+    gatherActionItems(),
+    gatherClientHealth(),
+    gatherClientMovement(monthStart()),
+  ]);
+
+  const blocks: Block[] = [];
+  blocks.push(headerBlock(`Month-End Review — ${thisMonthLabel()}`));
+  blocks.push(divider());
+
+  // Financial summary
+  const finLines = [
+    `Revenue (invoiced): *£${fmt(fin.mtdRevenue)}* (${fin.mtdInvoicesRaised} invoices)`,
+    `Last month total: £${fmt(fin.lastMonthRevenue)}`,
+  ];
+  if (thisPnL) {
+    finLines.push(`COGS: £${fmt(thisPnL.cogs)} | OpEx: £${fmt(thisPnL.expenses)}`);
+    finLines.push(`*Net Profit: £${fmt(thisPnL.netProfit)} (${thisPnL.margin}% margin)*`);
+  }
+  finLines.push(`Outstanding receivables: *£${fmt(fin.outstandingReceivables)}*`);
+  if (fin.overdueInvoices.length) {
+    finLines.push(`*${fin.overdueInvoices.length} overdue invoice(s):*`);
+    for (const inv of fin.overdueInvoices.slice(0, 5)) {
+      finLines.push(`  ${inv.contact} — £${fmt(inv.amount)} (due ${inv.dueDate})`);
+    }
+  }
+  addSection(blocks, `${thisMonthLabel()} — Financial Summary`, finLines);
+
+  // Pipeline this month
+  addSection(blocks, `${thisMonthLabel()} — Pipeline Performance`, [
+    `Active: *${pipeline.activeDeals} deals* — *£${fmt(pipeline.activeValue)}*`,
+    `Deals won: ${thisPipeline.won} — £${fmt(thisPipeline.wonValue)}`,
+    `Deals lost: ${thisPipeline.lost}`,
+    `New leads: ${thisPipeline.newLeads}`,
+    ...(pipeline.stalledDeals.length
+      ? [`*${pipeline.stalledDeals.length} stalled (14+ days):*`,
+         ...pipeline.stalledDeals.slice(0, 5).map(d => `  ${d.name} — ${d.stage} — ${d.daysSinceMove}d — £${fmt(d.value)}`)]
+      : []),
+  ]);
+
+  // Team utilisation (full month)
+  if (util.length) {
+    const totalHrs = util.reduce((s, u) => s + u.totalHours, 0);
+    const billHrs = util.reduce((s, u) => s + u.billableHours, 0);
+    const avgPct = totalHrs > 0 ? Math.round((billHrs / totalHrs) * 100) : 0;
+    const utilLines: string[] = [
+      `Overall: ${fmt(billHrs)}h billable / ${fmt(totalHrs)}h total — *${avgPct}%*`,
+    ];
+    for (const u of util) {
+      const flag = u.billablePct < u.target ? ' :warning:' : '';
+      utilLines.push(`${u.name}: ${u.billableHours}h / ${u.totalHours}h — ${u.billablePct}%${flag}`);
+    }
+    addSection(blocks, `${thisMonthLabel()} — Team Utilisation`, utilLines);
+  }
+
+  // Client movement
+  const clientLines: string[] = [`Active clients: *${clients.activeCount}*`];
+  if (clients.newClients.length) clientLines.push(`New this month: ${clients.newClients.join(', ')}`);
+  if (clients.churnedClients.length) clientLines.push(`Offboarded: ${clients.churnedClients.join(', ')}`);
+  addSection(blocks, 'Client Movement', clientLines);
+
+  // Client health
+  if (health.atRisk.length || health.offboardings.length || health.staleClients.length) {
+    const riskLines: string[] = [];
+    for (const c of health.atRisk) riskLines.push(`RED: ${c.name} (score ${c.score}/100)`);
+    if (health.offboardings.length) riskLines.push(`Active offboardings: ${health.offboardings.join(', ')}`);
+    if (health.staleClients.length) riskLines.push(`No meeting 30+ days: ${health.staleClients.slice(0, 6).join(', ')}`);
+    addSection(blocks, 'Client Health Watch', riskLines);
+  }
+
+  // Carry into next month
+  const carryLines: string[] = [];
+  if (actions.totalOpen > 0) carryLines.push(`${actions.totalOpen} open action items`);
+  if (pipeline.stalledDeals.length) carryLines.push(`${pipeline.stalledDeals.length} stalled deals to chase`);
+  if (fin.overdueInvoices.length) carryLines.push(`£${fmt(fin.overdueInvoices.reduce((s, i) => s + i.amount, 0))} overdue to collect`);
+  if (health.offboardings.length) carryLines.push(`${health.offboardings.length} offboarding(s) to complete`);
+  addSection(blocks, 'Carry Into Next Month', carryLines);
+
+  blocks.push(contextBlock(`Generated by Vendo OS — ${thisMonthLabel()} Month-End`));
+  return blocks;
+}
+
 // ─── Slack posting ───────────────────────────────────────────────
 
 async function postToSlack(blocks: Block[]): Promise<void> {
@@ -839,6 +1169,12 @@ async function main() {
 
   let blocks: Block[];
   switch (dayType) {
+    case 'month-start':
+      blocks = await buildMonthStartBrief();
+      break;
+    case 'month-end':
+      blocks = await buildMonthEndBrief();
+      break;
     case 'monday':
       blocks = await buildMondayBrief();
       break;
