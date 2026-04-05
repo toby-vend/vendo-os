@@ -323,6 +323,18 @@
       if (label && saved.includes(label)) group.classList.add('open');
     });
   })();
+
+  // Preserve sidebar scroll position across page navigations
+  (function() {
+    var nav = document.querySelector('.sidebar-nav');
+    if (!nav) return;
+    var saved = sessionStorage.getItem('sidebarScroll');
+    if (saved) nav.scrollTop = parseInt(saved, 10);
+    document.addEventListener('click', function(e) {
+      var link = e.target.closest('.sidebar-nav a');
+      if (link) sessionStorage.setItem('sidebarScroll', nav.scrollTop);
+    });
+  })();
   </script>
 </body>
 </html>
