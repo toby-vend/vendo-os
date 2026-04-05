@@ -99,6 +99,16 @@ async function main() {
   // Push data table by table
   const tableNames = tables[0].values.map(r => r[0] as string);
 
+  // Tables where stale rows must be removed before push (local is source of truth)
+  // Order matters: clear child tables before parent tables (foreign key constraints)
+  const CLEAR_BEFORE_PUSH = new Set(['clients', 'client_source_mappings']);
+  const CLEAR_ORDER = ['client_source_mappings', 'clients'];
+
+  for (const tbl of CLEAR_ORDER) {
+    console.log(`\nClearing remote ${tbl} before push...`);
+    await remote.execute(`DELETE FROM ${tbl}`);
+  }
+
   for (const tableName of tableNames) {
     console.log(`\nPushing ${tableName}...`);
 
