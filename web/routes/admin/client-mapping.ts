@@ -28,7 +28,7 @@ export const adminClientMappingRoutes: FastifyPluginAsync = async (app) => {
     const external_name = (body.platform_account_name || body.external_name || '').trim();
 
     if (!client_id || !source || !external_id) {
-      reply.type('text/html').send(`<pre>DEBUG: validation failed\nclient_id: ${client_id}\nsource: "${source}"\nexternal_id: "${external_id}"\nbody keys: ${JSON.stringify(Object.keys(body))}\nbody: ${JSON.stringify(body, null, 2)}</pre><a href="/admin/client-mapping">Back</a>`);
+      reply.redirect('/admin/client-mapping');
       return;
     }
 
@@ -40,10 +40,10 @@ export const adminClientMappingRoutes: FastifyPluginAsync = async (app) => {
         external_id,
         external_name: external_name || external_id,
       });
-      reply.redirect('/admin/client-mapping');
-    } catch (err: any) {
-      reply.type('text/html').send(`<pre>DEBUG: insert failed\nerror: ${err?.message || err}\nclient_id: ${client_id}\nsource: "${source}"\nexternal_id: "${external_id}"</pre><a href="/admin/client-mapping">Back</a>`);
+    } catch {
+      // Write may be blocked by Turso plan limits
     }
+    reply.redirect('/admin/client-mapping');
   });
 
   // Delete a mapping

@@ -72,17 +72,17 @@ export const adminClientsRoutes: FastifyPluginAsync = async (app) => {
     const external_name = (body.external_name || '').trim() || external_id;
 
     if (!source || !external_id) {
-      reply.type('text/html').send(`<pre>DEBUG: validation failed\nsource: "${source}"\nexternal_id: "${external_id}"\nbody keys: ${JSON.stringify(Object.keys(body))}\nbody: ${JSON.stringify(body, null, 2)}</pre><a href="/admin/clients/${id}">Back</a>`);
+      reply.redirect(`/admin/clients/${id}`);
       return;
     }
 
     try {
       await removeExistingMapping(source, external_id);
       await addSourceMapping(Number(id), source, external_id, external_name);
-      reply.redirect(`/admin/clients/${id}`);
-    } catch (err: any) {
-      reply.type('text/html').send(`<pre>DEBUG: insert failed\nerror: ${err?.message || err}\nsource: "${source}"\nexternal_id: "${external_id}"\nclientId: ${id}</pre><a href="/admin/clients/${id}">Back</a>`);
+    } catch (err) {
+      app.log.error({ err, source, external_id, clientId: id }, 'client-mapping: failed to add mapping');
     }
+    reply.redirect(`/admin/clients/${id}`);
   });
 
   // Remove a source mapping
