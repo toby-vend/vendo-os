@@ -1,0 +1,41 @@
+{
+  "swarmId": "swarm-mnhsm7tq",
+  "objective": "Build Vendo Client CRM Performance System: client-facing reporting portal with 6 API integrations (Google Analytics, GSC, Ahrefs, Google Ads, Meta Ads, Client CRM). Data pipeline: extraction → channel layers → normalisation → lead attribution → enrichment → ROI calculation → dashboards. Next.js, Turso/SQLite, Vercel. Client portal with auth.",
+  "strategy": "development",
+  "status": "initialized",
+  "agents": 8,
+  "agentPlan": [
+    {
+      "role": "Coordinator",
+      "type": "coordinator",
+      "count": 1,
+      "purpose": "Orchestrate workflow"
+    },
+    {
+      "role": "Architect",
+      "type": "architect",
+      "count": 1,
+      "purpose": "System design"
+    },
+    {
+      "role": "Coder",
+      "type": "coder",
+      "count": 3,
+      "purpose": "Implementation"
+    },
+    {
+      "role": "Tester",
+      "type": "tester",
+      "count": 2,
+      "purpose": "Quality assurance"
+    },
+    {
+      "role": "Reviewer",
+      "type": "reviewer",
+      "count": 1,
+      "purpose": "Code review"
+    }
+  ],
+  "startedAt": "2026-04-02T18:13:14.655Z",
+  "parallel": true
+}

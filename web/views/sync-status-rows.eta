@@ -1,0 +1,31 @@
+<% it.sources.forEach(s => { %>
+<tr>
+  <td><%= s.source %></td>
+  <td><%= s.lastSync ? s.lastSync.slice(0, 19).replace('T', ' ') : '—' %></td>
+  <td><%= s.rowCount.toLocaleString() %></td>
+  <td>
+    <% if (!s.lastSync) { %>
+      <span class="sync-none">Not synced</span>
+    <% } else if ((Date.now() - new Date(s.lastSync).getTime()) < 86400000) { %>
+      <span class="sync-ok">OK</span>
+    <% } else { %>
+      <span class="sync-stale">Stale</span>
+    <% } %>
+  </td>
+  <% if (it.isAdmin) { %>
+  <td>
+    <% const slug = it.slugLookup[s.source]; if (slug) { %>
+    <button class="btn btn-sm"
+            hx-post="/sync-status/run/<%= slug %>"
+            hx-vals='{"_csrf":"<%= it.csrfToken %>"}'
+            hx-swap="none"
+            hx-disabled-elt="this"
+            hx-indicator="#spinner-<%= slug %>">
+      Refresh
+    </button>
+    <span id="spinner-<%= slug %>" class="htmx-indicator" style="font-size: 12px; color: #94A3B8;">Syncing...</span>
+    <% } %>
+  </td>
+  <% } %>
+</tr>
+<% }) %>

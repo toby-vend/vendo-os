@@ -8,6 +8,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local', override: true });
 
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { resolveClientBatch } from '../utils/resolve-client.js';
 
 const BACKFILL = process.argv.includes('--backfill');
 const DEFAULT_DAYS = 7;
@@ -248,6 +249,12 @@ async function main() {
     log('HARVEST', `Clients: ${total_clients}`);
     log('HARVEST', `Projects: ${total_projects}`);
     log('HARVEST', `Time entries: ${total_entries} (${total_hours} hours total)`);
+
+    // Auto-resolve Harvest clients to canonical clients
+    const harvestClients = db.exec('SELECT CAST(id AS TEXT), name FROM harvest_clients WHERE name IS NOT NULL');
+    if (harvestClients.length && harvestClients[0].values.length) {
+      await resolveClientBatch('harvest', harvestClients[0].values.map((r: unknown[]) => ({ id: r[0] as string, name: r[1] as string })));
+    }
 
     closeDb();
   } catch (err) {

@@ -164,6 +164,41 @@ export async function getUnlinkedGhlCompanies(): Promise<UnlinkedAccount[]> {
   `);
 }
 
+export async function getUnlinkedHarvestClients(): Promise<UnlinkedAccount[]> {
+  try {
+    return await rows<UnlinkedAccount>(`
+      SELECT DISTINCT CAST(id AS TEXT) as external_id, name as external_name
+      FROM harvest_clients
+      WHERE CAST(id AS TEXT) NOT IN (SELECT external_id FROM client_source_mappings WHERE source = 'harvest')
+        AND name IS NOT NULL
+      ORDER BY name
+    `);
+  } catch { return []; }
+}
+
+export async function getUnlinkedGa4Properties(): Promise<UnlinkedAccount[]> {
+  try {
+    return await rows<UnlinkedAccount>(`
+      SELECT id as external_id, display_name as external_name
+      FROM ga4_properties
+      WHERE id NOT IN (SELECT external_id FROM client_source_mappings WHERE source = 'ga4')
+        AND display_name IS NOT NULL
+      ORDER BY display_name
+    `);
+  } catch { return []; }
+}
+
+export async function getUnlinkedGscSites(): Promise<UnlinkedAccount[]> {
+  try {
+    return await rows<UnlinkedAccount>(`
+      SELECT id as external_id, id as external_name
+      FROM gsc_sites
+      WHERE id NOT IN (SELECT external_id FROM client_source_mappings WHERE source = 'gsc')
+      ORDER BY id
+    `);
+  } catch { return []; }
+}
+
 // --- Enriched detail (cross-source data for public detail page) ---
 
 interface MetaSpendRow { total_spend: number; impressions: number; clicks: number; }

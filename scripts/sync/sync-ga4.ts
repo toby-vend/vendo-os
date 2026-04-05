@@ -12,6 +12,7 @@ config({ path: '.env.local', override: true });
 
 import { readFileSync } from 'fs';
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
+import { resolveClientBatch } from '../utils/resolve-client.js';
 
 const BACKFILL = process.argv.includes('--backfill');
 const DEFAULT_DAYS = 7;
@@ -272,6 +273,12 @@ async function syncGA4() {
     saveDb();
 
     log('GA4', `Sync complete: ${totalDaily} daily rows, ${totalTraffic} traffic rows across ${GA4_PROPERTY_IDS!.length} properties`);
+
+    // Auto-resolve GA4 properties to canonical clients
+    const ga4Props = db.exec('SELECT id, display_name FROM ga4_properties WHERE display_name IS NOT NULL');
+    if (ga4Props.length && ga4Props[0].values.length) {
+      await resolveClientBatch('ga4', ga4Props[0].values.map((r: unknown[]) => ({ id: r[0] as string, name: r[1] as string })));
+    }
 
   } catch (err) {
     logError('GA4', 'Sync failed', err);

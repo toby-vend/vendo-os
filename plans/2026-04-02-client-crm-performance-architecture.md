@@ -815,12 +815,34 @@ The portal dashboard (`/portal`) shows:
 3. Build query modules (`roi.ts`, `attribution.ts`, `ga4.ts`, `gsc.ts`, `ahrefs.ts`)
 4. Validate attribution accuracy against known leads
 
-### Phase 4: Client Portal (Week 4)
+### Phase 4: Client Portal (Week 4) ✅
 1. Add `client` role to auth system
 2. Build portal routes and middleware
 3. Build portal templates (dashboard, SEO, ads, leads, ROI)
 4. Build admin UI for creating client portal users
 5. Deploy and test with one pilot client
+
+### Phase 5: Admin Onboarding UI (Week 5)
+
+Replace manual CLI/env-var setup with a self-service admin flow at `/admin/onboarding`.
+
+1. **Client master table** — create `clients` table if not already present (id, name, domain, crm_type, created_at)
+2. **API account discovery endpoints** — server-side routes that list available accounts from each platform:
+   - `GET /admin/api/ghl-locations` — pull GHL sub-accounts from agency API
+   - `GET /admin/api/meta-accounts` — list Meta ad accounts from existing token
+   - `GET /admin/api/gads-accounts` — list Google Ads accounts from existing token
+   - `GET /admin/api/ga4-properties` — list GA4 properties (Admin API)
+   - `GET /admin/api/gsc-sites` — list verified GSC sites
+3. **Multi-step onboarding wizard** (`/admin/onboarding`):
+   - Step 1: Create client (name, domain, CRM type)
+   - Step 2: Link platform accounts (dropdowns populated from discovery endpoints)
+   - Step 3: Configure treatment types (show defaults, allow per-client adjustments)
+   - Step 4: Create portal user (email + password)
+   - Step 5: Trigger initial sync + attribution backfill (background task with progress)
+4. **Server-side sync trigger** — `POST /admin/api/sync-client` that runs backfill for all linked platforms as a background task, returns progress via SSE or polling
+5. **Per-client GA4/GSC config** — move GA4_PROPERTY_IDS and GSC_SITE_URLS from .env.local into client_account_map so each client's properties are stored in the database, not env vars. Update sync scripts to read from DB instead.
+
+**Pilot client:** Zen House Dental
 
 ---
 
@@ -877,7 +899,7 @@ These must be added to the existing OAuth consent screen and the token re-author
 | 8 | GHL pipeline stages | **TBD.** Will map when reviewing GHL pipeline setup. |
 | 9 | Lead privacy | **Clients see lead data.** Build GHL sub-account auto-discovery from agency account → link to clients. |
 | 10 | Date ranges | **30 days default with date picker.** |
-| 11 | Pilot client | **Avenue Dental.** Ecom clients won't have GHL — need CRM type selector (GHL / Boxly / none). |
+| 11 | Pilot client | **Zen House Dental** (changed from Avenue Dental — Avenue not on GHL). Ecom clients won't have GHL — need CRM type selector (GHL / Boxly / none). |
 | 12 | Meta token expiry | **Manual refresh.** No automation needed. |
 
 ### New Requirements from Decisions

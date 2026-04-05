@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-04-02T19:43:54.361Z",
+  "projectRoot": "/Users/Toby_1/Vendo-OS",
+  "structure": {
+    "hasPackageJson": true,
+    "hasTsConfig": true,
+    "hasClaudeConfig": true,
+    "hasClaudeFlow": true
+  },
+  "scannedAt": 1775159034361
+}
