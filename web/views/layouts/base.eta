@@ -69,9 +69,8 @@
           const isSingle = visibleItems.length === 1 && group.icon;
         %>
         <% if (isSingle) { %>
-        <div class="nav-group nav-group-single"<%= group.id === 'home' ? ' style="padding-top: 0.25rem;"' : '' %>>
-          <a href="<%= visibleItems[0].href %>" class="nav-item<%= (visibleItems[0].href === '/' ? p === '/' : p.startsWith(visibleItems[0].href)) ? ' active' : '' %>"<%= group.id === 'home' ? ' style="margin: 0 0.5rem; width: calc(100% - 1rem);"' : '' %>>
-            <%~ group.icon %>
+        <div class="nav-group nav-group-single">
+          <a href="<%= visibleItems[0].href %>" class="nav-group-label nav-group-link<%= (visibleItems[0].href === '/' ? p === '/' : p.startsWith(visibleItems[0].href)) ? ' active' : '' %>">
             <span class="nav-label"><%= visibleItems[0].label %></span>
           </a>
         </div>

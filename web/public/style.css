@@ -336,12 +336,21 @@ body {
 
 /* Standalone top-level items between groups */
 .nav-group-single {
-  padding: 8px 0 0;
+  padding: 0;
 }
 
-.nav-group-single .nav-item {
-  margin: 0 0.5rem;
-  width: calc(100% - 1rem);
+.nav-group-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.nav-group-link:hover {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+}
+
+.nav-group-link.active {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* Collapsed sidebar overrides */
