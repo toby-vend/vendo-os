@@ -13,20 +13,101 @@
 
     :root {
       --vendo-font: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+      --vendo-green: #22C55E;
+      --vendo-green-hover: #16A34A;
     }
 
     body {
       font-family: var(--vendo-font);
       background: #0B0B0B;
-      background-image:
-        radial-gradient(ellipse at 30% 50%, rgba(34, 197, 94, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 30%, rgba(255, 255, 255, 0.02) 0%, transparent 40%);
       color: #E2E8F0;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 2rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* === Animated gradient orbs === */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.07;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    .bg-orb-1 {
+      width: 600px;
+      height: 600px;
+      background: var(--vendo-green);
+      top: -10%;
+      left: -10%;
+      animation: orb-drift-1 25s ease-in-out infinite;
+    }
+
+    .bg-orb-2 {
+      width: 500px;
+      height: 500px;
+      background: #10B981;
+      bottom: -15%;
+      right: -10%;
+      animation: orb-drift-2 30s ease-in-out infinite;
+    }
+
+    .bg-orb-3 {
+      width: 350px;
+      height: 350px;
+      background: #FFFFFF;
+      top: 40%;
+      right: 30%;
+      opacity: 0.03;
+      animation: orb-drift-3 20s ease-in-out infinite;
+    }
+
+    @keyframes orb-drift-1 {
+      0%, 100% { transform: translate(0, 0); }
+      33% { transform: translate(80px, 50px); }
+      66% { transform: translate(-40px, 80px); }
+    }
+
+    @keyframes orb-drift-2 {
+      0%, 100% { transform: translate(0, 0); }
+      33% { transform: translate(-60px, -40px); }
+      66% { transform: translate(50px, -70px); }
+    }
+
+    @keyframes orb-drift-3 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-30px, 40px); }
+    }
+
+    /* === Noise texture overlay === */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.035;
+      pointer-events: none;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 128px 128px;
+    }
+
+    /* === Dot grid === */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+      background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+      background-size: 24px 24px;
     }
 
     .login-container {
@@ -35,13 +116,27 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
+      z-index: 1;
+      animation: card-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes card-enter {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Logo */
     .login-logo {
       width: 64px;
       height: 64px;
-      background: #22C55E;
+      background: var(--vendo-green);
       color: #0B0B0B;
       border-radius: 18px;
       display: flex;
@@ -77,7 +172,7 @@
       font-family: var(--vendo-font);
       font-size: 18px;
       font-weight: 400;
-      color: #22C55E;
+      color: var(--vendo-green);
       letter-spacing: -0.01em;
     }
 
@@ -85,7 +180,7 @@
       display: inline-block;
       width: 2px;
       height: 22px;
-      background: #22C55E;
+      background: var(--vendo-green);
       margin-left: 2px;
       vertical-align: middle;
       animation: blink 0.5s infinite;
@@ -106,6 +201,20 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       padding: 2rem;
       width: 100%;
+      transition: transform 0.3s ease;
+    }
+
+    /* Shake on error */
+    .login-card.shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
     }
 
     .login-card label {
@@ -118,7 +227,9 @@
       margin-bottom: 0.5rem;
     }
 
-    .login-card input {
+    .login-card input[type="email"],
+    .login-card input[type="password"],
+    .login-card input[type="text"] {
       width: 100%;
       padding: 0.75rem 1rem;
       background: rgba(11, 11, 11, 0.6);
@@ -126,13 +237,13 @@
       border-radius: 12px;
       color: #E2E8F0;
       font-family: var(--vendo-font);
-      font-size: 14px;
+      font-size: 16px;
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .login-card input:focus {
-      border-color: #22C55E;
+      border-color: var(--vendo-green);
       box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
     }
 
@@ -140,11 +251,52 @@
       color: #64748b;
     }
 
-    .login-card button {
+    /* Password field wrapper */
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input {
+      padding-right: 3rem;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      color: #64748b;
+      transition: color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+
+    .password-toggle:hover {
+      color: #94A3B8;
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: none;
+      transform: translateY(-50%);
+    }
+
+    .password-toggle svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Submit button */
+    .login-btn {
       width: 100%;
       margin-top: 1.25rem;
       padding: 0.75rem 1.25rem;
-      background: #22C55E;
+      background: var(--vendo-green);
       color: #0B0B0B;
       border: none;
       border-radius: 14px;
@@ -153,20 +305,65 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 48px;
     }
 
-    .login-card button:hover {
-      background: #16A34A;
+    .login-btn:hover {
+      background: var(--vendo-green-hover);
       box-shadow: 0 0 24px rgba(34, 197, 94, 0.25);
       transform: scale(1.02);
     }
 
+    .login-btn:active {
+      transform: scale(0.98);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-btn:disabled:hover {
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(11, 11, 11, 0.3);
+      border-top-color: #0B0B0B;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    .login-btn.loading .spinner { display: block; }
+    .login-btn.loading .btn-label { display: none; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Error message */
     .error-text {
       color: #ef4444;
       font-weight: 600;
       text-align: center;
       font-size: 14px;
       margin-bottom: 1rem;
+      animation: error-fade 0.3s ease;
+    }
+
+    @keyframes error-fade {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .login-footer {
@@ -175,71 +372,147 @@
       color: rgba(148, 163, 184, 0.5);
       text-align: center;
     }
+
+    .keyboard-hint {
+      text-align: center;
+      margin-top: 0.75rem;
+      font-size: 11px;
+      color: rgba(148, 163, 184, 0.35);
+      letter-spacing: 0.02em;
+    }
+
+    .keyboard-hint kbd {
+      display: inline-block;
+      padding: 1px 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      font-family: var(--vendo-font);
+      font-size: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .keyboard-hint { display: none; }
+
+      body { padding: 1.5rem; }
+
+      .login-brand { font-size: 26px; }
+
+      .typewriter-text { font-size: 16px; }
+    }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+      .bg-orb { animation: none !important; }
+    }
   </style>
 </head>
 <body>
-  <div class="login-container">
+  <!-- Animated background orbs -->
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+
+  <main class="login-container" aria-label="Sign in">
     <div class="login-logo">V</div>
     <div class="login-brand">Vendo Digital</div>
     <div class="typewriter-wrap">
       <span class="typewriter-text" id="typewriter"></span><span class="typewriter-cursor"></span>
     </div>
 
-    <div class="login-card">
+    <div class="login-card<% if (it.error) { %> shake<% } %>" id="login-card">
       <% if (it.error) { %>
-        <p class="error-text"><%= it.error %></p>
+        <p class="error-text" role="alert"><%= it.error %></p>
       <% } %>
-      <form method="POST" action="/login">
+      <form method="POST" action="/login" id="login-form">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="you@vendo.digital" required autofocus>
+        <input type="email" id="email" name="email" placeholder="you@vendo.digital"
+               autocomplete="email" inputmode="email" required autofocus>
+
         <div style="margin-top: 1rem;">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" placeholder="Enter your password"
+                   autocomplete="current-password" required>
+            <button type="button" class="password-toggle" id="pw-toggle"
+                    aria-label="Show password" aria-pressed="false">
+              <svg id="pw-icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg id="pw-icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
         </div>
-        <button type="submit">Log In</button>
+
+        <button type="submit" class="login-btn" id="login-btn">
+          <span class="btn-label">Log In</span>
+          <span class="spinner"></span>
+        </button>
+
+        <p class="keyboard-hint">Press <kbd>Enter</kbd> to sign in</p>
       </form>
     </div>
 
     <p class="login-footer">Vendo OS &mdash; Team Dashboard</p>
-  </div>
+  </main>
 
   <script>
   (function() {
-    const words = ["Driving Strategic Digital Growth", "We Are Vendo Digital"];
-    const el = document.getElementById('typewriter');
-    const speed = 80;
-    const deleteSpeed = 40;
-    const pauseAfterWord = 2000;
-    const pauseAfterDelete = 500;
-    let wordIdx = 0;
-    let charIdx = 0;
-    let deleting = false;
+    /* Typewriter */
+    var words = ["Driving Strategic Digital Growth", "We Are Vendo Digital"];
+    var el = document.getElementById('typewriter');
+    var speed = 80, deleteSpeed = 40, pauseAfterWord = 2000, pauseAfterDelete = 500;
+    var wordIdx = 0, charIdx = 0, deleting = false;
 
     function tick() {
-      const word = words[wordIdx];
-
+      var word = words[wordIdx];
       if (!deleting) {
         charIdx++;
         el.textContent = word.slice(0, charIdx);
-        if (charIdx === word.length) {
-          setTimeout(function() { deleting = true; tick(); }, pauseAfterWord);
-          return;
-        }
+        if (charIdx === word.length) { setTimeout(function() { deleting = true; tick(); }, pauseAfterWord); return; }
         setTimeout(tick, speed);
       } else {
         charIdx--;
         el.textContent = word.slice(0, charIdx);
-        if (charIdx === 0) {
-          deleting = false;
-          wordIdx = (wordIdx + 1) % words.length;
-          setTimeout(tick, pauseAfterDelete);
-          return;
-        }
+        if (charIdx === 0) { deleting = false; wordIdx = (wordIdx + 1) % words.length; setTimeout(tick, pauseAfterDelete); return; }
         setTimeout(tick, deleteSpeed);
       }
     }
-
     setTimeout(tick, 600);
+
+    /* Password toggle */
+    var toggle = document.getElementById('pw-toggle');
+    var pwField = document.getElementById('password');
+    var iconShow = document.getElementById('pw-icon-show');
+    var iconHide = document.getElementById('pw-icon-hide');
+
+    toggle.addEventListener('click', function() {
+      var showing = pwField.type === 'text';
+      pwField.type = showing ? 'password' : 'text';
+      toggle.setAttribute('aria-pressed', showing ? 'false' : 'true');
+      toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+      iconShow.style.display = showing ? '' : 'none';
+      iconHide.style.display = showing ? 'none' : '';
+      pwField.focus();
+    });
+
+    /* Loading state on submit */
+    var form = document.getElementById('login-form');
+    var btn = document.getElementById('login-btn');
+
+    form.addEventListener('submit', function() {
+      btn.classList.add('loading');
+      btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+    });
   })();
   </script>
 </body>
