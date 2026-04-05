@@ -46,6 +46,7 @@
     "sync:all": "tsx scripts/sync/run-all.ts",
     "sync:all:no-push": "tsx scripts/sync/run-all.ts --no-push",
     "health:score": "tsx scripts/functions/client-health.ts",
+    "services:populate": "tsx scripts/functions/populate-client-services.ts",
     "report:client": "tsx scripts/functions/generate-client-report.ts",
     "report:all": "tsx scripts/functions/generate-client-report.ts --all",
     "ai:audit": "tsx scripts/utils/ai-wrapper.ts --audit",
