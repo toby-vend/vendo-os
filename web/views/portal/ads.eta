@@ -2,123 +2,385 @@
 
 <div id="portal-ads-content">
 
-<% if (it.channelSpend.length === 0) { %>
+<%
+  const g = it.ghlRoi;
+  const hasGhl = g && g.total_leads > 0;
+  const hasAds = it.channelSpend && it.channelSpend.length > 0;
+  const metaSpend = it.channelSpend.find(c => c.channel === 'meta_ads')?.spend || 0;
+  const gadsSpend = it.channelSpend.find(c => c.channel === 'google_ads')?.spend || 0;
+  const totalSpend = metaSpend + gadsSpend;
+
+  // Campaign totals for funnel top
+  const allCampaigns = [...(it.metaCampaigns || []), ...(it.gadsCampaigns || [])];
+  const totalClicks = allCampaigns.reduce((s, c) => s + c.clicks, 0);
+  const totalImpressions = allCampaigns.reduce((s, c) => s + c.impressions, 0);
+
+  // CPA
+  const cpa = hasGhl && g.total_won > 0 ? Math.round(totalSpend / g.total_won * 100) / 100 : 0;
+%>
+
+<% if (!hasGhl && !hasAds) { %>
   <div class="portal-empty" style="margin-top: 2rem;">No advertising data available for this period.</div>
 <% } else { %>
 
-<!-- Spend KPIs -->
-<%
-  const totalSpend = it.channelSpend.reduce((s, c) => s + c.spend, 0);
-  const metaSpend = it.channelSpend.find(c => c.channel === 'meta_ads')?.spend || 0;
-  const gadsSpend = it.channelSpend.find(c => c.channel === 'google_ads')?.spend || 0;
-  const allCampaigns = [...it.metaCampaigns, ...it.gadsCampaigns];
-  const totalImpressions = allCampaigns.reduce((s, c) => s + c.impressions, 0);
-  const totalClicks = allCampaigns.reduce((s, c) => s + c.clicks, 0);
-  const totalConversions = allCampaigns.reduce((s, c) => s + c.conversions, 0);
-  const avgCpc = totalClicks > 0 ? totalSpend / totalClicks : 0;
-  const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
-%>
+<!-- ===== Section 1: Headline KPIs ===== -->
 
 <div class="portal-kpi-grid">
+  <% if (hasGhl) { %>
+  <div class="portal-kpi kpi-positive">
+    <div class="kpi-value"><%= g.total_won.toLocaleString() %></div>
+    <div class="kpi-label">New Patients</div>
+    <div class="kpi-sub"><%= g.total_leads %> leads total</div>
+  </div>
+  <% } %>
+
   <div class="portal-kpi">
-    <div class="kpi-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
-    <div class="kpi-label">Total Spend</div>
+    <div class="kpi-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
+    <div class="kpi-label">Total Ad Spend</div>
     <div class="kpi-sub">
-      <% if (metaSpend > 0) { %>Meta &pound;<%= metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %><% } %>
+      <% if (metaSpend > 0) { %>Meta &pound;<%= metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %><% } %>
       <% if (metaSpend > 0 && gadsSpend > 0) { %> | <% } %>
-      <% if (gadsSpend > 0) { %>Google &pound;<%= gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %><% } %>
+      <% if (gadsSpend > 0) { %>Google &pound;<%= gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %><% } %>
     </div>
   </div>
+
+  <% if (hasGhl) { %>
   <div class="portal-kpi">
-    <div class="kpi-value"><%= totalImpressions.toLocaleString() %></div>
-    <div class="kpi-label">Impressions</div>
+    <div class="kpi-value">&pound;<%= g.cpl > 0 ? g.cpl.toFixed(2) : '0.00' %></div>
+    <div class="kpi-label">Cost Per Lead</div>
   </div>
+
   <div class="portal-kpi">
-    <div class="kpi-value"><%= totalClicks.toLocaleString() %></div>
-    <div class="kpi-label">Clicks</div>
+    <div class="kpi-value">&pound;<%= cpa > 0 ? cpa.toFixed(2) : '0.00' %></div>
+    <div class="kpi-label">Cost Per Patient</div>
   </div>
+
+  <div class="portal-kpi<%= g.roi_percent >= 0 ? ' kpi-positive' : ' kpi-negative' %>">
+    <div class="kpi-value"><%= g.roi_percent.toFixed(1) %>%</div>
+    <div class="kpi-label">Return on Investment</div>
+  </div>
+
   <div class="portal-kpi">
-    <div class="kpi-value">&pound;<%= avgCpc.toFixed(2) %></div>
-    <div class="kpi-label">Average CPC</div>
+    <div class="kpi-value"><%= g.conversion_rate.toFixed(1) %>%</div>
+    <div class="kpi-label">Lead-to-Patient Rate</div>
+    <div class="kpi-sub"><%= g.total_won %> of <%= g.total_leads %> leads</div>
   </div>
-  <div class="portal-kpi">
-    <div class="kpi-value"><%= avgCtr.toFixed(2) %>%</div>
-    <div class="kpi-label">Average CTR</div>
-  </div>
-  <div class="portal-kpi">
-    <div class="kpi-value"><%= totalConversions.toLocaleString() %></div>
-    <div class="kpi-label">Conversions</div>
-  </div>
+  <% } %>
 </div>
 
-<% if (metaSpend > 0 || gadsSpend > 0) { %>
+<!-- ===== Section 2: Funnel + Monthly Trend ===== -->
+
+<% if (hasGhl) { %>
 <div class="chart-row">
+  <!-- Lead Funnel -->
   <div class="chart-card">
-    <h3>Spend Breakdown</h3>
-    <div class="chart-wrap" style="max-width: 260px; margin: 0 auto;">
-      <canvas id="portalSpendChart"></canvas>
-    </div>
-  </div>
-  <div class="chart-card">
-    <h3>Performance Overview</h3>
+    <h3>Patient Journey</h3>
     <div class="chart-wrap">
-      <canvas id="portalPerfChart"></canvas>
+      <canvas id="adsFunnelChart"></canvas>
     </div>
   </div>
+
+  <!-- Monthly Trend -->
+  <% if (it.monthlyTrend && it.monthlyTrend.length > 1) { %>
+  <div class="chart-card">
+    <h3>Monthly Trend</h3>
+    <div class="chart-wrap">
+      <canvas id="adsTrendChart"></canvas>
+    </div>
+  </div>
+  <% } %>
 </div>
+
 <script>
 (function() {
-  new Chart(document.getElementById('portalSpendChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Meta Ads', 'Google Ads'],
-      datasets: [{
-        data: [<%= metaSpend.toFixed(2) %>, <%= gadsSpend.toFixed(2) %>],
-        backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(34, 197, 94, 0.7)'],
-        borderColor: ['#3B82F6', '#22C55E'],
-        borderWidth: 1,
-        hoverOffset: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      cutout: '65%',
-      plugins: {
-        legend: { position: 'bottom' },
-        tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': \u00A3' + ctx.parsed.toLocaleString(undefined, { minimumFractionDigits: 2 }); } } }
-      }
-    }
-  });
+  // --- Funnel Chart ---
+  var funnel = <%~ JSON.stringify(it.funnel || []) %>;
+  var funnelMap = {};
+  funnel.forEach(function(f) { funnelMap[f.stage] = f.count; });
 
-  new Chart(document.getElementById('portalPerfChart'), {
+  var funnelStages = ['lead', 'booked', 'attended', 'converted'];
+  var funnelLabels = ['Enquiries', 'Booked', 'Attended', 'Patients'];
+  var funnelData = funnelStages.map(function(s) { return funnelMap[s] || 0; });
+  var funnelColours = ['rgba(59, 130, 246, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(251, 191, 36, 0.7)', 'rgba(34, 197, 94, 0.7)'];
+
+  new Chart(document.getElementById('adsFunnelChart'), {
     type: 'bar',
     data: {
-      labels: ['Impressions', 'Clicks', 'Conversions'],
+      labels: funnelLabels,
       datasets: [{
-        label: 'Total',
-        data: [<%= totalImpressions %>, <%= totalClicks %>, <%= totalConversions %>],
-        backgroundColor: ['rgba(167, 139, 250, 0.6)', 'rgba(59, 130, 246, 0.6)', 'rgba(34, 197, 94, 0.6)'],
-        borderColor: ['#A78BFA', '#3B82F6', '#22C55E'],
+        data: funnelData,
+        backgroundColor: funnelColours,
+        borderColor: funnelColours.map(function(c) { return c.replace('0.7', '1'); }),
         borderWidth: 1
       }]
     },
     options: {
-      responsive: true,
       indexAxis: 'y',
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { beginAtZero: true, ticks: { callback: function(v) { return v.toLocaleString(); } } }
-      }
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            afterLabel: function(ctx) {
+              if (ctx.dataIndex === 0 || funnelData[ctx.dataIndex - 1] === 0) return '';
+              var rate = (funnelData[ctx.dataIndex] / funnelData[ctx.dataIndex - 1] * 100).toFixed(1);
+              return rate + '% conversion from ' + funnelLabels[ctx.dataIndex - 1].toLowerCase();
+            }
+          }
+        }
+      },
+      scales: { x: { beginAtZero: true } }
     }
   });
+
+  // --- Monthly Trend ---
+  var trend = <%~ JSON.stringify(it.monthlyTrend || []) %>;
+  if (trend.length > 1) {
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    new Chart(document.getElementById('adsTrendChart'), {
+      type: 'bar',
+      data: {
+        labels: trend.map(function(t) { var m = parseInt(t.month.split('-')[1], 10); return months[m - 1]; }),
+        datasets: [
+          {
+            label: 'New Patients',
+            data: trend.map(function(t) { return t.new_patients; }),
+            backgroundColor: 'rgba(34, 197, 94, 0.6)',
+            borderColor: '#22C55E',
+            borderWidth: 1,
+            yAxisID: 'y',
+            order: 2
+          },
+          {
+            label: 'Cost Per Lead',
+            data: trend.map(function(t) { return t.cpl; }),
+            type: 'line',
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            yAxisID: 'y1',
+            order: 1,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Patients' } },
+          y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'CPL (\u00A3)' },
+            ticks: { callback: function(v) { return '\u00A3' + v; } }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                if (ctx.dataset.yAxisID === 'y1') return 'CPL: \u00A3' + ctx.parsed.y.toFixed(2);
+                return ctx.parsed.y + ' patients';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
 })();
 </script>
 <% } %>
 
-<!-- Meta Ads Campaigns -->
-<% if (it.metaCampaigns.length > 0) { %>
+<!-- ===== Section 3: Treatment Performance + Spend vs Revenue ===== -->
+
+<% if (hasGhl && g.treatments.length > 0) { %>
+<div class="chart-row">
+  <div class="chart-card">
+    <h3>Revenue by Treatment</h3>
+    <div class="chart-wrap">
+      <canvas id="adsTreatmentChart"></canvas>
+    </div>
+  </div>
+
+  <% if (g.channels.length > 0) { %>
+  <div class="chart-card">
+    <h3>Spend vs Revenue by Channel</h3>
+    <div class="chart-wrap">
+      <canvas id="adsChannelChart"></canvas>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<script>
+(function() {
+  // --- Treatment Revenue Chart ---
+  var treatments = <%~ JSON.stringify(g.treatments) %>;
+  treatments.sort(function(a, b) { return b.revenue - a.revenue; });
+
+  new Chart(document.getElementById('adsTreatmentChart'), {
+    type: 'bar',
+    data: {
+      labels: treatments.map(function(t) { return t.treatment.replace(/\b\w/g, function(c) { return c.toUpperCase(); }); }),
+      datasets: [{
+        label: 'Revenue',
+        data: treatments.map(function(t) { return t.revenue; }),
+        backgroundColor: 'rgba(34, 197, 94, 0.6)',
+        borderColor: '#22C55E',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } } }
+      }
+    }
+  });
+
+  // --- Channel Spend vs Revenue ---
+  <% if (g.channels.length > 0) { %>
+  var channels = <%~ JSON.stringify(g.channels.map(function(ch) {
+    return {
+      channel: ch.channel === 'google' ? 'Google Ads' : ch.channel === 'facebook' ? 'Meta Ads' : ch.channel,
+      spend: ch.spend,
+      revenue: ch.revenue
+    };
+  })) %>;
+
+  new Chart(document.getElementById('adsChannelChart'), {
+    type: 'bar',
+    data: {
+      labels: channels.map(function(c) { return c.channel; }),
+      datasets: [
+        { label: 'Spend', data: channels.map(function(c) { return c.spend; }), backgroundColor: 'rgba(239, 68, 68, 0.5)', borderColor: '#EF4444', borderWidth: 1 },
+        { label: 'Revenue', data: channels.map(function(c) { return c.revenue; }), backgroundColor: 'rgba(34, 197, 94, 0.6)', borderColor: '#22C55E', borderWidth: 1 }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } } } },
+      plugins: { tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': \u00A3' + ctx.parsed.y.toLocaleString(); } } } }
+    }
+  });
+  <% } %>
+})();
+</script>
+<% } %>
+
+<!-- ===== Section 4: Treatment Breakdown Table ===== -->
+
+<% if (hasGhl && g.treatments.length > 0) { %>
 <div class="portal-section">
-  <h2>Meta Ads Campaigns</h2>
+  <h2>Treatment Performance</h2>
+  <table class="compact">
+    <thead>
+      <tr>
+        <th>Treatment</th>
+        <th style="text-align: right;">Leads</th>
+        <th style="text-align: right;">In Progress</th>
+        <th style="text-align: right;">Won</th>
+        <th style="text-align: right;">Win Rate</th>
+        <th style="text-align: right;">Revenue</th>
+        <th style="text-align: right;">ROI</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% g.treatments.forEach(t => { %>
+      <%
+        const winRate = t.leads > 0 ? (t.won / t.leads * 100) : 0;
+        const allocatedSpend = g.total_leads > 0 ? (totalSpend * t.leads / g.total_leads) : 0;
+        const treatmentRoi = allocatedSpend > 0 ? ((t.revenue - allocatedSpend) / allocatedSpend * 100) : (t.revenue > 0 ? 100 : 0);
+        const label = t.treatment.replace(/\b\w/g, c => c.toUpperCase());
+      %>
+      <tr>
+        <td><%= label %></td>
+        <td style="text-align: right;"><%= t.leads.toLocaleString() %></td>
+        <td style="text-align: right;"><%= t.in_progress.toLocaleString() %></td>
+        <td style="text-align: right; color: var(--vendo-green);"><%= t.won.toLocaleString() %></td>
+        <td style="text-align: right;"><%= winRate.toFixed(1) %>%</td>
+        <td style="text-align: right;">&pound;<%= t.revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        <td style="text-align: right; color: <%= treatmentRoi >= 0 ? 'var(--vendo-green)' : '#F87171' %>;"><%= treatmentRoi.toFixed(1) %>%</td>
+      </tr>
+      <% }) %>
+    </tbody>
+    <tfoot>
+      <tr style="border-top: 2px solid rgba(255,255,255,0.10); font-weight: 600;">
+        <td>Total</td>
+        <td style="text-align: right;"><%= g.total_leads.toLocaleString() %></td>
+        <td style="text-align: right;"><%= g.total_in_progress.toLocaleString() %></td>
+        <td style="text-align: right; color: var(--vendo-green);"><%= g.total_won.toLocaleString() %></td>
+        <td style="text-align: right;"><%= g.conversion_rate.toFixed(1) %>%</td>
+        <td style="text-align: right;">&pound;<%= g.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        <td style="text-align: right; color: <%= g.roi_percent >= 0 ? 'var(--vendo-green)' : '#F87171' %>;"><%= g.roi_percent.toFixed(1) %>%</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+<% } %>
+
+<!-- ===== Section 5: Channel Performance Table ===== -->
+
+<% if (hasGhl && g.channels.length > 0) { %>
+<div class="portal-section">
+  <h2>Channel Performance</h2>
+  <table class="compact">
+    <thead>
+      <tr>
+        <th>Channel</th>
+        <th style="text-align: right;">Leads</th>
+        <th style="text-align: right;">Won</th>
+        <th style="text-align: right;">Revenue</th>
+        <th style="text-align: right;">Spend</th>
+        <th style="text-align: right;">CPL</th>
+        <th style="text-align: right;">ROI</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% g.channels.forEach(ch => { %>
+      <%
+        const chRoi = ch.spend > 0 ? ((ch.revenue - ch.spend) / ch.spend * 100) : (ch.revenue > 0 ? 100 : 0);
+        const chCpl = ch.leads > 0 ? ch.spend / ch.leads : 0;
+        const label = ch.channel === 'google' ? 'Google Ads' : ch.channel === 'facebook' ? 'Meta Ads' : ch.channel.replace(/\b\w/g, c => c.toUpperCase());
+        const chColour = ch.channel === 'google' ? '#FBBC05' : ch.channel === 'facebook' ? '#1877F2' : '#94A3B8';
+      %>
+      <tr>
+        <td>
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: <%= chColour %>; margin-right: 6px;"></span>
+          <%= label %>
+        </td>
+        <td style="text-align: right;"><%= ch.leads.toLocaleString() %></td>
+        <td style="text-align: right; color: var(--vendo-green);"><%= ch.won.toLocaleString() %></td>
+        <td style="text-align: right;">&pound;<%= ch.revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        <td style="text-align: right;">&pound;<%= ch.spend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        <td style="text-align: right;">&pound;<%= chCpl > 0 ? chCpl.toFixed(2) : '—' %></td>
+        <td style="text-align: right; color: <%= chRoi >= 0 ? 'var(--vendo-green)' : '#F87171' %>;"><%= ch.spend > 0 ? chRoi.toFixed(1) + '%' : '—' %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+    <tfoot>
+      <tr style="border-top: 2px solid rgba(255,255,255,0.10); font-weight: 600;">
+        <td>Total</td>
+        <td style="text-align: right;"><%= g.total_leads.toLocaleString() %></td>
+        <td style="text-align: right; color: var(--vendo-green);"><%= g.total_won.toLocaleString() %></td>
+        <td style="text-align: right;">&pound;<%= g.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        <td style="text-align: right;">&pound;<%= g.total_spend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+        <td style="text-align: right;">&pound;<%= g.cpl > 0 ? g.cpl.toFixed(2) : '—' %></td>
+        <td style="text-align: right; color: <%= g.roi_percent >= 0 ? 'var(--vendo-green)' : '#F87171' %>;"><%= g.roi_percent.toFixed(1) %>%</td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+<% } %>
+
+<!-- ===== Section 6: Campaign Detail (collapsed) ===== -->
+
+<% if ((it.metaCampaigns && it.metaCampaigns.length > 0) || (it.gadsCampaigns && it.gadsCampaigns.length > 0)) { %>
+<details class="portal-section campaign-details">
+  <summary>Show Campaign Detail</summary>
+
+  <% if (it.metaCampaigns && it.metaCampaigns.length > 0) { %>
+  <h3 style="margin-top: 1rem;">Meta Ads Campaigns</h3>
   <table class="compact">
     <thead>
       <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CTR</th></tr>
@@ -136,13 +398,10 @@
       <% }) %>
     </tbody>
   </table>
-</div>
-<% } %>
+  <% } %>
 
-<!-- Google Ads Campaigns -->
-<% if (it.gadsCampaigns.length > 0) { %>
-<div class="portal-section">
-  <h2>Google Ads Campaigns</h2>
+  <% if (it.gadsCampaigns && it.gadsCampaigns.length > 0) { %>
+  <h3 style="margin-top: 1.25rem;">Google Ads Campaigns</h3>
   <table class="compact">
     <thead>
       <tr><th>Campaign</th><th>Spend</th><th>Impressions</th><th>Clicks</th><th>CPC</th><th>CTR</th><th>Conversions</th></tr>
@@ -161,28 +420,8 @@
       <% }) %>
     </tbody>
   </table>
-</div>
-<% } %>
-
-<!-- Leads by Ad Channel -->
-<% if (it.adLeads.length > 0) { %>
-<div class="portal-section">
-  <h2>Leads by Ad Channel</h2>
-  <% const maxAdLeads = Math.max(...it.adLeads.map(c => c.lead_count), 1); %>
-  <% it.adLeads.forEach(ch => { %>
-    <%
-      const pct = Math.round((ch.lead_count / maxAdLeads) * 100);
-      const colourClass = ch.channel === 'meta_ads' ? 'channel-meta' : ch.channel === 'google_ads' ? 'channel-google' : 'channel-other';
-      const label = ch.channel.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    %>
-    <div class="channel-bar-wrap">
-      <div class="channel-bar-name"><%= label %></div>
-      <div class="channel-bar-track">
-        <div class="channel-bar-fill <%= colourClass %>" style="width: <%= pct %>%"><%= ch.lead_count %></div>
-      </div>
-    </div>
-  <% }) %>
-</div>
+  <% } %>
+</details>
 <% } %>
 
 <% } %>

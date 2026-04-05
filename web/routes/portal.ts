@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend, getRevenueByChannel, getROIByTreatment, getGhlROI } from '../lib/queries/roi.js';
+import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend, getRevenueByChannel, getROIByTreatment, getGhlROI, getMonthlyAdTrend } from '../lib/queries/roi.js';
 import { getGA4Summary, getGA4TrafficSources, getOrganicTrend } from '../lib/queries/ga4.js';
 import { getGSCSummary, getTopQueries, getTopPages } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
@@ -82,28 +82,33 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     });
   });
 
-  // GET /portal/ads — Paid ads performance
+  // GET /portal/ads — Unified ad performance (merged ads + ROI)
   app.get('/ads', async (request, reply) => {
     const q = request.query as Record<string, string>;
     const days = parseDays(q);
     const clientId = getClientId(request);
 
-    const [channelSpend, leadsByChannel, metaCampaigns, gadsCampaigns, clientName] = await Promise.all([
+    const [ghlRoi, channelSpend, leadsByChannel, funnel, metaCampaigns, gadsCampaigns, monthlyTrend, clientName] = await Promise.all([
+      getGhlROI(clientId, days),
       getChannelSpend(clientId, days),
       getLeadsByChannel(clientId, days),
+      getConversionFunnel(clientId, days),
       getMetaCampaignsForClient(clientId, days),
       getGadsCampaignsForClient(clientId, days),
+      getMonthlyAdTrend(clientId),
       getClientName(clientId),
     ]);
 
-    // Filter leads to ad channels only
     const adLeads = leadsByChannel.filter(l => l.channel === 'google_ads' || l.channel === 'meta_ads');
 
     reply.render('portal/ads', {
+      ghlRoi,
       channelSpend,
       adLeads,
+      funnel,
       metaCampaigns,
       gadsCampaigns,
+      monthlyTrend,
       clientName,
       days,
       pageTitle: 'Ad Performance',
@@ -157,33 +162,10 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     });
   });
 
-  // GET /portal/roi — ROI breakdown
+  // GET /portal/roi — Redirect to unified ads page
   app.get('/roi', async (request, reply) => {
     const q = request.query as Record<string, string>;
-    const days = parseDays(q);
-    const clientId = getClientId(request);
-
-    const [roi, treatmentROI, channelSpend, revenueByChannel, leadsByChannel, ghlRoi, clientName] = await Promise.all([
-      getROISummary(clientId, days),
-      getROIByTreatment(clientId, days),
-      getChannelSpend(clientId, days),
-      getRevenueByChannel(clientId, days),
-      getLeadsByChannel(clientId, days),
-      getGhlROI(clientId, days),
-      getClientName(clientId),
-    ]);
-
-    reply.render('portal/roi', {
-      roi,
-      treatmentROI,
-      channelSpend,
-      revenueByChannel,
-      leadsByChannel,
-      ghlRoi,
-      clientName,
-      days,
-      pageTitle: 'ROI Breakdown',
-    });
+    reply.redirect(`/portal/ads${q.days ? '?days=' + q.days : ''}`);
   });
 
   // --- HTMX Partials ---

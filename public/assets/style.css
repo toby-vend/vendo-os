@@ -1376,3 +1376,47 @@ mark {
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
+
+/* === Collapsible Campaign Detail === */
+
+details.portal-section summary {
+  cursor: pointer;
+  font-family: var(--vendo-font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vendo-text-muted);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.15s;
+}
+
+details.portal-section summary::-webkit-details-marker { display: none; }
+
+details.portal-section summary::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+details.portal-section[open] summary::before {
+  transform: rotate(45deg);
+}
+
+details.portal-section summary:hover {
+  color: var(--vendo-text);
+}
+
+details.portal-section[open] summary {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--vendo-text);
+}

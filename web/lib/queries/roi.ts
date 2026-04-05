@@ -350,3 +350,67 @@ export async function getConversionFunnel(clientId: number, days = 30): Promise<
       END
   `, [clientId, days]);
 }
+
+// --- Monthly ad trend (6-month view for charts) ---
+
+export interface MonthlyAdTrendRow {
+  month: string;
+  total_leads: number;
+  new_patients: number;
+  total_spend: number;
+  cpl: number;
+}
+
+export async function getMonthlyAdTrend(clientId: number): Promise<MonthlyAdTrendRow[]> {
+  const loc = ghlLocationFilter(clientId);
+
+  // GHL opportunities by month
+  const oppsByMonth = await rows<{ month: string; total_leads: number; new_patients: number }>(`
+    SELECT strftime('%Y-%m', o.created_at) as month,
+           COUNT(*) as total_leads,
+           SUM(CASE WHEN o.stage_name IN (${WON_STAGES.map(() => '?').join(',')}) THEN 1 ELSE 0 END) as new_patients
+    FROM ghl_opportunities o
+    WHERE ${loc.clause}
+      AND o.created_at >= date('now', '-6 months')
+    GROUP BY month
+    ORDER BY month
+  `, [...WON_STAGES, ...loc.args]);
+
+  // Ad spend by month (Meta + Google)
+  const [metaByMonth, gadsByMonth] = await Promise.all([
+    rows<{ month: string; spend: number }>(`
+      SELECT strftime('%Y-%m', m.date) as month, COALESCE(SUM(m.spend), 0) as spend
+      FROM meta_insights m
+      JOIN client_source_mappings csm ON csm.external_id = m.account_id AND csm.source = 'meta'
+      WHERE csm.client_id = ? AND m.date >= date('now', '-6 months') AND m.level = 'campaign'
+      GROUP BY month ORDER BY month
+    `, [clientId]),
+    rows<{ month: string; spend: number }>(`
+      SELECT strftime('%Y-%m', g.date) as month, COALESCE(SUM(g.spend), 0) as spend
+      FROM gads_campaign_spend g
+      JOIN client_source_mappings csm ON csm.external_id = g.account_id AND csm.source = 'gads'
+      WHERE csm.client_id = ? AND g.date >= date('now', '-6 months')
+      GROUP BY month ORDER BY month
+    `, [clientId]),
+  ]);
+
+  // Merge all by month
+  const map = new Map<string, MonthlyAdTrendRow>();
+  for (const r of oppsByMonth) {
+    map.set(r.month, { month: r.month, total_leads: r.total_leads, new_patients: r.new_patients, total_spend: 0, cpl: 0 });
+  }
+  for (const r of [...metaByMonth, ...gadsByMonth]) {
+    const existing = map.get(r.month);
+    if (existing) {
+      existing.total_spend += r.spend;
+    } else {
+      map.set(r.month, { month: r.month, total_leads: 0, new_patients: 0, total_spend: r.spend, cpl: 0 });
+    }
+  }
+
+  const result = Array.from(map.values()).sort((a, b) => a.month.localeCompare(b.month));
+  for (const r of result) {
+    r.cpl = r.total_leads > 0 ? Math.round((r.total_spend / r.total_leads) * 100) / 100 : 0;
+  }
+  return result;
+}
