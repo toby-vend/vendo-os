@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { getUserByEmail, updateUserPassword, logAuditEvent } from '../lib/queries.js';
+import { getUserByEmail, getUserById, updateUserPassword, logAuditEvent } from '../lib/queries.js';
 import {
   verifyPassword,
   hashPassword,
@@ -83,8 +83,12 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post('/change-password', async (request, reply) => {
-    const user = (request as any).user as SessionUser | null;
-    if (!user) { reply.redirect('/login'); return; }
+    const sessionUser = (request as any).user as SessionUser | null;
+    if (!sessionUser) { reply.redirect('/login'); return; }
+
+    // Fetch fresh DB record to get current password hash
+    const dbUser = await getUserById(sessionUser.id);
+    if (!dbUser) { reply.redirect('/login'); return; }
 
     const body = request.body as { password?: string; confirm?: string } | undefined;
     const password = body?.password || '';
@@ -101,11 +105,18 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
       return;
     }
 
-    await updateUserPassword(user.id, hashPassword(password), false);
-    logAuditEvent({ eventType: 'password_changed', userId: user.id, ipAddress: request.ip }).catch(() => {});
+    // Reject if new password is the same as the current one
+    if (verifyPassword(password, dbUser.password_hash)) {
+      reply.render('change-password', { error: 'New password must be different from your current password' });
+      return;
+    }
+
+    const newHash = hashPassword(password);
+    await updateUserPassword(dbUser.id, newHash, false);
+    logAuditEvent({ eventType: 'password_changed', userId: dbUser.id, ipAddress: request.ip }).catch(() => {});
 
     // Re-issue token so session stays valid
-    const token = createSessionToken({ userId: user.id, role: user.role, iat: Date.now() });
+    const token = createSessionToken({ userId: dbUser.id, role: dbUser.role, iat: Date.now() });
     reply.header('Set-Cookie', sessionCookie(token));
     reply.redirect('/');
   });
