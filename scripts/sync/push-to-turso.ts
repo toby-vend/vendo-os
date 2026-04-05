@@ -80,6 +80,9 @@ async function main() {
     'ALTER TABLE drive_watch_channels ADD COLUMN user_id TEXT',
     // Client hub display name
     'ALTER TABLE clients ADD COLUMN display_name TEXT',
+    // Harvest user rate columns
+    'ALTER TABLE harvest_users ADD COLUMN default_hourly_rate REAL',
+    'ALTER TABLE harvest_users ADD COLUMN cost_rate REAL',
   ];
   for (const sql of migrations) {
     try { await remote.execute(sql); } catch { /* column already exists */ }
