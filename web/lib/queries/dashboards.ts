@@ -644,7 +644,7 @@ export async function getClientProfitability(costRate = 35): Promise<Profitabili
 // 10. Pipeline Tracker
 // ============================================================
 
-const VENDO_LOCATION_ID = 'IqXxEPhxyRi8uv1SvjN8';
+const VENDO_LOCATION_ID = 'Ge4RVAS8R9T8vUIqgV73';
 
 const STAGE_PROBABILITIES: Record<string, number> = {
   'Lead': 10,
