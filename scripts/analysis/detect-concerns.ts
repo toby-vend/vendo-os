@@ -15,7 +15,6 @@ config({ path: '.env.local' });
 import type { Database } from 'sql.js';
 import { getDb, initSchema, saveDb, closeDb, log, logError } from '../utils/db.js';
 import { aiCall } from '../utils/ai-wrapper.js';
-import { createAsanaTask, getAsanaProjectForClient } from '../utils/asana-client.js';
 
 const MONITOR_NAME = 'concern-ai';
 
@@ -64,25 +63,6 @@ export interface ConcernResult {
   category: string | null;
   summary: string | null;
   excerpts: string[];
-}
-
-/**
- * Find the most active Asana assignee for a project (likely the AM/lead).
- * Falls back to null if no tasks or no assignees.
- */
-function getLeadAssignee(db: Database, projectGid: string): { name: string; gid: string } | null {
-  const result = db.exec(
-    `SELECT assignee_name, assignee_gid, COUNT(*) as cnt
-     FROM asana_tasks
-     WHERE project_gid = ? AND assignee_name IS NOT NULL
-     GROUP BY assignee_name
-     ORDER BY cnt DESC
-     LIMIT 1`,
-    [projectGid],
-  );
-  if (!result.length || !result[0].values.length) return null;
-  const [name, gid] = result[0].values[0] as [string, string];
-  return { name, gid };
 }
 
 function queryRows(db: Database, sql: string, params: unknown[] = []): Record<string, unknown>[] {
@@ -230,41 +210,6 @@ export async function run(options?: { reprocess?: boolean }): Promise<{ checked:
             `*Severity:* ${severityLabel} — ${result.category}\n` +
             `\n${result.summary}${excerpt}${fathomLink}`,
           );
-
-          // Asana task — assigned to the client's lead and in their project
-          const projectGid = clientName !== 'Unknown'
-            ? await getAsanaProjectForClient(clientName)
-            : null;
-          const lead = projectGid ? getLeadAssignee(db, projectGid) : null;
-
-          const dueDate = new Date();
-          dueDate.setDate(dueDate.getDate() + (result.severity === 'critical' ? 1 : 3));
-
-          const taskNotes = [
-            `Severity: ${severityLabel}`,
-            `Category: ${result.category}`,
-            `Client: ${clientName}`,
-            `Meeting: ${title}`,
-            `Date: ${date.slice(0, 10)}`,
-            fathomUrl ? `Fathom: ${fathomUrl}` : '',
-            '',
-            result.summary || '',
-            ...(result.excerpts.length > 0 ? ['', 'Key excerpts:', ...result.excerpts.map(e => `• ${e}`)] : []),
-            '',
-            'Action required: review meeting context and address client concern.',
-          ].filter(Boolean).join('\n');
-
-          const task = await createAsanaTask({
-            projectId: projectGid || undefined,
-            name: `${severityLabel} concern: ${clientName} — ${(result.category || '').replace(/_/g, ' ')}`,
-            notes: taskNotes,
-            assigneeEmail: lead?.gid, // gid works as assignee value too
-            dueDate: dueDate.toISOString().slice(0, 10),
-          });
-
-          if (task) {
-            log('CONCERNS', `Asana task created: ${task.name} → ${lead?.name || 'unassigned'} (${task.permalink_url})`);
-          }
 
           db.run(
             `INSERT OR IGNORE INTO monitor_alerts (monitor, entity, alert_type, message)
