@@ -129,7 +129,17 @@ async function main() {
         args: row.map(v => v === null ? null : v) as any[],
       }));
 
-      await remote.batch(statements);
+      // Retry up to 3 times on network errors
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          await remote.batch(statements);
+          break;
+        } catch (err: any) {
+          if (attempt === 3 || !['ECONNRESET', 'ETIMEDOUT', 'EPIPE'].includes(err?.code)) throw err;
+          console.log(`\n  Retry ${attempt}/3 for ${tableName} at offset ${offset}...`);
+          await new Promise(r => setTimeout(r, 2000 * attempt));
+        }
+      }
       offset += batch[0].values.length;
       process.stdout.write(`  ${Math.min(offset, totalRows)}/${totalRows}\r`);
     }
