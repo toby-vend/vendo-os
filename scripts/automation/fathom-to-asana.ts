@@ -138,16 +138,50 @@ function defaultDueDate(): string {
   return d.toISOString().slice(0, 10);
 }
 
-async function createAsanaTask(
-  meetingTitle: string,
+function getClientAM(db: any, clientName: string | null): string | null {
+  if (!clientName) return null;
+  try {
+    const result = db.exec(
+      'SELECT am FROM clients WHERE (name = ? OR display_name = ?) AND am IS NOT NULL LIMIT 1',
+      [clientName, clientName],
+    );
+    if (result.length && result[0].values.length) return result[0].values[0][0] as string;
+  } catch { /* column may not exist */ }
+  return null;
+}
+
+function getAsanaProjectForClient(db: any, clientName: string | null): string | undefined {
+  if (!clientName) return undefined;
+  try {
+    const result = db.exec(
+      `SELECT csm.external_id FROM client_source_mappings csm
+       JOIN clients c ON c.id = csm.client_id
+       WHERE csm.source = 'asana' AND (c.name = ? OR c.display_name = ?)
+       LIMIT 1`,
+      [clientName, clientName],
+    );
+    if (result.length && result[0].values.length) return result[0].values[0][0] as string;
+  } catch { /* table may not exist */ }
+  return undefined;
+}
+
+async function createAsanaTaskFromAction(
+  source: string,
   item: ActionItem,
+  clientName: string | null,
   projectGid?: string,
 ): Promise<string> {
-  const assigneeGid = resolveAssignee(item.assignee);
+  // Resolve assignee: try explicit name first, then fall back to client AM
+  let assigneeGid = resolveAssignee(item.assignee);
+  if (!assigneeGid && clientName) {
+    const db = await getDb();
+    const am = getClientAM(db, clientName);
+    if (am) assigneeGid = resolveAssignee(am);
+  }
 
   const taskData: Record<string, unknown> = {
     name: item.description.slice(0, 200),
-    notes: `From meeting: ${meetingTitle}\n\nOriginal action item: ${item.description}`,
+    notes: `Source: ${source}\n\nOriginal: ${item.description}`,
     due_on: item.dueDate || defaultDueDate(),
     workspace: ASANA_WORKSPACE_GID,
   };
@@ -179,6 +213,151 @@ async function ensureSyncTable(): Promise<void> {
     )
   `);
   db.run('CREATE INDEX IF NOT EXISTS idx_fas_meeting ON fathom_asana_synced(meeting_id)');
+
+  // Migrate: add source tracking columns
+  try { db.run("ALTER TABLE fathom_asana_synced ADD COLUMN source_type TEXT DEFAULT 'meeting'"); } catch { /* exists */ }
+  try { db.run('ALTER TABLE fathom_asana_synced ADD COLUMN source_id TEXT'); } catch { /* exists */ }
+}
+
+function alreadySynced(db: any, sourceType: string, sourceId: string): boolean {
+  const result = db.exec(
+    'SELECT id FROM fathom_asana_synced WHERE source_type = ? AND source_id = ?',
+    [sourceType, sourceId],
+  );
+  return result.length > 0 && result[0].values.length > 0;
+}
+
+function recordSync(db: any, meetingId: string, description: string, taskGid: string, assignee: string | null, sourceType: string, sourceId: string): void {
+  db.run(`
+    INSERT OR IGNORE INTO fathom_asana_synced (meeting_id, action_description, asana_task_gid, assignee, created_at, source_type, source_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `, [meetingId, description, taskGid, assignee, new Date().toISOString(), sourceType, sourceId]);
+}
+
+async function syncMeetingActions(db: any): Promise<{ created: number; skipped: number }> {
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  let created = 0;
+  let skipped = 0;
+
+  const result = db.exec(`
+    SELECT id, title, raw_action_items, client_name
+    FROM meetings
+    WHERE date >= ? AND raw_action_items IS NOT NULL AND raw_action_items != ''
+    ORDER BY date DESC
+  `, [twentyFourHoursAgo]);
+
+  if (!result.length || !result[0].values.length) {
+    log('FATHOM-ASANA', 'No recent meetings with action items');
+    return { created, skipped };
+  }
+
+  for (const row of result[0].values) {
+    const [meetingId, title, rawItems, clientName] = row as [string, string, string, string | null];
+    const items = parseActionItems(rawItems);
+    const projectGid = getAsanaProjectForClient(db, clientName);
+
+    for (const item of items) {
+      if (!item.description || item.description.length < 5) continue;
+
+      const sourceId = `meeting-${meetingId}-${item.description.slice(0, 50)}`;
+      if (alreadySynced(db, 'meeting', sourceId)) { skipped++; continue; }
+
+      // Also check legacy dedup
+      const existing = db.exec(
+        'SELECT id FROM fathom_asana_synced WHERE meeting_id = ? AND action_description = ?',
+        [meetingId, item.description],
+      );
+      if (existing.length && existing[0].values.length) { skipped++; continue; }
+
+      try {
+        const taskGid = await createAsanaTaskFromAction(`Meeting: ${title}`, item, clientName, projectGid);
+        recordSync(db, meetingId, item.description, taskGid, item.assignee || null, 'meeting', sourceId);
+        created++;
+        log('FATHOM-ASANA', `  [meeting] ${item.description.slice(0, 60)}...`);
+      } catch (err) {
+        logError('FATHOM-ASANA', `Failed: ${item.description.slice(0, 60)}`, err);
+      }
+    }
+  }
+
+  return { created, skipped };
+}
+
+async function syncEscalations(db: any): Promise<{ created: number; skipped: number }> {
+  let created = 0;
+  let skipped = 0;
+
+  let result: any[];
+  try {
+    result = db.exec("SELECT id, client_name, tier, description FROM escalations WHERE status = 'open'");
+  } catch { return { created, skipped }; } // Table may not exist
+
+  if (!result.length || !result[0].values.length) return { created, skipped };
+
+  for (const row of result[0].values) {
+    const [id, clientName, tier, description] = row as [number, string, string, string];
+    const sourceId = `escalation-${id}`;
+    if (alreadySynced(db, 'escalation', sourceId)) { skipped++; continue; }
+
+    const projectGid = getAsanaProjectForClient(db, clientName);
+    const taskName = `[ESCALATION] ${clientName} — ${description}`.slice(0, 200);
+    const today = new Date().toISOString().slice(0, 10);
+
+    try {
+      const taskGid = await createAsanaTaskFromAction(
+        `Escalation (${tier.toUpperCase()})`,
+        { description: taskName, dueDate: today },
+        clientName,
+        projectGid,
+      );
+      recordSync(db, sourceId, taskName, taskGid, null, 'escalation', sourceId);
+      created++;
+      log('FATHOM-ASANA', `  [escalation] ${clientName}: ${description.slice(0, 50)}`);
+    } catch (err) {
+      logError('FATHOM-ASANA', `Failed escalation task: ${clientName}`, err);
+    }
+  }
+
+  return { created, skipped };
+}
+
+async function syncNpsDetractors(db: any): Promise<{ created: number; skipped: number }> {
+  let created = 0;
+  let skipped = 0;
+
+  let result: any[];
+  try {
+    result = db.exec("SELECT id, client_name, score, feedback FROM nps_responses WHERE score < 7 AND follow_up_done = 0");
+  } catch { return { created, skipped }; } // Table may not exist
+
+  if (!result.length || !result[0].values.length) return { created, skipped };
+
+  const threeDaysFromNow = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  for (const row of result[0].values) {
+    const [id, clientName, score, feedback] = row as [number, string, number, string | null];
+    const sourceId = `nps-${id}`;
+    if (alreadySynced(db, 'nps', sourceId)) { skipped++; continue; }
+
+    const projectGid = getAsanaProjectForClient(db, clientName);
+    const taskName = `[NPS] ${clientName} scored ${score}/10 — follow up required`;
+
+    try {
+      const taskGid = await createAsanaTaskFromAction(
+        `NPS detractor (${score}/10)`,
+        { description: taskName, dueDate: threeDaysFromNow },
+        clientName,
+        projectGid,
+      );
+      recordSync(db, sourceId, taskName, taskGid, null, 'nps', sourceId);
+      created++;
+      log('FATHOM-ASANA', `  [nps] ${clientName}: ${score}/10`);
+    } catch (err) {
+      logError('FATHOM-ASANA', `Failed NPS task: ${clientName}`, err);
+    }
+  }
+
+  return { created, skipped };
 }
 
 async function main() {
@@ -192,73 +371,27 @@ async function main() {
   await loadAsanaUsers();
 
   const db = await getDb();
-  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  // Fetch recent meetings with action items
-  const result = db.exec(`
-    SELECT id, title, raw_action_items, client_name
-    FROM meetings
-    WHERE date >= ? AND raw_action_items IS NOT NULL AND raw_action_items != ''
-    ORDER BY date DESC
-  `, [twentyFourHoursAgo]);
+  // 1. Meeting action items
+  log('FATHOM-ASANA', '--- Meeting action items ---');
+  const meetings = await syncMeetingActions(db);
 
-  if (!result.length || !result[0].values.length) {
-    log('FATHOM-ASANA', 'No recent meetings with action items');
-    closeDb();
-    return;
-  }
+  // 2. Open escalations
+  log('FATHOM-ASANA', '--- Escalations ---');
+  const escalations = await syncEscalations(db);
 
-  let created = 0;
-  let skipped = 0;
-
-  for (const row of result[0].values) {
-    const [meetingId, title, rawItems, clientName] = row as [string, string, string, string | null];
-    const items = parseActionItems(rawItems);
-
-    // Find Asana project for this client (if mapped)
-    let projectGid: string | undefined;
-    if (clientName) {
-      const mapping = db.exec(
-        "SELECT external_id FROM client_source_mappings WHERE source = 'asana' AND client_id IN (SELECT id FROM clients WHERE name = ? OR display_name = ?) LIMIT 1",
-        [clientName, clientName],
-      );
-      if (mapping.length && mapping[0].values.length) {
-        projectGid = mapping[0].values[0][0] as string;
-      }
-    }
-
-    for (const item of items) {
-      if (!item.description || item.description.length < 5) continue;
-
-      // Check if already synced
-      const existing = db.exec(
-        'SELECT id FROM fathom_asana_synced WHERE meeting_id = ? AND action_description = ?',
-        [meetingId, item.description],
-      );
-      if (existing.length && existing[0].values.length) {
-        skipped++;
-        continue;
-      }
-
-      try {
-        const taskGid = await createAsanaTask(title, item, projectGid);
-        const now = new Date().toISOString();
-
-        db.run(`
-          INSERT INTO fathom_asana_synced (meeting_id, action_description, asana_task_gid, assignee, created_at)
-          VALUES (?, ?, ?, ?, ?)
-        `, [meetingId, item.description, taskGid, item.assignee || null, now]);
-
-        created++;
-        log('FATHOM-ASANA', `  Created task: ${item.description.slice(0, 60)}...`);
-      } catch (err) {
-        logError('FATHOM-ASANA', `Failed to create task: ${item.description.slice(0, 60)}`, err);
-      }
-    }
-  }
+  // 3. NPS detractors
+  log('FATHOM-ASANA', '--- NPS detractors ---');
+  const nps = await syncNpsDetractors(db);
 
   saveDb();
-  log('FATHOM-ASANA', `Done: ${created} tasks created, ${skipped} already synced`);
+
+  const totalCreated = meetings.created + escalations.created + nps.created;
+  const totalSkipped = meetings.skipped + escalations.skipped + nps.skipped;
+  log('FATHOM-ASANA', `\nDone: ${totalCreated} tasks created, ${totalSkipped} already synced`);
+  log('FATHOM-ASANA', `  Meetings: ${meetings.created} new, ${meetings.skipped} skipped`);
+  log('FATHOM-ASANA', `  Escalations: ${escalations.created} new, ${escalations.skipped} skipped`);
+  log('FATHOM-ASANA', `  NPS: ${nps.created} new, ${nps.skipped} skipped`);
   closeDb();
 }
 

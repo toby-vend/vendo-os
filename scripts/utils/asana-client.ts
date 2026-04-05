@@ -76,6 +76,46 @@ export async function createAsanaTask(opts: {
   }
 }
 
+/**
+ * Look up the Asana project GID for a client via client_source_mappings.
+ * Returns the project GID or the default project as fallback.
+ */
+export async function getAsanaProjectForClient(clientName: string): Promise<string | null> {
+  try {
+    const { getDb } = await import('./db.js');
+    const db = await getDb();
+    const result = db.exec(
+      `SELECT csm.external_id FROM client_source_mappings csm
+       JOIN clients c ON c.id = csm.client_id
+       WHERE csm.source = 'asana' AND (c.name = ? OR c.display_name = ?)
+       LIMIT 1`,
+      [clientName, clientName],
+    );
+    if (result.length && result[0].values.length) {
+      return result[0].values[0][0] as string;
+    }
+  } catch { /* table may not exist */ }
+  return process.env.ASANA_DEFAULT_PROJECT_GID || null;
+}
+
+/**
+ * Look up the AM name for a client from the clients table.
+ */
+export async function getClientAM(clientName: string): Promise<string | null> {
+  try {
+    const { getDb } = await import('./db.js');
+    const db = await getDb();
+    const result = db.exec(
+      'SELECT am FROM clients WHERE (name = ? OR display_name = ?) AND am IS NOT NULL LIMIT 1',
+      [clientName, clientName],
+    );
+    if (result.length && result[0].values.length) {
+      return result[0].values[0][0] as string | null;
+    }
+  } catch { /* column may not exist */ }
+  return null;
+}
+
 export async function findAsanaUser(email: string): Promise<string | null> {
   if (!PAT || !WORKSPACE_ID) return null;
 

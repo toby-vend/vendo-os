@@ -85,7 +85,7 @@ export async function run(): Promise<{ checked: number; flagged: number }> {
   }
 
   const clients = queryRows(db, `
-    SELECT name, ${contractCol} AS contract_end, account_manager
+    SELECT name, ${contractCol} AS contract_end, am AS account_manager
     FROM clients
     WHERE status = 'active'
       AND ${contractCol} IS NOT NULL

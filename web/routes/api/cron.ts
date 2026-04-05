@@ -71,4 +71,28 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       });
     }
   });
+
+  /**
+   * GET /sync-actions-to-asana — Create Asana tasks from meeting actions, escalations, NPS (Vercel Cron)
+   */
+  app.get('/sync-actions-to-asana', async (_request, reply) => {
+    const scriptPath = resolve(PROJECT_ROOT, 'scripts/automation/fathom-to-asana.ts');
+
+    try {
+      const { stdout } = await runScript(scriptPath);
+      return reply.send({
+        ok: true,
+        message: 'Action-to-Asana sync completed',
+        output: stdout.slice(-2000),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/sync-actions-to-asana] Failed:', msg);
+      return reply.code(500).send({
+        ok: false,
+        message: 'Action-to-Asana sync failed',
+        error: msg,
+      });
+    }
+  });
 };

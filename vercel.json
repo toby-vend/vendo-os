@@ -47,6 +47,10 @@
     {
       "path": "/api/cron/daily-brief",
       "schedule": "30 7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/sync-actions-to-asana",
+      "schedule": "45 7 * * 1-5"
     }
   ],
   "routes": [
