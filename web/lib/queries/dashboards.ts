@@ -644,6 +644,8 @@ export async function getClientProfitability(costRate = 35): Promise<Profitabili
 // 10. Pipeline Tracker
 // ============================================================
 
+const VENDO_LOCATION_ID = 'IqXxEPhxyRi8uv1SvjN8';
+
 const STAGE_PROBABILITIES: Record<string, number> = {
   'Lead': 10,
   'Qualified': 20,
@@ -661,10 +663,10 @@ export async function getPipelineStages(): Promise<PipelineStageRow[]> {
            COALESCE(SUM(o.monetary_value), 0) as value
     FROM ghl_opportunities o
     LEFT JOIN ghl_stages s ON o.stage_id = s.id
-    WHERE o.status = 'open'
+    WHERE o.status = 'open' AND o.location_id = ?
     GROUP BY s.name
     ORDER BY s.position
-  `);
+  `, [VENDO_LOCATION_ID]);
   return stageRows.map(s => {
     const prob = STAGE_PROBABILITIES[s.stage_name] ?? 25;
     return {
@@ -680,9 +682,10 @@ export async function getPipelineWonDeals(days = 30): Promise<WonDealRow[]> {
     SELECT o.id, o.name, o.contact_name, o.monetary_value as value,
            o.updated_at as won_date
     FROM ghl_opportunities o
-    WHERE o.status = 'won' AND o.updated_at >= date('now', '-' || ? || ' days')
+    WHERE o.status = 'won' AND o.location_id = ?
+      AND o.updated_at >= date('now', '-' || ? || ' days')
     ORDER BY o.updated_at DESC
-  `, [days]);
+  `, [VENDO_LOCATION_ID, days]);
 }
 
 export async function getPipelineMonthlyForecast(): Promise<MonthlyForecastRow[]> {
@@ -691,11 +694,11 @@ export async function getPipelineMonthlyForecast(): Promise<MonthlyForecastRow[]
            COUNT(*) as deal_count,
            COALESCE(SUM(o.monetary_value), 0) as weighted_value
     FROM ghl_opportunities o
-    WHERE o.status = 'open'
+    WHERE o.status = 'open' AND o.location_id = ?
     GROUP BY month
     ORDER BY month DESC
     LIMIT 6
-  `);
+  `, [VENDO_LOCATION_ID]);
 }
 
 // ============================================================
