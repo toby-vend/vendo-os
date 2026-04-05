@@ -240,13 +240,14 @@
 
   // --- Channel Spend vs Revenue ---
   <% if (g.channels.length > 0) { %>
-  var channels = <%~ JSON.stringify(g.channels.map(function(ch) {
-    return {
+  <%
+    const channelChartData = g.channels.map(ch => ({
       channel: ch.channel === 'google' ? 'Google Ads' : ch.channel === 'facebook' ? 'Meta Ads' : ch.channel,
       spend: ch.spend,
       revenue: ch.revenue
-    };
-  })) %>;
+    }));
+  %>
+  var channels = <%~ JSON.stringify(channelChartData) %>;
 
   new Chart(document.getElementById('adsChannelChart'), {
     type: 'bar',

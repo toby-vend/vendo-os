@@ -88,14 +88,16 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     const days = parseDays(q);
     const clientId = getClientId(request);
 
+    const emptyGhl = { total_leads: 0, total_in_progress: 0, total_won: 0, total_revenue: 0, total_spend: 0, roi_percent: 0, cpl: 0, conversion_rate: 0, channels: [] as any[], treatments: [] as any[] };
+
     const [ghlRoi, channelSpend, leadsByChannel, funnel, metaCampaigns, gadsCampaigns, monthlyTrend, clientName] = await Promise.all([
-      getGhlROI(clientId, days),
-      getChannelSpend(clientId, days),
-      getLeadsByChannel(clientId, days),
-      getConversionFunnel(clientId, days),
+      getGhlROI(clientId, days).catch(() => emptyGhl),
+      getChannelSpend(clientId, days).catch(() => []),
+      getLeadsByChannel(clientId, days).catch(() => []),
+      getConversionFunnel(clientId, days).catch(() => []),
       getMetaCampaignsForClient(clientId, days),
       getGadsCampaignsForClient(clientId, days),
-      getMonthlyAdTrend(clientId),
+      getMonthlyAdTrend(clientId).catch(() => []),
       getClientName(clientId),
     ]);
 
