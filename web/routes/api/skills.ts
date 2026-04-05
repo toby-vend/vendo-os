@@ -5,6 +5,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import Anthropic from '@anthropic-ai/sdk';
 import { rows, db } from '../../lib/queries/base.js';
+import { searchSkills } from '../../lib/queries/drive.js';
 import { trackUsage } from '../../lib/usage-tracker.js';
 import type { SessionUser } from '../../lib/auth.js';
 
@@ -45,7 +46,20 @@ export const skillsApiRoutes: FastifyPluginAsync = async (app) => {
     if (!clientRows.length) { reply.code(404).send({ error: 'Client not found' }); return; }
     const client = clientRows[0];
 
-    const systemPrompt = `You are a specialist content generator for Vendo Digital, a marketing agency. You are executing the following skill for a specific client. Follow the instructions, output format, and quality checks exactly as described.\n\nUse UK English throughout. Be specific and actionable — no placeholder text or generic filler.\n\n=== SKILL INSTRUCTIONS ===\n\n${skillRow.content}\n\n=== CLIENT CONTEXT ===\n\nClient: ${client.name}\nVertical: ${client.vertical || 'Not specified'}`;
+    // Search Drive SOPs for relevant knowledge (skill slug maps to channel-like terms)
+    const sopChannel = skill.includes('social') ? 'paid_social' : skill.includes('seo') ? 'seo' : skill.includes('ads') || skill.includes('ppc') || skill.includes('rsa') ? 'paid_ads' : 'general';
+    let sopSection = '';
+    try {
+      const sopResponse = await searchSkills(skillRow.title, sopChannel, 3);
+      if (sopResponse.results.length > 0) {
+        const sopText = sopResponse.results
+          .map(s => `### ${s.title}\n${s.content.slice(0, 2000)}`)
+          .join('\n\n');
+        sopSection = `\n\n=== AGENCY SOPs & BEST PRACTICES ===\n\nThe following SOPs from Vendo Digital's knowledge base are relevant. Follow these standards when generating content.\n\n${sopText}`;
+      }
+    } catch { /* SOPs unavailable — proceed without */ }
+
+    const systemPrompt = `You are a specialist content generator for Vendo Digital, a marketing agency. You are executing the following skill for a specific client. Follow the instructions, output format, and quality checks exactly as described.\n\nUse UK English throughout. Be specific and actionable — no placeholder text or generic filler.\n\n=== SKILL INSTRUCTIONS ===\n\n${skillRow.content}\n\n=== CLIENT CONTEXT ===\n\nClient: ${client.name}\nVertical: ${client.vertical || 'Not specified'}${sopSection}`;
 
     const inputLines = Object.entries(inputs)
       .filter(([key]) => key !== 'skill' && key !== 'client_id')

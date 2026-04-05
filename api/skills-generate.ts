@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
 import { parseCookies, verifySessionToken } from '../web/lib/auth.js';
 import { rows, db } from '../web/lib/queries/base.js';
+import { searchSkills } from '../web/lib/queries/drive.js';
 import { trackUsage } from '../web/lib/usage-tracker.js';
 
 interface SkillRow {
@@ -81,7 +82,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  // Build system prompt from skill markdown content + client context
+  // Search Drive SOPs for relevant knowledge
+  const sopChannel = skill.includes('social') ? 'paid_social' : skill.includes('seo') ? 'seo' : skill.includes('ads') || skill.includes('ppc') || skill.includes('rsa') ? 'paid_ads' : 'general';
+  let sopSection = '';
+  try {
+    const sopResponse = await searchSkills(skillRow.title, sopChannel, 3);
+    if (sopResponse.results.length > 0) {
+      const sopText = sopResponse.results
+        .map(s => `### ${s.title}\n${s.content.slice(0, 2000)}`)
+        .join('\n\n');
+      sopSection = `\n\n=== AGENCY SOPs & BEST PRACTICES ===\n\nThe following SOPs from Vendo Digital's knowledge base are relevant. Follow these standards when generating content.\n\n${sopText}`;
+    }
+  } catch { /* SOPs unavailable — proceed without */ }
+
+  // Build system prompt from skill markdown content + client context + SOPs
   const systemPrompt = `You are a specialist content generator for Vendo Digital, a marketing agency. You are executing the following skill for a specific client. Follow the instructions, output format, and quality checks exactly as described.
 
 Use UK English throughout. Be specific and actionable — no placeholder text or generic filler.
@@ -93,7 +107,7 @@ ${skillRow.content}
 === CLIENT CONTEXT ===
 
 Client: ${client.name}
-Vertical: ${client.vertical || 'Not specified'}`;
+Vertical: ${client.vertical || 'Not specified'}${sopSection}`;
 
   // Build user message from inputs
   const inputLines = Object.entries(inputs)
