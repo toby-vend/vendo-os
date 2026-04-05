@@ -1,9 +1,9 @@
 <% layout('/layouts/base') %>
 
 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-  <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600;">Portal Users</h2>
+  <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600;">Portal Users</h2>
   <button onclick="document.getElementById('create-form').style.display = document.getElementById('create-form').style.display === 'none' ? 'block' : 'none'"
-          style="padding: 8px 16px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;">
+          style="padding: 8px 16px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">
     + New Portal User
   </button>
 </div>
@@ -24,23 +24,23 @@
         <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Name</label>
           <input type="text" name="name" required placeholder="Contact name"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
         </div>
         <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Email</label>
           <input type="email" name="email" required placeholder="client@example.com"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
         </div>
         <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Temporary Password</label>
           <input type="text" name="password" required placeholder="They will change this on first login"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
         </div>
         <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Client</label>
           <select name="client_id" id="portal-client-select" required
                   onchange="var opt = this.options[this.selectedIndex]; document.getElementById('portal-client-name').value = opt.dataset.name || '';"
-                  style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+                  style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
             <option value="">Select a client...</option>
             <% (it.clients || []).forEach(c => { %>
             <option value="<%= c.id %>" data-name="<%= c.label %>"><%= c.label %></option>
@@ -50,8 +50,8 @@
         </div>
       </div>
       <div style="display: flex; gap: 0.75rem;">
-        <button type="submit" style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;">Create Portal User</button>
-        <button type="button" onclick="document.getElementById('create-form').style.display='none'" style="padding: 8px 20px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;">Cancel</button>
+        <button type="submit" style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">Create Portal User</button>
+        <button type="button" onclick="document.getElementById('create-form').style.display='none'" style="padding: 8px 20px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; cursor: pointer;">Cancel</button>
       </div>
     </form>
   </div>

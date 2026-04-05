@@ -7,7 +7,7 @@
       <path d="M7 11V7a5 5 0 0110 0v4"/>
     </svg>
   </div>
-  <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; margin-bottom: 0.5rem;">Access Denied</h2>
+  <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin-bottom: 0.5rem;">Access Denied</h2>
   <p style="color: #94A3B8; font-size: 14px; max-width: 400px;">You don't have permission to view this page. Contact an admin if you need access.</p>
   <a href="/" style="margin-top: 1.5rem; padding: 8px 20px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; text-decoration: none; font-size: 14px;">Go to Dashboard</a>
 </div>

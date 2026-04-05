@@ -1,5 +1,5 @@
 /* Vendo OS Dashboard — Dark Premium Theme with Sidebar */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
 /* === Reset & Base === */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -18,18 +18,31 @@
   --vendo-text: #E2E8F0;
   --vendo-text-muted: #94A3B8;
   --vendo-text-heading: #FFFFFF;
-  --vendo-serif: 'Playfair Display', 'Georgia', serif;
-  --vendo-sans: 'DM Sans', 'Inter', -apple-system, sans-serif;
+  --vendo-font: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
   --sidebar-width: 256px;
   --sidebar-collapsed: 72px;
   --topbar-height: 64px;
+
+  /* Glassmorphism tokens */
+  --glass-bg: rgba(20, 20, 20, 0.55);
+  --glass-bg-strong: rgba(20, 20, 20, 0.7);
+  --glass-blur: blur(40px);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-radius: 20px;
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --glass-inset: 16px;
 }
 
 html { height: 100%; }
 
 body {
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   background: var(--vendo-bg);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(34, 197, 94, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 100%, rgba(34, 197, 94, 0.02) 0%, transparent 50%);
+  background-attachment: fixed;
   color: var(--vendo-text);
   font-size: 14px;
   line-height: 1.6;
@@ -42,6 +55,8 @@ body {
 .app-layout {
   display: flex;
   height: 100vh;
+  padding: var(--glass-inset);
+  gap: var(--glass-inset);
 }
 
 /* === Sidebar === */
@@ -49,8 +64,12 @@ body {
 .sidebar {
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
-  background: var(--vendo-nav);
-  border-right: 1px solid var(--vendo-border);
+  background: var(--glass-bg-strong);
+  backdrop-filter: saturate(180%) var(--glass-blur);
+  -webkit-backdrop-filter: saturate(180%) var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
   transition: width 0.25s ease, min-width 0.25s ease;
@@ -64,8 +83,8 @@ body {
 }
 
 .sidebar-header {
-  padding: 1rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
   min-height: 64px;
   display: flex;
   align-items: center;
@@ -88,7 +107,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--vendo-serif);
+  font-family: var(--vendo-font);
   font-weight: 700;
   font-size: 18px;
 }
@@ -100,7 +119,7 @@ body {
 }
 
 .logo-name {
-  font-family: var(--vendo-serif);
+  font-family: var(--vendo-font);
   font-weight: 600;
   font-size: 15px;
   color: rgba(255, 255, 255, 0.95);
@@ -141,7 +160,7 @@ body {
   left: 0;
   right: 0;
   height: 20px;
-  background: linear-gradient(to top, var(--vendo-nav), transparent);
+  background: linear-gradient(to top, rgba(20, 20, 20, 0.7), transparent);
   pointer-events: none;
   flex-shrink: 0;
 }
@@ -244,7 +263,7 @@ body {
   white-space: nowrap;
   min-height: 0;
   cursor: pointer;
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -342,7 +361,7 @@ body {
 
 .sidebar-footer {
   padding: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -354,7 +373,7 @@ body {
 }
 
 .sidebar-toggle {
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -402,6 +421,12 @@ body {
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
+  background: var(--glass-bg);
+  backdrop-filter: saturate(120%) blur(20px);
+  -webkit-backdrop-filter: saturate(120%) blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
 }
 
 /* === Topbar === */
@@ -413,8 +438,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--vendo-border);
-  background: var(--vendo-nav);
+  border-bottom: 1px solid var(--glass-border);
+  background: transparent;
 }
 
 .topbar-left {
@@ -424,11 +449,11 @@ body {
 }
 
 .topbar-title {
-  font-family: var(--vendo-serif);
-  font-size: 22px;
+  font-family: var(--vendo-font);
+  font-size: 20px;
   font-weight: 700;
   color: var(--vendo-text-heading);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   margin: 0;
 }
 
@@ -469,22 +494,22 @@ body {
 /* === Typography === */
 
 h1, h2, h3, h4 {
-  font-family: var(--vendo-serif);
+  font-family: var(--vendo-font);
   color: var(--vendo-text-heading);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   font-weight: 700;
   line-height: 1.2;
 }
 
-h1 { font-size: 28px; margin-bottom: 1.5rem; }
-h2 { font-size: 22px; margin-top: 2rem; margin-bottom: 1rem; }
-h3 { font-size: 18px; margin-bottom: 0.75rem; }
+h1 { font-size: 26px; margin-bottom: 1.5rem; }
+h2 { font-size: 20px; margin-top: 2rem; margin-bottom: 1rem; }
+h3 { font-size: 17px; margin-bottom: 0.75rem; }
 
 /* Hide the h1 in main content since topbar shows it */
 .main-content > h1:first-child { display: none; }
 
 h1 small, h2 small {
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   font-weight: 400;
   font-size: 0.5em;
   color: var(--vendo-text-muted);
@@ -518,7 +543,7 @@ p { margin-bottom: 0.75rem; }
 }
 
 .stat-card .stat-value {
-  font-family: var(--vendo-serif);
+  font-family: var(--vendo-font);
   font-size: 36px;
   font-weight: 700;
   color: var(--vendo-green);
@@ -528,7 +553,7 @@ p { margin-bottom: 0.75rem; }
 }
 
 .stat-card .stat-label {
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
@@ -538,14 +563,14 @@ p { margin-bottom: 0.75rem; }
 }
 
 .stat-card .stat-breakdown {
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   font-size: 11px;
   color: var(--vendo-text-muted);
   margin: 4px 0 0;
 }
 
 .stat-inline {
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   font-size: 14px;
   color: var(--vendo-text-muted);
   margin: 0 0 1rem;
@@ -583,7 +608,7 @@ table {
 thead { background: rgba(255, 255, 255, 0.02); }
 
 th {
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -676,7 +701,7 @@ input[type="password"], input[type="date"] {
   color: var(--vendo-text);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   font-size: 13px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -701,7 +726,7 @@ label {
 /* === Buttons === */
 
 button, [type="submit"] {
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   font-weight: 600;
   font-size: 13px;
   border-radius: 999px;
@@ -871,14 +896,21 @@ mark {
 }
 
 @media (max-width: 768px) {
+  .app-layout {
+    padding: 8px;
+    gap: 0;
+  }
+
   .sidebar {
     position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    transform: translateX(-100%);
+    left: 8px;
+    top: 8px;
+    height: calc(100vh - 16px);
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    transform: translateX(calc(-100% - 16px));
     z-index: 200;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    box-shadow: 4px 0 40px rgba(0, 0, 0, 0.6);
   }
 
   .sidebar:not(.collapsed) {
@@ -886,9 +918,13 @@ mark {
   }
 
   .sidebar.collapsed {
-    transform: translateX(-100%);
+    transform: translateX(calc(-100% - 16px));
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
+  }
+
+  .main-wrapper {
+    width: 100%;
   }
 
   .mobile-menu-btn { display: flex; }
@@ -904,6 +940,16 @@ mark {
 
   .stat-card { padding: 1rem; }
   .stat-card .stat-value { font-size: 28px; }
+}
+
+/* Backdrop-filter fallback for unsupported browsers */
+@supports not (backdrop-filter: blur(1px)) {
+  .sidebar {
+    background: rgba(17, 17, 17, 0.95);
+  }
+  .main-wrapper {
+    background: rgba(20, 20, 20, 0.95);
+  }
 }
 
 /* === Google Drive === */
@@ -954,7 +1000,7 @@ mark {
   background: transparent;
   color: var(--vendo-text-muted);
   font-size: 13px;
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
@@ -975,7 +1021,7 @@ mark {
   background: transparent;
   color: var(--vendo-text-muted);
   font-size: 13px;
-  font-family: var(--vendo-sans);
+  font-family: var(--vendo-font);
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;

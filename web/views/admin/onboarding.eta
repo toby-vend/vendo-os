@@ -1,7 +1,7 @@
 <% layout('/layouts/base') %>
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-  <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; margin: 0;">Client Onboarding</h2>
+  <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin: 0;">Client Onboarding</h2>
 </div>
 
 <!-- Step Indicator -->
@@ -59,22 +59,22 @@
           <div>
             <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 4px;">Client Name *</label>
             <input type="text" name="name" placeholder="e.g. Kana Health Group"
-              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px; box-sizing: border-box;" />
+              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px; box-sizing: border-box;" />
           </div>
           <div>
             <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 4px;">Display Name</label>
             <input type="text" name="display_name" placeholder="Optional friendly name"
-              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px; box-sizing: border-box;" />
+              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px; box-sizing: border-box;" />
           </div>
           <div>
             <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 4px;">Domain</label>
             <input type="text" name="domain" placeholder="e.g. kanahealthgroup.com"
-              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px; box-sizing: border-box;" />
+              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px; box-sizing: border-box;" />
           </div>
           <div>
             <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 4px;">CRM Type</label>
             <select name="crm_type"
-              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px; box-sizing: border-box;">
+              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px; box-sizing: border-box;">
               <option value="ghl">GoHighLevel</option>
               <option value="boxly">Boxly</option>
               <option value="none">None</option>
@@ -83,7 +83,7 @@
           <div>
             <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 4px;">Vertical</label>
             <select name="vertical"
-              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px; box-sizing: border-box;">
+              style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px; box-sizing: border-box;">
               <option value="">Select...</option>
               <option value="dental">Dental</option>
               <option value="aesthetics">Aesthetics</option>
@@ -99,7 +99,7 @@
         <div style="max-width: 400px;">
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 4px;">Select Client</label>
           <select name="existing_client_id"
-            style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px; box-sizing: border-box;">
+            style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px; box-sizing: border-box;">
             <option value="">Choose a client...</option>
             <% (it.clients || []).forEach(c => { %>
             <option value="<%= c.id %>"><%= c.label || c.name %></option>
@@ -109,7 +109,7 @@
         <div style="margin-top: 0.75rem;">
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 4px;">CRM Type</label>
           <select name="crm_type"
-            style="width: 200px; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px; box-sizing: border-box;">
+            style="width: 200px; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px; box-sizing: border-box;">
             <option value="ghl">GoHighLevel</option>
             <option value="boxly">Boxly</option>
             <option value="none">None</option>
@@ -118,7 +118,7 @@
       </div>
 
       <button type="submit"
-        style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; font-size: 14px;">
+        style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-family: var(--vendo-font); font-weight: 600; cursor: pointer; font-size: 14px;">
         Continue
       </button>
     </form>

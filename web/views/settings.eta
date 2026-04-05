@@ -1,7 +1,7 @@
 <% layout('/layouts/base') %>
 
 <div style="max-width: 640px;">
-  <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; margin-bottom: 1.5rem;">Account Settings</h2>
+  <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin-bottom: 1.5rem;">Account Settings</h2>
 
   <% if (it.flash === 'connected') { %>
   <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; color: #22C55E; font-size: 14px;">
@@ -64,13 +64,13 @@
         <form method="POST" action="/auth/google/disconnect" style="display: inline;">
           <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
           <button type="submit" onclick="return confirm('Disconnect your Google account?')"
-                  style="padding: 6px 14px; font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif;">
+                  style="padding: 6px 14px; font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; cursor: pointer; font-family: var(--vendo-font);">
             Disconnect
           </button>
         </form>
         <% } else { %>
         <a href="/auth/google/connect"
-           style="padding: 6px 14px; font-size: 12px; color: #0B0B0B; background: #22C55E; border: none; border-radius: 6px; text-decoration: none; font-family: 'DM Sans', sans-serif; font-weight: 600;">
+           style="padding: 6px 14px; font-size: 12px; color: #0B0B0B; background: #22C55E; border: none; border-radius: 6px; text-decoration: none; font-family: var(--vendo-font); font-weight: 600;">
           Connect
         </a>
         <% } %>

@@ -23,7 +23,7 @@
   }
   .chat-welcome.hidden { display: none; }
   .chat-welcome h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--vendo-font);
     font-size: 1.75rem;
     font-weight: 600;
     background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
@@ -174,7 +174,7 @@
     outline: none;
     padding: 0.875rem 1rem;
     color: #E2E8F0;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--vendo-font);
     font-size: 14px;
     line-height: 1.5;
     max-height: 200px;

@@ -6,7 +6,7 @@
   <title><%= it.pageTitle ? it.pageTitle + ' — Vendo Digital' : 'Vendo Digital — Client Portal' %></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/style.css">
   <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
   <style>
@@ -18,7 +18,7 @@
       padding: 0.25rem 0;
     }
     .portal-brand-text {
-      font-family: var(--vendo-serif);
+      font-family: var(--vendo-font);
       font-size: 15px;
       font-weight: 600;
       color: var(--vendo-text-heading);
@@ -49,7 +49,7 @@
       border-radius: 6px;
       padding: 5px 10px;
       font-size: 13px;
-      font-family: var(--vendo-sans);
+      font-family: var(--vendo-font);
       cursor: pointer;
     }
     .portal-date-selector select:focus {
@@ -79,7 +79,7 @@
       border-color: var(--vendo-border-strong);
     }
     .portal-kpi .kpi-value {
-      font-family: var(--vendo-serif);
+      font-family: var(--vendo-font);
       font-size: 28px;
       font-weight: 600;
       color: var(--vendo-text-heading);
@@ -109,7 +109,7 @@
       margin-bottom: 1.5rem;
     }
     .portal-section h2 {
-      font-family: var(--vendo-serif);
+      font-family: var(--vendo-font);
       font-size: 18px;
       font-weight: 600;
       color: var(--vendo-text-heading);
@@ -209,7 +209,7 @@
       border-radius: 6px;
       padding: 6px 10px;
       font-size: 13px;
-      font-family: var(--vendo-sans);
+      font-family: var(--vendo-font);
     }
     .portal-filters label {
       font-size: 12px;

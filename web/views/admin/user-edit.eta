@@ -14,19 +14,19 @@
         <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Name</label>
           <input type="text" name="name" required value="<%= it.editUser.name %>"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
         </div>
         <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Email</label>
           <input type="email" name="email" required value="<%= it.editUser.email %>"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
         </div>
       </div>
 
       <div style="margin-bottom: 1rem;">
         <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Role</label>
         <select name="role" id="edit-role" onchange="document.getElementById('edit-channels').style.display = this.value === 'standard' ? 'block' : 'none'"
-                style="width: 100%; max-width: 280px; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: 'DM Sans', sans-serif; font-size: 14px;">
+                style="width: 100%; max-width: 280px; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
           <option value="standard" <%= it.editUser.role === 'standard' ? 'selected' : '' %>>Standard</option>
           <option value="admin" <%= it.editUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
         </select>
@@ -47,8 +47,8 @@
       </div>
 
       <div style="display: flex; gap: 0.75rem;">
-        <button type="submit" style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;">Save Changes</button>
-        <a href="/admin/users" style="padding: 8px 20px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center;">Cancel</a>
+        <button type="submit" style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">Save Changes</button>
+        <a href="/admin/users" style="padding: 8px 20px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; text-decoration: none; display: inline-flex; align-items: center;">Cancel</a>
       </div>
     </form>
   </div>

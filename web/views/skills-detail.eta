@@ -37,14 +37,14 @@
             <% }) %>
           </select>
           <% } else if (f.type === 'textarea') { %>
-          <textarea name="<%= f.name %>" <%= f.required ? 'required' : '' %> placeholder="<%= f.placeholder || '' %>" rows="3" style="width: 100%; padding: 8px 10px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; resize: vertical; font-family: 'DM Sans', sans-serif;"></textarea>
+          <textarea name="<%= f.name %>" <%= f.required ? 'required' : '' %> placeholder="<%= f.placeholder || '' %>" rows="3" style="width: 100%; padding: 8px 10px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; resize: vertical; font-family: var(--vendo-font);"></textarea>
           <% } else { %>
           <input type="text" name="<%= f.name %>" <%= f.required ? 'required' : '' %> placeholder="<%= f.placeholder || '' %>" value="<%= f.defaultValue || '' %>" style="width: 100%; padding: 8px 10px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;">
           <% } %>
         </div>
         <% }) %>
 
-        <button type="submit" id="generate-btn" style="width: 100%; padding: 10px 16px; font-size: 14px; font-weight: 600; color: #0B0B0B; background: #22C55E; border: none; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif;">Generate</button>
+        <button type="submit" id="generate-btn" style="width: 100%; padding: 10px 16px; font-size: 14px; font-weight: 600; color: #0B0B0B; background: #22C55E; border: none; border-radius: 8px; cursor: pointer; font-family: var(--vendo-font);">Generate</button>
       </form>
     </div>
 

@@ -38,7 +38,7 @@
 </form>
 
 <div class="portal-section">
-  <h2>Leads <span style="font-size: 14px; font-family: var(--vendo-sans); color: var(--vendo-text-muted); font-weight: 400;">(<%= it.leadsResult.total.toLocaleString() %> total)</span></h2>
+  <h2>Leads <span style="font-size: 14px; font-family: var(--vendo-font); color: var(--vendo-text-muted); font-weight: 400;">(<%= it.leadsResult.total.toLocaleString() %> total)</span></h2>
 
   <% if (it.leadsResult.leads.length === 0) { %>
     <div class="portal-empty">No leads match the selected filters.</div>
@@ -102,7 +102,7 @@
 
 <% if (it.ghlResult && it.ghlResult.total > 0) { %>
 <div class="portal-section" style="margin-top: 1.5rem;">
-  <h2>Pipeline Leads <span style="font-size: 14px; font-family: var(--vendo-sans); color: var(--vendo-text-muted); font-weight: 400;">(<%= it.ghlResult.total.toLocaleString() %> total)</span></h2>
+  <h2>Pipeline Leads <span style="font-size: 14px; font-family: var(--vendo-font); color: var(--vendo-text-muted); font-weight: 400;">(<%= it.ghlResult.total.toLocaleString() %> total)</span></h2>
 
   <!-- Tag + Status Filters -->
   <form class="portal-filters" method="GET" action="/portal/leads" style="margin-bottom: 1rem;">
