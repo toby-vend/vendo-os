@@ -23,10 +23,16 @@
   <select name="tier" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"
     hx-get="/client-database" hx-target="#client-table" hx-include="[name='status'],[name='am'],[name='q']" hx-push-url="true">
     <option value="">All Health Tiers</option>
+    <% if (it.isAdmin) { %>
     <option value="healthy" <%= it.tierFilter === 'healthy' ? 'selected' : '' %>>Healthy (&gt;70)</option>
     <option value="at-risk" <%= it.tierFilter === 'at-risk' ? 'selected' : '' %>>At-Risk (40-70)</option>
     <option value="critical" <%= it.tierFilter === 'critical' ? 'selected' : '' %>>Critical (&lt;40)</option>
     <option value="no-score" <%= it.tierFilter === 'no-score' ? 'selected' : '' %>>No Score</option>
+    <% } else { %>
+    <option value="healthy" <%= it.tierFilter === 'healthy' ? 'selected' : '' %>>Healthy</option>
+    <option value="at-risk" <%= it.tierFilter === 'at-risk' ? 'selected' : '' %>>At-Risk</option>
+    <option value="critical" <%= it.tierFilter === 'critical' ? 'selected' : '' %>>Critical</option>
+    <% } %>
   </select>
 
   <select name="am" style="padding: 6px 12px; font-size: 13px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"

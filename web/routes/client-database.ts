@@ -123,10 +123,12 @@ export const clientDatabaseRoutes: FastifyPluginAsync = async (app) => {
     `);
 
     const isPartial = request.headers['hx-request'] === 'true';
+    const isAdmin = (request as any).user?.role === 'admin';
 
     if (isPartial) {
       reply.render('client-database-table', {
         clients,
+        isAdmin,
         statusFilter,
         tierFilter,
         amFilter,
@@ -135,6 +137,7 @@ export const clientDatabaseRoutes: FastifyPluginAsync = async (app) => {
     } else {
       reply.render('client-database', {
         clients,
+        isAdmin,
         ams: ams.map(a => a.am),
         statusFilter,
         tierFilter,

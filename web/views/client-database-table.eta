@@ -8,13 +8,13 @@
       <th>MRR</th>
       <th>Contract End</th>
       <th>Last Meeting</th>
-      <th>Health Score</th>
-      <th>Invoices</th>
+      <th><%= it.isAdmin ? 'Health Score' : 'Health' %></th>
+      <% if (it.isAdmin) { %><th>Invoices</th><% } %>
     </tr>
   </thead>
   <tbody>
     <% if (!it.clients.length) { %>
-    <tr><td colspan="9" style="text-align: center; color: #94A3B8;">No clients match the current filters.</td></tr>
+    <tr><td colspan="<%= it.isAdmin ? 9 : 8 %>" style="text-align: center; color: #94A3B8;">No clients match the current filters.</td></tr>
     <% } %>
     <% it.clients.forEach(c => { %>
     <tr>
@@ -28,21 +28,24 @@
       <td>
         <% if (c.health_score != null) { %>
         <span style="display: inline-flex; align-items: center; gap: 6px;">
-          <span style="width: 10px; height: 10px; border-radius: 50%; background: <%= c.health_score >= 70 ? '#22C55E' : c.health_score >= 40 ? '#F59E0B' : '#EF4444' %>;"></span>
+          <span style="width: 10px; height: 10px; border-radius: 50%; background: <%= c.health_score >= 70 ? '#22C55E' : c.health_score >= 40 ? '#F59E0B' : '#EF4444' %>;" title="<%= c.health_tier %>"></span>
+          <% if (it.isAdmin) { %>
           <%= c.health_score %>/100
           <% if (c.health_trend === 'up') { %>
           <span style="color: #22C55E; font-size: 0.75rem;" title="Up from <%= c.health_prev_score %>">&#9650;</span>
           <% } else if (c.health_trend === 'down') { %>
           <span style="color: #EF4444; font-size: 0.75rem;" title="Down from <%= c.health_prev_score %>">&#9660;</span>
           <% } %>
+          <% } %>
         </span>
         <% } else { %>
         <span style="display: inline-flex; align-items: center; gap: 6px;">
           <span style="width: 10px; height: 10px; border-radius: 50%; background: #6B7280;"></span>
-          <span style="color: #94A3B8;">\u2014</span>
+          <% if (it.isAdmin) { %><span style="color: #94A3B8;">\u2014</span><% } %>
         </span>
         <% } %>
       </td>
+      <% if (it.isAdmin) { %>
       <td>
         <% if (c.overdue_invoices > 0) { %>
         <span style="color: #EF4444; font-weight: 600;"><%= c.overdue_invoices %> overdue</span>
@@ -50,6 +53,7 @@
         <span style="color: #22C55E;">Clear</span>
         <% } %>
       </td>
+      <% } %>
     </tr>
     <% }) %>
   </tbody>
