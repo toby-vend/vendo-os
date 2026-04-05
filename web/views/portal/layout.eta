@@ -61,28 +61,35 @@
       padding: 0.5rem 1.25rem;
       border-bottom: 1px solid var(--vendo-border);
     }
-    .portal-date-selector {
+    .portal-date-pills {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 3px;
     }
-    .portal-date-selector select {
-      background: var(--vendo-surface);
-      color: var(--vendo-text);
-      border: 1px solid var(--vendo-border-strong);
-      border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 13px;
-      font-family: var(--vendo-font);
-      cursor: pointer;
-    }
-    .portal-date-selector select:focus {
-      outline: none;
-      border-color: var(--vendo-green);
-    }
-    .portal-date-selector label {
+    .portal-date-pill {
+      padding: 5px 12px;
       font-size: 12px;
+      font-weight: 500;
+      font-family: var(--vendo-font);
       color: var(--vendo-text-muted);
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .portal-date-pill:hover {
+      color: var(--vendo-text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .portal-date-pill.active {
+      color: #0B0B0B;
+      background: var(--vendo-green);
+      font-weight: 600;
     }
 
     /* KPI card enhancements for portal */
@@ -92,16 +99,7 @@
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
-    .portal-kpi {
-      background: var(--vendo-surface);
-      border: 1px solid var(--vendo-border);
-      border-radius: 10px;
-      padding: 1.25rem;
-      transition: border-color 0.2s;
-    }
-    .portal-kpi:hover {
-      border-color: var(--vendo-border-strong);
-    }
+    /* .portal-kpi now defined in main style.css with glass treatment */
     .portal-kpi .kpi-value {
       font-family: var(--vendo-font);
       font-size: 28px;
@@ -124,14 +122,7 @@
     .portal-kpi.kpi-positive .kpi-value { color: var(--vendo-green); }
     .portal-kpi.kpi-negative .kpi-value { color: #F87171; }
 
-    /* Section card */
-    .portal-section {
-      background: var(--vendo-surface);
-      border: 1px solid var(--vendo-border);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
+    /* .portal-section now defined in main style.css with glass treatment */
     .portal-section h2 {
       font-family: var(--vendo-font);
       font-size: 18px;
@@ -341,15 +332,12 @@
           <h1 class="topbar-title"><%= it.pageTitle || 'Dashboard' %></h1>
         </div>
         <div class="topbar-right" style="display: flex; align-items: center; gap: 1rem;">
-          <div class="portal-date-selector">
-            <label for="portal-days">Period:</label>
-            <select id="portal-days" onchange="updatePortalPeriod(this.value)">
-              <option value="7" <%= it.days === 7 ? 'selected' : '' %>>Last 7 days</option>
-              <option value="30" <%= it.days === 30 ? 'selected' : '' %>>Last 30 days</option>
-              <option value="90" <%= it.days === 90 ? 'selected' : '' %>>Last 90 days</option>
-              <option value="180" <%= it.days === 180 ? 'selected' : '' %>>Last 6 months</option>
-              <option value="365" <%= it.days === 365 ? 'selected' : '' %>>Last 12 months</option>
-            </select>
+          <div class="portal-date-pills">
+            <a href="?days=7" class="portal-date-pill<%= it.days === 7 ? ' active' : '' %>">7d</a>
+            <a href="?days=30" class="portal-date-pill<%= it.days === 30 ? ' active' : '' %>">30d</a>
+            <a href="?days=90" class="portal-date-pill<%= it.days === 90 ? ' active' : '' %>">90d</a>
+            <a href="?days=180" class="portal-date-pill<%= it.days === 180 ? ' active' : '' %>">6m</a>
+            <a href="?days=365" class="portal-date-pill<%= it.days === 365 ? ' active' : '' %>">12m</a>
           </div>
           <span class="topbar-date"><%= new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></span>
         </div>
@@ -374,11 +362,7 @@
     document.querySelector('.app-layout').classList.add('sidebar-collapsed');
   }
 
-  function updatePortalPeriod(days) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('days', days);
-    window.location.href = url.toString();
-  }
+  // Period selector now uses pill links
   </script>
 </body>
 </html>
