@@ -320,7 +320,8 @@ app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(taskRunsUiRoutes, { prefix: '/tasks' });
 app.register(skillsBrowserRoutes, { prefix: '/skills-drive' });
 app.register(portalRoutes, { prefix: '/portal' });
-// client-database removed — unified into /clients
+// Redirect old /client-database URL to unified /clients
+app.get('/client-database', async (_req, reply) => reply.redirect('/clients'));
 app.register(operationsRoutes, { prefix: '/operations' });
 app.register(skillsLibraryRoutes, { prefix: '/skills' });
 app.register(cronRoutes, { prefix: '/api/cron' });
