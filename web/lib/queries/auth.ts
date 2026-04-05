@@ -616,6 +616,10 @@ export async function initSchema(): Promise<void> {
   } catch {
     // Column already exists
   }
+
+  // Sidebar config
+  const { initSidebarSchema } = await import('./sidebar.js');
+  await initSidebarSchema();
 }
 
 /** @deprecated Use initSchema instead */

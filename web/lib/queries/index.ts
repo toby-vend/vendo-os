@@ -16,3 +16,4 @@ export * from './attribution.js';
 export * from './dashboards.js';
 export * from './notifications.js';
 export * from './tracking.js';
+export * from './sidebar.js';

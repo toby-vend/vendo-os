@@ -1,0 +1,260 @@
+<% layout('/layouts/base') %>
+
+<div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start;">
+  <div>
+    <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; margin-bottom: 0.5rem;">Sidebar Menu</h2>
+    <p style="color: #94A3B8; font-size: 14px;">Drag to reorder groups and items. Rename labels, hide items, or move items between groups.</p>
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <form method="POST" action="/admin/sidebar/reset" style="margin: 0;">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+      <button type="submit" onclick="return confirm('Reset sidebar to default layout?')" style="padding: 8px 16px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;">Reset to Default</button>
+    </form>
+  </div>
+</div>
+
+<form id="sidebar-form" method="POST" action="/admin/sidebar">
+  <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+  <input type="hidden" name="config_json" id="config-json" />
+
+  <div id="groups-container">
+    <% it.config.forEach((group, gi) => { %>
+    <div class="card sb-group" data-group-id="<%= group.id %>" style="margin-bottom: 1rem; padding: 0; overflow: visible;">
+      <!-- Group header -->
+      <div class="sb-group-header" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: grab;">
+        <span class="sb-drag-handle" style="color: #64748B; cursor: grab; flex-shrink: 0;" title="Drag to reorder group">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+        </span>
+        <input type="text" class="sb-group-label" value="<%= group.label %>" style="flex: 1; background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 4px 8px; color: #E2E8F0; font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif;" onfocus="this.style.borderColor='rgba(255,255,255,0.15)'" onblur="this.style.borderColor='transparent'" />
+        <% if (group.adminOnly) { %>
+        <span style="font-size: 11px; color: #64748B; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">Admin only</span>
+        <% } %>
+        <button type="button" class="sb-toggle-group" onclick="toggleGroupCollapse(this)" style="background: none; border: none; color: #64748B; cursor: pointer; padding: 4px;" title="Collapse group">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6,9 12,15 18,9"/></svg>
+        </button>
+      </div>
+
+      <!-- Items list -->
+      <div class="sb-items" data-group-id="<%= group.id %>">
+        <% group.items.forEach((item, ii) => { %>
+        <div class="sb-item<%= item.hidden ? ' sb-item-hidden' : '' %>" data-item-id="<%= item.id %>" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem 0.5rem 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.03);">
+          <span class="sb-item-drag" style="color: #475569; cursor: grab; flex-shrink: 0;" title="Drag to reorder or move to another group">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+          </span>
+          <input type="text" class="sb-item-label" value="<%= item.label %>" style="flex: 1; background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 3px 8px; color: #CBD5E1; font-size: 13px; font-family: 'DM Sans', sans-serif;" onfocus="this.style.borderColor='rgba(255,255,255,0.15)'" onblur="this.style.borderColor='transparent'" />
+          <span style="font-size: 11px; color: #475569; min-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= item.href %></span>
+          <button type="button" class="sb-hide-btn" onclick="toggleItemHidden(this)" style="background: none; border: none; cursor: pointer; padding: 4px; color: <%= item.hidden ? '#EF4444' : '#64748B' %>;" title="<%= item.hidden ? 'Show item' : 'Hide item' %>">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <% if (item.hidden) { %>
+              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+              <% } else { %>
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              <% } %>
+            </svg>
+          </button>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+
+  <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+    <button type="submit" style="padding: 10px 24px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;">Save Layout</button>
+    <a href="/admin/sidebar" style="padding: 10px 24px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center;">Discard</a>
+  </div>
+</form>
+
+<script>
+// --- Original config for preserving non-visual fields (icon, permission, href, adminOnly) ---
+var originalConfig = <%~ JSON.stringify(it.config) %>;
+var originalLookup = {};
+originalConfig.forEach(function(g) {
+  originalLookup[g.id] = g;
+  g.items.forEach(function(item) { originalLookup[item.id] = item; });
+});
+
+// --- Serialize current DOM state to JSON ---
+function serializeConfig() {
+  var groups = [];
+  document.querySelectorAll('.sb-group').forEach(function(groupEl) {
+    var gid = groupEl.dataset.groupId;
+    var orig = originalLookup[gid] || {};
+    var group = {
+      id: gid,
+      label: groupEl.querySelector('.sb-group-label').value.trim(),
+      items: []
+    };
+    if (orig.icon) group.icon = orig.icon;
+    if (orig.permission) group.permission = orig.permission;
+    if (orig.adminOnly) group.adminOnly = true;
+
+    groupEl.querySelectorAll('.sb-item').forEach(function(itemEl) {
+      var iid = itemEl.dataset.itemId;
+      var iorig = originalLookup[iid] || {};
+      var item = {
+        id: iid,
+        label: itemEl.querySelector('.sb-item-label').value.trim(),
+        href: iorig.href || '',
+      };
+      if (iorig.permission) item.permission = iorig.permission;
+      if (itemEl.classList.contains('sb-item-hidden')) item.hidden = true;
+      group.items.push(item);
+    });
+    groups.push(group);
+  });
+  return groups;
+}
+
+// --- Form submission: serialize to hidden field ---
+document.getElementById('sidebar-form').addEventListener('submit', function(e) {
+  document.getElementById('config-json').value = JSON.stringify(serializeConfig());
+});
+
+// --- Toggle item hidden ---
+function toggleItemHidden(btn) {
+  var item = btn.closest('.sb-item');
+  var isHidden = item.classList.toggle('sb-item-hidden');
+  btn.style.color = isHidden ? '#EF4444' : '#64748B';
+  btn.title = isHidden ? 'Show item' : 'Hide item';
+  // Swap the eye icon
+  var svg = btn.querySelector('svg');
+  if (isHidden) {
+    svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+// --- Collapse group ---
+function toggleGroupCollapse(btn) {
+  var items = btn.closest('.sb-group').querySelector('.sb-items');
+  var collapsed = items.style.display === 'none';
+  items.style.display = collapsed ? '' : 'none';
+  btn.querySelector('svg').style.transform = collapsed ? '' : 'rotate(-90deg)';
+}
+
+// --- Drag and drop: groups ---
+(function() {
+  var container = document.getElementById('groups-container');
+  var dragGroup = null;
+
+  container.addEventListener('dragstart', function(e) {
+    var group = e.target.closest('.sb-group');
+    if (!group || !e.target.closest('.sb-group-header')) return;
+    dragGroup = group;
+    group.style.opacity = '0.5';
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', 'group');
+  });
+
+  container.addEventListener('dragend', function(e) {
+    if (dragGroup) { dragGroup.style.opacity = ''; dragGroup = null; }
+    document.querySelectorAll('.sb-group').forEach(function(g) { g.classList.remove('sb-drag-over'); });
+  });
+
+  container.addEventListener('dragover', function(e) {
+    if (!dragGroup) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    var target = e.target.closest('.sb-group');
+    if (target && target !== dragGroup) {
+      document.querySelectorAll('.sb-group').forEach(function(g) { g.classList.remove('sb-drag-over'); });
+      target.classList.add('sb-drag-over');
+    }
+  });
+
+  container.addEventListener('drop', function(e) {
+    if (!dragGroup) return;
+    e.preventDefault();
+    var target = e.target.closest('.sb-group');
+    if (target && target !== dragGroup) {
+      var rect = target.getBoundingClientRect();
+      var mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) {
+        container.insertBefore(dragGroup, target);
+      } else {
+        container.insertBefore(dragGroup, target.nextElementSibling);
+      }
+    }
+    document.querySelectorAll('.sb-group').forEach(function(g) { g.classList.remove('sb-drag-over'); });
+  });
+
+  // Make group headers draggable
+  document.querySelectorAll('.sb-group-header').forEach(function(h) {
+    h.closest('.sb-group').setAttribute('draggable', 'true');
+  });
+})();
+
+// --- Drag and drop: items (within and across groups) ---
+(function() {
+  var dragItem = null;
+  var placeholder = document.createElement('div');
+  placeholder.className = 'sb-item-placeholder';
+  placeholder.style.cssText = 'height: 2px; background: #22C55E; margin: 0 1rem; border-radius: 1px;';
+
+  document.addEventListener('dragstart', function(e) {
+    var item = e.target.closest('.sb-item');
+    if (!item || e.target.closest('.sb-group-header')) return;
+    dragItem = item;
+    item.style.opacity = '0.4';
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', 'item');
+    // Stop group drag
+    e.stopPropagation();
+  });
+
+  document.addEventListener('dragend', function(e) {
+    if (dragItem) { dragItem.style.opacity = ''; dragItem = null; }
+    if (placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+  });
+
+  document.querySelectorAll('.sb-items').forEach(function(list) {
+    list.addEventListener('dragover', function(e) {
+      if (!dragItem) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'move';
+
+      var closest = null;
+      var closestDist = Infinity;
+      list.querySelectorAll('.sb-item').forEach(function(it) {
+        var rect = it.getBoundingClientRect();
+        var mid = rect.top + rect.height / 2;
+        var dist = e.clientY - mid;
+        if (dist < closestDist && dist > 0) { closestDist = dist; closest = it; }
+      });
+
+      if (closest) {
+        list.insertBefore(placeholder, closest.nextElementSibling);
+      } else {
+        list.insertBefore(placeholder, list.firstElementChild);
+      }
+    });
+
+    list.addEventListener('drop', function(e) {
+      if (!dragItem) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (placeholder.parentNode === list) {
+        list.insertBefore(dragItem, placeholder);
+      } else {
+        list.appendChild(dragItem);
+      }
+      if (placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+    });
+  });
+
+  // Make items draggable
+  document.querySelectorAll('.sb-item').forEach(function(it) {
+    it.setAttribute('draggable', 'true');
+  });
+})();
+</script>
+
+<style>
+.sb-group.sb-drag-over { outline: 2px solid rgba(34,197,94,0.4); outline-offset: -2px; border-radius: 10px; }
+.sb-item-hidden { opacity: 0.4; }
+.sb-item-hidden .sb-item-label { text-decoration: line-through; }
+.sb-group-label:hover, .sb-item-label:hover { border-color: rgba(255,255,255,0.10) !important; }
+</style>
