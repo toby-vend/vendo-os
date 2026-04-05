@@ -9,7 +9,7 @@
   <h2 style="margin-top: 0; font-size: 16px; color: #E2E8F0;">Add Mapping</h2>
   <form method="POST" action="/admin/client-mapping">
     <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
 
       <!-- Client -->
       <div>
@@ -37,17 +37,8 @@
           <option value="gads">Google Ads</option>
           <option value="ga4">GA4</option>
           <option value="gsc">Google Search Console</option>
-        </select>
-      </div>
-
-      <!-- CRM Type -->
-      <div>
-        <label style="display: block; color: #94A3B8; font-size: 13px; margin-bottom: 4px;">CRM Type</label>
-        <select name="crm_type"
-          style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;">
-          <option value="ghl">GoHighLevel</option>
-          <option value="boxly">Boxly</option>
-          <option value="none">None</option>
+          <option value="asana">Asana</option>
+          <option value="harvest">Harvest</option>
         </select>
       </div>
     </div>
@@ -103,34 +94,27 @@
         <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Platform</th>
         <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Account ID</th>
         <th style="text-align: left; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Account Name</th>
-        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">CRM</th>
         <th style="text-align: right; padding: 0.75rem 0.5rem; color: #94A3B8; font-weight: 500; font-size: 13px;">Created</th>
         <th style="text-align: right; padding: 0.75rem 0.5rem;"></th>
       </tr>
     </thead>
     <tbody>
       <% if (!it.mappings.length) { %>
-      <tr><td colspan="7" style="padding: 2rem; text-align: center; color: #94A3B8;">No mappings yet. Add one above.</td></tr>
+      <tr><td colspan="6" style="padding: 2rem; text-align: center; color: #94A3B8;">No mappings yet. Add one above.</td></tr>
       <% } %>
-      <% const platformColours = { ghl: '#4ADE80', meta: '#1877F2', gads: '#FBBC05', ga4: '#E37400', gsc: '#4285F4' }; %>
+      <% const platformColours = { ghl: '#4ADE80', meta: '#1877F2', gads: '#FBBC05', ga4: '#E37400', gsc: '#4285F4', asana: '#F06A6A', harvest: '#F36C00' }; %>
+      <% const platformLabels = { ghl: 'GHL', meta: 'Meta Ads', gads: 'Google Ads', ga4: 'GA4', gsc: 'Search Console', asana: 'Asana', harvest: 'Harvest' }; %>
       <% it.mappings.forEach(m => { %>
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
         <td style="padding: 0.65rem 0.5rem; font-weight: 500; color: #E2E8F0;"><%= m.client_name %></td>
         <td style="padding: 0.65rem 0.5rem;">
           <span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
-            background: rgba(255,255,255,0.06); color: <%= platformColours[m.platform] || '#94A3B8' %>;">
-            <%= m.platform %>
+            background: rgba(255,255,255,0.06); color: <%= platformColours[m.source] || '#94A3B8' %>;">
+            <%= platformLabels[m.source] || m.source %>
           </span>
         </td>
-        <td style="padding: 0.65rem 0.5rem; color: #94A3B8; font-size: 13px; font-family: monospace;"><%= m.platform_account_id %></td>
-        <td style="padding: 0.65rem 0.5rem; color: #E2E8F0;"><%= m.platform_account_name || '—' %></td>
-        <td style="padding: 0.65rem 0.5rem; text-align: center;">
-          <span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
-            background: <%= m.crm_type === 'ghl' ? 'rgba(74,222,128,0.15)' : m.crm_type === 'boxly' ? 'rgba(96,165,250,0.15)' : 'rgba(148,163,184,0.15)' %>;
-            color: <%= m.crm_type === 'ghl' ? '#4ADE80' : m.crm_type === 'boxly' ? '#60A5FA' : '#94A3B8' %>;">
-            <%= m.crm_type %>
-          </span>
-        </td>
+        <td style="padding: 0.65rem 0.5rem; color: #94A3B8; font-size: 13px; font-family: monospace;"><%= m.external_id %></td>
+        <td style="padding: 0.65rem 0.5rem; color: #E2E8F0;"><%= m.external_name || '—' %></td>
         <td style="padding: 0.65rem 0.5rem; text-align: right; color: #94A3B8; font-size: 13px;"><%= m.created_at ? m.created_at.slice(0, 10) : '—' %></td>
         <td style="padding: 0.65rem 0.5rem; text-align: right;">
           <form method="POST" action="/admin/client-mapping/<%= m.id %>/delete" style="display: inline; margin: 0;">

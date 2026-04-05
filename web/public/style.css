@@ -242,11 +242,13 @@ body {
 
 .nav-group {
   margin: 0;
-  padding: 20px 0 0;
+  padding: 12px 0 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .nav-group:first-child {
   padding-top: 0;
+  border-top: none;
 }
 
 /* Section label (the group toggle) */
@@ -255,7 +257,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 0 1rem;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   border: none;
   background: none;
   width: 100%;
@@ -336,7 +338,8 @@ body {
 
 /* Standalone top-level items between groups */
 .nav-group-single {
-  padding: 0;
+  padding: 8px 0 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .nav-group-link {
