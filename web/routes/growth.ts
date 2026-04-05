@@ -55,31 +55,37 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
   // ===== MAIN PAGE =====
 
   app.get('/', async (_request, reply) => {
-    const [
-      linkedinStats, linkedinPosts, recentMeetings,
-      outboundFunnel, outboundPipeline,
-      caseStudyStats, caseStudies,
-      referralStats, referrals,
-      upsellStats, upsells,
-      taskLog,
-    ] = await Promise.all([
-      getLinkedInStats(), getLinkedInPipeline(), getRecentMeetingsForLinkedIn(),
-      getOutboundFunnel(), getOutboundPipeline(),
-      getCaseStudyStats(), getCaseStudies(),
-      getReferralStats(), getReferrals(),
-      getUpsellStats(), getUpsellOpportunities(),
-      getGrowthLog('linkedin', 10),
-    ]);
+    try {
+      const [
+        linkedinStats, linkedinPosts, recentMeetings,
+        outboundFunnel, outboundPipeline,
+        caseStudyStats, caseStudies,
+        referralStats, referrals,
+        upsellStats, upsells,
+        taskLog,
+      ] = await Promise.all([
+        getLinkedInStats(), getLinkedInPipeline(), getRecentMeetingsForLinkedIn(),
+        getOutboundFunnel(), getOutboundPipeline(),
+        getCaseStudyStats(), getCaseStudies(),
+        getReferralStats(), getReferrals(),
+        getUpsellStats().catch(() => ({ total: 0, identified: 0, pitched: 0, won: 0 })),
+        getUpsellOpportunities().catch(() => []),
+        getGrowthLog('linkedin', 10),
+      ]);
 
-    reply.render('growth/index', {
-      linkedinStats, linkedinPosts, recentMeetings,
-      outboundFunnel, outboundPipeline,
-      caseStudyStats, caseStudies,
-      referralStats, referrals,
-      upsellStats, upsells,
-      taskLog,
-      activeTab: 'linkedin',
-    });
+      reply.render('growth/index', {
+        linkedinStats, linkedinPosts, recentMeetings,
+        outboundFunnel, outboundPipeline,
+        caseStudyStats, caseStudies,
+        referralStats, referrals,
+        upsellStats, upsells,
+        taskLog,
+        activeTab: 'linkedin',
+      });
+    } catch (err) {
+      console.error('[growth] Page load failed:', err);
+      throw err;
+    }
   });
 
   // ===== TAB LOADING =====
