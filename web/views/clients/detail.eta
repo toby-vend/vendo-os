@@ -1,83 +1,179 @@
 <% layout('/layouts/base') %>
 
-<p><a href="/clients">&laquo; Back to clients</a></p>
+<style>
+  .cd-back { color: var(--vendo-text-muted); text-decoration: none; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+  .cd-back:hover { color: var(--vendo-green); }
+  .cd-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .cd-header-left { flex: 1; min-width: 0; }
+  .cd-title { font-size: 24px; font-weight: 700; color: var(--vendo-text-heading); margin: 0 0 2px 0; }
+  .cd-subtitle { color: var(--vendo-text-muted); font-size: 13px; margin: 0; }
+  .cd-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .cd-tag { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; }
+  .cd-tag-status { background: var(--vendo-green-subtle); color: var(--vendo-green); }
+  .cd-tag-vertical { background: rgba(99,102,241,0.12); color: #818CF8; }
+  .cd-tag-health { display: inline-flex; align-items: center; gap: 5px; }
+  .cd-health-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
-<h1><%= it.client.display_name || it.client.name %></h1>
-<% if (it.client.display_name && it.client.display_name !== it.client.name) { %>
-<p style="color: #94A3B8; margin-top: -0.5rem; font-size: 13px;">Xero: <%= it.client.name %></p>
-<% } %>
+  /* Stat cards */
+  .cd-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+  .cd-stat { background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-radius: 10px; padding: 1rem; }
+  .cd-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vendo-text-muted); margin-bottom: 4px; }
+  .cd-stat-value { font-size: 20px; font-weight: 700; color: var(--vendo-text-heading); }
+  .cd-stat-sub { font-size: 11px; color: var(--vendo-text-muted); margin-top: 2px; }
 
-<p class="meeting-meta">
-  <% if (it.client.email) { %><strong>Email:</strong> <%= it.client.email %> | <% } %>
-  <strong>Vertical:</strong> <%= it.client.vertical || '—' %>
-  | <strong>Status:</strong> <span class="badge badge-active"><%= it.client.status %></span>
-  | <strong>Meetings:</strong> <%= it.client.meeting_count %>
-  <% if (it.client.first_meeting_date) { %> | <strong>Since:</strong> <%= it.client.first_meeting_date.slice(0, 10) %><% } %>
-</p>
+  /* Section cards */
+  .cd-section { background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
+  .cd-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .cd-section-title { font-size: 14px; font-weight: 700; color: var(--vendo-text-heading); margin: 0; display: flex; align-items: center; gap: 8px; }
+  .cd-section-count { font-size: 11px; background: rgba(255,255,255,0.06); color: var(--vendo-text-muted); padding: 2px 8px; border-radius: 10px; }
+  .cd-section-empty { color: var(--vendo-text-muted); font-size: 13px; text-align: center; padding: 1.5rem 0; }
 
-<% /* ---- Health Score (admin: full breakdown, staff: dot + tier only) ---- */ %>
-<% if (it.health) { %>
+  /* Progress bars */
+  .cd-progress-track { background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; }
+  .cd-progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+
+  /* Health breakdown grid */
+  .cd-health-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+  .cd-health-card { background: rgba(255,255,255,0.02); border: 1px solid var(--vendo-border); border-radius: 8px; padding: 0.75rem; }
+  .cd-health-card-head { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .cd-health-card-label { color: var(--vendo-text); font-weight: 600; font-size: 13px; }
+  .cd-health-card-score { color: var(--vendo-text-muted); font-size: 13px; }
+  .cd-health-card-item { display: flex; justify-content: space-between; font-size: 12px; color: var(--vendo-text-muted); margin-bottom: 2px; }
+
+  /* Issues box */
+  .cd-issues { padding: 0.75rem 1rem; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); border-radius: 8px; margin-bottom: 1rem; }
+  .cd-issues-title { color: #EF4444; font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .cd-issues-item { color: #F87171; font-size: 13px; }
+
+  /* Two-column grid for sections */
+  .cd-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 900px) { .cd-grid-2 { grid-template-columns: 1fr; } }
+
+  /* Table inside cards */
+  .cd-section table.compact { margin: 0; }
+  .cd-section table.compact th { border-top: none; }
+</style>
+
+<%
+  /* ---- Computed values ---- */
+  const clientName = it.client.display_name || it.client.name;
+  const totalAdSpend = (it.enriched?.metaSpend?.total_spend || 0) + (it.enriched?.gadsSpend?.total_spend || 0);
+  const totalClicks = (it.enriched?.metaSpend?.clicks || 0) + (it.enriched?.gadsSpend?.clicks || 0);
+  const totalImpressions = (it.enriched?.metaSpend?.impressions || 0) + (it.enriched?.gadsSpend?.impressions || 0);
+  const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : null;
+  const openActions = it.actions.filter(a => !a.completed).length;
+  const completedActions = it.actions.filter(a => a.completed).length;
+  const openAsana = it.enriched?.asanaTasks?.filter(t => !t.completed).length || 0;
+
+  let healthColour = '#6B7280';
+  let healthLabel = 'No Data';
+  if (it.health) {
+    healthColour = it.health.score >= 70 ? '#22C55E' : it.health.score >= 40 ? '#F59E0B' : '#EF4444';
+    healthLabel = it.health.score >= 70 ? 'Healthy' : it.health.score >= 40 ? 'At-Risk' : 'Critical';
+  }
+%>
+
+<!-- Breadcrumb -->
+<a href="/clients" class="cd-back">&larr; Clients</a>
+
+<!-- Header -->
+<div class="cd-header" style="margin-top: 0.75rem;">
+  <div class="cd-header-left">
+    <h1 class="cd-title"><%= clientName %></h1>
+    <% if (it.client.display_name && it.client.display_name !== it.client.name) { %>
+    <p class="cd-subtitle">Xero: <%= it.client.name %></p>
+    <% } %>
+    <div class="cd-tags">
+      <span class="cd-tag cd-tag-status"><%= it.client.status %></span>
+      <% if (it.client.vertical) { %><span class="cd-tag cd-tag-vertical"><%= it.client.vertical %></span><% } %>
+      <span class="cd-tag cd-tag-health" style="background: <%= healthColour %>15; color: <%= healthColour %>; border: 1px solid <%= healthColour %>30;">
+        <span class="cd-health-dot" style="background: <%= healthColour %>;"></span>
+        <%= healthLabel %>
+        <% if (it.isAdmin && it.health) { %>&middot; <%= it.health.score %>/100<% } %>
+      </span>
+      <% if (it.client.email) { %><span class="cd-tag" style="background: rgba(255,255,255,0.04); color: var(--vendo-text-muted);"><%= it.client.email %></span><% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Stat cards -->
+<div class="cd-stats">
+  <% if (it.health) { %>
+  <div class="cd-stat">
+    <div class="cd-stat-label">Health</div>
+    <div class="cd-stat-value" style="color: <%= healthColour %>;"><%= it.health.score %><span style="font-size: 13px; color: var(--vendo-text-muted);">/100</span></div>
+    <div class="cd-stat-sub">
+      <% if (it.health.trend === 'up') { %><span style="color: #22C55E;">&#9650; +<%= it.health.score - it.health.prev_score %></span> vs last month
+      <% } else if (it.health.trend === 'down') { %><span style="color: #EF4444;">&#9660; <%= it.health.score - it.health.prev_score %></span> vs last month
+      <% } else if (it.health.trend === 'flat') { %>Stable vs last month
+      <% } else { %><%= it.health.period %><% } %>
+    </div>
+  </div>
+  <% } %>
+
+  <div class="cd-stat">
+    <div class="cd-stat-label">Meetings</div>
+    <div class="cd-stat-value"><%= it.client.meeting_count %></div>
+    <div class="cd-stat-sub">
+      <% if (it.client.first_meeting_date) { %>Since <%= it.client.first_meeting_date.slice(0, 10) %><% } else { %>—<% } %>
+    </div>
+  </div>
+
+  <% if (totalAdSpend > 0) { %>
+  <div class="cd-stat">
+    <div class="cd-stat-label">Ad Spend</div>
+    <div class="cd-stat-value">&pound;<%= totalAdSpend.toLocaleString('en-GB', { maximumFractionDigits: 0 }) %></div>
+    <div class="cd-stat-sub"><%= totalClicks.toLocaleString() %> clicks<% if (ctr) { %> &middot; <%= ctr %>% CTR<% } %></div>
+  </div>
+  <% } %>
+
+  <% if (openActions > 0 || completedActions > 0) { %>
+  <div class="cd-stat">
+    <div class="cd-stat-label">Action Items</div>
+    <div class="cd-stat-value"><%= openActions %> <span style="font-size: 13px; color: var(--vendo-text-muted);">open</span></div>
+    <div class="cd-stat-sub"><%= completedActions %> completed</div>
+  </div>
+  <% } %>
+
+  <% if (openAsana > 0) { %>
+  <div class="cd-stat">
+    <div class="cd-stat-label">Asana Tasks</div>
+    <div class="cd-stat-value"><%= openAsana %> <span style="font-size: 13px; color: var(--vendo-text-muted);">open</span></div>
+    <div class="cd-stat-sub"><%= (it.enriched.asanaTasks.length - openAsana) %> completed</div>
+  </div>
+  <% } %>
+
+  <% if (it.enriched?.ghlOpps?.length > 0) { %>
+  <div class="cd-stat">
+    <div class="cd-stat-label">Pipeline</div>
+    <div class="cd-stat-value"><%= it.enriched.ghlOpps.length %></div>
+    <div class="cd-stat-sub">&pound;<%= it.enriched.ghlOpps.reduce((s, o) => s + (o.monetary_value || 0), 0).toLocaleString('en-GB', { maximumFractionDigits: 0 }) %> total value</div>
+  </div>
+  <% } %>
+</div>
+
+<% /* ================================================================
+      HEALTH BREAKDOWN — admin only
+   ================================================================ */ %>
+<% if (it.isAdmin && it.health) { %>
 <%
   const h = it.health;
-  const tierColour = h.score >= 70 ? '#22C55E' : h.score >= 40 ? '#F59E0B' : '#EF4444';
-  const tierLabel = h.score >= 70 ? 'Healthy' : h.score >= 40 ? 'At-Risk' : 'Critical';
-%>
-<% if (it.isAdmin) { %>
-<h2>Health Score</h2>
-<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;">
-  <span style="width: 14px; height: 14px; border-radius: 50%; background: <%= tierColour %>;"></span>
-  <span style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= h.score %>/100</span>
-  <span class="badge" style="background: <%= tierColour %>20; color: <%= tierColour %>; border: 1px solid <%= tierColour %>40;"><%= tierLabel %></span>
-  <% if (h.trend === 'up') { %>
-  <span style="color: #22C55E; font-size: 13px;">&#9650; up from <%= h.prev_score %></span>
-  <% } else if (h.trend === 'down') { %>
-  <span style="color: #EF4444; font-size: 13px;">&#9660; down from <%= h.prev_score %></span>
-  <% } else if (h.trend === 'flat') { %>
-  <span style="color: #94A3B8; font-size: 13px;">&#8594; stable (<%= h.prev_score %>)</span>
-  <% } %>
-  <span style="color: #64748B; font-size: 12px; margin-left: auto;">Period: <%= h.period %></span>
-</div>
+  const bars = [
+    { label: 'Performance', score: h.performance_score, max: 40, items: [
+      { label: 'Ad Spend / Organic', pts: h.breakdown.adSpend, max: 20 },
+      { label: 'CTR / Engagement', pts: h.breakdown.ctr, max: 10 },
+      { label: 'Consistency', pts: h.breakdown.spendConsistency, max: 10 },
+    ]},
+    { label: 'Relationship', score: h.relationship_score, max: 30, items: [
+      { label: 'Meeting Recency', pts: h.breakdown.recentMeeting, max: 15 },
+      { label: 'Actions Resolved', pts: h.breakdown.actionsResolved, max: 15 },
+    ]},
+    { label: 'Financial', score: h.financial_score, max: 30, items: [
+      { label: 'No Overdue Invoices', pts: h.breakdown.noOverdue, max: 15 },
+      { label: 'Paid On Time', pts: h.breakdown.paidOnTime, max: 15 },
+    ]},
+  ];
 
-<!-- Sub-scores -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; max-width: 700px; margin-bottom: 1.5rem;">
-  <%
-    const bars = [
-      { label: 'Performance', score: h.performance_score, max: 40, items: [
-        { label: 'Ad Spend / Organic', pts: h.breakdown.adSpend, max: 20 },
-        { label: 'CTR / Engagement', pts: h.breakdown.ctr, max: 10 },
-        { label: 'Consistency', pts: h.breakdown.spendConsistency, max: 10 },
-      ]},
-      { label: 'Relationship', score: h.relationship_score, max: 30, items: [
-        { label: 'Meeting Recency', pts: h.breakdown.recentMeeting, max: 15 },
-        { label: 'Actions Resolved', pts: h.breakdown.actionsResolved, max: 15 },
-      ]},
-      { label: 'Financial', score: h.financial_score, max: 30, items: [
-        { label: 'No Overdue Invoices', pts: h.breakdown.noOverdue, max: 15 },
-        { label: 'Paid On Time', pts: h.breakdown.paidOnTime, max: 15 },
-      ]},
-    ];
-  %>
-  <% bars.forEach(b => { %>
-  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-      <span style="color: #E2E8F0; font-weight: 600; font-size: 13px;"><%= b.label %></span>
-      <span style="color: #94A3B8; font-size: 13px;"><%= b.score %>/<%= b.max %></span>
-    </div>
-    <div style="background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; margin-bottom: 8px;">
-      <div style="background: <%= (b.score / b.max) >= 0.7 ? '#22C55E' : (b.score / b.max) >= 0.4 ? '#F59E0B' : '#EF4444' %>; height: 100%; border-radius: 4px; width: <%= Math.round((b.score / b.max) * 100) %>%;"></div>
-    </div>
-    <% b.items.forEach(item => { %>
-    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #64748B; margin-bottom: 2px;">
-      <span><%= item.label %></span>
-      <span><%= item.pts %>/<%= item.max %></span>
-    </div>
-    <% }) %>
-  </div>
-  <% }) %>
-</div>
-
-<%
-  // Build plain-English issues
   const issues = [];
   if (h.breakdown.adSpend === 0) issues.push('No ad spend or organic traffic in last 30 days');
   if (h.breakdown.recentMeeting < 8) issues.push('Meeting overdue or not recent enough');
@@ -85,137 +181,203 @@
   if (h.breakdown.noOverdue === 0) issues.push('Overdue invoices');
   if (h.breakdown.paidOnTime === 0) issues.push('Last invoice not paid on time');
 %>
-<% if (issues.length) { %>
-<div style="padding: 0.75rem 1rem; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); border-radius: 8px; max-width: 700px; margin-bottom: 1.5rem;">
-  <div style="color: #EF4444; font-weight: 600; font-size: 13px; margin-bottom: 4px;">Issues to address</div>
-  <% issues.forEach(issue => { %>
-  <div style="color: #F87171; font-size: 13px;">&bull; <%= issue %></div>
-  <% }) %>
+
+<div class="cd-section">
+  <div class="cd-section-header">
+    <h2 class="cd-section-title">
+      Health Breakdown
+      <span class="cd-section-count"><%= h.score %>/100</span>
+    </h2>
+    <span style="font-size: 12px; color: var(--vendo-text-muted);">Period: <%= h.period %></span>
+  </div>
+
+  <div class="cd-health-grid">
+    <% bars.forEach(b => { %>
+    <div class="cd-health-card">
+      <div class="cd-health-card-head">
+        <span class="cd-health-card-label"><%= b.label %></span>
+        <span class="cd-health-card-score"><%= b.score %>/<%= b.max %></span>
+      </div>
+      <div class="cd-progress-track" style="margin-bottom: 8px;">
+        <div class="cd-progress-fill" style="background: <%= (b.score / b.max) >= 0.7 ? '#22C55E' : (b.score / b.max) >= 0.4 ? '#F59E0B' : '#EF4444' %>; width: <%= Math.round((b.score / b.max) * 100) %>%;"></div>
+      </div>
+      <% b.items.forEach(item => { %>
+      <div class="cd-health-card-item">
+        <span><%= item.label %></span>
+        <span><%= item.pts %>/<%= item.max %></span>
+      </div>
+      <% }) %>
+    </div>
+    <% }) %>
+  </div>
+
+  <% if (issues.length) { %>
+  <div class="cd-issues">
+    <div class="cd-issues-title">Issues to address</div>
+    <% issues.forEach(issue => { %>
+    <div class="cd-issues-item">&bull; <%= issue %></div>
+    <% }) %>
+  </div>
+  <% } %>
 </div>
 <% } %>
 
-<% } else { %>
-<!-- Staff view: dot + tier only -->
-<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem;">
-  <span style="width: 12px; height: 12px; border-radius: 50%; background: <%= tierColour %>;"></span>
-  <span style="color: #E2E8F0; font-weight: 600;"><%= tierLabel %></span>
-</div>
-<% } %>
-<% } %>
-
-<% /* ---- Financials (admin only) ---- */ %>
-<% if (it.isAdmin && (it.client.total_invoiced > 0 || it.client.outstanding > 0)) { %>
-<h2>Financials</h2>
-<table class="compact" style="max-width: 400px">
-  <tr><td><strong>Total Invoiced</strong></td><td>&pound;<%= it.client.total_invoiced.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td></tr>
-  <% if (it.client.outstanding > 0) { %><tr><td><strong>Outstanding</strong></td><td>&pound;<%= it.client.outstanding.toLocaleString('en-GB', { minimumFractionDigits: 2 }) %></td></tr><% } %>
-  <% if (it.client.first_invoice_date) { %><tr><td><strong>First Invoice</strong></td><td><%= it.client.first_invoice_date.slice(0, 10) %></td></tr><% } %>
-  <% if (it.client.last_invoice_date) { %><tr><td><strong>Last Invoice</strong></td><td><%= it.client.last_invoice_date.slice(0, 10) %></td></tr><% } %>
-</table>
-<% } %>
-
+<% /* ================================================================
+      AD SPEND — visible to all
+   ================================================================ */ %>
 <% if (it.enriched && (it.enriched.metaSpend || it.enriched.gadsSpend)) { %>
-<h2>Ad Spend</h2>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; max-width: 600px;">
-  <% if (it.enriched.metaSpend) { %>
-  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
-    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Meta Ads</div>
-    <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;">&pound;<%= it.enriched.metaSpend.total_spend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
-    <div style="color: #64748B; font-size: 12px;"><%= it.enriched.metaSpend.impressions.toLocaleString() %> impr &middot; <%= it.enriched.metaSpend.clicks.toLocaleString() %> clicks</div>
+<div class="cd-section">
+  <div class="cd-section-header">
+    <h2 class="cd-section-title">Ad Spend</h2>
   </div>
-  <% } %>
-  <% if (it.enriched.gadsSpend) { %>
-  <div style="padding: 0.75rem; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
-    <div style="color: #94A3B8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Google Ads</div>
-    <div style="color: #E2E8F0; font-size: 18px; font-weight: 600;">&pound;<%= it.enriched.gadsSpend.total_spend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></div>
-    <div style="color: #64748B; font-size: 12px;"><%= it.enriched.gadsSpend.impressions.toLocaleString() %> impr &middot; <%= it.enriched.gadsSpend.clicks.toLocaleString() %> clicks</div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+    <% if (it.enriched.metaSpend) { %>
+    <div style="padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--vendo-border); border-radius: 8px;">
+      <div style="color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Meta Ads</div>
+      <div style="color: var(--vendo-text-heading); font-size: 18px; font-weight: 600;">&pound;<%= it.enriched.metaSpend.total_spend.toLocaleString('en-GB', { maximumFractionDigits: 0 }) %></div>
+      <div style="color: var(--vendo-text-muted); font-size: 12px;"><%= it.enriched.metaSpend.impressions.toLocaleString() %> impr &middot; <%= it.enriched.metaSpend.clicks.toLocaleString() %> clicks</div>
+    </div>
+    <% } %>
+    <% if (it.enriched.gadsSpend) { %>
+    <div style="padding: 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--vendo-border); border-radius: 8px;">
+      <div style="color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Google Ads</div>
+      <div style="color: var(--vendo-text-heading); font-size: 18px; font-weight: 600;">&pound;<%= it.enriched.gadsSpend.total_spend.toLocaleString('en-GB', { maximumFractionDigits: 0 }) %></div>
+      <div style="color: var(--vendo-text-muted); font-size: 12px;"><%= it.enriched.gadsSpend.impressions.toLocaleString() %> impr &middot; <%= it.enriched.gadsSpend.clicks.toLocaleString() %> clicks</div>
+    </div>
+    <% } %>
   </div>
-  <% } %>
 </div>
 <% } %>
 
-<h2>Meetings</h2>
-<table class="compact">
-  <thead>
-    <tr><th>Date</th><th>Title</th><th>Category</th><th>Duration</th></tr>
-  </thead>
-  <tbody>
+<% /* ================================================================
+      TWO-COLUMN: Meetings + Action Items
+   ================================================================ */ %>
+<div class="cd-grid-2">
+
+  <!-- Meetings -->
+  <div class="cd-section">
+    <div class="cd-section-header">
+      <h2 class="cd-section-title">Meetings <span class="cd-section-count"><%= it.meetings.length %></span></h2>
+    </div>
     <% if (!it.meetings.length) { %>
-    <tr><td colspan="4">No meetings linked yet.</td></tr>
+    <div class="cd-section-empty">No meetings linked yet.</div>
+    <% } else { %>
+    <table class="compact">
+      <thead><tr><th>Date</th><th>Title</th><th>Category</th><th>Duration</th></tr></thead>
+      <tbody>
+        <% it.meetings.slice(0, 10).forEach(m => { %>
+        <tr>
+          <td><%= m.date ? m.date.slice(0, 10) : '—' %></td>
+          <td><a href="/meetings/<%= m.id %>"><%= m.title %></a></td>
+          <td><%= m.category || '—' %></td>
+          <td class="duration"><%= m.duration_seconds ? Math.round(m.duration_seconds / 60) + ' min' : '—' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% if (it.meetings.length > 10) { %>
+    <div style="text-align: center; padding-top: 0.5rem;">
+      <span style="font-size: 12px; color: var(--vendo-text-muted);">+ <%= it.meetings.length - 10 %> more meetings</span>
+    </div>
     <% } %>
-    <% it.meetings.forEach(m => { %>
-    <tr>
-      <td><%= m.date ? m.date.slice(0, 10) : '—' %></td>
-      <td><a href="/meetings/<%= m.id %>"><%= m.title %></a></td>
-      <td><%= m.category || '—' %></td>
-      <td class="duration"><%= m.duration_seconds ? Math.round(m.duration_seconds / 60) + ' min' : '—' %></td>
-    </tr>
-    <% }) %>
-  </tbody>
-</table>
+    <% } %>
+  </div>
 
-<% if (it.actions.length) { %>
-<h2>Action Items (<%= it.actions.length %>)</h2>
-<table class="compact">
-  <thead>
-    <tr><th>Status</th><th>Description</th><th>Assignee</th><th>From Meeting</th></tr>
-  </thead>
-  <tbody>
-    <% it.actions.forEach(a => { %>
-    <tr>
-      <td><span class="badge <%= a.completed ? 'badge-completed' : 'badge-open' %>"><%= a.completed ? 'Done' : 'Open' %></span></td>
-      <td><%= a.description %></td>
-      <td><%= a.assignee || '—' %></td>
-      <td><a href="/meetings/<%= a.meeting_id %>"><%= a.meeting_title || '—' %></a></td>
-    </tr>
-    <% }) %>
-  </tbody>
-</table>
-<% } %>
+  <!-- Action Items -->
+  <div class="cd-section">
+    <div class="cd-section-header">
+      <h2 class="cd-section-title">Action Items <span class="cd-section-count"><%= it.actions.length %></span></h2>
+    </div>
+    <% if (!it.actions.length) { %>
+    <div class="cd-section-empty">No action items.</div>
+    <% } else { %>
+    <table class="compact">
+      <thead><tr><th>Status</th><th>Description</th><th>Assignee</th><th>Meeting</th></tr></thead>
+      <tbody>
+        <% it.actions.slice(0, 10).forEach(a => { %>
+        <tr>
+          <td><span class="badge <%= a.completed ? 'badge-completed' : 'badge-open' %>"><%= a.completed ? 'Done' : 'Open' %></span></td>
+          <td><%= a.description %></td>
+          <td><%= a.assignee || '—' %></td>
+          <td><a href="/meetings/<%= a.meeting_id %>"><%= a.meeting_title || '—' %></a></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% if (it.actions.length > 10) { %>
+    <div style="text-align: center; padding-top: 0.5rem;">
+      <span style="font-size: 12px; color: var(--vendo-text-muted);">+ <%= it.actions.length - 10 %> more items</span>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
 
-<% if (it.enriched && it.enriched.asanaTasks.length) { %>
-<h2>Asana Tasks (<%= it.enriched.asanaTasks.length %>)</h2>
-<table class="compact">
-  <thead>
-    <tr><th>Status</th><th>Task</th><th>Assignee</th><th>Due</th><th>Project</th></tr>
-  </thead>
-  <tbody>
-    <% it.enriched.asanaTasks.forEach(t => { %>
-    <tr>
-      <td><span class="badge <%= t.completed ? 'badge-completed' : 'badge-open' %>"><%= t.completed ? 'Done' : 'Open' %></span></td>
-      <td><%= t.name %></td>
-      <td><%= t.assignee_name || '—' %></td>
-      <td><%= t.due_on || '—' %></td>
-      <td style="color: #94A3B8; font-size: 13px;"><%= t.project_name || '—' %></td>
-    </tr>
-    <% }) %>
-  </tbody>
-</table>
-<% } %>
+</div>
 
-<% if (it.enriched && it.enriched.ghlOpps.length > 0) { %>
-<h2>Pipeline (<%= it.enriched.ghlOpps.length %>)</h2>
-<table class="compact">
-  <thead>
-    <tr><th>Deal</th><th>Value</th><th>Stage</th><th>Status</th><th>Contact</th><th>Created</th></tr>
-  </thead>
-  <tbody>
-    <% it.enriched.ghlOpps.forEach(o => { %>
-    <tr>
-      <td><%= o.name || '—' %></td>
-      <td>&pound;<%= (o.monetary_value || 0).toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
-      <td><%= o.stage_name || '—' %></td>
-      <td><span class="badge badge-<%= o.status === 'won' ? 'completed' : o.status === 'lost' ? 'open' : 'active' %>"><%= o.status %></span></td>
-      <td><%= o.contact_name || '—' %></td>
-      <td><%= o.created_at ? o.created_at.slice(0, 10) : '—' %></td>
-    </tr>
-    <% }) %>
-  </tbody>
-</table>
-<% } %>
+<% /* ================================================================
+      TWO-COLUMN: Asana Tasks + Pipeline
+   ================================================================ */ %>
+<div class="cd-grid-2">
 
-<!-- Generated Content (from Skills) -->
-<div id="skill-outputs-section"></div>
+  <!-- Asana Tasks -->
+  <div class="cd-section">
+    <div class="cd-section-header">
+      <h2 class="cd-section-title">Asana Tasks <% if (it.enriched?.asanaTasks?.length) { %><span class="cd-section-count"><%= it.enriched.asanaTasks.length %></span><% } %></h2>
+    </div>
+    <% if (!it.enriched?.asanaTasks?.length) { %>
+    <div class="cd-section-empty">No Asana tasks linked.</div>
+    <% } else { %>
+    <table class="compact">
+      <thead><tr><th>Status</th><th>Task</th><th>Assignee</th><th>Due</th></tr></thead>
+      <tbody>
+        <% it.enriched.asanaTasks.slice(0, 10).forEach(t => { %>
+        <tr>
+          <td><span class="badge <%= t.completed ? 'badge-completed' : 'badge-open' %>"><%= t.completed ? 'Done' : 'Open' %></span></td>
+          <td><%= t.name %><% if (t.project_name) { %> <span style="color: var(--vendo-text-muted); font-size: 11px;">(<%= t.project_name %>)</span><% } %></td>
+          <td><%= t.assignee_name || '—' %></td>
+          <td><%= t.due_on || '—' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% if (it.enriched.asanaTasks.length > 10) { %>
+    <div style="text-align: center; padding-top: 0.5rem;">
+      <span style="font-size: 12px; color: var(--vendo-text-muted);">+ <%= it.enriched.asanaTasks.length - 10 %> more tasks</span>
+    </div>
+    <% } %>
+    <% } %>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="cd-section">
+    <div class="cd-section-header">
+      <h2 class="cd-section-title">Pipeline <% if (it.enriched?.ghlOpps?.length) { %><span class="cd-section-count"><%= it.enriched.ghlOpps.length %></span><% } %></h2>
+    </div>
+    <% if (!it.enriched?.ghlOpps?.length) { %>
+    <div class="cd-section-empty">No pipeline deals.</div>
+    <% } else { %>
+    <table class="compact">
+      <thead><tr><th>Deal</th><th>Value</th><th>Stage</th><th>Status</th></tr></thead>
+      <tbody>
+        <% it.enriched.ghlOpps.slice(0, 10).forEach(o => { %>
+        <tr>
+          <td><%= o.name || '—' %></td>
+          <td>&pound;<%= (o.monetary_value || 0).toLocaleString('en-GB', { maximumFractionDigits: 0 }) %></td>
+          <td><%= o.stage_name || '—' %></td>
+          <td><span class="badge badge-<%= o.status === 'won' ? 'completed' : o.status === 'lost' ? 'open' : 'active' %>"><%= o.status %></span></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+</div>
+
+<% /* ================================================================
+      GENERATED CONTENT — visible to all
+   ================================================================ */ %>
+<div class="cd-section" id="skill-outputs-section" style="display: none;"></div>
 <script>
 (function() {
   <% if (it.client && it.client.id) { %>
@@ -225,7 +387,7 @@
     .then(function(data) {
       if (!data.outputs || data.outputs.length === 0) return;
       const section = document.getElementById('skill-outputs-section');
-      let html = '<h2>Generated Content (' + data.outputs.length + ')</h2>';
+      let html = '<div class="cd-section-header"><h2 class="cd-section-title">Generated Content <span class="cd-section-count">' + data.outputs.length + '</span></h2></div>';
       html += '<table class="compact"><thead><tr><th>Skill</th><th>Date</th><th>By</th><th>Preview</th></tr></thead><tbody>';
       data.outputs.forEach(function(o) {
         const date = new Date(o.created_at + 'Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -234,11 +396,12 @@
         html += '<td><a href="/skills/outputs/' + o.id + '">' + o.skill_title + '</a></td>';
         html += '<td>' + date + '</td>';
         html += '<td>' + (o.created_by || '\u2014') + '</td>';
-        html += '<td style="color: #94A3B8; font-size: 13px;">' + preview + '</td>';
+        html += '<td style="color: var(--vendo-text-muted); font-size: 13px;">' + preview + '</td>';
         html += '</tr>';
       });
       html += '</tbody></table>';
       section.innerHTML = html;
+      section.style.display = 'block';
     })
     .catch(function() {});
   <% } %>
