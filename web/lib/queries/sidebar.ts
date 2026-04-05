@@ -142,25 +142,29 @@ const CACHE_TTL_MS = 60_000;
 export async function getSidebarConfig(): Promise<SidebarConfig> {
   if (cachedConfig && Date.now() - cacheTime < CACHE_TTL_MS) return cachedConfig;
 
-  const result = await rows<{ config_json: string }>(
-    'SELECT config_json FROM sidebar_config WHERE key = ?',
-    ['default'],
-  );
-  if (result.length === 0) {
-    cachedConfig = DEFAULT_SIDEBAR_CONFIG;
-    cacheTime = Date.now();
-    return DEFAULT_SIDEBAR_CONFIG;
-  }
   try {
+    const result = await rows<{ config_json: string }>(
+      'SELECT config_json FROM sidebar_config WHERE key = ?',
+      ['default'],
+    );
+    if (result.length === 0) {
+      cachedConfig = DEFAULT_SIDEBAR_CONFIG;
+      cacheTime = Date.now();
+      return DEFAULT_SIDEBAR_CONFIG;
+    }
     cachedConfig = JSON.parse(result[0].config_json) as SidebarConfig;
     cacheTime = Date.now();
     return cachedConfig;
   } catch {
+    // Table may not exist yet — return default and cache it
+    cachedConfig = DEFAULT_SIDEBAR_CONFIG;
+    cacheTime = Date.now();
     return DEFAULT_SIDEBAR_CONFIG;
   }
 }
 
 export async function saveSidebarConfig(config: SidebarConfig): Promise<void> {
+  await initSidebarSchema();
   const now = new Date().toISOString();
   await db.execute({
     sql: `INSERT INTO sidebar_config (key, config_json, updated_at)
