@@ -25,147 +25,71 @@
 <!-- Sales Funnel -->
 <div class="chart-card">
   <h3>Sales Funnel</h3>
-  <div class="funnel-container" id="funnel-tracker"></div>
+  <div class="funnel-bars" id="funnel-tracker"></div>
 </div>
 
 <script>
 (function() {
   var allStages = <%~ JSON.stringify(it.stages) %>;
-  // Exclude exit stages — keep only the progression journey
-  var exitNames = ['lost', 'no response', 'wrong number'];
-  var stages = allStages.filter(function(s) {
-    var lower = s.stage_name.toLowerCase();
-    return !exitNames.some(function(e) { return lower.indexOf(e) !== -1; });
+  // Only show the 5 key progression stages
+  var funnelOrder = ['enquiry', 'loom/email sent', 'call booked', 'proposal sent', 'won'];
+  var stageMap = {};
+  allStages.forEach(function(s) { stageMap[s.stage_name.toLowerCase()] = s; });
+  var stages = funnelOrder.map(function(name) {
+    return stageMap[name] || { stage_name: name.charAt(0).toUpperCase() + name.slice(1), count: 0, value: 0, probability: 0 };
   });
-  if (!stages.length) return;
+
+  var maxCount = Math.max.apply(null, stages.map(function(s) { return s.count; })) || 1;
 
   var colours = [
-    'rgba(59, 130, 246, 0.6)',
-    'rgba(99, 102, 241, 0.6)',
-    'rgba(139, 92, 246, 0.6)',
-    'rgba(168, 85, 247, 0.6)',
-    'rgba(236, 72, 153, 0.6)',
-    'rgba(251, 191, 36, 0.6)',
-    'rgba(245, 158, 11, 0.6)',
-    'rgba(34, 197, 94, 0.55)',
-    'rgba(34, 197, 94, 0.7)',
-    'rgba(34, 197, 94, 0.9)'
+    '#60A5FA',
+    '#38BDF8',
+    '#818CF8',
+    '#A78BFA',
+    '#22C55E'
   ];
-  var hoverColours = colours.map(function(c) { return c.replace(/[\d.]+\)$/, '0.9)'); });
 
   var container = document.getElementById('funnel-tracker');
   if (!container) return;
 
-  var W = 560, segH = 56, gap = 3, pad = 24;
-  var H = pad * 2 + stages.length * segH + (stages.length - 1) * gap;
-  var centerX = W / 2;
-  var maxCount = Math.max.apply(null, stages.map(function(s) { return s.count; })) || 1;
-
-  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-
-  // Tooltip
-  var tooltip = document.createElement('div');
-  tooltip.className = 'funnel-tooltip';
-  container.appendChild(tooltip);
-
-  function showTip(evt, stage, i) {
-    var rect = container.getBoundingClientRect();
-    var x = evt.clientX - rect.left + 14;
-    var y = evt.clientY - rect.top - 10;
-    if (x + 180 > rect.width) x = evt.clientX - rect.left - 180;
-    var conv = '';
-    if (i > 0 && stages[i - 1].count > 0) {
-      conv = '<div class="tt-row">\u2193 ' + (stages[i].count / stages[i - 1].count * 100).toFixed(1) + '% from ' + stages[i - 1].stage_name + '</div>';
-    }
-    tooltip.innerHTML = '<div class="tt-title">' + stage.stage_name + '</div>' +
-      '<div class="tt-row">' + stage.count + ' deal' + (stage.count !== 1 ? 's' : '') + '</div>' +
-      '<div class="tt-row">\u00A3' + Math.round(stage.value).toLocaleString() + '</div>' +
-      '<div class="tt-row">' + stage.probability + '% win probability</div>' + conv;
-    tooltip.style.left = x + 'px';
-    tooltip.style.top = y + 'px';
-    tooltip.classList.add('visible');
-  }
-
-  function hideTip() { tooltip.classList.remove('visible'); }
-
   stages.forEach(function(stage, i) {
-    var ratio = Math.max(stage.count / maxCount, 0.18);
-    var nextRatio;
-    if (i < stages.length - 1) {
-      nextRatio = Math.max(stages[i + 1].count / maxCount, 0.18);
-    } else {
-      nextRatio = ratio * 0.5;
-    }
+    var pct = Math.max(stage.count / maxCount * 100, 8);
 
-    var topW = ratio * (W - pad * 2);
-    var botW = nextRatio * (W - pad * 2);
-    var y1 = pad + i * (segH + gap);
-    var y2 = y1 + segH;
+    var row = document.createElement('div');
+    row.className = 'funnel-row';
 
-    var d = 'M' + (centerX - topW / 2) + ' ' + y1 +
-            'L' + (centerX + topW / 2) + ' ' + y1 +
-            'L' + (centerX + botW / 2) + ' ' + y2 +
-            'L' + (centerX - botW / 2) + ' ' + y2 + 'Z';
+    var bar = document.createElement('div');
+    bar.className = 'funnel-bar';
+    bar.style.width = pct + '%';
+    bar.style.backgroundColor = colours[i];
 
-    var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.setAttribute('class', 'funnel-segment');
+    var label = document.createElement('div');
+    label.className = 'funnel-bar-label';
 
-    var colIdx = i % colours.length;
-    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', d);
-    path.setAttribute('fill', colours[colIdx]);
-    path.setAttribute('stroke', 'rgba(255,255,255,0.06)');
-    path.setAttribute('stroke-width', '1');
-    g.appendChild(path);
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'funnel-bar-name';
+    nameSpan.textContent = stage.stage_name;
 
-    var midY = (y1 + y2) / 2;
+    var valSpan = document.createElement('span');
+    valSpan.className = 'funnel-bar-value';
+    var v = stage.value;
+    valSpan.textContent = v >= 1000 ? '\u00A3' + (v / 1000).toFixed(1).replace(/\.0$/, '') + 'K' : '\u00A3' + Math.round(v).toLocaleString();
 
-    // Stage label — left-aligned inside the trapezoid
-    var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', centerX);
-    label.setAttribute('y', midY - 5);
-    label.setAttribute('text-anchor', 'middle');
-    label.setAttribute('class', 'funnel-label');
-    label.textContent = stage.stage_name;
-    g.appendChild(label);
+    label.appendChild(nameSpan);
+    label.appendChild(valSpan);
+    bar.appendChild(label);
 
-    var sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    sub.setAttribute('x', centerX);
-    sub.setAttribute('y', midY + 12);
-    sub.setAttribute('text-anchor', 'middle');
-    sub.setAttribute('class', 'funnel-sublabel');
-    sub.textContent = stage.count + ' deals  \u00B7  \u00A3' + Math.round(stage.value).toLocaleString();
-    g.appendChild(sub);
-
-    g.addEventListener('mouseenter', function(e) {
-      path.setAttribute('fill', hoverColours[colIdx]);
-      showTip(e, stage, i);
-    });
-    g.addEventListener('mousemove', function(e) { showTip(e, stage, i); });
-    g.addEventListener('mouseleave', function() {
-      path.setAttribute('fill', colours[colIdx]);
-      hideTip();
-    });
-    g.addEventListener('click', function(e) { showTip(e, stage, i); });
-
-    svg.appendChild(g);
-
-    // Conversion rate label between segments
+    // Conversion badge on the right
     if (i > 0 && stages[i - 1].count > 0) {
-      var convRate = (stage.count / stages[i - 1].count * 100).toFixed(0);
-      var convText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      convText.setAttribute('x', W - pad + 6);
-      convText.setAttribute('y', y1 + 4);
-      convText.setAttribute('text-anchor', 'start');
-      convText.setAttribute('class', 'funnel-conversion');
-      convText.textContent = '\u2193 ' + convRate + '%';
-      svg.appendChild(convText);
+      var conv = document.createElement('span');
+      conv.className = 'funnel-conv';
+      conv.textContent = (stage.count / stages[i - 1].count * 100).toFixed(0) + '%';
+      row.appendChild(conv);
     }
-  });
 
-  container.appendChild(svg);
+    row.appendChild(bar);
+    container.appendChild(row);
+  });
 })();
 </script>
 <% } %>
