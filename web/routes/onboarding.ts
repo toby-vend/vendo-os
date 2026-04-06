@@ -66,6 +66,19 @@ function mergeAnswers(
         const locIdx = subKey.split('.')[1];
         if (!matrix.byLocation) matrix.byLocation = {};
         (matrix.byLocation as Record<string, unknown>)[locIdx] = Array.isArray(val) ? val : [val];
+      } else if (subKey.startsWith('t.')) {
+        // Treatment pricing: t.treatment_slug.field
+        const parts = subKey.split('.');
+        const treatSlug = parts[1];
+        const field = parts[2];
+        if (treatSlug && field) {
+          if (!matrix[treatSlug]) matrix[treatSlug] = {};
+          (matrix[treatSlug] as Record<string, unknown>)[field] = val;
+        }
+      } else if (subKey.startsWith('h.')) {
+        // Opening hours: h.Monday, h.Tuesday, etc.
+        const day = subKey.slice(2);
+        matrix[day] = val;
       }
       continue;
     }

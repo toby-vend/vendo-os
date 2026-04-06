@@ -22,7 +22,7 @@ export interface SubField {
 export interface Question {
   id: string;
   label: string;
-  type: 'text' | 'textarea' | 'email' | 'url' | 'tel' | 'number' | 'select' | 'checkbox' | 'radio' | 'repeater' | 'drive-link' | 'location-checkbox-matrix';
+  type: 'text' | 'textarea' | 'email' | 'url' | 'tel' | 'number' | 'select' | 'checkbox' | 'radio' | 'repeater' | 'drive-link' | 'location-checkbox-matrix' | 'treatment-pricing' | 'opening-hours';
   placeholder?: string;
   hint?: string;
   required?: boolean;
@@ -39,6 +39,10 @@ export interface Question {
   locationSourceId?: string;
   /** For location-checkbox-matrix: the checkbox options per location */
   matrixOptions?: QuestionOption[];
+  /** For treatment-pricing: question ID containing selected treatments (checkbox) */
+  treatmentSourceId?: string;
+  /** For treatment-pricing: the master options list to resolve labels */
+  treatmentOptions?: QuestionOption[];
 }
 
 export interface Section {
@@ -98,7 +102,7 @@ const dentalSingleSections: Section[] = [
         { value: 'mixed', label: 'Mixed' },
       ]},
       { id: '1.7', label: 'How many dentists / clinicians currently work at the practice?', type: 'number', placeholder: 'e.g. 4' },
-      { id: '1.8', label: 'What are your opening hours?', type: 'textarea', hint: 'Include any late evenings or weekend availability \u2014 this affects ad scheduling.', placeholder: 'e.g. Mon-Fri 8am-6pm, Sat 9am-1pm' },
+      { id: '1.8', label: 'What are your opening hours?', type: 'opening-hours', hint: 'Include any late evenings or weekend availability \u2014 this affects ad scheduling.' },
       { id: '1.9', label: 'What geographic area do you serve / want to target?', type: 'textarea', placeholder: 'e.g. within 5 miles, specific towns or postcodes' },
       { id: '1.10', label: 'Do you have a patient CRM or lead management system in place?', type: 'text', hint: 'e.g. GoHighLevel, Dentally, SOE, Exact', placeholder: 'System name or "None"' },
     ],
@@ -181,14 +185,25 @@ const dentalSingleSections: Section[] = [
   {
     id: '3',
     title: 'Treatments to Advertise',
-    description: 'Which treatments should we focus on?',
+    description: 'Select all treatments you want to actively advertise.',
     questions: [
-      { id: '3.1', label: 'Which treatments do you want to actively advertise?', type: 'checkbox', options: TREATMENT_OPTIONS },
-      { id: '3.2', label: 'For each selected treatment, what is the approximate price point or starting price you advertise?', type: 'textarea', hint: 'This helps us write accurate ad copy and calculate ROI.', placeholder: 'e.g. Implants from \u00a32,500, Invisalign from \u00a32,900...' },
-      { id: '3.3', label: 'Are there any treatments you are NOT able to offer or want to exclude from advertising?', type: 'textarea' },
-      { id: '3.4', label: 'Which treatment is your highest priority to fill capacity for right now?', type: 'text' },
-      { id: '3.5', label: 'What is your current average monthly volume of new patients for your priority treatment?', type: 'text', placeholder: 'e.g. 8 per month' },
-      { id: '3.6', label: 'What is your target monthly volume of new patients for your priority treatment?', type: 'text', placeholder: 'e.g. 15 per month' },
+      { id: '3.1', label: 'Which treatments do you want to actively advertise?', type: 'checkbox', required: true, options: TREATMENT_OPTIONS },
+      { id: '3.2', label: 'Are there any treatments you are NOT able to offer or want to exclude from advertising?', type: 'textarea' },
+      { id: '3.3', label: 'Which treatment is your highest priority to fill capacity for right now?', type: 'text' },
+    ],
+  },
+  {
+    id: '3A',
+    title: 'Treatment Pricing & Details',
+    description: 'For each treatment you selected, tell us about your pricing and offers.',
+    questions: [
+      { id: '3A.1', label: 'Treatment pricing', type: 'treatment-pricing', treatmentSourceId: '3.1', treatmentOptions: TREATMENT_OPTIONS, hint: 'This helps us write accurate ad copy and calculate ROI.' },
+      { id: '3A.2', label: 'Do you have a price list you can share?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3A.2a', label: 'Price list link', type: 'url', placeholder: 'https://yourpractice.com/prices or Google Drive / Dropbox link', hint: 'Paste a link to your online price list or upload to the Brand Assets Drive folder.', showWhen: { questionId: '3A.2', equals: 'yes' } },
+      { id: '3A.3', label: 'What is your current average monthly volume of new patients for your priority treatment?', type: 'text', placeholder: 'e.g. 8 per month' },
+      { id: '3A.4', label: 'What is your target monthly volume of new patients for your priority treatment?', type: 'text', placeholder: 'e.g. 15 per month' },
     ],
   },
   {
@@ -399,14 +414,27 @@ const dentalMultiSections: Section[] = [
   {
     id: '3',
     title: 'Treatments to Advertise',
+    description: 'Select all treatments you want to actively advertise across the group.',
     questions: [
-      { id: '3.1', label: 'Which treatments do you want to actively advertise across the group?', type: 'checkbox', options: TREATMENT_OPTIONS },
+      { id: '3.1', label: 'Which treatments do you want to actively advertise across the group?', type: 'checkbox', required: true, options: TREATMENT_OPTIONS },
       { id: '3.2', label: 'Which treatments does each location offer?', type: 'location-checkbox-matrix', locationSourceId: '1.6', matrixOptions: TREATMENT_OPTIONS, hint: 'Toggle "Applies to all" if every location offers the same treatments.' },
-      { id: '3.3', label: 'Are prices standardised across locations, or does pricing vary?', type: 'textarea', hint: 'Please provide approximate price points or starting prices per treatment.' },
-      { id: '3.4', label: 'Which treatment is the group\u2019s highest priority to fill capacity for right now?', type: 'text' },
-      { id: '3.5', label: 'Are there specific locations where certain treatments need prioritising more than others?', type: 'textarea' },
-      { id: '3.6', label: 'What is the current average monthly new patient volume for your priority treatment \u2014 total across the group and per location?', type: 'textarea' },
-      { id: '3.7', label: 'What is the target monthly new patient volume for your priority treatment \u2014 total and per location?', type: 'textarea' },
+      { id: '3.3', label: 'Which treatment is the group\u2019s highest priority to fill capacity for right now?', type: 'text' },
+      { id: '3.4', label: 'Are there specific locations where certain treatments need prioritising more than others?', type: 'textarea' },
+    ],
+  },
+  {
+    id: '3A',
+    title: 'Treatment Pricing & Details',
+    description: 'For each treatment you selected, tell us about your pricing and offers.',
+    questions: [
+      { id: '3A.1', label: 'Treatment pricing', type: 'treatment-pricing', treatmentSourceId: '3.1', treatmentOptions: TREATMENT_OPTIONS, hint: 'This helps us write accurate ad copy and calculate ROI.' },
+      { id: '3A.2', label: 'Are prices standardised across locations, or does pricing vary?', type: 'textarea', hint: 'If prices differ by location, please note the key differences.' },
+      { id: '3A.3', label: 'Do you have a price list you can share?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3A.3a', label: 'Price list link', type: 'url', placeholder: 'https://yourpractice.com/prices or Google Drive / Dropbox link', hint: 'Paste a link to your online price list or upload to the Brand Assets Drive folder.', showWhen: { questionId: '3A.3', equals: 'yes' } },
+      { id: '3A.4', label: 'What is the current average monthly new patient volume for your priority treatment \u2014 total across the group and per location?', type: 'textarea' },
+      { id: '3A.5', label: 'What is the target monthly new patient volume for your priority treatment \u2014 total and per location?', type: 'textarea' },
     ],
   },
   {

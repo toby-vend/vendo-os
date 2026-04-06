@@ -10,6 +10,23 @@
 
   // Helper: format a value for review display
   function reviewVal(q, val) {
+    if (q.type === 'treatment-pricing' && typeof val === 'object' && val !== null) {
+      return Object.entries(val)
+        .filter(([k]) => k !== 'applyAll' && k !== 'treatments' && k !== 'byLocation')
+        .map(([slug, data]) => {
+          const opt = q.treatmentOptions?.find(o => o.value === slug);
+          const label = opt ? opt.label : slug;
+          const d = data || {};
+          const parts = [label];
+          if (d.price) parts.push('Price: ' + d.price);
+          if (d.offer) parts.push('Offer: ' + d.offer);
+          return parts.join(' \u2014 ');
+        }).join('\n');
+    }
+    if (q.type === 'opening-hours' && typeof val === 'object' && val !== null) {
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      return days.map(d => d + ': ' + (val[d] || 'Closed')).join('\n');
+    }
     if (q.type === 'repeater' && Array.isArray(val)) {
       return val.map((entry, i) => {
         if (typeof entry !== 'object') return entry;
@@ -270,9 +287,14 @@
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
+          <% } else if (mode === 'internal') { %>
+            <div class="wizard-drive-fallback">
+              <p class="wizard-hint">No Drive folder set. Add one via the admin create form, or the client can paste a link below.</p>
+              <input name="<%= q.id %>" type="url" class="wizard-input" value="<%= answers[q.id] || '' %>" placeholder="Paste file sharing link here">
+            </div>
           <% } else { %>
             <div class="wizard-drive-fallback">
-              <p class="wizard-hint">No Drive folder has been set up yet. You can paste a link to your files below (Google Drive, Dropbox, WeTransfer, etc.)</p>
+              <p class="wizard-hint">If you have brand assets to share (logos, photos, guidelines), paste a link below (Google Drive, Dropbox, WeTransfer, etc.)</p>
               <input name="<%= q.id %>" type="url" class="wizard-input" value="<%= answers[q.id] || '' %>" placeholder="Paste file sharing link here">
             </div>
           <% } %>
@@ -327,6 +349,55 @@
                   </details>
                 <% } %>
               </div>
+            </div>
+          <% } %>
+
+        <% } else if (q.type === 'opening-hours') { %>
+          <%
+            const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+            const hoursData = (typeof answers[q.id] === 'object' && answers[q.id] !== null && !Array.isArray(answers[q.id])) ? answers[q.id] : {};
+          %>
+          <div class="wizard-hours-grid">
+            <% for (const day of DAYS) { %>
+              <div class="wizard-hours-row">
+                <label class="wizard-hours-day"><%= day %></label>
+                <input name="<%= q.id %>._h.<%= day %>" type="text" class="wizard-input wizard-hours-input"
+                       value="<%= (hoursData[day]) || '' %>" placeholder="e.g. 8:00am - 6:00pm or Closed">
+              </div>
+            <% } %>
+          </div>
+
+        <% } else if (q.type === 'treatment-pricing') { %>
+          <%
+            const selectedTreats = Array.isArray(answers[q.treatmentSourceId]) ? answers[q.treatmentSourceId] : (answers[q.treatmentSourceId] ? [answers[q.treatmentSourceId]] : []);
+            const pricingData = (typeof answers[q.id] === 'object' && answers[q.id] !== null && !Array.isArray(answers[q.id])) ? answers[q.id] : {};
+          %>
+          <% if (selectedTreats.length === 0) { %>
+            <p class="wizard-hint">No treatments selected yet. Go back and select treatments first.</p>
+          <% } else { %>
+            <div class="wizard-treatment-pricing">
+              <% for (const tv of selectedTreats) { %>
+                <%
+                  const tOpt = (q.treatmentOptions || []).find(o => o.value === tv);
+                  const tLabel = tOpt ? tOpt.label : tv;
+                  const tData = pricingData[tv] || {};
+                %>
+                <div class="wizard-treatment-card">
+                  <div class="wizard-treatment-name"><%= tLabel %></div>
+                  <div class="wizard-treatment-fields">
+                    <div class="wizard-repeater-field">
+                      <label class="wizard-label">Starting price / price from</label>
+                      <input name="<%= q.id %>._t.<%= tv %>.price" type="text" class="wizard-input"
+                             value="<%= tData.price || '' %>" placeholder="e.g. From &pound;2,500">
+                    </div>
+                    <div class="wizard-repeater-field">
+                      <label class="wizard-label">Current offer or promotion (if any)</label>
+                      <input name="<%= q.id %>._t.<%= tv %>.offer" type="text" class="wizard-input"
+                             value="<%= tData.offer || '' %>" placeholder="e.g. Free consultation, 0% finance">
+                    </div>
+                  </div>
+                </div>
+              <% } %>
             </div>
           <% } %>
 
