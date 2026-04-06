@@ -26,7 +26,7 @@
 <div class="growth-alert growth-alert-error"><%= it.error %></div>
 <% } %>
 
-<!-- Filters -->
+<!-- Filters + Bulk actions -->
 <% if (it.linkedinPosts && it.linkedinPosts.length) { %>
 <div class="growth-filters">
   <select id="linkedin-filter-pillar" class="growth-select" onchange="filterLinkedinTable()">
@@ -43,10 +43,74 @@
     <option value="approved">Approved</option>
     <option value="published">Published</option>
   </select>
+  <span style="flex: 1;"></span>
+  <span id="linkedin-bulk-count" style="font-size: 12px; color: #94A3B8; display: none;">0 selected</span>
+  <button class="btn btn-sm growth-sort-btn" id="linkedin-bulk-draft-btn" style="display: none;"
+    hx-post="/growth/linkedin/bulk-draft"
+    hx-target="#growth-tab-content"
+    hx-swap="innerHTML"
+    hx-indicator="#linkedin-spinner"
+    hx-disabled-elt="this"
+    onclick="document.getElementById('linkedin-bulk-ids').value = getSelectedLinkedinIds();">
+    Draft Selected
+  </button>
+  <input type="hidden" id="linkedin-bulk-ids" name="ids" form="linkedin-bulk-form" />
+</div>
+<form id="linkedin-bulk-form" style="display:none;"
+  hx-post="/growth/linkedin/bulk-draft"
+  hx-target="#growth-tab-content"
+  hx-swap="innerHTML"
+  hx-indicator="#linkedin-spinner">
+  <input type="hidden" id="linkedin-bulk-ids-form" name="ids" />
+</form>
+<% } %>
+
+<!-- View toggle -->
+<% if (it.linkedinPosts && it.linkedinPosts.length) { %>
+<div style="display: flex; gap: 2px; margin-bottom: 0.75rem;">
+  <button class="growth-view-toggle active" id="view-table-btn" onclick="showLinkedinView('table')">Table</button>
+  <button class="growth-view-toggle" id="view-cal-btn" onclick="showLinkedinView('calendar')">Calendar</button>
 </div>
 <% } %>
 
-<div class="growth-split">
+<!-- Calendar view (hidden by default) -->
+<% if (it.linkedinPosts && it.linkedinPosts.length) { %>
+<div id="linkedin-calendar" style="display: none;">
+  <div class="content-calendar">
+    <% const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']; %>
+    <% days.forEach(day => { %>
+    <div class="cal-day">
+      <div class="cal-day-header"><%= day %></div>
+      <% const dayIndex = ['Mon','Tue','Wed','Thu','Fri'].indexOf(day); %>
+      <% it.linkedinPosts.forEach(p => {
+        if (!p.scheduled_date) return;
+        const d = new Date(p.scheduled_date);
+        const postDay = (d.getDay() + 6) % 7; // 0=Mon
+        if (postDay !== dayIndex) return;
+      %>
+      <div class="cal-post cal-post-<%= p.pillar %>"
+        hx-get="/growth/linkedin/<%= p.id %>/result"
+        hx-target="#growth-result-panel-cal"
+        hx-swap="innerHTML"
+        style="cursor: pointer;">
+        <span class="cal-post-date"><%= p.scheduled_date.slice(5, 10) %></span>
+        <span class="cal-post-pillar"><%= p.pillar %></span>
+        <span class="cal-post-topic"><%= (p.topic || '').slice(0, 35) %></span>
+        <% if (p.draft) { %><span style="color: #22C55E; font-size: 10px;">&#9679;</span><% } %>
+      </div>
+      <% }) %>
+    </div>
+    <% }) %>
+  </div>
+  <div class="result-panel" id="growth-result-panel-cal" style="margin-top: 1rem;">
+    <div class="result-panel-empty">
+      <p>Click a post in the calendar to preview</p>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<div class="growth-split" id="linkedin-table-view">
   <!-- Pipeline table -->
   <div class="growth-table-col">
     <% if (!it.linkedinPosts || !it.linkedinPosts.length) { %>
@@ -58,7 +122,10 @@
     <% } else { %>
     <table class="compact" id="linkedin-table">
       <thead>
-        <tr><th>Date</th><th>Pillar</th><th>Topic</th><th>Status</th><th>Actions</th></tr>
+        <tr>
+          <th style="width: 28px;"><input type="checkbox" id="linkedin-select-all" onchange="toggleAllLinkedin(this.checked)" style="cursor:pointer;"></th>
+          <th>Date</th><th>Pillar</th><th>Topic</th><th>Status</th><th>Actions</th>
+        </tr>
       </thead>
       <tbody>
         <% it.linkedinPosts.forEach(p => { %>
@@ -69,6 +136,11 @@
           hx-swap="innerHTML"
           style="cursor: pointer;"
           onclick="document.querySelectorAll('.row-selectable').forEach(r=>r.classList.remove('row-selected'));this.classList.add('row-selected');">
+          <td onclick="event.stopPropagation();">
+            <% if (!p.draft && p.status === 'idea') { %>
+            <input type="checkbox" class="linkedin-row-cb" value="<%= p.id %>" onchange="updateBulkCount()" style="cursor:pointer;">
+            <% } %>
+          </td>
           <td><%= p.scheduled_date ? p.scheduled_date.slice(0, 10) : '&mdash;' %></td>
           <td>
             <span class="badge badge-<%= p.pillar === 'sell' ? 'warning' : p.pillar === 'teach' ? 'active' : p.pillar === 'trust' ? 'info' : 'default' %>"><%= p.pillar %></span>
@@ -133,7 +205,26 @@
 </script>
 <% } %>
 
-<!-- Client-side filter -->
+<!-- Client-side interactions -->
+<script>
+function showLinkedinView(view) {
+  var tableEl = document.getElementById('linkedin-table-view');
+  var calEl = document.getElementById('linkedin-calendar');
+  var tableBtn = document.getElementById('view-table-btn');
+  var calBtn = document.getElementById('view-cal-btn');
+  if (view === 'calendar') {
+    if (tableEl) tableEl.style.display = 'none';
+    if (calEl) calEl.style.display = '';
+    if (tableBtn) tableBtn.classList.remove('active');
+    if (calBtn) calBtn.classList.add('active');
+  } else {
+    if (tableEl) tableEl.style.display = '';
+    if (calEl) calEl.style.display = 'none';
+    if (tableBtn) tableBtn.classList.add('active');
+    if (calBtn) calBtn.classList.remove('active');
+  }
+}
+</script>
 <script>
 function filterLinkedinTable() {
   var pillar = document.getElementById('linkedin-filter-pillar')?.value || '';
@@ -141,6 +232,28 @@ function filterLinkedinTable() {
   document.querySelectorAll('#linkedin-table tbody tr').forEach(function(row) {
     var show = (!pillar || row.dataset.pillar === pillar) && (!status || row.dataset.status === status);
     row.style.display = show ? '' : 'none';
+  });
+}
+function getSelectedLinkedinIds() {
+  return Array.from(document.querySelectorAll('.linkedin-row-cb:checked')).map(function(cb) { return cb.value; }).join(',');
+}
+function updateBulkCount() {
+  var ids = getSelectedLinkedinIds();
+  var count = ids ? ids.split(',').length : 0;
+  var countEl = document.getElementById('linkedin-bulk-count');
+  var btnEl = document.getElementById('linkedin-bulk-draft-btn');
+  if (countEl) { countEl.style.display = count > 0 ? '' : 'none'; countEl.textContent = count + ' selected'; }
+  if (btnEl) { btnEl.style.display = count > 0 ? '' : 'none'; }
+}
+function toggleAllLinkedin(checked) {
+  document.querySelectorAll('.linkedin-row-cb').forEach(function(cb) { cb.checked = checked; });
+  updateBulkCount();
+}
+// Wire the bulk draft button to send ids via hx-vals
+var bulkBtn = document.getElementById('linkedin-bulk-draft-btn');
+if (bulkBtn) {
+  bulkBtn.addEventListener('htmx:configRequest', function(evt) {
+    evt.detail.parameters.ids = getSelectedLinkedinIds();
   });
 }
 </script>

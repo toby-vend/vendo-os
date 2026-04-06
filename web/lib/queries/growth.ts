@@ -331,12 +331,19 @@ export async function updateOutboundResponse(id: number, responseType: string): 
 
 // --- Case Study mutations ---
 
-export async function getCaseStudy(id: number): Promise<(CaseStudy & { draft?: string }) | null> {
-  const r = await rows<CaseStudy & { draft?: string }>(
-    'SELECT id, client_name, win_type, metric_highlight, client_approved, anonymous, status, draft, created_at FROM case_studies WHERE id = ?',
+export async function getCaseStudy(id: number): Promise<(CaseStudy & { draft?: string; distribution?: string }) | null> {
+  const r = await rows<CaseStudy & { draft?: string; distribution?: string }>(
+    'SELECT id, client_name, win_type, metric_highlight, client_approved, anonymous, status, draft, distribution, created_at FROM case_studies WHERE id = ?',
     [id],
   );
   return r[0] ?? null;
+}
+
+export async function updateCaseStudyDistribution(id: number, distribution: string): Promise<void> {
+  await db.execute({
+    sql: 'UPDATE case_studies SET distribution = ?, updated_at = ? WHERE id = ?',
+    args: [distribution, new Date().toISOString(), id],
+  });
 }
 
 export async function insertCaseStudies(wins: { clientName: string; winType: string; metric: string }[]): Promise<void> {

@@ -6,7 +6,7 @@ import {
   getOutboundPipeline, getOutboundFunnel, getProspect,
   insertProspect, updateOutboundDraft, updateOutboundStatus, updateOutboundResponse,
   getCaseStudies, getCaseStudyStats, getCaseStudy,
-  insertCaseStudies, updateCaseStudyDraft, updateCaseStudyStatus, updateCaseStudyApproval,
+  insertCaseStudies, updateCaseStudyDraft, updateCaseStudyStatus, updateCaseStudyApproval, updateCaseStudyDistribution,
   getReferrals, getReferralStats,
   insertReferral, updateReferralStatus, markReferralPaid,
   getUpsellOpportunities, getUpsellStats,
@@ -241,6 +241,35 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     }
   });
 
+  // Bulk draft multiple LinkedIn posts
+  app.post('/linkedin/bulk-draft', async (request, reply) => {
+    const body = request.body as Record<string, string> | undefined;
+    const idsRaw = body?.ids || '';
+    const ids = idsRaw.split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n));
+    if (!ids.length) {
+      return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({ error: 'No posts selected.' }));
+    }
+
+    let drafted = 0;
+    for (const id of ids) {
+      try {
+        const post = await getLinkedInPost(id);
+        if (!post || post.draft) continue;
+        const draft = await draftLinkedInPost(post.pillar, post.topic);
+        await updateLinkedInDraft(id, draft);
+        drafted++;
+      } catch (err) {
+        console.error(`[growth] Bulk draft failed for id=${id}:`, err);
+      }
+    }
+
+    await insertGrowthLog('linkedin', 'bulk_draft', `Bulk drafted ${drafted} of ${ids.length} posts`, drafted);
+
+    return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({
+      message: drafted > 0 ? `${drafted} post(s) drafted.` : 'No posts needed drafting.',
+    }));
+  });
+
   // ===== OUTBOUND =====
 
   app.post('/outbound/add', async (request, reply) => {
@@ -351,6 +380,28 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
     const anonymous = body.approval === 'anonymous';
     await updateCaseStudyApproval(id, approved, anonymous);
     return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData());
+  });
+
+  // Toggle a distribution channel as done/undone
+  app.post<{ Params: { id: string } }>('/casestudies/:id/distribution', async (request, reply) => {
+    const id = parseInt((request.params as { id: string }).id, 10);
+    const body = request.body as Record<string, string>;
+    const channelIndex = parseInt(body.channelIndex, 10);
+
+    const cs = await getCaseStudy(id);
+    if (!cs || !cs.distribution) return reply.code(404).send('Not found');
+
+    try {
+      const channels = JSON.parse(cs.distribution) as { channel: string; done: boolean }[];
+      if (channels[channelIndex]) {
+        channels[channelIndex].done = !channels[channelIndex].done;
+        await updateCaseStudyDistribution(id, JSON.stringify(channels));
+      }
+    } catch { /* invalid JSON */ }
+
+    // Re-fetch and return the result panel
+    const updated = await getCaseStudy(id);
+    return reply.type('text/html').render('growth/_result-casestudy', { cs: updated });
   });
 
   // ===== REFERRALS =====

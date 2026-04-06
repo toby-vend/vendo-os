@@ -25,12 +25,25 @@
   <% if (it.cs.distribution) { %>
   <div class="result-panel-section">
     <div class="result-panel-draft-label">Distribution Checklist</div>
-    <% try { const channels = JSON.parse(it.cs.distribution); channels.forEach(ch => { %>
-    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; font-size: 13px;">
-      <span style="color: <%= ch.done ? '#22C55E' : '#94A3B8' %>; font-size: 16px;"><%= ch.done ? '&#10003;' : '&#9675;' %></span>
-      <span><%= ch.channel %></span>
+    <% try { const channels = JSON.parse(it.cs.distribution); channels.forEach((ch, idx) => { %>
+    <div class="dist-channel-row"
+      hx-post="/growth/casestudies/<%= it.cs.id %>/distribution"
+      hx-target="#growth-result-panel"
+      hx-swap="innerHTML"
+      hx-vals='{"channelIndex": "<%= idx %>"}'
+      style="cursor: pointer;">
+      <span class="dist-check <%= ch.done ? 'dist-check-done' : '' %>"><%= ch.done ? '&#10003;' : '' %></span>
+      <span class="<%= ch.done ? 'dist-label-done' : '' %>"><%= ch.channel %></span>
     </div>
     <% }) } catch { } %>
+    <% try { const channels = JSON.parse(it.cs.distribution); const done = channels.filter(c => c.done).length; %>
+    <div style="margin-top: 0.5rem; font-size: 11px; color: #94A3B8;">
+      <%= done %>/<%= channels.length %> complete
+      <div style="height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 4px; overflow: hidden;">
+        <div style="width: <%= channels.length > 0 ? Math.round((done / channels.length) * 100) : 0 %>%; height: 100%; background: var(--vendo-green); border-radius: 2px;"></div>
+      </div>
+    </div>
+    <% } catch { } %>
   </div>
   <% } %>
 

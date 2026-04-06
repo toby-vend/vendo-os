@@ -3,7 +3,6 @@
   <div class="result-panel-header">
     <span class="badge badge-<%= it.prospect.status === 'converted' ? 'active' : it.prospect.status === 'meeting_booked' ? 'warning' : 'default' %>"><%= it.prospect.status.replace(/_/g, ' ') %></span>
     <span style="font-size: 12px; color: #94A3B8;">ICP: <strong><%= it.prospect.icp_match_score %></strong>/100</span>
-    <span style="font-size: 12px; color: #94A3B8;">Step <%= it.prospect.sequence_step %></span>
   </div>
 
   <h3 style="font-size: 15px; margin: 0.75rem 0 0.25rem;"><%= it.prospect.prospect_name %></h3>
@@ -17,6 +16,21 @@
   </div>
   <% } %>
 
+  <!-- Sequence Timeline -->
+  <div class="result-panel-section" style="border-top: none; margin-top: 0; padding-top: 0;">
+    <div class="result-panel-draft-label">Outreach Sequence</div>
+    <div class="sequence-timeline">
+      <% const steps = [1, 2, 3]; %>
+      <% steps.forEach((step, idx) => { %>
+        <div class="seq-step <%= it.prospect.sequence_step >= step ? 'seq-step-done' : '' %> <%= it.prospect.sequence_step === step - 1 ? 'seq-step-next' : '' %>">
+          <div class="seq-step-dot"></div>
+          <% if (idx < steps.length - 1) { %><div class="seq-step-line <%= it.prospect.sequence_step > step ? 'seq-step-line-done' : '' %>"></div><% } %>
+          <div class="seq-step-label">Step <%= step %><%= step === 1 ? ' — Initial' : step === 2 ? ' — Follow-up' : ' — Final' %></div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
   <% if (it.prospect.notes) { %>
   <div class="result-panel-draft">
     <div class="result-panel-draft-label">Outreach Drafts</div>
@@ -28,7 +42,7 @@
   </div>
   <% } else { %>
   <div style="padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; color: #94A3B8; font-size: 13px;">
-    No outreach drafted yet. Click "Draft" in the table to generate the next sequence step.
+    No outreach drafted yet. Click "Draft" to generate Step <%= it.prospect.sequence_step + 1 %>.
   </div>
   <% } %>
 
