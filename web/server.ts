@@ -243,6 +243,7 @@ app.addHook('onSend', async (_request, reply) => {
     "frame-src https://app.frame.io https://*.frame.io",
     "frame-ancestors 'none'",
   ].join('; '));
+  reply.header('Vary', 'HX-Request');
 });
 
 // Form body parser — supports multi-value fields (e.g. checkboxes with same name)

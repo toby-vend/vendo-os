@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're offline — VendoOS</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #0A0A0A;
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      color: #94A3B8;
+    }
+    .offline-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      gap: 24px;
+      padding: 32px 16px;
+      text-align: center;
+    }
+    .offline-logo {
+      width: 56px;
+      height: 56px;
+    }
+    .offline-heading {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #F1F5F9;
+      letter-spacing: -0.02em;
+    }
+    .offline-message {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #94A3B8;
+    }
+    .offline-retry {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 10px 24px;
+      background: #22C55E;
+      color: #0A0A0A;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+    .offline-retry:hover {
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-wrapper">
+    <svg class="offline-logo" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="56" height="56" rx="12" fill="#22C55E"/>
+      <path d="M14 16L28 40L42 16H35L28 29L21 16H14Z" fill="#0A0A0A"/>
+    </svg>
+    <h1 class="offline-heading">You're offline</h1>
+    <p class="offline-message">Check your connection and try again</p>
+    <button class="offline-retry" onclick="window.location.reload()">
+      Try again
+    </button>
+  </div>
+</body>
+</html>
