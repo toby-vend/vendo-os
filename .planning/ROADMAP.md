@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order. v1.1 
 
 - [x] **Phase 11: Responsive Layout** - Mobile viewport, bottom tab bar, touch targets, table reflow, swipe and pull-to-refresh gestures (completed 2026-04-06)
 - [x] **Phase 12: PWA Foundation** - Manifest, service worker shell, static asset caching, home screen install (completed 2026-04-06)
-- [ ] **Phase 13: Offline Caching** - Full-page and HTMX partial caching, offline fallback pages, Vary header
+- [x] **Phase 13: Offline Caching** - Full-page and HTMX partial caching, offline fallback pages, Vary header (completed 2026-04-06)
 - [ ] **Phase 14: Push Notifications** - VAPID keys, push subscriptions, draft-ready/QA-failure/status-change notifications, dead subscription pruning
 
 ## Phase Details
@@ -68,7 +68,7 @@ Plans:
   2. An HTMX partial request made while offline renders an appropriate offline partial snippet in the swap target — not a full HTML document injected into the page (which would corrupt it)
   3. When no cached version of a requested page exists, a branded "You are offline" page is shown, not a browser error
   4. All Fastify routes return a `Vary: HX-Request` header, enabling the service worker to cache full-page and partial responses separately
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 13-01-PLAN.md — Vary: HX-Request header, offline.html fallback page, offline-partial.html snippet
@@ -95,5 +95,5 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 |-------|----------------|--------|-----------|
 | 11. Responsive Layout | 3/3 | Complete    | 2026-04-06 |
 | 12. PWA Foundation | 2/2 | Complete    | 2026-04-06 |
-| 13. Offline Caching | 1/2 | In Progress|  |
+| 13. Offline Caching | 2/2 | Complete   | 2026-04-06 |
 | 14. Push Notifications | 0/? | Not started | - |

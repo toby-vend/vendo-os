@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Complete
 status: planning
-stopped_at: Completed 13-offline-caching-01-PLAN.md
-last_updated: "2026-04-06T21:56:22.894Z"
+stopped_at: Completed 13-offline-caching-02-PLAN.md (awaiting human-verify checkpoint)
+last_updated: "2026-04-06T21:58:38.844Z"
 last_activity: 2026-04-06 — v1.1 roadmap created (4 phases, 26 requirements mapped)
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -74,6 +74,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 12-pwa-foundation P01 | 154 | 2 tasks | 9 files |
 | Phase 12-pwa-foundation P02 | 2 | 1 tasks | 1 files |
 | Phase 13-offline-caching P01 | 1 | 1 tasks | 3 files |
+| Phase 13-offline-caching P02 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 12-pwa-foundation]: Install App section in settings.eta uses all client-side platform detection — no SSR needed; section permanently visible regardless of dismiss/install state
 - [Phase 13-offline-caching]: Vary: HX-Request added inside existing onSend hook (not a new hook) to keep security header logic consolidated
 - [Phase 13-offline-caching]: Offline files use no external resources — system font stack and inline SVG avoid network dependencies when offline
+- [Phase 13-offline-caching]: try/catch on NetworkFirst.handle() is required — it throws on both network and cache miss
+- [Phase 13-offline-caching]: Precaching via manual install event — CDN-only Workbox has no manifest injection support
 
 ### Research Flags (v1.1)
 
@@ -140,6 +143,6 @@ None blocking v1.1 start.
 
 ## Session Continuity
 
-Last session: 2026-04-06T21:56:22.892Z
-Stopped at: Completed 13-offline-caching-01-PLAN.md
+Last session: 2026-04-06T21:58:34.791Z
+Stopped at: Completed 13-offline-caching-02-PLAN.md (awaiting human-verify checkpoint)
 Resume file: None
