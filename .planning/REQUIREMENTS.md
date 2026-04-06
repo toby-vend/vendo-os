@@ -98,8 +98,8 @@ Requirements for milestone v1.1. Each maps to roadmap phases (continuing from Ph
 - [ ] **OFFL-01**: Static assets (CSS, JS, icons, fonts) are cached by the service worker on install
 - [ ] **OFFL-02**: Previously visited full pages are cached and available offline
 - [ ] **OFFL-03**: HTMX partial responses are cached separately and served correctly (not as full pages)
-- [ ] **OFFL-04**: A branded offline fallback page is shown when no cached version exists
-- [ ] **OFFL-05**: All Fastify routes include `Vary: HX-Request` header to enable correct SW caching
+- [x] **OFFL-04**: A branded offline fallback page is shown when no cached version exists
+- [x] **OFFL-05**: All Fastify routes include `Vary: HX-Request` header to enable correct SW caching
 
 ### Push Notifications
 
@@ -216,8 +216,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OFFL-01 | Phase 13 | Pending |
 | OFFL-02 | Phase 13 | Pending |
 | OFFL-03 | Phase 13 | Pending |
-| OFFL-04 | Phase 13 | Pending |
-| OFFL-05 | Phase 13 | Pending |
+| OFFL-04 | Phase 13 | Complete |
+| OFFL-05 | Phase 13 | Complete |
 | PUSH-01 | Phase 14 | Pending |
 | PUSH-02 | Phase 14 | Pending |
 | PUSH-03 | Phase 14 | Pending |
