@@ -49,6 +49,9 @@
         <% } %>
       </div>
       <div class="vp-card-footer">
+        <% if (['shoot_booked','shoot_plan_in_progress','shoot_plan_approved'].includes(p.status)) { %>
+        <a href="/video-production/<%= p.id %>/shoot-plan" class="vp-card-link" onclick="event.stopPropagation();">Plan</a>
+        <% } %>
         <span class="vp-card-status-badge vp-cs-<%= p.client_status %>"><%= p.client_status.replace('_', ' ') %></span>
       </div>
     </div>

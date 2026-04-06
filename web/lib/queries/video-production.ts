@@ -536,6 +536,51 @@ export async function getVideoColumnCounts(): Promise<Record<string, number>> {
   return counts;
 }
 
+export async function getVideoProjectsByDateRange(
+  startDate: string,
+  endDate: string,
+  clientId?: number,
+): Promise<VideoProject[]> {
+  let sql = `
+    SELECT vp.*,
+           COALESCE(c.display_name, c.name) as client_name
+    FROM video_projects vp
+    JOIN clients c ON c.id = vp.client_id
+    WHERE vp.shoot_date IS NOT NULL
+      AND vp.shoot_date >= ? AND vp.shoot_date <= ?
+      AND vp.archived = 0
+  `;
+  const args: (string | number | null)[] = [startDate, endDate];
+  if (clientId) {
+    sql += ' AND vp.client_id = ?';
+    args.push(clientId);
+  }
+  sql += ' ORDER BY vp.shoot_date ASC, vp.shoot_time ASC';
+  return rows<VideoProject>(sql, args);
+}
+
+export async function getUpcomingShootList(
+  clientId?: number,
+  limit = 50,
+): Promise<VideoProject[]> {
+  const today = new Date().toISOString().split('T')[0];
+  let sql = `
+    SELECT vp.*,
+           COALESCE(c.display_name, c.name) as client_name
+    FROM video_projects vp
+    JOIN clients c ON c.id = vp.client_id
+    WHERE vp.archived = 0
+  `;
+  const args: (string | number | null)[] = [];
+  if (clientId) {
+    sql += ' AND vp.client_id = ?';
+    args.push(clientId);
+  }
+  sql += ' ORDER BY CASE WHEN vp.shoot_date >= ? THEN 0 ELSE 1 END, vp.shoot_date ASC LIMIT ?';
+  args.push(today, limit);
+  return rows<VideoProject>(sql, args);
+}
+
 export async function getActiveClients(): Promise<{ id: number; label: string }[]> {
   return rows<{ id: number; label: string }>(
     "SELECT id, COALESCE(display_name, name) as label FROM clients WHERE status = 'active' ORDER BY label COLLATE NOCASE",

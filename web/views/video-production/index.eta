@@ -22,7 +22,10 @@
       <option value="low" <%= it.filters.priority === 'low' ? 'selected' : '' %>>Low</option>
     </select>
   </div>
-  <a href="/video-production/new" class="btn btn-primary">+ New Project</a>
+  <div style="display: flex; gap: 0.5rem;">
+    <a href="/video-production/calendar" class="btn btn-secondary">Calendar View</a>
+    <a href="/video-production/new" class="btn btn-primary">+ New Project</a>
+  </div>
 </div>
 
 <!-- Kanban board -->
@@ -79,6 +82,9 @@
           <% } %>
         </div>
         <div class="vp-card-footer">
+          <% if (['shoot_booked','shoot_plan_in_progress','shoot_plan_approved'].includes(p.status)) { %>
+          <a href="/video-production/<%= p.id %>/shoot-plan" class="vp-card-link" onclick="event.stopPropagation();">Plan</a>
+          <% } %>
           <span class="vp-card-status-badge vp-cs-<%= p.client_status %>"><%= p.client_status.replace('_', ' ') %></span>
         </div>
       </div>

@@ -8,6 +8,7 @@ import {
   getVideoComments, addVideoComment,
   getVideoAuditLog, logVideoAudit,
   getVideoColumnCounts, getActiveClients, getInternalUsers,
+  getVideoProjectsByDateRange, getUpcomingShootList,
   VIDEO_COLUMNS, VALID_STATUSES,
   type VideoProject,
 } from '../lib/queries.js';
@@ -108,6 +109,134 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
       columns,
       columnDefs: VIDEO_COLUMNS,
       columnCounts,
+    });
+  });
+
+  // ── Content Calendar ─────────────────────────────────────────────
+
+  app.get('/calendar', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const query = request.query as Record<string, string>;
+    const view = query.view || 'month'; // month | week | list
+    const clientFilter = query.client ? parseInt(query.client, 10) : undefined;
+
+    // Determine the target date
+    const now = new Date();
+    const year = query.year ? parseInt(query.year, 10) : now.getFullYear();
+    const month = query.month ? parseInt(query.month, 10) - 1 : now.getMonth(); // 0-indexed
+    const weekStart = query.weekStart || ''; // ISO date for week view
+
+    const clients = await getActiveClients();
+
+    if (view === 'list') {
+      const projects = await getUpcomingShootList(clientFilter);
+      reply.render('video-production/calendar-list', {
+        projects,
+        clients,
+        filters: query,
+        view,
+      });
+      return;
+    }
+
+    if (view === 'week') {
+      // Week view — 7 days starting from weekStart or current Monday
+      let startDate: Date;
+      if (weekStart) {
+        startDate = new Date(weekStart);
+      } else {
+        startDate = new Date(year, month, now.getDate());
+        const day = startDate.getDay();
+        const diff = day === 0 ? -6 : 1 - day; // Monday
+        startDate.setDate(startDate.getDate() + diff);
+      }
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 6);
+
+      const startStr = startDate.toISOString().split('T')[0];
+      const endStr = endDate.toISOString().split('T')[0];
+      const projects = await getVideoProjectsByDateRange(startStr, endStr, clientFilter);
+
+      // Group by date
+      const days: { date: Date; dateStr: string; projects: VideoProject[] }[] = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        const ds = d.toISOString().split('T')[0];
+        days.push({ date: d, dateStr: ds, projects: projects.filter(p => p.shoot_date === ds) });
+      }
+
+      reply.render('video-production/calendar-week', {
+        days,
+        startDate,
+        endDate,
+        clients,
+        filters: query,
+        view,
+      });
+      return;
+    }
+
+    // Month view (default)
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    // Extend to fill the calendar grid (start on Monday)
+    const gridStart = new Date(firstDay);
+    const startDow = gridStart.getDay();
+    const mondayOffset = startDow === 0 ? -6 : 1 - startDow;
+    gridStart.setDate(gridStart.getDate() + mondayOffset);
+
+    const gridEnd = new Date(lastDay);
+    const endDow = gridEnd.getDay();
+    if (endDow !== 0) gridEnd.setDate(gridEnd.getDate() + (7 - endDow));
+
+    const startStr = gridStart.toISOString().split('T')[0];
+    const endStr = gridEnd.toISOString().split('T')[0];
+    const projects = await getVideoProjectsByDateRange(startStr, endStr, clientFilter);
+
+    // Build day cells
+    const weeks: { date: Date; dateStr: string; isCurrentMonth: boolean; isToday: boolean; projects: VideoProject[] }[][] = [];
+    let current = new Date(gridStart);
+    const todayStr = now.toISOString().split('T')[0];
+
+    while (current <= gridEnd) {
+      const week: typeof weeks[0] = [];
+      for (let d = 0; d < 7; d++) {
+        const ds = current.toISOString().split('T')[0];
+        week.push({
+          date: new Date(current),
+          dateStr: ds,
+          isCurrentMonth: current.getMonth() === month,
+          isToday: ds === todayStr,
+          projects: projects.filter(p => p.shoot_date === ds),
+        });
+        current.setDate(current.getDate() + 1);
+      }
+      weeks.push(week);
+    }
+
+    // Nav links
+    const prevMonth = month === 0 ? 12 : month; // 1-indexed for URL
+    const prevYear = month === 0 ? year - 1 : year;
+    const nextMonth = month === 11 ? 1 : month + 2;
+    const nextYear = month === 11 ? year + 1 : year;
+    const monthLabel = firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+    reply.render('video-production/calendar', {
+      weeks,
+      year,
+      month: month + 1,
+      monthLabel,
+      prevMonth,
+      prevYear,
+      nextMonth,
+      nextYear,
+      clients,
+      filters: query,
+      view,
     });
   });
 
@@ -369,5 +498,145 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     await logVideoAudit(projectId, 'archived', null, null, user.id, user.name);
 
     reply.redirect('/video-production');
+  });
+
+  // ── Shoot Plan ──────────────────────────────────────────────────
+
+  app.get('/:id/shoot-plan', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const project = await getVideoProject(parseInt(id, 10));
+    if (!project) { reply.code(404).send('Project not found'); return; }
+
+    const [plan, history] = await Promise.all([
+      getShootPlan(project.id),
+      getShootPlanHistory(project.id),
+    ]);
+
+    reply.render('video-production/shoot-plan', {
+      project,
+      plan,
+      history,
+    });
+  });
+
+  app.post('/:id/shoot-plan', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const project = await getVideoProject(projectId);
+    if (!project) { reply.code(404).send('Project not found'); return; }
+
+    const body = request.body as Record<string, string | string[]>;
+    const existingPlan = await getShootPlan(projectId);
+
+    const planData = {
+      treatments: typeof body.treatments === 'string' ? body.treatments : undefined,
+      run_order: typeof body.run_order === 'string' ? body.run_order : undefined,
+      shot_list: typeof body.shot_list === 'string' ? body.shot_list : undefined,
+      equipment_notes: typeof body.equipment_notes === 'string' ? body.equipment_notes : undefined,
+      talent_requirements: typeof body.talent_requirements === 'string' ? body.talent_requirements : undefined,
+    };
+
+    if (existingPlan && existingPlan.status === 'draft') {
+      // Update existing draft
+      await updateShootPlan(existingPlan.id, planData);
+      await logVideoAudit(projectId, 'shoot_plan_updated', null, null, user.id, user.name);
+    } else {
+      // Create new version (either first plan or new version after changes requested)
+      await createShootPlan({ project_id: projectId, ...planData });
+      await logVideoAudit(projectId, 'shoot_plan_created', null, null, user.id, user.name);
+    }
+
+    // Move to shoot_plan_in_progress if still at shoot_booked
+    if (project.status === 'shoot_booked') {
+      await moveVideoProject(projectId, 'shoot_plan_in_progress', user.id, user.name);
+    }
+
+    reply.redirect(`/video-production/${id}/shoot-plan`);
+  });
+
+  // Mark plan as ready for client review
+  app.post('/:id/shoot-plan/submit', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const plan = await getShootPlan(projectId);
+    if (!plan) { reply.code(404).send('No shoot plan found'); return; }
+
+    await updateShootPlan(plan.id, { status: 'ready_for_review' });
+    await updateVideoProject(projectId, { client_status: 'awaiting' });
+    await logVideoAudit(projectId, 'shoot_plan_submitted', 'draft', 'ready_for_review', user.id, user.name);
+
+    reply.redirect(`/video-production/${id}/shoot-plan`);
+  });
+
+  // Client approves the plan
+  app.post('/:id/shoot-plan/approve', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const plan = await getShootPlan(projectId);
+    if (!plan) { reply.code(404).send('No shoot plan found'); return; }
+
+    const now = new Date().toISOString();
+    await updateShootPlan(plan.id, { status: 'approved', approved_at: now });
+    await updateVideoProject(projectId, { client_status: 'approved' });
+
+    // Auto-move Kanban to shoot_plan_approved
+    await moveVideoProject(projectId, 'shoot_plan_approved', user.id, user.name);
+
+    // Update project treatments from approved plan
+    if (plan.treatments) {
+      await updateVideoProject(projectId, { treatments_planned: plan.treatments });
+    }
+
+    await logVideoAudit(projectId, 'shoot_plan_approved', null, null, user.id, user.name);
+
+    reply.redirect(`/video-production/${id}/shoot-plan`);
+  });
+
+  // Client requests changes
+  app.post('/:id/shoot-plan/request-changes', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const plan = await getShootPlan(projectId);
+    if (!plan) { reply.code(404).send('No shoot plan found'); return; }
+
+    const body = request.body as Record<string, string | string[]>;
+    const comments = typeof body.client_comments === 'string' ? body.client_comments.trim() : '';
+
+    await updateShootPlan(plan.id, {
+      status: 'changes_requested',
+      client_comments: comments,
+    });
+    await updateVideoProject(projectId, { client_status: 'changes_requested' });
+
+    // Log the feedback as a comment too
+    if (comments) {
+      await addVideoComment({
+        project_id: projectId,
+        source: 'client',
+        author_name: user.name,
+        body: comments,
+      });
+    }
+
+    // Move back to shoot_plan_in_progress
+    await moveVideoProject(projectId, 'shoot_plan_in_progress', user.id, user.name);
+    await logVideoAudit(projectId, 'shoot_plan_changes_requested', null, null, user.id, user.name, { comments });
+
+    reply.redirect(`/video-production/${id}/shoot-plan`);
   });
 };

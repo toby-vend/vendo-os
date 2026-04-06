@@ -159,6 +159,18 @@
           <tr><td style="color: var(--vendo-text-muted);">Client Status</td><td><span class="vp-cs-badge vp-cs-<%= p.client_status %>"><%= p.client_status.replace('_', ' ') %></span></td></tr>
           <tr><td style="color: var(--vendo-text-muted);">Revision Round</td><td>R<%= p.revision_round %></td></tr>
           <tr><td style="color: var(--vendo-text-muted);">Editor</td><td><%= p.assigned_editor_name || 'Unassigned' %></td></tr>
+          <tr>
+            <td style="color: var(--vendo-text-muted);">Shoot Plan</td>
+            <td>
+              <% if (it.shootPlan) { %>
+              <a href="/video-production/<%= p.id %>/shoot-plan" style="color: var(--vendo-green); text-decoration: none; font-weight: 600;">
+                v<%= it.shootPlan.version %> — <%= it.shootPlan.status.replace(/_/g, ' ') %>
+              </a>
+              <% } else { %>
+              <a href="/video-production/<%= p.id %>/shoot-plan" style="color: var(--vendo-green); text-decoration: none;">Create Plan</a>
+              <% } %>
+            </td>
+          </tr>
           <tr><td style="color: var(--vendo-text-muted);">Raw Files</td><td><%= it.rawFiles.length %></td></tr>
           <tr><td style="color: var(--vendo-text-muted);">Edit Files</td><td><%= it.editFiles.length %></td></tr>
           <tr><td style="color: var(--vendo-text-muted);">QA Reviews</td><td><%= it.qaReviews.length %></td></tr>

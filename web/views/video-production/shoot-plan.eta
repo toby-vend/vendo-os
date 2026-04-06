@@ -1,0 +1,288 @@
+<% layout('/layouts/base') %>
+
+<%
+  const p = it.project;
+  const plan = it.plan;
+  const history = it.history || [];
+  const isEditable = !plan || plan.status === 'draft' || plan.status === 'changes_requested';
+  const isReviewable = plan && plan.status === 'ready_for_review';
+  const isApproved = plan && plan.status === 'approved';
+
+  // Parse treatments JSON
+  let treatments = [];
+  try { if (plan && plan.treatments) treatments = JSON.parse(plan.treatments); } catch {}
+
+  // Parse run order JSON
+  let runOrder = [];
+  try { if (plan && plan.run_order) runOrder = JSON.parse(plan.run_order); } catch {}
+%>
+
+<a href="/video-production/<%= p.id %>" style="font-size: 13px; color: var(--vendo-text-muted); text-decoration: none; margin-bottom: 1rem; display: inline-block;">&larr; Back to Project</a>
+
+<!-- Header -->
+<div class="vp-detail-header">
+  <div>
+    <h2 style="font-size: 20px; font-weight: 600; margin: 0;">Shoot Plan — <%= p.client_name %></h2>
+    <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <span style="font-size: 13px; color: var(--vendo-text-muted);"><%= p.title %></span>
+      <% if (p.shoot_date) { %>
+      <span style="font-size: 13px; color: var(--vendo-text-muted);">Shoot: <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+      <% } %>
+      <% if (plan) { %>
+      <span class="sp-status sp-status-<%= plan.status %>"><%= plan.status.replace(/_/g, ' ') %></span>
+      <span style="font-size: 12px; color: var(--vendo-text-muted);">v<%= plan.version %></span>
+      <% } else { %>
+      <span class="sp-status sp-status-draft">no plan yet</span>
+      <% } %>
+    </div>
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <% if (isEditable && plan) { %>
+    <form method="POST" action="/video-production/<%= p.id %>/shoot-plan/submit" style="margin:0;">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+      <button type="submit" class="btn btn-primary" onclick="return confirm('Submit this plan for client review?');">Submit for Review</button>
+    </form>
+    <% } %>
+    <% if (isReviewable) { %>
+    <form method="POST" action="/video-production/<%= p.id %>/shoot-plan/approve" style="margin:0;">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+      <button type="submit" class="btn btn-primary" onclick="return confirm('Approve this shoot plan?');">Approve</button>
+    </form>
+    <% } %>
+  </div>
+</div>
+
+<% if (plan && plan.status === 'changes_requested' && plan.client_comments) { %>
+<div class="sp-feedback-banner">
+  <strong>Client feedback:</strong> <%= plan.client_comments %>
+</div>
+<% } %>
+
+<div class="two-col" style="gap: 1.5rem; margin-top: 1.5rem;">
+  <!-- Left: Plan form -->
+  <div>
+    <form method="POST" action="/video-production/<%= p.id %>/shoot-plan" class="vp-form" id="shoot-plan-form">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+
+      <!-- Treatments -->
+      <div class="stat-card" style="margin-bottom: 1rem;">
+        <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Treatments & Videos</h3>
+        <p style="font-size: 12px; color: var(--vendo-text-muted); margin-bottom: 0.75rem;">Define each treatment to be filmed and the video types for each.</p>
+
+        <div id="sp-treatments">
+          <% if (treatments.length) { %>
+            <% treatments.forEach(function(t, idx) { %>
+            <div class="sp-treatment-row" data-idx="<%= idx %>">
+              <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                  <label>Treatment</label>
+                  <input type="text" class="sp-t-name" value="<%= t.name || '' %>" placeholder="e.g. Invisalign">
+                </div>
+                <div class="form-group" style="flex: 2;">
+                  <label>Video Types</label>
+                  <input type="text" class="sp-t-types" value="<%= (t.videoTypes || []).join(', ') %>" placeholder="e.g. UGC, Talking Head, Before/After">
+                </div>
+                <div class="form-group" style="flex: 0.5;">
+                  <label>Qty</label>
+                  <input type="number" class="sp-t-qty" value="<%= t.numVideos || 1 %>" min="1">
+                </div>
+                <div class="form-group" style="flex: 0 0 auto; align-self: flex-end;">
+                  <button type="button" class="btn-icon" onclick="this.closest('.sp-treatment-row').remove(); updateTreatmentsJson();" title="Remove">&times;</button>
+                </div>
+              </div>
+            </div>
+            <% }); %>
+          <% } %>
+        </div>
+
+        <button type="button" class="btn btn-secondary" onclick="addTreatmentRow()" style="margin-top: 0.5rem;">+ Add Treatment</button>
+
+        <!-- Hidden field that holds the serialised JSON -->
+        <input type="hidden" name="treatments" id="sp-treatments-json" value='<%= plan ? (plan.treatments || "[]") : "[]" %>'>
+      </div>
+
+      <!-- Run Order / Schedule -->
+      <div class="stat-card" style="margin-bottom: 1rem;">
+        <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Run Order / Schedule</h3>
+        <p style="font-size: 12px; color: var(--vendo-text-muted); margin-bottom: 0.75rem;">Time blocks for the shoot day. Add each segment in order.</p>
+
+        <div id="sp-schedule">
+          <% if (runOrder.length) { %>
+            <% runOrder.forEach(function(block, idx) { %>
+            <div class="sp-schedule-row" data-idx="<%= idx %>">
+              <div class="form-row">
+                <div class="form-group" style="flex: 0 0 90px;">
+                  <label>Start</label>
+                  <input type="time" class="sp-s-start" value="<%= block.start || '' %>">
+                </div>
+                <div class="form-group" style="flex: 0 0 90px;">
+                  <label>End</label>
+                  <input type="time" class="sp-s-end" value="<%= block.end || '' %>">
+                </div>
+                <div class="form-group" style="flex: 2;">
+                  <label>Activity</label>
+                  <input type="text" class="sp-s-activity" value="<%= block.activity || '' %>" placeholder="e.g. Invisalign UGC x2">
+                </div>
+                <div class="form-group" style="flex: 0 0 auto; align-self: flex-end;">
+                  <button type="button" class="btn-icon" onclick="this.closest('.sp-schedule-row').remove(); updateScheduleJson();" title="Remove">&times;</button>
+                </div>
+              </div>
+            </div>
+            <% }); %>
+          <% } %>
+        </div>
+
+        <button type="button" class="btn btn-secondary" onclick="addScheduleRow()" style="margin-top: 0.5rem;">+ Add Time Block</button>
+
+        <input type="hidden" name="run_order" id="sp-schedule-json" value='<%= plan ? (plan.run_order || "[]") : "[]" %>'>
+      </div>
+
+      <!-- Shot List -->
+      <div class="stat-card" style="margin-bottom: 1rem;">
+        <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Shot List</h3>
+        <div class="form-group">
+          <textarea name="shot_list" rows="8" placeholder="Detail the specific shots needed for each video. Use markdown for formatting.&#10;&#10;## Invisalign UGC&#10;1. Patient testimonial — front angle&#10;2. Tray reveal close-up&#10;3. Before/after smile comparison"><%= plan ? (plan.shot_list || '') : '' %></textarea>
+        </div>
+      </div>
+
+      <!-- Equipment & Talent -->
+      <div class="stat-card" style="margin-bottom: 1rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 0.75rem;">Equipment Notes</h3>
+            <textarea name="equipment_notes" rows="3" placeholder="Camera, lighting, audio gear, props..."><%= plan ? (plan.equipment_notes || '') : '' %></textarea>
+          </div>
+          <div class="form-group">
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 0.75rem;">Talent / Patient Requirements</h3>
+            <textarea name="talent_requirements" rows="3" placeholder="Consented patient needed, staff member, actor..."><%= plan ? (plan.talent_requirements || '') : '' %></textarea>
+          </div>
+        </div>
+      </div>
+
+      <% if (isEditable) { %>
+      <button type="submit" class="btn btn-primary" onclick="updateTreatmentsJson(); updateScheduleJson();">Save Plan</button>
+      <% } %>
+    </form>
+  </div>
+
+  <!-- Right: Status + Version History + Client Actions -->
+  <div>
+    <% if (isReviewable) { %>
+    <div class="stat-card" style="margin-bottom: 1rem; border-color: rgba(245,158,11,0.3);">
+      <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 0.75rem;">Awaiting Client Response</h3>
+      <p style="font-size: 13px; color: var(--vendo-text-muted); margin-bottom: 1rem;">This plan has been submitted for review. The client can approve or request changes.</p>
+
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <form method="POST" action="/video-production/<%= p.id %>/shoot-plan/approve" style="margin:0;">
+          <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+          <button type="submit" class="btn btn-primary">Approve</button>
+        </form>
+      </div>
+
+      <form method="POST" action="/video-production/<%= p.id %>/shoot-plan/request-changes" class="vp-form">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+        <div class="form-group">
+          <label>Request Changes</label>
+          <textarea name="client_comments" rows="3" placeholder="Describe what needs changing..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger">Request Changes</button>
+      </form>
+    </div>
+    <% } %>
+
+    <% if (isApproved) { %>
+    <div class="stat-card" style="margin-bottom: 1rem; border-color: rgba(34,197,94,0.3);">
+      <h3 style="font-size: 14px; font-weight: 600; color: var(--vendo-green); margin-bottom: 0.5rem;">Plan Approved</h3>
+      <p style="font-size: 13px; color: var(--vendo-text-muted);">
+        Approved on <%= plan.approved_at ? new Date(plan.approved_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—' %>
+      </p>
+    </div>
+    <% } %>
+
+    <!-- Version History -->
+    <div class="stat-card">
+      <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Version History</h3>
+      <% if (history.length === 0) { %>
+      <p style="color: var(--vendo-text-muted); font-size: 13px;">No versions yet. Save the plan to create v1.</p>
+      <% } else { %>
+      <div class="sp-version-list">
+        <% history.forEach(function(v) { %>
+        <div class="sp-version-item<%= v.id === (plan ? plan.id : 0) ? ' sp-version-current' : '' %>">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 600; font-size: 13px;">Version <%= v.version %></span>
+            <span class="sp-status sp-status-<%= v.status %>"><%= v.status.replace(/_/g, ' ') %></span>
+          </div>
+          <div style="font-size: 11px; color: var(--vendo-text-muted); margin-top: 0.25rem;">
+            <%= new Date(v.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+            <% if (v.approved_at) { %> — approved <%= new Date(v.approved_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %><% } %>
+          </div>
+          <% if (v.client_comments) { %>
+          <div style="font-size: 12px; color: #F59E0B; margin-top: 0.35rem;">Client: <%= v.client_comments %></div>
+          <% } %>
+        </div>
+        <% }); %>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script>
+// Treatment rows — dynamic builder
+function addTreatmentRow() {
+  var container = document.getElementById('sp-treatments');
+  var idx = container.children.length;
+  var html = '<div class="sp-treatment-row" data-idx="' + idx + '">' +
+    '<div class="form-row">' +
+    '<div class="form-group" style="flex:2;"><label>Treatment</label><input type="text" class="sp-t-name" placeholder="e.g. Implants"></div>' +
+    '<div class="form-group" style="flex:2;"><label>Video Types</label><input type="text" class="sp-t-types" placeholder="e.g. UGC, Reel, Talking Head"></div>' +
+    '<div class="form-group" style="flex:0.5;"><label>Qty</label><input type="number" class="sp-t-qty" value="1" min="1"></div>' +
+    '<div class="form-group" style="flex:0 0 auto;align-self:flex-end;"><button type="button" class="btn-icon" onclick="this.closest(\'.sp-treatment-row\').remove();updateTreatmentsJson();" title="Remove">&times;</button></div>' +
+    '</div></div>';
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+function updateTreatmentsJson() {
+  var rows = document.querySelectorAll('.sp-treatment-row');
+  var arr = [];
+  rows.forEach(function(row) {
+    var name = row.querySelector('.sp-t-name').value.trim();
+    var types = row.querySelector('.sp-t-types').value.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    var qty = parseInt(row.querySelector('.sp-t-qty').value, 10) || 1;
+    if (name) arr.push({ name: name, videoTypes: types, numVideos: qty });
+  });
+  document.getElementById('sp-treatments-json').value = JSON.stringify(arr);
+}
+
+// Schedule rows — dynamic builder
+function addScheduleRow() {
+  var container = document.getElementById('sp-schedule');
+  var idx = container.children.length;
+  var html = '<div class="sp-schedule-row" data-idx="' + idx + '">' +
+    '<div class="form-row">' +
+    '<div class="form-group" style="flex:0 0 90px;"><label>Start</label><input type="time" class="sp-s-start"></div>' +
+    '<div class="form-group" style="flex:0 0 90px;"><label>End</label><input type="time" class="sp-s-end"></div>' +
+    '<div class="form-group" style="flex:2;"><label>Activity</label><input type="text" class="sp-s-activity" placeholder="e.g. Whitening Before/After x2"></div>' +
+    '<div class="form-group" style="flex:0 0 auto;align-self:flex-end;"><button type="button" class="btn-icon" onclick="this.closest(\'.sp-schedule-row\').remove();updateScheduleJson();" title="Remove">&times;</button></div>' +
+    '</div></div>';
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+function updateScheduleJson() {
+  var rows = document.querySelectorAll('.sp-schedule-row');
+  var arr = [];
+  rows.forEach(function(row) {
+    var start = row.querySelector('.sp-s-start').value;
+    var end = row.querySelector('.sp-s-end').value;
+    var activity = row.querySelector('.sp-s-activity').value.trim();
+    if (activity || start) arr.push({ start: start, end: end, activity: activity });
+  });
+  document.getElementById('sp-schedule-json').value = JSON.stringify(arr);
+}
+
+// Serialise on form submit
+document.getElementById('shoot-plan-form').addEventListener('submit', function() {
+  updateTreatmentsJson();
+  updateScheduleJson();
+});
+</script>
