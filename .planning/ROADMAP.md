@@ -68,7 +68,11 @@ Plans:
   2. An HTMX partial request made while offline renders an appropriate offline partial snippet in the swap target — not a full HTML document injected into the page (which would corrupt it)
   3. When no cached version of a requested page exists, a branded "You are offline" page is shown, not a browser error
   4. All Fastify routes return a `Vary: HX-Request` header, enabling the service worker to cache full-page and partial responses separately
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Vary: HX-Request header, offline.html fallback page, offline-partial.html snippet
+- [ ] 13-02-PLAN.md — Service worker NetworkFirst routes for pages and HTMX partials, precaching
 
 ### Phase 14: Push Notifications
 **Goal**: AMs receive OS-level push notifications on their phone when tasks complete, fail QA, or change status — no polling required — with push subscriptions managed per-device and pruned automatically
@@ -91,5 +95,5 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 |-------|----------------|--------|-----------|
 | 11. Responsive Layout | 3/3 | Complete    | 2026-04-06 |
 | 12. PWA Foundation | 2/2 | Complete    | 2026-04-06 |
-| 13. Offline Caching | 0/? | Not started | - |
+| 13. Offline Caching | 0/2 | Planning complete | - |
 | 14. Push Notifications | 0/? | Not started | - |
