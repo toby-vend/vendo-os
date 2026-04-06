@@ -1,0 +1,95 @@
+<% layout('/layouts/base') %>
+
+<%
+  // Status → colour class mapping
+  const statusColour = {
+    shoot_booked: 'cal-blue',
+    shoot_plan_in_progress: 'cal-amber',
+    shoot_plan_approved: 'cal-green',
+    content_day_complete: 'cal-grey',
+    raw_files_shared: 'cal-grey',
+    in_editing: 'cal-grey',
+    qa_review: 'cal-grey',
+    revisions: 'cal-grey',
+    client_review: 'cal-grey',
+    live: 'cal-grey',
+  };
+%>
+
+<!-- Toolbar -->
+<div class="vp-toolbar">
+  <div class="vp-filters">
+    <!-- View switcher -->
+    <div class="cal-view-switcher">
+      <a href="/video-production/calendar?view=month&year=<%= it.year %>&month=<%= it.month %><%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn active">Month</a>
+      <a href="/video-production/calendar?view=week<%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn">Week</a>
+      <a href="/video-production/calendar?view=list<%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn">List</a>
+    </div>
+
+    <select onchange="calFilterClient(this.value)">
+      <option value="">All Clients</option>
+      <% it.clients.forEach(function(c) { %>
+      <option value="<%= c.id %>" <%= it.filters.client == c.id ? 'selected' : '' %>><%= c.label %></option>
+      <% }); %>
+    </select>
+  </div>
+
+  <div style="display: flex; gap: 0.5rem; align-items: center;">
+    <a href="/video-production" class="btn btn-secondary">Board View</a>
+    <a href="/video-production/new" class="btn btn-primary">+ New Project</a>
+  </div>
+</div>
+
+<!-- Month navigation -->
+<div class="cal-nav">
+  <a href="/video-production/calendar?view=month&year=<%= it.prevYear %>&month=<%= it.prevMonth %><%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-nav-btn">&larr;</a>
+  <h2 class="cal-month-label"><%= it.monthLabel %></h2>
+  <a href="/video-production/calendar?view=month&year=<%= it.nextYear %>&month=<%= it.nextMonth %><%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-nav-btn">&rarr;</a>
+</div>
+
+<!-- Calendar grid -->
+<div class="cal-grid">
+  <!-- Day headers -->
+  <div class="cal-header">Mon</div>
+  <div class="cal-header">Tue</div>
+  <div class="cal-header">Wed</div>
+  <div class="cal-header">Thu</div>
+  <div class="cal-header">Fri</div>
+  <div class="cal-header cal-weekend">Sat</div>
+  <div class="cal-header cal-weekend">Sun</div>
+
+  <!-- Day cells -->
+  <% it.weeks.forEach(function(week) { %>
+    <% week.forEach(function(day) { %>
+    <div class="cal-cell<%= day.isCurrentMonth ? '' : ' cal-cell-muted' %><%= day.isToday ? ' cal-cell-today' : '' %>">
+      <div class="cal-date"><%= day.date.getDate() %></div>
+      <% day.projects.forEach(function(p) {
+        const colClass = statusColour[p.status] || 'cal-grey';
+      %>
+      <a href="/video-production/<%= p.id %>" class="cal-event <%= colClass %>" title="<%= p.client_name %> — <%= p.title %>">
+        <span class="cal-event-time"><%= p.shoot_time || '' %></span>
+        <span class="cal-event-label"><%= p.client_name %></span>
+      </a>
+      <% }); %>
+    </div>
+    <% }); %>
+  <% }); %>
+</div>
+
+<!-- Legend -->
+<div class="cal-legend">
+  <span class="cal-legend-item"><span class="cal-legend-dot cal-blue"></span> Booked</span>
+  <span class="cal-legend-item"><span class="cal-legend-dot cal-amber"></span> Plan In Progress</span>
+  <span class="cal-legend-item"><span class="cal-legend-dot cal-green"></span> Plan Approved</span>
+  <span class="cal-legend-item"><span class="cal-legend-dot cal-grey"></span> Complete / Post-Shoot</span>
+</div>
+
+<script>
+function calFilterClient(val) {
+  var params = new URLSearchParams(window.location.search);
+  if (val) params.set('client', val);
+  else params.delete('client');
+  params.set('view', 'month');
+  window.location.href = '/video-production/calendar?' + params.toString();
+}
+</script>

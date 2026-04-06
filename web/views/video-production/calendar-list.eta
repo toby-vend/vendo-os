@@ -1,0 +1,96 @@
+<% layout('/layouts/base') %>
+
+<%
+  const statusLabels = {
+    shoot_booked: 'Booked',
+    shoot_plan_in_progress: 'Plan In Progress',
+    shoot_plan_approved: 'Plan Approved',
+    content_day_complete: 'Day Complete',
+    raw_files_shared: 'Files Shared',
+    in_editing: 'In Editing',
+    qa_review: 'QA Review',
+    revisions: 'Revisions',
+    client_review: 'Client Review',
+    live: 'Live',
+  };
+  const todayStr = new Date().toISOString().split('T')[0];
+%>
+
+<!-- Toolbar -->
+<div class="vp-toolbar">
+  <div class="vp-filters">
+    <div class="cal-view-switcher">
+      <a href="/video-production/calendar?view=month<%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn">Month</a>
+      <a href="/video-production/calendar?view=week<%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn">Week</a>
+      <a href="/video-production/calendar?view=list<%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn active">List</a>
+    </div>
+    <select onchange="calFilterClient(this.value)">
+      <option value="">All Clients</option>
+      <% it.clients.forEach(function(c) { %>
+      <option value="<%= c.id %>" <%= it.filters.client == c.id ? 'selected' : '' %>><%= c.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div style="display: flex; gap: 0.5rem; align-items: center;">
+    <a href="/video-production" class="btn btn-secondary">Board View</a>
+    <a href="/video-production/new" class="btn btn-primary">+ New Project</a>
+  </div>
+</div>
+
+<h2 style="font-size: 18px; font-weight: 600; margin-bottom: 1rem;">All Shoots</h2>
+
+<% if (it.projects.length === 0) { %>
+<div class="stat-card" style="text-align: center; padding: 2rem;">
+  <p style="color: var(--vendo-text-muted);">No shoots found.<% if (it.filters.client) { %> Try removing the client filter.<% } %></p>
+</div>
+<% } else { %>
+<div class="stat-card" style="overflow-x: auto;">
+  <table class="compact" style="width: 100%;">
+    <thead>
+      <tr>
+        <th>Shoot Date</th>
+        <th>Time</th>
+        <th>Client</th>
+        <th>Project</th>
+        <th>Location</th>
+        <th>Videos</th>
+        <th>Status</th>
+        <th>Editor</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.projects.forEach(function(p) {
+        const isPast = p.shoot_date && p.shoot_date < todayStr;
+        const isToday = p.shoot_date === todayStr;
+      %>
+      <tr class="<%= isToday ? 'cal-list-today' : '' %><%= isPast ? ' cal-list-past' : '' %>" style="cursor: pointer;" onclick="window.location='/video-production/<%= p.id %>'">
+        <td>
+          <% if (p.shoot_date) { %>
+          <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) %>
+          <% } else { %>
+          <span style="color: var(--vendo-text-muted);">No date</span>
+          <% } %>
+        </td>
+        <td><%= p.shoot_time || '—' %><% if (p.shoot_time && p.shoot_end_time) { %> — <%= p.shoot_end_time %><% } %></td>
+        <td style="font-weight: 600;"><%= p.client_name %></td>
+        <td><%= p.title %></td>
+        <td><%= p.location || '—' %></td>
+        <td><%= p.num_videos || '—' %></td>
+        <td><span class="status-badge status-<%= p.status.replace(/_/g, '-') %>"><%= statusLabels[p.status] || p.status %></span></td>
+        <td><%= p.assigned_editor_name || '—' %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<script>
+function calFilterClient(val) {
+  var params = new URLSearchParams(window.location.search);
+  if (val) params.set('client', val);
+  else params.delete('client');
+  params.set('view', 'list');
+  window.location.href = '/video-production/calendar?' + params.toString();
+}
+</script>

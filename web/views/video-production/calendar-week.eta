@@ -1,0 +1,103 @@
+<% layout('/layouts/base') %>
+
+<%
+  const statusColour = {
+    shoot_booked: 'cal-blue',
+    shoot_plan_in_progress: 'cal-amber',
+    shoot_plan_approved: 'cal-green',
+    content_day_complete: 'cal-grey',
+    raw_files_shared: 'cal-grey',
+    in_editing: 'cal-grey',
+    qa_review: 'cal-grey',
+    revisions: 'cal-grey',
+    client_review: 'cal-grey',
+    live: 'cal-grey',
+  };
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // Prev/next week dates
+  const prevStart = new Date(it.startDate);
+  prevStart.setDate(prevStart.getDate() - 7);
+  const nextStart = new Date(it.startDate);
+  nextStart.setDate(nextStart.getDate() + 7);
+  const prevStr = prevStart.toISOString().split('T')[0];
+  const nextStr = nextStart.toISOString().split('T')[0];
+
+  const rangeLabel = it.startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) +
+    ' — ' + it.endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+%>
+
+<!-- Toolbar -->
+<div class="vp-toolbar">
+  <div class="vp-filters">
+    <div class="cal-view-switcher">
+      <a href="/video-production/calendar?view=month<%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn">Month</a>
+      <a href="/video-production/calendar?view=week&weekStart=<%= it.startDate.toISOString().split('T')[0] %><%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn active">Week</a>
+      <a href="/video-production/calendar?view=list<%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-view-btn">List</a>
+    </div>
+    <select onchange="calFilterClient(this.value)">
+      <option value="">All Clients</option>
+      <% it.clients.forEach(function(c) { %>
+      <option value="<%= c.id %>" <%= it.filters.client == c.id ? 'selected' : '' %>><%= c.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <div style="display: flex; gap: 0.5rem; align-items: center;">
+    <a href="/video-production" class="btn btn-secondary">Board View</a>
+    <a href="/video-production/new" class="btn btn-primary">+ New Project</a>
+  </div>
+</div>
+
+<!-- Week navigation -->
+<div class="cal-nav">
+  <a href="/video-production/calendar?view=week&weekStart=<%= prevStr %><%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-nav-btn">&larr;</a>
+  <h2 class="cal-month-label"><%= rangeLabel %></h2>
+  <a href="/video-production/calendar?view=week&weekStart=<%= nextStr %><%= it.filters.client ? '&client=' + it.filters.client : '' %>" class="cal-nav-btn">&rarr;</a>
+</div>
+
+<!-- Week grid -->
+<div class="cal-week-grid">
+  <% it.days.forEach(function(day) {
+    const isToday = day.dateStr === todayStr;
+    const dayName = day.date.toLocaleDateString('en-GB', { weekday: 'short' });
+    const dayNum = day.date.getDate();
+    const monthName = day.date.toLocaleDateString('en-GB', { month: 'short' });
+  %>
+  <div class="cal-week-col<%= isToday ? ' cal-week-today' : '' %>">
+    <div class="cal-week-header">
+      <span class="cal-week-day"><%= dayName %></span>
+      <span class="cal-week-num<%= isToday ? ' cal-today-badge' : '' %>"><%= dayNum %> <%= monthName %></span>
+    </div>
+    <div class="cal-week-body">
+      <% if (day.projects.length === 0) { %>
+      <div class="cal-week-empty">No shoots</div>
+      <% } %>
+      <% day.projects.forEach(function(p) {
+        const colClass = statusColour[p.status] || 'cal-grey';
+      %>
+      <a href="/video-production/<%= p.id %>" class="cal-week-event <%= colClass %>">
+        <div class="cal-week-event-time"><%= p.shoot_time || '' %><% if (p.shoot_time && p.shoot_end_time) { %> — <%= p.shoot_end_time %><% } %></div>
+        <div class="cal-week-event-client"><%= p.client_name %></div>
+        <div class="cal-week-event-title"><%= p.title %></div>
+        <% if (p.location) { %>
+        <div class="cal-week-event-location"><%= p.location %></div>
+        <% } %>
+        <% if (p.num_videos > 0) { %>
+        <div class="cal-week-event-meta"><%= p.num_videos %> video<%= p.num_videos !== 1 ? 's' : '' %> planned</div>
+        <% } %>
+      </a>
+      <% }); %>
+    </div>
+  </div>
+  <% }); %>
+</div>
+
+<script>
+function calFilterClient(val) {
+  var params = new URLSearchParams(window.location.search);
+  if (val) params.set('client', val);
+  else params.delete('client');
+  params.set('view', 'week');
+  window.location.href = '/video-production/calendar?' + params.toString();
+}
+</script>
