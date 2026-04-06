@@ -64,6 +64,8 @@
   ],
   "routes": [
     { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
+    { "src": "/sw.js", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" }, "dest": "/public/sw.js" },
+    { "src": "/manifest.json", "dest": "/public/manifest.json" },
     { "src": "/api/chat", "dest": "/api/chat.ts", "methods": ["POST"] },
     { "src": "/api/skills/generate", "dest": "/api/skills-generate.ts", "methods": ["POST"] },
     { "src": "/api/skills/save", "dest": "/api/skills-save.ts", "methods": ["POST"] },
