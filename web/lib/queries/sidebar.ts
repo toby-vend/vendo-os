@@ -57,7 +57,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'finance',
     label: 'Finance',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 7H9a4 4 0 00-4 4 4 4 0 004 4h1"/><line x1="4" y1="19" x2="18" y2="19"/><line x1="4" y1="15" x2="12" y2="15"/></svg>',
     permission: 'dashboards',
     items: [
       { id: 'finance-dashboard', label: 'Finance', href: '/dashboards/finance', permission: 'dashboards' },

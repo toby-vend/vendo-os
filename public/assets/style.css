@@ -386,7 +386,7 @@ body {
   display: flex;
   justify-content: center;
   padding: 0;
-  margin: 2px auto;
+  margin: 0 auto;
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -419,7 +419,7 @@ body {
   justify-content: center;
   width: 36px;
   height: 36px;
-  margin: 2px auto;
+  margin: 0 auto;
   border-radius: 8px;
   color: var(--vendo-green);
   text-decoration: none;
@@ -449,6 +449,16 @@ body {
 
 .sidebar.collapsed .nav-group {
   padding-top: 0;
+}
+
+.sidebar.collapsed .nav-group:first-child {
+  padding-top: 0;
+}
+
+.sidebar.collapsed .sidebar-nav {
+  align-items: center;
+  gap: 2px;
+  padding: 0.5rem 0;
 }
 
 .sidebar.collapsed .nav-group-children {
