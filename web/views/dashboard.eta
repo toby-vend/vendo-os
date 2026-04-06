@@ -2,116 +2,164 @@
 
 <h1>Dashboard</h1>
 
+<% if (it.isAdmin) { %>
+
+<%
+  const f = it.finance;
+  const p = it.pipeline;
+  const runRate = Math.round(f.mrr * 12);
+  const totalSpend = it.stats.adSpend30d;
+  const totalLeads = it.stats.totalLeads30d;
+  const cpl = totalLeads > 0 ? (totalSpend / totalLeads) : 0;
+  const metaPct = totalSpend > 0 ? Math.round(it.stats.metaSpend30d / totalSpend * 100) : 0;
+%>
+
+<h2 style="margin-top: 0;">Revenue & Margin</h2>
 <div class="stat-grid">
-  <article class="stat-card stat-card-icon">
-    <div class="stat-icon" style="background: rgba(167, 139, 250, 0.12); color: #A78BFA;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-    </div>
-    <div>
-      <p class="stat-value"><%= it.stats.totalMeetings %></p>
-      <p class="stat-label">Total Meetings</p>
-    </div>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= Math.round(f.mrr).toLocaleString('en-GB') %></p>
+    <p class="stat-label">Monthly Revenue</p>
   </article>
-  <article class="stat-card stat-card-icon">
-    <div class="stat-icon" style="background: rgba(251, 191, 36, 0.12); color: #FBBF24;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    </div>
-    <div>
-      <p class="stat-value"><%= it.stats.openActions %></p>
-      <p class="stat-label">Open Action Items</p>
-    </div>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= (runRate / 1000).toFixed(0) %>k</p>
+    <p class="stat-label">Annual Run Rate</p>
+    <p class="stat-breakdown">Target: &pound;2,000k</p>
   </article>
-  <article class="stat-card stat-card-icon">
-    <div class="stat-icon" style="background: rgba(59, 130, 246, 0.12); color: #3B82F6;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-    </div>
-    <div>
-      <p class="stat-value"><%= it.stats.activeClients %></p>
-      <p class="stat-label">Active Clients</p>
-    </div>
+  <article class="stat-card">
+    <p class="stat-value" style="<%= it.marginPct < 20 ? 'color: #EF4444;' : '' %>"><%= it.marginPct %>%</p>
+    <p class="stat-label">Net Margin</p>
+    <p class="stat-breakdown">Target: 25%</p>
   </article>
-  <article class="stat-card stat-card-icon">
-    <div class="stat-icon" style="background: var(--vendo-green-subtle); color: var(--vendo-green);">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-    </div>
-    <div>
-      <p class="stat-value">&pound;<%= it.stats.adSpend30d.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
-      <p class="stat-label">Ad Spend (30d)</p>
-      <p class="stat-breakdown">Meta &pound;<%= (it.stats.metaSpend30d / 1000).toFixed(1) %>k | Google &pound;<%= (it.stats.gadsSpend30d / 1000).toFixed(1) %>k</p>
-    </div>
+  <article class="stat-card">
+    <p class="stat-value" style="<%= it.revChange < 0 ? 'color: #EF4444;' : '' %>"><%= it.revChange > 0 ? '+' : '' %><%= it.revChange %>%</p>
+    <p class="stat-label">vs Last Month</p>
+    <p class="stat-breakdown">&pound;<%= Math.round(it.currentIncome).toLocaleString('en-GB') %> this month</p>
   </article>
 </div>
 
-<div class="two-col">
-  <div>
-    <h2>Recent Meetings</h2>
-    <table class="compact">
-      <thead>
-        <tr><th>Date</th><th>Title</th><th>Client</th><th>Category</th></tr>
-      </thead>
-      <tbody>
-        <% it.recentMeetings.forEach(m => { %>
-        <tr class="table-row-link" onclick="window.location='/meetings/<%= m.id %>'">
-          <td><%= m.date ? m.date.slice(0, 10) : '—' %></td>
-          <td><a href="/meetings/<%= m.id %>"><%= m.title %></a></td>
-          <td><%= m.client_name || '—' %></td>
-          <td><%= m.category || '—' %></td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
-    <p><a href="/meetings">View all meetings</a></p>
-
-    <h2>Open Actions by Assignee</h2>
-    <table class="compact">
-      <thead>
-        <tr><th>Assignee</th><th>Total</th><th>Open</th></tr>
-      </thead>
-      <tbody>
-        <% it.assigneeSummary.forEach(a => { %>
-        <tr class="table-row-link" onclick="window.location='/action-items?assignee=<%= encodeURIComponent(a.assignee) %>&status=open'">
-          <td><a href="/action-items?assignee=<%= encodeURIComponent(a.assignee) %>&status=open"><%= a.assignee %></a></td>
-          <td><%= a.total %></td>
-          <td><strong><%= a.open %></strong></td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
-
-  <div>
-    <h2>Data Freshness</h2>
-    <table class="compact">
-      <thead>
-        <tr><th>Source</th><th>Last Sync</th><th>Rows</th></tr>
-      </thead>
-      <tbody>
-        <% it.syncStatus.forEach(s => { %>
-        <tr>
-          <td><%= s.source %></td>
-          <td>
-            <% if (s.lastSync) { %>
-              <span class="<%= (Date.now() - new Date(s.lastSync).getTime()) < 86400000 ? 'sync-ok' : 'sync-stale' %>">
-                <%= s.lastSync.slice(0, 10) %>
-              </span>
-            <% } else { %>
-              <span class="sync-none">Not synced</span>
-            <% } %>
-          </td>
-          <td><%= s.rowCount.toLocaleString() %></td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
-
-    <h2>Today's Brief</h2>
-    <% const today = new Date().toISOString().slice(0, 10); %>
-    <div class="brief-link-card">
-      <a href="/briefs/<%= today %>">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        View brief for <%= today %>
-      </a>
-      <a href="/briefs" class="brief-link-all">All briefs</a>
-    </div>
-  </div>
+<h2>Pipeline & Sales</h2>
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= Math.round(p.totalOpenValue).toLocaleString('en-GB') %></p>
+    <p class="stat-label">Open Deals</p>
+    <p class="stat-breakdown"><%= p.totalOpen %> opportunities</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= p.wonThisMonth %></p>
+    <p class="stat-label">Won This Month</p>
+    <p class="stat-breakdown">&pound;<%= Math.round(p.wonThisMonthValue).toLocaleString('en-GB') %> value</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= p.proposalsOut %></p>
+    <p class="stat-label">Proposals Out</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="<%= it.stalledCount > 0 ? 'color: #eab308;' : '' %>"><%= it.stalledCount %></p>
+    <p class="stat-label">Stalled >14d</p>
+  </article>
 </div>
+
+<h2>Cash & Invoices</h2>
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value" style="<%= f.cashPosition < 20000 ? 'color: #EF4444;' : '' %>">&pound;<%= Math.round(f.cashPosition).toLocaleString('en-GB') %></p>
+    <p class="stat-label">Cash Position</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= Math.round(f.outstanding).toLocaleString('en-GB') %></p>
+    <p class="stat-label">Outstanding</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="<%= f.overdueCount > 0 ? 'color: #EF4444;' : '' %>"><%= f.overdueCount %></p>
+    <p class="stat-label">Overdue Invoices</p>
+    <% if (f.overdueTotal > 0) { %>
+    <p class="stat-breakdown">&pound;<%= Math.round(f.overdueTotal).toLocaleString('en-GB') %> total</p>
+    <% } %>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= Math.round(f.invoiced).toLocaleString('en-GB') %></p>
+    <p class="stat-label">Invoiced (30d)</p>
+    <p class="stat-breakdown">&pound;<%= Math.round(f.paid).toLocaleString('en-GB') %> paid</p>
+  </article>
+</div>
+
+<h2>Ad Performance <small>30 days</small></h2>
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Total Ad Spend</p>
+    <p class="stat-breakdown">Meta &pound;<%= (it.stats.metaSpend30d / 1000).toFixed(1) %>k | Google &pound;<%= (it.stats.gadsSpend30d / 1000).toFixed(1) %>k</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= totalLeads.toLocaleString('en-GB') %></p>
+    <p class="stat-label">Total Leads</p>
+    <p class="stat-breakdown">Meta <%= it.stats.metaLeads30d %> | Google <%= it.stats.gadsLeads30d %></p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= cpl.toFixed(2) %></p>
+    <p class="stat-label">Avg CPL</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">Meta <%= metaPct %>%</p>
+    <p class="stat-label">Spend Split</p>
+    <p class="stat-breakdown">Google <%= 100 - metaPct %>%</p>
+  </article>
+</div>
+
+<% } else { %>
+
+<%
+  const totalSpend = it.stats.adSpend30d;
+  const totalLeads = it.stats.totalLeads30d;
+  const cpl = totalLeads > 0 ? (totalSpend / totalLeads) : 0;
+%>
+
+<h2 style="margin-top: 0;">Ad Performance <small>30 days</small></h2>
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
+    <p class="stat-label">Total Ad Spend</p>
+    <p class="stat-breakdown">Meta &pound;<%= (it.stats.metaSpend30d / 1000).toFixed(1) %>k | Google &pound;<%= (it.stats.gadsSpend30d / 1000).toFixed(1) %>k</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= totalLeads.toLocaleString('en-GB') %></p>
+    <p class="stat-label">Total Leads</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value">&pound;<%= cpl.toFixed(2) %></p>
+    <p class="stat-label">Avg CPL</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.activeClients %></p>
+    <p class="stat-label">Active Clients</p>
+  </article>
+</div>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.openActions %></p>
+    <p class="stat-label">Open Action Items</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value"><%= it.stats.totalMeetings %></p>
+    <p class="stat-label">Total Meetings</p>
+  </article>
+</div>
+
+<% } %>
+
+<h2>Action Items by Assignee</h2>
+<table class="compact">
+  <thead>
+    <tr><th>Assignee</th><th>Total</th><th>Open</th></tr>
+  </thead>
+  <tbody>
+    <% it.assigneeSummary.forEach(a => { %>
+    <tr class="table-row-link" onclick="window.location='/action-items?assignee=<%= encodeURIComponent(a.assignee) %>&status=open'">
+      <td><a href="/action-items?assignee=<%= encodeURIComponent(a.assignee) %>&status=open"><%= a.assignee %></a></td>
+      <td><%= a.total %></td>
+      <td><strong><%= a.open %></strong></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
