@@ -1,8 +1,16 @@
-# Roadmap: VendoOS Skills Layer
+# Roadmap: VendoOS Mobile & PWA (v1.1)
+
+## v1.0 Complete
+
+Milestone v1.0 (Skills Layer) completed 2026-04-02. Phases 1–10 all code-complete. See git history for phase plans and implementation notes. Production data population (brand:reindex + drive:reindex against Turso) pending after DRIVE_FOLDER_BRANDS env var is configured on Vercel.
+
+---
 
 ## Overview
 
-VendoOS already has a working web dashboard, meeting intelligence pipeline, and data syncs. This milestone adds the skills layer: Google Drive is indexed in real time, SOPs and brand context are stored in a classified, queryable library, and AI agents use that library to produce compliant drafts when an AM assigns a task. The build order is strict — each phase is a hard prerequisite for the next. Infrastructure is hardened first, Drive sync is established second, the knowledge stores are built third, and agent execution and AM interface come last.
+v1.1 adds a mobile and PWA layer on top of the existing Fastify + Eta + HTMX dashboard. No framework changes. No new build pipeline. Everything is additive: responsive CSS additions, a static manifest, a Workbox-powered service worker, `web-push` for server-side notifications, and a `push_subscriptions` table. The build order is strictly dependency-sequenced — responsive layout first (no new tech), PWA manifest and service worker shell second (enables installs), offline caching third (extends the service worker — highest-risk integration), push notifications fourth (new backend work on stable service worker foundation).
+
+The core mobile use case is read-and-approve. AMs use their phones to check task status, review AI-generated drafts, and approve or reject — not to create tasks.
 
 ## Phases
 
@@ -10,187 +18,69 @@ VendoOS already has a working web dashboard, meeting intelligence pipeline, and 
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-Decimal phases appear between their surrounding integers in numeric order.
+Decimal phases appear between their surrounding integers in numeric order. v1.1 continues from v1.0 Phase 10.
 
-- [x] **Phase 1: Infrastructure** - Harden OAuth tokens, split queries.ts, extend database schema (completed 2026-04-01)
-- [x] **Phase 2: Drive Webhook Foundation** - Register webhook channels, receive push notifications, renew before expiry (completed 2026-04-01)
-- [x] **Phase 3: Drive Document Processing** - Classify documents by folder, detect content changes, handle moves and deletions (completed 2026-04-01)
-- [x] **Phase 4: Skills Library** - FTS5-indexed SOP store with channel classification and version tracking (completed 2026-04-01)
-- [x] **Phase 5: Brand Hub** - Per-client brand context ingested from Drive and queryable in isolation (completed 2026-04-01)
-- [x] **Phase 6: Task Matching Engine** - Match task type and client to relevant SOPs and brand context, async queuing (completed 2026-04-01)
-- [x] **Phase 7: Agent Execution** - Produce structured draft output per channel using retrieved context (completed 2026-04-02)
-- [x] **Phase 8: QA and Compliance** - Validate output against SOP criteria, AHPRA pre-flight, retry with critique (completed 2026-04-02)
-- [x] **Phase 9: Audit and Traceability** - Append-only generation log with SOP version attribution (completed 2026-04-02)
-- [x] **Phase 10: AM Interface** - Task submission, status polling, draft review, approve and regenerate (completed 2026-04-02)
+- [ ] **Phase 11: Responsive Layout** - Mobile viewport, bottom tab bar, touch targets, table reflow, swipe and pull-to-refresh gestures
+- [ ] **Phase 12: PWA Foundation** - Manifest, service worker shell, static asset caching, home screen install
+- [ ] **Phase 13: Offline Caching** - Full-page and HTMX partial caching, offline fallback pages, Vary header
+- [ ] **Phase 14: Push Notifications** - VAPID keys, push subscriptions, draft-ready/QA-failure/status-change notifications, dead subscription pruning
 
 ## Phase Details
 
-### Phase 1: Infrastructure
-**Goal**: The existing codebase is stable enough to build on — OAuth tokens survive key rotation, queries.ts is split into domain modules, and all new database tables exist
-**Depends on**: Nothing (first phase)
-**Requirements**: INFR-01, INFR-02, INFR-03
+### Phase 11: Responsive Layout
+**Goal**: VendoOS is fully usable on a mobile browser — no horizontal scrolling, touch-sized targets, intuitive navigation, and interactive gestures for the read-and-approve workflow
+**Depends on**: Phase 10 (v1.0 AM Interface complete)
+**Requirements**: RESP-01, RESP-02, RESP-03, RESP-04, RESP-05, RESP-06, RESP-07, RESP-08, RESP-09, RESP-10
 **Success Criteria** (what must be TRUE):
-  1. OAuth token encryption uses versioned keys — a key rotation does not invalidate existing tokens
-  2. Existing dashboard routes and data syncs continue to work after the queries.ts split
-  3. All new tables exist in the schema: skills, skills_fts, brand_hub, drive_watch_channels, task_runs
-  4. Admin dashboard surfaces OAuth token status — silent failure is visible
-**Plans:** 3/3 plans complete
+  1. Every page can be viewed and used on a 375px-wide mobile screen with no horizontal scrollbar appearing at any point
+  2. On a screen below 768px, the sidebar is hidden and a fixed bottom tab bar appears with navigation to the 4-5 main sections, with each tab target meeting the 48px minimum
+  3. Data tables (task list, skills browser) reflow to a stacked card layout on mobile — no table scrolling or cut-off columns
+  4. The task submission form and draft review page are fully usable on mobile — all inputs, selects, buttons, and structured output visible without zooming
+  5. On the task list, a user can swipe left/right to navigate between sections and pull down to trigger a refresh
+**Plans**: TBD
 
-Plans:
-- [ ] 01-01-PLAN.md — Crypto key versioning, dual-key rotation, lazy migration, admin OAuth status
-- [ ] 01-02-PLAN.md — Database schema extension (5 new tables in both schema paths)
-- [ ] 01-03-PLAN.md — Split queries.ts monolith into domain modules with barrel export
-
-### Phase 2: Drive Webhook Foundation
-**Goal**: The system receives real-time push notifications from Google Drive and never loses sync due to silent channel expiry
-**Depends on**: Phase 1
-**Requirements**: SYNC-01, SYNC-03, SYNC-06
+### Phase 12: PWA Foundation
+**Goal**: VendoOS is installable to the home screen on Android and iOS, opens in standalone mode without browser chrome, and loads static assets instantly on repeat visits
+**Depends on**: Phase 11
+**Requirements**: PWA-01, PWA-02, PWA-03, PWA-04
 **Success Criteria** (what must be TRUE):
-  1. A new or updated file in Google Drive triggers a push notification to the webhook endpoint within seconds
-  2. Webhook channels are renewed automatically before their 7-day expiry — no manual intervention required
-  3. Running the full re-index command populates the skills table from all current Drive documents
-  4. The pageToken survives Vercel serverless cold starts — sync does not gap on restart
-**Plans:** 2/2 plans complete
+  1. An Android user sees the browser's "Add to Home Screen" prompt automatically and can install VendoOS to their home screen
+  2. An iOS user sees an in-app banner with instructions to use "Share > Add to Home Screen" and can complete installation manually
+  3. After installation, tapping the home screen icon opens VendoOS in standalone mode — no browser address bar, no back/forward buttons
+  4. Static assets (CSS, HTMX JS, icons) load from the service worker cache on a second visit, not from the network
+**Plans**: TBD
 
-Plans:
-- [ ] 02-01-PLAN.md — Drive queries module, webhook endpoint, channel registration logic
-- [ ] 02-02-PLAN.md — Cron channel renewal route, full re-index CLI script
-
-### Phase 3: Drive Document Processing
-**Goal**: Every document arriving via webhook is classified by channel, content-hashed for change detection, and correctly updated when moved, renamed, or deleted
-**Depends on**: Phase 2
-**Requirements**: SYNC-02, SYNC-04, SYNC-05
+### Phase 13: Offline Caching
+**Goal**: When an AM loses signal (common in dental practices), previously visited pages and drafts remain readable, HTMX partial requests fall back gracefully, and a clear offline indicator is shown when a live action is attempted
+**Depends on**: Phase 12
+**Requirements**: OFFL-01, OFFL-02, OFFL-03, OFFL-04, OFFL-05
 **Success Criteria** (what must be TRUE):
-  1. A document in the "paid social" Drive folder is classified as paid_social; moving it to "SEO" reclassifies it on next sync
-  2. A metadata-only update (rename without content change) does not trigger a re-index of the document body
-  3. Deleting a Drive document removes the corresponding skill record from the database
-  4. A document moved between channel folders updates its channel classification in the skills table
-**Plans:** 2/2 plans complete
+  1. A previously visited full page (e.g. the task list or a draft review) loads correctly when the device is offline
+  2. An HTMX partial request made while offline renders an appropriate offline partial snippet in the swap target — not a full HTML document injected into the page (which would corrupt it)
+  3. When no cached version of a requested page exists, a branded "You are offline" page is shown, not a browser error
+  4. All Fastify routes return a `Vary: HX-Request` header, enabling the service worker to cache full-page and partial responses separately
+**Plans**: TBD
 
-Plans:
-- [ ] 03-01-PLAN.md — Query functions and Drive API helpers (classification, extraction, hashing)
-- [ ] 03-02-PLAN.md — Queue processor, unit tests, re-index content extraction
-
-### Phase 4: Skills Library
-**Goal**: SOPs, templates, and frameworks from Drive are stored in a queryable FTS5 index, classified by channel and skill type, with version tracking
-**Depends on**: Phase 3
-**Requirements**: SKIL-01, SKIL-02, SKIL-03, SKIL-04, SKIL-05
+### Phase 14: Push Notifications
+**Goal**: AMs receive OS-level push notifications on their phone when tasks complete, fail QA, or change status — no polling required — with push subscriptions managed per-device and pruned automatically
+**Depends on**: Phase 13
+**Requirements**: PUSH-01, PUSH-02, PUSH-03, PUSH-04, PUSH-05, PUSH-06, PUSH-07
 **Success Criteria** (what must be TRUE):
-  1. Searching the skills library by channel and keyword returns relevant SOPs ranked by relevance
-  2. Each skill record shows its Drive document version (modified timestamp) and content hash
-  3. When a Drive document is updated, the corresponding skill record is re-indexed with new content and version
-  4. Querying for a task type with no matching SOPs returns an explicit "no skill found" signal, not an empty result that silently degrades output
-**Plans:** 2/2 plans complete
-
-Plans:
-- [ ] 04-01-PLAN.md — FTS5 search queries, gap detection, version tracking (TDD)
-- [ ] 04-02-PLAN.md — Wire FTS5 sync into mutation functions, skill type taxonomy
-
-### Phase 5: Brand Hub
-**Goal**: Per-client brand context (tone, compliance, differentiators) is ingested from Drive brand files and queryable in strict client isolation
-**Depends on**: Phase 3
-**Requirements**: BRND-01, BRND-02, BRND-03, BRND-04
-**Success Criteria** (what must be TRUE):
-  1. Brand context for a given client is retrievable by client name or slug
-  2. A query for client A never returns any data belonging to client B — verified by a test that asserts this explicitly
-  3. All 25+ active clients can have brand files ingested without performance degradation on retrieval
-  4. When a client's brand file in Drive is updated, the brand hub record reflects the new content on next sync
-**Plans:** 2/2 plans complete
-
-Plans:
-- [ ] 05-01-PLAN.md — Brand query module with FTS5 search, client isolation tests (TDD)
-- [ ] 05-02-PLAN.md — Brand ingestion pipeline: re-index script and queue processor routing
-
-### Phase 6: Task Matching Engine
-**Goal**: An AM can queue a task (client + channel + task type) and the system assembles the correct context — relevant SOPs plus brand context — without blocking the web request
-**Depends on**: Phase 4, Phase 5
-**Requirements**: TASK-01, TASK-02, TASK-03, TASK-06, TASK-07
-**Success Criteria** (what must be TRUE):
-  1. Submitting a task from the UI returns immediately — status shows "queued" without waiting for generation
-  2. The task matching engine retrieves the top relevant SOPs for the given channel and task type
-  3. Client brand context is injected into the task context alongside SOPs — never mixed with another client's data
-  4. Every task in the system has one of the defined statuses: queued / generating / qa_check / draft_ready / approved / failed
-**Plans:** 2/2 plans complete
-
-Plans:
-- [ ] 06-01-PLAN.md — Task runs query module, context assembly engine (TDD)
-- [ ] 06-02-PLAN.md — Fastify HTTP route with fire-and-forget, server registration
-
-### Phase 7: Agent Execution
-**Goal**: The background task executor produces a structured draft — ad copy, content brief, or report section — grounded in retrieved SOPs and brand context, with channel-specific output structure
-**Depends on**: Phase 6
-**Requirements**: TASK-04, TASK-05
-**Success Criteria** (what must be TRUE):
-  1. A paid social task produces output in the paid social channel structure (headline, body, CTA format)
-  2. A SEO task produces output in the SEO channel structure (meta title, meta description, content brief)
-  3. Every generated draft is grounded in at least one retrieved SOP — freeform generation without SOP context does not occur
-  4. Agent output includes the names of the SOPs used to produce it
-**Plans:** 2/2 plans complete
-
-Plans:
-- [ ] 07-01-PLAN.md — Config-driven task type registry (schemas + prompt builders for 3 channels)
-- [ ] 07-02-PLAN.md — generateDraft function, Anthropic API integration, assembleContext wiring
-
-### Phase 8: QA and Compliance
-**Goal**: Every draft is validated against SOP checklist criteria and AHPRA dental advertising rules before it reaches an AM — non-compliant output is flagged with specific rule violations, not silently surfaced or suppressed
-**Depends on**: Phase 7
-**Requirements**: QA-01, QA-02, QA-03, QA-04, QA-05
-**Success Criteria** (what must be TRUE):
-  1. A draft that fails a SOP criterion is regenerated with a critique — the AM sees only the improved version
-  2. After two retries, a still-failing draft reaches the AM as "requires human review" with the QA critique attached
-  3. Output containing a prohibited AHPRA claim is flagged with the specific rule violated
-  4. AHPRA compliance check runs on every draft before status moves to draft_ready — it cannot be bypassed
-  5. QA failures never loop indefinitely — maximum three total attempts (initial + 2 retries) is enforced
-**Plans:** 2/2 plans complete
-
-Plans:
-- [ ] 08-01-PLAN.md — AHPRA dental advertising compliance checker (deterministic rule-based module)
-- [ ] 08-02-PLAN.md — QA judge (Haiku LLM), retry-with-critique loop, generateDraft wiring
-
-### Phase 9: Audit and Traceability
-**Goal**: Every generation is logged in an append-only record — who triggered it, which client, which SOPs were used, which SOP versions, and what QA score was achieved
-**Depends on**: Phase 8
-**Requirements**: AUDT-01, AUDT-02, AUDT-03
-**Success Criteria** (what must be TRUE):
-  1. Every draft displayed to an AM shows which SOPs it was based on (names visible in the UI)
-  2. The audit log contains a complete record for each generation: AM, client, channel, SOPs used, SOP versions, QA score
-  3. Audit records cannot be deleted — the log is append-only at the database level
-**Plans:** 2/2 plans complete
-
-Plans:
-- [ ] 09-01-PLAN.md — SOP version snapshots in sops_used, getAuditRecord query, append-only policy
-- [ ] 09-02-PLAN.md — Gap closure: wire getAuditRecord to route, attempt DB trigger, fix test failures
-
-### Phase 10: AM Interface
-**Goal**: Account managers can submit tasks, monitor status, review drafts with SOP attribution, and approve or request regeneration — all from the existing web dashboard
-**Depends on**: Phase 9
-**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05
-**Success Criteria** (what must be TRUE):
-  1. An AM can submit a new task by selecting client, channel, and task type from the dashboard
-  2. The task list shows live status for all tasks — queued, generating, draft ready, approved, failed
-  3. An AM can read a draft alongside the SOPs it was based on, then approve it or request regeneration with a single click
-  4. An AM can browse and search the skills library by channel and skill type to understand what SOPs the system has available
-**Plans:** 3/3 plans complete
-
-Plans:
-- [ ] 10-01-PLAN.md — Foundation: rejected status, extended listTaskRuns filters, route prefix swap, badge CSS
-- [ ] 10-02-PLAN.md — Task submission form, task list with HTMX polling, draft review with actions
-- [ ] 10-03-PLAN.md — Skills browser with channel tabs and FTS5 search, end-to-end verification
+  1. When a draft is ready for review, the AM who submitted the task receives a push notification on their phone within seconds of the task completing
+  2. When a task fails QA after all retries, the AM receives a push notification with the task name and failure reason
+  3. A user on iOS who has installed VendoOS to their home screen on iOS 16.4+ can subscribe to push notifications; a user who has not installed it sees an install prompt with instructions rather than a broken permission request
+  4. When a push subscription is no longer valid (HTTP 410 from the push service), it is automatically removed from the database — no stale subscriptions accumulate
+  5. A single user can subscribe from multiple devices and receive notifications on all of them independently
+**Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
+Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 3/3 | Complete    | 2026-04-01 |
-| 2. Drive Webhook Foundation | 2/2 | Complete    | 2026-04-01 |
-| 3. Drive Document Processing | 2/2 | Complete    | 2026-04-01 |
-| 4. Skills Library | 2/2 | Complete    | 2026-04-01 |
-| 5. Brand Hub | 2/2 | Complete   | 2026-04-01 |
-| 6. Task Matching Engine | 2/2 | Complete   | 2026-04-01 |
-| 7. Agent Execution | 2/2 | Complete   | 2026-04-02 |
-| 8. QA and Compliance | 2/2 | Complete   | 2026-04-02 |
-| 9. Audit and Traceability | 2/2 | Complete   | 2026-04-02 |
-| 10. AM Interface | 3/3 | Complete    | 2026-04-02 |
+| 11. Responsive Layout | 0/? | Not started | - |
+| 12. PWA Foundation | 0/? | Not started | - |
+| 13. Offline Caching | 0/? | Not started | - |
+| 14. Push Notifications | 0/? | Not started | - |

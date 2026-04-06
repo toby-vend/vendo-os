@@ -199,12 +199,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-03 | Phase 10 | Complete |
 | UI-04 | Phase 10 | Complete |
 | UI-05 | Phase 10 | Complete |
+| RESP-01 | Phase 11 | Pending |
+| RESP-02 | Phase 11 | Pending |
+| RESP-03 | Phase 11 | Pending |
+| RESP-04 | Phase 11 | Pending |
+| RESP-05 | Phase 11 | Pending |
+| RESP-06 | Phase 11 | Pending |
+| RESP-07 | Phase 11 | Pending |
+| RESP-08 | Phase 11 | Pending |
+| RESP-09 | Phase 11 | Pending |
+| RESP-10 | Phase 11 | Pending |
+| PWA-01 | Phase 12 | Pending |
+| PWA-02 | Phase 12 | Pending |
+| PWA-03 | Phase 12 | Pending |
+| PWA-04 | Phase 12 | Pending |
+| OFFL-01 | Phase 13 | Pending |
+| OFFL-02 | Phase 13 | Pending |
+| OFFL-03 | Phase 13 | Pending |
+| OFFL-04 | Phase 13 | Pending |
+| OFFL-05 | Phase 13 | Pending |
+| PUSH-01 | Phase 14 | Pending |
+| PUSH-02 | Phase 14 | Pending |
+| PUSH-03 | Phase 14 | Pending |
+| PUSH-04 | Phase 14 | Pending |
+| PUSH-05 | Phase 14 | Pending |
+| PUSH-06 | Phase 14 | Pending |
+| PUSH-07 | Phase 14 | Pending |
 
 **Coverage:**
-- v1 requirements: 38 total
-- Mapped to phases: 38
-- Unmapped: 0
+- v1 requirements: 38 total — mapped to phases: 38 — unmapped: 0
+- v1.1 requirements: 26 total — mapped to phases: 26 — unmapped: 0
 
 ---
 *Requirements defined: 2026-04-01*
-*Last updated: 2026-04-06 — v1.1 Mobile & PWA requirements added*
+*Last updated: 2026-04-06 — v1.1 traceability mappings added (Phases 11–14)*
