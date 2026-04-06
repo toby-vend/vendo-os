@@ -4774,6 +4774,27 @@ button.growth-sort-btn:hover {
     flex-wrap: wrap;
   }
 
+  /* === Skills library grid — single column on mobile === */
+  .skills-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* === Chat page — fixed viewport with input above tab bar === */
+  .chat-container {
+    height: calc(100dvh - 56px - env(safe-area-inset-bottom) - 64px - 1rem) !important;
+    overflow: hidden;
+  }
+
+  .chat-messages {
+    min-height: 0;
+  }
+
+  .chat-input-area {
+    flex-shrink: 0;
+    padding-bottom: 0 !important;
+  }
+
   /* === Reporting hub + dashboard headers — stack on mobile === */
   form[action="/dashboards/reporting-hub"] {
     flex-direction: column;

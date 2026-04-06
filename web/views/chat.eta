@@ -8,6 +8,7 @@
     max-width: 800px;
     margin: 0 auto;
     position: relative;
+    overflow: hidden;
   }
 
   .chat-welcome {

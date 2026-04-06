@@ -6,7 +6,7 @@
 <% if (!it.skills || it.skills.length === 0) { %>
 <p style="color: var(--text-secondary);">No skills found. Add skill files to <code>.claude/commands/skills/</code>.</p>
 <% } else { %>
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+<div class="skills-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
   <% it.skills.forEach(s => { %>
   <a href="/skills/<%= s.slug %>" class="card" style="padding: 1.5rem; text-decoration: none; color: inherit;">
     <h3 style="margin: 0 0 0.5rem;"><%= s.title %></h3>
