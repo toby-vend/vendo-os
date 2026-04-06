@@ -1036,7 +1036,11 @@ mark {
 
   .main-content { padding: 1rem; }
 
-  .topbar { padding: 0 1rem; }
+  .topbar {
+    padding: 0 1rem;
+    padding-top: env(safe-area-inset-top);
+    min-height: calc(var(--topbar-height) + env(safe-area-inset-top));
+  }
 
   .topbar-title { font-size: 17px; }
 
