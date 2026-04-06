@@ -26,19 +26,44 @@
 <div class="growth-alert growth-alert-error"><%= it.error %></div>
 <% } %>
 
+<!-- Filters -->
+<% if (it.linkedinPosts && it.linkedinPosts.length) { %>
+<div class="growth-filters">
+  <select id="linkedin-filter-pillar" class="growth-select" onchange="filterLinkedinTable()">
+    <option value="">All pillars</option>
+    <option value="teach">Teach</option>
+    <option value="sell">Sell</option>
+    <option value="trust">Trust</option>
+    <option value="personal">Personal</option>
+  </select>
+  <select id="linkedin-filter-status" class="growth-select" onchange="filterLinkedinTable()">
+    <option value="">All statuses</option>
+    <option value="idea">Idea</option>
+    <option value="drafted">Drafted</option>
+    <option value="approved">Approved</option>
+    <option value="published">Published</option>
+  </select>
+</div>
+<% } %>
+
 <div class="growth-split">
   <!-- Pipeline table -->
   <div class="growth-table-col">
     <% if (!it.linkedinPosts || !it.linkedinPosts.length) { %>
-      <p style="color: #94A3B8; font-size: 14px; padding: 1rem;">No content yet. Select a meeting and click "Generate Ideas" to start.</p>
+      <div class="growth-empty-state">
+        <div class="growth-empty-icon">&#9998;</div>
+        <h3>No content ideas yet</h3>
+        <p>Select a meeting above and click "Generate Ideas" to create LinkedIn content from your conversations.</p>
+      </div>
     <% } else { %>
-    <table class="compact">
+    <table class="compact" id="linkedin-table">
       <thead>
         <tr><th>Date</th><th>Pillar</th><th>Topic</th><th>Status</th><th>Actions</th></tr>
       </thead>
       <tbody>
         <% it.linkedinPosts.forEach(p => { %>
         <tr class="row-selectable <%= it.selectedId === p.id ? 'row-selected' : '' %>"
+          data-pillar="<%= p.pillar %>" data-status="<%= p.status %>"
           hx-get="/growth/linkedin/<%= p.id %>/result"
           hx-target="#growth-result-panel"
           hx-swap="innerHTML"
@@ -88,7 +113,7 @@
       <div style="text-align: center; color: #94A3B8; padding: 2rem;">Loading...</div>
     <% } else { %>
     <div class="result-panel-empty">
-      <p>Select a content idea to view its draft and details</p>
+      <p>Click a row to preview its draft and source meeting</p>
     </div>
     <% } %>
   </div>
@@ -96,3 +121,26 @@
 
 <!-- Task log -->
 <%~ include('/growth/_task-log', { taskLog: it.taskLog || [] }) %>
+
+<!-- Auto-load result panel if selectedId was set after a draft action -->
+<% if (it.selectedId) { %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    htmx.ajax('GET', '/growth/linkedin/<%= it.selectedId %>/result', '#growth-result-panel');
+    var row = document.querySelector('tr.row-selectable[hx-get*="/<%= it.selectedId %>/result"]');
+    if (row) { row.classList.add('row-selected'); row.scrollIntoView({ block: 'nearest' }); }
+  });
+</script>
+<% } %>
+
+<!-- Client-side filter -->
+<script>
+function filterLinkedinTable() {
+  var pillar = document.getElementById('linkedin-filter-pillar')?.value || '';
+  var status = document.getElementById('linkedin-filter-status')?.value || '';
+  document.querySelectorAll('#linkedin-table tbody tr').forEach(function(row) {
+    var show = (!pillar || row.dataset.pillar === pillar) && (!status || row.dataset.status === status);
+    row.style.display = show ? '' : 'none';
+  });
+}
+</script>

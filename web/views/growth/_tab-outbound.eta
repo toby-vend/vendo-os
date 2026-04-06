@@ -62,17 +62,34 @@
 
 <div id="outbound-spinner" class="htmx-indicator" style="font-size: 13px; color: #94A3B8; padding: 0.5rem 0;">Generating outreach draft...</div>
 
+<!-- Filters -->
+<% if (it.outboundPipeline && it.outboundPipeline.length) { %>
+<div class="growth-filters">
+  <select id="outbound-filter-status" class="growth-select" onchange="filterOutboundTable()">
+    <option value="">All statuses</option>
+    <option value="queued">Queued</option>
+    <option value="drafted">Drafted</option>
+    <option value="sent">Sent</option>
+    <option value="responded">Responded</option>
+    <option value="meeting_booked">Meeting Booked</option>
+    <option value="converted">Converted</option>
+  </select>
+  <button class="btn btn-sm growth-sort-btn" onclick="sortOutboundByIcp()">Sort by ICP</button>
+</div>
+<% } %>
+
 <div class="growth-split">
   <!-- Pipeline table -->
   <div class="growth-table-col">
     <% if (it.outboundPipeline && it.outboundPipeline.length) { %>
-    <table class="compact">
+    <table class="compact" id="outbound-table">
       <thead>
-        <tr><th>Prospect</th><th>Company</th><th>ICP</th><th>Step</th><th>Status</th><th>Actions</th></tr>
+        <tr><th>Prospect</th><th>Company</th><th style="cursor:pointer;" onclick="sortOutboundByIcp()">ICP &#8597;</th><th>Step</th><th>Status</th><th>Actions</th></tr>
       </thead>
       <tbody>
         <% it.outboundPipeline.slice(0, 20).forEach(p => { %>
         <tr class="row-selectable <%= it.selectedId === p.id ? 'row-selected' : '' %>"
+          data-status="<%= p.status %>" data-icp="<%= p.icp_match_score %>"
           hx-get="/growth/outbound/<%= p.id %>/result"
           hx-target="#growth-result-panel"
           hx-swap="innerHTML"
@@ -108,17 +125,49 @@
       </tbody>
     </table>
     <% } else { %>
-      <p style="color: #94A3B8; font-size: 14px; padding: 1rem;">No prospects yet. Use the form above to add your first prospect.</p>
+      <div class="growth-empty-state">
+        <div class="growth-empty-icon">&#128233;</div>
+        <h3>No outbound prospects</h3>
+        <p>Use the form above to add a prospect. The AI will draft personalised outreach based on their ICP match score.</p>
+      </div>
     <% } %>
   </div>
 
   <!-- Result panel -->
   <div class="result-panel" id="growth-result-panel">
     <div class="result-panel-empty">
-      <p>Select a prospect to view their outreach drafts and details</p>
+      <p>Click a prospect to view their outreach drafts</p>
     </div>
   </div>
 </div>
 
 <!-- Task log -->
 <%~ include('/growth/_task-log', { taskLog: it.taskLog || [] }) %>
+
+<!-- Auto-load result panel -->
+<% if (it.selectedId) { %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    htmx.ajax('GET', '/growth/outbound/<%= it.selectedId %>/result', '#growth-result-panel');
+    var row = document.querySelector('tr.row-selectable[hx-get*="/<%= it.selectedId %>/result"]');
+    if (row) { row.classList.add('row-selected'); row.scrollIntoView({ block: 'nearest' }); }
+  });
+</script>
+<% } %>
+
+<!-- Client-side filter + sort -->
+<script>
+function filterOutboundTable() {
+  var status = document.getElementById('outbound-filter-status')?.value || '';
+  document.querySelectorAll('#outbound-table tbody tr').forEach(function(row) {
+    row.style.display = (!status || row.dataset.status === status) ? '' : 'none';
+  });
+}
+function sortOutboundByIcp() {
+  var tbody = document.querySelector('#outbound-table tbody');
+  if (!tbody) return;
+  var rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort(function(a, b) { return (parseInt(b.dataset.icp) || 0) - (parseInt(a.dataset.icp) || 0); });
+  rows.forEach(function(row) { tbody.appendChild(row); });
+}
+</script>

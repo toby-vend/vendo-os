@@ -20,10 +20,13 @@
 <% } %>
 
 <div class="growth-split">
-  <!-- Pipeline table -->
   <div class="growth-table-col">
     <% if (!it.upsells || !it.upsells.length) { %>
-      <p style="color: #94A3B8; font-size: 14px; padding: 1rem;">No upsell opportunities detected. Click "Scan" to analyse your ad performance and meeting data.</p>
+      <div class="growth-empty-state">
+        <div class="growth-empty-icon">&#128200;</div>
+        <h3>No upsell opportunities</h3>
+        <p>Click "Scan for Opportunities" to analyse ad performance and meeting transcripts for expansion signals.</p>
+      </div>
     <% } else { %>
     <table class="compact">
       <thead>
@@ -60,13 +63,11 @@
     <% } %>
   </div>
 
-  <!-- Result panel -->
   <div class="result-panel" id="growth-result-panel">
     <div class="result-panel-empty">
-      <p>Select an opportunity to view signal details and recommended actions</p>
+      <p>Click an opportunity to view signal details and recommended actions</p>
     </div>
   </div>
 </div>
 
-<!-- Task log -->
 <%~ include('/growth/_task-log', { taskLog: it.taskLog || [] }) %>

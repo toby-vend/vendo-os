@@ -1947,3 +1947,66 @@ details.task-log[open] > .task-log-toggle::before {
   border-radius: 10px;
   white-space: nowrap;
 }
+
+/* Empty states */
+
+.growth-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  min-height: 250px;
+}
+
+.growth-empty-icon {
+  font-size: 40px;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+.growth-empty-state h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--vendo-text-heading);
+  margin: 0 0 0.5rem;
+}
+
+.growth-empty-state p {
+  font-size: 13px;
+  color: var(--vendo-text-muted);
+  max-width: 320px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Filters */
+
+.growth-filters {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+button.growth-sort-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: var(--vendo-text-muted);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: var(--vendo-font);
+  box-shadow: none;
+  transform: none;
+}
+
+button.growth-sort-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--vendo-text);
+  box-shadow: none;
+  transform: none;
+}
