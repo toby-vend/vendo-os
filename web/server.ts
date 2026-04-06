@@ -66,7 +66,7 @@ import {
   verifyCsrfToken,
   type SessionUser,
 } from './lib/auth.js';
-import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, hasUserOAuthToken, getClientForUser } from './lib/queries.js';
+import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, hasUserOAuthToken, getClientForUser, migrateSidebarConfig } from './lib/queries.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -104,6 +104,15 @@ if (!process.env.VERCEL) {
     prefix: '/assets/',
   });
 }
+
+// Run sidebar migration once on first request
+let sidebarMigrated = false;
+app.addHook('onRequest', async () => {
+  if (!sidebarMigrated) {
+    sidebarMigrated = true;
+    migrateSidebarConfig().catch(() => {});
+  }
+});
 
 // Auth hook — verify session, load user, check permissions
 app.addHook('onRequest', async (request, reply) => {
