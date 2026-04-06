@@ -4547,9 +4547,13 @@ button.growth-sort-btn:hover {
     background: rgba(255,255,255,0.04);
   }
 
-  .more-nav-item .nav-icon {
-    width: 20px;
-    height: 20px;
+  .more-nav-item .nav-icon,
+  .more-nav-item > svg,
+  .more-nav-item svg {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+    max-width: 20px;
     flex-shrink: 0;
   }
 
