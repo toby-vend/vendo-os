@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Complete
 status: planning
-stopped_at: Phase 12 context gathered
-last_updated: "2026-04-06T20:09:09.808Z"
+stopped_at: Completed 12-pwa-foundation 12-01-PLAN.md
+last_updated: "2026-04-06T20:32:38.012Z"
 last_activity: 2026-04-06 — v1.1 roadmap created (4 phases, 26 requirements mapped)
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
   percent: 0
 ---
 
@@ -71,6 +71,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 11-responsive-layout P01 | 8 | 1 tasks | 2 files |
 | Phase 11-responsive-layout P01 | 17 | 2 tasks | 2 files |
 | Phase 11-responsive-layout P02 | 101 | 1 tasks | 3 files |
+| Phase 12-pwa-foundation P01 | 154 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 11-responsive-layout]: Draft review page mobile fix uses attribute selector on inline style rather than modifying detail.eta markup
 - [Phase 11-responsive-layout]: Approve endpoint confirmed as POST /tasks/:id/approve (registered at prefix /tasks in server.ts, handler in task-runs-ui.ts)
 - [Phase 11-responsive-layout]: ptr-spin @keyframes placed outside 768px media query — keyframes are global and do not scope inside media queries in all browsers
+- [Phase 12-pwa-foundation]: Service worker registered globally (all viewports) — desktop Chrome and Android both require this for PWA installability
 
 ### Research Flags (v1.1)
 
@@ -133,6 +135,6 @@ None blocking v1.1 start.
 
 ## Session Continuity
 
-Last session: 2026-04-06T20:09:09.806Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-pwa-foundation/12-CONTEXT.md
+Last session: 2026-04-06T20:32:38.010Z
+Stopped at: Completed 12-pwa-foundation 12-01-PLAN.md
+Resume file: None
