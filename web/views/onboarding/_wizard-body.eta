@@ -7,6 +7,46 @@
   const isSubmitted = it.isSubmitted;
   const baseUrl = it.baseUrl;
   const mode = it.mode;
+
+  // Helper: format a value for review display
+  function reviewVal(q, val) {
+    if (q.type === 'repeater' && Array.isArray(val)) {
+      return val.map((entry, i) => {
+        if (typeof entry !== 'object') return entry;
+        const parts = Object.entries(entry)
+          .filter(([,v]) => v)
+          .map(([k,v]) => {
+            const sf = q.subFields?.find(f => f.id === k);
+            const label = sf ? sf.label : k;
+            if (sf?.type === 'radio' && sf.options) {
+              const opt = sf.options.find(o => o.value === v);
+              return label + ': ' + (opt ? opt.label : v);
+            }
+            return label + ': ' + v;
+          });
+        return parts.join(', ');
+      }).filter(x => x).join('\n');
+    }
+    if (q.type === 'location-checkbox-matrix' && typeof val === 'object' && val !== null) {
+      if (val.applyAll) return 'Applies to all locations: ' + (val.treatments || []).join(', ');
+      if (val.byLocation) {
+        return Object.entries(val.byLocation).map(([idx, treats]) => 'Location ' + (parseInt(idx)+1) + ': ' + (treats || []).join(', ')).join('\n');
+      }
+      return '';
+    }
+    if (Array.isArray(val)) {
+      const labels = val.map(v => {
+        const opt = q.options?.find(o => o.value === v);
+        return opt ? opt.label : v;
+      });
+      return labels.join(', ');
+    }
+    if (q.type === 'radio' && q.options) {
+      const opt = q.options.find(o => o.value === val);
+      return opt ? opt.label : val;
+    }
+    return val;
+  }
 %>
 
 <!-- Progress bar -->
@@ -40,33 +80,24 @@
     <% } %>
   </div>
 
-  <!-- Review summary (read-only) -->
+  <!-- Review summary (read-only, collapsible) -->
   <div class="wizard-review">
     <% for (const section of sections) { %>
-      <div class="wizard-review-section">
-        <h3><%= section.title %></h3>
+      <details class="wizard-review-section" open>
+        <summary><h3><%= section.title %></h3></summary>
         <% for (const q of section.questions) { %>
+          <% if (q.showWhen) { const sw = answers[q.showWhen.questionId]; if (sw !== q.showWhen.equals) continue; } %>
           <div class="wizard-review-item">
             <div class="wizard-review-label"><%= q.label %></div>
             <div class="wizard-review-value">
-              <%
-                let val = answers[q.id];
-                if (Array.isArray(val)) {
-                  const labels = val.map(v => {
-                    const opt = q.options?.find(o => o.value === v);
-                    return opt ? opt.label : v;
-                  });
-                  val = labels.join(', ');
-                } else if (q.type === 'radio' && q.options) {
-                  const opt = q.options.find(o => o.value === val);
-                  val = opt ? opt.label : val;
-                }
-              %>
-              <%= val || '<span class="wizard-review-empty">Not answered</span>' %>
+              <% const rv = reviewVal(q, answers[q.id]); %>
+              <% if (rv) { %><%= rv %><% } else { %>
+                <span class="wizard-review-empty">Not answered</span>
+              <% } %>
             </div>
           </div>
         <% } %>
-      </div>
+      </details>
     <% } %>
   </div>
 
@@ -77,30 +108,21 @@
 
   <div class="wizard-review">
     <% for (const section of sections) { %>
-      <div class="wizard-review-section">
-        <h3><%= section.title %></h3>
+      <details class="wizard-review-section" open>
+        <summary><h3><%= section.title %></h3></summary>
         <% for (const q of section.questions) { %>
+          <% if (q.showWhen) { const sw = answers[q.showWhen.questionId]; if (sw !== q.showWhen.equals) continue; } %>
           <div class="wizard-review-item">
             <div class="wizard-review-label"><%= q.label %></div>
             <div class="wizard-review-value">
-              <%
-                let val = answers[q.id];
-                if (Array.isArray(val)) {
-                  const labels = val.map(v => {
-                    const opt = q.options?.find(o => o.value === v);
-                    return opt ? opt.label : v;
-                  });
-                  val = labels.join(', ');
-                } else if (q.type === 'radio' && q.options) {
-                  const opt = q.options.find(o => o.value === val);
-                  val = opt ? opt.label : val;
-                }
-              %>
-              <%= val || '<span class="wizard-review-empty">Not answered</span>' %>
+              <% const rv2 = reviewVal(q, answers[q.id]); %>
+              <% if (rv2) { %><%= rv2 %><% } else { %>
+                <span class="wizard-review-empty">Not answered</span>
+              <% } %>
             </div>
           </div>
         <% } %>
-      </div>
+      </details>
     <% } %>
   </div>
 
@@ -136,7 +158,12 @@
     <% if (mode === 'internal') { %><input type="hidden" name="_csrf" value="<%= it.csrfToken %>"><% } %>
 
     <% for (const q of section.questions) { %>
-      <div class="wizard-field">
+      <%
+        // showWhen: hide field if condition not met (check current answers)
+        const showWhenHidden = q.showWhen && answers[q.showWhen.questionId] !== q.showWhen.equals;
+        const showWhenAttrs = q.showWhen ? ` data-show-when="${q.showWhen.questionId}" data-show-when-value="${q.showWhen.equals}"` : '';
+      %>
+      <div class="wizard-field"<%~ showWhenAttrs %><% if (showWhenHidden) { %> style="display:none"<% } %>>
         <label class="wizard-label" for="q-<%= q.id %>">
           <%= q.label %>
           <% if (q.required) { %><span class="wizard-required">*</span><% } %>
@@ -184,6 +211,125 @@
             <% } %>
           </select>
 
+        <% } else if (q.type === 'repeater') { %>
+          <%
+            const existingData = Array.isArray(answers[q.id]) ? answers[q.id] : [];
+            const countFrom = q.repeatCountFrom ? parseInt(answers[q.repeatCountFrom] || '0', 10) : 0;
+            const initialCount = Math.max(existingData.length, countFrom, q.minRepeats || 1);
+            const entries = [];
+            for (let i = 0; i < initialCount; i++) {
+              entries.push(existingData[i] || {});
+            }
+          %>
+          <div class="wizard-repeater" data-question-id="<%= q.id %>" data-min="<%= q.minRepeats || 1 %>" data-max="<%= q.maxRepeats || 50 %>">
+            <% for (let i = 0; i < entries.length; i++) { %>
+              <div class="wizard-repeater-block" data-index="<%= i %>">
+                <div class="wizard-repeater-header">
+                  <span class="wizard-repeater-num"><%= i + 1 %></span>
+                  <% if (entries.length > (q.minRepeats || 1)) { %>
+                    <button type="button" class="wizard-repeater-remove" onclick="removeRepeaterBlock(this)">&times;</button>
+                  <% } %>
+                </div>
+                <% for (const sf of q.subFields || []) { %>
+                  <div class="wizard-repeater-field">
+                    <label class="wizard-label"><%= sf.label %></label>
+                    <% if (sf.type === 'textarea') { %>
+                      <textarea name="<%= q.id %>[<%= i %>].<%= sf.id %>" class="wizard-input wizard-textarea" rows="2" placeholder="<%= sf.placeholder || '' %>"><%= (entries[i] && entries[i][sf.id]) || '' %></textarea>
+                    <% } else if (sf.type === 'radio' && sf.options) { %>
+                      <div class="wizard-options wizard-options-inline">
+                        <% for (const opt of sf.options) { %>
+                          <label class="wizard-option wizard-option-compact">
+                            <input type="radio" name="<%= q.id %>[<%= i %>].<%= sf.id %>" value="<%= opt.value %>"
+                                   <%= (entries[i] && entries[i][sf.id] === opt.value) ? 'checked' : '' %>>
+                            <span class="wizard-option-box"></span>
+                            <span><%= opt.label %></span>
+                          </label>
+                        <% } %>
+                      </div>
+                    <% } else { %>
+                      <input name="<%= q.id %>[<%= i %>].<%= sf.id %>" type="<%= sf.type %>" class="wizard-input"
+                             value="<%= (entries[i] && entries[i][sf.id]) || '' %>" placeholder="<%= sf.placeholder || '' %>">
+                    <% } %>
+                  </div>
+                <% } %>
+              </div>
+            <% } %>
+            <button type="button" class="wizard-repeater-add" onclick="addRepeaterBlock(this)">+ Add another</button>
+          </div>
+
+        <% } else if (q.type === 'drive-link') { %>
+          <%
+            const driveUrl = answers._driveFolderUrl || it.submission?.drive_folder_url || '';
+          %>
+          <% if (driveUrl) { %>
+            <a href="<%= driveUrl %>" target="_blank" rel="noopener" class="wizard-drive-card">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+              <div>
+                <div class="wizard-drive-title">Open Brand Assets Folder</div>
+                <div class="wizard-drive-url"><%= driveUrl %></div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          <% } else { %>
+            <div class="wizard-drive-fallback">
+              <p class="wizard-hint">No Drive folder has been set up yet. You can paste a link to your files below (Google Drive, Dropbox, WeTransfer, etc.)</p>
+              <input name="<%= q.id %>" type="url" class="wizard-input" value="<%= answers[q.id] || '' %>" placeholder="Paste file sharing link here">
+            </div>
+          <% } %>
+
+        <% } else if (q.type === 'location-checkbox-matrix') { %>
+          <%
+            const locations = Array.isArray(answers[q.locationSourceId]) ? answers[q.locationSourceId] : [];
+            const matrixVal = (typeof answers[q.id] === 'object' && answers[q.id] !== null) ? answers[q.id] : { applyAll: true, treatments: [] };
+            const applyAll = matrixVal.applyAll !== false;
+          %>
+          <% if (locations.length === 0) { %>
+            <p class="wizard-hint">Please complete location details in Section 1 first.</p>
+          <% } else { %>
+            <div class="wizard-matrix" data-question-id="<%= q.id %>">
+              <label class="wizard-option wizard-matrix-toggle">
+                <input type="checkbox" name="<%= q.id %>._applyAll" value="true" <%= applyAll ? 'checked' : '' %>
+                       onchange="toggleApplyAll(this)">
+                <span class="wizard-option-box wizard-option-check"></span>
+                <span><strong>Applies to all locations</strong></span>
+              </label>
+
+              <div class="wizard-matrix-all" <%= !applyAll ? 'style="display:none"' : '' %>>
+                <div class="wizard-options">
+                  <% const allTreats = applyAll ? (matrixVal.treatments || []) : []; %>
+                  <% for (const opt of q.matrixOptions || []) { %>
+                    <label class="wizard-option wizard-option-compact">
+                      <input type="checkbox" name="<%= q.id %>._treatments" value="<%= opt.value %>"
+                             <%= allTreats.includes(opt.value) ? 'checked' : '' %>>
+                      <span class="wizard-option-box wizard-option-check"></span>
+                      <span><%= opt.label %></span>
+                    </label>
+                  <% } %>
+                </div>
+              </div>
+
+              <div class="wizard-matrix-per-location" <%= applyAll ? 'style="display:none"' : '' %>>
+                <% for (let li = 0; li < locations.length; li++) { %>
+                  <% const loc = locations[li]; const locName = loc.name || ('Location ' + (li + 1)); %>
+                  <% const locTreats = (!applyAll && matrixVal.byLocation && matrixVal.byLocation[li]) ? matrixVal.byLocation[li] : []; %>
+                  <details class="wizard-matrix-location" open>
+                    <summary><%= locName %></summary>
+                    <div class="wizard-options">
+                      <% for (const opt of q.matrixOptions || []) { %>
+                        <label class="wizard-option wizard-option-compact">
+                          <input type="checkbox" name="<%= q.id %>._loc.<%= li %>" value="<%= opt.value %>"
+                                 <%= locTreats.includes(opt.value) ? 'checked' : '' %>>
+                          <span class="wizard-option-box wizard-option-check"></span>
+                          <span><%= opt.label %></span>
+                        </label>
+                      <% } %>
+                    </div>
+                  </details>
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+
         <% } else { %>
           <input id="q-<%= q.id %>" name="<%= q.id %>" type="<%= q.type %>"
                  class="wizard-input"
@@ -211,6 +357,90 @@
 <% } %>
 
 <script>
-  // Scroll to top of card on step change
-  document.getElementById('wizard-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+// Scroll to top on step change
+document.getElementById('wizard-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+// showWhen: toggle field visibility based on radio/select changes
+document.querySelectorAll('[data-show-when]').forEach(function(el) {
+  var qId = el.dataset.showWhen;
+  var reqVal = el.dataset.showWhenValue;
+  function check() {
+    var sel = document.querySelector('input[name="' + qId + '"]:checked');
+    var val = sel ? sel.value : '';
+    if (!sel) {
+      var selEl = document.querySelector('select[name="' + qId + '"]');
+      val = selEl ? selEl.value : '';
+    }
+    el.style.display = val === reqVal ? '' : 'none';
+  }
+  document.querySelectorAll('input[name="' + qId + '"], select[name="' + qId + '"]').forEach(function(inp) {
+    inp.addEventListener('change', check);
+  });
+});
+
+// Repeater: add block
+function addRepeaterBlock(btn) {
+  var container = btn.closest('.wizard-repeater');
+  var blocks = container.querySelectorAll('.wizard-repeater-block');
+  var max = parseInt(container.dataset.max || '50', 10);
+  if (blocks.length >= max) return;
+  var last = blocks[blocks.length - 1];
+  var clone = last.cloneNode(true);
+  var newIdx = blocks.length;
+  clone.dataset.index = newIdx;
+  clone.querySelector('.wizard-repeater-num').textContent = newIdx + 1;
+  // Clear values and update names
+  clone.querySelectorAll('input, textarea, select').forEach(function(inp) {
+    var name = inp.getAttribute('name') || '';
+    inp.setAttribute('name', name.replace(/\[\d+\]/, '[' + newIdx + ']'));
+    if (inp.type === 'radio' || inp.type === 'checkbox') { inp.checked = false; }
+    else { inp.value = ''; }
+  });
+  // Ensure remove button exists
+  var header = clone.querySelector('.wizard-repeater-header');
+  if (!header.querySelector('.wizard-repeater-remove')) {
+    var rmBtn = document.createElement('button');
+    rmBtn.type = 'button'; rmBtn.className = 'wizard-repeater-remove';
+    rmBtn.textContent = '\u00d7'; rmBtn.onclick = function() { removeRepeaterBlock(rmBtn); };
+    header.appendChild(rmBtn);
+  }
+  container.insertBefore(clone, btn);
+  reindexRepeater(container);
+}
+
+// Repeater: remove block
+function removeRepeaterBlock(btn) {
+  var container = btn.closest('.wizard-repeater');
+  var blocks = container.querySelectorAll('.wizard-repeater-block');
+  var min = parseInt(container.dataset.min || '1', 10);
+  if (blocks.length <= min) return;
+  btn.closest('.wizard-repeater-block').remove();
+  reindexRepeater(container);
+}
+
+// Repeater: re-index after add/remove
+function reindexRepeater(container) {
+  var blocks = container.querySelectorAll('.wizard-repeater-block');
+  var min = parseInt(container.dataset.min || '1', 10);
+  blocks.forEach(function(block, i) {
+    block.dataset.index = i;
+    block.querySelector('.wizard-repeater-num').textContent = i + 1;
+    block.querySelectorAll('input, textarea, select').forEach(function(inp) {
+      var name = inp.getAttribute('name') || '';
+      inp.setAttribute('name', name.replace(/\[\d+\]/, '[' + i + ']'));
+    });
+    var rmBtn = block.querySelector('.wizard-repeater-remove');
+    if (blocks.length <= min) { if (rmBtn) rmBtn.style.display = 'none'; }
+    else { if (rmBtn) rmBtn.style.display = ''; }
+  });
+}
+
+// Location-checkbox-matrix: toggle apply all
+function toggleApplyAll(cb) {
+  var matrix = cb.closest('.wizard-matrix');
+  var allDiv = matrix.querySelector('.wizard-matrix-all');
+  var perDiv = matrix.querySelector('.wizard-matrix-per-location');
+  if (cb.checked) { allDiv.style.display = ''; perDiv.style.display = 'none'; }
+  else { allDiv.style.display = 'none'; perDiv.style.display = ''; }
+}
 </script>

@@ -11,14 +11,34 @@ export interface QuestionOption {
   label: string;
 }
 
+export interface SubField {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea' | 'url' | 'tel' | 'email' | 'number' | 'select' | 'radio';
+  placeholder?: string;
+  options?: QuestionOption[];
+}
+
 export interface Question {
   id: string;
   label: string;
-  type: 'text' | 'textarea' | 'email' | 'url' | 'tel' | 'number' | 'select' | 'checkbox' | 'radio';
+  type: 'text' | 'textarea' | 'email' | 'url' | 'tel' | 'number' | 'select' | 'checkbox' | 'radio' | 'repeater' | 'drive-link' | 'location-checkbox-matrix';
   placeholder?: string;
   hint?: string;
   required?: boolean;
   options?: QuestionOption[];
+  /** Show this field only when a sibling question has a specific answer */
+  showWhen?: { questionId: string; equals: string };
+  /** Sub-fields for repeater type */
+  subFields?: SubField[];
+  /** Question ID whose numeric answer sets initial repeat count */
+  repeatCountFrom?: string;
+  minRepeats?: number;
+  maxRepeats?: number;
+  /** For location-checkbox-matrix: question ID containing repeater location data */
+  locationSourceId?: string;
+  /** For location-checkbox-matrix: the checkbox options per location */
+  matrixOptions?: QuestionOption[];
 }
 
 export interface Section {
@@ -38,6 +58,24 @@ export interface OnboardingTemplate {
   subtitle: string;
   sections: Section[];
 }
+
+// ---------------------------------------------------------------------------
+// Shared treatment options
+// ---------------------------------------------------------------------------
+
+const TREATMENT_OPTIONS: QuestionOption[] = [
+  { value: 'dental_implants', label: 'Dental Implants' },
+  { value: 'invisalign', label: 'Invisalign / Clear Aligners' },
+  { value: 'composite_bonding', label: 'Composite Bonding' },
+  { value: 'smile_makeover', label: 'Smile Makeover / Full Smile Design' },
+  { value: 'teeth_whitening', label: 'Teeth Whitening' },
+  { value: 'veneers', label: 'Veneers' },
+  { value: 'general_dentistry', label: 'General Dentistry / Check-ups' },
+  { value: 'emergency_dental', label: 'Emergency Dental' },
+  { value: 'orthodontics', label: 'Orthodontics (Fixed Braces)' },
+  { value: 'facial_aesthetics', label: 'Facial Aesthetics / Botox' },
+  { value: 'other', label: 'Other (please specify below)' },
+];
 
 // ---------------------------------------------------------------------------
 // Dental — Single Practice
@@ -60,7 +98,7 @@ const dentalSingleSections: Section[] = [
         { value: 'mixed', label: 'Mixed' },
       ]},
       { id: '1.7', label: 'How many dentists / clinicians currently work at the practice?', type: 'number', placeholder: 'e.g. 4' },
-      { id: '1.8', label: 'What are your opening hours?', type: 'textarea', hint: 'Include any late evenings or weekend availability — this affects ad scheduling.', placeholder: 'e.g. Mon-Fri 8am-6pm, Sat 9am-1pm' },
+      { id: '1.8', label: 'What are your opening hours?', type: 'textarea', hint: 'Include any late evenings or weekend availability \u2014 this affects ad scheduling.', placeholder: 'e.g. Mon-Fri 8am-6pm, Sat 9am-1pm' },
       { id: '1.9', label: 'What geographic area do you serve / want to target?', type: 'textarea', placeholder: 'e.g. within 5 miles, specific towns or postcodes' },
       { id: '1.10', label: 'Do you have a patient CRM or lead management system in place?', type: 'text', hint: 'e.g. GoHighLevel, Dentally, SOE, Exact', placeholder: 'System name or "None"' },
     ],
@@ -72,7 +110,7 @@ const dentalSingleSections: Section[] = [
     questions: [
       { id: '2.1', label: 'Which services are you signing up for?', type: 'checkbox', required: true, options: [
         { value: 'paid_search', label: 'Paid Search (Google Ads)' },
-        { value: 'paid_social', label: 'Paid Social (Meta Ads — Facebook & Instagram)' },
+        { value: 'paid_social', label: 'Paid Social (Meta Ads \u2014 Facebook & Instagram)' },
         { value: 'seo', label: 'SEO (Search Engine Optimisation)' },
       ]},
     ],
@@ -83,16 +121,22 @@ const dentalSingleSections: Section[] = [
     description: 'Tell us about your Google Ads setup.',
     conditional: { questionId: '2.1', includes: 'paid_search' },
     questions: [
-      { id: '2A.1', label: 'Do you currently have an active Google Ads account?', type: 'textarea', hint: 'If yes, please provide the Google Ads Customer ID (found in the top-right of Google Ads).' },
+      { id: '2A.1', label: 'Do you have an active Google Ads account?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '2A.1a', label: 'Google Ads Customer ID', type: 'text', placeholder: 'e.g. 123-456-7890', hint: 'The 10-digit ID found in the top-right corner of Google Ads.', showWhen: { questionId: '2A.1', equals: 'yes' } },
       { id: '2A.2', label: 'Do you have Google Analytics 4 installed on your website?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
       ]},
+      { id: '2A.2a', label: 'GA4 Measurement ID', type: 'text', placeholder: 'e.g. G-XXXXXXXXXX', showWhen: { questionId: '2A.2', equals: 'yes' } },
       { id: '2A.3', label: 'Do you have Google Tag Manager installed?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
       ]},
+      { id: '2A.3a', label: 'GTM Container ID', type: 'text', placeholder: 'e.g. GTM-XXXXXXX', showWhen: { questionId: '2A.3', equals: 'yes' } },
       { id: '2A.4', label: 'Do you currently track phone call conversions from Google Ads?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
       ]},
+      { id: '2A.4a', label: 'Which call tracking provider?', type: 'text', placeholder: 'e.g. CallRail, Mediahawk', showWhen: { questionId: '2A.4', equals: 'yes' } },
       { id: '2A.5', label: 'What is your current monthly Google Ads spend?', type: 'text', hint: 'Approximate is fine.', placeholder: 'e.g. \u00a31,500/month' },
       { id: '2A.6', label: 'What is your target monthly Google Ads budget going forward?', type: 'text', placeholder: 'e.g. \u00a32,000/month' },
       { id: '2A.7', label: 'What has been your average cost per lead from Google Ads historically?', type: 'text', hint: 'If known.', placeholder: 'e.g. \u00a325' },
@@ -139,19 +183,7 @@ const dentalSingleSections: Section[] = [
     title: 'Treatments to Advertise',
     description: 'Which treatments should we focus on?',
     questions: [
-      { id: '3.1', label: 'Which treatments do you want to actively advertise?', type: 'checkbox', options: [
-        { value: 'dental_implants', label: 'Dental Implants' },
-        { value: 'invisalign', label: 'Invisalign / Clear Aligners' },
-        { value: 'composite_bonding', label: 'Composite Bonding' },
-        { value: 'smile_makeover', label: 'Smile Makeover / Full Smile Design' },
-        { value: 'teeth_whitening', label: 'Teeth Whitening' },
-        { value: 'veneers', label: 'Veneers' },
-        { value: 'general_dentistry', label: 'General Dentistry / Check-ups' },
-        { value: 'emergency_dental', label: 'Emergency Dental' },
-        { value: 'orthodontics', label: 'Orthodontics (Fixed Braces)' },
-        { value: 'facial_aesthetics', label: 'Facial Aesthetics / Botox' },
-        { value: 'other', label: 'Other (please specify below)' },
-      ]},
+      { id: '3.1', label: 'Which treatments do you want to actively advertise?', type: 'checkbox', options: TREATMENT_OPTIONS },
       { id: '3.2', label: 'For each selected treatment, what is the approximate price point or starting price you advertise?', type: 'textarea', hint: 'This helps us write accurate ad copy and calculate ROI.', placeholder: 'e.g. Implants from \u00a32,500, Invisalign from \u00a32,900...' },
       { id: '3.3', label: 'Are there any treatments you are NOT able to offer or want to exclude from advertising?', type: 'textarea' },
       { id: '3.4', label: 'Which treatment is your highest priority to fill capacity for right now?', type: 'text' },
@@ -186,11 +218,12 @@ const dentalSingleSections: Section[] = [
     id: '6',
     title: 'Brand Assets & Guidelines',
     questions: [
-      { id: '6.1', label: 'Please share your logo files', type: 'textarea', hint: 'PNG with transparent background preferred, plus any vector files. Paste a link or describe what you can share.' },
+      { id: '6.0', label: 'Brand Assets Folder', type: 'drive-link', hint: 'Please upload your logo files, brand guidelines, photography, and any other assets to the Google Drive folder below.' },
+      { id: '6.1', label: 'Please share your logo files', type: 'textarea', hint: 'PNG with transparent background preferred, plus any vector files. Upload to the Drive folder above, or paste a link here.' },
       { id: '6.2', label: 'What are your brand colours?', type: 'text', hint: 'Hex codes preferred, or describe them.', placeholder: 'e.g. #1A2B3C, Navy blue and gold' },
       { id: '6.3', label: 'Do you have brand fonts?', type: 'text', hint: 'Please share the font names or files.', placeholder: 'e.g. Montserrat, Open Sans' },
-      { id: '6.4', label: 'Do you have existing brand guidelines or a style guide?', type: 'textarea', hint: 'If yes, please share a link or describe.' },
-      { id: '6.5', label: 'Do you have existing photography or video assets of the practice, team, or patients (with consent)?', type: 'textarea', hint: 'If yes, please share a link or upload.' },
+      { id: '6.4', label: 'Do you have existing brand guidelines or a style guide?', type: 'textarea', hint: 'If yes, upload to the Drive folder or paste a link.' },
+      { id: '6.5', label: 'Do you have existing photography or video assets of the practice, team, or patients (with consent)?', type: 'textarea', hint: 'Upload to the Drive folder or paste a link.' },
       { id: '6.6', label: 'Do you have patient testimonials or reviews we can use in ads?', type: 'textarea', hint: 'Google reviews, video testimonials, written quotes.' },
       { id: '6.7', label: 'What tone of voice best describes your practice brand?', type: 'radio', options: [
         { value: 'warm', label: 'Warm and approachable' },
@@ -206,7 +239,11 @@ const dentalSingleSections: Section[] = [
     id: '7',
     title: 'Competitors',
     questions: [
-      { id: '7.1', label: 'Who are your top 3 competitors in your local area?', type: 'textarea', placeholder: 'Practice names and locations...' },
+      { id: '7.1', label: 'Who are your top competitors in your local area?', type: 'repeater', minRepeats: 1, maxRepeats: 10, subFields: [
+        { id: 'name', label: 'Competitor name', type: 'text', placeholder: 'Practice name' },
+        { id: 'location', label: 'Location / area', type: 'text', placeholder: 'e.g. High Street, Croydon' },
+        { id: 'website', label: 'Website (if known)', type: 'url', placeholder: 'https://' },
+      ]},
       { id: '7.2', label: 'Are there any competitor practices you particularly admire or feel threatened by?', type: 'textarea' },
       { id: '7.3', label: 'What do you feel your key differentiators are vs competitors?', type: 'textarea', hint: 'e.g. price, technology, location, team experience, finance options.', placeholder: 'What makes you stand out...' },
       { id: '7.4', label: 'Do you offer patient finance?', type: 'textarea', hint: 'If yes, through which provider and at what rates?', placeholder: 'e.g. Tabeo, 0% over 12 months' },
@@ -256,7 +293,19 @@ const dentalMultiSections: Section[] = [
       { id: '1.3', label: 'What is the best email address and phone number for strategic communication?', type: 'textarea' },
       { id: '1.4', label: 'Who is the day-to-day operational contact (if different from above)?', type: 'text' },
       { id: '1.5', label: 'How many locations does your group currently operate?', type: 'number', placeholder: 'e.g. 5' },
-      { id: '1.6', label: 'Please list each location with details', type: 'textarea', hint: 'For each: practice name, full address & postcode, website URL, NHS/private/mixed, number of clinicians, opening hours, primary contact.', placeholder: 'Location 1:\nName: ...\nAddress: ...\n\nLocation 2:\n...' },
+      { id: '1.6', label: 'Location details', type: 'repeater', repeatCountFrom: '1.5', minRepeats: 1, maxRepeats: 50, subFields: [
+        { id: 'name', label: 'Practice name', type: 'text', placeholder: 'e.g. Smile Dental Croydon' },
+        { id: 'address', label: 'Full address & postcode', type: 'textarea', placeholder: 'Full address including postcode' },
+        { id: 'website', label: 'Website URL', type: 'url', placeholder: 'https://' },
+        { id: 'type', label: 'NHS / Private / Mixed', type: 'radio', options: [
+          { value: 'nhs', label: 'NHS' }, { value: 'private', label: 'Private' }, { value: 'mixed', label: 'Mixed' },
+        ]},
+        { id: 'clinicians', label: 'Number of clinicians', type: 'number', placeholder: 'e.g. 4' },
+        { id: 'hours', label: 'Opening hours', type: 'text', placeholder: 'e.g. Mon-Fri 8am-6pm, Sat 9am-1pm' },
+        { id: 'contact_name', label: 'Primary contact name', type: 'text' },
+        { id: 'contact_email', label: 'Primary contact email', type: 'email' },
+        { id: 'contact_phone', label: 'Primary contact phone', type: 'tel' },
+      ]},
       { id: '1.7', label: 'Do your locations operate under a single brand or individual practice brands?', type: 'radio', options: [
         { value: 'single', label: 'Single brand' },
         { value: 'individual', label: 'Individual brands' },
@@ -289,9 +338,18 @@ const dentalMultiSections: Section[] = [
     description: 'Google Ads setup across the group.',
     conditional: { questionId: '2.1', includes: 'paid_search' },
     questions: [
-      { id: '2A.1', label: 'Do you have existing Google Ads accounts?', type: 'textarea', hint: 'Are they managed centrally or per location? Please provide all Customer IDs.' },
-      { id: '2A.2', label: 'Does each location have Google Analytics 4 installed?', type: 'textarea', hint: 'Is it linked to a centralised GA4 property or separate properties?' },
-      { id: '2A.3', label: 'Is Google Tag Manager in use? Centrally managed or per site?', type: 'text' },
+      { id: '2A.1', label: 'Do you have existing Google Ads accounts?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '2A.1a', label: 'Google Ads Customer IDs', type: 'textarea', placeholder: 'List all 10-digit IDs, e.g. 123-456-7890', hint: 'Are they managed centrally or per location?', showWhen: { questionId: '2A.1', equals: 'yes' } },
+      { id: '2A.2', label: 'Does each location have Google Analytics 4 installed?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'partial', label: 'Some locations' },
+      ]},
+      { id: '2A.2a', label: 'GA4 Property details', type: 'textarea', placeholder: 'Centralised or separate properties? Measurement IDs if known.', showWhen: { questionId: '2A.2', equals: 'yes' } },
+      { id: '2A.3', label: 'Is Google Tag Manager in use?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
+      ]},
+      { id: '2A.3a', label: 'GTM details', type: 'text', placeholder: 'Centrally managed or per site? Container ID if known.', showWhen: { questionId: '2A.3', equals: 'yes' } },
       { id: '2A.4', label: 'Are phone call conversions currently tracked per location?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'partial', label: 'Some locations' },
       ]},
@@ -305,7 +363,10 @@ const dentalMultiSections: Section[] = [
     description: 'Meta Ads setup across the group.',
     conditional: { questionId: '2.1', includes: 'paid_social' },
     questions: [
-      { id: '2B.1', label: 'Do you have a central Facebook Business Manager?', type: 'text', hint: 'If yes, please provide the Business Manager ID.' },
+      { id: '2B.1', label: 'Do you have a central Facebook Business Manager?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '2B.1a', label: 'Business Manager ID', type: 'text', placeholder: 'e.g. 123456789012345', showWhen: { questionId: '2B.1', equals: 'yes' } },
       { id: '2B.2', label: 'Does each location have its own Facebook Page, or is there a single group page?', type: 'text' },
       { id: '2B.3', label: 'Is Meta Pixel / Conversions API installed across all location websites?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'partial', label: 'Some locations' },
@@ -339,20 +400,8 @@ const dentalMultiSections: Section[] = [
     id: '3',
     title: 'Treatments to Advertise',
     questions: [
-      { id: '3.1', label: 'Which treatments do you want to actively advertise across the group?', type: 'checkbox', options: [
-        { value: 'dental_implants', label: 'Dental Implants' },
-        { value: 'invisalign', label: 'Invisalign / Clear Aligners' },
-        { value: 'composite_bonding', label: 'Composite Bonding' },
-        { value: 'smile_makeover', label: 'Smile Makeover / Full Smile Design' },
-        { value: 'teeth_whitening', label: 'Teeth Whitening' },
-        { value: 'veneers', label: 'Veneers' },
-        { value: 'general_dentistry', label: 'General Dentistry / Check-ups' },
-        { value: 'emergency_dental', label: 'Emergency Dental' },
-        { value: 'orthodontics', label: 'Orthodontics (Fixed Braces)' },
-        { value: 'facial_aesthetics', label: 'Facial Aesthetics / Botox' },
-        { value: 'other', label: 'Other (please specify below)' },
-      ]},
-      { id: '3.2', label: 'Do all locations offer all selected treatments, or does availability vary by location?', type: 'textarea', hint: 'Please specify per location if different.' },
+      { id: '3.1', label: 'Which treatments do you want to actively advertise across the group?', type: 'checkbox', options: TREATMENT_OPTIONS },
+      { id: '3.2', label: 'Which treatments does each location offer?', type: 'location-checkbox-matrix', locationSourceId: '1.6', matrixOptions: TREATMENT_OPTIONS, hint: 'Toggle "Applies to all" if every location offers the same treatments.' },
       { id: '3.3', label: 'Are prices standardised across locations, or does pricing vary?', type: 'textarea', hint: 'Please provide approximate price points or starting prices per treatment.' },
       { id: '3.4', label: 'Which treatment is the group\u2019s highest priority to fill capacity for right now?', type: 'text' },
       { id: '3.5', label: 'Are there specific locations where certain treatments need prioritising more than others?', type: 'textarea' },
@@ -390,16 +439,17 @@ const dentalMultiSections: Section[] = [
     id: '6',
     title: 'Brand Assets & Guidelines',
     questions: [
+      { id: '6.0', label: 'Brand Assets Folder', type: 'drive-link', hint: 'Please upload your logo files, brand guidelines, photography, and any other assets to the Google Drive folder below.' },
       { id: '6.1', label: 'Is the group operating under a single brand identity or do locations have individual branding?', type: 'radio', options: [
         { value: 'single', label: 'Single brand' },
         { value: 'individual', label: 'Individual branding per location' },
         { value: 'mix', label: 'Mix' },
       ]},
-      { id: '6.2', label: 'Please share the master logo files for the group brand', type: 'textarea', hint: 'PNG transparent + vector. If locations have individual logos, please share per location.' },
+      { id: '6.2', label: 'Please share the master logo files for the group brand', type: 'textarea', hint: 'Upload to the Drive folder above. If locations have individual logos, please share per location.' },
       { id: '6.3', label: 'What are the group brand colours?', type: 'text', hint: 'Hex codes preferred.', placeholder: 'e.g. #1A2B3C, #F5A623' },
       { id: '6.4', label: 'Do you have brand fonts?', type: 'text', placeholder: 'Font names or files' },
-      { id: '6.5', label: 'Do you have a group brand guidelines document or style guide?', type: 'textarea', hint: 'If yes, please share.' },
-      { id: '6.6', label: 'Do you have photography or video assets \u2014 of practices, teams, or patients (with consent) \u2014 for any or all locations?', type: 'textarea', hint: 'Please share links or uploads.' },
+      { id: '6.5', label: 'Do you have a group brand guidelines document or style guide?', type: 'textarea', hint: 'Upload to the Drive folder or paste a link.' },
+      { id: '6.6', label: 'Do you have photography or video assets \u2014 of practices, teams, or patients (with consent) \u2014 for any or all locations?', type: 'textarea', hint: 'Upload to the Drive folder or paste links.' },
       { id: '6.7', label: 'Do you have patient testimonials or reviews per location we can use in ads?', type: 'textarea' },
       { id: '6.8', label: 'What tone of voice best describes the group brand?', type: 'radio', options: [
         { value: 'warm', label: 'Warm and approachable' },
@@ -415,7 +465,11 @@ const dentalMultiSections: Section[] = [
     id: '7',
     title: 'Competitors',
     questions: [
-      { id: '7.1', label: 'Who are the main competitors for the group at a national or regional level?', type: 'textarea' },
+      { id: '7.1', label: 'Who are the main competitors for the group at a national or regional level?', type: 'repeater', minRepeats: 1, maxRepeats: 10, subFields: [
+        { id: 'name', label: 'Competitor name', type: 'text', placeholder: 'Group or practice name' },
+        { id: 'location', label: 'Location / region', type: 'text', placeholder: 'e.g. South East, National' },
+        { id: 'website', label: 'Website (if known)', type: 'url', placeholder: 'https://' },
+      ]},
       { id: '7.2', label: 'Who are the local competitors for each individual location?', type: 'textarea', hint: 'Please list per location if possible.' },
       { id: '7.3', label: 'Are there specific competitor groups or independent practices you feel are outperforming you in marketing?', type: 'textarea' },
       { id: '7.4', label: 'What are the group\u2019s key differentiators vs competitors?', type: 'textarea', hint: 'e.g. pricing, technology, group scale, finance options, team credentials.' },
@@ -442,17 +496,12 @@ const dentalMultiSections: Section[] = [
         { value: 'group', label: 'Group level only' },
         { value: 'both', label: 'Group + location managers' },
       ]},
-      { id: '9.2', label: 'What reporting cadence do you prefer?', type: 'radio', options: [
-        { value: 'weekly', label: 'Weekly' },
-        { value: 'monthly', label: 'Monthly' },
-        { value: 'quarterly', label: 'Quarterly' },
-      ]},
-      { id: '9.3', label: 'Do you need location-by-location breakdowns in reporting or a consolidated group view?', type: 'radio', options: [
+      { id: '9.2', label: 'Do you need location-by-location breakdowns in reporting or a consolidated group view?', type: 'radio', options: [
         { value: 'location', label: 'Location-by-location breakdowns' },
         { value: 'consolidated', label: 'Consolidated group view' },
         { value: 'both', label: 'Both' },
       ]},
-      { id: '9.4', label: 'Who has sign-off authority for ad creative and campaign changes?', type: 'text', hint: 'Central marketing team, individual practice managers, or Vendo autonomy?' },
+      { id: '9.3', label: 'Who has sign-off authority for ad creative and campaign changes?', type: 'text', hint: 'Central marketing team, individual practice managers, or Vendo autonomy?' },
     ],
   },
   {

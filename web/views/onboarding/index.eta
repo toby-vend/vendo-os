@@ -33,6 +33,12 @@
         <input id="create-email" name="contactEmail" type="email" class="wizard-input" placeholder="Optional">
       </div>
 
+      <div class="wizard-field">
+        <label class="wizard-label" for="create-drive">Google Drive Folder URL</label>
+        <input id="create-drive" name="driveFolderUrl" type="url" class="wizard-input" placeholder="https://drive.google.com/drive/folders/...">
+        <p class="wizard-hint">Create a shared folder for the client to upload brand assets. This link will be shown in the Brand Assets section.</p>
+      </div>
+
       <div class="wizard-nav" style="margin-top: 1.5rem;">
         <button type="button" class="wizard-btn wizard-btn-secondary" onclick="this.closest('dialog').close()">Cancel</button>
         <button type="submit" class="wizard-btn wizard-btn-primary">Create</button>

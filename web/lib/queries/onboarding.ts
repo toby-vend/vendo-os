@@ -12,6 +12,7 @@ export interface OnboardingRow {
   client_id: number | null;
   practice_name: string | null;
   contact_email: string | null;
+  drive_folder_url: string | null;
   status: string;
   answers: string; // JSON
   current_step: number;
@@ -54,6 +55,11 @@ export async function initOnboardingSchema(): Promise<void> {
     sql: 'CREATE INDEX IF NOT EXISTS idx_onboarding_status ON onboarding_submissions(status)',
     args: [],
   });
+
+  // Migration: add drive_folder_url column
+  try {
+    await db.execute({ sql: 'ALTER TABLE onboarding_submissions ADD COLUMN drive_folder_url TEXT', args: [] });
+  } catch { /* already exists */ }
 }
 
 // ---------------------------------------------------------------------------
@@ -86,15 +92,16 @@ export async function createOnboarding(data: {
   templateId: string;
   practiceName?: string;
   contactEmail?: string;
+  driveFolderUrl?: string;
   createdBy?: string;
 }): Promise<{ id: number; token: string }> {
   const token = crypto.randomBytes(24).toString('base64url');
   const now = new Date().toISOString();
 
   const result = await db.execute({
-    sql: `INSERT INTO onboarding_submissions (token, template_id, practice_name, contact_email, status, answers, current_step, created_by, created_at, updated_at)
-          VALUES (?, ?, ?, ?, 'draft', '{}', 1, ?, ?, ?)`,
-    args: [token, data.templateId, data.practiceName || null, data.contactEmail || null, data.createdBy || null, now, now],
+    sql: `INSERT INTO onboarding_submissions (token, template_id, practice_name, contact_email, drive_folder_url, status, answers, current_step, created_by, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, 'draft', '{}', 1, ?, ?, ?)`,
+    args: [token, data.templateId, data.practiceName || null, data.contactEmail || null, data.driveFolderUrl || null, data.createdBy || null, now, now],
   });
 
   return { id: Number(result.lastInsertRowid), token };

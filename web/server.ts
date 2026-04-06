@@ -250,8 +250,8 @@ app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string
   String(body).split('&').forEach(pair => {
     const [key, val] = pair.split('=');
     if (key) {
-      const k = decodeURIComponent(key);
-      const v = decodeURIComponent(val || '');
+      const k = decodeURIComponent(key.replace(/\+/g, ' '));
+      const v = decodeURIComponent((val || '').replace(/\+/g, ' '));
       if (parsed[k]) { parsed[k].push(v); } else { parsed[k] = [v]; }
     }
   });

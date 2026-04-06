@@ -23,16 +23,56 @@ async function ensureSchema() {
   schemaReady = true;
 }
 
-/** Parse answers from body, merging into existing answers object */
+/** Parse answers from body, merging into existing answers object.
+ *  Handles repeater bracket notation (e.g. 1.6[0].name) and
+ *  location-checkbox-matrix fields (e.g. 3.2._applyAll, 3.2._treatments, 3.2._loc.0).
+ */
 function mergeAnswers(
   body: Record<string, string | string[]>,
   existing: Record<string, unknown>,
 ): Record<string, unknown> {
   const merged = { ...existing };
+  const repeaterPattern = /^(.+)\[(\d+)\]\.(.+)$/;
+  const matrixPattern = /^(.+)\._(.+)$/;
+
   for (const [key, val] of Object.entries(body)) {
     if (key.startsWith('_')) continue;
+
+    // Repeater fields: q[0].field -> answers[q] = [{ field: val }, ...]
+    const rm = key.match(repeaterPattern);
+    if (rm) {
+      const [, qId, idxStr, field] = rm;
+      const idx = parseInt(idxStr, 10);
+      if (!Array.isArray(merged[qId])) merged[qId] = [];
+      const arr = merged[qId] as Record<string, unknown>[];
+      while (arr.length <= idx) arr.push({});
+      arr[idx][field] = val;
+      continue;
+    }
+
+    // Matrix fields: q._applyAll, q._treatments, q._loc.0
+    const mm = key.match(matrixPattern);
+    if (mm) {
+      const [, qId, subKey] = mm;
+      if (typeof merged[qId] !== 'object' || merged[qId] === null || Array.isArray(merged[qId])) {
+        merged[qId] = { applyAll: true, treatments: [], byLocation: {} };
+      }
+      const matrix = merged[qId] as Record<string, unknown>;
+      if (subKey === 'applyAll') {
+        matrix.applyAll = val === 'true';
+      } else if (subKey === 'treatments') {
+        matrix.treatments = Array.isArray(val) ? val : [val];
+      } else if (subKey.startsWith('loc.')) {
+        const locIdx = subKey.split('.')[1];
+        if (!matrix.byLocation) matrix.byLocation = {};
+        (matrix.byLocation as Record<string, unknown>)[locIdx] = Array.isArray(val) ? val : [val];
+      }
+      continue;
+    }
+
     merged[key] = val;
   }
+
   return merged;
 }
 
@@ -171,6 +211,7 @@ export const onboardingInternalRoutes: FastifyPluginAsync = async (app) => {
     const templateId = body?.templateId;
     const practiceName = body?.practiceName;
     const contactEmail = body?.contactEmail;
+    const driveFolderUrl = body?.driveFolderUrl;
     const user = (request as any).user;
 
     if (!templateId || !getTemplate(templateId)) {
@@ -181,6 +222,7 @@ export const onboardingInternalRoutes: FastifyPluginAsync = async (app) => {
       templateId,
       practiceName,
       contactEmail,
+      driveFolderUrl,
       createdBy: user?.id,
     });
 
