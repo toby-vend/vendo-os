@@ -1,0 +1,117 @@
+<% layout('/layouts/base') %>
+
+<%
+  const statusLabels = {
+    shoot_booked: 'Shoot Booked',
+    shoot_plan_in_progress: 'Plan In Progress',
+    shoot_plan_approved: 'Plan Approved',
+    content_day_complete: 'Day Complete',
+    raw_files_shared: 'Files Shared',
+    in_editing: 'In Editing',
+    qa_review: 'QA Review',
+    revisions: 'Revisions',
+    client_review: 'Client Review',
+    live: 'Live',
+  };
+  const todayStr = new Date().toISOString().split('T')[0];
+%>
+
+<!-- Toolbar -->
+<div class="vp-toolbar">
+  <div class="vp-filters">
+    <select id="vp-filter-client" onchange="applyListFilters()">
+      <option value="">All Clients</option>
+      <% it.clients.forEach(function(c) { %>
+      <option value="<%= c.id %>" <%= it.filters.client == c.id ? 'selected' : '' %>><%= c.label %></option>
+      <% }); %>
+    </select>
+    <select id="vp-filter-editor" onchange="applyListFilters()">
+      <option value="">All Editors</option>
+      <% it.editors.forEach(function(e) { %>
+      <option value="<%= e.id %>" <%= it.filters.editor == e.id ? 'selected' : '' %>><%= e.name %></option>
+      <% }); %>
+    </select>
+    <select id="vp-filter-priority" onchange="applyListFilters()">
+      <option value="">All Priorities</option>
+      <option value="high" <%= it.filters.priority === 'high' ? 'selected' : '' %>>High</option>
+      <option value="normal" <%= it.filters.priority === 'normal' ? 'selected' : '' %>>Normal</option>
+      <option value="low" <%= it.filters.priority === 'low' ? 'selected' : '' %>>Low</option>
+    </select>
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <a href="/video-production" class="btn btn-secondary">Board View</a>
+    <a href="/video-production/calendar" class="btn btn-secondary">Calendar</a>
+    <a href="/video-production/new" class="btn btn-primary">+ New Project</a>
+  </div>
+</div>
+
+<% if (it.projects.length === 0) { %>
+<div class="stat-card" style="text-align: center; padding: 2rem;">
+  <p style="color: var(--vendo-text-muted);">No active projects. <a href="/video-production/new" style="color: var(--vendo-green);">Create one</a>.</p>
+</div>
+<% } else { %>
+<div class="stat-card" style="overflow-x: auto;">
+  <table class="compact" style="width: 100%;">
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Project</th>
+        <th>Status</th>
+        <th>Shoot Date</th>
+        <th>Editor</th>
+        <th>Deadline</th>
+        <th>Priority</th>
+        <th>Rev</th>
+        <th>Client</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.projects.forEach(function(p) {
+        const deadline = p.deadline ? new Date(p.deadline) : null;
+        const now = new Date();
+        const daysUntil = deadline ? Math.ceil((deadline.getTime() - now.getTime()) / 86400000) : null;
+        let rag = '';
+        if (daysUntil !== null) {
+          if (daysUntil < 0) rag = 'red';
+          else if (daysUntil <= 2) rag = 'amber';
+          else rag = 'green';
+        }
+      %>
+      <tr style="cursor: pointer;" onclick="window.location='/video-production/<%= p.id %>'">
+        <td style="font-weight: 600; color: var(--vendo-green);"><%= p.client_name %></td>
+        <td><%= p.title %></td>
+        <td><span class="status-badge status-<%= p.status.replace(/_/g, '-') %>"><%= statusLabels[p.status] || p.status %></span></td>
+        <td>
+          <% if (p.shoot_date) { %>
+          <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %>
+          <% } else { %>—<% } %>
+        </td>
+        <td><%= p.assigned_editor_name || '—' %></td>
+        <td>
+          <% if (deadline) { %>
+          <span class="vp-rag-<%= rag %>" style="font-weight:600;"><%= deadline.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %></span>
+          <% } else { %>—<% } %>
+        </td>
+        <td><span class="vp-card-priority vp-priority-<%= p.priority %>"><%= p.priority %></span></td>
+        <td><% if (p.revision_round > 0) { %><span class="vp-card-revision">R<%= p.revision_round %></span><% } else { %>—<% } %></td>
+        <td><span class="vp-cs-badge vp-cs-<%= p.client_status %>"><%= p.client_status.replace('_', ' ') %></span></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<script>
+function applyListFilters() {
+  var client = document.getElementById('vp-filter-client').value;
+  var editor = document.getElementById('vp-filter-editor').value;
+  var priority = document.getElementById('vp-filter-priority').value;
+  var params = new URLSearchParams();
+  if (client) params.set('client', client);
+  if (editor) params.set('editor', editor);
+  if (priority) params.set('priority', priority);
+  var qs = params.toString();
+  window.location.href = '/video-production/list' + (qs ? '?' + qs : '');
+}
+</script>

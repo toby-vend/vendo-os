@@ -23,7 +23,8 @@
     </select>
   </div>
   <div style="display: flex; gap: 0.5rem;">
-    <a href="/video-production/calendar" class="btn btn-secondary">Calendar View</a>
+    <a href="/video-production/list" class="btn btn-secondary">List View</a>
+    <a href="/video-production/calendar" class="btn btn-secondary">Calendar</a>
     <a href="/video-production/new" class="btn btn-primary">+ New Project</a>
   </div>
 </div>

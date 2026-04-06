@@ -4281,3 +4281,117 @@ button.growth-sort-btn:hover {
   .pvp-card-grid { grid-template-columns: 1fr; }
   .pvp-file-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Notification Bell & Dropdown ────────────────────────────── */
+
+.vp-notif-bell {
+  position: relative;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.vp-notif-bell svg {
+  width: 18px;
+  height: 18px;
+  color: var(--vendo-text-muted);
+  transition: color 0.15s;
+}
+
+.vp-notif-bell:hover svg { color: var(--vendo-text); }
+
+.vp-notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  background: #EF4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.vp-notif-badge:empty,
+.vp-notif-badge[data-count="0"] { display: none; }
+
+.vp-notif-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 340px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--vendo-surface);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.vp-notif-dropdown.open { display: block; }
+
+.vp-notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vendo-text);
+}
+
+.vp-notif-clear {
+  background: none;
+  border: none;
+  color: var(--vendo-green);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.vp-notif-item {
+  display: block;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.vp-notif-item:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.vp-notif-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vendo-text);
+}
+
+.vp-notif-body {
+  font-size: 12px;
+  color: var(--vendo-text-muted);
+  margin-top: 0.15rem;
+}
+
+.vp-notif-time {
+  font-size: 11px;
+  color: var(--vendo-text-muted);
+  opacity: 0.6;
+  margin-top: 0.15rem;
+}
+
+.vp-notif-empty {
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 13px;
+  color: var(--vendo-text-muted);
+}

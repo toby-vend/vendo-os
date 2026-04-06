@@ -13,6 +13,7 @@ import {
   type VideoProject,
 } from '../lib/queries.js';
 import type { SessionUser } from '../lib/auth.js';
+import { notifyVideoEvent, getUnreadNotifications, getUnreadCount, markNotificationRead, markAllRead } from '../lib/video-notifications.js';
 
 function requireAuth(user: SessionUser | null): asserts user is SessionUser {
   if (!user) throw { statusCode: 401, message: 'Not authenticated' };
@@ -281,6 +282,9 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     });
 
     await logVideoAudit(projectId, 'created', null, 'shoot_booked', user.id, user.name);
+    // Fetch client name for notification context
+    const created = await getVideoProject(projectId);
+    if (created) notifyVideoEvent('project_created', { projectId, projectTitle: created.title, clientName: created.client_name, userId: user.id, userName: user.name });
 
     reply.redirect('/video-production');
   });
@@ -425,13 +429,17 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     });
 
     // Auto-move based on result
+    const qaProject = await getVideoProject(projectId);
     if (result === 'pass') {
       await moveVideoProject(projectId, 'client_review', user.id, user.name);
+      if (qaProject) notifyVideoEvent('qa_pass', { projectId, projectTitle: qaProject.title, clientName: qaProject.client_name, userId: user.id, userName: user.name, newStatus: 'client_review' });
     } else {
-      // Increment revision round
-      const project = await getVideoProject(projectId);
-      if (project) {
-        await updateVideoProject(projectId, { revision_round: project.revision_round + 1 });
+      if (qaProject) {
+        await updateVideoProject(projectId, { revision_round: qaProject.revision_round + 1 });
+        notifyVideoEvent('qa_fail', { projectId, projectTitle: qaProject.title, clientName: qaProject.client_name, userId: user.id, userName: user.name, editorId: qaProject.assigned_editor_id, editorName: qaProject.assigned_editor_name, newStatus: 'revisions' });
+        if (qaProject.revision_round + 1 >= 3) {
+          notifyVideoEvent('escalation_r3', { projectId, projectTitle: qaProject.title, clientName: qaProject.client_name });
+        }
       }
       await moveVideoProject(projectId, 'revisions', user.id, user.name);
     }
@@ -512,6 +520,8 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
 
     await moveVideoProject(projectId, 'content_day_complete', user.id, user.name);
     await logVideoAudit(projectId, 'content_day_completed', null, null, user.id, user.name);
+    const cdProject = await getVideoProject(projectId);
+    if (cdProject) notifyVideoEvent('content_day_completed', { projectId, projectTitle: cdProject.title, clientName: cdProject.client_name, userId: user.id, userName: user.name });
 
     reply.redirect(`/video-production/${id}`);
   });
@@ -527,6 +537,8 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     await updateVideoProject(projectId, { client_status: 'awaiting' });
     await moveVideoProject(projectId, 'raw_files_shared', user.id, user.name);
     await logVideoAudit(projectId, 'raw_files_shared', null, null, user.id, user.name);
+    const rfProject = await getVideoProject(projectId);
+    if (rfProject) notifyVideoEvent('raw_files_shared', { projectId, projectTitle: rfProject.title, clientName: rfProject.client_name, userId: user.id, userName: user.name, newStatus: 'raw_files_shared' });
 
     reply.redirect(`/video-production/${id}`);
   });
@@ -546,6 +558,8 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     });
     await moveVideoProject(projectId, 'in_editing', user.id, user.name);
     await logVideoAudit(projectId, 'raw_files_confirmed', null, null, user.id, user.name);
+    const rcProject = await getVideoProject(projectId);
+    if (rcProject) notifyVideoEvent('raw_files_confirmed', { projectId, projectTitle: rcProject.title, clientName: rcProject.client_name, userId: user.id, userName: user.name, newStatus: 'in_editing' });
 
     reply.redirect(`/video-production/${id}`);
   });
@@ -610,6 +624,8 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     });
     await moveVideoProject(projectId, 'live', user.id, user.name);
     await logVideoAudit(projectId, 'client_approved', null, null, user.id, user.name);
+    const caProject = await getVideoProject(projectId);
+    if (caProject) notifyVideoEvent('client_approved', { projectId, projectTitle: caProject.title, clientName: caProject.client_name, userId: user.id, userName: user.name, newStatus: 'live' });
 
     reply.redirect(`/video-production/${id}`);
   });
@@ -644,6 +660,11 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
 
     await moveVideoProject(projectId, 'revisions', user.id, user.name);
     await logVideoAudit(projectId, 'client_changes_requested', null, null, user.id, user.name, { feedback });
+    const crProject = await getVideoProject(projectId);
+    if (crProject) {
+      notifyVideoEvent('client_changes_requested', { projectId, projectTitle: crProject.title, clientName: crProject.client_name, userId: user.id, userName: user.name, editorId: crProject.assigned_editor_id, editorName: crProject.assigned_editor_name, newStatus: 'revisions' });
+      if (crProject.revision_round >= 3) notifyVideoEvent('escalation_r3', { projectId, projectTitle: crProject.title, clientName: crProject.client_name });
+    }
 
     reply.redirect(`/video-production/${id}`);
   });
@@ -721,6 +742,8 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     await updateShootPlan(plan.id, { status: 'ready_for_review' });
     await updateVideoProject(projectId, { client_status: 'awaiting' });
     await logVideoAudit(projectId, 'shoot_plan_submitted', 'draft', 'ready_for_review', user.id, user.name);
+    const spProject = await getVideoProject(projectId);
+    if (spProject) notifyVideoEvent('shoot_plan_submitted', { projectId, projectTitle: spProject.title, clientName: spProject.client_name, userId: user.id, userName: user.name });
 
     reply.redirect(`/video-production/${id}/shoot-plan`);
   });
@@ -748,6 +771,8 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     }
 
     await logVideoAudit(projectId, 'shoot_plan_approved', null, null, user.id, user.name);
+    const apProject = await getVideoProject(projectId);
+    if (apProject) notifyVideoEvent('shoot_plan_approved', { projectId, projectTitle: apProject.title, clientName: apProject.client_name, userId: user.id, userName: user.name });
 
     reply.redirect(`/video-production/${id}/shoot-plan`);
   });
@@ -784,7 +809,68 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     // Move back to shoot_plan_in_progress
     await moveVideoProject(projectId, 'shoot_plan_in_progress', user.id, user.name);
     await logVideoAudit(projectId, 'shoot_plan_changes_requested', null, null, user.id, user.name, { comments });
+    const scProject = await getVideoProject(projectId);
+    if (scProject) notifyVideoEvent('shoot_plan_changes_requested', { projectId, projectTitle: scProject.title, clientName: scProject.client_name, userId: user.id, userName: user.name });
 
     reply.redirect(`/video-production/${id}/shoot-plan`);
+  });
+
+  // ── Notifications ───────────────────────────────────────────────
+
+  app.get('/notifications', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+    const notifications = await getUnreadNotifications(user.id);
+    reply.render('video-production/partials/notifications', { notifications });
+  });
+
+  app.get('/notifications/count', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+    const count = await getUnreadCount(user.id);
+    reply.send(String(count));
+  });
+
+  app.post('/notifications/:nid/read', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+    const { nid } = request.params as { nid: string };
+    await markNotificationRead(parseInt(nid, 10));
+    reply.send('OK');
+  });
+
+  app.post('/notifications/mark-all-read', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+    await markAllRead(user.id);
+    reply.header('HX-Trigger', 'notificationsCleared');
+    reply.send('OK');
+  });
+
+  // ── List View (alternative to Kanban) ───────────────────────────
+
+  app.get('/list', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const query = request.query as Record<string, string>;
+    const filters: { clientId?: number; editorId?: string; priority?: string } = {};
+    if (query.client) filters.clientId = parseInt(query.client, 10);
+    if (query.editor) filters.editorId = query.editor;
+    if (query.priority) filters.priority = query.priority;
+
+    const [projects, clients, editors] = await Promise.all([
+      getActiveVideoProjects(filters),
+      getActiveClients(),
+      getInternalUsers(),
+    ]);
+
+    reply.render('video-production/list', {
+      projects,
+      clients,
+      editors,
+      filters: query,
+      columnDefs: VIDEO_COLUMNS,
+    });
   });
 };
