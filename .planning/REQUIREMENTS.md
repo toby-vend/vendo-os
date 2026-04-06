@@ -1,4 +1,4 @@
-# Requirements: VendoOS Skills Layer
+# Requirements: VendoOS
 
 **Defined:** 2026-04-01
 **Core Value:** When an AM assigns a task, the system pulls the right SOPs and brand context, produces a compliant draft, and validates it against standards.
@@ -69,6 +69,48 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INFR-02**: Database schema extended with skills, brand_hub, task_runs, drive_watch_channels tables
 - [x] **INFR-03**: OAuth token handling hardened (crypto key versioning resolved, silent-failure path surfaces status)
 
+## v1.1 Requirements — Mobile & PWA
+
+Requirements for milestone v1.1. Each maps to roadmap phases (continuing from Phase 10).
+
+### Responsive Layout
+
+- [ ] **RESP-01**: All pages fit within the mobile viewport with no horizontal scrolling
+- [ ] **RESP-02**: Viewport meta tag and mobile-first CSS reset applied globally
+- [ ] **RESP-03**: Sidebar collapses to a fixed bottom tab bar on screens below 768px
+- [ ] **RESP-04**: Bottom tab bar provides navigation to the 4-5 most-used sections
+- [ ] **RESP-05**: All interactive elements have minimum 48px touch targets on mobile
+- [ ] **RESP-06**: Data tables reflow to a stacked card layout on screens below 768px
+- [ ] **RESP-07**: Task submission form is usable on mobile (inputs, selects, buttons all fit)
+- [ ] **RESP-08**: Draft review page displays structured output readably on mobile
+- [ ] **RESP-09**: User can swipe left/right to navigate between sections on mobile
+- [ ] **RESP-10**: User can pull down on task list to trigger a refresh
+
+### PWA Foundation
+
+- [ ] **PWA-01**: Web app manifest exists with app name, icons (192px + 512px), theme colour, display: standalone
+- [ ] **PWA-02**: Service worker registers on first page load
+- [ ] **PWA-03**: App is installable to home screen on Android (auto-prompt) and iOS (manual banner with instructions)
+- [ ] **PWA-04**: Installed app opens in standalone mode without browser chrome
+
+### Offline Support
+
+- [ ] **OFFL-01**: Static assets (CSS, JS, icons, fonts) are cached by the service worker on install
+- [ ] **OFFL-02**: Previously visited full pages are cached and available offline
+- [ ] **OFFL-03**: HTMX partial responses are cached separately and served correctly (not as full pages)
+- [ ] **OFFL-04**: A branded offline fallback page is shown when no cached version exists
+- [ ] **OFFL-05**: All Fastify routes include `Vary: HX-Request` header to enable correct SW caching
+
+### Push Notifications
+
+- [ ] **PUSH-01**: VAPID keys are generated and stored as environment variables
+- [ ] **PUSH-02**: Push subscription endpoint exists and stores subscriptions per user in the database
+- [ ] **PUSH-03**: User receives a push notification when their draft is ready for review
+- [ ] **PUSH-04**: User receives a push notification when a task fails QA
+- [ ] **PUSH-05**: User receives a push notification when a task status changes
+- [ ] **PUSH-06**: Dead subscriptions (HTTP 410) are automatically cleaned up on failed send
+- [ ] **PUSH-07**: On iOS, push subscription is gated behind standalone mode detection with install instructions
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -83,6 +125,11 @@ Deferred to future release. Tracked but not in current roadmap.
 - **TIER-01**: Staff portal with tools and chatbot only (no revenue/financials visible)
 - **TIER-02**: Client CRM portal on isolated database (about Vendo, their AM, integration guides, live results)
 - **TIER-03**: Admin dashboard with revenue, financials, user monitoring, project admin
+
+### Push Notification Enhancements
+
+- **PUSH-08**: User can configure notification preferences per type
+- **PUSH-09**: Notifications grouped by client
 
 ### Future Agents
 
@@ -103,7 +150,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | Freeform LLM output without SOP grounding | Defeats the purpose; always retrieve-then-generate |
 | Per-task fine-tuning or model training | RAG achieves equivalent grounding without ML infrastructure costs |
 | Multi-step approval chains | Defeats time-saving purpose; single AM review step only |
-| Mobile app | Web-first; browser access sufficient |
+| Mobile app | PWA covers the use case without App Store overhead |
+| Background Sync (offline writes) | iOS Safari does not support Background Sync API — silent failure |
+| Task creation on mobile | Mobile use case is review/approve, not creation — desktop workflow |
+| EU iOS push workaround | Apple removed standalone PWA in EU under DMA — no technical fix |
 
 ## Traceability
 
@@ -157,4 +207,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-01*
-*Last updated: 2026-04-01 — traceability populated after roadmap creation*
+*Last updated: 2026-04-06 — v1.1 Mobile & PWA requirements added*
