@@ -37,7 +37,12 @@ Decimal phases appear between their surrounding integers in numeric order. v1.1 
   3. Data tables (task list, skills browser) reflow to a stacked card layout on mobile — no table scrolling or cut-off columns
   4. The task submission form and draft review page are fully usable on mobile — all inputs, selects, buttons, and structured output visible without zooming
   5. On the task list, a user can swipe left/right to navigate between sections and pull down to trigger a refresh
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Global viewport reset, bottom tab bar, More overlay
+- [ ] 11-02-PLAN.md — Table-to-card reflow (tasks + clients), form and draft review mobile fixes
+- [ ] 11-03-PLAN.md — Swipe navigation, card swipe actions, pull-to-refresh
 
 ### Phase 12: PWA Foundation
 **Goal**: VendoOS is installable to the home screen on Android and iOS, opens in standalone mode without browser chrome, and loads static assets instantly on repeat visits
