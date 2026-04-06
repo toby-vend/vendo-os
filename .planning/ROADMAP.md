@@ -20,7 +20,7 @@ The core mobile use case is read-and-approve. AMs use their phones to check task
 
 Decimal phases appear between their surrounding integers in numeric order. v1.1 continues from v1.0 Phase 10.
 
-- [ ] **Phase 11: Responsive Layout** - Mobile viewport, bottom tab bar, touch targets, table reflow, swipe and pull-to-refresh gestures
+- [x] **Phase 11: Responsive Layout** - Mobile viewport, bottom tab bar, touch targets, table reflow, swipe and pull-to-refresh gestures (completed 2026-04-06)
 - [ ] **Phase 12: PWA Foundation** - Manifest, service worker shell, static asset caching, home screen install
 - [ ] **Phase 13: Offline Caching** - Full-page and HTMX partial caching, offline fallback pages, Vary header
 - [ ] **Phase 14: Push Notifications** - VAPID keys, push subscriptions, draft-ready/QA-failure/status-change notifications, dead subscription pruning
@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order. v1.1 
   3. Data tables (task list, skills browser) reflow to a stacked card layout on mobile — no table scrolling or cut-off columns
   4. The task submission form and draft review page are fully usable on mobile — all inputs, selects, buttons, and structured output visible without zooming
   5. On the task list, a user can swipe left/right to navigate between sections and pull down to trigger a refresh
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 11-01-PLAN.md — Global viewport reset, bottom tab bar, More overlay
@@ -85,7 +85,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 11. Responsive Layout | 2/3 | In Progress|  |
+| 11. Responsive Layout | 3/3 | Complete   | 2026-04-06 |
 | 12. PWA Foundation | 0/? | Not started | - |
 | 13. Offline Caching | 0/? | Not started | - |
 | 14. Push Notifications | 0/? | Not started | - |

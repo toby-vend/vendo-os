@@ -83,8 +83,8 @@ Requirements for milestone v1.1. Each maps to roadmap phases (continuing from Ph
 - [x] **RESP-06**: Data tables reflow to a stacked card layout on screens below 768px
 - [x] **RESP-07**: Task submission form is usable on mobile (inputs, selects, buttons all fit)
 - [x] **RESP-08**: Draft review page displays structured output readably on mobile
-- [ ] **RESP-09**: User can swipe left/right to navigate between sections on mobile
-- [ ] **RESP-10**: User can pull down on task list to trigger a refresh
+- [x] **RESP-09**: User can swipe left/right to navigate between sections on mobile
+- [x] **RESP-10**: User can pull down on task list to trigger a refresh
 
 ### PWA Foundation
 
@@ -207,8 +207,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RESP-06 | Phase 11 | Complete |
 | RESP-07 | Phase 11 | Complete |
 | RESP-08 | Phase 11 | Complete |
-| RESP-09 | Phase 11 | Pending |
-| RESP-10 | Phase 11 | Pending |
+| RESP-09 | Phase 11 | Complete |
+| RESP-10 | Phase 11 | Complete |
 | PWA-01 | Phase 12 | Pending |
 | PWA-02 | Phase 12 | Pending |
 | PWA-03 | Phase 12 | Pending |
