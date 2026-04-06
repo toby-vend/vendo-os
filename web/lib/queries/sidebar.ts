@@ -206,6 +206,11 @@ export async function migrateSidebarConfig(): Promise<void> {
           changed = true;
         }
       }
+      // Sync group icon from default
+      if (defaultGroup.icon && savedGroup.icon !== defaultGroup.icon) {
+        savedGroup.icon = defaultGroup.icon;
+        changed = true;
+      }
       // Rename items whose labels changed in the default
       for (const defaultItem of defaultGroup.items) {
         const savedItem = savedGroup.items.find(i => i.id === defaultItem.id);
