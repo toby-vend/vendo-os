@@ -27,7 +27,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'home',
     label: 'Home',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+    icon: '<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
     items: [
       { id: 'dashboard', label: 'Home', href: '/', permission: 'dashboard' },
     ],
@@ -35,7 +35,6 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'clients',
     label: 'Clients',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
     items: [
       { id: 'clients-overview', label: 'Clients', href: '/clients', permission: 'clients' },
       { id: 'client-onboarding', label: 'Onboarding', href: '/onboarding', permission: 'clients' },
@@ -47,7 +46,6 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'performance',
     label: 'Performance',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
     items: [
       { id: 'ads-dashboard', label: 'Ads Dashboard', href: '/dashboards/ads', permission: 'dashboards' },
       { id: 'reporting-hub', label: 'Reporting Hub', href: '/dashboards/reporting-hub', permission: 'dashboards' },
@@ -57,7 +55,6 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'finance',
     label: 'Finance',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 7H9a4 4 0 00-4 4 4 4 0 004 4h1"/><line x1="4" y1="19" x2="18" y2="19"/><line x1="4" y1="15" x2="12" y2="15"/></svg>',
     permission: 'dashboards',
     items: [
       { id: 'finance-dashboard', label: 'Finance', href: '/dashboards/finance', permission: 'dashboards' },
@@ -68,7 +65,6 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'work',
     label: 'Work',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
     items: [
       { id: 'action-items', label: 'Action Items', href: '/action-items', permission: 'action-items' },
       { id: 'asana-tasks', label: 'Asana Tasks', href: '/asana-tasks', permission: 'asana-tasks' },
@@ -81,7 +77,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'meetings',
     label: 'Meetings',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>',
+    icon: '<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>',
     items: [
       { id: 'meetings-page', label: 'Meetings', href: '/meetings', permission: 'meetings' },
     ],
@@ -89,7 +85,6 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'tools',
     label: 'Tools',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
     items: [
       { id: 'skills', label: 'Skills', href: '/skills', permission: 'skills' },
       { id: 'chat', label: 'Chat', href: '/chat', permission: 'chat' },
@@ -101,7 +96,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'operations',
     label: 'Operations',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+    icon: '<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
     permission: 'operations',
     items: [
       { id: 'operations-hub', label: 'Operations', href: '/operations', permission: 'operations' },
@@ -110,7 +105,6 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
   {
     id: 'admin',
     label: 'Admin',
-    icon: '<svg class="nav-group-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
     adminOnly: true,
     items: [
       { id: 'admin-users', label: 'Users', href: '/admin/users' },
@@ -205,11 +199,6 @@ export async function migrateSidebarConfig(): Promise<void> {
           savedGroup.items.splice(prevIdx + 1, 0, defaultItem);
           changed = true;
         }
-      }
-      // Sync group icon from default
-      if (defaultGroup.icon && savedGroup.icon !== defaultGroup.icon) {
-        savedGroup.icon = defaultGroup.icon;
-        changed = true;
       }
       // Rename items whose labels changed in the default
       for (const defaultItem of defaultGroup.items) {

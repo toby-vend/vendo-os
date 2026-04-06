@@ -84,10 +84,6 @@ app.decorateReply('render', function (template: string, data: Record<string, unk
   const user = (this.request as any).user as SessionUser | null;
   const sessionToken = (this.request as any)._sessionToken as string | undefined;
   const csrfToken = sessionToken ? generateCsrfToken(sessionToken) : '';
-  const includeChartJs = data.includeChartJs === true
-    || template.startsWith('dashboards/')
-    || template.startsWith('portal/')
-    || template === 'dashboard';
   const html = eta.render(template, {
     ...data,
     isHtmx,
@@ -97,7 +93,6 @@ app.decorateReply('render', function (template: string, data: Record<string, unk
     md,
     sanitiseHtml,
     sidebarConfig: (this.request as any)._sidebarConfig,
-    includeChartJs,
   });
   this.type('text/html').send(html);
 });
