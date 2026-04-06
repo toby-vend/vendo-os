@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
   <title>Vendo OS</title>
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/style.css">
   <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+  <% if (it.includeChartJs) { %>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script>
   // Vendo Chart.js dark theme defaults
@@ -36,12 +38,13 @@
     Chart.defaults.scale.border = { display: false };
   })();
   </script>
+  <% } %>
 </head>
 <body>
   <div class="app-layout">
     <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" role="complementary" aria-label="Main navigation">
       <div class="sidebar-header">
         <div class="sidebar-logo">
           <div class="logo-icon">V</div>
@@ -57,7 +60,7 @@
         const p = it.currentPath || '';
         const isInGroup = (paths) => paths.some(x => p === x || p.startsWith(x + '/'));
       %>
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" aria-label="Main navigation">
         <% (it.sidebarConfig || []).forEach(function(group) {
           if (group.adminOnly && it.user?.role !== 'admin') return;
           const visibleItems = group.items.filter(function(item) {
@@ -81,7 +84,7 @@
           <% if (group.icon) { %>
           <a href="<%= visibleItems[0].href %>" class="nav-collapsed-icon<%= isInGroup(hrefs) ? ' active' : '' %>" title="<%= group.label %>"><%~ group.icon %></a>
           <% } %>
-          <button class="nav-group-label" onclick="toggleNavGroup(this)">
+          <button class="nav-group-label" onclick="toggleNavGroup(this)" aria-expanded="<%= isInGroup(hrefs) ? 'true' : 'false' %>">
             <% if (group.icon) { %><%~ group.icon %><% } %>
             <span class="nav-label"><%= group.label %></span>
             <svg class="nav-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
@@ -135,7 +138,7 @@
         </div>
       </header>
 
-      <main class="main-content">
+      <main class="main-content" role="main">
         <% if (it.user && !it.user.googleConnected && it.currentPath !== '/settings' && !it.currentPath?.startsWith('/auth/')) { %>
         <div id="google-connect-banner" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1.25rem; margin-bottom: 1rem; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px;">
           <div style="font-size: 14px; color: #E2E8F0;">
@@ -199,6 +202,7 @@
   function toggleNavGroup(btn) {
     const group = btn.closest('.nav-group');
     group.classList.toggle('open');
+    btn.setAttribute('aria-expanded', group.classList.contains('open'));
     saveNavGroupState();
   }
   function saveNavGroupState() {
