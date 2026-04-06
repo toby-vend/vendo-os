@@ -21,7 +21,7 @@ The core mobile use case is read-and-approve. AMs use their phones to check task
 Decimal phases appear between their surrounding integers in numeric order. v1.1 continues from v1.0 Phase 10.
 
 - [x] **Phase 11: Responsive Layout** - Mobile viewport, bottom tab bar, touch targets, table reflow, swipe and pull-to-refresh gestures (completed 2026-04-06)
-- [ ] **Phase 12: PWA Foundation** - Manifest, service worker shell, static asset caching, home screen install
+- [x] **Phase 12: PWA Foundation** - Manifest, service worker shell, static asset caching, home screen install (completed 2026-04-06)
 - [ ] **Phase 13: Offline Caching** - Full-page and HTMX partial caching, offline fallback pages, Vary header
 - [ ] **Phase 14: Push Notifications** - VAPID keys, push subscriptions, draft-ready/QA-failure/status-change notifications, dead subscription pruning
 
@@ -53,7 +53,7 @@ Plans:
   2. An iOS user sees an in-app banner with instructions to use "Share > Add to Home Screen" and can complete installation manually
   3. After installation, tapping the home screen icon opens VendoOS in standalone mode — no browser address bar, no back/forward buttons
   4. Static assets (CSS, HTMX JS, icons) load from the service worker cache on a second visit, not from the network
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 12-01-PLAN.md — Manifest, icons, service worker, base.eta patches, vercel.json routes
@@ -90,6 +90,6 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 11. Responsive Layout | 3/3 | Complete    | 2026-04-06 |
-| 12. PWA Foundation | 1/2 | In Progress|  |
+| 12. PWA Foundation | 2/2 | Complete   | 2026-04-06 |
 | 13. Offline Caching | 0/? | Not started | - |
 | 14. Push Notifications | 0/? | Not started | - |

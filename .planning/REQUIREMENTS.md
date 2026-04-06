@@ -90,7 +90,7 @@ Requirements for milestone v1.1. Each maps to roadmap phases (continuing from Ph
 
 - [x] **PWA-01**: Web app manifest exists with app name, icons (192px + 512px), theme colour, display: standalone
 - [x] **PWA-02**: Service worker registers on first page load
-- [ ] **PWA-03**: App is installable to home screen on Android (auto-prompt) and iOS (manual banner with instructions)
+- [x] **PWA-03**: App is installable to home screen on Android (auto-prompt) and iOS (manual banner with instructions)
 - [x] **PWA-04**: Installed app opens in standalone mode without browser chrome
 
 ### Offline Support
@@ -211,7 +211,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RESP-10 | Phase 11 | Complete |
 | PWA-01 | Phase 12 | Complete |
 | PWA-02 | Phase 12 | Complete |
-| PWA-03 | Phase 12 | Pending |
+| PWA-03 | Phase 12 | Complete |
 | PWA-04 | Phase 12 | Complete |
 | OFFL-01 | Phase 13 | Pending |
 | OFFL-02 | Phase 13 | Pending |
