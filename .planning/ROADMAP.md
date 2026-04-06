@@ -53,7 +53,11 @@ Plans:
   2. An iOS user sees an in-app banner with instructions to use "Share > Add to Home Screen" and can complete installation manually
   3. After installation, tapping the home screen icon opens VendoOS in standalone mode — no browser address bar, no back/forward buttons
   4. Static assets (CSS, HTMX JS, icons) load from the service worker cache on a second visit, not from the network
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Manifest, icons, service worker, base.eta patches, vercel.json routes
+- [ ] 12-02-PLAN.md — Settings page Install App section with platform detection
 
 ### Phase 13: Offline Caching
 **Goal**: When an AM loses signal (common in dental practices), previously visited pages and drafts remain readable, HTMX partial requests fall back gracefully, and a clear offline indicator is shown when a live action is attempted
@@ -86,6 +90,6 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 11. Responsive Layout | 3/3 | Complete    | 2026-04-06 |
-| 12. PWA Foundation | 0/? | Not started | - |
+| 12. PWA Foundation | 0/2 | Not started | - |
 | 13. Offline Caching | 0/? | Not started | - |
 | 14. Push Notifications | 0/? | Not started | - |
