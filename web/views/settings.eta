@@ -81,4 +81,49 @@
       Connecting your Google account gives VendoOS access to your Drive, Gmail, and Calendar (read-only).
     </p>
   </div>
+
+  <!-- Install App -->
+  <div class="card" style="padding: 1.5rem; margin-top: 1.5rem;" id="install-app-section">
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 1rem;">Install App</h3>
+    <div id="install-content"></div>
+  </div>
+
+  <script>
+  (function() {
+    var el = document.getElementById('install-content');
+    if (!el) return;
+
+    // Already installed — standalone mode detection
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      el.innerHTML = '<p style="font-size:14px;color:#22C55E;">App installed &#10003;</p>';
+      return;
+    }
+
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    if (isIOS) {
+      el.innerHTML = '<p style="font-size:14px;color:#E2E8F0;line-height:1.6;">'
+        + 'To install VendoOS on your home screen:<br>'
+        + '1. Tap the <strong>Share</strong> button (box with arrow) in Safari<br>'
+        + '2. Scroll down and tap <strong>Add to Home Screen</strong><br>'
+        + '3. Tap <strong>Add</strong> to confirm</p>';
+      return;
+    }
+
+    // Android / Chrome — use captured beforeinstallprompt if available
+    if (window._pwaInstallPrompt) {
+      el.innerHTML = '<button id="pwa-install-btn" style="padding:8px 20px;font-size:14px;'
+        + 'color:#0B0B0B;background:#22C55E;border:none;border-radius:8px;cursor:pointer;'
+        + 'font-family:var(--vendo-font);font-weight:600;">Add to Home Screen</button>';
+      document.getElementById('pwa-install-btn').addEventListener('click', function() {
+        window._pwaInstallPrompt.prompt();
+      });
+      return;
+    }
+
+    // Generic fallback (desktop or Android without captured prompt)
+    el.innerHTML = '<p style="font-size:14px;color:#94A3B8;">Open VendoOS in Chrome on your phone '
+      + 'and use the browser menu to select <strong>Add to Home Screen</strong>.</p>';
+  })();
+  </script>
 </div>
