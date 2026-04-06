@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Complete
 status: planning
-stopped_at: "Checkpoint: 11-03 Task 2 human-verify pending"
-last_updated: "2026-04-06T19:05:23.937Z"
+stopped_at: Completed 11-03-PLAN.md — all Phase 11 plans done
+last_updated: "2026-04-06T19:12:28.088Z"
 last_activity: 2026-04-06 — v1.1 roadmap created (4 phases, 26 requirements mapped)
 progress:
   total_phases: 4
@@ -112,6 +112,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 11-responsive-layout]: SVG icons in More overlay must be explicitly sized — inline SVGs have no implicit dimensions and render at full width without width/height constraints
 - [Phase 11-responsive-layout]: Swipe-action-approve div pre-rendered in markup (display:none) on draft_ready cards — wired by Plan 03
 - [Phase 11-responsive-layout]: Draft review page mobile fix uses attribute selector on inline style rather than modifying detail.eta markup
+- [Phase 11-responsive-layout]: Approve endpoint confirmed as POST /tasks/:id/approve (registered at prefix /tasks in server.ts, handler in task-runs-ui.ts)
+- [Phase 11-responsive-layout]: ptr-spin @keyframes placed outside 768px media query — keyframes are global and do not scope inside media queries in all browsers
 
 ### Research Flags (v1.1)
 
@@ -131,6 +133,6 @@ None blocking v1.1 start.
 
 ## Session Continuity
 
-Last session: 2026-04-06T19:05:23.935Z
-Stopped at: Checkpoint: 11-03 Task 2 human-verify pending
+Last session: 2026-04-06T19:12:20.414Z
+Stopped at: Completed 11-03-PLAN.md — all Phase 11 plans done
 Resume file: None
