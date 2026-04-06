@@ -95,5 +95,5 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 |-------|----------------|--------|-----------|
 | 11. Responsive Layout | 3/3 | Complete    | 2026-04-06 |
 | 12. PWA Foundation | 2/2 | Complete    | 2026-04-06 |
-| 13. Offline Caching | 2/2 | Complete   | 2026-04-06 |
+| 13. Offline Caching | 2/2 | Complete    | 2026-04-06 |
 | 14. Push Notifications | 0/? | Not started | - |
