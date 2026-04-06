@@ -477,6 +477,16 @@
       }, { passive: true });
     })();
 
+    // Auto-wrap tables in scroll containers on mobile
+    document.querySelectorAll('.main-content table').forEach(function(table) {
+      // Skip tables already in a scroll wrap or inside mobile card containers
+      if (table.closest('.table-scroll-wrap') || table.closest('.mobile-only')) return;
+      var wrap = document.createElement('div');
+      wrap.className = 'table-scroll-wrap';
+      table.parentNode.insertBefore(wrap, table);
+      wrap.appendChild(table);
+    });
+
   } // end mobile-only guard
   </script>
 </body>

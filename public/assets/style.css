@@ -4811,36 +4811,17 @@ button.growth-sort-btn:hover {
     padding: 8px 14px;
   }
 
-  /* === Tables — horizontal scroll on mobile === */
-  table {
-    display: block;
+  /* === Tables — scrollable wrapper on mobile === */
+  .table-scroll-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  .table-scroll-wrap > table {
+    min-width: 600px;
     white-space: nowrap;
-  }
-
-  table thead,
-  table tbody,
-  table tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-  }
-
-  /* Restore normal table display but allow scroll */
-  table {
-    min-width: 500px;
-  }
-
-  /* Wrap tables in their parent to enable scroll */
-  .main-content table {
-    display: table;
-  }
-
-  .main-content > div:has(> table),
-  .main-content table:not(.task-card-list table) {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   /* === Chat page — fixed viewport with input above tab bar === */
