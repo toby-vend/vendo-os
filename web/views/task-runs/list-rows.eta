@@ -1,4 +1,5 @@
 <% if (!it.runs || it.runs.length === 0) { %>
+<div class="desktop-only">
 <table class="compact" style="width: 100%;">
   <thead>
     <tr>
@@ -11,7 +12,10 @@
     </tr>
   </tbody>
 </table>
+</div>
+<div class="mobile-only" style="text-align: center; color: #64748B; padding: 2rem;">No tasks found.</div>
 <% } else { %>
+<div class="desktop-only">
 <table class="compact" style="width: 100%;">
   <thead>
     <tr>
@@ -31,4 +35,31 @@
     <% }) %>
   </tbody>
 </table>
+</div>
+<div class="task-card-list mobile-only">
+  <% it.runs.forEach(function(run) { %>
+  <div class="task-card-wrapper">
+    <% if (run.status === 'draft_ready') { %>
+    <div class="swipe-action-approve" style="display: none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Approve</span>
+    </div>
+    <% } %>
+    <div class="task-card" data-task-id="<%= run.id %>" data-status="<%= run.status %>" onclick="window.location='/tasks/<%= run.id %>'">
+      <div class="task-card-header">
+        <span><%= run.client_name || 'Unknown' %></span>
+        <span class="badge badge-<%= run.status %>"><%= run.status.replace(/_/g, ' ') %></span>
+      </div>
+      <div class="task-card-meta">
+        <span class="badge"><%= run.channel.replace(/_/g, ' ') %></span>
+        <span><%= run.task_type.replace(/_/g, ' ') %></span>
+      </div>
+      <div class="task-card-footer">
+        <span><%= new Date(run.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+        <span><%= run.created_by %></span>
+      </div>
+    </div>
+  </div>
+  <% }) %>
+</div>
 <% } %>

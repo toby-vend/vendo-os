@@ -4562,4 +4562,144 @@ button.growth-sort-btn:hover {
 
   /* 48px touch targets on interactive elements */
   button, .btn, select { min-height: 48px; }
+
+  /* === Task run cards === */
+  .task-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .task-card-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  .task-card {
+    position: relative;
+    z-index: 1;
+    background: var(--glass-bg, rgba(255,255,255,0.04));
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .task-card:active {
+    background: rgba(255,255,255,0.06);
+  }
+
+  .task-card.swiped-right {
+    transform: translateX(80px);
+  }
+
+  .task-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.375rem;
+  }
+
+  .task-card-header > span:first-child {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--vendo-text);
+  }
+
+  .task-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 13px;
+    color: var(--vendo-text-muted);
+    margin-bottom: 0.375rem;
+  }
+
+  .task-card-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #64748B;
+  }
+
+  .swipe-action-approve {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    background: var(--vendo-green);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #0B0B0B;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 0;
+  }
+
+  /* === Client cards === */
+  .client-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .client-card {
+    display: block;
+    background: var(--glass-bg, rgba(255,255,255,0.04));
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    text-decoration: none;
+  }
+
+  .client-card:active {
+    background: rgba(255,255,255,0.06);
+  }
+
+  .client-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .client-card-row + .client-card-row {
+    margin-top: 0.25rem;
+  }
+
+  .client-card-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--vendo-text);
+  }
+
+  /* === Form mobile fixes === */
+  .form-group, .form-row { flex-direction: column; }
+
+  input, select, textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  button[type="submit"], .btn { width: 100%; }
+
+  /* === Draft review page mobile fixes === */
+  [style*="max-width: 780px"] { max-width: 100% !important; }
+
+  .output-block pre,
+  .output-block code {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Approve/reject action buttons stack vertically on mobile */
+  [style*="display: flex"][style*="flex-wrap: wrap"] {
+    flex-direction: column;
+  }
 }

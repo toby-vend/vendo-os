@@ -1,3 +1,4 @@
+<div class="desktop-only">
 <table class="compact">
   <thead>
     <tr>
@@ -54,3 +55,28 @@
     <% }) %>
   </tbody>
 </table>
+</div>
+
+<div class="client-card-list mobile-only">
+  <% if (!it.clients.length) { %>
+  <div style="text-align: center; color: #94A3B8; padding: 2rem;">No clients match the current filters.</div>
+  <% } %>
+  <% it.clients.forEach(c => { %>
+  <a href="/clients/<%= encodeURIComponent(c.name) %>" class="client-card">
+    <div class="client-card-row">
+      <span class="client-card-name"><%= c.label %></span>
+      <% if (c.health_score != null) { %>
+      <span style="width: 10px; height: 10px; border-radius: 50%; background: <%= c.health_score >= 70 ? '#22C55E' : c.health_score >= 40 ? '#F59E0B' : '#EF4444' %>; display: inline-block;" title="<%= c.health_tier %>"></span>
+      <% } else { %>
+      <span style="width: 10px; height: 10px; border-radius: 50%; background: #6B7280; display: inline-block;"></span>
+      <% } %>
+    </div>
+    <div class="client-card-row" style="font-size: 12px; color: #64748B; margin-top: 0.25rem;">
+      <span><%= c.vertical || '\u2014' %></span>
+      <% if (it.isAdmin && c.health_score != null) { %>
+      <span><%= c.health_score %>/100</span>
+      <% } %>
+    </div>
+  </a>
+  <% }) %>
+</div>
