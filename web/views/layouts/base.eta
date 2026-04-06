@@ -72,14 +72,16 @@
         <% if (isSingle) { %>
         <div class="nav-group nav-group-single">
           <a href="<%= visibleItems[0].href %>" class="nav-group-label nav-group-link<%= (visibleItems[0].href === '/' ? p === '/' : p.startsWith(visibleItems[0].href)) ? ' active' : '' %>">
+            <% if (group.icon) { %><%~ group.icon %><% } %>
             <span class="nav-label"><%= visibleItems[0].label %></span>
           </a>
         </div>
         <% } else { %>
         <div class="nav-group<%= isInGroup(hrefs) ? ' open' : '' %>">
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
+            <% if (group.icon) { %><%~ group.icon %><% } %>
             <span class="nav-label"><%= group.label %></span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
+            <svg class="nav-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,6 15,12 9,18"/></svg>
           </button>
           <div class="nav-group-children">
             <% visibleItems.forEach(function(item) { %>
