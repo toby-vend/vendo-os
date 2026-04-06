@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Complete
 status: planning
-stopped_at: Phase 11 context gathered
-last_updated: "2026-04-06T18:05:25.380Z"
+stopped_at: Completed 11-01 Task 1, awaiting human verification at checkpoint
+last_updated: "2026-04-06T18:28:40.514Z"
 last_activity: 2026-04-06 — v1.1 roadmap created (4 phases, 26 requirements mapped)
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 0
 ---
 
@@ -68,6 +68,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 11-responsive-layout P01 | 8 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 08-qa-and-compliance]: MAX_ATTEMPTS=3 (initial + 2 retries); qa_critique always contains both sop_issues and ahpra_violations
 - [Phase 09-audit-and-traceability]: getAuditRecord replaces getTaskRun in GET /runs/:id
 - [Phase 10-am-interface]: POST /tasks/new forwards to app.inject('/api/tasks/runs') — reuses creation logic
+- [Phase 11-responsive-layout]: Tab bar hides sidebar entirely on mobile (display:none !important) — no hybrid approach
+- [Phase 11-responsive-layout]: group.icon in sidebarConfig is a full SVG string — rendered unescaped via Eta <%~ %>
 
 ### Research Flags (v1.1)
 
@@ -123,6 +126,6 @@ None blocking v1.1 start.
 
 ## Session Continuity
 
-Last session: 2026-04-06T18:05:25.378Z
-Stopped at: Phase 11 context gathered
-Resume file: .planning/phases/11-responsive-layout/11-CONTEXT.md
+Last session: 2026-04-06T18:28:40.513Z
+Stopped at: Completed 11-01 Task 1, awaiting human verification at checkpoint
+Resume file: None

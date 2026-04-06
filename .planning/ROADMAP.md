@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order. v1.1 
   3. Data tables (task list, skills browser) reflow to a stacked card layout on mobile — no table scrolling or cut-off columns
   4. The task submission form and draft review page are fully usable on mobile — all inputs, selects, buttons, and structured output visible without zooming
   5. On the task list, a user can swipe left/right to navigate between sections and pull down to trigger a refresh
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 11-01-PLAN.md — Global viewport reset, bottom tab bar, More overlay
@@ -85,7 +85,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 11. Responsive Layout | 0/? | Not started | - |
+| 11. Responsive Layout | 1/3 | In Progress|  |
 | 12. PWA Foundation | 0/? | Not started | - |
 | 13. Offline Caching | 0/? | Not started | - |
 | 14. Push Notifications | 0/? | Not started | - |

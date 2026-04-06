@@ -75,11 +75,11 @@ Requirements for milestone v1.1. Each maps to roadmap phases (continuing from Ph
 
 ### Responsive Layout
 
-- [ ] **RESP-01**: All pages fit within the mobile viewport with no horizontal scrolling
-- [ ] **RESP-02**: Viewport meta tag and mobile-first CSS reset applied globally
-- [ ] **RESP-03**: Sidebar collapses to a fixed bottom tab bar on screens below 768px
-- [ ] **RESP-04**: Bottom tab bar provides navigation to the 4-5 most-used sections
-- [ ] **RESP-05**: All interactive elements have minimum 48px touch targets on mobile
+- [x] **RESP-01**: All pages fit within the mobile viewport with no horizontal scrolling
+- [x] **RESP-02**: Viewport meta tag and mobile-first CSS reset applied globally
+- [x] **RESP-03**: Sidebar collapses to a fixed bottom tab bar on screens below 768px
+- [x] **RESP-04**: Bottom tab bar provides navigation to the 4-5 most-used sections
+- [x] **RESP-05**: All interactive elements have minimum 48px touch targets on mobile
 - [ ] **RESP-06**: Data tables reflow to a stacked card layout on screens below 768px
 - [ ] **RESP-07**: Task submission form is usable on mobile (inputs, selects, buttons all fit)
 - [ ] **RESP-08**: Draft review page displays structured output readably on mobile
@@ -199,11 +199,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-03 | Phase 10 | Complete |
 | UI-04 | Phase 10 | Complete |
 | UI-05 | Phase 10 | Complete |
-| RESP-01 | Phase 11 | Pending |
-| RESP-02 | Phase 11 | Pending |
-| RESP-03 | Phase 11 | Pending |
-| RESP-04 | Phase 11 | Pending |
-| RESP-05 | Phase 11 | Pending |
+| RESP-01 | Phase 11 | Complete |
+| RESP-02 | Phase 11 | Complete |
+| RESP-03 | Phase 11 | Complete |
+| RESP-04 | Phase 11 | Complete |
+| RESP-05 | Phase 11 | Complete |
 | RESP-06 | Phase 11 | Pending |
 | RESP-07 | Phase 11 | Pending |
 | RESP-08 | Phase 11 | Pending |
