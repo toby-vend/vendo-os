@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Vendo OS</title>
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -309,6 +313,18 @@
     if (bell && !bell.contains(e.target)) {
       document.getElementById('notif-dropdown')?.classList.remove('open');
     }
+  });
+
+  // === Phase 12: PWA Service Worker & Install ===
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js')
+        .catch(function(err) { console.warn('SW registration failed:', err); });
+    });
+  }
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    window._pwaInstallPrompt = e;
   });
 
   // === Phase 11: Touch Gestures (mobile only) ===
