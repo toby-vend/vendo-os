@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { getDashboardStats, getActionsByAssignee } from '../lib/queries.js';
+import { getDashboardStats } from '../lib/queries.js';
 import { getFinanceOverview, getRevenueTrend } from '../lib/queries/dashboards.js';
 import { getPipelineOverview, getStalledDeals } from '../lib/queries/pipeline.js';
 
@@ -11,7 +11,6 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
     // Queries for all users
     const baseQueries = Promise.all([
       getDashboardStats(),
-      getActionsByAssignee(),
     ]);
 
     // Additional queries for admin users
@@ -25,9 +24,9 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
       : Promise.resolve(null);
 
     const [baseResults, adminResults] = await Promise.all([baseQueries, adminQueries]);
-    const [stats, assigneeSummary] = baseResults;
+    const [stats] = baseResults;
 
-    const data: Record<string, unknown> = { stats, assigneeSummary, isAdmin };
+    const data: Record<string, unknown> = { stats, isAdmin };
 
     if (adminResults) {
       const [finance, pipelineOverviews, stalledDeals, revenueTrend] = adminResults;

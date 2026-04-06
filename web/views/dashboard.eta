@@ -148,18 +148,3 @@
 
 <% } %>
 
-<h2>Action Items by Assignee</h2>
-<table class="compact">
-  <thead>
-    <tr><th>Assignee</th><th>Total</th><th>Open</th></tr>
-  </thead>
-  <tbody>
-    <% it.assigneeSummary.forEach(a => { %>
-    <tr class="table-row-link" onclick="window.location='/action-items?assignee=<%= encodeURIComponent(a.assignee) %>&status=open'">
-      <td><a href="/action-items?assignee=<%= encodeURIComponent(a.assignee) %>&status=open"><%= a.assignee %></a></td>
-      <td><%= a.total %></td>
-      <td><strong><%= a.open %></strong></td>
-    </tr>
-    <% }) %>
-  </tbody>
-</table>
