@@ -475,12 +475,14 @@ export async function insertGrowthLog(section: string, action: string, summary: 
       args: [section, action, summary, itemCount, new Date().toISOString()],
     });
   } catch {
-    // Table may not exist yet — create it and retry
-    await ensureGrowthLogTable();
-    await db.execute({
-      sql: 'INSERT INTO growth_task_log (section, action, summary, item_count, created_at) VALUES (?, ?, ?, ?, ?)',
-      args: [section, action, summary, itemCount, new Date().toISOString()],
-    });
+    // Table may not exist or DDL may be blocked — silently skip
+    try {
+      await ensureGrowthLogTable();
+      await db.execute({
+        sql: 'INSERT INTO growth_task_log (section, action, summary, item_count, created_at) VALUES (?, ?, ?, ?, ?)',
+        args: [section, action, summary, itemCount, new Date().toISOString()],
+      });
+    } catch { /* DDL blocked or table creation failed — skip logging */ }
   }
 }
 
@@ -497,8 +499,8 @@ export async function getGrowthLog(section?: string, limit = 20): Promise<Growth
       [limit],
     );
   } catch {
-    // Table may not exist yet — create it for next time
-    await ensureGrowthLogTable();
+    // Table may not exist yet — silently return empty
+    try { await ensureGrowthLogTable(); } catch { /* DDL may be blocked */ }
     return [];
   }
 }
