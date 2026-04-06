@@ -6,7 +6,7 @@
       "use": "@vercel/node",
       "config": {
         "maxDuration": 60,
-        "includeFiles": ["web/views/**", "web/public/**", "context/**", ".claude/commands/skills/**"]
+        "includeFiles": ["web/views/**", "web/views/**/*", "web/public/**", "context/**", ".claude/commands/skills/**"]
       }
     },
     {
