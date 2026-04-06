@@ -500,6 +500,154 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     reply.redirect('/video-production');
   });
 
+  // ── Stage transition actions ─────────────────────────────────────
+
+  // Mark content day as complete → moves to content_day_complete
+  app.post('/:id/mark-complete', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+
+    await moveVideoProject(projectId, 'content_day_complete', user.id, user.name);
+    await logVideoAudit(projectId, 'content_day_completed', null, null, user.id, user.name);
+
+    reply.redirect(`/video-production/${id}`);
+  });
+
+  // Share raw files → moves to raw_files_shared, sets client_status awaiting
+  app.post('/:id/share-raw-files', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+
+    await updateVideoProject(projectId, { client_status: 'awaiting' });
+    await moveVideoProject(projectId, 'raw_files_shared', user.id, user.name);
+    await logVideoAudit(projectId, 'raw_files_shared', null, null, user.id, user.name);
+
+    reply.redirect(`/video-production/${id}`);
+  });
+
+  // Client confirms raw file receipt → moves to in_editing
+  app.post('/:id/confirm-receipt', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const now = new Date().toISOString();
+
+    await updateVideoProject(projectId, {
+      raw_files_confirmed_at: now,
+      client_status: 'confirmed',
+    });
+    await moveVideoProject(projectId, 'in_editing', user.id, user.name);
+    await logVideoAudit(projectId, 'raw_files_confirmed', null, null, user.id, user.name);
+
+    reply.redirect(`/video-production/${id}`);
+  });
+
+  // Flag raw file issue
+  app.post('/:id/flag-raw-issue', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const body = request.body as Record<string, string | string[]>;
+    const issue = typeof body.issue === 'string' ? body.issue.trim() : 'Raw file issue reported';
+
+    await updateVideoProject(projectId, { client_status: 'changes_requested' });
+    await addVideoComment({
+      project_id: projectId,
+      source: 'client',
+      author_name: user.name,
+      body: issue,
+    });
+    await logVideoAudit(projectId, 'raw_file_issue', null, null, user.id, user.name, { issue });
+
+    reply.redirect(`/video-production/${id}`);
+  });
+
+  // Assign editor and move to in_editing
+  app.post('/:id/assign-editor', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const body = request.body as Record<string, string | string[]>;
+
+    const editorId = typeof body.assigned_editor_id === 'string' ? body.assigned_editor_id : '';
+    const editorName = typeof body.assigned_editor_name === 'string' ? body.assigned_editor_name : '';
+
+    if (editorId) {
+      await updateVideoProject(projectId, {
+        assigned_editor_id: editorId,
+        assigned_editor_name: editorName,
+      });
+      await logVideoAudit(projectId, 'editor_assigned', null, editorName, user.id, user.name);
+    }
+
+    reply.redirect(`/video-production/${id}`);
+  });
+
+  // Client approves edit → moves to live
+  app.post('/:id/client-approve', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const now = new Date().toISOString();
+
+    await updateVideoProject(projectId, {
+      client_status: 'approved',
+      client_approved_at: now,
+    });
+    await moveVideoProject(projectId, 'live', user.id, user.name);
+    await logVideoAudit(projectId, 'client_approved', null, null, user.id, user.name);
+
+    reply.redirect(`/video-production/${id}`);
+  });
+
+  // Client requests changes on edit → moves to revisions
+  app.post('/:id/client-request-changes', async (request, reply) => {
+    const user = (request as any).user as SessionUser;
+    requireAuth(user);
+
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const body = request.body as Record<string, string | string[]>;
+    const feedback = typeof body.feedback === 'string' ? body.feedback.trim() : '';
+
+    const project = await getVideoProject(projectId);
+    const newRound = (project?.revision_round || 0) + 1;
+
+    await updateVideoProject(projectId, {
+      client_status: 'changes_requested',
+      revision_round: newRound,
+    });
+
+    if (feedback) {
+      await addVideoComment({
+        project_id: projectId,
+        source: 'client',
+        round: newRound,
+        author_name: user.name,
+        body: feedback,
+      });
+    }
+
+    await moveVideoProject(projectId, 'revisions', user.id, user.name);
+    await logVideoAudit(projectId, 'client_changes_requested', null, null, user.id, user.name, { feedback });
+
+    reply.redirect(`/video-production/${id}`);
+  });
+
   // ── Shoot Plan ──────────────────────────────────────────────────
 
   app.get('/:id/shoot-plan', async (request, reply) => {

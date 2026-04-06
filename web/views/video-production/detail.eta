@@ -12,6 +12,28 @@
     else if (daysUntil <= 2) rag = 'amber';
     else rag = 'green';
   }
+
+  // 48-hour raw file receipt timeout check
+  let receiptOverdue = false;
+  if (p.status === 'raw_files_shared' && !p.raw_files_confirmed_at) {
+    const lastMove = it.auditLog.find(a => a.action === 'status_change' && a.to_value === 'raw_files_shared');
+    if (lastMove) {
+      const sharedAt = new Date(lastMove.created_at);
+      const hoursSince = (now.getTime() - sharedAt.getTime()) / (1000 * 60 * 60);
+      receiptOverdue = hoursSince >= 48;
+    }
+  }
+
+  // 3-business-day client review timeout check
+  let reviewOverdue = false;
+  if (p.status === 'client_review') {
+    const lastMove = it.auditLog.find(a => a.action === 'status_change' && a.to_value === 'client_review');
+    if (lastMove) {
+      const sentAt = new Date(lastMove.created_at);
+      const daysSince = (now.getTime() - sentAt.getTime()) / (1000 * 60 * 60 * 24);
+      reviewOverdue = daysSince >= 3;
+    }
+  }
 %>
 
 <a href="/video-production" style="font-size: 13px; color: var(--vendo-text-muted); text-decoration: none; margin-bottom: 1rem; display: inline-block;">&larr; Back to Board</a>
@@ -34,21 +56,123 @@
       <% } %>
     </div>
   </div>
-  <div style="display: flex; gap: 0.5rem;">
-    <% if (p.status === 'revisions') { %>
-    <form method="POST" action="/video-production/<%= p.id %>/resubmit" style="margin:0;">
-      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
-      <button type="submit" class="btn btn-primary">Re-submit for QA</button>
-    </form>
-    <% } %>
-    <% if (p.status === 'live' && !p.archived) { %>
-    <form method="POST" action="/video-production/<%= p.id %>/archive" style="margin:0;">
-      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
-      <button type="submit" class="btn btn-secondary">Archive</button>
-    </form>
-    <% } %>
-  </div>
 </div>
+
+<!-- Alerts -->
+<% if (p.revision_round >= 3) { %>
+<div class="vp-alert vp-alert-red">
+  <strong>Escalation:</strong> This project is on revision round R<%= p.revision_round %>. Review scope with the client before proceeding.
+</div>
+<% } %>
+<% if (receiptOverdue) { %>
+<div class="vp-alert vp-alert-amber">
+  <strong>Overdue:</strong> Client has not confirmed raw file receipt within 48 hours. Follow up required.
+</div>
+<% } %>
+<% if (reviewOverdue) { %>
+<div class="vp-alert vp-alert-amber">
+  <strong>Overdue:</strong> Client has not responded to edit review within 3 business days. Follow up required.
+</div>
+<% } %>
+
+<!-- Status-driven action panel -->
+<div class="vp-action-panel">
+
+  <% if (p.status === 'shoot_booked' || p.status === 'shoot_plan_in_progress') { %>
+  <a href="/video-production/<%= p.id %>/shoot-plan" class="btn btn-primary">Open Shoot Plan</a>
+  <% } %>
+
+  <% if (p.status === 'shoot_plan_approved') { %>
+  <form method="POST" action="/video-production/<%= p.id %>/mark-complete" style="margin:0;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <button type="submit" class="btn btn-primary">Mark Content Day Complete</button>
+  </form>
+  <% } %>
+
+  <% if (p.status === 'content_day_complete') { %>
+  <span style="font-size: 13px; color: var(--vendo-text-muted);">Add raw file links below, then:</span>
+  <form method="POST" action="/video-production/<%= p.id %>/share-raw-files" style="margin:0;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <button type="submit" class="btn btn-primary" onclick="return confirm('Share raw files with client? They will be notified.');">Share Raw Files with Client</button>
+  </form>
+  <% } %>
+
+  <% if (p.status === 'raw_files_shared') { %>
+  <form method="POST" action="/video-production/<%= p.id %>/confirm-receipt" style="margin:0;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <button type="submit" class="btn btn-primary">Confirm Receipt &rarr; Start Editing</button>
+  </form>
+  <button type="button" class="btn btn-danger" onclick="document.getElementById('raw-issue-form').style.display='block'">Flag Issue</button>
+  <% } %>
+
+  <% if (p.status === 'in_editing' && !p.assigned_editor_id) { %>
+  <form method="POST" action="/video-production/<%= p.id %>/assign-editor" style="margin:0; display:flex; gap:0.5rem; align-items:center;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <select name="assigned_editor_id" required onchange="this.form.assigned_editor_name.value=this.options[this.selectedIndex].text" style="background:var(--vendo-surface);color:var(--vendo-text);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 12px;font-size:13px;">
+      <option value="">Assign editor...</option>
+      <% it.editors.forEach(function(e) { %>
+      <option value="<%= e.id %>"><%= e.name %></option>
+      <% }); %>
+    </select>
+    <input type="hidden" name="assigned_editor_name" value="">
+    <button type="submit" class="btn btn-primary">Assign</button>
+  </form>
+  <% } %>
+
+  <% if (p.status === 'revisions') { %>
+  <form method="POST" action="/video-production/<%= p.id %>/resubmit" style="margin:0;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <button type="submit" class="btn btn-primary">Re-submit for QA</button>
+  </form>
+  <% } %>
+
+  <% if (p.status === 'client_review') { %>
+  <form method="POST" action="/video-production/<%= p.id %>/client-approve" style="margin:0;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <button type="submit" class="btn btn-primary" onclick="return confirm('Approve this edit on behalf of client?');">Client Approves &rarr; Live</button>
+  </form>
+  <button type="button" class="btn btn-danger" onclick="document.getElementById('client-changes-form').style.display='block'">Client Requests Changes</button>
+  <% } %>
+
+  <% if (p.status === 'live' && !p.archived) { %>
+  <form method="POST" action="/video-production/<%= p.id %>/archive" style="margin:0;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <button type="submit" class="btn btn-secondary">Archive Project</button>
+  </form>
+  <% } %>
+
+  <% if (p.status === 'shoot_plan_approved') { %>
+  <a href="/video-production/<%= p.id %>/shoot-plan" class="btn btn-secondary">View Shoot Plan</a>
+  <% } %>
+
+</div>
+
+<!-- Expandable forms for flag/changes -->
+<% if (p.status === 'raw_files_shared') { %>
+<div id="raw-issue-form" style="display:none; margin-top: 0.75rem;">
+  <form method="POST" action="/video-production/<%= p.id %>/flag-raw-issue" class="vp-form" style="max-width: 500px;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <div class="form-group">
+      <label>Describe the issue</label>
+      <textarea name="issue" rows="2" required placeholder="e.g. Wrong treatment filmed, missing content..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-danger">Submit Issue</button>
+  </form>
+</div>
+<% } %>
+
+<% if (p.status === 'client_review') { %>
+<div id="client-changes-form" style="display:none; margin-top: 0.75rem;">
+  <form method="POST" action="/video-production/<%= p.id %>/client-request-changes" class="vp-form" style="max-width: 500px;">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+    <div class="form-group">
+      <label>Client Feedback</label>
+      <textarea name="feedback" rows="3" required placeholder="What changes does the client want?"></textarea>
+    </div>
+    <button type="submit" class="btn btn-danger">Submit Changes Request</button>
+  </form>
+</div>
+<% } %>
 
 <!-- Tabs -->
 <div class="growth-tabs" style="margin-top: 1.5rem;">
