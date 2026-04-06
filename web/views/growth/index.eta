@@ -1,7 +1,7 @@
 <% layout('/layouts/base') %>
 
 <!-- Stat cards -->
-<div class="stat-grid" style="grid-template-columns: repeat(5, 1fr);">
+<div class="stat-grid growth-stat-grid" style="grid-template-columns: repeat(5, 1fr);">
   <article class="stat-card">
     <p class="stat-value"><%= it.linkedinStats.total %></p>
     <p class="stat-label">Content Ideas</p>

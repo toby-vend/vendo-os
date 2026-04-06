@@ -2,7 +2,7 @@
 
 <h2>Operations Hub</h2>
 
-<div class="stat-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+<div class="stat-grid ops-stat-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
   <article class="stat-card">
     <p class="stat-value"><%= it.stats.total %></p>
     <p class="stat-label">Alerts (7 days)</p>
@@ -21,7 +21,7 @@
   </article>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+<div class="ops-layout" style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
   <!-- Left: Monitor & Automation controls -->
   <div>
     <h3>Monitors</h3>
