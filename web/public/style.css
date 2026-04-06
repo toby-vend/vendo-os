@@ -1669,10 +1669,11 @@ details.portal-section[open] summary {
   -webkit-overflow-scrolling: touch;
 }
 
-.growth-tab {
+button.growth-tab {
   padding: 0.75rem 1.25rem;
   background: none;
   border: none;
+  border-radius: 0;
   border-bottom: 2px solid transparent;
   color: var(--vendo-text-muted);
   font-family: var(--vendo-font);
@@ -1681,34 +1682,44 @@ details.portal-section[open] summary {
   cursor: pointer;
   white-space: nowrap;
   transition: color 0.15s, border-color 0.15s;
+  box-shadow: none;
+  transform: none;
 }
 
-.growth-tab:hover {
+button.growth-tab:hover {
   color: var(--vendo-text);
+  background: none;
+  box-shadow: none;
+  transform: none;
 }
 
-.growth-tab.active {
+button.growth-tab.active {
   color: var(--vendo-green);
   border-bottom-color: var(--vendo-green);
+  background: none;
 }
 
 .growth-section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 0.75rem;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
 
+.growth-section-header select {
+  max-width: 280px;
+}
+
 .growth-split {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 1.25rem;
+  grid-template-columns: 1fr 340px;
+  gap: 1rem;
   min-height: 300px;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 860px) {
   .growth-split {
     grid-template-columns: 1fr;
   }
