@@ -78,6 +78,9 @@
         </div>
         <% } else { %>
         <div class="nav-group<%= isInGroup(hrefs) ? ' open' : '' %>">
+          <% if (group.icon) { %>
+          <a href="<%= visibleItems[0].href %>" class="nav-collapsed-icon<%= isInGroup(hrefs) ? ' active' : '' %>" title="<%= group.label %>"><%~ group.icon %></a>
+          <% } %>
           <button class="nav-group-label" onclick="toggleNavGroup(this)">
             <% if (group.icon) { %><%~ group.icon %><% } %>
             <span class="nav-label"><%= group.label %></span>
