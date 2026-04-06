@@ -162,14 +162,12 @@
           </td>
           <td onclick="event.stopPropagation();">
             <% if (!p.draft && (p.status === 'idea')) { %>
-            <button class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;"
-              hx-post="/growth/linkedin/<%= p.id %>/draft"
-              hx-target="#growth-tab-content"
-              hx-swap="innerHTML"
-              hx-indicator="#linkedin-spinner"
-              hx-disabled-elt="this">Draft</button>
+            <form method="POST" action="/growth/linkedin/<%= p.id %>/draft-and-return" style="display:inline;">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+              <button type="submit" class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;">Draft</button>
+            </form>
             <% } else if (p.draft) { %>
-            <a href="/growth/linkedin/<%= p.id %>" class="btn btn-sm" style="font-size: 11px; padding: 2px 8px; text-decoration: none;">Open</a>
+            <a href="/growth/linkedin/<%= p.id %>" class="btn btn-sm" style="font-size: 11px; padding: 2px 8px; text-decoration: none;">View</a>
             <% } %>
           </td>
         </tr>

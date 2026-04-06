@@ -67,12 +67,10 @@
           </td>
           <td onclick="event.stopPropagation();">
             <% if (cs.status === 'identified' || cs.status === 'approved') { %>
-            <button class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;"
-              hx-post="/growth/casestudies/<%= cs.id %>/draft"
-              hx-target="#growth-tab-content"
-              hx-swap="innerHTML"
-              hx-indicator="#casestudies-spinner"
-              hx-disabled-elt="this">Draft</button>
+            <form method="POST" action="/growth/casestudies/<%= cs.id %>/draft" style="display:inline;">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+              <button type="submit" class="btn btn-sm" style="font-size: 11px; padding: 2px 8px;">Draft</button>
+            </form>
             <% } %>
           </td>
         </tr>

@@ -188,6 +188,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
   app.post<{ Params: { id: string } }>('/linkedin/:id/draft', async (request, reply) => {
     const id = parseInt((request.params as { id: string }).id, 10);
+    const isHtmx = request.headers['hx-request'] === 'true';
     try {
       const post = await getLinkedInPost(id);
       if (!post) return reply.code(404).send('Post not found');
@@ -197,9 +198,11 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
       await insertGrowthLog('linkedin', 'draft', `Drafted "${post.topic.slice(0, 50)}"`, 1);
 
+      if (!isHtmx) return reply.redirect('/growth');
       return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({ message: 'Draft created.', selectedId: id }));
     } catch (err) {
       console.error('[growth] LinkedIn draft failed:', err);
+      if (!isHtmx) return reply.redirect('/growth');
       return reply.type('text/html').render('growth/_tab-linkedin', await linkedinPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
@@ -294,6 +297,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
   app.post<{ Params: { id: string } }>('/outbound/:id/draft', async (request, reply) => {
     const id = parseInt((request.params as { id: string }).id, 10);
+    const isHtmx = request.headers['hx-request'] === 'true';
     try {
       const prospect = await getProspect(id);
       if (!prospect) return reply.code(404).send('Prospect not found');
@@ -305,9 +309,11 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
       await insertGrowthLog('outbound', 'draft', `Drafted outreach for ${prospect.prospect_name} (Step ${prospect.sequence_step + 1})`, 1);
 
+      if (!isHtmx) return reply.redirect('/growth');
       return reply.type('text/html').render('growth/_tab-outbound', await outboundPartialData({ message: 'Outreach draft generated.', selectedId: id }));
     } catch (err) {
       console.error('[growth] Outbound draft failed:', err);
+      if (!isHtmx) return reply.redirect('/growth');
       return reply.type('text/html').render('growth/_tab-outbound', await outboundPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
@@ -347,6 +353,7 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
   app.post<{ Params: { id: string } }>('/casestudies/:id/draft', async (request, reply) => {
     const id = parseInt((request.params as { id: string }).id, 10);
+    const isHtmx = request.headers['hx-request'] === 'true';
     try {
       const cs = await getCaseStudy(id);
       if (!cs) return reply.code(404).send('Case study not found');
@@ -359,9 +366,11 @@ export const growthRoutes: FastifyPluginAsync = async (app) => {
 
       await updateCaseStudyDraft(id, draft, distribution);
       await insertGrowthLog('casestudies', 'draft', `Drafted case study for ${cs.client_name}`, 1);
+      if (!isHtmx) return reply.redirect('/growth');
       return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData({ message: 'Case study drafted.', selectedId: id }));
     } catch (err) {
       console.error('[growth] Case study draft failed:', err);
+      if (!isHtmx) return reply.redirect('/growth');
       return reply.type('text/html').render('growth/_tab-casestudies', await casestudiesPartialData({ error: 'Draft failed. Please try again.' }));
     }
   });
