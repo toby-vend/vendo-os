@@ -4395,3 +4395,167 @@ button.growth-sort-btn:hover {
   font-size: 13px;
   color: var(--vendo-text-muted);
 }
+
+/* === Phase 11: Mobile Responsive === */
+
+/* Desktop default: hide tab bar and mobile-only elements */
+.tab-bar { display: none; }
+.mobile-only { display: none; }
+
+@media (max-width: 768px) {
+  /* Viewport/overflow fix — override the body overflow:hidden that breaks mobile scroll */
+  body { overflow: auto; }
+
+  /* Hide sidebar, backdrop and hamburger entirely — tab bar replaces them */
+  .sidebar { display: none !important; }
+  .sidebar-backdrop { display: none !important; }
+  .mobile-menu-btn { display: none !important; }
+
+  /* dvh with vh fallback for full-height containers */
+  .app-layout { height: 100vh; height: 100dvh; }
+
+  /* Desktop-only / mobile-only toggles */
+  .desktop-only { display: none !important; }
+  .mobile-only { display: block; }
+
+  /* === Tab Bar === */
+  .tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(56px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--glass-bg-strong, rgba(14,14,14,0.95));
+    backdrop-filter: saturate(180%) var(--glass-blur);
+    -webkit-backdrop-filter: saturate(180%) var(--glass-blur);
+    border-top: 1px solid var(--glass-border);
+    z-index: 100;
+    justify-content: space-around;
+    align-items: stretch;
+  }
+
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 48px;
+    min-width: 48px;
+    color: var(--vendo-text-muted);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--vendo-font);
+  }
+
+  .tab-item.active,
+  .tab-item:active {
+    color: var(--vendo-green);
+  }
+
+  .tab-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tab-label {
+    line-height: 1;
+  }
+
+  /* Main content bottom padding to clear the tab bar */
+  .main-content { padding-bottom: calc(56px + env(safe-area-inset-bottom) + 1rem); }
+
+  /* === More Navigation Overlay === */
+  .more-nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--vendo-bg, #0B0B0B);
+    z-index: 300;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .more-nav-overlay.open {
+    display: flex;
+  }
+
+  .more-nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+    min-height: 56px;
+    flex-shrink: 0;
+  }
+
+  .more-nav-header span {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--vendo-text);
+  }
+
+  .more-nav-close {
+    background: none;
+    border: none;
+    color: var(--vendo-text-muted);
+    cursor: pointer;
+    padding: 8px;
+    min-width: 48px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .more-nav-body {
+    flex: 1;
+    padding: 0.75rem 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .more-nav-group-label {
+    padding: 0.5rem 1.25rem;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--vendo-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .more-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0 1.25rem;
+    min-height: 48px;
+    color: var(--vendo-text);
+    text-decoration: none;
+    font-size: 15px;
+  }
+
+  .more-nav-item:active {
+    background: rgba(255,255,255,0.04);
+  }
+
+  .more-nav-item .nav-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Input font-size fix — prevents iOS Safari auto-zoom */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* 48px touch targets on interactive elements */
+  button, .btn, select { min-height: 48px; }
+}

@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Vendo OS</title>
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -148,10 +148,82 @@
     </div>
   </div>
 
+  <!-- Mobile Tab Bar -->
+  <nav class="tab-bar" role="navigation" aria-label="Mobile navigation">
+    <a href="/" class="tab-item<%= it.currentPath === '/' ? ' active' : '' %>">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="tab-label">Dashboard</span>
+    </a>
+    <a href="/tasks" class="tab-item<%= it.currentPath?.startsWith('/tasks') ? ' active' : '' %>">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <span class="tab-label">Tasks</span>
+    </a>
+    <a href="/clients" class="tab-item<%= it.currentPath?.startsWith('/clients') ? ' active' : '' %>">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span class="tab-label">Clients</span>
+    </a>
+    <button class="tab-item" onclick="openMoreNav()" aria-label="More navigation options">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>
+      <span class="tab-label">More</span>
+    </button>
+  </nav>
+
+  <!-- More Navigation Overlay -->
+  <div class="more-nav-overlay" id="more-nav-overlay" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div class="more-nav-header">
+      <span>Menu</span>
+      <button class="more-nav-close" onclick="closeMoreNav()" aria-label="Close menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="more-nav-body">
+      <% (it.sidebarConfig || []).forEach(function(group) {
+        if (group.adminOnly && it.user?.role !== 'admin') return;
+        const visibleItems = group.items.filter(function(item) {
+          if (item.hidden) return false;
+          if (!item.permission) return true;
+          return canSee(item.permission);
+        });
+        if (visibleItems.length === 0) return;
+      %>
+      <div class="more-nav-group-label"><%= group.label %></div>
+      <% visibleItems.forEach(function(item) { %>
+      <a href="<%= item.href %>" class="more-nav-item" onclick="closeMoreNav()">
+        <% if (group.icon) { %><%~ group.icon %><% } %>
+        <span><%= item.label %></span>
+      </a>
+      <% }); %>
+      <% }); %>
+    </div>
+  </div>
+
   <script>
   var isMobile = window.innerWidth <= 768;
 
+  // Mobile More overlay
+  function openMoreNav() {
+    var overlay = document.getElementById('more-nav-overlay');
+    if (overlay) {
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeMoreNav() {
+    var overlay = document.getElementById('more-nav-overlay');
+    if (overlay) {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Close More overlay on bfcache restore (back/forward navigation)
+  window.addEventListener('pageshow', closeMoreNav);
+
   function toggleSidebar() {
+    // No-op on mobile — sidebar is hidden, tab bar is used instead
+    if (window.innerWidth <= 768) return;
+
     var sidebar = document.getElementById('sidebar');
     var layout = document.querySelector('.app-layout');
     var backdrop = document.getElementById('sidebar-backdrop');
