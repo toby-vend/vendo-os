@@ -6,8 +6,7 @@
 
 import { db } from './queries/base.js';
 
-const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
-const SLACK_CHANNEL = process.env.SLACK_VIDEO_CHANNEL || process.env.SLACK_GENERAL_CHANNEL || '';
+const SLACK_WEBHOOK_URL = process.env.SLACK_VIDEO_WEBHOOK_URL || '';
 const MAKE_WEBHOOK_URL = process.env.MAKE_VIDEO_WEBHOOK_URL || '';
 const APP_URL = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 
@@ -72,18 +71,15 @@ export async function markAllRead(userId: string): Promise<void> {
   });
 }
 
-// ── Slack channel message (fire-and-forget) ─────────────────────
+// ── Slack incoming webhook (fire-and-forget) ────────────────────
 
 async function sendSlackMessage(text: string): Promise<void> {
-  if (!SLACK_BOT_TOKEN || !SLACK_CHANNEL) return;
+  if (!SLACK_WEBHOOK_URL) return;
   try {
-    await fetch('https://slack.com/api/chat.postMessage', {
+    await fetch(SLACK_WEBHOOK_URL, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ channel: SLACK_CHANNEL, text }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
     });
   } catch (err) {
     console.error('[video-notify] Slack error:', err);

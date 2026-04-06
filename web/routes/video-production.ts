@@ -19,6 +19,14 @@ function requireAuth(user: SessionUser | null): asserts user is SessionUser {
   if (!user) throw { statusCode: 401, message: 'Not authenticated' };
 }
 
+/** Format a Date as YYYY-MM-DD without timezone drift (avoids toISOString UTC conversion). */
+function formatDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
 
   // ── Kanban Board ────────────────────────────────────────────────
@@ -120,63 +128,47 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     requireAuth(user);
 
     const query = request.query as Record<string, string>;
-    const view = query.view || 'month'; // month | week | list
+    const view = query.view || 'month';
     const clientFilter = query.client ? parseInt(query.client, 10) : undefined;
 
-    // Determine the target date
     const now = new Date();
     const year = query.year ? parseInt(query.year, 10) : now.getFullYear();
-    const month = query.month ? parseInt(query.month, 10) - 1 : now.getMonth(); // 0-indexed
-    const weekStart = query.weekStart || ''; // ISO date for week view
+    const month = query.month ? parseInt(query.month, 10) - 1 : now.getMonth();
+    const weekStart = query.weekStart || '';
 
     const clients = await getActiveClients();
 
     if (view === 'list') {
       const projects = await getUpcomingShootList(clientFilter);
-      reply.render('video-production/calendar-list', {
-        projects,
-        clients,
-        filters: query,
-        view,
-      });
+      reply.render('video-production/calendar-list', { projects, clients, filters: query, view });
       return;
     }
 
     if (view === 'week') {
-      // Week view — 7 days starting from weekStart or current Monday
       let startDate: Date;
       if (weekStart) {
-        startDate = new Date(weekStart);
+        startDate = new Date(weekStart + 'T00:00:00');
       } else {
         startDate = new Date(year, month, now.getDate());
         const day = startDate.getDay();
-        const diff = day === 0 ? -6 : 1 - day; // Monday
-        startDate.setDate(startDate.getDate() + diff);
+        startDate.setDate(startDate.getDate() + (day === 0 ? -6 : 1 - day));
       }
       const endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 6);
 
-      const startStr = startDate.toISOString().split('T')[0];
-      const endStr = endDate.toISOString().split('T')[0];
+      const startStr = formatDate(startDate);
+      const endStr = formatDate(endDate);
       const projects = await getVideoProjectsByDateRange(startStr, endStr, clientFilter);
 
-      // Group by date
       const days: { date: Date; dateStr: string; projects: VideoProject[] }[] = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date(startDate);
         d.setDate(d.getDate() + i);
-        const ds = d.toISOString().split('T')[0];
+        const ds = formatDate(d);
         days.push({ date: d, dateStr: ds, projects: projects.filter(p => p.shoot_date === ds) });
       }
 
-      reply.render('video-production/calendar-week', {
-        days,
-        startDate,
-        endDate,
-        clients,
-        filters: query,
-        view,
-      });
+      reply.render('video-production/calendar-week', { days, startDate, endDate, clients, filters: query, view });
       return;
     }
 
@@ -184,60 +176,52 @@ export const videoProductionRoutes: FastifyPluginAsync = async (app) => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
 
-    // Extend to fill the calendar grid (start on Monday)
+    // Grid start: Monday of the week containing the 1st
     const gridStart = new Date(firstDay);
     const startDow = gridStart.getDay();
-    const mondayOffset = startDow === 0 ? -6 : 1 - startDow;
-    gridStart.setDate(gridStart.getDate() + mondayOffset);
+    gridStart.setDate(gridStart.getDate() + (startDow === 0 ? -6 : 1 - startDow));
 
+    // Grid end: Sunday of the week containing the last day
     const gridEnd = new Date(lastDay);
     const endDow = gridEnd.getDay();
     if (endDow !== 0) gridEnd.setDate(gridEnd.getDate() + (7 - endDow));
 
-    const startStr = gridStart.toISOString().split('T')[0];
-    const endStr = gridEnd.toISOString().split('T')[0];
+    const startStr = formatDate(gridStart);
+    const endStr = formatDate(gridEnd);
     const projects = await getVideoProjectsByDateRange(startStr, endStr, clientFilter);
 
-    // Build day cells
+    // Build week rows — use a counter to prevent runaway loops
     const weeks: { date: Date; dateStr: string; isCurrentMonth: boolean; isToday: boolean; projects: VideoProject[] }[][] = [];
-    let current = new Date(gridStart);
-    const todayStr = now.toISOString().split('T')[0];
+    const todayStr = formatDate(now);
+    let cursor = new Date(gridStart);
 
-    while (current <= gridEnd) {
+    for (let w = 0; w < 6; w++) { // max 6 weeks in any month view
+      if (formatDate(cursor) > endStr) break;
       const week: typeof weeks[0] = [];
       for (let d = 0; d < 7; d++) {
-        const ds = current.toISOString().split('T')[0];
+        const ds = formatDate(cursor);
         week.push({
-          date: new Date(current),
+          date: new Date(cursor),
           dateStr: ds,
-          isCurrentMonth: current.getMonth() === month,
+          isCurrentMonth: cursor.getMonth() === month,
           isToday: ds === todayStr,
           projects: projects.filter(p => p.shoot_date === ds),
         });
-        current.setDate(current.getDate() + 1);
+        cursor.setDate(cursor.getDate() + 1);
       }
       weeks.push(week);
     }
 
-    // Nav links
-    const prevMonth = month === 0 ? 12 : month; // 1-indexed for URL
+    const prevMonth = month === 0 ? 12 : month;
     const prevYear = month === 0 ? year - 1 : year;
     const nextMonth = month === 11 ? 1 : month + 2;
     const nextYear = month === 11 ? year + 1 : year;
     const monthLabel = firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
     reply.render('video-production/calendar', {
-      weeks,
-      year,
-      month: month + 1,
-      monthLabel,
-      prevMonth,
-      prevYear,
-      nextMonth,
-      nextYear,
-      clients,
-      filters: query,
-      view,
+      weeks, year, month: month + 1, monthLabel,
+      prevMonth, prevYear, nextMonth, nextYear,
+      clients, filters: query, view,
     });
   });
 
