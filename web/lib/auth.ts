@@ -114,6 +114,7 @@ const ROUTE_MAP: [string, string][] = [
   ['/skills', 'skills'],
   ['/asana-tasks', 'asana-tasks'],
   ['/operations', 'operations'],
+  ['/onboarding', 'clients'],
   ['/skills', 'skills'],
 ];
 

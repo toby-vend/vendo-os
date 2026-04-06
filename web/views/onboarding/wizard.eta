@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= it.template.title %> — Vendo Digital</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+</head>
+<body class="onboard-body">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+
+  <main class="onboard-container" aria-label="Onboarding">
+    <div class="onboard-logo">V</div>
+    <h1 class="onboard-brand">Vendo Digital</h1>
+    <p class="onboard-subtitle"><%= it.template.title %></p>
+
+    <div class="onboard-card" id="wizard-card">
+      <div id="wizard-body">
+        <%~ include('_wizard-body', it) %>
+      </div>
+    </div>
+
+    <p class="onboard-footer">Vendo Digital &mdash; Client Onboarding</p>
+  </main>
+</body>
+</html>

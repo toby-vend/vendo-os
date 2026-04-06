@@ -1,0 +1,19 @@
+<% layout('/layouts/base') %>
+
+<div class="onboard-internal-wrap">
+  <div class="onboard-internal-header">
+    <a href="/onboarding" class="onboard-back-link">&larr; All Submissions</a>
+    <div class="onboard-meta-row">
+      <h1><%= it.template.title %></h1>
+      <span class="onboard-status-badge onboard-status-<%= it.submission.status %>"><%= it.submission.status %></span>
+    </div>
+    <% if (it.submission.practice_name) { %>
+      <p class="onboard-practice-name"><%= it.submission.practice_name %></p>
+    <% } %>
+  </div>
+  <div class="onboard-card" id="wizard-card">
+    <div id="wizard-body">
+      <%~ include('_wizard-body', it) %>
+    </div>
+  </div>
+</div>

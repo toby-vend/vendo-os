@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Not Found — Vendo Digital</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="onboard-body">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+
+  <main class="onboard-container" aria-label="Not found">
+    <div class="onboard-logo">V</div>
+    <h1 class="onboard-brand">Vendo Digital</h1>
+
+    <div class="onboard-card" style="text-align: center; padding: 3rem 2rem;">
+      <h2 style="margin-bottom: 0.75rem;">Link Not Found</h2>
+      <p style="color: #94A3B8;">This onboarding link is invalid or has expired. Please contact your Vendo account manager for a new link.</p>
+    </div>
+
+    <p class="onboard-footer">Vendo Digital &mdash; Client Onboarding</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<% layout('/layouts/base') %>
+
+<div class="onboard-admin">
+  <div class="onboard-admin-header">
+    <h1>Client Onboarding</h1>
+    <button class="wizard-btn wizard-btn-primary" onclick="document.getElementById('create-modal').showModal()">
+      + New Onboarding
+    </button>
+  </div>
+
+  <!-- Create modal -->
+  <dialog id="create-modal" class="onboard-modal">
+    <form method="POST" action="/onboarding/create" class="onboard-modal-form">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+      <h2>Create New Onboarding</h2>
+
+      <div class="wizard-field">
+        <label class="wizard-label" for="create-template">Template</label>
+        <select id="create-template" name="templateId" class="wizard-input wizard-select" required>
+          <% for (const tpl of it.templates) { %>
+            <option value="<%= tpl.id %>"><%= tpl.title %> (<%= tpl.vertical %>)</option>
+          <% } %>
+        </select>
+      </div>
+
+      <div class="wizard-field">
+        <label class="wizard-label" for="create-name">Practice / Group Name</label>
+        <input id="create-name" name="practiceName" type="text" class="wizard-input" placeholder="Optional — client can fill in">
+      </div>
+
+      <div class="wizard-field">
+        <label class="wizard-label" for="create-email">Contact Email</label>
+        <input id="create-email" name="contactEmail" type="email" class="wizard-input" placeholder="Optional">
+      </div>
+
+      <div class="wizard-nav" style="margin-top: 1.5rem;">
+        <button type="button" class="wizard-btn wizard-btn-secondary" onclick="this.closest('dialog').close()">Cancel</button>
+        <button type="submit" class="wizard-btn wizard-btn-primary">Create</button>
+      </div>
+    </form>
+  </dialog>
+
+  <% if (!it.submissions || it.submissions.length === 0) { %>
+    <div class="onboard-admin-empty">
+      <p>No onboarding submissions yet.</p>
+      <p class="wizard-hint">Create one and share the link with your client, or fill it in yourself.</p>
+    </div>
+  <% } else { %>
+    <div class="onboard-admin-table-wrap">
+      <table class="onboard-admin-table">
+        <thead>
+          <tr>
+            <th>Practice / Group</th>
+            <th>Template</th>
+            <th>Status</th>
+            <th>Last Updated</th>
+            <th>Client Link</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (const sub of it.submissions) { %>
+            <%
+              const tpl = it.templates.find(t => t.id === sub.template_id);
+              const tplLabel = tpl ? tpl.title : sub.template_id;
+              const updated = new Date(sub.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            %>
+            <tr>
+              <td><a href="/onboarding/<%= sub.id %>"><%= sub.practice_name || 'Unnamed' %></a></td>
+              <td><%= tplLabel %></td>
+              <td><span class="onboard-status-badge onboard-status-<%= sub.status %>"><%= sub.status %></span></td>
+              <td><%= updated %></td>
+              <td>
+                <button class="onboard-copy-btn" data-url="/onboard/<%= sub.token %>"
+                        onclick="copyLink(this)" title="Copy client link">
+                  Copy Link
+                </button>
+              </td>
+              <td>
+                <a href="/onboarding/<%= sub.id %>" class="onboard-edit-link">Edit</a>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<script>
+function copyLink(btn) {
+  var path = btn.dataset.url;
+  var url = window.location.origin + path;
+  navigator.clipboard.writeText(url).then(function() {
+    var orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>

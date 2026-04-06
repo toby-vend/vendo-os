@@ -55,6 +55,7 @@ import { operationsRoutes } from './routes/operations.js';
 import { skillsLibraryRoutes } from './routes/skills-library.js';
 import { cronRoutes } from './routes/api/cron.js';
 import { skillsApiRoutes } from './routes/api/skills.js';
+import { onboardPublicRoutes, onboardingInternalRoutes } from './routes/onboarding.js';
 import crypto from 'crypto';
 import {
   parseCookies,
@@ -108,7 +109,7 @@ app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
   // Public routes (no session required)
-  if (path.startsWith('/assets/') || path === '/login' || path === '/api/drive/webhook' || path === '/api/fathom/webhook') return;
+  if (path.startsWith('/assets/') || path === '/login' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook') return;
 
   // Cron routes — validate Vercel cron secret
   if (path.startsWith('/api/cron/')) {
@@ -333,6 +334,8 @@ app.register(portalRoutes, { prefix: '/portal' });
 app.get('/client-database', async (_req, reply) => reply.redirect('/clients'));
 app.register(operationsRoutes, { prefix: '/operations' });
 app.register(skillsLibraryRoutes, { prefix: '/skills' });
+app.register(onboardPublicRoutes, { prefix: '/onboard' });
+app.register(onboardingInternalRoutes, { prefix: '/onboarding' });
 app.register(cronRoutes, { prefix: '/api/cron' });
 app.register(skillsApiRoutes, { prefix: '/api/skills' });
 

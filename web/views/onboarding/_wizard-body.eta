@@ -1,0 +1,216 @@
+<%
+  const sections = it.activeSections;
+  const step = it.stepIndex;
+  const total = it.totalSteps;
+  const answers = it.answers || {};
+  const isReview = it.isReview;
+  const isSubmitted = it.isSubmitted;
+  const baseUrl = it.baseUrl;
+  const mode = it.mode;
+%>
+
+<!-- Progress bar -->
+<div class="wizard-progress">
+  <div class="wizard-progress-bar">
+    <div class="wizard-progress-fill" style="width: <%= Math.round(((step + 1) / total) * 100) %>%"></div>
+  </div>
+  <div class="wizard-progress-label">
+    Step <%= step + 1 %> of <%= total %>
+  </div>
+</div>
+
+<% if (isSubmitted) { %>
+  <!-- Submitted confirmation -->
+  <div class="wizard-submitted">
+    <div class="wizard-submitted-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <h2>Onboarding Submitted</h2>
+    <p>Thank you! The Vendo team will review your responses, confirm budget, and schedule a strategy call.</p>
+    <% if (mode === 'internal') { %>
+      <div class="wizard-submitted-actions">
+        <form method="POST" action="<%= baseUrl %>/review">
+          <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+          <button type="submit" class="wizard-btn wizard-btn-primary">Mark as Reviewed</button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Review summary (read-only) -->
+  <div class="wizard-review">
+    <% for (const section of sections) { %>
+      <div class="wizard-review-section">
+        <h3><%= section.title %></h3>
+        <% for (const q of section.questions) { %>
+          <div class="wizard-review-item">
+            <div class="wizard-review-label"><%= q.label %></div>
+            <div class="wizard-review-value">
+              <%
+                let val = answers[q.id];
+                if (Array.isArray(val)) {
+                  const labels = val.map(v => {
+                    const opt = q.options?.find(o => o.value === v);
+                    return opt ? opt.label : v;
+                  });
+                  val = labels.join(', ');
+                } else if (q.type === 'radio' && q.options) {
+                  const opt = q.options.find(o => o.value === val);
+                  val = opt ? opt.label : val;
+                }
+              %>
+              <%= val || '<span class="wizard-review-empty">Not answered</span>' %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+
+<% } else if (isReview) { %>
+  <!-- Review before submit -->
+  <h2 class="wizard-step-title">Review Your Answers</h2>
+  <p class="wizard-step-desc">Please check everything looks correct before submitting.</p>
+
+  <div class="wizard-review">
+    <% for (const section of sections) { %>
+      <div class="wizard-review-section">
+        <h3><%= section.title %></h3>
+        <% for (const q of section.questions) { %>
+          <div class="wizard-review-item">
+            <div class="wizard-review-label"><%= q.label %></div>
+            <div class="wizard-review-value">
+              <%
+                let val = answers[q.id];
+                if (Array.isArray(val)) {
+                  const labels = val.map(v => {
+                    const opt = q.options?.find(o => o.value === v);
+                    return opt ? opt.label : v;
+                  });
+                  val = labels.join(', ');
+                } else if (q.type === 'radio' && q.options) {
+                  const opt = q.options.find(o => o.value === val);
+                  val = opt ? opt.label : val;
+                }
+              %>
+              <%= val || '<span class="wizard-review-empty">Not answered</span>' %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="wizard-nav">
+    <form method="POST" action="<%= baseUrl %>/save"
+          hx-post="<%= baseUrl %>/save" hx-target="#wizard-body" hx-swap="innerHTML">
+      <input type="hidden" name="_stepIndex" value="<%= step %>">
+      <input type="hidden" name="_direction" value="back">
+      <% if (mode === 'internal') { %><input type="hidden" name="_csrf" value="<%= it.csrfToken %>"><% } %>
+      <button type="submit" class="wizard-btn wizard-btn-secondary">Back</button>
+    </form>
+
+    <form method="POST" action="<%= baseUrl %>/submit"
+          hx-post="<%= baseUrl %>/submit" hx-target="<%= mode === 'client' ? '#wizard-card' : '#wizard-body' %>" hx-swap="innerHTML">
+      <% if (mode === 'internal') { %><input type="hidden" name="_csrf" value="<%= it.csrfToken %>"><% } %>
+      <button type="submit" class="wizard-btn wizard-btn-primary wizard-btn-submit">Submit Onboarding</button>
+    </form>
+  </div>
+
+<% } else { %>
+  <!-- Step content -->
+  <% const section = sections[step]; %>
+  <h2 class="wizard-step-title"><%= section.title %></h2>
+  <% if (section.description) { %>
+    <p class="wizard-step-desc"><%= section.description %></p>
+  <% } %>
+
+  <form method="POST" action="<%= baseUrl %>/save"
+        hx-post="<%= baseUrl %>/save" hx-target="#wizard-body" hx-swap="innerHTML"
+        class="wizard-form" id="wizard-form">
+    <input type="hidden" name="_stepIndex" value="<%= step %>">
+    <input type="hidden" name="_direction" value="next">
+    <% if (mode === 'internal') { %><input type="hidden" name="_csrf" value="<%= it.csrfToken %>"><% } %>
+
+    <% for (const q of section.questions) { %>
+      <div class="wizard-field">
+        <label class="wizard-label" for="q-<%= q.id %>">
+          <%= q.label %>
+          <% if (q.required) { %><span class="wizard-required">*</span><% } %>
+        </label>
+        <% if (q.hint) { %>
+          <p class="wizard-hint"><%= q.hint %></p>
+        <% } %>
+
+        <% if (q.type === 'textarea') { %>
+          <textarea id="q-<%= q.id %>" name="<%= q.id %>"
+                    class="wizard-input wizard-textarea"
+                    placeholder="<%= q.placeholder || '' %>"
+                    rows="3"><%= answers[q.id] || '' %></textarea>
+
+        <% } else if (q.type === 'radio') { %>
+          <div class="wizard-options">
+            <% for (const opt of q.options || []) { %>
+              <label class="wizard-option">
+                <input type="radio" name="<%= q.id %>" value="<%= opt.value %>"
+                       <%= answers[q.id] === opt.value ? 'checked' : '' %>>
+                <span class="wizard-option-box"></span>
+                <span><%= opt.label %></span>
+              </label>
+            <% } %>
+          </div>
+
+        <% } else if (q.type === 'checkbox') { %>
+          <div class="wizard-options">
+            <% const checked = Array.isArray(answers[q.id]) ? answers[q.id] : (answers[q.id] ? [answers[q.id]] : []); %>
+            <% for (const opt of q.options || []) { %>
+              <label class="wizard-option">
+                <input type="checkbox" name="<%= q.id %>" value="<%= opt.value %>"
+                       <%= checked.includes(opt.value) ? 'checked' : '' %>>
+                <span class="wizard-option-box wizard-option-check"></span>
+                <span><%= opt.label %></span>
+              </label>
+            <% } %>
+          </div>
+
+        <% } else if (q.type === 'select') { %>
+          <select id="q-<%= q.id %>" name="<%= q.id %>" class="wizard-input wizard-select">
+            <option value="">Select...</option>
+            <% for (const opt of q.options || []) { %>
+              <option value="<%= opt.value %>" <%= answers[q.id] === opt.value ? 'selected' : '' %>><%= opt.label %></option>
+            <% } %>
+          </select>
+
+        <% } else { %>
+          <input id="q-<%= q.id %>" name="<%= q.id %>" type="<%= q.type %>"
+                 class="wizard-input"
+                 value="<%= answers[q.id] || '' %>"
+                 placeholder="<%= q.placeholder || '' %>"
+                 <%= q.required ? 'required' : '' %>>
+        <% } %>
+      </div>
+    <% } %>
+
+    <div class="wizard-nav">
+      <% if (step > 0) { %>
+        <button type="submit" class="wizard-btn wizard-btn-secondary"
+                onclick="this.form.querySelector('[name=_direction]').value='back'">
+          Back
+        </button>
+      <% } else { %>
+        <div></div>
+      <% } %>
+      <button type="submit" class="wizard-btn wizard-btn-primary">
+        <%= step < sections.length - 1 ? 'Continue' : 'Review Answers' %>
+      </button>
+    </div>
+  </form>
+<% } %>
+
+<script>
+  // Scroll to top of card on step change
+  document.getElementById('wizard-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+</script>

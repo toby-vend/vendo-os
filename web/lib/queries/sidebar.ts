@@ -37,6 +37,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
     label: 'Clients',
     items: [
       { id: 'clients-overview', label: 'Clients', href: '/clients', permission: 'clients' },
+      { id: 'client-onboarding', label: 'Onboarding', href: '/onboarding', permission: 'clients' },
       { id: 'pipeline', label: 'Pipeline', href: '/pipeline', permission: 'pipeline' },
       { id: 'client-mer', label: 'Client MER', href: '/dashboards/client-mer', permission: 'dashboards' },
       { id: 'reviews', label: 'Reviews', href: '/dashboards/reviews', permission: 'dashboards' },
