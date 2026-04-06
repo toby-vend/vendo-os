@@ -27,6 +27,12 @@
       const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
       return days.map(d => d + ': ' + (val[d] || 'Closed')).join('\n');
     }
+    if (q.type === 'brand-colours' && Array.isArray(val)) {
+      return val.filter(v => v).join(', ');
+    }
+    if (q.type === 'brand-fonts' && Array.isArray(val)) {
+      return val.filter(v => v).join(', ');
+    }
     if (q.type === 'repeater' && Array.isArray(val)) {
       return val.map((entry, i) => {
         if (typeof entry !== 'object') return entry;
@@ -367,6 +373,48 @@
             <% } %>
           </div>
 
+        <% } else if (q.type === 'brand-colours') { %>
+          <%
+            const colours = Array.isArray(answers[q.id]) ? answers[q.id] : (answers[q.id] ? [answers[q.id]] : ['']);
+          %>
+          <div class="wizard-brand-colours" data-question-id="<%= q.id %>">
+            <% for (let ci = 0; ci < colours.length; ci++) { %>
+              <div class="wizard-colour-row" data-index="<%= ci %>">
+                <div class="wizard-colour-swatch" style="background: <%= colours[ci] || 'transparent' %>; border: 1px solid rgba(255,255,255,0.1);"></div>
+                <input name="<%= q.id %>" type="text" class="wizard-input wizard-colour-input"
+                       value="<%= colours[ci] || '' %>" placeholder="e.g. #1A2B3C or Navy blue"
+                       oninput="updateColourSwatch(this)">
+                <input type="color" class="wizard-colour-picker" value="<%= (colours[ci] && colours[ci].startsWith('#') && colours[ci].length === 7) ? colours[ci] : '#000000' %>"
+                       oninput="this.previousElementSibling.value=this.value; updateColourSwatch(this.previousElementSibling)">
+                <% if (colours.length > 1) { %>
+                  <button type="button" class="wizard-repeater-remove" onclick="this.closest('.wizard-colour-row').remove()">&times;</button>
+                <% } %>
+              </div>
+            <% } %>
+            <button type="button" class="wizard-repeater-add" onclick="addColourRow(this)">+ Add another colour</button>
+          </div>
+
+        <% } else if (q.type === 'brand-fonts') { %>
+          <%
+            const fonts = Array.isArray(answers[q.id]) ? answers[q.id] : (answers[q.id] ? [answers[q.id]] : ['']);
+          %>
+          <div class="wizard-brand-fonts" data-question-id="<%= q.id %>">
+            <% for (let fi = 0; fi < fonts.length; fi++) { %>
+              <div class="wizard-font-row" data-index="<%= fi %>">
+                <input name="<%= q.id %>" type="text" class="wizard-input wizard-font-input"
+                       value="<%= fonts[fi] || '' %>" placeholder="e.g. Montserrat, Open Sans"
+                       oninput="previewFont(this)">
+                <div class="wizard-font-preview" style="<%= fonts[fi] ? 'font-family: ' + fonts[fi] + ', sans-serif' : '' %>">
+                  <% if (fonts[fi]) { %><span>The quick brown fox jumps over the lazy dog</span><% } %>
+                </div>
+                <% if (fonts.length > 1) { %>
+                  <button type="button" class="wizard-repeater-remove" onclick="this.closest('.wizard-font-row').remove()">&times;</button>
+                <% } %>
+              </div>
+            <% } %>
+            <button type="button" class="wizard-repeater-add" onclick="addFontRow(this)">+ Add another font</button>
+          </div>
+
         <% } else if (q.type === 'treatment-pricing') { %>
           <%
             const selectedTreats = Array.isArray(answers[q.treatmentSourceId]) ? answers[q.treatmentSourceId] : (answers[q.treatmentSourceId] ? [answers[q.treatmentSourceId]] : []);
@@ -513,5 +561,77 @@ function toggleApplyAll(cb) {
   var perDiv = matrix.querySelector('.wizard-matrix-per-location');
   if (cb.checked) { allDiv.style.display = ''; perDiv.style.display = 'none'; }
   else { allDiv.style.display = 'none'; perDiv.style.display = ''; }
+}
+
+// Brand colours: update swatch preview
+function updateColourSwatch(input) {
+  var row = input.closest('.wizard-colour-row');
+  var swatch = row.querySelector('.wizard-colour-swatch');
+  var picker = row.querySelector('.wizard-colour-picker');
+  var val = input.value.trim();
+  swatch.style.background = val || 'transparent';
+  // Update colour picker if valid hex
+  if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+    picker.value = val;
+  }
+}
+
+// Brand colours: add row
+function addColourRow(btn) {
+  var container = btn.closest('.wizard-brand-colours');
+  var rows = container.querySelectorAll('.wizard-colour-row');
+  var last = rows[rows.length - 1];
+  var clone = last.cloneNode(true);
+  clone.querySelector('.wizard-colour-input').value = '';
+  clone.querySelector('.wizard-colour-swatch').style.background = 'transparent';
+  clone.querySelector('.wizard-colour-picker').value = '#000000';
+  // Ensure remove button
+  if (!clone.querySelector('.wizard-repeater-remove')) {
+    var rm = document.createElement('button');
+    rm.type = 'button'; rm.className = 'wizard-repeater-remove'; rm.textContent = '\u00d7';
+    rm.onclick = function() { rm.closest('.wizard-colour-row').remove(); };
+    clone.appendChild(rm);
+  }
+  container.insertBefore(clone, btn);
+}
+
+// Brand fonts: preview font
+var loadedFonts = {};
+function previewFont(input) {
+  var row = input.closest('.wizard-font-row');
+  var preview = row.querySelector('.wizard-font-preview');
+  var fontName = input.value.trim();
+  if (!fontName) { preview.innerHTML = ''; preview.style.fontFamily = ''; return; }
+
+  preview.style.fontFamily = fontName + ', sans-serif';
+  preview.innerHTML = '<span>The quick brown fox jumps over the lazy dog</span>';
+
+  // Try loading from Google Fonts if not already loaded
+  if (!loadedFonts[fontName]) {
+    loadedFonts[fontName] = true;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(fontName) + ':wght@400;700&display=swap';
+    link.onerror = function() { /* not a Google Font, fallback will show font name */ };
+    document.head.appendChild(link);
+  }
+}
+
+// Brand fonts: add row
+function addFontRow(btn) {
+  var container = btn.closest('.wizard-brand-fonts');
+  var rows = container.querySelectorAll('.wizard-font-row');
+  var last = rows[rows.length - 1];
+  var clone = last.cloneNode(true);
+  clone.querySelector('.wizard-font-input').value = '';
+  clone.querySelector('.wizard-font-preview').innerHTML = '';
+  clone.querySelector('.wizard-font-preview').style.fontFamily = '';
+  if (!clone.querySelector('.wizard-repeater-remove')) {
+    var rm = document.createElement('button');
+    rm.type = 'button'; rm.className = 'wizard-repeater-remove'; rm.textContent = '\u00d7';
+    rm.onclick = function() { rm.closest('.wizard-font-row').remove(); };
+    clone.appendChild(rm);
+  }
+  container.insertBefore(clone, btn);
 }
 </script>

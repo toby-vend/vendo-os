@@ -22,7 +22,7 @@ export interface SubField {
 export interface Question {
   id: string;
   label: string;
-  type: 'text' | 'textarea' | 'email' | 'url' | 'tel' | 'number' | 'select' | 'checkbox' | 'radio' | 'repeater' | 'drive-link' | 'location-checkbox-matrix' | 'treatment-pricing' | 'opening-hours';
+  type: 'text' | 'textarea' | 'email' | 'url' | 'tel' | 'number' | 'select' | 'checkbox' | 'radio' | 'repeater' | 'drive-link' | 'location-checkbox-matrix' | 'treatment-pricing' | 'opening-hours' | 'brand-colours' | 'brand-fonts';
   placeholder?: string;
   hint?: string;
   required?: boolean;
@@ -235,8 +235,8 @@ const dentalSingleSections: Section[] = [
     questions: [
       { id: '6.0', label: 'Brand Assets Folder', type: 'drive-link', hint: 'Please upload your logo files, brand guidelines, photography, and any other assets to the Google Drive folder below.' },
       { id: '6.1', label: 'Please share your logo files', type: 'textarea', hint: 'PNG with transparent background preferred, plus any vector files. Upload to the Drive folder above, or paste a link here.' },
-      { id: '6.2', label: 'What are your brand colours?', type: 'text', hint: 'Hex codes preferred, or describe them.', placeholder: 'e.g. #1A2B3C, Navy blue and gold' },
-      { id: '6.3', label: 'Do you have brand fonts?', type: 'text', hint: 'Please share the font names or files.', placeholder: 'e.g. Montserrat, Open Sans' },
+      { id: '6.2', label: 'What are your brand colours?', type: 'brand-colours', hint: 'Add each colour individually. Hex codes (e.g. #1A2B3C), RGB, or colour names all work.' },
+      { id: '6.3', label: 'What are your brand fonts?', type: 'brand-fonts', hint: 'Add each font. If it\u2019s a Google Font, we\u2019ll preview it for you.' },
       { id: '6.4', label: 'Do you have existing brand guidelines or a style guide?', type: 'textarea', hint: 'If yes, upload to the Drive folder or paste a link.' },
       { id: '6.5', label: 'Do you have existing photography or video assets of the practice, team, or patients (with consent)?', type: 'textarea', hint: 'Upload to the Drive folder or paste a link.' },
       { id: '6.6', label: 'Do you have patient testimonials or reviews we can use in ads?', type: 'textarea', hint: 'Google reviews, video testimonials, written quotes.' },
@@ -474,8 +474,8 @@ const dentalMultiSections: Section[] = [
         { value: 'mix', label: 'Mix' },
       ]},
       { id: '6.2', label: 'Please share the master logo files for the group brand', type: 'textarea', hint: 'Upload to the Drive folder above. If locations have individual logos, please share per location.' },
-      { id: '6.3', label: 'What are the group brand colours?', type: 'text', hint: 'Hex codes preferred.', placeholder: 'e.g. #1A2B3C, #F5A623' },
-      { id: '6.4', label: 'Do you have brand fonts?', type: 'text', placeholder: 'Font names or files' },
+      { id: '6.3', label: 'What are the group brand colours?', type: 'brand-colours', hint: 'Add each colour individually. Hex codes (e.g. #1A2B3C), RGB, or colour names all work.' },
+      { id: '6.4', label: 'What are your brand fonts?', type: 'brand-fonts', hint: 'Add each font. If it\u2019s a Google Font, we\u2019ll preview it for you.' },
       { id: '6.5', label: 'Do you have a group brand guidelines document or style guide?', type: 'textarea', hint: 'Upload to the Drive folder or paste a link.' },
       { id: '6.6', label: 'Do you have photography or video assets \u2014 of practices, teams, or patients (with consent) \u2014 for any or all locations?', type: 'textarea', hint: 'Upload to the Drive folder or paste links.' },
       { id: '6.7', label: 'Do you have patient testimonials or reviews per location we can use in ads?', type: 'textarea' },
