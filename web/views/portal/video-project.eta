@@ -1,0 +1,218 @@
+<% layout('/portal/layout') %>
+
+<%
+  const p = it.project;
+  const plan = it.shootPlan;
+  const statusLabel = it.columnDefs.find(c => c.key === p.status)?.label || p.status;
+
+  let treatments = [];
+  try { if (plan && plan.treatments) treatments = JSON.parse(plan.treatments); } catch {}
+  let runOrder = [];
+  try { if (plan && plan.run_order) runOrder = JSON.parse(plan.run_order); } catch {}
+%>
+
+<a href="/portal/video-production" style="font-size: 13px; color: var(--vendo-text-muted); text-decoration: none; margin-bottom: 1rem; display: inline-block;">&larr; All Projects</a>
+
+<div style="margin-bottom: 1.5rem;">
+  <h2 style="font-size: 20px; font-weight: 600; margin: 0;"><%= p.title %></h2>
+  <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; align-items: center; flex-wrap: wrap;">
+    <span class="status-badge status-<%= p.status.replace(/_/g, '-') %>"><%= statusLabel %></span>
+    <% if (p.shoot_date) { %>
+    <span style="font-size: 13px; color: var(--vendo-text-muted);">Shoot: <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %><% if (p.shoot_time) { %> at <%= p.shoot_time %><% } %></span>
+    <% } %>
+    <% if (p.client_approved_at) { %>
+    <span style="font-size: 12px; color: var(--vendo-green);">Approved <%= new Date(p.client_approved_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %></span>
+    <% } %>
+  </div>
+</div>
+
+<!-- ── Shoot Plan Review (visible when plan exists and is ready for review) ── -->
+<% if (plan && (plan.status === 'ready_for_review' || plan.status === 'approved' || plan.status === 'changes_requested')) { %>
+<div class="portal-section" style="margin-bottom: 1.5rem;">
+  <h2>Shoot Plan <% if (plan.status === 'approved') { %><span style="color: var(--vendo-green); font-size: 14px;">(Approved)</span><% } %></h2>
+
+  <% if (treatments.length) { %>
+  <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 0.5rem;">Treatments</h3>
+  <table class="compact" style="width: 100%; margin-bottom: 1rem;">
+    <thead><tr><th>Treatment</th><th>Video Types</th><th>Videos</th></tr></thead>
+    <tbody>
+    <% treatments.forEach(function(t) { %>
+    <tr>
+      <td style="font-weight: 600;"><%= t.name %></td>
+      <td><%= (t.videoTypes || []).join(', ') %></td>
+      <td><%= t.numVideos %></td>
+    </tr>
+    <% }); %>
+    </tbody>
+  </table>
+  <% } %>
+
+  <% if (runOrder.length) { %>
+  <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 0.5rem;">Shoot Schedule</h3>
+  <table class="compact" style="width: 100%; margin-bottom: 1rem;">
+    <thead><tr><th>Time</th><th>Activity</th></tr></thead>
+    <tbody>
+    <% runOrder.forEach(function(block) { %>
+    <tr>
+      <td><%= block.start %><% if (block.end) { %> — <%= block.end %><% } %></td>
+      <td><%= block.activity %></td>
+    </tr>
+    <% }); %>
+    </tbody>
+  </table>
+  <% } %>
+
+  <% if (plan.shot_list) { %>
+  <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 0.5rem;">Shot List</h3>
+  <div style="white-space: pre-wrap; font-size: 13px; color: var(--vendo-text); margin-bottom: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px;"><%= plan.shot_list %></div>
+  <% } %>
+
+  <% if (plan.talent_requirements) { %>
+  <p style="font-size: 13px; color: var(--vendo-text-muted);"><strong>Talent/Patient:</strong> <%= plan.talent_requirements %></p>
+  <% } %>
+
+  <% if (plan.status === 'ready_for_review') { %>
+  <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+    <p style="font-size: 13px; color: var(--vendo-text-muted); margin-bottom: 0.75rem;">Please review the shoot plan above. If everything looks good, approve it. If changes are needed, let us know below.</p>
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+      <form method="POST" action="/portal/video-production/<%= p.id %>/approve-plan" style="margin:0;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+        <button type="submit" class="btn btn-primary">Approve Plan</button>
+      </form>
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('plan-changes-form').style.display='block'; this.style.display='none';">Request Changes</button>
+    </div>
+    <div id="plan-changes-form" style="display: none; margin-top: 0.75rem;">
+      <form method="POST" action="/portal/video-production/<%= p.id %>/request-plan-changes" class="vp-form">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+        <div class="form-group">
+          <label style="color: var(--vendo-text-muted);">What would you like changed?</label>
+          <textarea name="comments" rows="3" required placeholder="Describe the changes you'd like..." style="width:100%;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger">Submit Changes</button>
+      </form>
+    </div>
+  </div>
+  <% } %>
+</div>
+<% } %>
+
+<!-- ── Raw Files (visible when shared) ── -->
+<% if (p.status === 'raw_files_shared' || it.rawFiles.length > 0) { %>
+<div class="portal-section" style="margin-bottom: 1.5rem;">
+  <h2>Raw Files</h2>
+  <% if (it.rawFiles.length) { %>
+  <div class="pvp-file-grid">
+    <% it.rawFiles.forEach(function(f) { %>
+    <a href="<%= f.url %>" target="_blank" rel="noopener" class="pvp-file-card">
+      <div class="pvp-file-label"><%= f.label || 'Raw File' %></div>
+      <% if (f.treatment) { %><div class="pvp-file-meta"><%= f.treatment %></div><% } %>
+      <div class="pvp-file-action">Open in Google Drive &rarr;</div>
+    </a>
+    <% }); %>
+  </div>
+  <% } else { %>
+  <p style="color: var(--vendo-text-muted); font-size: 13px;">Files are being prepared.</p>
+  <% } %>
+
+  <% if (p.status === 'raw_files_shared' && p.client_status !== 'confirmed') { %>
+  <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+    <p style="font-size: 13px; color: var(--vendo-text-muted); margin-bottom: 0.75rem;">Please confirm you have reviewed the raw files. Once confirmed, editing will begin.</p>
+    <form method="POST" action="/portal/video-production/<%= p.id %>/confirm-receipt" style="margin:0;">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+      <button type="submit" class="btn btn-primary">Confirm Receipt</button>
+    </form>
+  </div>
+  <% } %>
+</div>
+<% } %>
+
+<!-- ── Edit Review (visible when in client_review or has edit files) ── -->
+<% if (p.status === 'client_review' || it.editFiles.length > 0) { %>
+<div class="portal-section" style="margin-bottom: 1.5rem;">
+  <h2>Edit Review</h2>
+  <% if (it.editFiles.length) { %>
+  <div class="pvp-file-grid">
+    <% it.editFiles.forEach(function(f) { %>
+    <div class="pvp-file-card">
+      <div class="pvp-file-label"><%= f.label || 'Edit' %> <span style="color: var(--vendo-text-muted);">v<%= f.version %></span></div>
+      <!-- Embedded Frame viewer — iframe for frame.io links -->
+      <div class="pvp-video-embed">
+        <iframe src="<%= f.url %>" frameborder="0" allowfullscreen style="width:100%;height:100%;border-radius:8px;"></iframe>
+      </div>
+      <a href="<%= f.url %>" target="_blank" rel="noopener" class="pvp-file-action" style="display:block; margin-top:0.5rem;">Open in Frame &rarr;</a>
+    </div>
+    <% }); %>
+  </div>
+  <% } %>
+
+  <% if (p.status === 'client_review') { %>
+  <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+    <p style="font-size: 13px; color: var(--vendo-text-muted); margin-bottom: 0.75rem;">Please review the edit above. If you're happy, approve it. If changes are needed, let us know.</p>
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+      <form method="POST" action="/portal/video-production/<%= p.id %>/approve-edit" style="margin:0;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+        <button type="submit" class="btn btn-primary">Approve Edit</button>
+      </form>
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('edit-changes-form').style.display='block'; this.style.display='none';">Request Changes</button>
+    </div>
+    <div id="edit-changes-form" style="display: none; margin-top: 0.75rem;">
+      <form method="POST" action="/portal/video-production/<%= p.id %>/request-edit-changes" class="vp-form">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+        <div class="form-group">
+          <label style="color: var(--vendo-text-muted);">What changes would you like?</label>
+          <textarea name="feedback" rows="3" required placeholder="Describe the changes..." style="width:100%;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger">Submit Changes</button>
+      </form>
+    </div>
+  </div>
+  <% } %>
+</div>
+<% } %>
+
+<!-- ── Approval Record (visible when approved) ── -->
+<% if (p.client_approved_at) { %>
+<div class="portal-section" style="margin-bottom: 1.5rem;">
+  <h2>Approval Record</h2>
+  <div style="padding: 1rem; background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px;">
+    <p style="font-size: 14px; color: var(--vendo-green); font-weight: 600; margin-bottom: 0.25rem;">Content Approved</p>
+    <p style="font-size: 13px; color: var(--vendo-text-muted);">
+      Approved on <%= new Date(p.client_approved_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %>
+    </p>
+  </div>
+</div>
+<% } %>
+
+<!-- ── Published (visible when live) ── -->
+<% if (p.status === 'live') { %>
+<div class="portal-section" style="margin-bottom: 1.5rem;">
+  <h2>Published Content</h2>
+  <% if (p.publish_link) { %>
+  <p style="font-size: 13px;">
+    <% if (p.publish_platforms) { try { const platforms = JSON.parse(p.publish_platforms); %>
+    Published on <%= platforms.join(', ') %>
+    <% } catch {} } %>
+    <% if (p.publish_date) { %> on <%= new Date(p.publish_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %><% } %>
+  </p>
+  <a href="<%= p.publish_link %>" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top: 0.75rem;">View Live Post &rarr;</a>
+  <% } else { %>
+  <p style="color: var(--vendo-text-muted); font-size: 13px;">Your content has been approved and is being scheduled for publication.</p>
+  <% } %>
+</div>
+<% } %>
+
+<!-- ── Activity / Comments ── -->
+<% if (it.comments.length > 0) { %>
+<div class="portal-section">
+  <h2>Activity</h2>
+  <% it.comments.forEach(function(c) { %>
+  <div style="padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--vendo-text-muted);">
+      <span><strong><%= c.author_name || 'Team' %></strong> &middot; <%= c.source %></span>
+      <span><%= new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></span>
+    </div>
+    <div style="font-size: 13px; margin-top: 0.25rem;"><%= c.body %></div>
+  </div>
+  <% }); %>
+</div>
+<% } %>

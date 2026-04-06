@@ -240,6 +240,7 @@ app.addHook('onSend', async (_request, reply) => {
     "img-src 'self' data: https:",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self'",
+    "frame-src https://app.frame.io https://*.frame.io",
     "frame-ancestors 'none'",
   ].join('; '));
 });

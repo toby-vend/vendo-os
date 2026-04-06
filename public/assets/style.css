@@ -4151,3 +4151,133 @@ button.growth-sort-btn:hover {
 }
 
 .vp-alert-amber strong { color: #F59E0B; }
+
+/* ── Portal: Video Production ────────────────────────────────── */
+
+.pvp-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.pvp-card {
+  display: block;
+  background: var(--vendo-surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 1rem;
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+
+.pvp-card:hover {
+  border-color: rgba(34,197,94,0.3);
+}
+
+.pvp-card-action {
+  border-color: rgba(245,158,11,0.2);
+  background: rgba(245,158,11,0.02);
+}
+
+.pvp-card-done {
+  opacity: 0.7;
+}
+
+.pvp-card-status {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vendo-green);
+  margin-bottom: 0.25rem;
+}
+
+.pvp-card-action .pvp-card-status {
+  color: #F59E0B;
+}
+
+.pvp-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vendo-text);
+  margin-bottom: 0.25rem;
+}
+
+.pvp-card-date {
+  font-size: 12px;
+  color: var(--vendo-text-muted);
+}
+
+.pvp-card-editor {
+  font-size: 12px;
+  color: var(--vendo-text-muted);
+  margin-top: 0.25rem;
+}
+
+.pvp-card-action-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #F59E0B;
+  margin-top: 0.5rem;
+}
+
+.pvp-card-link-ext {
+  font-size: 12px;
+  color: var(--vendo-green);
+  margin-top: 0.35rem;
+}
+
+/* Portal file cards */
+
+.pvp-file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.75rem;
+}
+
+.pvp-file-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 0.75rem;
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+
+.pvp-file-card:hover {
+  border-color: rgba(34,197,94,0.2);
+}
+
+.pvp-file-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vendo-text);
+  margin-bottom: 0.25rem;
+}
+
+.pvp-file-meta {
+  font-size: 11px;
+  color: var(--vendo-text-muted);
+}
+
+.pvp-file-action {
+  font-size: 12px;
+  color: var(--vendo-green);
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.pvp-video-embed {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .pvp-card-grid { grid-template-columns: 1fr; }
+  .pvp-file-grid { grid-template-columns: 1fr; }
+}

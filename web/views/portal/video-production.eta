@@ -1,0 +1,89 @@
+<% layout('/portal/layout') %>
+
+<%
+  const statusLabels = {
+    shoot_booked: 'Shoot Booked',
+    shoot_plan_in_progress: 'Plan In Progress',
+    shoot_plan_approved: 'Plan Approved',
+    content_day_complete: 'Day Complete',
+    raw_files_shared: 'Files Ready',
+    in_editing: 'In Editing',
+    qa_review: 'In Review',
+    revisions: 'Revisions',
+    client_review: 'Your Review Needed',
+    live: 'Live',
+  };
+
+  // Split into action-needed and others
+  const needsAction = it.projects.filter(p => ['raw_files_shared', 'client_review'].includes(p.status) || (p.status === 'shoot_plan_in_progress' && p.client_status === 'awaiting'));
+  const inProgress = it.projects.filter(p => !needsAction.includes(p) && p.status !== 'live');
+  const completed = it.projects.filter(p => p.status === 'live');
+%>
+
+<% if (needsAction.length > 0) { %>
+<div class="portal-section" style="margin-bottom: 1.5rem;">
+  <h2>Action Required</h2>
+  <div class="pvp-card-grid">
+    <% needsAction.forEach(function(p) { %>
+    <a href="/portal/video-production/<%= p.id %>" class="pvp-card pvp-card-action">
+      <div class="pvp-card-status"><%= statusLabels[p.status] || p.status %></div>
+      <div class="pvp-card-title"><%= p.title %></div>
+      <% if (p.shoot_date) { %>
+      <div class="pvp-card-date">Shoot: <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+      <% } %>
+      <div class="pvp-card-action-label">
+        <% if (p.status === 'raw_files_shared') { %>Confirm file receipt<% } %>
+        <% if (p.status === 'client_review') { %>Review and approve edit<% } %>
+        <% if (p.status === 'shoot_plan_in_progress' && p.client_status === 'awaiting') { %>Review shoot plan<% } %>
+      </div>
+    </a>
+    <% }); %>
+  </div>
+</div>
+<% } %>
+
+<% if (inProgress.length > 0) { %>
+<div class="portal-section" style="margin-bottom: 1.5rem;">
+  <h2>In Progress</h2>
+  <div class="pvp-card-grid">
+    <% inProgress.forEach(function(p) { %>
+    <a href="/portal/video-production/<%= p.id %>" class="pvp-card">
+      <div class="pvp-card-status"><%= statusLabels[p.status] || p.status %></div>
+      <div class="pvp-card-title"><%= p.title %></div>
+      <% if (p.shoot_date) { %>
+      <div class="pvp-card-date">Shoot: <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+      <% } %>
+      <% if (p.assigned_editor_name) { %>
+      <div class="pvp-card-editor">Editor: <%= p.assigned_editor_name %></div>
+      <% } %>
+    </a>
+    <% }); %>
+  </div>
+</div>
+<% } %>
+
+<% if (completed.length > 0) { %>
+<div class="portal-section">
+  <h2>Published</h2>
+  <div class="pvp-card-grid">
+    <% completed.forEach(function(p) { %>
+    <a href="/portal/video-production/<%= p.id %>" class="pvp-card pvp-card-done">
+      <div class="pvp-card-status">Live</div>
+      <div class="pvp-card-title"><%= p.title %></div>
+      <% if (p.publish_date) { %>
+      <div class="pvp-card-date">Published: <%= new Date(p.publish_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></div>
+      <% } %>
+      <% if (p.publish_link) { %>
+      <div class="pvp-card-link-ext">View live post &rarr;</div>
+      <% } %>
+    </a>
+    <% }); %>
+  </div>
+</div>
+<% } %>
+
+<% if (it.projects.length === 0) { %>
+<div class="portal-empty">
+  <p>No video projects yet. Your account manager will create projects here when content days are booked.</p>
+</div>
+<% } %>

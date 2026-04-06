@@ -1,5 +1,11 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { getROISummary, getLeadsByChannel, getConversionFunnel, getChannelSpend, getRevenueByChannel, getROIByTreatment, getGhlROI, getMonthlyAdTrend } from '../lib/queries/roi.js';
+import {
+  getActiveVideoProjects, getVideoProject, getShootPlan,
+  getVideoFiles, getVideoComments, getVideoAuditLog,
+  moveVideoProject, updateVideoProject, addVideoComment, logVideoAudit,
+  VIDEO_COLUMNS,
+} from '../lib/queries/video-production.js';
 import { getGA4Summary, getGA4TrafficSources, getOrganicTrend, getGA4EngagementSummary, getGA4EngagementSummaryPrior } from '../lib/queries/ga4.js';
 import { getGSCSummary, getTopQueries, getTopPages, getGSCDailyTrend, getGSCSummaryPrior, getPositionDistribution, getCTROpportunities, getPositionMovers } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
@@ -404,6 +410,157 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       pageTitle: 'Lead Attribution',
       isHtmx: true,
     });
+  });
+
+  // ── Portal: Video Production ──────────────────────────────────────
+
+  app.get('/video-production', async (request, reply) => {
+    const clientId = getClientId(request);
+    const clientName = await getClientName(clientId);
+    const projects = await getActiveVideoProjects({ clientId });
+
+    reply.render('portal/video-production', {
+      projects,
+      columnDefs: VIDEO_COLUMNS,
+      clientName,
+      days: 30,
+      pageTitle: 'Video Production',
+    });
+  });
+
+  app.get('/video-production/:id', async (request, reply) => {
+    const clientId = getClientId(request);
+    const { id } = request.params as { id: string };
+    const project = await getVideoProject(parseInt(id, 10));
+
+    if (!project || project.client_id !== clientId) {
+      reply.code(404).send('Project not found');
+      return;
+    }
+
+    const clientName = await getClientName(clientId);
+    const [shootPlan, files, comments] = await Promise.all([
+      getShootPlan(project.id),
+      getVideoFiles(project.id),
+      getVideoComments(project.id),
+    ]);
+
+    const rawFiles = files.filter(f => f.type === 'raw');
+    const editFiles = files.filter(f => f.type === 'edit');
+
+    reply.render('portal/video-project', {
+      project,
+      shootPlan,
+      rawFiles,
+      editFiles,
+      comments,
+      columnDefs: VIDEO_COLUMNS,
+      clientName,
+      days: 30,
+      pageTitle: project.title,
+    });
+  });
+
+  // Client confirms raw file receipt
+  app.post('/video-production/:id/confirm-receipt', async (request, reply) => {
+    const clientId = getClientId(request);
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const project = await getVideoProject(projectId);
+    if (!project || project.client_id !== clientId) { reply.code(404).send('Not found'); return; }
+
+    const now = new Date().toISOString();
+    await updateVideoProject(projectId, { raw_files_confirmed_at: now, client_status: 'confirmed' });
+    await moveVideoProject(projectId, 'in_editing', request.user?.id, request.user?.name);
+    await logVideoAudit(projectId, 'raw_files_confirmed', null, null, request.user?.id, request.user?.name);
+
+    reply.redirect(`/portal/video-production/${id}`);
+  });
+
+  // Client approves shoot plan
+  app.post('/video-production/:id/approve-plan', async (request, reply) => {
+    const clientId = getClientId(request);
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const project = await getVideoProject(projectId);
+    if (!project || project.client_id !== clientId) { reply.code(404).send('Not found'); return; }
+
+    const { updateShootPlan } = await import('../lib/queries/video-production.js');
+    const plan = await getShootPlan(projectId);
+    if (!plan) { reply.code(404).send('No plan'); return; }
+
+    const now = new Date().toISOString();
+    await updateShootPlan(plan.id, { status: 'approved', approved_at: now });
+    await updateVideoProject(projectId, { client_status: 'approved' });
+    if (plan.treatments) await updateVideoProject(projectId, { treatments_planned: plan.treatments });
+    await moveVideoProject(projectId, 'shoot_plan_approved', request.user?.id, request.user?.name);
+    await logVideoAudit(projectId, 'shoot_plan_approved', null, null, request.user?.id, request.user?.name);
+
+    reply.redirect(`/portal/video-production/${id}`);
+  });
+
+  // Client requests changes on shoot plan
+  app.post('/video-production/:id/request-plan-changes', async (request, reply) => {
+    const clientId = getClientId(request);
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const project = await getVideoProject(projectId);
+    if (!project || project.client_id !== clientId) { reply.code(404).send('Not found'); return; }
+
+    const { updateShootPlan } = await import('../lib/queries/video-production.js');
+    const plan = await getShootPlan(projectId);
+    if (!plan) { reply.code(404).send('No plan'); return; }
+
+    const body = request.body as Record<string, string | string[]>;
+    const comments = typeof body.comments === 'string' ? body.comments.trim() : '';
+
+    await updateShootPlan(plan.id, { status: 'changes_requested', client_comments: comments });
+    await updateVideoProject(projectId, { client_status: 'changes_requested' });
+    if (comments) {
+      await addVideoComment({ project_id: projectId, source: 'client', author_name: request.user?.name || 'Client', body: comments });
+    }
+    await moveVideoProject(projectId, 'shoot_plan_in_progress', request.user?.id, request.user?.name);
+    await logVideoAudit(projectId, 'shoot_plan_changes_requested', null, null, request.user?.id, request.user?.name);
+
+    reply.redirect(`/portal/video-production/${id}`);
+  });
+
+  // Client approves edit
+  app.post('/video-production/:id/approve-edit', async (request, reply) => {
+    const clientId = getClientId(request);
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const project = await getVideoProject(projectId);
+    if (!project || project.client_id !== clientId) { reply.code(404).send('Not found'); return; }
+
+    const now = new Date().toISOString();
+    await updateVideoProject(projectId, { client_status: 'approved', client_approved_at: now });
+    await moveVideoProject(projectId, 'live', request.user?.id, request.user?.name);
+    await logVideoAudit(projectId, 'client_approved', null, null, request.user?.id, request.user?.name);
+
+    reply.redirect(`/portal/video-production/${id}`);
+  });
+
+  // Client requests changes on edit
+  app.post('/video-production/:id/request-edit-changes', async (request, reply) => {
+    const clientId = getClientId(request);
+    const { id } = request.params as { id: string };
+    const projectId = parseInt(id, 10);
+    const project = await getVideoProject(projectId);
+    if (!project || project.client_id !== clientId) { reply.code(404).send('Not found'); return; }
+
+    const body = request.body as Record<string, string | string[]>;
+    const feedback = typeof body.feedback === 'string' ? body.feedback.trim() : '';
+    const newRound = (project.revision_round || 0) + 1;
+
+    await updateVideoProject(projectId, { client_status: 'changes_requested', revision_round: newRound });
+    if (feedback) {
+      await addVideoComment({ project_id: projectId, source: 'client', round: newRound, author_name: request.user?.name || 'Client', body: feedback });
+    }
+    await moveVideoProject(projectId, 'revisions', request.user?.id, request.user?.name);
+    await logVideoAudit(projectId, 'client_changes_requested', null, null, request.user?.id, request.user?.name);
+
+    reply.redirect(`/portal/video-production/${id}`);
   });
 
   app.get('/partials/roi-chart', async (request, reply) => {
