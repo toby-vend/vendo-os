@@ -4702,4 +4702,24 @@ button.growth-sort-btn:hover {
   [style*="display: flex"][style*="flex-wrap: wrap"] {
     flex-direction: column;
   }
+
+  /* === Pull-to-refresh indicator === */
+  .ptr-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    color: var(--vendo-text-muted);
+  }
+
+  .ptr-indicator svg {
+    width: 20px;
+    height: 20px;
+    animation: ptr-spin 0.8s linear infinite;
+  }
+}
+
+/* Pull-to-refresh keyframes (global — outside media query) */
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
 }
