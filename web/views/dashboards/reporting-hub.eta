@@ -9,72 +9,228 @@
         <option value="<%= c.id %>" <%= it.query.client == c.id ? 'selected' : '' %>><%= c.name %></option>
       <% }) %>
     </select>
-    <select name="days" onchange="this.form.submit()">
-      <option value="7" <%= it.days === 7 ? 'selected' : '' %>>7 days</option>
-      <option value="14" <%= it.days === 14 ? 'selected' : '' %>>14 days</option>
-      <option value="30" <%= it.days === 30 ? 'selected' : '' %>>30 days</option>
-      <option value="90" <%= it.days === 90 ? 'selected' : '' %>>90 days</option>
-    </select>
+    <div class="portal-date-pills">
+      <% [7, 30, 90, 180, 365].forEach(d => { %>
+        <button type="submit" name="days" value="<%= d %>" class="portal-date-pill<%= it.days === d ? ' active' : '' %>">
+          <%= d <= 90 ? d + 'd' : (d === 180 ? '6m' : '12m') %>
+        </button>
+      <% }) %>
+    </div>
   </form>
 </div>
 
 <% if (!it.report) { %>
   <p>Select a client above to view their report.</p>
-<% } else { const r = it.report; %>
+<% } else {
+  const r = it.report;
+  const g = r.ghlRoi;
+  const hasGhl = g && g.total_leads > 0;
+  const metaSpend = r.channelSpend.find(c => c.channel === 'meta_ads')?.spend || 0;
+  const gadsSpend = r.channelSpend.find(c => c.channel === 'google_ads')?.spend || 0;
+  const totalSpend = metaSpend + gadsSpend;
+  const pipelineValue = r.pipelineStages.reduce((s, st) => s + st.total_value, 0);
+  const pipelineCount = r.pipelineStages.reduce((s, st) => s + st.opp_count, 0);
+%>
 
-<div class="stat-grid">
-  <article class="stat-card">
-    <p class="stat-value">&pound;<%= r.totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></p>
-    <p class="stat-label">Total Ad Spend</p>
-  </article>
-  <article class="stat-card">
-    <p class="stat-value"><%= r.totalLeads.toLocaleString() %></p>
-    <p class="stat-label">Total Leads / Conversions</p>
-  </article>
-  <article class="stat-card">
-    <p class="stat-value">&pound;<%= r.blendedCPA.toFixed(2) %></p>
-    <p class="stat-label">Blended CPA</p>
-  </article>
-  <article class="stat-card">
-    <p class="stat-value">&pound;<%= r.mrr.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) %></p>
-    <p class="stat-label">Total Invoiced</p>
-  </article>
-  <% if (r.healthScore !== null) { %>
-  <article class="stat-card">
-    <p class="stat-value"><%= r.healthScore %></p>
-    <p class="stat-label">Health Score (<%= r.healthTier %>)</p>
-  </article>
+<% if (r.clientName) { %>
+<p style="color: var(--vendo-green); font-weight: 500; margin-bottom: 1.5rem;"><%= r.clientName %></p>
+<% } %>
+
+<!-- KPI Cards — matches portal dashboard -->
+<div class="portal-kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+  <% if (hasGhl) { %>
+  <div class="portal-kpi kpi-positive">
+    <div class="kpi-label">Am I Getting a Return?</div>
+    <div class="kpi-value" style="font-size: 36px;"><%= g.roi_percent.toFixed(1) %>%</div>
+    <div class="kpi-sub">Blended ROI</div>
+  </div>
+  <% } %>
+
+  <div class="portal-kpi">
+    <div class="kpi-label">Total Ad Spend</div>
+    <div class="kpi-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
+    <div class="kpi-sub">
+      <% if (metaSpend > 0) { %>Meta &pound;<%= metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %><% } %>
+      <% if (metaSpend > 0 && gadsSpend > 0) { %> | <% } %>
+      <% if (gadsSpend > 0) { %>Google &pound;<%= gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %><% } %>
+    </div>
+  </div>
+
+  <% if (hasGhl) { %>
+  <div class="portal-kpi">
+    <div class="kpi-label">Revenue from Ads</div>
+    <div class="kpi-value" style="color: var(--vendo-green);">&pound;<%= g.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
+    <div class="kpi-sub"><%= g.total_won %> patients won</div>
+  </div>
+  <% } %>
+
+  <% if (hasGhl && g.treatments.length > 0) { %>
+  <div class="portal-kpi">
+    <div class="kpi-label">Treatments Won</div>
+    <div class="kpi-value"><%= g.total_won %></div>
+    <div class="kpi-sub">
+      <%
+        const topTreatment = g.treatments.sort((a, b) => b.won - a.won)[0];
+        if (topTreatment) {
+      %>
+        Top: <%= topTreatment.treatment.replace(/\b\w/g, c => c.toUpperCase()) %> (<%= topTreatment.won %>)
+      <% } %>
+    </div>
+  </div>
+  <% } %>
+
+  <div class="portal-kpi">
+    <div class="kpi-label">Pipeline Value</div>
+    <div class="kpi-value">&pound;<%= pipelineValue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
+    <div class="kpi-sub"><%= pipelineCount %> open opportunities</div>
+  </div>
+
+  <% if (hasGhl) { %>
+  <div class="portal-kpi">
+    <div class="kpi-label">Total Leads</div>
+    <div class="kpi-value"><%= g.total_leads.toLocaleString() %></div>
+    <div class="kpi-sub">CPL &pound;<%= g.cpl.toFixed(2) %> | Conv. rate <%= g.conversion_rate.toFixed(1) %>%</div>
+  </div>
   <% } %>
 </div>
 
-<h3>Channel Breakdown</h3>
-<table class="compact">
-  <thead>
-    <tr><th>Channel</th><th>Spend</th><th>Leads / Conversions</th><th>CPL / CPA</th></tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Meta Ads</td>
-      <td>&pound;<%= r.metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
-      <td><%= r.metaLeads.toLocaleString() %></td>
-      <td>&pound;<%= r.metaCPL.toFixed(2) %></td>
-    </tr>
-    <tr>
-      <td>Google Ads</td>
-      <td>&pound;<%= r.gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
-      <td><%= r.gadsConversions.toLocaleString() %></td>
-      <td>&pound;<%= r.gadsCPA.toFixed(2) %></td>
-    </tr>
-    <tr style="font-weight: 600;">
-      <td>Total</td>
-      <td>&pound;<%= r.totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
-      <td><%= r.totalLeads.toLocaleString() %></td>
-      <td>&pound;<%= r.blendedCPA.toFixed(2) %></td>
-    </tr>
-  </tbody>
-</table>
+<!-- Month-on-Month Performance Chart -->
+<% if (r.monthlyTrend && r.monthlyTrend.length > 1) { %>
+<div class="chart-card">
+  <h3>Month-on-Month Performance</h3>
+  <div class="chart-wrap">
+    <canvas id="homeMomChart"></canvas>
+  </div>
+</div>
 
-<div style="margin-top: 1.5rem;">
+<script>
+(function() {
+  var trend = <%~ JSON.stringify(r.monthlyTrend) %>;
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  new Chart(document.getElementById('homeMomChart'), {
+    type: 'bar',
+    data: {
+      labels: trend.map(function(t) { var m = parseInt(t.month.split('-')[1], 10); return months[m - 1]; }),
+      datasets: [
+        {
+          label: 'Ad Spend',
+          data: trend.map(function(t) { return t.total_spend; }),
+          backgroundColor: 'rgba(239, 68, 68, 0.4)',
+          borderColor: '#EF4444',
+          borderWidth: 1,
+          order: 2
+        },
+        {
+          label: 'Revenue',
+          data: trend.map(function(t) {
+            var avgVal = t.new_patients > 0 && <%= hasGhl ? g.total_revenue : 0 %> > 0
+              ? <%= hasGhl ? g.total_revenue : 0 %> / <%= hasGhl ? g.total_won || 1 : 1 %>
+              : 0;
+            return Math.round(t.new_patients * avgVal);
+          }),
+          backgroundColor: 'rgba(34, 197, 94, 0.6)',
+          borderColor: '#22C55E',
+          borderWidth: 1,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.dataset.label + ': \u00A3' + ctx.parsed.y.toLocaleString(); }
+          }
+        }
+      }
+    }
+  });
+})();
+</script>
+<% } %>
+
+<!-- Channel Breakdown -->
+<% if (r.metaCampaigns.length > 0 || r.gadsCampaigns.length > 0) { %>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+  <% if (r.metaCampaigns.length > 0) { %>
+  <div class="portal-section">
+    <h3>Meta Ads Campaigns</h3>
+    <table class="compact">
+      <thead>
+        <tr><th>Campaign</th><th>Spend</th><th>Leads</th><th>CPL</th><th>CTR</th></tr>
+      </thead>
+      <tbody>
+        <% r.metaCampaigns.forEach(c => { %>
+        <tr>
+          <td><%= c.campaign_name %></td>
+          <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+          <td><%= c.conversions %></td>
+          <td>&pound;<%= c.conversions > 0 ? (c.spend / c.conversions).toFixed(2) : '—' %></td>
+          <td><%= c.impressions > 0 ? ((c.clicks / c.impressions) * 100).toFixed(2) : '0' %>%</td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+
+  <% if (r.gadsCampaigns.length > 0) { %>
+  <div class="portal-section">
+    <h3>Google Ads Campaigns</h3>
+    <table class="compact">
+      <thead>
+        <tr><th>Campaign</th><th>Spend</th><th>Conv.</th><th>CPA</th><th>CTR</th></tr>
+      </thead>
+      <tbody>
+        <% r.gadsCampaigns.forEach(c => { %>
+        <tr>
+          <td><%= c.campaign_name %></td>
+          <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+          <td><%= c.conversions %></td>
+          <td>&pound;<%= c.conversions > 0 ? (c.spend / c.conversions).toFixed(2) : '—' %></td>
+          <td><%= c.impressions > 0 ? ((c.clicks / c.impressions) * 100).toFixed(2) : '0' %>%</td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+<% } %>
+
+<!-- Pipeline Stages -->
+<% if (r.pipelineStages.length > 0) { %>
+<div class="portal-section" style="margin-top: 1.5rem;">
+  <h3>Pipeline Stages</h3>
+  <table class="compact">
+    <thead>
+      <tr><th>Stage</th><th>Opportunities</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+      <% r.pipelineStages.forEach(st => { %>
+      <tr>
+        <td><%= st.stage_name %></td>
+        <td><%= st.opp_count %></td>
+        <td>&pound;<%= st.total_value.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<!-- Portal Preview Link -->
+<div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+  <a href="/portal/?clientId=<%= it.query.client %>&days=<%= it.days %>" class="outline" target="_blank" style="text-decoration: none;">Open Client Portal Preview</a>
   <button onclick="window.print()" class="outline">Export PDF (Print)</button>
 </div>
 
