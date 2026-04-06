@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Complete
 status: planning
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-04-06T18:53:10.616Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-04-06T19:01:03.607Z"
 last_activity: 2026-04-06 — v1.1 roadmap created (4 phases, 26 requirements mapped)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -70,6 +70,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 11-responsive-layout P01 | 8 | 1 tasks | 2 files |
 | Phase 11-responsive-layout P01 | 17 | 2 tasks | 2 files |
+| Phase 11-responsive-layout P02 | 101 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 11-responsive-layout]: Tab bar hides sidebar entirely on mobile (display:none !important) — no hybrid approach
 - [Phase 11-responsive-layout]: group.icon in sidebarConfig is a full SVG string — rendered unescaped via Eta <%~ %>
 - [Phase 11-responsive-layout]: SVG icons in More overlay must be explicitly sized — inline SVGs have no implicit dimensions and render at full width without width/height constraints
+- [Phase 11-responsive-layout]: Swipe-action-approve div pre-rendered in markup (display:none) on draft_ready cards — wired by Plan 03
+- [Phase 11-responsive-layout]: Draft review page mobile fix uses attribute selector on inline style rather than modifying detail.eta markup
 
 ### Research Flags (v1.1)
 
@@ -128,6 +131,6 @@ None blocking v1.1 start.
 
 ## Session Continuity
 
-Last session: 2026-04-06T18:53:10.614Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-04-06T19:00:55.545Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None
