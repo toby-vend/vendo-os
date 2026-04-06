@@ -556,6 +556,282 @@ const dentalMultiSections: Section[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// E-Commerce
+// ---------------------------------------------------------------------------
+
+const ecomSections: Section[] = [
+  {
+    id: '1',
+    title: 'Business Information',
+    description: 'Tell us about your e-commerce business.',
+    questions: [
+      { id: '1.1', label: 'What is the full legal / trading name of your business?', type: 'text', required: true, maxLength: 200 },
+      { id: '1.2', label: 'What is your e-commerce website URL?', type: 'url', placeholder: 'https://', required: true },
+      { id: '1.3', label: 'What is the name and role of the main point of contact we will be working with?', type: 'text', required: true, maxLength: 200 },
+      { id: '1.4', label: 'What is the best email address and phone number for day-to-day communication?', type: 'textarea', maxLength: 500 },
+      { id: '1.5', label: 'Where are you based, and which countries do you currently sell to?', type: 'textarea', placeholder: 'e.g. Based in UK, sell to UK + EU', maxLength: 500 },
+      { id: '1.6', label: 'What platform is your store built on?', type: 'select', options: [
+        { value: 'shopify', label: 'Shopify' },
+        { value: 'woocommerce', label: 'WooCommerce' },
+        { value: 'magento', label: 'Magento' },
+        { value: 'bigcommerce', label: 'BigCommerce' },
+        { value: 'squarespace', label: 'Squarespace' },
+        { value: 'custom', label: 'Custom / Other' },
+      ]},
+      { id: '1.7', label: 'How long has the business been trading online?', type: 'text', placeholder: 'e.g. 3 years' },
+      { id: '1.8', label: 'Do you sell exclusively online, or do you also have physical retail locations?', type: 'radio', options: [
+        { value: 'online_only', label: 'Online only' },
+        { value: 'online_and_retail', label: 'Online + physical retail' },
+      ]},
+      { id: '1.9', label: 'Do you sell direct-to-consumer (DTC), wholesale, or both?', type: 'radio', options: [
+        { value: 'dtc', label: 'Direct-to-consumer (DTC)' },
+        { value: 'wholesale', label: 'Wholesale' },
+        { value: 'both', label: 'Both' },
+      ]},
+      { id: '1.10', label: 'What is your approximate current monthly revenue from online sales?', type: 'text', placeholder: 'e.g. \u00a350,000/month' },
+    ],
+  },
+  {
+    id: '2',
+    title: 'Products & Catalogue',
+    description: 'Help us understand what you sell.',
+    questions: [
+      { id: '2.1', label: 'What do you sell? Please give a clear description of your core product range.', type: 'textarea', required: true, maxLength: 2000 },
+      { id: '2.2', label: 'How many SKUs / product lines are in your current catalogue?', type: 'text', placeholder: 'e.g. 150 SKUs' },
+      { id: '2.3', label: 'What is your average order value (AOV)?', type: 'text', placeholder: 'e.g. \u00a345' },
+      { id: '2.4', label: 'What is your customer lifetime value (LTV)?', type: 'text', hint: 'If known.', placeholder: 'e.g. \u00a3120' },
+      { id: '2.5', label: 'What is your typical gross margin per order?', type: 'text', hint: 'Approximate % is fine.', placeholder: 'e.g. 60%' },
+      { id: '2.6', label: 'Do you have a hero product or best-seller that drives the majority of revenue?', type: 'textarea', maxLength: 500 },
+      { id: '2.7', label: 'Are there seasonal peaks in your product demand?', type: 'textarea', hint: 'If yes, which months?', placeholder: 'e.g. Christmas, Summer, Back to School' },
+      { id: '2.8', label: 'Do you offer subscriptions, bundles, or recurring orders?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '2.9', label: 'Are there any products you specifically want to push or hold back from advertising?', type: 'textarea', maxLength: 1000 },
+      { id: '2.10', label: 'Do you offer gift cards, loyalty programmes, or referral schemes?', type: 'textarea', maxLength: 500 },
+    ],
+  },
+  {
+    id: '3',
+    title: 'Services Required',
+    description: 'Select all the services you are signing up for.',
+    questions: [
+      { id: '3.1', label: 'Which services are you signing up for?', type: 'checkbox', required: true, options: [
+        { value: 'paid_search', label: 'Paid Search (Google Ads)' },
+        { value: 'paid_social', label: 'Paid Social (Meta Ads \u2014 Facebook & Instagram)' },
+        { value: 'seo', label: 'SEO (Search Engine Optimisation)' },
+      ]},
+    ],
+  },
+  {
+    id: '3A',
+    title: 'Paid Search Details',
+    description: 'Tell us about your Google Ads setup.',
+    conditional: { questionId: '3.1', includes: 'paid_search' },
+    questions: [
+      { id: '3A.1', label: 'Do you have an active Google Ads account?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3A.1a', label: 'Google Ads Customer ID', type: 'text', placeholder: '123-456-7890', hint: 'The 10-digit ID found in the top-right corner of Google Ads.', showWhen: { questionId: '3A.1', equals: 'yes' }, pattern: '\\d{3}-\\d{3}-\\d{4}' },
+      { id: '3A.2', label: 'Do you have Google Analytics 4 set up and tracking ecommerce events (add to cart, purchase, revenue)?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
+      ]},
+      { id: '3A.2a', label: 'GA4 Measurement ID', type: 'text', placeholder: 'G-XXXXXXXXXX', showWhen: { questionId: '3A.2', equals: 'yes' }, pattern: 'G-[A-Za-z0-9]+' },
+      { id: '3A.3', label: 'Do you have Google Tag Manager installed?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
+      ]},
+      { id: '3A.3a', label: 'GTM Container ID', type: 'text', placeholder: 'GTM-XXXXXXX', showWhen: { questionId: '3A.3', equals: 'yes' }, pattern: 'GTM-[A-Za-z0-9]+' },
+      { id: '3A.4', label: 'Is your Google Merchant Centre account set up and your product feed live?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
+      ]},
+      { id: '3A.5', label: 'Are you currently running Shopping / Performance Max campaigns?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3A.6', label: 'What is your current monthly Google Ads spend?', type: 'text', placeholder: 'e.g. \u00a33,000/month' },
+      { id: '3A.7', label: 'What is your target monthly Google Ads budget going forward?', type: 'text', placeholder: 'e.g. \u00a35,000/month' },
+      { id: '3A.8', label: 'What is your current Google Ads ROAS?', type: 'text', hint: 'If known.', placeholder: 'e.g. 4.5x' },
+      { id: '3A.9', label: 'What is your target ROAS for Google Ads?', type: 'text', placeholder: 'e.g. 5x' },
+    ],
+  },
+  {
+    id: '3B',
+    title: 'Paid Social Details',
+    description: 'Tell us about your Meta/TikTok Ads setup.',
+    conditional: { questionId: '3.1', includes: 'paid_social' },
+    questions: [
+      { id: '3B.1', label: 'Do you have a Facebook Business Page?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3B.1a', label: 'Page name or URL', type: 'text', showWhen: { questionId: '3B.1', equals: 'yes' } },
+      { id: '3B.2', label: 'Do you have a Meta Business Manager account?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3B.2a', label: 'Business Manager ID', type: 'text', placeholder: 'e.g. 123456789012345', showWhen: { questionId: '3B.2', equals: 'yes' } },
+      { id: '3B.3', label: 'Is your Meta Pixel or Conversions API (CAPI) installed and firing purchase events?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
+      ]},
+      { id: '3B.4', label: 'Is your product catalogue connected to Meta for Dynamic Product Ads (DPA)?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
+      ]},
+      { id: '3B.5', label: 'Do you have an Instagram profile linked to your Facebook Page?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3B.6', label: 'Do you use TikTok Ads?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3B.6a', label: 'Is your TikTok Pixel set up?', type: 'radio', showWhen: { questionId: '3B.6', equals: 'yes' }, options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+      { id: '3B.7', label: 'What is your current monthly Meta Ads spend?', type: 'text', placeholder: 'e.g. \u00a32,000/month' },
+      { id: '3B.8', label: 'What is your target monthly Meta Ads budget going forward?', type: 'text', placeholder: 'e.g. \u00a34,000/month' },
+      { id: '3B.9', label: 'What is your current Meta Ads ROAS?', type: 'text', hint: 'If known.', placeholder: 'e.g. 3x' },
+      { id: '3B.10', label: 'What is your target ROAS for Meta Ads?', type: 'text', placeholder: 'e.g. 4x' },
+      { id: '3B.11', label: 'Have you run Meta Ads before?', type: 'textarea', hint: 'If yes, what worked well and what didn\u2019t?', maxLength: 2000 },
+    ],
+  },
+  {
+    id: '3C',
+    title: 'SEO Details',
+    description: 'Tell us about your current SEO status.',
+    conditional: { questionId: '3.1', includes: 'seo' },
+    questions: [
+      { id: '3C.1', label: 'Are you currently ranking for any keywords you are aware of?', type: 'textarea', placeholder: 'e.g. "organic protein powder", "sustainable candles UK"', maxLength: 1000 },
+      { id: '3C.2', label: 'Has any SEO work been done on the site previously?', type: 'textarea', hint: 'If yes, by whom and when?', maxLength: 1000 },
+      { id: '3C.3', label: 'Do you have a blog or content section? Is it actively updated?', type: 'radio', options: [
+        { value: 'yes_active', label: 'Yes, actively updated' },
+        { value: 'yes_inactive', label: 'Yes, but not updated' },
+        { value: 'no', label: 'No' },
+      ]},
+      { id: '3C.4', label: 'Are your product pages and category pages optimised?', type: 'textarea', hint: 'Meta titles, descriptions, structured data.', maxLength: 1000 },
+      { id: '3C.5', label: 'Do you have any existing backlinks or domain authority score?', type: 'text', hint: 'Don\u2019t worry if unknown \u2014 we will audit.', placeholder: 'e.g. DA 30 or "Not sure"' },
+    ],
+  },
+  {
+    id: '4',
+    title: 'Current Marketing & Ad Spend',
+    questions: [
+      { id: '4.1', label: 'What is your total current monthly marketing spend across all channels?', type: 'text', placeholder: 'e.g. \u00a310,000/month' },
+      { id: '4.2', label: 'Which channels are you currently active on?', type: 'textarea', placeholder: 'e.g. Google Ads, Meta Ads, TikTok Ads, email, influencer, affiliates, SEO' },
+      { id: '4.3', label: 'Are you working with any other agency or freelancer?', type: 'textarea', hint: 'If yes, what are they managing?', maxLength: 1000 },
+      { id: '4.4', label: 'What is your current blended ROAS across all paid channels?', type: 'text', hint: 'If known.', placeholder: 'e.g. 3.5x' },
+      { id: '4.5', label: 'What is your current monthly paid ad spend split by channel?', type: 'textarea', hint: 'Approximate.', placeholder: 'e.g. Google \u00a33k, Meta \u00a32k, TikTok \u00a31k' },
+      { id: '4.6', label: 'What attribution model are you using?', type: 'select', options: [
+        { value: 'last_click', label: 'Last click' },
+        { value: 'data_driven', label: 'Data-driven' },
+        { value: 'mta', label: 'Multi-touch attribution (MTA)' },
+        { value: 'triple_whale', label: 'Triple Whale' },
+        { value: 'northbeam', label: 'Northbeam' },
+        { value: 'other', label: 'Other' },
+        { value: 'unsure', label: 'Not sure' },
+      ]},
+      { id: '4.7', label: 'Do you use any third-party analytics or attribution tools?', type: 'text', placeholder: 'e.g. Triple Whale, Northbeam, Rockerbox, None' },
+      { id: '4.8', label: 'What has not worked in your past marketing efforts?', type: 'textarea', maxLength: 2000 },
+    ],
+  },
+  {
+    id: '5',
+    title: 'Goals & Revenue Targets',
+    questions: [
+      { id: '5.1', label: 'What is your monthly revenue target from paid channels?', type: 'text', placeholder: 'e.g. \u00a3100,000' },
+      { id: '5.2', label: 'What is your target blended ROAS across all paid activity?', type: 'text', placeholder: 'e.g. 4x' },
+      { id: '5.3', label: 'What is your target customer acquisition cost (CAC)?', type: 'text', placeholder: 'e.g. \u00a315' },
+      { id: '5.4', label: 'What is your target monthly number of new customer orders?', type: 'text', placeholder: 'e.g. 500' },
+      { id: '5.5', label: 'What does success look like at 3 months? At 12 months?', type: 'textarea', maxLength: 2000 },
+      { id: '5.6', label: 'Are you focused primarily on new customer acquisition, retention / repeat purchase, or both?', type: 'radio', options: [
+        { value: 'acquisition', label: 'New customer acquisition' },
+        { value: 'retention', label: 'Retention / repeat purchase' },
+        { value: 'both', label: 'Both' },
+      ]},
+      { id: '5.7', label: 'Do you have a specific product or category you want to scale first?', type: 'text', maxLength: 200 },
+      { id: '5.8', label: 'Are there upcoming product launches or key trading periods we should plan around?', type: 'textarea', hint: 'e.g. Black Friday, product drops, sale events.', maxLength: 1000 },
+    ],
+  },
+  {
+    id: '6',
+    title: 'Brand Assets & Creative',
+    questions: [
+      { id: '6.0', label: 'Brand Assets Folder', type: 'drive-link', hint: 'Please upload your logo files, brand guidelines, product photography, and any other assets to the Google Drive folder below.' },
+      { id: '6.1', label: 'Please share your logo files', type: 'textarea', hint: 'PNG with transparent background + vector if available. Upload to the Drive folder or paste a link.', maxLength: 500 },
+      { id: '6.2', label: 'What are your brand colours?', type: 'brand-colours', hint: 'Add each colour individually. Hex codes preferred.' },
+      { id: '6.3', label: 'What are your brand fonts?', type: 'brand-fonts', hint: 'Add each font. If it\u2019s a Google Font, we\u2019ll preview it.' },
+      { id: '6.4', label: 'Do you have a brand guidelines document or style guide?', type: 'textarea', hint: 'Upload to the Drive folder or paste a link.', maxLength: 500 },
+      { id: '6.5', label: 'Do you have existing product photography?', type: 'textarea', hint: 'Studio shots, lifestyle, flat lays \u2014 upload to Drive or paste a link.', maxLength: 500 },
+      { id: '6.6', label: 'Do you have existing video content?', type: 'textarea', hint: 'Product demos, UGC, brand films \u2014 upload to Drive or paste a link.', maxLength: 500 },
+      { id: '6.7', label: 'Do you have UGC (user-generated content) or customer reviews / testimonials we can use in ads?', type: 'textarea', maxLength: 1000 },
+      { id: '6.8', label: 'What creative has performed best for you historically?', type: 'textarea', hint: 'Image vs video, style, format.', maxLength: 1000 },
+      { id: '6.9', label: 'What tone of voice best describes your brand?', type: 'radio', options: [
+        { value: 'bold', label: 'Bold and energetic' },
+        { value: 'premium', label: 'Premium and aspirational' },
+        { value: 'friendly', label: 'Friendly and relatable' },
+        { value: 'minimal', label: 'Minimal and clean' },
+        { value: 'fun', label: 'Fun and playful' },
+        { value: 'other', label: 'Other (describe below)' },
+      ]},
+      { id: '6.10', label: 'Are there any visual styles, phrases, or approaches you do NOT want used in advertising?', type: 'textarea', maxLength: 1000 },
+    ],
+  },
+  {
+    id: '7',
+    title: 'Audience & Customer Insight',
+    questions: [
+      { id: '7.1', label: 'Who is your core customer?', type: 'textarea', hint: 'Age range, gender, interests, lifestyle.', maxLength: 1000 },
+      { id: '7.2', label: 'Do you have existing customer data we can use for lookalike audiences?', type: 'textarea', hint: 'e.g. email list, customer CSV, purchaser list.', maxLength: 500 },
+      { id: '7.3', label: 'If yes, how large is your customer email / CRM list approximately?', type: 'text', placeholder: 'e.g. 15,000 contacts' },
+      { id: '7.4', label: 'Do you retarget website visitors currently?', type: 'textarea', hint: 'If yes, through which platforms?', maxLength: 500 },
+      { id: '7.5', label: 'What problem does your product solve for the customer, or what desire does it fulfil?', type: 'textarea', maxLength: 1000 },
+      { id: '7.6', label: 'What is the main reason a customer chooses you over a competitor?', type: 'textarea', maxLength: 1000 },
+    ],
+  },
+  {
+    id: '8',
+    title: 'Competitors & Market Position',
+    questions: [
+      { id: '8.1', label: 'Who are your top 3 competitors?', type: 'repeater', minRepeats: 1, maxRepeats: 10, subFields: [
+        { id: 'name', label: 'Competitor name', type: 'text', placeholder: 'Brand name' },
+        { id: 'website', label: 'Website', type: 'url', placeholder: 'https://' },
+      ]},
+      { id: '8.2', label: 'Are there any brands whose marketing you admire \u2014 in your sector or outside it?', type: 'textarea', maxLength: 1000 },
+      { id: '8.3', label: 'What is your key differentiator vs competitors?', type: 'textarea', hint: 'e.g. price, quality, niche, branding, delivery speed, sustainability.', maxLength: 1000 },
+      { id: '8.4', label: 'What price tier would you place yourself in?', type: 'radio', options: [
+        { value: 'budget', label: 'Budget' },
+        { value: 'mid_market', label: 'Mid-market' },
+        { value: 'premium', label: 'Premium' },
+        { value: 'luxury', label: 'Luxury' },
+      ]},
+      { id: '8.5', label: 'Do you have any PR coverage, press mentions, or awards we can use in ad creative?', type: 'textarea', maxLength: 1000 },
+    ],
+  },
+  {
+    id: '9',
+    title: 'Tech Stack & Integrations',
+    questions: [
+      { id: '9.1', label: 'What email marketing platform do you use?', type: 'text', placeholder: 'e.g. Klaviyo, Mailchimp, Omnisend, None' },
+      { id: '9.2', label: 'Do you have abandoned cart and post-purchase email flows set up?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'partial', label: 'Some flows' },
+      ]},
+      { id: '9.3', label: 'What fulfilment / shipping solution do you use?', type: 'text', placeholder: 'e.g. In-house, 3PL, Royal Mail, DPD' },
+      { id: '9.4', label: 'Do you use a subscription or loyalty platform?', type: 'text', placeholder: 'e.g. Recharge, LoyaltyLion, Smile.io, None' },
+      { id: '9.5', label: 'Do you use any review platforms?', type: 'text', placeholder: 'e.g. Trustpilot, Yotpo, Judge.me, Google Reviews' },
+      { id: '9.6', label: 'Do you use any CRO or heatmap tools?', type: 'text', placeholder: 'e.g. Hotjar, Microsoft Clarity, None' },
+      { id: '9.7', label: 'Do you use any inventory management or feed management tools?', type: 'text', placeholder: 'e.g. DataFeedWatch, Channable, None' },
+    ],
+  },
+  {
+    id: '10',
+    title: 'Website & Conversion',
+    questions: [
+      { id: '10.1', label: 'What is your current website conversion rate?', type: 'text', hint: 'If known.', placeholder: 'e.g. 2.5%' },
+      { id: '10.2', label: 'What is your average cart abandonment rate?', type: 'text', hint: 'If known.', placeholder: 'e.g. 70%' },
+      { id: '10.3', label: 'Do you have a checkout optimised for mobile? What percentage of your traffic is mobile?', type: 'textarea', maxLength: 500 },
+      { id: '10.4', label: 'Do you have dedicated landing pages for key products or collections, or do ads send traffic to standard product/collection pages?', type: 'textarea', maxLength: 1000 },
+      { id: '10.5', label: 'How fast does your site load?', type: 'text', hint: 'If known \u2014 we will audit.', placeholder: 'e.g. 2.5s or "Not sure"' },
+      { id: '10.6', label: 'Do you have on-site product reviews visible to shoppers?', type: 'radio', options: [
+        { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
+      ]},
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Template registry
 // ---------------------------------------------------------------------------
 
@@ -575,6 +851,14 @@ export const ONBOARDING_TEMPLATES: OnboardingTemplate[] = [
     title: 'DSO / Multi-Location Onboarding',
     subtitle: 'For dental groups with multiple locations',
     sections: dentalMultiSections,
+  },
+  {
+    id: 'ecom',
+    vertical: 'ecommerce',
+    type: 'single',
+    title: 'E-Commerce Onboarding',
+    subtitle: 'For online stores and DTC brands',
+    sections: ecomSections,
   },
 ];
 

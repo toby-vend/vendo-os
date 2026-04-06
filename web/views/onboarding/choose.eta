@@ -29,16 +29,21 @@
           <form method="POST" action="/onboard/start" class="onboard-choose-option">
             <input type="hidden" name="templateId" value="<%= tpl.id %>">
             <div class="onboard-choose-icon">
-              <% if (tpl.type === 'single') { %>
+              <% if (tpl.vertical === 'ecommerce') { %>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                 </svg>
-              <% } else { %>
+              <% } else if (tpl.type === 'multi') { %>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="1" y="3" width="7" height="18" rx="1"/>
                   <rect x="9" y="3" width="7" height="18" rx="1"/>
                   <rect x="17" y="3" width="6" height="18" rx="1"/>
+                </svg>
+              <% } else { %>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
               <% } %>
             </div>
