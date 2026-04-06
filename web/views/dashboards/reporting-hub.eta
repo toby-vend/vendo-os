@@ -1,8 +1,8 @@
 <% layout('/layouts/base') %>
 
-<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-  <h2 style="margin: 0;">Client Reporting Hub</h2>
-  <form method="GET" action="/dashboards/reporting-hub" style="display: flex; gap: 0.75rem; align-items: center;">
+<div style="margin-bottom: 1.5rem;">
+  <h2 style="margin: 0 0 0.75rem 0;">Client Reporting Hub</h2>
+  <form method="GET" action="/dashboards/reporting-hub" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
     <select name="client" onchange="this.form.submit()" style="min-width: 220px;">
       <option value="">Select a client&hellip;</option>
       <% it.clients.forEach(c => { %>

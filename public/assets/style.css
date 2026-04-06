@@ -918,6 +918,42 @@ mark {
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.15); }
 
+/* === Date pill buttons (shared with portal layout) === */
+.portal-date-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 3px;
+}
+
+.portal-date-pill {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--vendo-font);
+  color: var(--vendo-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.portal-date-pill:hover {
+  color: var(--vendo-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.portal-date-pill.active {
+  color: #0B0B0B;
+  background: var(--vendo-green);
+  font-weight: 600;
+}
+
 /* === Responsive === */
 
 @media (max-width: 1024px) {
@@ -4736,6 +4772,33 @@ button.growth-sort-btn:hover {
   h2 + .btn,
   [style*="justify-content: space-between"] {
     flex-wrap: wrap;
+  }
+
+  /* === Reporting hub + dashboard headers — stack on mobile === */
+  form[action="/dashboards/reporting-hub"] {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  form[action="/dashboards/reporting-hub"] select {
+    width: 100%;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+
+  form[action="/dashboards/reporting-hub"] .portal-date-pills {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  /* Date pill buttons should NOT get 48px min-height */
+  .portal-date-pill {
+    min-height: auto !important;
+    padding: 6px 14px;
   }
 
   /* === Pull-to-refresh indicator === */
