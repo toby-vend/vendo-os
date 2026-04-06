@@ -1,0 +1,146 @@
+<% layout('/layouts/base') %>
+
+<!-- Filters bar -->
+<div class="vp-toolbar">
+  <div class="vp-filters">
+    <select id="vp-filter-client" onchange="applyFilters()">
+      <option value="">All Clients</option>
+      <% it.clients.forEach(function(c) { %>
+      <option value="<%= c.id %>" <%= it.filters.client == c.id ? 'selected' : '' %>><%= c.label %></option>
+      <% }); %>
+    </select>
+    <select id="vp-filter-editor" onchange="applyFilters()">
+      <option value="">All Editors</option>
+      <% it.editors.forEach(function(e) { %>
+      <option value="<%= e.id %>" <%= it.filters.editor == e.id ? 'selected' : '' %>><%= e.name %></option>
+      <% }); %>
+    </select>
+    <select id="vp-filter-priority" onchange="applyFilters()">
+      <option value="">All Priorities</option>
+      <option value="high" <%= it.filters.priority === 'high' ? 'selected' : '' %>>High</option>
+      <option value="normal" <%= it.filters.priority === 'normal' ? 'selected' : '' %>>Normal</option>
+      <option value="low" <%= it.filters.priority === 'low' ? 'selected' : '' %>>Low</option>
+    </select>
+  </div>
+  <a href="/video-production/new" class="btn btn-primary">+ New Project</a>
+</div>
+
+<!-- Kanban board -->
+<div class="vp-board" id="vp-board">
+  <% it.columnDefs.forEach(function(col) {
+    const cards = it.columns[col.key] || [];
+    const count = cards.length;
+    const isWipWarning = (col.key === 'in_editing' || col.key === 'qa_review') && count > 5;
+  %>
+  <div class="vp-column" data-status="<%= col.key %>">
+    <div class="vp-column-header">
+      <span class="vp-column-title"><%= col.label %></span>
+      <span class="vp-column-count<%= isWipWarning ? ' vp-wip-warning' : '' %>"><%= count %></span>
+    </div>
+    <% if (isWipWarning) { %>
+    <div class="vp-wip-banner">WIP limit exceeded (5)</div>
+    <% } %>
+    <div class="vp-card-list" data-status="<%= col.key %>">
+      <% cards.forEach(function(p) {
+        const now = new Date();
+        const deadline = p.deadline ? new Date(p.deadline) : null;
+        const daysUntil = deadline ? Math.ceil((deadline.getTime() - now.getTime()) / 86400000) : null;
+        let rag = '';
+        if (daysUntil !== null) {
+          if (daysUntil < 0) rag = 'red';
+          else if (daysUntil <= 2) rag = 'amber';
+          else rag = 'green';
+        }
+        const treatments = p.treatments_planned ? JSON.parse(p.treatments_planned) : [];
+      %>
+      <div class="vp-card" draggable="true" data-id="<%= p.id %>" onclick="window.location='/video-production/<%= p.id %>'">
+        <div class="vp-card-top">
+          <span class="vp-card-client"><%= p.client_name %></span>
+          <span class="vp-card-priority vp-priority-<%= p.priority %>"><%= p.priority %></span>
+        </div>
+        <div class="vp-card-title"><%= p.title %></div>
+        <% if (p.shoot_date) { %>
+        <div class="vp-card-date">Shoot: <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %></div>
+        <% } %>
+        <div class="vp-card-meta">
+          <% if (p.assigned_editor_name) { %>
+          <span class="vp-card-editor" title="<%= p.assigned_editor_name %>">
+            <span class="vp-avatar"><%= p.assigned_editor_name.charAt(0) %></span>
+            <%= p.assigned_editor_name.split(' ')[0] %>
+          </span>
+          <% } %>
+          <% if (deadline) { %>
+          <span class="vp-card-deadline vp-rag-<%= rag %>" title="Deadline: <%= p.deadline %>">
+            <%= deadline.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %>
+          </span>
+          <% } %>
+          <% if (p.revision_round > 0) { %>
+          <span class="vp-card-revision">R<%= p.revision_round %></span>
+          <% } %>
+        </div>
+        <div class="vp-card-footer">
+          <span class="vp-card-status-badge vp-cs-<%= p.client_status %>"><%= p.client_status.replace('_', ' ') %></span>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+  <% }); %>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+(function() {
+  // Initialise SortableJS on each column
+  document.querySelectorAll('.vp-card-list').forEach(function(list) {
+    new Sortable(list, {
+      group: 'kanban',
+      animation: 150,
+      ghostClass: 'vp-card-ghost',
+      dragClass: 'vp-card-drag',
+      onEnd: function(evt) {
+        var cardEl = evt.item;
+        var newCol = evt.to.dataset.status;
+        var cardId = cardEl.dataset.id;
+        if (!cardId || !newCol) return;
+
+        // Get CSRF token from any form on page (or meta tag)
+        var csrf = document.querySelector('input[name="_csrf"]')?.value || '';
+
+        // POST the move
+        fetch('/video-production/move/' + cardId, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'HX-Request': 'true',
+          },
+          body: '_csrf=' + encodeURIComponent(csrf) + '&status=' + encodeURIComponent(newCol),
+        }).then(function(res) {
+          if (!res.ok) {
+            // Revert — reload the board
+            location.reload();
+          }
+        }).catch(function() {
+          location.reload();
+        });
+      },
+    });
+  });
+
+  // Filter application
+  window.applyFilters = function() {
+    var client = document.getElementById('vp-filter-client').value;
+    var editor = document.getElementById('vp-filter-editor').value;
+    var priority = document.getElementById('vp-filter-priority').value;
+    var params = new URLSearchParams();
+    if (client) params.set('client', client);
+    if (editor) params.set('editor', editor);
+    if (priority) params.set('priority', priority);
+    var qs = params.toString();
+    window.location.href = '/video-production' + (qs ? '?' + qs : '');
+  };
+})();
+</script>
+
+<!-- Hidden CSRF token for drag-and-drop JS -->
+<form style="display:none"><input type="hidden" name="_csrf" value="<%= it.csrfToken %>"></form>

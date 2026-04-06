@@ -69,6 +69,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
       { id: 'action-items', label: 'Action Items', href: '/action-items', permission: 'action-items' },
       { id: 'asana-tasks', label: 'Asana Tasks', href: '/asana-tasks', permission: 'asana-tasks' },
       { id: 'content-tasks', label: 'Content Tasks', href: '/tasks', permission: 'tasks' },
+      { id: 'video-production', label: 'Video Production', href: '/video-production', permission: 'video-production' },
       { id: 'time-tracking', label: 'Time Tracking', href: '/dashboards/time-tracking', permission: 'dashboards' },
       { id: 'capacity', label: 'Capacity', href: '/dashboards/capacity', permission: 'dashboards' },
     ],
@@ -110,7 +111,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
       { id: 'admin-permissions', label: 'Permissions', href: '/admin/permissions' },
       { id: 'admin-client-mapping', label: 'Client Mapping', href: '/admin/client-mapping' },
       { id: 'admin-portal-users', label: 'Portal Users', href: '/admin/portal-users' },
-      { id: 'admin-onboarding', label: 'Onboarding', href: '/admin/onboarding' },
+      { id: 'admin-onboarding', label: 'Account Setup', href: '/admin/onboarding' },
       { id: 'admin-usage', label: 'Usage', href: '/admin/usage' },
       { id: 'admin-sidebar', label: 'Sidebar', href: '/admin/sidebar' },
       { id: 'sync-status', label: 'Sync Status', href: '/sync-status' },
@@ -160,6 +161,60 @@ export async function getSidebarConfig(): Promise<SidebarConfig> {
     cachedConfig = DEFAULT_SIDEBAR_CONFIG;
     cacheTime = Date.now();
     return DEFAULT_SIDEBAR_CONFIG;
+  }
+}
+
+/**
+ * Patch any DB-saved sidebar config to include new items from DEFAULT_SIDEBAR_CONFIG.
+ * Ensures items added in code appear even when a custom config was previously saved.
+ */
+export async function migrateSidebarConfig(): Promise<void> {
+  await initSidebarSchema();
+  try {
+    const result = await rows<{ config_json: string }>(
+      'SELECT config_json FROM sidebar_config WHERE key = ?',
+      ['default'],
+    );
+    if (result.length === 0) return; // Using defaults — nothing to patch
+
+    const saved = JSON.parse(result[0].config_json) as SidebarConfig;
+    let changed = false;
+
+    // Ensure each default group/item exists in saved config
+    for (const defaultGroup of DEFAULT_SIDEBAR_CONFIG) {
+      const savedGroup = saved.find(g => g.id === defaultGroup.id);
+      if (!savedGroup) {
+        // Whole group missing — add it
+        saved.push(defaultGroup);
+        changed = true;
+        continue;
+      }
+      // Check items within the group
+      for (const defaultItem of defaultGroup.items) {
+        if (!savedGroup.items.find(i => i.id === defaultItem.id)) {
+          // Find the insert position (after the item that precedes it in the default)
+          const defaultIdx = defaultGroup.items.indexOf(defaultItem);
+          const prevItem = defaultIdx > 0 ? defaultGroup.items[defaultIdx - 1] : null;
+          const prevIdx = prevItem ? savedGroup.items.findIndex(i => i.id === prevItem.id) : -1;
+          savedGroup.items.splice(prevIdx + 1, 0, defaultItem);
+          changed = true;
+        }
+      }
+      // Rename items whose labels changed in the default
+      for (const defaultItem of defaultGroup.items) {
+        const savedItem = savedGroup.items.find(i => i.id === defaultItem.id);
+        if (savedItem && savedItem.label !== defaultItem.label) {
+          savedItem.label = defaultItem.label;
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
+      await saveSidebarConfig(saved);
+    }
+  } catch {
+    // Ignore — table may not exist yet
   }
 }
 

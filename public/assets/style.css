@@ -2916,3 +2916,413 @@ button.growth-sort-btn:hover {
   .onboard-container { animation-duration: 0.01ms !important; }
   .wizard-progress-fill { transition-duration: 0.01ms !important; }
 }
+
+/* ── Video Production — Kanban Board ─────────────────────────────── */
+
+.vp-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.vp-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.vp-filters select {
+  background: var(--vendo-surface);
+  color: var(--vendo-text);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.vp-board {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  min-height: 60vh;
+}
+
+.vp-column {
+  min-width: 260px;
+  max-width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.vp-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--vendo-surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+}
+
+.vp-column-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vendo-text-muted);
+}
+
+.vp-column-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vendo-text-muted);
+  background: rgba(255,255,255,0.06);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.vp-column-count.vp-wip-warning {
+  color: #F59E0B;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.vp-wip-banner {
+  font-size: 11px;
+  color: #F59E0B;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 6px;
+  padding: 4px 8px;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.vp-card-list {
+  flex: 1;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Project Card ── */
+
+.vp-card {
+  background: var(--vendo-surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.vp-card:hover {
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.1);
+}
+
+.vp-card-ghost {
+  opacity: 0.4;
+}
+
+.vp-card-drag {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  border-color: var(--vendo-green);
+}
+
+.vp-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.vp-card-client {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vendo-green);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.vp-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vendo-text);
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+
+.vp-card-date {
+  font-size: 11px;
+  color: var(--vendo-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.vp-card-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.vp-card-editor {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 11px;
+  color: var(--vendo-text-muted);
+}
+
+.vp-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--vendo-green);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vp-card-deadline {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.vp-rag-green { color: #22C55E; background: rgba(34,197,94,0.1); }
+.vp-rag-amber { color: #F59E0B; background: rgba(245,158,11,0.1); }
+.vp-rag-red { color: #EF4444; background: rgba(239,68,68,0.1); }
+
+.vp-card-revision {
+  font-size: 11px;
+  font-weight: 700;
+  color: #F59E0B;
+  background: rgba(245,158,11,0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.vp-card-priority {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.vp-priority-high { color: #EF4444; background: rgba(239,68,68,0.1); }
+.vp-priority-normal { color: var(--vendo-text-muted); background: rgba(255,255,255,0.04); }
+.vp-priority-low { color: #64748B; background: rgba(100,116,139,0.1); }
+
+.vp-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.vp-card-status-badge,
+.vp-cs-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.vp-cs-awaiting { color: #94A3B8; background: rgba(148,163,184,0.1); }
+.vp-cs-confirmed { color: #22C55E; background: rgba(34,197,94,0.1); }
+.vp-cs-approved { color: #22C55E; background: rgba(34,197,94,0.15); }
+.vp-cs-changes_requested { color: #F59E0B; background: rgba(245,158,11,0.1); }
+
+/* ── Detail Page ── */
+
+.vp-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.vp-tab-panel {
+  margin-top: 1.25rem;
+}
+
+/* ── QA Checklist ── */
+
+.vp-qa-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vp-qa-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+  color: var(--vendo-text);
+  cursor: pointer;
+}
+
+.vp-qa-item input[type="checkbox"] {
+  accent-color: var(--vendo-green);
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Forms (shared for video-production) ── */
+
+.vp-form .form-group {
+  margin-bottom: 0.75rem;
+}
+
+.vp-form label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vendo-text-muted);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.vp-form input[type="text"],
+.vp-form input[type="url"],
+.vp-form input[type="number"],
+.vp-form input[type="date"],
+.vp-form input[type="time"],
+.vp-form textarea,
+.vp-form select {
+  width: 100%;
+  background: var(--vendo-bg);
+  color: var(--vendo-text);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.vp-form input:focus,
+.vp-form textarea:focus,
+.vp-form select:focus {
+  outline: none;
+  border-color: var(--vendo-green);
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.15);
+}
+
+.vp-form .form-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.vp-form .form-row .form-group {
+  flex: 1;
+}
+
+.vp-form .form-hint {
+  font-size: 11px;
+  color: var(--vendo-text-muted);
+  margin-top: 0.2rem;
+  display: block;
+}
+
+/* ── Buttons ── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btn:hover { opacity: 0.85; }
+
+.btn-primary {
+  background: var(--vendo-green);
+  color: #0B0B0B;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--vendo-text);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.btn-danger {
+  background: rgba(239,68,68,0.15);
+  color: #EF4444;
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  color: var(--vendo-text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.btn-icon:hover {
+  color: #EF4444;
+  background: rgba(239,68,68,0.1);
+}
+
+/* ── Status badges (kanban column statuses) ── */
+
+.status-badge.status-shoot-booked { color: #60A5FA; background: rgba(96,165,250,0.1); }
+.status-badge.status-shoot-plan-in-progress { color: #F59E0B; background: rgba(245,158,11,0.1); }
+.status-badge.status-shoot-plan-approved { color: #22C55E; background: rgba(34,197,94,0.1); }
+.status-badge.status-content-day-complete { color: #94A3B8; background: rgba(148,163,184,0.1); }
+.status-badge.status-raw-files-shared { color: #A78BFA; background: rgba(167,139,250,0.1); }
+.status-badge.status-in-editing { color: #F472B6; background: rgba(244,114,182,0.1); }
+.status-badge.status-qa-review { color: #FBBF24; background: rgba(251,191,36,0.1); }
+.status-badge.status-revisions { color: #FB923C; background: rgba(251,146,60,0.1); }
+.status-badge.status-client-review { color: #38BDF8; background: rgba(56,189,248,0.1); }
+.status-badge.status-live { color: #22C55E; background: rgba(34,197,94,0.15); }
+
+/* ── Responsive ── */
+
+@media (max-width: 900px) {
+  .vp-board {
+    gap: 0.5rem;
+  }
+  .vp-column {
+    min-width: 220px;
+    max-width: 240px;
+  }
+  .vp-detail-header {
+    flex-direction: column;
+  }
+  .vp-form .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

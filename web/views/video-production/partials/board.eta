@@ -1,0 +1,58 @@
+<% it.columnDefs.forEach(function(col) {
+  const cards = it.columns[col.key] || [];
+  const count = cards.length;
+  const isWipWarning = (col.key === 'in_editing' || col.key === 'qa_review') && count > 5;
+%>
+<div class="vp-column" data-status="<%= col.key %>">
+  <div class="vp-column-header">
+    <span class="vp-column-title"><%= col.label %></span>
+    <span class="vp-column-count<%= isWipWarning ? ' vp-wip-warning' : '' %>"><%= count %></span>
+  </div>
+  <% if (isWipWarning) { %>
+  <div class="vp-wip-banner">WIP limit exceeded (5)</div>
+  <% } %>
+  <div class="vp-card-list" data-status="<%= col.key %>">
+    <% cards.forEach(function(p) {
+      const now = new Date();
+      const deadline = p.deadline ? new Date(p.deadline) : null;
+      const daysUntil = deadline ? Math.ceil((deadline.getTime() - now.getTime()) / 86400000) : null;
+      let rag = '';
+      if (daysUntil !== null) {
+        if (daysUntil < 0) rag = 'red';
+        else if (daysUntil <= 2) rag = 'amber';
+        else rag = 'green';
+      }
+    %>
+    <div class="vp-card" draggable="true" data-id="<%= p.id %>" onclick="window.location='/video-production/<%= p.id %>'">
+      <div class="vp-card-top">
+        <span class="vp-card-client"><%= p.client_name %></span>
+        <span class="vp-card-priority vp-priority-<%= p.priority %>"><%= p.priority %></span>
+      </div>
+      <div class="vp-card-title"><%= p.title %></div>
+      <% if (p.shoot_date) { %>
+      <div class="vp-card-date">Shoot: <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %></div>
+      <% } %>
+      <div class="vp-card-meta">
+        <% if (p.assigned_editor_name) { %>
+        <span class="vp-card-editor" title="<%= p.assigned_editor_name %>">
+          <span class="vp-avatar"><%= p.assigned_editor_name.charAt(0) %></span>
+          <%= p.assigned_editor_name.split(' ')[0] %>
+        </span>
+        <% } %>
+        <% if (deadline) { %>
+        <span class="vp-card-deadline vp-rag-<%= rag %>">
+          <%= deadline.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %>
+        </span>
+        <% } %>
+        <% if (p.revision_round > 0) { %>
+        <span class="vp-card-revision">R<%= p.revision_round %></span>
+        <% } %>
+      </div>
+      <div class="vp-card-footer">
+        <span class="vp-card-status-badge vp-cs-<%= p.client_status %>"><%= p.client_status.replace('_', ' ') %></span>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+</div>
+<% }); %>

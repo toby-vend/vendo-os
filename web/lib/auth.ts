@@ -116,6 +116,7 @@ const ROUTE_MAP: [string, string][] = [
   ['/operations', 'operations'],
   ['/onboarding', 'clients'],
   ['/skills', 'skills'],
+  ['/video-production', 'video-production'],
 ];
 
 export function getRouteSlug(url: string): string | null {

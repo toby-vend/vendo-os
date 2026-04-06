@@ -1,0 +1,99 @@
+<% layout('/layouts/base') %>
+
+<div style="max-width: 640px;">
+  <a href="/video-production" style="font-size: 13px; color: var(--vendo-text-muted); text-decoration: none; margin-bottom: 1rem; display: inline-block;">&larr; Back to Board</a>
+
+  <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 1.5rem;">New Video Project</h2>
+
+  <form method="POST" action="/video-production/new" class="vp-form">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+
+    <div class="form-group">
+      <label for="client_id">Client *</label>
+      <select name="client_id" id="client_id" required>
+        <option value="">Select client...</option>
+        <% it.clients.forEach(function(c) { %>
+        <option value="<%= c.id %>"><%= c.label %></option>
+        <% }); %>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="title">Project Title *</label>
+      <input type="text" name="title" id="title" required placeholder="e.g. Invisalign UGC x3">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="shoot_date">Shoot Date</label>
+        <input type="date" name="shoot_date" id="shoot_date">
+      </div>
+      <div class="form-group">
+        <label for="shoot_time">Start Time</label>
+        <input type="time" name="shoot_time" id="shoot_time">
+      </div>
+      <div class="form-group">
+        <label for="shoot_end_time">End Time</label>
+        <input type="time" name="shoot_end_time" id="shoot_end_time">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="location">Location</label>
+      <input type="text" name="location" id="location" placeholder="Clinic address or studio">
+    </div>
+
+    <div class="form-group">
+      <label for="contact_on_day">Contact on the Day</label>
+      <input type="text" name="contact_on_day" id="contact_on_day" placeholder="Name and phone number">
+    </div>
+
+    <div class="form-group">
+      <label for="treatments_planned">Treatments Planned</label>
+      <input type="text" name="treatments_planned" id="treatments_planned" placeholder='e.g. ["Invisalign","Implants","Whitening"]'>
+      <span class="form-hint">JSON array of treatment names</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="num_videos">Number of Videos</label>
+        <input type="number" name="num_videos" id="num_videos" min="0" value="0">
+      </div>
+      <div class="form-group">
+        <label for="priority">Priority</label>
+        <select name="priority" id="priority">
+          <option value="normal">Normal</option>
+          <option value="high">High</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="deadline">Deadline</label>
+        <input type="date" name="deadline" id="deadline">
+      </div>
+      <div class="form-group">
+        <label for="assigned_editor_id">Assigned Editor</label>
+        <select name="assigned_editor_id" id="assigned_editor_id" onchange="document.getElementById('assigned_editor_name').value=this.options[this.selectedIndex].text">
+          <option value="">Unassigned</option>
+          <% it.editors.forEach(function(e) { %>
+          <option value="<%= e.id %>"><%= e.name %></option>
+          <% }); %>
+        </select>
+        <input type="hidden" name="assigned_editor_name" id="assigned_editor_name">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="internal_notes">Internal Notes</label>
+      <textarea name="internal_notes" id="internal_notes" rows="3" placeholder="Any internal notes for the team..."></textarea>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+      <button type="submit" class="btn btn-primary">Create Project</button>
+      <a href="/video-production" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>

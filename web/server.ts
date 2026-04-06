@@ -56,6 +56,7 @@ import { skillsLibraryRoutes } from './routes/skills-library.js';
 import { cronRoutes } from './routes/api/cron.js';
 import { skillsApiRoutes } from './routes/api/skills.js';
 import { onboardPublicRoutes, onboardingInternalRoutes } from './routes/onboarding.js';
+import { videoProductionRoutes } from './routes/video-production.js';
 import crypto from 'crypto';
 import {
   parseCookies,
@@ -338,6 +339,7 @@ app.register(onboardPublicRoutes, { prefix: '/onboard' });
 app.register(onboardingInternalRoutes, { prefix: '/onboarding' });
 app.register(cronRoutes, { prefix: '/api/cron' });
 app.register(skillsApiRoutes, { prefix: '/api/skills' });
+app.register(videoProductionRoutes, { prefix: '/video-production' });
 
 // Dashboard modules
 app.register(unifiedAdsRoutes, { prefix: '/dashboards/ads' });

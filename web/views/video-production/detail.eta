@@ -1,0 +1,402 @@
+<% layout('/layouts/base') %>
+
+<%
+  const p = it.project;
+  const statusLabel = it.columnDefs.find(c => c.key === p.status)?.label || p.status;
+  const now = new Date();
+  const deadline = p.deadline ? new Date(p.deadline) : null;
+  const daysUntil = deadline ? Math.ceil((deadline.getTime() - now.getTime()) / 86400000) : null;
+  let rag = '';
+  if (daysUntil !== null) {
+    if (daysUntil < 0) rag = 'red';
+    else if (daysUntil <= 2) rag = 'amber';
+    else rag = 'green';
+  }
+%>
+
+<a href="/video-production" style="font-size: 13px; color: var(--vendo-text-muted); text-decoration: none; margin-bottom: 1rem; display: inline-block;">&larr; Back to Board</a>
+
+<!-- Header -->
+<div class="vp-detail-header">
+  <div>
+    <h2 style="font-size: 20px; font-weight: 600; margin: 0;"><%= p.client_name %> &mdash; <%= p.title %></h2>
+    <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <span class="status-badge status-<%= p.status.replace(/_/g, '-') %>"><%= statusLabel %></span>
+      <span class="vp-card-priority vp-priority-<%= p.priority %>"><%= p.priority %></span>
+      <% if (p.shoot_date) { %>
+      <span style="font-size: 13px; color: var(--vendo-text-muted);">Shoot: <%= new Date(p.shoot_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %><% if (p.shoot_time) { %> at <%= p.shoot_time %><% } %></span>
+      <% } %>
+      <% if (deadline) { %>
+      <span class="vp-card-deadline vp-rag-<%= rag %>">Due: <%= deadline.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) %></span>
+      <% } %>
+      <% if (p.revision_round > 0) { %>
+      <span class="vp-card-revision">R<%= p.revision_round %></span>
+      <% } %>
+    </div>
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <% if (p.status === 'revisions') { %>
+    <form method="POST" action="/video-production/<%= p.id %>/resubmit" style="margin:0;">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+      <button type="submit" class="btn btn-primary">Re-submit for QA</button>
+    </form>
+    <% } %>
+    <% if (p.status === 'live' && !p.archived) { %>
+    <form method="POST" action="/video-production/<%= p.id %>/archive" style="margin:0;">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+      <button type="submit" class="btn btn-secondary">Archive</button>
+    </form>
+    <% } %>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="growth-tabs" style="margin-top: 1.5rem;">
+  <button class="growth-tab active" onclick="showDetailTab('overview', this)">Overview</button>
+  <button class="growth-tab" onclick="showDetailTab('files', this)">Files (<%= it.rawFiles.length + it.editFiles.length %>)</button>
+  <button class="growth-tab" onclick="showDetailTab('qa', this)">QA (<%= it.qaReviews.length %>)</button>
+  <button class="growth-tab" onclick="showDetailTab('comments', this)">Notes (<%= it.comments.length %>)</button>
+  <button class="growth-tab" onclick="showDetailTab('log', this)">Audit Log</button>
+</div>
+
+<!-- Overview Tab -->
+<div class="vp-tab-panel" id="tab-overview">
+  <div class="two-col" style="gap: 1.5rem;">
+    <!-- Left: Project details -->
+    <div>
+      <div class="stat-card" style="margin-bottom: 1rem;">
+        <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Project Details</h3>
+        <form method="POST" action="/video-production/<%= p.id %>/update" class="vp-form">
+          <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" name="title" value="<%= p.title %>">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Shoot Date</label>
+              <input type="date" name="shoot_date" value="<%= p.shoot_date || '' %>">
+            </div>
+            <div class="form-group">
+              <label>Start</label>
+              <input type="time" name="shoot_time" value="<%= p.shoot_time || '' %>">
+            </div>
+            <div class="form-group">
+              <label>End</label>
+              <input type="time" name="shoot_end_time" value="<%= p.shoot_end_time || '' %>">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" name="location" value="<%= p.location || '' %>">
+          </div>
+
+          <div class="form-group">
+            <label>Contact on Day</label>
+            <input type="text" name="contact_on_day" value="<%= p.contact_on_day || '' %>">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Priority</label>
+              <select name="priority">
+                <option value="high" <%= p.priority === 'high' ? 'selected' : '' %>>High</option>
+                <option value="normal" <%= p.priority === 'normal' ? 'selected' : '' %>>Normal</option>
+                <option value="low" <%= p.priority === 'low' ? 'selected' : '' %>>Low</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Deadline</label>
+              <input type="date" name="deadline" value="<%= p.deadline || '' %>">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Assigned Editor</label>
+            <select name="assigned_editor_id" onchange="this.form.assigned_editor_name.value=this.options[this.selectedIndex].text">
+              <option value="">Unassigned</option>
+              <% it.editors.forEach(function(e) { %>
+              <option value="<%= e.id %>" <%= p.assigned_editor_id === e.id ? 'selected' : '' %>><%= e.name %></option>
+              <% }); %>
+            </select>
+            <input type="hidden" name="assigned_editor_name" value="<%= p.assigned_editor_name || '' %>">
+          </div>
+
+          <div class="form-group">
+            <label>Internal Notes</label>
+            <textarea name="internal_notes" rows="3"><%= p.internal_notes || '' %></textarea>
+          </div>
+
+          <% if (p.status === 'live') { %>
+          <div class="form-group">
+            <label>Publish Date</label>
+            <input type="date" name="publish_date" value="<%= p.publish_date || '' %>">
+          </div>
+          <div class="form-group">
+            <label>Platforms</label>
+            <input type="text" name="publish_platforms" value="<%= p.publish_platforms || '' %>" placeholder='e.g. ["Instagram","TikTok"]'>
+          </div>
+          <div class="form-group">
+            <label>Live Link</label>
+            <input type="url" name="publish_link" value="<%= p.publish_link || '' %>" placeholder="https://...">
+          </div>
+          <% } %>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 0.75rem;">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right: Quick info -->
+    <div>
+      <div class="stat-card" style="margin-bottom: 1rem;">
+        <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Status</h3>
+        <table class="compact" style="width: 100%;">
+          <tr><td style="color: var(--vendo-text-muted);">Stage</td><td><%= statusLabel %></td></tr>
+          <tr><td style="color: var(--vendo-text-muted);">Client Status</td><td><span class="vp-cs-badge vp-cs-<%= p.client_status %>"><%= p.client_status.replace('_', ' ') %></span></td></tr>
+          <tr><td style="color: var(--vendo-text-muted);">Revision Round</td><td>R<%= p.revision_round %></td></tr>
+          <tr><td style="color: var(--vendo-text-muted);">Editor</td><td><%= p.assigned_editor_name || 'Unassigned' %></td></tr>
+          <tr><td style="color: var(--vendo-text-muted);">Raw Files</td><td><%= it.rawFiles.length %></td></tr>
+          <tr><td style="color: var(--vendo-text-muted);">Edit Files</td><td><%= it.editFiles.length %></td></tr>
+          <tr><td style="color: var(--vendo-text-muted);">QA Reviews</td><td><%= it.qaReviews.length %></td></tr>
+          <tr><td style="color: var(--vendo-text-muted);">Created</td><td><%= new Date(p.created_at).toLocaleDateString('en-GB') %></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Files Tab -->
+<div class="vp-tab-panel" id="tab-files" style="display:none;">
+  <div class="two-col" style="gap: 1.5rem;">
+    <!-- Raw Files -->
+    <div class="stat-card">
+      <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Raw Files (Google Drive)</h3>
+      <% if (it.rawFiles.length) { %>
+      <table class="compact" style="width: 100%;">
+        <thead><tr><th>Label</th><th>Treatment</th><th>Link</th><th></th></tr></thead>
+        <tbody>
+        <% it.rawFiles.forEach(function(f) { %>
+        <tr>
+          <td><%= f.label || '—' %></td>
+          <td><%= f.treatment || '—' %></td>
+          <td><a href="<%= f.url %>" target="_blank" rel="noopener" style="color: var(--vendo-green);">Open</a></td>
+          <td>
+            <form method="POST" action="/video-production/<%= p.id %>/files/<%= f.id %>/delete" style="margin:0;">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+              <button type="submit" class="btn-icon" title="Remove" onclick="return confirm('Remove this file link?');">&times;</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <p style="color: var(--vendo-text-muted); font-size: 13px;">No raw files added yet.</p>
+      <% } %>
+
+      <form method="POST" action="/video-production/<%= p.id %>/files" class="vp-form" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1rem;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+        <input type="hidden" name="type" value="raw">
+        <div class="form-row">
+          <div class="form-group" style="flex: 2;">
+            <label>Google Drive URL</label>
+            <input type="url" name="url" required placeholder="https://drive.google.com/...">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Label</label>
+            <input type="text" name="label" placeholder="e.g. Implants Take 3">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Treatment</label>
+            <input type="text" name="treatment" placeholder="Treatment name">
+          </div>
+          <div class="form-group">
+            <label>Video Type</label>
+            <input type="text" name="video_type" placeholder="e.g. UGC Hook">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-secondary">Add Raw File</button>
+      </form>
+    </div>
+
+    <!-- Edit Files -->
+    <div class="stat-card">
+      <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Edit Files (Frame)</h3>
+      <% if (it.editFiles.length) { %>
+      <table class="compact" style="width: 100%;">
+        <thead><tr><th>Label</th><th>Version</th><th>Link</th><th></th></tr></thead>
+        <tbody>
+        <% it.editFiles.forEach(function(f) { %>
+        <tr>
+          <td><%= f.label || '—' %></td>
+          <td>v<%= f.version %></td>
+          <td><a href="<%= f.url %>" target="_blank" rel="noopener" style="color: var(--vendo-green);">Open</a></td>
+          <td>
+            <form method="POST" action="/video-production/<%= p.id %>/files/<%= f.id %>/delete" style="margin:0;">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+              <button type="submit" class="btn-icon" title="Remove" onclick="return confirm('Remove this file link?');">&times;</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <p style="color: var(--vendo-text-muted); font-size: 13px;">No edit files added yet.</p>
+      <% } %>
+
+      <form method="POST" action="/video-production/<%= p.id %>/files" class="vp-form" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1rem;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+        <input type="hidden" name="type" value="edit">
+        <div class="form-row">
+          <div class="form-group" style="flex: 2;">
+            <label>Frame URL</label>
+            <input type="url" name="url" required placeholder="https://app.frame.io/...">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Version</label>
+            <input type="number" name="version" min="1" value="<%= it.editFiles.length + 1 %>">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Label</label>
+          <input type="text" name="label" placeholder="e.g. Invisalign UGC Final">
+        </div>
+        <button type="submit" class="btn btn-secondary">Add Edit File</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- QA Tab -->
+<div class="vp-tab-panel" id="tab-qa" style="display:none;">
+  <% if (p.status === 'qa_review') { %>
+  <div class="stat-card" style="margin-bottom: 1.5rem;">
+    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Submit QA Review</h3>
+    <form method="POST" action="/video-production/<%= p.id %>/qa" class="vp-form">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+
+      <div class="vp-qa-checklist">
+        <label class="vp-qa-item"><input type="checkbox" name="matches_brief" value="1"> Edit matches brief (treatment, type, duration)</label>
+        <label class="vp-qa-item"><input type="checkbox" name="captions_accurate" value="1"> Captions accurate and on-brand</label>
+        <label class="vp-qa-item"><input type="checkbox" name="brand_correct" value="1"> Brand colours, fonts, logo correct</label>
+        <label class="vp-qa-item"><input type="checkbox" name="compliance_ok" value="1"> No compliance violations (ASA/GDC)</label>
+        <label class="vp-qa-item"><input type="checkbox" name="audio_ok" value="1"> Audio levels acceptable</label>
+        <label class="vp-qa-item"><input type="checkbox" name="hook_ok" value="1"> Hook / opening frame meets platform reqs</label>
+        <label class="vp-qa-item"><input type="checkbox" name="cta_present" value="1"> CTA present and correct</label>
+      </div>
+
+      <div class="form-group" style="margin-top: 1rem;">
+        <label>Notes</label>
+        <textarea name="notes" rows="3" placeholder="Specific issues or feedback..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+        <button type="submit" name="result" value="pass" class="btn btn-primary">Pass &rarr; Client Review</button>
+        <button type="submit" name="result" value="fail" class="btn btn-danger">Fail &rarr; Revisions</button>
+      </div>
+    </form>
+  </div>
+  <% } %>
+
+  <% if (it.qaReviews.length) { %>
+  <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Review History</h3>
+  <% it.qaReviews.forEach(function(qa) { %>
+  <div class="stat-card" style="margin-bottom: 0.75rem;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+      <span style="font-weight: 600;">Round <%= qa.round %></span>
+      <span class="status-badge status-<%= qa.result === 'pass' ? 'active' : 'overdue' %>"><%= qa.result %></span>
+    </div>
+    <div style="font-size: 13px; color: var(--vendo-text-muted);">
+      Reviewed by <%= qa.reviewer_name || 'Unknown' %> on <%= new Date(qa.reviewed_at).toLocaleDateString('en-GB') %>
+    </div>
+    <% if (qa.notes) { %>
+    <div style="margin-top: 0.5rem; font-size: 13px;"><%= qa.notes %></div>
+    <% } %>
+  </div>
+  <% }); %>
+  <% } else { %>
+  <p style="color: var(--vendo-text-muted); font-size: 13px;">No QA reviews yet.</p>
+  <% } %>
+</div>
+
+<!-- Comments / Notes Tab -->
+<div class="vp-tab-panel" id="tab-comments" style="display:none;">
+  <div class="stat-card" style="margin-bottom: 1.5rem;">
+    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 1rem;">Add Note</h3>
+    <form method="POST" action="/video-production/<%= p.id %>/comments" class="vp-form">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+      <div class="form-row">
+        <div class="form-group" style="flex: 1;">
+          <label>Source</label>
+          <select name="source">
+            <option value="internal">Internal</option>
+            <option value="qa">QA</option>
+            <option value="client">Client</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label>Timestamp Ref</label>
+          <input type="text" name="timestamp_ref" placeholder="e.g. 0:23">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea name="body" rows="3" required placeholder="Revision feedback or notes..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-secondary">Add Note</button>
+    </form>
+  </div>
+
+  <% if (it.comments.length) { %>
+  <% it.comments.forEach(function(c) { %>
+  <div class="stat-card" style="margin-bottom: 0.5rem; padding: 0.75rem 1rem;">
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--vendo-text-muted);">
+      <span><strong><%= c.author_name || 'Unknown' %></strong> &middot; <%= c.source %><% if (c.round > 0) { %> &middot; R<%= c.round %><% } %></span>
+      <span><%= new Date(c.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></span>
+    </div>
+    <% if (c.timestamp_ref) { %><span style="font-size: 11px; color: var(--vendo-green);">[<%= c.timestamp_ref %>]</span> <% } %>
+    <div style="font-size: 13px; margin-top: 0.25rem;"><%= c.body %></div>
+  </div>
+  <% }); %>
+  <% } else { %>
+  <p style="color: var(--vendo-text-muted); font-size: 13px;">No notes yet.</p>
+  <% } %>
+</div>
+
+<!-- Audit Log Tab -->
+<div class="vp-tab-panel" id="tab-log" style="display:none;">
+  <% if (it.auditLog.length) { %>
+  <table class="compact" style="width: 100%;">
+    <thead><tr><th>Action</th><th>From</th><th>To</th><th>User</th><th>Date</th></tr></thead>
+    <tbody>
+    <% it.auditLog.forEach(function(a) { %>
+    <tr>
+      <td><%= a.action.replace(/_/g, ' ') %></td>
+      <td><%= a.from_value || '—' %></td>
+      <td><%= a.to_value || '—' %></td>
+      <td><%= a.user_name || '—' %></td>
+      <td><%= new Date(a.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></td>
+    </tr>
+    <% }); %>
+    </tbody>
+  </table>
+  <% } else { %>
+  <p style="color: var(--vendo-text-muted); font-size: 13px;">No audit entries yet.</p>
+  <% } %>
+</div>
+
+<script>
+function showDetailTab(name, btn) {
+  document.querySelectorAll('.vp-tab-panel').forEach(function(el) { el.style.display = 'none'; });
+  document.getElementById('tab-' + name).style.display = 'block';
+  document.querySelectorAll('.growth-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+}
+</script>

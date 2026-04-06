@@ -16,3 +16,4 @@ export * from './attribution.js';
 export * from './dashboards.js';
 export * from './sidebar.js';
 export * from './onboarding.js';
+export * from './video-production.js';
