@@ -42,6 +42,18 @@ When an AM assigns a task (e.g. "write Meta ad copy for Lateral Dental"), the sy
 - Real-time chat or messaging features — not core to the operating system
 - Mobile app — web-first, accessed via browser
 
+## Current Milestone: v1.1 Mobile & PWA
+
+**Goal:** Make VendoOS fully usable on mobile — responsive layout, touch-optimised interactions, installable PWA with push notifications and offline support.
+
+**Target features:**
+- Responsive layout overhaul (sidebar, navigation, all pages)
+- Bottom tab bar navigation on mobile
+- Touch-optimised tables and task flows
+- PWA manifest + service worker (installable to home screen)
+- Push notifications (draft ready, QA failure, task status changes)
+- Offline caching (view cached drafts/tasks when signal drops)
+
 ## Context
 
 Vendo is a dental marketing agency with a structured Google Drive containing all operational knowledge: SOPs, templates, frameworks, and content guides organised by channel (paid social, SEO, paid ads) and type. AMs currently manually reference these documents when producing client work. The goal is to automate this: Drive becomes the source of truth, VendoOS indexes and classifies everything, and AI agents use this knowledge to produce work.
@@ -70,4 +82,4 @@ The existing codebase already has a working web dashboard, meeting intelligence 
 | Extend existing Fastify/Eta stack | Proven in production, team knows it, no migration cost | -- Pending |
 
 ---
-*Last updated: 2026-04-01 after initialisation*
+*Last updated: 2026-04-06 after milestone v1.1 initialisation*
