@@ -1,389 +1,375 @@
-# Architecture Research
+# Architecture Patterns — Mobile PWA Layer
 
-**Domain:** Agency OS — Google Drive-synced skills library + AI agent task execution in Fastify monolith
-**Researched:** 2026-04-01
+**Domain:** PWA + responsive design integration with Fastify + Eta + HTMX server-rendered dashboard
+**Milestone:** v1.1 Mobile & PWA
+**Researched:** 2026-04-06
 **Confidence:** HIGH
 
-## Standard Architecture
+---
 
-### System Overview
+## System Overview
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        PRESENTATION LAYER                           │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
-│  │  Drive UI    │  │  Skills UI   │  │  Task UI     │              │
-│  │ (existing)   │  │  /skills/*   │  │  /tasks/*    │              │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘              │
-└─────────┼─────────────────┼─────────────────┼───────────────────────┘
-          │                 │                 │
-┌─────────▼─────────────────▼─────────────────▼───────────────────────┐
-│                        BUSINESS LOGIC LAYER                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
-│  │  Drive Sync  │  │  Skills      │  │  Task        │              │
-│  │  Engine      │  │  Library     │  │  Executor    │              │
-│  │              │  │              │  │              │              │
-│  │ - Watch reg  │  │ - Classify   │  │ - Match      │              │
-│  │ - Renewal    │  │ - FTS index  │  │ - Retrieve   │              │
-│  │ - Extract    │  │ - Brand hub  │  │ - Generate   │              │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘              │
-│         │                 │                 │                       │
-│  ┌──────▼─────────────────▼─────────────────▼───────────────────┐   │
-│  │                    QA Validator                               │   │
-│  │           (validate output against SOP standard)             │   │
-│  └───────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
-          │                 │                 │
-┌─────────▼─────────────────▼─────────────────▼───────────────────────┐
-│                          DATA LAYER                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
-│  │  skills      │  │  brand_hub   │  │  task_runs   │              │
-│  │  (FTS5)      │  │  (per-client)│  │  (audit log) │              │
-│  └──────────────┘  └──────────────┘  └──────────────┘              │
-│  ┌──────────────┐  ┌──────────────┐                                │
-│  │  drive_watch │  │  (existing   │                                │
-│  │  _channels   │  │   tables)    │                                │
-│  └──────────────┘  └──────────────┘                                │
-└─────────────────────────────────────────────────────────────────────┘
-          │                                   │
-┌─────────▼───────────────────────────────────▼───────────────────────┐
-│                       EXTERNAL SERVICES                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
-│  │  Google      │  │  Google      │  │  Anthropic   │              │
-│  │  Drive API   │  │  Docs Export │  │  API         │              │
-│  │  (webhooks)  │  │  (text)      │  │  (Claude)    │              │
-│  └──────────────┘  └──────────────┘  └──────────────┘              │
-└─────────────────────────────────────────────────────────────────────┘
-```
+The PWA layer sits entirely on top of the existing architecture. The Fastify server, Eta templates, HTMX partial updates, and Turso database are unchanged. What is added is:
 
-### Component Responsibilities
-
-| Component | Responsibility | Location |
-|-----------|----------------|----------|
-| Drive Sync Engine | Register/renew webhook channels, receive push notifications, extract document text, trigger indexing | `web/routes/drive-webhook.ts`, `scripts/sync/sync-drive.ts` |
-| Skills Library | Store classified documents (SOPs, templates, frameworks), FTS5 full-text search, channel classification (paid social / SEO / paid ads) | `web/lib/skills.ts`, DB: `skills` table |
-| Brand Hub | Per-client brand files (tone, compliance, identifiers), keyed by client slug, queried by task executor | DB: `brand_hub` table |
-| Task Executor | Accept task assignment, retrieve relevant skills + brand context, call Claude API, return draft | `scripts/functions/execute-task.ts` |
-| QA Validator | Score agent output against SOP standards, trigger retry if below threshold | `scripts/functions/validate-output.ts` |
-| Drive Watch Channels | Track active notification channels, expiry timestamps, resource IDs for renewal scheduling | DB: `drive_watch_channels` table |
-
-## Recommended Project Structure
+1. A service worker (static file served from `/`) that intercepts network requests
+2. A web app manifest (`/manifest.json`) that enables home-screen installation
+3. A push subscription API endpoint on the Fastify server (`/api/push/*`)
+4. A push subscriptions table in Turso/SQLite
+5. CSS changes to the single stylesheet (`public/assets/style.css`) for responsive layout
 
 ```
-web/
-├── routes/
-│   ├── drive.ts              # existing Drive browser UI
-│   ├── drive-webhook.ts      # NEW: POST /api/drive/webhook (receives push notifications)
-│   ├── skills.ts             # NEW: GET /skills (skills library UI)
-│   └── tasks.ts              # NEW: POST /tasks (task assignment + execution trigger)
-├── lib/
-│   ├── skills.ts             # NEW: skills retrieval, FTS search, brand context queries
-│   ├── drive-sync.ts         # NEW: watch channel registration, renewal, document extraction
-│   └── (existing files)
-scripts/
-├── sync/
-│   ├── sync-drive.ts         # NEW: full Drive re-index (on-demand / initial setup)
-│   └── (existing files)
-├── functions/
-│   ├── execute-task.ts       # NEW: task executor using Claude Agent SDK
-│   ├── validate-output.ts    # NEW: QA validator
-│   ├── renew-drive-watches.ts # NEW: cron-triggered channel renewal
-│   └── generate-daily-brief.ts # existing
-data/
-└── vendo.db                  # extended with skills, brand_hub, task_runs, drive_watch_channels
+┌────────────────────────────────────────────────────────────────────────┐
+│                         DEVICE / BROWSER                               │
+│                                                                        │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                   SERVICE WORKER THREAD                         │   │
+│  │  (sw.js — separate JS thread, intercepts fetch, handles push)   │   │
+│  │                                                                 │   │
+│  │  ┌─────────────┐   ┌─────────────┐   ┌──────────────────────┐  │   │
+│  │  │ Cache Store │   │ Push Handler│   │ Background Sync Queue│  │   │
+│  │  │ (CacheAPI)  │   │ (onpush)    │   │ (NOT on iOS Safari)  │  │   │
+│  │  └─────────────┘   └─────────────┘   └──────────────────────┘  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│              ↑ intercepts fetch requests                               │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                     MAIN PAGE THREAD                            │   │
+│  │   Eta-rendered HTML + HTMX + Chart.js                           │   │
+│  │   service worker registration (base.eta <head>)                 │   │
+│  │   push subscription management (subscribe/unsubscribe JS)       │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+└────────────────────────────────────────────────────────────────────────┘
+                            ↕ HTTPS
+┌────────────────────────────────────────────────────────────────────────┐
+│                    FASTIFY SERVER (Vercel)                              │
+│                                                                        │
+│  ┌──────────────────────┐  ┌───────────────────────────────────────┐   │
+│  │ Static assets        │  │ Existing routes (unmodified)          │   │
+│  │ /sw.js               │  │ Eta SSR, HTMX partials                │   │
+│  │ /manifest.json       │  │ Session auth                          │   │
+│  │ /assets/style.css    │  └───────────────────────────────────────┘   │
+│  └──────────────────────┘                                              │
+│  ┌──────────────────────┐                                              │
+│  │ NEW: Push API routes │                                              │
+│  │ POST /api/push/subscribe                                           │
+│  │ POST /api/push/unsubscribe                                         │
+│  │ POST /api/push/send (internal trigger)                             │
+│  └──────────────────────┘                                              │
+└────────────────────────────────────────────────────────────────────────┘
+                            ↕ HTTPS (encrypted push payload)
+┌────────────────────────────────────────────────────────────────────────┐
+│               BROWSER PUSH SERVICE (platform-operated)                 │
+│    Chrome: FCM (Google)  |  Firefox: Mozilla  |  Safari: Apple APNs   │
+│    VendoOS server encrypts payload with device public key + VAPID.     │
+│    Push service forwards to device when online.                        │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Structure Rationale
+---
 
-- **`web/routes/drive-webhook.ts`:** Receives Google push notifications. Must be a registered HTTPS endpoint. Lives in the web server so it is reachable via the Vercel deployment URL.
-- **`web/lib/skills.ts`:** Query functions following the existing `queries.ts` pattern — keeps all DB access in `web/lib/`.
-- **`web/lib/drive-sync.ts`:** Channel management logic separate from route handler; called both by the webhook handler (incremental sync) and the full re-index script.
-- **`scripts/functions/execute-task.ts`:** Async, potentially long-running. Runs as a Vercel Function or cloud scheduled task — not in the request/response cycle of a route handler.
-- **`scripts/sync/sync-drive.ts`:** Follows the existing sync script pattern. Backfills all Drive documents on initial setup; subsequent changes handled by webhooks.
+## Component Boundaries
 
-## Architectural Patterns
+| Component | Responsibility | Location | Communicates With |
+|-----------|----------------|----------|-------------------|
+| `sw.js` | Intercept fetch, serve from cache, handle push events, show browser notifications | `public/sw.js` | Browser Cache API, Notification API, main thread via postMessage |
+| `manifest.json` | PWA install metadata (name, icons, start_url, display: standalone, theme colour) | `public/manifest.json` | Browser install prompt only |
+| Push API routes | Accept push subscriptions, store in DB, trigger `web-push` sendNotification | `web/routes/push.ts` | Turso/SQLite `push_subscriptions` table, `web-push` npm library |
+| `push_subscriptions` table | Per-user push endpoint, public key, auth token — stored against `user_id` | Turso DB | Push API routes |
+| Responsive CSS | Media queries, mobile layout, bottom tab bar, touch targets | `public/assets/style.css` | None — pure CSS |
+| Offline fallback page | Static HTML rendered when network fails and no cache hit exists | `public/offline.html` | Served by service worker only |
+| VAPID key pair | Server identity for push services — generated once, stored in env vars | `VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` env vars | Push API routes |
 
-### Pattern 1: Folder-Based Classification at Ingest
-
-**What:** Classify documents by their Google Drive folder path at the point of indexing, not at query time.
-**When to use:** Always — this is the chosen classification strategy per PROJECT.md constraints.
-**Trade-offs:** Deterministic and fast; requires AMs to maintain correct folder structure; no fallback if folder structure is wrong.
-
-```typescript
-// In drive-sync.ts
-function classifyByFolder(filePath: string): 'paid_social' | 'seo' | 'paid_ads' | 'general' {
-  if (filePath.includes('/Paid Social/')) return 'paid_social';
-  if (filePath.includes('/SEO/')) return 'seo';
-  if (filePath.includes('/Paid Ads/')) return 'paid_ads';
-  return 'general';
-}
-```
-
-### Pattern 2: Incremental Sync via Push + Periodic Full Re-index
-
-**What:** Google Drive push notifications handle real-time changes. A scheduled full re-index runs weekly as a safety net for missed notifications.
-**When to use:** Always — required because Drive push channels expire (max 1 day for file resources, 1 week for changes resources per official docs).
-**Trade-offs:** Handles channel expiry gaps; adds a scheduled job to maintain.
-
-Channel renewal pattern:
-```
-drive_watch_channels table: { channel_id, resource_id, expiry_ms, channel_type }
-renew-drive-watches.ts runs daily → find channels expiring within 12 hours → register new channel → update table
-```
-
-Note: Google Drive does NOT notify you before a channel expires — it silently stops. Renewal must be proactive, not reactive.
-
-### Pattern 3: Retrieve-Then-Generate with FTS5
-
-**What:** Use SQLite FTS5 full-text search to retrieve relevant skills documents before calling Claude API. No vector embeddings needed.
-**When to use:** For this system — document corpus is small (SOPs/templates per channel), keyword search on structured documents is sufficient. Adding vector search is a future optimisation if relevance is poor.
-**Trade-offs:** Simple, no external embedding service, works within Turso; less semantically aware than vector search.
-
-```sql
--- skills table schema
-CREATE VIRTUAL TABLE skills_fts USING fts5(
-  title, content, channel, doc_type,
-  content='skills', content_rowid='rowid'
-);
-
--- Query: find SOPs relevant to "Meta ad copy for dental practice"
-SELECT s.id, s.title, s.channel, s.doc_type, s.content
-FROM skills_fts fts JOIN skills s ON s.rowid = fts.rowid
-WHERE skills_fts MATCH 'meta ad copy dental'
-  AND s.channel IN ('paid_social', 'general')
-ORDER BY rank LIMIT 5;
-```
-
-### Pattern 4: Task Execution as Async Function (Not Request Handler)
-
-**What:** Task execution (retrieve skills → call Claude → QA → return draft) runs as a background script or cloud function, not inside a Fastify request handler.
-**When to use:** Always — Claude generation takes 10-60 seconds; Vercel serverless functions have a max timeout and HTTP requests should not block this long.
-**Trade-offs:** Requires a job queue or polling mechanism for the UI to get results; adds complexity.
-
-Simplest viable approach for this scale: task is written to `task_runs` table with `status: pending`, executor runs as a Vercel Function triggered by a webhook or cron, UI polls `/tasks/:id` for status.
-
-### Pattern 5: QA as a Second Claude Call
-
-**What:** After the primary generation call, a second cheaper/faster Claude call evaluates the output against SOP criteria and returns a structured score + verdict.
-**When to use:** When output quality standards matter (ad copy, regulated dental content).
-**Trade-offs:** Adds latency and API cost; prevents publishing non-compliant output.
-
-```typescript
-// validate-output.ts — second Claude call
-const qa = await anthropic.messages.create({
-  model: 'claude-haiku-4-5-20251001', // cheap, fast
-  messages: [{
-    role: 'user',
-    content: `Evaluate this ad copy against the SOP checklist:\n\nSOP:\n${sopContent}\n\nOutput:\n${draftOutput}\n\nReturn JSON: { passes: boolean, score: number, issues: string[] }`
-  }]
-});
-```
+---
 
 ## Data Flow
 
-### Drive Sync Flow (Incremental via Webhook)
+### 1. PWA Installation Flow
 
 ```
-Google Drive (AM edits file)
-    ↓ push notification (POST /api/drive/webhook)
-drive-webhook.ts route
-    ↓ reads X-Goog-Resource-State header
-    ↓ fetches changed file metadata from Drive API
-    ↓ calls drive-sync.ts → extractDocumentText()
-    ↓ classifyByFolder() → channel assignment
-    ↓ upserts to skills table
-    ↓ updates skills_fts virtual table
-SQLite/Turso (updated skills index)
+User visits VendoOS on mobile browser
+  → base.eta serves <link rel="manifest" href="/manifest.json">
+  → base.eta registers service worker: navigator.serviceWorker.register('/sw.js')
+  → sw.js install event: precache static assets (style.css, htmx.js, offline.html)
+  → sw.js activate event: delete old caches
+  → Browser shows "Add to Home Screen" prompt (Android/Chrome automatic;
+    iOS requires user to tap Share → Add to Home Screen)
+  → User installs → subsequent opens launch in standalone mode (no browser chrome)
 ```
 
-### Task Execution Flow
+### 2. Request Interception and Caching (HTMX Partial Updates)
+
+This is the most architecturally significant integration point with HTMX.
 
 ```
-AM submits task via UI (client, channel, task type)
-    ↓ POST /tasks
-tasks.ts route handler
-    ↓ writes task_runs row (status: pending, task details)
-    ↓ triggers execute-task function (async, non-blocking)
-    ↓ returns task_run id to UI
-        [background]
-        execute-task.ts
-            ↓ queries skills_fts → retrieve top 5 relevant SOPs/templates
-            ↓ queries brand_hub → fetch client brand context
-            ↓ constructs prompt: task + skills + brand context
-            ↓ calls Claude API (claude-sonnet-4-6 for quality)
-            ↓ draft output returned
-            ↓ validate-output.ts → QA check (claude-haiku-4-5-20251001)
-            ↓ if QA fails: retry once with issues appended to prompt
-            ↓ writes final output + QA score to task_runs row (status: complete)
-UI polls GET /tasks/:id → returns output when status: complete
+User navigates / HTMX fires hx-get request
+  → Fetch event intercepted by service worker
+
+  IF request is a static asset (style.css, htmx.js, chart.js, fonts):
+    → Cache-first strategy
+    → Return from cache immediately; revalidate in background
+
+  IF request is a full-page navigation (no HX-Request header):
+    → Network-first strategy
+    → Fetch from Fastify server → cache response → return
+    → On network failure → return cached page or offline.html
+
+  IF request has HX-Request: true header (HTMX partial):
+    → Network-first strategy
+    → Fetch from Fastify → cache partial response → return
+    → On network failure → return cached partial OR return offline partial
+      (pre-cached /offline-partial.html snippet)
+
+  IF request is POST (form submit, HTMX post):
+    → Pass through to network, never cache
+    → On network failure → show error (Background Sync not viable; see pitfalls)
 ```
 
-### Channel Renewal Flow
+**Critical detail:** HTMX partials are identified by the `HX-Request: true` header. The service worker must check for this header to distinguish full-page navigations from HTMX partial swaps. Treating them differently matters: a full-page fallback served for an HTMX partial request will corrupt the DOM.
+
+### 3. Push Notification Flow (Server to Device)
 
 ```
-renew-drive-watches.ts (runs daily via cloud scheduled task)
-    ↓ SELECT channels WHERE expiry_ms < NOW() + 12 hours
-    ↓ for each expiring channel:
-        ↓ POST to Drive API: files.watch or changes.watch (new channel_id)
-        ↓ UPDATE drive_watch_channels: new channel_id, expiry_ms
-    ↓ log renewal results
+Internal event occurs (e.g. task status changes to 'complete', QA fails)
+  → Event handler in Fastify route calls pushNotificationService.send(userId, payload)
+
+pushNotificationService.send():
+  → SELECT push_subscriptions WHERE user_id = ? (may be multiple devices)
+  → for each subscription:
+      webPush.sendNotification(subscription, JSON.stringify(payload), vapidOptions)
+      → POST to browser push service endpoint (FCM / Mozilla / Apple APNs)
+      → Push service holds payload until device is online
+
+Device receives push (online or wakes):
+  → Service worker push event fires (sw.js onpush handler)
+  → sw.js: self.registration.showNotification(title, options)
+  → Notification appears in OS notification centre
+  → User taps notification
+  → notificationclick event fires in sw.js
+  → sw.js: clients.openWindow(payload.url) or focus existing window
+  → VendoOS opens to the relevant page
 ```
 
-## Database Schema Extensions
+**Vercel constraint:** `webPush.sendNotification()` is a standard outbound HTTPS call — compatible with Vercel serverless functions. The Vercel function does not need to stay alive; the push service handles delivery. No long-lived connections required.
 
-New tables to add alongside existing schema:
+### 4. Push Subscription Lifecycle
+
+```
+User opens VendoOS (post-install or in browser)
+  → Settings page or banner triggers requestNotificationPermission()
+  → User grants permission
+  → pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: VAPID_PUBLIC_KEY })
+  → Browser returns PushSubscription object (endpoint URL + keys)
+  → POST /api/push/subscribe { subscription: {...} }
+  → Server: INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, ua_hint)
+  → Confirmation shown to user
+
+Push delivery failure (subscription expired / device unregistered):
+  → webPush.sendNotification() throws with statusCode 410 (Gone)
+  → Server: DELETE FROM push_subscriptions WHERE endpoint = ?
+  → Subscription pruned automatically — no manual cleanup needed
+```
+
+---
+
+## Caching Strategy by Resource Type
+
+| Resource Type | Strategy | Rationale |
+|---------------|----------|-----------|
+| CSS, HTMX JS, Chart.js | Cache-first + background revalidate (stale-while-revalidate) | Static — serve instantly, update silently |
+| Font files (Manrope) | Cache-first (long TTL) | Immutable once loaded |
+| SVG icons / favicon | Cache-first | Immutable |
+| Full-page navigations (GET, no HX-Request header) | Network-first, cache fallback | Pages have session-dependent content; freshness matters |
+| HTMX partial responses (GET, HX-Request: true) | Network-first, cache fallback | Partials contain live data; offline fallback partial acceptable |
+| POST requests (form submissions, HTMX posts) | Network only — never cache | Mutations must reach server |
+| Push subscription API (`/api/push/*`) | Network only | Subscription state must be accurate |
+
+---
+
+## New Files and Integration Points
+
+```
+public/
+├── sw.js                    NEW — service worker
+├── manifest.json            NEW — PWA manifest
+├── offline.html             NEW — offline fallback (full page)
+├── offline-partial.html     NEW — offline fallback (HTMX partial swap)
+├── icons/                   NEW — PWA icons (192×192, 512×512 PNG + maskable)
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   └── icon-maskable-512.png
+└── assets/
+    └── style.css            MODIFIED — responsive CSS additions
+
+web/
+├── views/
+│   └── layouts/
+│       └── base.eta         MODIFIED — add manifest link, SW registration,
+│                              push subscription JS, mobile-menu button
+├── routes/
+│   └── push.ts              NEW — POST /api/push/subscribe + unsubscribe + send
+└── lib/
+    └── push.ts              NEW — webPush.sendNotification() wrapper,
+                               subscription CRUD queries
+
+data/
+└── migrations/
+    └── add_push_subscriptions.sql   NEW — push_subscriptions table
+```
+
+---
+
+## Database Schema: Push Subscriptions
 
 ```sql
--- Indexed Drive documents (skills, SOPs, templates)
-CREATE TABLE skills (
-  id TEXT PRIMARY KEY,              -- Google Drive file ID
-  title TEXT NOT NULL,
-  channel TEXT NOT NULL,            -- paid_social | seo | paid_ads | general
-  doc_type TEXT NOT NULL,           -- sop | template | framework | guide
-  content TEXT NOT NULL,            -- extracted plain text
-  drive_url TEXT,
-  file_modified_at TEXT,
-  indexed_at TEXT DEFAULT (datetime('now')),
-  is_active INTEGER DEFAULT 1
+CREATE TABLE push_subscriptions (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint    TEXT NOT NULL UNIQUE,          -- push service URL (device-specific)
+  p256dh      TEXT NOT NULL,                 -- device public key
+  auth        TEXT NOT NULL,                 -- auth secret
+  ua_hint     TEXT,                          -- e.g. 'Chrome/Android' for debugging
+  created_at  TEXT DEFAULT (datetime('now')),
+  last_used   TEXT
 );
 
-CREATE VIRTUAL TABLE skills_fts USING fts5(
-  title, content, channel, doc_type,
-  content='skills', content_rowid='rowid'
-);
-
--- Per-client brand context
-CREATE TABLE brand_hub (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  client_slug TEXT NOT NULL,
-  brand_voice TEXT,
-  compliance_notes TEXT,
-  key_differentiators TEXT,
-  target_audience TEXT,
-  drive_file_id TEXT,
-  updated_at TEXT DEFAULT (datetime('now'))
-);
-
--- Active Drive notification channels
-CREATE TABLE drive_watch_channels (
-  channel_id TEXT PRIMARY KEY,
-  resource_id TEXT NOT NULL,
-  resource_type TEXT NOT NULL,      -- file | changes
-  expiry_ms INTEGER NOT NULL,
-  created_at TEXT DEFAULT (datetime('now'))
-);
-
--- Task execution log
-CREATE TABLE task_runs (
-  id TEXT PRIMARY KEY,
-  client_slug TEXT NOT NULL,
-  channel TEXT NOT NULL,
-  task_type TEXT NOT NULL,
-  status TEXT DEFAULT 'pending',    -- pending | running | complete | failed
-  input_context TEXT,               -- JSON: skills used, brand context
-  draft_output TEXT,
-  qa_score REAL,
-  qa_issues TEXT,                   -- JSON array
-  retry_count INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT (datetime('now')),
-  completed_at TEXT
-);
+CREATE INDEX idx_push_subscriptions_user ON push_subscriptions(user_id);
 ```
 
-## Integration Points
+No separate subscriptions-per-notification-type table needed at this scale. All notifications go to all subscriptions for a user. Opt-out is handled at the OS notification settings level.
 
-### External Services
+---
 
-| Service | Integration Pattern | Key Constraints |
-|---------|---------------------|-----------------|
-| Google Drive Push Notifications | POST endpoint at `/api/drive/webhook` receives notification headers; no body for file resources; must respond 200 within timeout | HTTPS required; channels expire (max 1 day for files, 1 week for changes); renewal must be proactive |
-| Google Drive REST API | Existing `getGoogleAccessToken()` pattern; fetch file metadata + export text via `files.export` for Google Docs | Service account preferred over per-user OAuth for server-side sync; per-user OAuth acceptable for initial implementation |
-| Anthropic API (Claude) | Direct `@anthropic/sdk` messages.create calls (not Agent SDK for this use case — simpler prompt-in/output-out pattern) | Rate limits; cost scales with context size; use Haiku for QA, Sonnet for generation |
+## Responsive Layout Architecture
 
-Note on Claude Agent SDK vs direct API: The Agent SDK (`@anthropic-ai/claude-agent-sdk`) is designed for file-system-aware agents that read/write local files. For VendoOS task execution — where context is assembled from DB queries and passed as a prompt — the direct Anthropic client SDK (`@anthropic/sdk`) is simpler and more appropriate. Agent SDK would be relevant if the executor needs to autonomously browse files.
+The sidebar-based desktop layout must coexist with a bottom-tab-bar mobile layout. The transition breakpoint is 768px (already used in `base.eta` JS logic — `window.innerWidth <= 768`).
 
-### Internal Boundaries
+```
+Desktop (> 768px):                  Mobile (≤ 768px):
+┌──────────┬─────────────────┐      ┌────────────────────────────┐
+│          │   Topbar        │      │   Topbar (hamburger only)  │
+│ Sidebar  ├─────────────────┤      ├────────────────────────────┤
+│          │                 │      │                            │
+│          │   Main content  │      │   Main content             │
+│          │                 │      │   (full width)             │
+│          │                 │      │                            │
+└──────────┴─────────────────┘      ├────────────────────────────┤
+                                    │   Bottom tab bar           │
+                                    │ (Home|Clients|Briefs|More) │
+                                    └────────────────────────────┘
+```
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| drive-webhook.ts route → drive-sync.ts | Direct function call (synchronous extraction, async DB write) | Webhook must respond 200 quickly; heavy extraction should not block response |
-| tasks.ts route → execute-task.ts | Via task_runs table (write status: pending, trigger async function) | Decoupled via DB poll; simplest viable approach at this scale |
-| execute-task.ts → skills.ts | Direct import, DB query | No HTTP — both run in same Node.js process or function |
-| execute-task.ts → Anthropic API | HTTP via @anthropic/sdk | Latency 5-30s; must not run in request cycle |
+The sidebar (currently `<aside class="sidebar">`) is hidden at mobile breakpoint. A bottom tab bar `<nav class="mobile-tab-bar">` is added inside `base.eta` as a sibling to `.main-wrapper`. It contains the 4-5 most-used navigation items. The overflow drawer (slide-up panel triggered by "More") exposes remaining navigation groups — this replaces the desktop sidebar accordion on mobile.
 
-## Suggested Build Order
+The topbar hamburger button (`class="mobile-menu-btn"`) is already in `base.eta`; it currently triggers `toggleSidebar()`. On mobile, this will open a slide-over drawer rather than the sidebar.
 
-Dependencies between components determine this order:
+---
 
-1. **Database schema** — All other components depend on new tables existing. Extend `web/lib/queries.ts` with skills/brand/task queries.
+## Build Order (Dependencies)
 
-2. **Drive Sync Engine** (`scripts/sync/sync-drive.ts` + `web/lib/drive-sync.ts`) — Required before skills library has any data. Implement full re-index first (webhook is incremental on top).
+This order avoids blockers and allows incremental testing at each step.
 
-3. **Skills Library queries** (`web/lib/skills.ts`) — Once documents are indexed, FTS retrieval can be tested independently.
+```
+1. Responsive CSS
+   (no dependencies — pure CSS changes to style.css)
 
-4. **Brand Hub data entry** — Can be seeded manually or via a simple admin UI. Required before task execution can include brand context.
+2. Web app manifest + icons
+   (depends on: CSS breakpoints decided, icon assets designed)
+   (enables: "Add to Home Screen" prompt on Android Chrome)
 
-5. **Webhook endpoint** (`web/routes/drive-webhook.ts`) — Enables real-time sync after the full re-index pattern is validated.
+3. Service worker — static asset caching only
+   (depends on: manifest registered in base.eta)
+   (enables: offline static assets, Lighthouse PWA score, installability)
+   Build and validate before adding fetch interception for dynamic routes.
 
-6. **Channel Renewal** (`scripts/functions/renew-drive-watches.ts`) — Must be set up before the webhook is in production use, or channels will expire silently.
+4. Service worker — full-page + HTMX partial caching
+   (depends on: static caching working; offline.html + offline-partial.html exist)
+   (enables: offline page fallback, cached navigation)
+   THIS STEP carries the highest integration risk with HTMX — test thoroughly.
 
-7. **Task Executor** (`scripts/functions/execute-task.ts`) — Depends on skills + brand hub. Build as a testable script first, then wire to the route.
+5. Push subscription API (server-side)
+   (depends on: VAPID keys generated, push_subscriptions table migration run)
+   (enables: subscriptions stored; does not require service worker push handling)
 
-8. **QA Validator** (`scripts/functions/validate-output.ts`) — Add after executor produces baseline output. Can be skipped in MVP and added in next iteration.
+6. Service worker push handler
+   (depends on: push subscription API complete)
+   (enables: notifications appearing on device)
 
-9. **Task UI** (`web/routes/tasks.ts` + template) — Frontend wiring. Depends on task executor being functional.
+7. Trigger push from application events
+   (depends on: push subscription API + service worker push handler both working)
+   Wire into existing task status changes, QA results, etc.
+```
 
-## Anti-Patterns
+---
 
-### Anti-Pattern 1: Running Task Execution Inside a Route Handler
+## Integration with Existing HTMX Partial Updates
 
-**What people do:** Call Claude API directly from a Fastify route handler, await the result, return it in the response.
-**Why it's wrong:** Claude generation takes 10-60 seconds. Vercel serverless functions have execution limits. HTTP clients time out. Long-running synchronous handlers block the event loop and degrade dashboard responsiveness.
-**Do this instead:** Write a `task_runs` row with `status: pending`, trigger execution asynchronously (Vercel background function or cloud scheduled task), and have the UI poll for completion.
+HTMX makes a standard `fetch()` under the hood. The service worker intercepts all fetches, including HTMX partial requests. This creates one important integration concern:
 
-### Anti-Pattern 2: Assuming Drive Webhook Channels Are Persistent
+**Partial vs full response disambiguation.** When offline, the service worker must not serve a full cached page as the response to an HTMX swap — this would replace the `<main>` content with a full HTML document including `<html>`, `<head>`, `<body>`, breaking the page. The service worker must:
 
-**What people do:** Register a channel once during setup and never renew it.
-**Why it's wrong:** Google Drive channels expire silently. File-resource channels expire after at most 1 day. Changes channels last at most 1 week. Google does not send expiry notifications. The system will stop receiving updates without any error log.
-**Do this instead:** Store expiry timestamps in `drive_watch_channels`. Run a daily renewal job that proactively re-registers channels expiring within 12 hours. Accept brief overlap periods (two active channels) as normal.
+1. Check for `HX-Request: true` request header to identify HTMX requests
+2. Serve a cached partial (`offline-partial.html`) or a lightweight JSON error response
+3. NEVER serve a full-page HTML response to an HTMX swap target
 
-### Anti-Pattern 3: Using AI Classification for Drive Documents
+HTMX's `hx-boost` is not used in VendoOS — navigation is standard `<a>` links plus `hx-get`/`hx-post` for partials. The service worker strategy does not need to handle `hx-boost` page intercept patterns.
 
-**What people do:** Send document content to Claude and ask it to determine channel (paid social / SEO / paid ads).
-**Why it's wrong:** Non-deterministic, adds latency and cost to every document ingest, and produces false positives when folder structure is already the correct classification signal.
-**Do this instead:** Classify by folder path at ingest time. The Drive folder hierarchy is the authoritative classification maintained by AMs.
+**Cache key design.** HTMX partial responses vary by URL path (e.g. `/video-production/notifications` returns partial HTML). The cache key is the full URL. The service worker uses `Request.url` as the cache key and `Request.headers.get('HX-Request')` for strategy selection. No special cache key manipulation is needed.
 
-### Anti-Pattern 4: One Giant Skills Retrieval Query Across All Channels
+---
 
-**What people do:** Retrieve top-N skills documents regardless of channel when assembling task context.
-**Why it's wrong:** An SEO SOP is irrelevant context for a paid social task. Irrelevant context increases prompt length, increases cost, and degrades output quality.
-**Do this instead:** Filter by channel at retrieval time. The task executor knows the task channel; pass it as a filter to the FTS query before ranking.
+## Platform Constraints (iOS Safari)
 
-### Anti-Pattern 5: Storing Full Document Text in FTS Table Only
+| Feature | Android Chrome | iOS Safari (≥ 16.4) |
+|---------|---------------|----------------------|
+| PWA install to home screen | Automatic prompt via `beforeinstallprompt` | Manual: Share → Add to Home Screen only |
+| Service worker | Full support | Full support |
+| Offline caching | Full support | Full support |
+| Push notifications (installed PWA) | Full support | Supported since iOS 16.4 |
+| Push notifications (browser tab, not installed) | Not supported | Not supported |
+| Background Sync API | Supported | Not supported |
+| Periodic Background Sync | Supported | Not supported |
+| EU users (iOS 17.4+) | N/A | PWA opens in Safari tab — no push |
 
-**What people do:** Put all document content into the FTS virtual table and delete the base table.
-**Why it's wrong:** SQLite FTS5 virtual tables are index-only; they cannot be used as the primary store for structured data (channel, doc_type, metadata).
-**Do this instead:** Keep a `skills` base table with all metadata and content. Create a content-linked FTS5 virtual table (`content='skills'`) that indexes from the base table. Query joins both.
+**Implication for VendoOS:** Push notifications only reach staff who have installed the PWA to their home screen. This is acceptable for an internal tool — staff can be instructed to install it. Do not design push as the only notification channel.
 
-## Scaling Considerations
+---
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 25 clients, ~200 documents | Current monolith is fine. SQLite/Turso, inline execution, single Vercel deployment. |
-| 100+ clients, 1000+ documents | FTS5 performance degrades on large corpora — consider adding `sqlite-vec` for vector search. Task queue should move to a proper job queue (e.g. Upstash QStash). |
-| 500+ clients | Brand hub and skills library would benefit from dedicated read replicas. Task execution should move to separate service. |
+## Anti-Patterns to Avoid
 
-At 25 clients and ~200 documents (realistic current scope), the described monolith architecture is appropriate with no premature scaling needed.
+### Anti-Pattern 1: Caching POST Requests
+The Cache API cannot store POST responses. Service worker `fetch` handlers should pass POST requests straight to the network. Attempting to cache or intercept writes will corrupt form submission flows and HTMX `hx-post` behaviour.
+
+### Anti-Pattern 2: Serving Full Pages to HTMX Partial Targets
+When the service worker returns a cached full-page response to an HTMX `hx-swap`, the entire `<html>` document is injected into the swap target element. The page breaks visually and functionally. Always identify and handle HTMX requests separately.
+
+### Anti-Pattern 3: Registering the Service Worker from a Subdirectory Path
+If `sw.js` is served from `/assets/sw.js`, its scope is limited to `/assets/`. It will not intercept requests for `/`, `/dashboard`, `/clients`, etc. The service worker **must** be served from the root path (`/sw.js`) to control the entire origin.
+
+Fastify static file serving must explicitly serve `/sw.js` with `Cache-Control: no-cache` so updated service workers are picked up promptly.
+
+### Anti-Pattern 4: Hardcoding VAPID Keys in Source
+VAPID private key must not be committed to git. Store in `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` environment variables. The public key is safe to expose in client JS (it is public by design). The private key is server-only.
+
+### Anti-Pattern 5: One Push Subscription Row Per User (No Multi-Device Support)
+Staff will access VendoOS from phone and laptop. `UNIQUE` constraint on `user_id` would overwrite the other device's subscription on each new login. Use `UNIQUE` on `endpoint` only — one row per device, multiple rows per user.
+
+### Anti-Pattern 6: Relying on Background Sync for Offline Write Queue
+Background Sync API is not supported on iOS Safari and was removed from Firefox. An offline write queue (e.g. "retry form submission when back online") cannot be implemented with this API cross-platform. For VendoOS, the correct behaviour is: POST fails while offline → show an error toast → user retries manually when online. Implementing a custom write queue in IndexedDB is over-engineering for an internal tool.
+
+---
 
 ## Sources
 
-- [Google Drive Push Notifications — Official Docs](https://developers.google.com/workspace/drive/api/guides/push) (updated March 2026) — HIGH confidence
-- [SQLite FTS5 Extension](https://sqlite.org/fts5.html) — HIGH confidence
-- [Anthropic Agent SDK Overview](https://platform.claude.com/docs/en/agent-sdk/overview) — HIGH confidence
-- [Anthropic Structured Outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) — HIGH confidence
-- [Agentic Workflows 2026 — Vellum AI](https://vellum.ai/blog/agentic-workflows-emerging-architectures-and-design-patterns) — MEDIUM confidence
-- Google Drive channel expiry behaviour (no automatic renewal, no expiry notification) — HIGH confidence, sourced from official docs + Prismatic integration guide
+- [MDN: PWA Caching Strategies](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Caching) — HIGH confidence
+- [Chrome Developers: Workbox Caching Strategies Overview](https://developer.chrome.com/docs/workbox/caching-strategies-overview) — HIGH confidence
+- [MDN: Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API) — HIGH confidence
+- [web-push npm library](https://www.npmjs.com/package/web-push) — HIGH confidence (active, 4.6.x, Node.js standard for VAPID push)
+- [Apple Developer: Sending Web Push in Web Apps](https://developer.apple.com/documentation/usernotifications/sending-web-push-notifications-in-web-apps-and-browsers) — HIGH confidence
+- [MagicBell: PWA iOS Limitations](https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide) — MEDIUM confidence
+- [Philip Walton: Smaller HTML Payloads with Service Workers](https://philipwalton.com/articles/smaller-html-payloads-with-service-workers/) — HIGH confidence (authoritative on HTMX + SW integration pattern)
+- [HTMX GitHub Issue #1445: HTMX and service workers](https://github.com/bigskysoftware/htmx/issues/1445) — MEDIUM confidence (community discussion confirming fetch interception approach)
+- [MDN: Making PWAs Installable](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable) — HIGH confidence
 
 ---
-*Architecture research for: VendoOS skills library + AI agent task execution*
-*Researched: 2026-04-01*
+
+*Architecture research for: VendoOS v1.1 Mobile & PWA*
+*Researched: 2026-04-06*

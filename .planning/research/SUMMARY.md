@@ -1,17 +1,19 @@
 # Project Research Summary
 
-**Project:** VendoOS Skills Layer — Google Drive-synced SOPs + AI Agent Task Execution
-**Domain:** Agency operating system — SOP-grounded AI task execution for dental marketing
-**Researched:** 2026-04-01
+**Project:** VendoOS — Mobile & PWA (v1.1)
+**Domain:** Progressive Web App layer on top of existing Fastify + Eta + HTMX internal dashboard
+**Researched:** 2026-04-06
 **Confidence:** HIGH
+
+---
 
 ## Executive Summary
 
-VendoOS is adding a structured knowledge layer on top of its existing Fastify 5 + Eta + HTMX + Turso stack. The core pattern is retrieve-then-generate: Google Drive is the source of truth for SOPs and brand guidelines; these documents are synced in real time via Drive webhooks, indexed in SQLite FTS5, and retrieved at task time to ground Claude-generated output. This is not a generic AI content tool — every draft is traceable to specific SOP documents, QA-validated against those documents, and checked against AHPRA/TGA dental advertising compliance rules before it surfaces to an account manager.
+VendoOS v1.1 adds a mobile and PWA layer on top of an existing server-rendered stack (Fastify 5, Eta templates, HTMX, Turso/SQLite, Vercel). The recommended approach is strictly additive: no framework changes, no build pipeline, no new dependencies beyond `web-push` for server-side push notifications. Everything is achieved with a static manifest JSON, a Workbox-powered service worker loaded via CDN, and media query additions to the existing stylesheet. This approach is confirmed correct for the specific stack and avoids the traps of adding bundler tooling or CSS frameworks that would require rewriting or co-existing with existing styles.
 
-The recommended approach is deliberately minimal: no new frameworks, no vector database, no separate job queue. The existing stack extends cleanly — `googleapis` for Drive, `@anthropic-ai/sdk` with a manual tool loop for Claude, SQLite FTS5 for retrieval, and Turso's existing `@libsql/client` connection throughout. Task execution runs asynchronously (write to `task_runs`, trigger background function, UI polls for completion) to avoid Vercel serverless timeout issues. The QA layer uses claude-haiku for speed and cost, with a hard cap of two retries before escalating to a human reviewer.
+The core mobile use case is read-and-approve, not creation. Account managers use their phones to check task status, review AI-generated drafts, and approve or reject without returning to a laptop. The build order is strictly sequenced by dependencies: responsive CSS first (no new tech), then PWA manifest and service worker shell (enables installs), then offline caching (extends the service worker), then push notification infrastructure (new backend work). Each phase is independently deployable and testable before moving to the next.
 
-The highest risks are all operational, not architectural: Google Drive webhook channels expire silently (must be renewed proactively), the `pageToken` for change tracking must be persisted to the database on every poll, client brand data must be isolated at the query level rather than in application logic, and the existing OAuth token infrastructure has a crypto key rotation problem that must be resolved before building Drive sync on top of it. None of these are blockers — all are known and all have clear mitigations.
+The primary technical risk is the iOS Safari constraint: push notifications only work on PWAs installed to the home screen on iOS 16.4+, and the iOS installation flow is manual — there is no `beforeinstallprompt` event. For an internal tool where staff can be instructed to install it, this is acceptable. A secondary risk is the HTMX + service worker integration: the service worker must distinguish HTMX partial requests from full-page navigations using the `HX-Request` header, or offline fallbacks will inject a full HTML document into a partial swap target, corrupting the page. This is a well-understood pattern with a clear solution, but it must be tested in an offline simulation before shipping.
 
 ---
 
@@ -19,173 +21,175 @@ The highest risks are all operational, not architectural: Google Drive webhook c
 
 ### Recommended Stack
 
-The existing stack requires three net-new runtime dependencies: `googleapis` (official Drive API client), `@anthropic-ai/sdk` (Claude API with manual tool loop), and `openai` (embeddings only, using `text-embedding-3-small`). Supporting libraries are `tiktoken` for token counting during chunking and `google-auth-library` as a peer dependency of googleapis. Nothing from the existing stack changes.
-
-The decision to avoid LangChain, the Anthropic Agent SDK, and a dedicated vector database is deliberate. All three would add significant bundle weight and abstraction overhead for what is a simple three-step loop (retrieve, generate, validate). Turso's native `F32_BLOB` vector type is available if FTS5 relevance proves insufficient, but it is a future optimisation, not a day-one requirement.
+The existing stack requires no changes. Two npm packages are added: `web-push` 3.6.7 (server-side VAPID push) and `@types/web-push`. Workbox 7.4.0 is loaded via CDN import inside the service worker file — no build step required. All responsive CSS goes into the existing `public/assets/style.css`. The PWA manifest is a plain JSON file served by the existing `@fastify/static` configuration.
 
 **Core technologies:**
-- `googleapis@171.x`: Drive API v3 — file sync, export, webhook channel registration — Google's official Node.js client; typed, handles OAuth2 refresh
-- `@anthropic-ai/sdk@0.81.x`: Claude API for task generation (Sonnet) and QA validation (Haiku) — manual tool loop, ~30 lines of TypeScript, no framework dependency
-- `openai@4.x`: Embeddings only (`text-embedding-3-small`) — $0.02/1M tokens; Anthropic has no embedding model
-- `tiktoken@1.x`: Token counting for 400–500 token chunking before embedding — prevents exceeding the 8191-token embedding limit
-- `@libsql/client@0.17.x` (existing): Extends to FTS5 skills index and, if needed, F32_BLOB vector columns — no new DB client
+
+- `web-push` 3.6.7: Server-side VAPID key generation and push message dispatch — de facto Node.js standard for the Web Push Protocol (RFC 8030/8292); handles JWT signing, encryption, and FCM/APNs routing
+- Workbox 7.4.0 (CDN): Service worker caching strategies — avoids manual cache versioning and stale content cleanup; CDN import via `importScripts` bypasses the need for a bundler; URL pinned to exact version
+- Static `manifest.json`: PWA manifest with name, icons (192×192 and 512×512 PNG), `start_url`, `display: standalone`, `theme_color` — zero dependencies, served from `public/` by existing `@fastify/static`
+- Media queries in `public/assets/style.css`: All responsive layout additions — no CSS framework, no build step, additive to existing styles
+- `dvh` units for full-height mobile layouts: Avoids the iOS Safari `vh` bug where 100vh includes the hidden address bar, causing overflow; `dvh` supported from iOS 15.4+
+
+**Critical requirements:**
+
+- iOS 16.4+ required for push notifications; older versions silently fail with no error thrown
+- `/sw.js` must be served with `Cache-Control: no-cache` in `vercel.json` — otherwise updated service workers are not detected by the browser
+- Workbox CDN URL must be pinned to `releases/7.4.0/` — an unpinned URL silently updates Workbox and may break caching behaviour
+- VAPID private key must be stored as a Vercel environment variable only — never committed to git
 
 ### Expected Features
 
-The complete MVP is ten features, all P1. The feature dependency chain is strict: Drive sync must be stable before the skills library has data; the skills library must be indexed before task matching works; task matching must work before agent execution can be tested; agent execution must produce output before QA can be developed. Building out of this order wastes time.
+**Must have (table stakes for v1.1 — missing any makes mobile feel broken):**
 
-**Must have (table stakes — v1):**
-- Drive webhook sync with delta token persistence — real-time SOP updates; polling is unacceptable
-- Folder-based channel classification — deterministic (paid_social / SEO / paid_ads / general) from Drive folder path; no AI classification
-- Skills library — FTS5-indexed store of SOPs with channel and doc type metadata
-- Brand hub — per-client brand context (tone, compliance, differentiators) keyed by client slug
-- Task matching engine — maps task type + client ID to relevant SOPs + brand context
-- Agent task execution — structured draft from retrieved context using Claude Sonnet
-- QA validation with retry — SOP-checklist pass, one retry with critique, `draft_review_required` on third failure
-- AHPRA/TGA compliance pre-flight — dental-specific rules enforced before draft surfaces
-- Output status tracking — queued / running / qa_check / draft_ready / approved
-- AM review interface — trigger task, view draft, approve or request regeneration
+- Responsive layout with no horizontal scrolling at any viewport width
+- Bottom tab bar navigation at ≤ 768px (hamburger menus are considered poor mobile UX since iOS 7 / Material Design)
+- Touch targets ≥ 44×44px on all interactive elements (Apple HIG; WCAG 2.5.5)
+- Input `font-size` ≥ 16px — iOS Safari auto-zooms on smaller inputs and breaks layout, requiring manual zoom-out
+- Horizontal scroll on data tables — cost-effective fix for 8-column task and skills tables
+- Approve/Regenerate actions reachable within 2 taps from the home screen install
+- PWA `manifest.json` with correct icons, `display: standalone`, `start_url`
+- Service worker with static asset caching (CSS, JS, icons) — required for Android install prompt and for push notifications
 
-**Should have (add after v1 is stable — v1.x):**
-- SOP versioning — link generation output to the document version used; enables debugging when output changes after an SOP update
-- SOP gap detection — surface "no skill found" explicitly rather than producing degraded output; requires real usage data to calibrate thresholds
-- Output audit trail — generation log with AM, SOPs used, QA score, version; required before scaling beyond 3–4 users
-- Admin skills management UI — view indexed skills, force re-sync, deprecate documents
+**Should have (differentiators that solve real AM pain points):**
 
-**Defer (v2+):**
-- Specialist sub-agents per channel — current single agent per channel is sufficient; split when output quality demands it
-- Client CRM portal — separate milestone, separate database
-- Cross-client performance correlation — requires mature data layer
+- Push notifications for draft ready, QA failure, and task status changes — eliminates polling and closes the feedback loop immediately
+- Offline draft viewing (read-only) — AMs reviewing in dental practices with poor signal
+- In-browser install prompt/banner — most users do not discover "Add to Home Screen" without prompting
+- Badge count on home screen icon — shows pending approval count without opening the app
 
-**Explicit anti-features (not building):**
-- AI-based document classification — deterministic folder path is safer and auditable
-- Autonomous publishing to ad platforms — AHPRA compliance requires AM sign-off; no exceptions
-- Freeform LLM output without SOP grounding — generic output defeats the purpose of the system
+**Defer to v1.2:**
+
+- Swipe gestures on task cards (approve/regenerate via swipe — higher complexity, low frequency)
+- Background sync (iOS support unreliable; not justified for this tool)
+- Task creation on mobile (desktop-only workflow; building a full mobile creation form adds complexity for negligible real-world usage)
 
 ### Architecture Approach
 
-The system is a three-layer monolith extending the existing Fastify deployment: a Drive Sync Engine that registers/renews webhook channels and ingests document text, a Skills Library that stores classified SOPs in an FTS5 virtual table alongside a base `skills` table, and a Task Executor that assembles context (skills + brand) and runs the generate → QA → conditional retry loop asynchronously. All four components share the existing SQLite/Turso database with four new tables. No new services.
+The PWA layer sits entirely on top of the existing architecture. No existing routes, templates, or database tables are modified except `base.eta` (add manifest link, SW registration, Apple meta tags, mobile menu button) and `style.css` (responsive additions). All new components are additive.
 
 **Major components:**
-1. **Drive Sync Engine** (`web/routes/drive-webhook.ts` + `web/lib/drive-sync.ts`) — register/renew channels, receive push notifications, extract Google Doc text, classify by folder, upsert to skills table
-2. **Skills Library** (`web/lib/skills.ts`) — FTS5 retrieval filtered by channel; base `skills` table with metadata and content hash; `brand_hub` table for per-client context
-3. **Task Executor** (`scripts/functions/execute-task.ts` + `validate-output.ts`) — async background function; retrieves top-5 relevant skills + client brand context; calls Claude Sonnet for generation and Claude Haiku for QA; writes results to `task_runs`
-4. **QA Validator** — second Claude call returning structured `{ passes, score, issues[] }`; retries once with critique appended; escalates to `draft_review_required` on third failure
-5. **Channel Renewal Job** (`scripts/functions/renew-drive-watches.ts`) — daily cron; renews channels expiring within 12 hours; overlaps old/new channels by one hour to prevent notification gaps
 
-**Key patterns:**
-- Folder-based classification at ingest — not AI, not at query time
-- Async task execution via `task_runs` table + HTMX polling — never in the HTTP request cycle
-- QA as a second Claude call (Haiku, not Sonnet) — cheap, fast, structured output
-- FTS5 with content-linked virtual table — base table retains all metadata; FTS indexes from it
+1. **Service worker (`public/sw.js`)** — Intercepts all fetch requests; routes static assets through CacheFirst, full-page navigations and HTMX partials through NetworkFirst, POST requests and push API calls through NetworkOnly; handles push events and shows OS-level notifications via `self.registration.showNotification`; routes `notificationclick` to the relevant app page; uses Workbox CDN for caching strategy implementations
+2. **PWA manifest (`public/manifest.json`)** — Enables home screen installation; contains app name, icons, `start_url`, `display: standalone`, `theme_color`, `background_color`; Apple-specific meta tags in `base.eta` supplement this for iOS Safari
+3. **Push API routes (`web/routes/push.ts`)** — Accept push subscriptions via `POST /api/push/subscribe`, store in `push_subscriptions` table, dispatch notifications via `web-push.sendNotification()` on task events, prune stale subscriptions on 410 response from push service
+4. **Push subscriptions table** — Per-user, per-device storage: `user_id` FK, `endpoint` (UNIQUE constraint — one row per device, multiple rows per user), `p256dh`, `auth`, `ua_hint`, `created_at`, `last_used`
+5. **Responsive CSS additions** — Sidebar hidden at ≤ 768px; bottom tab bar (`position: fixed; bottom: 0`) shown at ≤ 768px; `env(safe-area-inset-bottom)` for iPhone notch/home indicator clearance; `dvh` for full-height containers
+
+**Highest-risk integration point — HTMX + service worker partial disambiguation:**
+
+HTMX partial requests carry an `HX-Request: true` header. The service worker must check this header before selecting a fallback strategy. If a full-page HTML response is served to an HTMX swap target, the entire `<html>` document is injected into the target element, breaking the page. The service worker uses `request.headers.get('HX-Request')` to branch: HTMX partials get `offline-partial.html`; full-page navigations get `offline.html`. This is the single most important implementation detail in the PWA layer.
 
 ### Critical Pitfalls
 
-1. **Webhook channels expire silently** — Google sends no expiry notification; after max 7 days (changes resource) the sync stops with no error. Prevention: store `expiry_ms` in `drive_watch_channels`, run daily renewal cron, overlap channels on renewal to avoid gaps, alert if no event received in 24 hours during business hours.
+**PWA-specific (v1.1):**
 
-2. **pageToken loss causes sync gaps** — the change tracking token is lost between Vercel serverless invocations if stored in memory. Prevention: persist `newStartPageToken` to a `webhook_state` table after every successful poll before processing changes; on cold start always load from DB; fall back to full re-index if no token found.
+1. **Full-page HTML served to HTMX swap target offline** — Check `HX-Request: true` header in the service worker before selecting offline fallback; serve `offline-partial.html` for partials, `offline.html` for full-page navigations; never cross-serve. This is the highest-risk integration failure in this milestone.
 
-3. **OAuth token refresh fails silently** — existing `CONCERNS.md` flags a crypto key rotation problem in `web/lib/crypto.ts` that could make all OAuth tokens unrecoverable. This must be addressed before Drive sync is built. Prevention: harden token refresh, surface failures on admin dashboard, implement key versioning.
+2. **Service worker served from a subdirectory** — If `sw.js` is served from `/assets/sw.js`, its scope is limited to `/assets/` and it cannot intercept requests for `/`, `/dashboard`, `/clients`, etc. It must be served at `/sw.js` (root). `@fastify/static` already serves `public/` at the root — no configuration change needed, but the file must be placed at `public/sw.js`.
 
-4. **Wrong client's SOP or brand data injected into agent context** — a missing or incorrectly placed `client_id` WHERE clause in a retrieval query causes content bleed between dental clients. Prevention: enforce client ID filtering at the database layer (never in application logic after retrieval); add a unit test that proves client B's data is never returned for client A's task.
+3. **Service worker cached by the CDN or browser** — Without `Cache-Control: no-cache` on `/sw.js` in `vercel.json`, browsers serve the old service worker and updated versions are not detected. This is a silent failure — the app appears to work but never updates.
 
-5. **Unbounded QA retry loop** — without a hard cap, QA failures cause an infinite generate→fail→regenerate loop, with documented production cost spikes exceeding $47k. Prevention: hard cap of 2 retries (3 total attempts); on third failure save best attempt as `draft_review_required`; track QA failure rate — above 30% signals a calibration problem, not a content problem.
+4. **One push subscription row per user** — Staff access VendoOS from multiple devices. A UNIQUE constraint on `user_id` would overwrite the subscription from the first device. The UNIQUE constraint must be on `endpoint` only.
 
-6. **Stale embeddings after document update** — sync updates document text but the stored embedding (derived from old text) is not invalidated. Prevention: store `content_hash` on every skills row from day one; on document update compare hashes and enqueue re-embedding if different; do not serve stale-marked documents for retrieval.
+5. **Push permission prompt on first page load** — Browsers auto-suppress or auto-deny immediate push permission prompts; first-visit opt-in rates are below 5%. Trigger the permission request after a meaningful event — ideally when the first task completes and a draft is waiting.
+
+6. **VAPID private key in source control** — The private key is server-only and must never be committed. Store as `VAPID_PRIVATE_KEY` env var in Vercel. The public key is safe to expose in client JS (it is public by design).
+
+**From v1 skills layer research (earlier milestone, recorded for completeness):**
+
+7. **Drive webhook channels expire silently** — Google sends no expiry notification; channels expire after max 7 days. Must be renewed proactively via a daily cron job; store expiry timestamps in the database; overlap old and new channels by one hour to prevent notification gaps.
+
+8. **pageToken loss on Vercel cold start** — The Drive Changes API token must be persisted to the database after every successful poll; in-memory storage is lost between serverless invocations.
+
+9. **Wrong client's SOP or brand data injected into agent context** — Enforce `client_id` filtering at the database query level, never in application logic after retrieval. Add a unit test that proves client B's data cannot appear in client A's task context.
+
+10. **Unbounded QA retry loop** — Hard cap at 2 retries (3 total attempts); on third failure save best attempt as `draft_review_required`. QA failure rate above 30% signals a calibration problem, not a content problem.
 
 ---
 
 ## Implications for Roadmap
 
-The feature dependency chain is linear and the architecture research confirms it. There is no optional ordering here — each phase is a hard prerequisite for the next.
+The feature dependency chain within v1.1 is clear and strictly ordered. Each phase is independently deployable and testable before the next begins.
 
-### Phase 1: Foundation — Drive Sync and OAuth Hardening
+### Phase 1: Responsive Layout
 
-**Rationale:** Three existing problems in `CONCERNS.md` (crypto key rotation vulnerability, queries.ts monolith at 732 lines, OAuth silent failure) must be resolved before any new infrastructure is built on top of them. Driving webhooks into a brittle token layer will create irreversible technical debt. This phase also establishes the database schema extensions that everything else depends on.
+**Rationale:** Pure CSS changes with no new technology, no new dependencies, and no deployment risk. Must come first because all other phases assume a usable mobile layout exists. The bottom tab bar navigation structure also informs which links to include in `base.eta`, which is modified in Phase 2.
 
-**Delivers:** Hardened OAuth token infrastructure, split queries.ts module, four new DB tables (`skills`, `skills_fts`, `brand_hub`, `drive_watch_channels`, `task_runs`), full Drive re-index script, webhook endpoint for incremental sync, channel renewal cron.
+**Delivers:** A functional, non-broken mobile experience. Sidebar collapses to a slide-over drawer. Bottom tab bar appears at ≤ 768px. Tables scroll horizontally. Touch targets meet the 44px minimum. Inputs do not trigger iOS zoom. Full-height containers use `dvh` not `vh`.
 
-**Addresses:** Drive webhook sync (table stakes), channel classification (table stakes)
+**Features addressed:** Responsive layout, bottom tab bar, touch targets ≥ 44px, input `font-size` ≥ 16px, horizontal table scroll, approve/regenerate accessible on mobile.
 
-**Avoids:** OAuth silent failure pitfall, pageToken loss pitfall, webhook channel silent expiry pitfall, queries.ts monolith technical debt
+**Pitfalls to avoid:** Use `dvh` not `vh` for full-height containers; use `env(safe-area-inset-bottom)` for iPhone notch/home indicator clearance; do not add Tailwind or any CSS framework (build pipeline cost is not justified).
 
-**Research flag:** Needs phase research — the Google Drive Changes API pagination and channel renewal logic is complex; the exact sequence for handling the initial `api#channel` sync notification and overlap renewal requires careful implementation against official docs.
-
----
-
-### Phase 2: Skills Library and Brand Hub
-
-**Rationale:** Once Drive sync is stable and the database schema exists, the skills index can be populated and tested in isolation. This phase produces a queryable store of SOPs before any agent logic is added, allowing retrieval quality to be verified independently.
-
-**Delivers:** FTS5-indexed skills library (channel-classified SOPs, templates, frameworks), brand hub populated from Drive brand files per client, retrieval queries returning top-N relevant documents by channel and task type.
-
-**Addresses:** Skills library (table stakes), brand hub (table stakes), folder-based classification (table stakes)
-
-**Avoids:** Stale embedding pitfall (content hash from day one), anti-pattern of one giant cross-channel retrieval query, anti-pattern of FTS-only storage without base table
-
-**Research flag:** Standard patterns — SQLite FTS5 is well-documented; retrieval queries are deterministic SQL; no external services involved.
+**Research flag:** Standard CSS patterns — no additional research needed. Build directly.
 
 ---
 
-### Phase 3: Agent Task Execution and QA
+### Phase 2: PWA Foundation (Manifest + Service Worker Shell)
 
-**Rationale:** With a populated skills library and brand hub, the task executor can be built and tested with real data. The generate → QA → retry pipeline is implemented as an async background function, never in the HTTP request cycle. The QA validator is a second Claude Haiku call returning structured pass/fail criteria.
+**Rationale:** Manifest and a minimal service worker unlock the "Add to Home Screen" install prompt on Android and satisfy Lighthouse PWA installability requirements. Must be in place before push notifications can work: iOS requires home screen install for push; Android requires a service worker for the install prompt to appear. Keep this phase minimal — static asset caching only — to validate the service worker is deployed and functioning before extending it with full-page request interception.
 
-**Delivers:** Task executor script (retrieve → generate → QA → write result), QA validator with hard retry cap (max 2 retries), AHPRA compliance pre-flight check, `task_runs` status tracking, unit tests for client isolation.
+**Delivers:** Installable PWA. VendoOS appears on the home screen with the correct icon and name. The app launches in standalone mode (no browser chrome). Static assets (CSS, HTMX JS, icons) are cached and load instantly on subsequent visits. In-browser install banner/prompt is included here (low complexity, same base.eta modification pass).
 
-**Addresses:** Task matching engine (table stakes), agent task execution (table stakes), QA validation with retry (table stakes), AHPRA compliance guardrails (table stakes), output status tracking (table stakes)
+**Stack elements used:** `public/manifest.json`, `public/icons/icon-192.png` and `icon-512.png`, Workbox 7.4.0 CDN in `sw.js`, `vercel.json` no-cache header for `/sw.js`, Apple meta tags in `base.eta`, `navigator.serviceWorker.register('/sw.js')` in `base.eta`.
 
-**Avoids:** Unbounded QA retry loop pitfall, client data bleed pitfall, synchronous execution in request handler anti-pattern
+**Pitfalls to avoid:** Service worker at `/sw.js` not a subdirectory; `Cache-Control: no-cache` on `sw.js` in `vercel.json`; Workbox CDN URL pinned to exact version `7.4.0`; do not add full-page request interception in this phase — validate static caching first.
 
-**Research flag:** Needs phase research — AHPRA/TGA dental advertising rules should be researched specifically to produce an accurate compliance checklist for the QA prompt. The 2025 guideline updates (cosmetic treatment restrictions) are particularly relevant.
-
----
-
-### Phase 4: AM Review Interface
-
-**Rationale:** The backend pipeline is complete after Phase 3. This phase wires the UI — task submission, status polling, draft display, approve/regenerate actions — following the existing Fastify + HTMX pattern.
-
-**Delivers:** Task submission UI, HTMX status polling (queued → running → draft_ready), draft display with SOP source attribution, approve and regenerate actions, QA failure detail (which rule failed, relevant rule text, suggested action).
-
-**Addresses:** AM review interface (table stakes), SOP-source traceability (v1.x differentiator, low complexity, include here)
-
-**Avoids:** AM submitting duplicate tasks due to no feedback, wall-of-text output, raw QA failure messages without context
-
-**Research flag:** Standard patterns — HTMX polling and Eta templates are already in use; no new patterns required.
+**Research flag:** Standard patterns, well-documented. No additional research needed.
 
 ---
 
-### Phase 5: Observability and v1.x Features
+### Phase 3: Offline Caching
 
-**Rationale:** Once the core pipeline is running with real tasks, add the features needed for quality monitoring and debugging before scaling beyond a handful of users. SOP versioning, gap detection, and the audit trail all require real usage data to be meaningful.
+**Rationale:** Extends the Phase 2 service worker with NetworkFirst strategies for full-page navigations and HTMX partials, plus dedicated offline fallback responses. Separated into its own phase because the HTMX + service worker integration is the highest-risk component of the entire milestone — it warrants isolated testing before push notification complexity is added on top.
 
-**Delivers:** Output audit trail (append-only generation log), SOP versioning (document version linked to generation), SOP gap detection (explicit signal when no SOP found, not degraded output), admin skills management UI, token cost logging per task execution.
+**Delivers:** Graceful offline experience. Cached pages load on poor signal. HTMX partials fall back to an offline partial snippet rather than a broken swap. Full-page navigations fall back to `offline.html`. A clear "you are offline" indicator appears when connectivity is lost and an action is attempted.
 
-**Addresses:** All v1.x features from FEATURES.md
+**Features addressed:** Offline draft viewing (read-only), offline indicator, cached navigation.
 
-**Avoids:** Invisible Anthropic cost spikes (per-task cost logging), AMs unable to debug why output changed (SOP versioning), system producing degraded output when SOPs are missing (gap detection)
+**Architecture components:** `public/offline.html`, `public/offline-partial.html`, NetworkFirst routing in `sw.js` with `HX-Request` header check, POST requests are always NetworkOnly.
 
-**Research flag:** Standard patterns — all features are low-complexity extensions to the existing data model.
+**Pitfalls to avoid:** This phase is where pitfall 1 (full-page HTML served to HTMX swap target) must be implemented and tested correctly. Test the offline fallback in an offline simulation against the actual VendoOS template structure before shipping. POST requests must never be cached or queued — show an error and let the user retry.
+
+**Research flag:** Pattern is documented and understood. Key implementation requirement: verify that `HX-Request: true` is present on all `hx-get` and `hx-post` requests in the actual VendoOS codebase. Check `base.eta` for any global HTMX configuration that might suppress request headers.
+
+---
+
+### Phase 4: Push Notification Infrastructure
+
+**Rationale:** The most substantial engineering phase in v1.1. New backend work: VAPID keys, `push_subscriptions` table, push API routes, `web-push` library, and service worker `onpush` handler. All notification types (draft ready, QA failure, task status changes) share the identical infrastructure — implement them all in one pass rather than in separate phases.
+
+**Delivers:** AMs receive OS-level notifications on their phone when tasks complete or fail QA. No polling required. Badge count on the home screen icon shows pending approvals. Push subscriptions are managed per-device, pruned automatically on 410 response. Permission is requested after the first task completes rather than on page load.
+
+**Features addressed:** Push notifications — draft ready, QA failure, task status changes. Badge count API (low-complexity add-on once push infrastructure is working).
+
+**Stack elements used:** `web-push` 3.6.7, `@types/web-push`, `VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` + `VAPID_SUBJECT` as Vercel environment variables, `push_subscriptions` table migration, `web/routes/push.ts`, `web/lib/push.ts`, `onpush` and `notificationclick` handlers in `sw.js`.
+
+**Pitfalls to avoid:** VAPID private key must not be committed to git; UNIQUE constraint on `endpoint` not `user_id`; push permission requested after meaningful trigger not on first page load; prune subscriptions on 410 response; keep notification title + body under 200 characters for iOS payload limit compatibility.
+
+**Research flag:** VAPID + Vercel serverless is a standard pattern — well-documented. iOS Safari push behaviour carries MEDIUM confidence (Apple has changed behaviour without notice historically). Validate on a real iOS device running iOS 16.4+ early in Phase 4, not as a final step before release. Do not rely on simulator testing for push.
 
 ---
 
 ### Phase Ordering Rationale
 
-- **Phase 1 before anything:** The crypto/OAuth vulnerability and queries.ts monolith are not cosmetic issues. Building Drive sync on top of an unversioned encryption key means any key rotation wipes all OAuth tokens and halts the entire system. Fix it first.
-- **Phase 2 before Phase 3:** The agent executor is not testable without a populated skills index. Attempting to build execution logic against an empty database produces no signal.
-- **Phase 3 before Phase 4:** There is nothing to display in the UI until the backend pipeline produces output. UI-first would require extensive mocking.
-- **Phase 5 last:** Observability and v1.x features require real data from real tasks to be meaningful. Building an audit trail before any tasks run is premature.
+- **CSS before PWA manifest:** No point making VendoOS installable before the layout is usable on mobile. The install prompt should not appear when the experience is broken.
+- **Manifest + SW shell before offline caching:** Offline caching extends the Phase 2 service worker. The service worker must be stable and deployed before extending it with NetworkFirst strategies and offline fallback files.
+- **Offline caching before push:** The `onpush` handler lives in the same service worker file. The service worker must be fully functional and tested (specifically the HTMX integration) before push complexity is added.
+- **All notification types in one phase:** Draft ready, QA failure, and task status notifications share identical infrastructure (VAPID, subscriptions table, push routes, `onpush` handler). Splitting them across phases doubles the setup cost for no benefit.
 
 ### Research Flags
 
-Phases needing deeper research during planning:
-- **Phase 1:** Google Drive Changes API — channel registration sequence, `api#channel` sync notification handling, renewal overlap strategy, `pageToken` persistence pattern
-- **Phase 3:** AHPRA/TGA 2025 dental advertising guidelines — enumerate specific prohibited practices for the compliance pre-flight checklist
+**Needs validation during implementation:**
 
-Phases with standard patterns (skip phase research):
-- **Phase 2:** SQLite FTS5 retrieval — well-documented, established SQL patterns
-- **Phase 4:** HTMX polling + Eta templates — already in use in the codebase
-- **Phase 5:** Audit log + versioning — standard append-only table patterns
+- **Phase 3 (Offline Caching):** Verify `HX-Request: true` header is present on all HTMX requests in the actual VendoOS codebase before relying on it for SW strategy branching. Check global HTMX config in `base.eta`. Test the offline partial fallback in a real offline simulation against the live template structure.
+- **Phase 4 (Push):** Test iOS push on a real physical device (iPhone, iOS 16.4+) early in Phase 4. Do not leave real-device validation until the end. Apple's push implementation has changed without notice; simulator behaviour is not representative.
+
+**Standard patterns — no additional research needed:**
+
+- **Phase 1 (Responsive CSS):** Established CSS patterns; nothing novel.
+- **Phase 2 (PWA Manifest + SW Shell):** Workbox and manifest spec are well-documented; straightforward implementation.
 
 ---
 
@@ -193,48 +197,46 @@ Phases with standard patterns (skip phase research):
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All libraries verified against npm registry and official docs; version compatibility confirmed; Turso vector beta is the only caveat (FTS5 is the primary strategy, not vectors) |
-| Features | HIGH | Table stakes and anti-features are definitive; AHPRA compliance specifics are MEDIUM (official source reviewed but rule encoding requires legal/practitioner validation) |
-| Architecture | HIGH | Official Drive API docs, SQLite FTS5 docs, and Anthropic SDK docs all sourced directly; component boundaries and data flows are well-defined |
-| Pitfalls | HIGH | Webhook expiry and pageToken pitfalls verified against official docs and production post-mortems; agent loop cost spike verified against documented case studies |
+| Stack | HIGH | Core choices verified against official Google, MDN, Vercel, and npm documentation. Workbox 7.4.0 confirmed on npm. web-push 3.6.7 confirmed. One MEDIUM caveat: iOS Safari push behaviour (Apple changes implementation without notice). |
+| Features | HIGH | Mobile table stakes are industry-established patterns with strong data backing (Web Almanac 2025, Apple HIG, Material Design). PWA feature set derived from official specs and cross-referenced sources. iOS constraints documented across multiple authoritative sources. |
+| Architecture | HIGH | Component boundaries are clear and additive. HTMX + service worker integration pattern is documented by authoritative sources (Philip Walton, HTMX GitHub issues). Main risk is execution correctness, not pattern validity. |
+| Pitfalls | HIGH for PWA pitfalls; MEDIUM for iOS-specific behaviour | PWA anti-patterns verified against official docs. iOS-specific push behaviour carries MEDIUM due to Apple's history of undocumented changes. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **AHPRA compliance rule set:** The research confirms that a dental-specific compliance check is required and identifies the categories (testimonials, unqualified superlatives, before/after imagery, cosmetic treatment restrictions). The exact enumerated rules for the QA prompt checklist require review against the current AHPRA advertising guidelines (2025 version) during Phase 3 planning.
-- **Turso F32_BLOB vector beta:** Confirmed syntactically correct but beta status means API stability is not guaranteed. FTS5 is the primary retrieval strategy; vector search is a future optimisation. Verify F32_BLOB works end-to-end in the dev environment before committing to it in Phase 2.
-- **Service account vs. per-user OAuth for Drive:** Research recommends a service account for server-side Drive sync (avoids per-user token revocation risk) but the existing infrastructure uses per-user OAuth. The practical migration path needs a decision during Phase 1 planning.
-- **queries.ts split strategy:** The file is already at 732 lines. The split into domain modules (skills, brand, tasks, drive) needs to be designed during Phase 1 to avoid disrupting existing functionality.
+- **iOS push on real hardware:** Research is MEDIUM confidence for iOS-specific push behaviour. Validate on a physical device (iOS 16.4+) early in Phase 4 before building out the full notification dispatch. Simulator testing is not sufficient.
+- **HTMX `HX-Request` header presence:** Research confirms the pattern; implementation must verify the header is present on all `hx-get` and `hx-post` requests in the actual VendoOS codebase. Check `base.eta` for any global HTMX configuration that might suppress headers.
+- **EU market iOS behaviour:** iOS 17.4+ in the EU opens installed PWAs in a Safari tab rather than standalone mode, which blocks push notifications for EU users. If any Vendo staff are on EU-region devices, push will not work for them on iOS. Accept as a known limitation; do not build a fallback polling system.
+- **Token encryption key rotation (pre-existing concern from CONCERNS.md):** This affects the v1 skills layer milestone, not v1.1. Must be resolved before Drive sync is built to prevent OAuth tokens becoming unrecoverable during any future key rotation. Flagged here for visibility.
 
 ---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Google Drive Push Notifications — Official Docs](https://developers.google.com/workspace/drive/api/guides/push) — channel lifecycle, expiry, headers, domain requirements
-- [Google Drive Retrieve Changes — Official Docs](https://developers.google.com/workspace/drive/api/guides/manage-changes) — pageToken management
-- [SQLite FTS5 Extension](https://sqlite.org/fts5.html) — virtual table schema, content-linked tables, query syntax
-- [googleapis@171.x — npm](https://www.npmjs.com/package/googleapis) — version confirmation
-- [@anthropic-ai/sdk@0.81.x — npm](https://www.npmjs.com/package/@anthropic-ai/sdk) — version confirmation
-- [Anthropic Structured Outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) — QA validator response schema
-- [Vercel Functions Limits](https://vercel.com/docs/functions/limitations) — maxDuration, Fluid Compute
-- [AHPRA Advertising Guidelines 2025](https://www.ahpra.gov.au/Resources/Advertising-hub/Advertising-guidelines-and-other-guidance.aspx) — dental advertising compliance
-- [Adobe GenStudio Brand Compliance](https://business.adobe.com/products/genstudio-for-performance-marketing/brand-compliance.html) — competitor feature reference
+
+- [MDN: Making PWAs Installable](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable) — manifest requirements, service worker requirement for installability
+- [Chrome Developers: Workbox Caching Strategies Overview](https://developer.chrome.com/docs/workbox/caching-strategies-overview) — CacheFirst, NetworkFirst, StaleWhileRevalidate patterns
+- [Chrome Developers: workbox-sw CDN import](https://developer.chrome.com/docs/workbox/modules/workbox-sw) — CDN import pattern for non-bundled environments
+- [Apple Developer: Sending Web Push in Web Apps and Browsers](https://developer.apple.com/documentation/usernotifications/sending-web-push-notifications-in-web-apps-and-browsers) — iOS Safari push requirements
+- [web-push npm](https://www.npmjs.com/package/web-push) — version 3.6.7, VAPID key generation, Node.js usage
+- [MDN: Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API) — subscription lifecycle, `onpush` event, `notificationclick`
+- [Vercel: Cache-Control Headers](https://vercel.com/docs/caching/cache-control-headers) — service worker no-cache requirement, confirmed March 2026
+- [Philip Walton: Smaller HTML Payloads with Service Workers](https://philipwalton.com/articles/smaller-html-payloads-with-service-workers/) — HTMX + service worker partial disambiguation pattern
+- [PWA | 2025 | Web Almanac by HTTP Archive](https://almanac.httparchive.org/en/2025/pwa) — PWA adoption data, mobile traffic patterns for B2B tools
+- [MDN: Offline and background operation](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Offline_and_background_operation) — offline caching patterns, Background Sync limitations
 
 ### Secondary (MEDIUM confidence)
-- [Turso native vector search](https://turso.tech/vector) — F32_BLOB syntax (beta, verify in dev)
-- [Integrating with Google APIs: Tips and Tricks Part 2 — Prismatic](https://prismatic.io/blog/integrating-with-google-apis-tips-and-tricks-part-2/) — production webhook renewal patterns
-- [Why Most RAG Systems Fail in Production — DEV Community](https://dev.to/theprodsde/why-most-rag-systems-fail-in-production-and-how-to-design-one-that-actually-works-j55) — retrieval failure modes
-- [Agentic RAG Failure Modes — Towards Data Science](https://towardsdatascience.com/agentic-rag-failure-modes-retrieval-thrash-tool-storms-and-context-bloat-and-how-to-spot-them-early/) — context bloat, retrieval thrash
-- [Multi-Tenant Data Isolation Patterns — Propelius](https://propelius.tech/blogs/tenant-data-isolation-patterns-and-anti-patterns/) — client data bleed anti-patterns
-- [SOP-Agent: Empower General Purpose AI Agent with Domain-Specific SOPs](https://arxiv.org/html/2501.09316v1) — SOP-guided agent execution patterns
-- [New AHPRA Guidelines for Dental Practitioners 2025](https://jrmg.com.au/new-ahpra-guidelines-for-dental-health-practitioners/) — 2 September 2025 cosmetic treatment changes
 
-### Tertiary (LOW confidence)
-- [LLM Tool-Calling Infinite Loop Failure Mode — Medium](https://medium.com/@komalbaparmar007/llm-tool-calling-in-production-rate-limits-retries-and-the-infinite-loop-failure-mode-you-must-2a1e2a1e84c8) — $47k cost spike case study (single source but highly consistent with other failure mode reports)
-- [AI Content Workflow for Agencies 2026 — Trysight](https://www.trysight.ai/blog/ai-content-workflow-for-agencies) — agency content production patterns (single vendor source)
+- [MagicBell: PWA iOS Limitations 2026](https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide) — iOS push constraints, iOS 16.4+ requirement, EU PWA behaviour
+- [Brainhub: PWA on iOS — Current Status 2025](https://brainhub.eu/library/pwa-on-ios) — iOS Safari behaviour, install flow differences
+- [HTMX GitHub Issue #1445: HTMX and service workers](https://github.com/bigskysoftware/htmx/issues/1445) — community confirmation of fetch interception approach and `HX-Request` header strategy
+- [MagicBell: Offline-First PWAs](https://www.magicbell.com/blog/offline-first-pwas-service-worker-caching-strategies) — strategy selection rationale, HTMX integration notes
+- [Progressier: PWA Capabilities 2026](https://progressier.com/pwa-capabilities) — current platform support table, iOS 26 improvement note
 
 ---
-*Research completed: 2026-04-01*
+
+*Research completed: 2026-04-06*
 *Ready for roadmap: yes*
