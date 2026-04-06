@@ -9,11 +9,9 @@
         <option value="<%= c.id %>" <%= it.query.client == c.id ? 'selected' : '' %>><%= c.name %></option>
       <% }) %>
     </select>
-    <div class="portal-date-pills">
+    <div class="portal-date-pills" style="flex-shrink: 0;">
       <% [7, 30, 90, 180, 365].forEach(d => { %>
-        <button type="submit" name="days" value="<%= d %>" class="portal-date-pill<%= it.days === d ? ' active' : '' %>">
-          <%= d <= 90 ? d + 'd' : (d === 180 ? '6m' : '12m') %>
-        </button>
+        <button type="submit" name="days" value="<%= d %>" class="portal-date-pill<%= it.days === d ? ' active' : '' %>"><%= d <= 90 ? d + 'd' : (d === 180 ? '6m' : '12m') %></button>
       <% }) %>
     </div>
   </form>
@@ -33,171 +31,233 @@
 %>
 
 <% if (r.clientName) { %>
-<p style="color: var(--vendo-green); font-weight: 500; margin-bottom: 1.5rem;"><%= r.clientName %></p>
+<p style="color: var(--vendo-green); font-weight: 500; margin-bottom: 1rem;"><%= r.clientName %></p>
 <% } %>
 
-<!-- KPI Cards — matches portal dashboard -->
-<div class="portal-kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-  <% if (hasGhl) { %>
-  <div class="portal-kpi kpi-positive">
-    <div class="kpi-label">Am I Getting a Return?</div>
-    <div class="kpi-value" style="font-size: 36px;"><%= g.roi_percent.toFixed(1) %>%</div>
-    <div class="kpi-sub">Blended ROI</div>
-  </div>
-  <% } %>
+<!-- Tab Navigation -->
+<div class="rh-tabs" style="display: flex; gap: 2px; border-bottom: 1px solid var(--vendo-border); margin-bottom: 1.5rem;">
+  <button class="rh-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
+  <button class="rh-tab" data-tab="campaigns" onclick="switchTab('campaigns')">Campaigns</button>
+  <button class="rh-tab" data-tab="pipeline" onclick="switchTab('pipeline')">Pipeline</button>
+</div>
 
-  <div class="portal-kpi">
-    <div class="kpi-label">Total Ad Spend</div>
-    <div class="kpi-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
-    <div class="kpi-sub">
-      <% if (metaSpend > 0) { %>Meta &pound;<%= metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %><% } %>
-      <% if (metaSpend > 0 && gadsSpend > 0) { %> | <% } %>
-      <% if (gadsSpend > 0) { %>Google &pound;<%= gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %><% } %>
+<style>
+  .rh-tab {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--vendo-font);
+    color: var(--vendo-text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-bottom: -1px;
+  }
+  .rh-tab:hover { color: var(--vendo-text); }
+  .rh-tab.active {
+    color: var(--vendo-green);
+    border-bottom-color: var(--vendo-green);
+  }
+  .rh-panel { display: none; }
+  .rh-panel.active { display: block; }
+</style>
+
+<!-- ═══ TAB: Overview ═══ -->
+<div id="tab-overview" class="rh-panel active">
+  <div class="portal-kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <% if (hasGhl) { %>
+    <div class="portal-kpi kpi-positive">
+      <div class="kpi-label">Am I Getting a Return?</div>
+      <div class="kpi-value" style="font-size: 36px;"><%= g.roi_percent.toFixed(1) %>%</div>
+      <div class="kpi-sub">Blended ROI</div>
+    </div>
+    <% } %>
+
+    <div class="portal-kpi">
+      <div class="kpi-label">Total Ad Spend</div>
+      <div class="kpi-value">&pound;<%= totalSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
+      <div class="kpi-sub">
+        <% if (metaSpend > 0) { %>Meta &pound;<%= metaSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %><% } %>
+        <% if (metaSpend > 0 && gadsSpend > 0) { %> | <% } %>
+        <% if (gadsSpend > 0) { %>Google &pound;<%= gadsSpend.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %><% } %>
+      </div>
+    </div>
+
+    <% if (hasGhl) { %>
+    <div class="portal-kpi">
+      <div class="kpi-label">Revenue from Ads</div>
+      <div class="kpi-value" style="color: var(--vendo-green);">&pound;<%= g.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
+      <div class="kpi-sub"><%= g.total_won %> patients won</div>
+    </div>
+    <% } %>
+
+    <% if (hasGhl && g.treatments.length > 0) { %>
+    <div class="portal-kpi">
+      <div class="kpi-label">Treatments Won</div>
+      <div class="kpi-value"><%= g.total_won %></div>
+      <div class="kpi-sub">
+        <%
+          const topTreatment = g.treatments.sort((a, b) => b.won - a.won)[0];
+          if (topTreatment) {
+        %>
+          Top: <%= topTreatment.treatment.replace(/\b\w/g, c => c.toUpperCase()) %> (<%= topTreatment.won %>)
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="portal-kpi">
+      <div class="kpi-label">Pipeline Value</div>
+      <div class="kpi-value">&pound;<%= pipelineValue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
+      <div class="kpi-sub"><%= pipelineCount %> open opportunities</div>
+    </div>
+
+    <% if (hasGhl) { %>
+    <div class="portal-kpi">
+      <div class="kpi-label">Total Leads</div>
+      <div class="kpi-value"><%= g.total_leads.toLocaleString() %></div>
+      <div class="kpi-sub">CPL &pound;<%= g.cpl.toFixed(2) %> | Conv. rate <%= g.conversion_rate.toFixed(1) %>%</div>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Month-on-Month Performance Chart -->
+  <% if (r.monthlyTrend && r.monthlyTrend.length > 1) { %>
+  <div class="chart-card">
+    <h3>Month-on-Month Performance</h3>
+    <div class="chart-wrap">
+      <canvas id="homeMomChart"></canvas>
     </div>
   </div>
 
-  <% if (hasGhl) { %>
-  <div class="portal-kpi">
-    <div class="kpi-label">Revenue from Ads</div>
-    <div class="kpi-value" style="color: var(--vendo-green);">&pound;<%= g.total_revenue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
-    <div class="kpi-sub"><%= g.total_won %> patients won</div>
-  </div>
-  <% } %>
+  <script>
+  (function() {
+    var trend = <%~ JSON.stringify(r.monthlyTrend) %>;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  <% if (hasGhl && g.treatments.length > 0) { %>
-  <div class="portal-kpi">
-    <div class="kpi-label">Treatments Won</div>
-    <div class="kpi-value"><%= g.total_won %></div>
-    <div class="kpi-sub">
-      <%
-        const topTreatment = g.treatments.sort((a, b) => b.won - a.won)[0];
-        if (topTreatment) {
-      %>
-        Top: <%= topTreatment.treatment.replace(/\b\w/g, c => c.toUpperCase()) %> (<%= topTreatment.won %>)
-      <% } %>
-    </div>
-  </div>
-  <% } %>
-
-  <div class="portal-kpi">
-    <div class="kpi-label">Pipeline Value</div>
-    <div class="kpi-value">&pound;<%= pipelineValue.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></div>
-    <div class="kpi-sub"><%= pipelineCount %> open opportunities</div>
-  </div>
-
-  <% if (hasGhl) { %>
-  <div class="portal-kpi">
-    <div class="kpi-label">Total Leads</div>
-    <div class="kpi-value"><%= g.total_leads.toLocaleString() %></div>
-    <div class="kpi-sub">CPL &pound;<%= g.cpl.toFixed(2) %> | Conv. rate <%= g.conversion_rate.toFixed(1) %>%</div>
-  </div>
-  <% } %>
-</div>
-
-<!-- Month-on-Month Performance Chart -->
-<% if (r.monthlyTrend && r.monthlyTrend.length > 1) { %>
-<div class="chart-card">
-  <h3>Month-on-Month Performance</h3>
-  <div class="chart-wrap">
-    <canvas id="homeMomChart"></canvas>
-  </div>
-</div>
-
-<script>
-(function() {
-  var trend = <%~ JSON.stringify(r.monthlyTrend) %>;
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-  new Chart(document.getElementById('homeMomChart'), {
-    type: 'bar',
-    data: {
-      labels: trend.map(function(t) { var m = parseInt(t.month.split('-')[1], 10); return months[m - 1]; }),
-      datasets: [
-        {
-          label: 'Ad Spend',
-          data: trend.map(function(t) { return t.total_spend; }),
-          backgroundColor: 'rgba(239, 68, 68, 0.4)',
-          borderColor: '#EF4444',
-          borderWidth: 1,
-          order: 2
-        },
-        {
-          label: 'Revenue',
-          data: trend.map(function(t) {
-            var avgVal = t.new_patients > 0 && <%= hasGhl ? g.total_revenue : 0 %> > 0
-              ? <%= hasGhl ? g.total_revenue : 0 %> / <%= hasGhl ? g.total_won || 1 : 1 %>
-              : 0;
-            return Math.round(t.new_patients * avgVal);
-          }),
-          backgroundColor: 'rgba(34, 197, 94, 0.6)',
-          borderColor: '#22C55E',
-          borderWidth: 1,
-          order: 1
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } }
-        }
+    new Chart(document.getElementById('homeMomChart'), {
+      type: 'bar',
+      data: {
+        labels: trend.map(function(t) { var m = parseInt(t.month.split('-')[1], 10); return months[m - 1]; }),
+        datasets: [
+          {
+            label: 'Ad Spend',
+            data: trend.map(function(t) { return t.total_spend; }),
+            backgroundColor: 'rgba(239, 68, 68, 0.4)',
+            borderColor: '#EF4444',
+            borderWidth: 1,
+            order: 2
+          },
+          {
+            label: 'Revenue',
+            data: trend.map(function(t) {
+              var avgVal = t.new_patients > 0 && <%= hasGhl ? g.total_revenue : 0 %> > 0
+                ? <%= hasGhl ? g.total_revenue : 0 %> / <%= hasGhl ? g.total_won || 1 : 1 %>
+                : 0;
+              return Math.round(t.new_patients * avgVal);
+            }),
+            backgroundColor: 'rgba(34, 197, 94, 0.6)',
+            borderColor: '#22C55E',
+            borderWidth: 1,
+            order: 1
+          }
+        ]
       },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: function(ctx) { return ctx.dataset.label + ': \u00A3' + ctx.parsed.y.toLocaleString(); }
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { callback: function(v) { return '\u00A3' + v.toLocaleString(); } }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(ctx) { return ctx.dataset.label + ': \u00A3' + ctx.parsed.y.toLocaleString(); }
+            }
           }
         }
       }
-    }
-  });
-})();
-</script>
-<% } %>
+    });
+  })();
+  </script>
+  <% } %>
+</div>
 
-<!-- Channel Breakdown -->
-<% if (r.metaCampaigns.length > 0 || r.gadsCampaigns.length > 0) { %>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
-  <% if (r.metaCampaigns.length > 0) { %>
-  <div class="portal-section">
-    <h3>Meta Ads Campaigns</h3>
-    <table class="compact">
-      <thead>
-        <tr><th>Campaign</th><th>Spend</th><th>Leads</th><th>CPL</th><th>CTR</th></tr>
-      </thead>
-      <tbody>
-        <% r.metaCampaigns.forEach(c => { %>
-        <tr>
-          <td><%= c.campaign_name %></td>
-          <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
-          <td><%= c.conversions %></td>
-          <td>&pound;<%= c.conversions > 0 ? (c.spend / c.conversions).toFixed(2) : '—' %></td>
-          <td><%= c.impressions > 0 ? ((c.clicks / c.impressions) * 100).toFixed(2) : '0' %>%</td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
+<!-- ═══ TAB: Campaigns ═══ -->
+<div id="tab-campaigns" class="rh-panel">
+  <% if (r.metaCampaigns.length === 0 && r.gadsCampaigns.length === 0) { %>
+    <p class="portal-empty">No campaign data for this period.</p>
+  <% } else { %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <% if (r.metaCampaigns.length > 0) { %>
+    <div class="portal-section">
+      <h3>Meta Ads Campaigns</h3>
+      <table class="compact">
+        <thead>
+          <tr><th>Campaign</th><th>Spend</th><th>Leads</th><th>CPL</th><th>CTR</th></tr>
+        </thead>
+        <tbody>
+          <% r.metaCampaigns.forEach(c => { %>
+          <tr>
+            <td><%= c.campaign_name %></td>
+            <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+            <td><%= c.conversions %></td>
+            <td>&pound;<%= c.conversions > 0 ? (c.spend / c.conversions).toFixed(2) : '—' %></td>
+            <td><%= c.impressions > 0 ? ((c.clicks / c.impressions) * 100).toFixed(2) : '0' %>%</td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+
+    <% if (r.gadsCampaigns.length > 0) { %>
+    <div class="portal-section">
+      <h3>Google Ads Campaigns</h3>
+      <table class="compact">
+        <thead>
+          <tr><th>Campaign</th><th>Spend</th><th>Conv.</th><th>CPA</th><th>CTR</th></tr>
+        </thead>
+        <tbody>
+          <% r.gadsCampaigns.forEach(c => { %>
+          <tr>
+            <td><%= c.campaign_name %></td>
+            <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+            <td><%= c.conversions %></td>
+            <td>&pound;<%= c.conversions > 0 ? (c.spend / c.conversions).toFixed(2) : '—' %></td>
+            <td><%= c.impressions > 0 ? ((c.clicks / c.impressions) * 100).toFixed(2) : '0' %>%</td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
   </div>
   <% } %>
+</div>
 
-  <% if (r.gadsCampaigns.length > 0) { %>
+<!-- ═══ TAB: Pipeline ═══ -->
+<div id="tab-pipeline" class="rh-panel">
+  <% if (r.pipelineStages.length === 0) { %>
+    <p class="portal-empty">No pipeline data available.</p>
+  <% } else { %>
   <div class="portal-section">
-    <h3>Google Ads Campaigns</h3>
+    <h3>Pipeline Stages</h3>
     <table class="compact">
       <thead>
-        <tr><th>Campaign</th><th>Spend</th><th>Conv.</th><th>CPA</th><th>CTR</th></tr>
+        <tr><th>Stage</th><th>Opportunities</th><th>Value</th></tr>
       </thead>
       <tbody>
-        <% r.gadsCampaigns.forEach(c => { %>
+        <% r.pipelineStages.forEach(st => { %>
         <tr>
-          <td><%= c.campaign_name %></td>
-          <td>&pound;<%= c.spend.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
-          <td><%= c.conversions %></td>
-          <td>&pound;<%= c.conversions > 0 ? (c.spend / c.conversions).toFixed(2) : '—' %></td>
-          <td><%= c.impressions > 0 ? ((c.clicks / c.impressions) * 100).toFixed(2) : '0' %>%</td>
+          <td><%= st.stage_name %></td>
+          <td><%= st.opp_count %></td>
+          <td>&pound;<%= st.total_value.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
         </tr>
         <% }) %>
       </tbody>
@@ -205,33 +265,18 @@
   </div>
   <% } %>
 </div>
-<% } %>
 
-<!-- Pipeline Stages -->
-<% if (r.pipelineStages.length > 0) { %>
-<div class="portal-section" style="margin-top: 1.5rem;">
-  <h3>Pipeline Stages</h3>
-  <table class="compact">
-    <thead>
-      <tr><th>Stage</th><th>Opportunities</th><th>Value</th></tr>
-    </thead>
-    <tbody>
-      <% r.pipelineStages.forEach(st => { %>
-      <tr>
-        <td><%= st.stage_name %></td>
-        <td><%= st.opp_count %></td>
-        <td>&pound;<%= st.total_value.toLocaleString('en-GB', { minimumFractionDigits: 0 }) %></td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</div>
-<% } %>
-
-<!-- Portal Preview Link -->
+<!-- Footer actions -->
 <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
   <a href="/portal/?clientId=<%= it.query.client %>&days=<%= it.days %>" class="outline" target="_blank" style="text-decoration: none;">Open Client Portal Preview</a>
   <button onclick="window.print()" class="outline">Export PDF (Print)</button>
 </div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.rh-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === name); });
+  document.querySelectorAll('.rh-panel').forEach(function(p) { p.classList.toggle('active', p.id === 'tab-' + name); });
+}
+</script>
 
 <% } %>
