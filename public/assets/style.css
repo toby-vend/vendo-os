@@ -4703,6 +4703,41 @@ button.growth-sort-btn:hover {
     flex-direction: column;
   }
 
+  /* === Task list filter form — full-width on mobile === */
+  form[action="/tasks"] {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  form[action="/tasks"] > div {
+    width: 100%;
+  }
+
+  form[action="/tasks"] select,
+  form[action="/tasks"] input[type="date"] {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  form[action="/tasks"] > div:last-child {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  form[action="/tasks"] > div:last-child .btn,
+  form[action="/tasks"] > div:last-child a {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Task page header — stack title and button */
+  h2 + .btn,
+  [style*="justify-content: space-between"] {
+    flex-wrap: wrap;
+  }
+
   /* === Pull-to-refresh indicator === */
   .ptr-indicator {
     display: flex;
