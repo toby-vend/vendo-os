@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Complete
 status: planning
-stopped_at: Completed 11-01 Task 1, awaiting human verification at checkpoint
-last_updated: "2026-04-06T18:28:40.514Z"
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-04-06T18:53:10.616Z"
 last_activity: 2026-04-06 — v1.1 roadmap created (4 phases, 26 requirements mapped)
 progress:
   total_phases: 4
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 11-responsive-layout P01 | 8 | 1 tasks | 2 files |
+| Phase 11-responsive-layout P01 | 17 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 10-am-interface]: POST /tasks/new forwards to app.inject('/api/tasks/runs') — reuses creation logic
 - [Phase 11-responsive-layout]: Tab bar hides sidebar entirely on mobile (display:none !important) — no hybrid approach
 - [Phase 11-responsive-layout]: group.icon in sidebarConfig is a full SVG string — rendered unescaped via Eta <%~ %>
+- [Phase 11-responsive-layout]: SVG icons in More overlay must be explicitly sized — inline SVGs have no implicit dimensions and render at full width without width/height constraints
 
 ### Research Flags (v1.1)
 
@@ -126,6 +128,6 @@ None blocking v1.1 start.
 
 ## Session Continuity
 
-Last session: 2026-04-06T18:28:40.513Z
-Stopped at: Completed 11-01 Task 1, awaiting human verification at checkpoint
+Last session: 2026-04-06T18:53:10.614Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None

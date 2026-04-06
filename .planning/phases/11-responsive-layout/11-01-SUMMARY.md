@@ -56,10 +56,10 @@ completed: 2026-04-06
 
 ## Performance
 
-- **Duration:** ~8 min
+- **Duration:** ~17 min
 - **Started:** 2026-04-06T18:19:00Z
-- **Completed:** 2026-04-06T18:27:50Z
-- **Tasks:** 1 of 2 (Task 2 is human verification checkpoint)
+- **Completed:** 2026-04-06T18:45:08Z
+- **Tasks:** 2 of 2 (including human verification checkpoint — approved)
 - **Files modified:** 2
 
 ## Accomplishments
@@ -74,6 +74,8 @@ completed: 2026-04-06
 ## Task Commits
 
 1. **Task 1: Global mobile viewport reset and tab bar + More overlay CSS** - `8c679a7` (feat)
+2. **Bug fix: Constrain SVG icon size in More nav overlay** - `f368fbb` (fix — see Deviations)
+3. **Task 2: Human verification checkpoint** — approved by user
 
 ## Files Created/Modified
 
@@ -88,11 +90,24 @@ completed: 2026-04-06
 
 ## Deviations from Plan
 
-None — plan executed exactly as written.
+### Auto-fixed Issues
+
+**1. [Rule 1 - Bug] SVG icons in More nav overlay rendering at massive size**
+- **Found during:** Post-Task 1, discovered during human verification
+- **Issue:** Inline SVG strings from sidebarConfig rendered without explicit width/height, causing them to fill the full row width
+- **Fix:** Added `.more-nav-item .nav-icon { width: 20px; height: 20px; flex-shrink: 0; }` CSS rule and adjusted icon sizing in the overlay template
+- **Files modified:** `public/assets/style.css`, `web/views/layouts/base.eta`
+- **Verification:** User confirmed icons displayed correctly during human verification approval
+- **Committed in:** `f368fbb`
+
+---
+
+**Total deviations:** 1 auto-fixed (Rule 1 — bug)
+**Impact on plan:** Fix was necessary for usable UI. No scope creep.
 
 ## Issues Encountered
 
-None.
+None beyond the SVG icon sizing bug documented above.
 
 ## User Setup Required
 
@@ -100,8 +115,9 @@ None — no external service configuration required.
 
 ## Next Phase Readiness
 
-- Human verification checkpoint (Task 2) required before marking plan complete
-- Once verified: Phase 12 (PWA Foundation) can begin — tab bar is the primary mobile chrome for the installed PWA
+- Plan complete and verified by user — all 2 tasks done
+- Phase 12 (PWA Foundation) can begin — tab bar is the primary mobile chrome for the installed PWA
+- The `.more-nav-overlay` open/close pattern established here may be extended for PWA install prompt in Phase 12
 
 ---
 *Phase: 11-responsive-layout*
