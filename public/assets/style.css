@@ -3199,6 +3199,54 @@ button.growth-sort-btn:hover {
   margin: 0;
 }
 
+/* --- Error banner --- */
+.wizard-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* --- Character counter --- */
+.wizard-char-count {
+  font-size: 11px;
+  color: #475569;
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+.wizard-char-count:empty { display: none; }
+
+.wizard-char-warn { color: #f59e0b; }
+.wizard-char-limit { color: #ef4444; font-weight: 600; }
+
+/* --- Loading spinner (reuse login pattern) --- */
+.wizard-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- Focus improvements --- */
+.wizard-input:focus {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+}
+
+.wizard-step-title:focus {
+  outline: none;
+}
+
+@media (prefers-contrast: more) {
+  .wizard-input:focus {
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.5);
+    outline: 2px solid #22C55E;
+  }
+}
+
 /* --- Mobile --- */
 @media (max-width: 768px) {
   .onboard-body {
@@ -3240,12 +3288,40 @@ button.growth-sort-btn:hover {
     align-items: flex-start;
     gap: 0.75rem;
   }
+
+  /* Touch targets — WCAG 2.1 minimum 44x44px */
+  .wizard-input {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+    min-height: 44px;
+  }
+
+  .wizard-option {
+    padding: 0.75rem 1rem;
+    min-height: 48px;
+  }
+
+  .wizard-option-compact {
+    padding: 0.6rem 0.875rem;
+  }
+
+  .wizard-repeater-remove {
+    width: 36px;
+    height: 36px;
+  }
+
+  .wizard-hours-row {
+    grid-template-columns: 80px 1fr;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .onboard-body .bg-orb { animation: none !important; }
-  .onboard-container { animation-duration: 0.01ms !important; }
-  .wizard-progress-fill { transition-duration: 0.01ms !important; }
+  .onboard-body *,
+  .onboard-body *::before,
+  .onboard-body *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ── Video Production — Kanban Board ─────────────────────────────── */
@@ -4030,3 +4106,48 @@ button.growth-sort-btn:hover {
 .vp-card-link:hover {
   background: rgba(34,197,94,0.15);
 }
+
+/* ── Action Panel & Alerts ── */
+
+.vp-action-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--vendo-surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+}
+
+.vp-action-panel:empty {
+  display: none;
+}
+
+.vp-alert {
+  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.vp-alert strong {
+  font-weight: 700;
+}
+
+.vp-alert-red {
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #FCA5A5;
+}
+
+.vp-alert-red strong { color: #EF4444; }
+
+.vp-alert-amber {
+  background: rgba(245,158,11,0.06);
+  border: 1px solid rgba(245,158,11,0.2);
+  color: #FCD34D;
+}
+
+.vp-alert-amber strong { color: #F59E0B; }

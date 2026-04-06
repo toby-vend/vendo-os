@@ -77,7 +77,7 @@
   <div class="wizard-progress-bar">
     <div class="wizard-progress-fill" style="width: <%= Math.round(((step + 1) / total) * 100) %>%"></div>
   </div>
-  <div class="wizard-progress-label">
+  <div class="wizard-progress-label" aria-live="polite">
     Step <%= step + 1 %> of <%= total %>
   </div>
 </div>
@@ -151,15 +151,18 @@
 
   <div class="wizard-nav">
     <form method="POST" action="<%= baseUrl %>/save"
-          hx-post="<%= baseUrl %>/save" hx-target="#wizard-body" hx-swap="innerHTML">
+          hx-post="<%= baseUrl %>/save" hx-target="#wizard-body" hx-swap="innerHTML"
+          hx-disabled-elt="find .wizard-btn">
       <input type="hidden" name="_stepIndex" value="<%= step %>">
       <input type="hidden" name="_direction" value="back">
       <% if (mode === 'internal') { %><input type="hidden" name="_csrf" value="<%= it.csrfToken %>"><% } %>
+      <% if (mode === 'client' && it.nonce) { %><input type="hidden" name="_nonce" value="<%= it.nonce %>"><% } %>
       <button type="submit" class="wizard-btn wizard-btn-secondary">Back</button>
     </form>
 
     <form method="POST" action="<%= baseUrl %>/submit"
-          hx-post="<%= baseUrl %>/submit" hx-target="<%= mode === 'client' ? '#wizard-card' : '#wizard-body' %>" hx-swap="innerHTML">
+          hx-post="<%= baseUrl %>/submit" hx-target="<%= mode === 'client' ? '#wizard-card' : '#wizard-body' %>" hx-swap="innerHTML"
+          hx-disabled-elt="find .wizard-btn">
       <% if (mode === 'internal') { %><input type="hidden" name="_csrf" value="<%= it.csrfToken %>"><% } %>
       <button type="submit" class="wizard-btn wizard-btn-primary wizard-btn-submit">Submit Onboarding</button>
     </form>
@@ -168,17 +171,22 @@
 <% } else { %>
   <!-- Step content -->
   <% const section = sections[step]; %>
-  <h2 class="wizard-step-title"><%= section.title %></h2>
+  <h2 class="wizard-step-title" tabindex="-1"><%= section.title %></h2>
   <% if (section.description) { %>
     <p class="wizard-step-desc"><%= section.description %></p>
   <% } %>
 
+  <div id="wizard-error" class="wizard-error" role="alert" style="display:none"></div>
+
   <form method="POST" action="<%= baseUrl %>/save"
         hx-post="<%= baseUrl %>/save" hx-target="#wizard-body" hx-swap="innerHTML"
+        hx-disabled-elt="find .wizard-btn"
+        hx-indicator="#wizard-spinner"
         class="wizard-form" id="wizard-form">
     <input type="hidden" name="_stepIndex" value="<%= step %>">
     <input type="hidden" name="_direction" value="next">
     <% if (mode === 'internal') { %><input type="hidden" name="_csrf" value="<%= it.csrfToken %>"><% } %>
+    <% if (mode === 'client' && it.nonce) { %><input type="hidden" name="_nonce" value="<%= it.nonce %>"><% } %>
 
     <% for (const q of section.questions) { %>
       <%
@@ -199,7 +207,10 @@
           <textarea id="q-<%= q.id %>" name="<%= q.id %>"
                     class="wizard-input wizard-textarea"
                     placeholder="<%= q.placeholder || '' %>"
-                    rows="3"><%= answers[q.id] || '' %></textarea>
+                    rows="3"
+                    <%= q.required ? 'required aria-required="true"' : '' %>
+                    maxlength="<%= q.maxLength || 2000 %>"><%= answers[q.id] || '' %></textarea>
+          <div class="wizard-char-count" data-max="<%= q.maxLength || 2000 %>"></div>
 
         <% } else if (q.type === 'radio') { %>
           <div class="wizard-options">
@@ -380,7 +391,7 @@
           <div class="wizard-brand-colours" data-question-id="<%= q.id %>">
             <% for (let ci = 0; ci < colours.length; ci++) { %>
               <div class="wizard-colour-row" data-index="<%= ci %>">
-                <div class="wizard-colour-swatch" style="background: <%= colours[ci] || 'transparent' %>; border: 1px solid rgba(255,255,255,0.1);"></div>
+                <div class="wizard-colour-swatch" data-colour="<%= (colours[ci] || '').replace(/[^a-zA-Z0-9#(),.\s%-]/g, '') %>"></div>
                 <input name="<%= q.id %>" type="text" class="wizard-input wizard-colour-input"
                        value="<%= colours[ci] || '' %>" placeholder="e.g. #1A2B3C or Navy blue"
                        oninput="updateColourSwatch(this)">
@@ -404,7 +415,7 @@
                 <input name="<%= q.id %>" type="text" class="wizard-input wizard-font-input"
                        value="<%= fonts[fi] || '' %>" placeholder="e.g. Montserrat, Open Sans"
                        oninput="previewFont(this)">
-                <div class="wizard-font-preview" style="<%= fonts[fi] ? 'font-family: ' + fonts[fi] + ', sans-serif' : '' %>">
+                <div class="wizard-font-preview" data-font="<%= (fonts[fi] || '').replace(/[^a-zA-Z0-9\s-]/g, '') %>">
                   <% if (fonts[fi]) { %><span>The quick brown fox jumps over the lazy dog</span><% } %>
                 </div>
                 <% if (fonts.length > 1) { %>
@@ -454,7 +465,11 @@
                  class="wizard-input"
                  value="<%= answers[q.id] || '' %>"
                  placeholder="<%= q.placeholder || '' %>"
-                 <%= q.required ? 'required' : '' %>>
+                 <%= q.required ? 'required aria-required="true"' : '' %>
+                 <%= q.maxLength ? 'maxlength="' + q.maxLength + '"' : '' %>
+                 <%= q.min !== undefined ? 'min="' + q.min + '"' : '' %>
+                 <%= q.max !== undefined ? 'max="' + q.max + '"' : '' %>
+                 <%= q.pattern ? 'pattern="' + q.pattern + '"' : '' %>>
         <% } %>
       </div>
     <% } %>
@@ -476,8 +491,55 @@
 <% } %>
 
 <script>
-// Scroll to top on step change
-document.getElementById('wizard-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+// Focus management: scroll to top and focus step title on step change
+(function() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  var title = document.querySelector('.wizard-step-title');
+  if (title) { setTimeout(function() { title.focus(); }, 100); }
+})();
+
+// Error handling for HTMX requests
+document.body.addEventListener('htmx:responseError', function(evt) {
+  var errDiv = document.getElementById('wizard-error');
+  if (!errDiv) return;
+  var status = evt.detail.xhr ? evt.detail.xhr.status : 0;
+  if (status === 429) errDiv.textContent = 'Too many requests. Please wait a moment and try again.';
+  else if (status === 413) errDiv.textContent = 'Your answers are too long. Please shorten some responses.';
+  else if (status === 403) errDiv.textContent = 'Form expired. Please reload the page.';
+  else errDiv.textContent = 'Something went wrong. Please try again.';
+  errDiv.style.display = 'block';
+});
+
+document.body.addEventListener('htmx:sendError', function() {
+  var errDiv = document.getElementById('wizard-error');
+  if (errDiv) { errDiv.textContent = 'Connection error. Please check your internet and try again.'; errDiv.style.display = 'block'; }
+});
+
+// Initialise colour swatches from data attributes (safe — no inline style injection)
+document.querySelectorAll('.wizard-colour-swatch[data-colour]').forEach(function(el) {
+  var c = el.dataset.colour;
+  if (c) el.style.background = c;
+});
+
+// Initialise font previews from data attributes (safe — sanitised)
+document.querySelectorAll('.wizard-font-preview[data-font]').forEach(function(el) {
+  var f = el.dataset.font;
+  if (f) el.style.fontFamily = f + ', sans-serif';
+});
+
+// Character count for textareas
+document.querySelectorAll('.wizard-char-count').forEach(function(counter) {
+  var ta = counter.previousElementSibling;
+  if (!ta || ta.tagName !== 'TEXTAREA') return;
+  var max = parseInt(counter.dataset.max || '2000', 10);
+  function update() {
+    var len = ta.value.length;
+    counter.textContent = len + ' / ' + max;
+    counter.className = 'wizard-char-count' + (len > max * 0.9 ? (len >= max ? ' wizard-char-limit' : ' wizard-char-warn') : '');
+  }
+  ta.addEventListener('input', update);
+  if (ta.value) update();
+});
 
 // showWhen: toggle field visibility based on radio/select changes
 document.querySelectorAll('[data-show-when]').forEach(function(el) {
@@ -563,14 +625,13 @@ function toggleApplyAll(cb) {
   else { allDiv.style.display = 'none'; perDiv.style.display = ''; }
 }
 
-// Brand colours: update swatch preview
+// Brand colours: update swatch preview (sanitised — only allow CSS colour values)
 function updateColourSwatch(input) {
   var row = input.closest('.wizard-colour-row');
   var swatch = row.querySelector('.wizard-colour-swatch');
   var picker = row.querySelector('.wizard-colour-picker');
-  var val = input.value.trim();
+  var val = input.value.trim().replace(/[^a-zA-Z0-9#(),.\s%-]/g, '');
   swatch.style.background = val || 'transparent';
-  // Update colour picker if valid hex
   if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
     picker.value = val;
   }
@@ -600,7 +661,7 @@ var loadedFonts = {};
 function previewFont(input) {
   var row = input.closest('.wizard-font-row');
   var preview = row.querySelector('.wizard-font-preview');
-  var fontName = input.value.trim();
+  var fontName = input.value.trim().replace(/[^a-zA-Z0-9\s-]/g, '');
   if (!fontName) { preview.innerHTML = ''; preview.style.fontFamily = ''; return; }
 
   preview.style.fontFamily = fontName + ', sans-serif';

@@ -43,6 +43,11 @@ export interface Question {
   treatmentSourceId?: string;
   /** For treatment-pricing: the master options list to resolve labels */
   treatmentOptions?: QuestionOption[];
+  /** Validation constraints */
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: string;
 }
 
 export interface Section {
@@ -91,11 +96,11 @@ const dentalSingleSections: Section[] = [
     title: 'Practice Information',
     description: 'Basic details about your practice so we can get started.',
     questions: [
-      { id: '1.1', label: 'What is the full legal name of your practice?', type: 'text', required: true },
-      { id: '1.2', label: 'What is your primary practice location?', type: 'textarea', placeholder: 'Full address including postcode', required: true },
+      { id: '1.1', label: 'What is the full legal name of your practice?', type: 'text', required: true, maxLength: 200 },
+      { id: '1.2', label: 'What is your primary practice location?', type: 'textarea', placeholder: 'Full address including postcode', required: true, maxLength: 500 },
       { id: '1.3', label: 'What is your practice website URL?', type: 'url', placeholder: 'https://' },
-      { id: '1.4', label: 'What is the name and role of the main point of contact we will be working with?', type: 'text', required: true },
-      { id: '1.5', label: 'What is the best email address and phone number for day-to-day communication?', type: 'textarea', placeholder: 'Email and phone number' },
+      { id: '1.4', label: 'What is the name and role of the main point of contact we will be working with?', type: 'text', required: true, maxLength: 200 },
+      { id: '1.5', label: 'What is the best email address and phone number for day-to-day communication?', type: 'textarea', placeholder: 'Email and phone number', maxLength: 500 },
       { id: '1.6', label: 'Is your practice NHS, private, or mixed?', type: 'radio', options: [
         { value: 'nhs', label: 'NHS' },
         { value: 'private', label: 'Private' },
@@ -128,15 +133,15 @@ const dentalSingleSections: Section[] = [
       { id: '2A.1', label: 'Do you have an active Google Ads account?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' },
       ]},
-      { id: '2A.1a', label: 'Google Ads Customer ID', type: 'text', placeholder: 'e.g. 123-456-7890', hint: 'The 10-digit ID found in the top-right corner of Google Ads.', showWhen: { questionId: '2A.1', equals: 'yes' } },
+      { id: '2A.1a', label: 'Google Ads Customer ID', type: 'text', placeholder: '123-456-7890', hint: 'The 10-digit ID found in the top-right corner of Google Ads.', showWhen: { questionId: '2A.1', equals: 'yes' }, pattern: '\\d{3}-\\d{3}-\\d{4}' },
       { id: '2A.2', label: 'Do you have Google Analytics 4 installed on your website?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
       ]},
-      { id: '2A.2a', label: 'GA4 Measurement ID', type: 'text', placeholder: 'e.g. G-XXXXXXXXXX', showWhen: { questionId: '2A.2', equals: 'yes' } },
+      { id: '2A.2a', label: 'GA4 Measurement ID', type: 'text', placeholder: 'G-XXXXXXXXXX', showWhen: { questionId: '2A.2', equals: 'yes' }, pattern: 'G-[A-Za-z0-9]+' },
       { id: '2A.3', label: 'Do you have Google Tag Manager installed?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
       ]},
-      { id: '2A.3a', label: 'GTM Container ID', type: 'text', placeholder: 'e.g. GTM-XXXXXXX', showWhen: { questionId: '2A.3', equals: 'yes' } },
+      { id: '2A.3a', label: 'GTM Container ID', type: 'text', placeholder: 'GTM-XXXXXXX', showWhen: { questionId: '2A.3', equals: 'yes' }, pattern: 'GTM-[A-Za-z0-9]+' },
       { id: '2A.4', label: 'Do you currently track phone call conversions from Google Ads?', type: 'radio', options: [
         { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, { value: 'unsure', label: 'Not sure' },
       ]},

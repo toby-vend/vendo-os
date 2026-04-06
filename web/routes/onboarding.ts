@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
+import crypto from 'crypto';
 import {
   getOnboardingByToken,
   getOnboardingById,
@@ -23,9 +24,59 @@ async function ensureSchema() {
   schemaReady = true;
 }
 
+// ---------------------------------------------------------------------------
+// Rate limiter (in-memory, per-IP)
+// ---------------------------------------------------------------------------
+
+const rateLimits = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string, key: string, maxRequests: number, windowMs: number): boolean {
+  const id = `${key}:${ip}`;
+  const now = Date.now();
+  const entry = rateLimits.get(id);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimits.set(id, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (entry.count >= maxRequests) return false;
+  entry.count++;
+  return true;
+}
+
+// Cleanup stale entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimits) {
+    if (now > entry.resetAt) rateLimits.delete(key);
+  }
+}, 5 * 60 * 1000).unref();
+
+// ---------------------------------------------------------------------------
+// Input sanitisation
+// ---------------------------------------------------------------------------
+
+const MAX_FIELD_LENGTH = 5000;
+const MAX_REPEATER_INDEX = 99;
+const MAX_JSON_SIZE = 512 * 1024; // 500KB
+
+/** Strip HTML tags from a string value */
+function stripHtml(val: string): string {
+  return val.replace(/<[^>]*>/g, '');
+}
+
+/** Sanitise a single value: strip HTML, enforce length */
+function sanitiseValue(val: string | string[]): string | string[] {
+  if (Array.isArray(val)) {
+    return val.map(v => stripHtml(String(v)).slice(0, MAX_FIELD_LENGTH));
+  }
+  return stripHtml(String(val)).slice(0, MAX_FIELD_LENGTH);
+}
+
 /** Parse answers from body, merging into existing answers object.
  *  Handles repeater bracket notation (e.g. 1.6[0].name) and
- *  location-checkbox-matrix fields (e.g. 3.2._applyAll, 3.2._treatments, 3.2._loc.0).
+ *  matrix/pricing/hours fields (e.g. 3.2._applyAll, 3A.1._t.slug.field, 1.8._h.Monday).
  */
 function mergeAnswers(
   body: Record<string, string | string[]>,
@@ -35,14 +86,17 @@ function mergeAnswers(
   const repeaterPattern = /^(.+)\[(\d+)\]\.(.+)$/;
   const matrixPattern = /^(.+)\._(.+)$/;
 
-  for (const [key, val] of Object.entries(body)) {
+  for (const [key, rawVal] of Object.entries(body)) {
     if (key.startsWith('_')) continue;
+
+    const val = sanitiseValue(rawVal);
 
     // Repeater fields: q[0].field -> answers[q] = [{ field: val }, ...]
     const rm = key.match(repeaterPattern);
     if (rm) {
       const [, qId, idxStr, field] = rm;
       const idx = parseInt(idxStr, 10);
+      if (idx < 0 || idx > MAX_REPEATER_INDEX) continue;
       if (!Array.isArray(merged[qId])) merged[qId] = [];
       const arr = merged[qId] as Record<string, unknown>[];
       while (arr.length <= idx) arr.push({});
@@ -50,12 +104,12 @@ function mergeAnswers(
       continue;
     }
 
-    // Matrix fields: q._applyAll, q._treatments, q._loc.0
+    // Matrix fields: q._applyAll, q._treatments, q._loc.0, q._t.slug.field, q._h.Day
     const mm = key.match(matrixPattern);
     if (mm) {
       const [, qId, subKey] = mm;
       if (typeof merged[qId] !== 'object' || merged[qId] === null || Array.isArray(merged[qId])) {
-        merged[qId] = { applyAll: true, treatments: [], byLocation: {} };
+        merged[qId] = {};
       }
       const matrix = merged[qId] as Record<string, unknown>;
       if (subKey === 'applyAll') {
@@ -67,7 +121,6 @@ function mergeAnswers(
         if (!matrix.byLocation) matrix.byLocation = {};
         (matrix.byLocation as Record<string, unknown>)[locIdx] = Array.isArray(val) ? val : [val];
       } else if (subKey.startsWith('t.')) {
-        // Treatment pricing: t.treatment_slug.field
         const parts = subKey.split('.');
         const treatSlug = parts[1];
         const field = parts[2];
@@ -76,7 +129,6 @@ function mergeAnswers(
           (matrix[treatSlug] as Record<string, unknown>)[field] = val;
         }
       } else if (subKey.startsWith('h.')) {
-        // Opening hours: h.Monday, h.Tuesday, etc.
         const day = subKey.slice(2);
         matrix[day] = val;
       }
@@ -86,7 +138,19 @@ function mergeAnswers(
     merged[key] = val;
   }
 
+  // Enforce total size limit
+  const json = JSON.stringify(merged);
+  if (json.length > MAX_JSON_SIZE) {
+    throw new Error('Payload too large');
+  }
+
   return merged;
+}
+
+/** Generate a per-submission nonce for CSRF-like protection on public forms */
+function generateNonce(token: string): string {
+  const secret = process.env.SESSION_SECRET || 'onboard-nonce-fallback';
+  return crypto.createHmac('sha256', secret).update('onboard:' + token).digest('hex').slice(0, 32);
 }
 
 /** Build the standard wizard render data */
@@ -111,6 +175,7 @@ function wizardData(
     isSubmitted: submission.status === 'submitted' || submission.status === 'reviewed',
     mode,
     baseUrl,
+    nonce: mode === 'client' ? generateNonce(submission.token) : undefined,
   };
 }
 
@@ -130,6 +195,11 @@ export const onboardPublicRoutes: FastifyPluginAsync = async (app) => {
 
   // Create new submission and redirect to wizard
   app.post('/start', async (request, reply) => {
+    const ip = request.ip;
+    if (!checkRateLimit(ip, 'start', 5, 60 * 60 * 1000)) {
+      return reply.code(429).header('Retry-After', '3600').send('Too many requests. Please try again later.');
+    }
+
     const body = request.body as Record<string, string>;
     const templateId = body?.templateId;
     if (!templateId || !getTemplate(templateId)) {
@@ -156,19 +226,44 @@ export const onboardPublicRoutes: FastifyPluginAsync = async (app) => {
 
   // Save step answers (HTMX)
   app.post('/:token/save', async (request, reply) => {
+    const ip = request.ip;
+    if (!checkRateLimit(ip, 'save', 60, 60 * 1000)) {
+      return reply.code(429).send('Too many requests.');
+    }
+
     const { token } = request.params as { token: string };
     const submission = await getOnboardingByToken(token);
-    if (!submission || submission.status === 'submitted') return reply.code(400).send('Invalid');
+    if (!submission || submission.status === 'submitted' || submission.status === 'reviewed') {
+      return reply.code(400).send('This form has already been submitted.');
+    }
 
     const body = request.body as Record<string, string | string[]>;
+
+    // Validate nonce
+    const nonce = body._nonce as string;
+    if (!nonce || nonce !== generateNonce(token)) {
+      return reply.code(403).send('Invalid form token. Please reload the page.');
+    }
+
     const template = getTemplate(submission.template_id)!;
-    const currentAnswers = mergeAnswers(body, JSON.parse(submission.answers || '{}'));
+
+    let currentAnswers: Record<string, unknown>;
+    try {
+      currentAnswers = mergeAnswers(body, JSON.parse(submission.answers || '{}'));
+    } catch (e: any) {
+      if (e.message === 'Payload too large') {
+        return reply.code(413).send('Answer data too large.');
+      }
+      throw e;
+    }
+
     const direction = body._direction as string || 'next';
     const currentStepIdx = parseInt(body._stepIndex as string, 10) || 0;
 
-    // Auto-set practice name from first question
+    // Auto-set practice name from first question (sanitised)
     if (currentAnswers['1.1'] && !submission.practice_name) {
-      await updateOnboardingMeta(submission.id, { practiceName: currentAnswers['1.1'] as string });
+      const name = String(currentAnswers['1.1']).slice(0, 200);
+      await updateOnboardingMeta(submission.id, { practiceName: name });
     }
 
     const activeSections = getActiveSections(template, currentAnswers);
@@ -187,7 +282,9 @@ export const onboardPublicRoutes: FastifyPluginAsync = async (app) => {
   app.post('/:token/submit', async (request, reply) => {
     const { token } = request.params as { token: string };
     const submission = await getOnboardingByToken(token);
-    if (!submission) return reply.code(400).send('Invalid');
+    if (!submission || submission.status === 'submitted' || submission.status === 'reviewed') {
+      return reply.code(400).send('Already submitted.');
+    }
 
     await updateOnboardingMeta(submission.id, { status: 'submitted' });
 
@@ -197,7 +294,6 @@ export const onboardPublicRoutes: FastifyPluginAsync = async (app) => {
     const activeSections = getActiveSections(template, answers);
     const data = wizardData(updatedSubmission, template, answers, activeSections.length, 'client', `/onboard/${token}`);
 
-    // Return full page on submit (not just body) so the submitted state renders properly
     reply.type('text/html').render('onboarding/wizard', data);
   });
 };
@@ -222,7 +318,7 @@ export const onboardingInternalRoutes: FastifyPluginAsync = async (app) => {
   app.post('/create', async (request, reply) => {
     const body = request.body as Record<string, string>;
     const templateId = body?.templateId;
-    const practiceName = body?.practiceName;
+    const practiceName = body?.practiceName?.slice(0, 200);
     const contactEmail = body?.contactEmail;
     const driveFolderUrl = body?.driveFolderUrl;
     const user = (request as any).user;
@@ -265,12 +361,23 @@ export const onboardingInternalRoutes: FastifyPluginAsync = async (app) => {
 
     const body = request.body as Record<string, string | string[]>;
     const template = getTemplate(submission.template_id)!;
-    const currentAnswers = mergeAnswers(body, JSON.parse(submission.answers || '{}'));
+
+    let currentAnswers: Record<string, unknown>;
+    try {
+      currentAnswers = mergeAnswers(body, JSON.parse(submission.answers || '{}'));
+    } catch (e: any) {
+      if (e.message === 'Payload too large') {
+        return reply.code(413).send('Answer data too large.');
+      }
+      throw e;
+    }
+
     const direction = body._direction as string || 'next';
     const currentStepIdx = parseInt(body._stepIndex as string, 10) || 0;
 
     if (currentAnswers['1.1'] && !submission.practice_name) {
-      await updateOnboardingMeta(submission.id, { practiceName: currentAnswers['1.1'] as string });
+      const name = String(currentAnswers['1.1']).slice(0, 200);
+      await updateOnboardingMeta(submission.id, { practiceName: name });
     }
 
     const activeSections = getActiveSections(template, currentAnswers);
