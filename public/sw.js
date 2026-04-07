@@ -76,3 +76,36 @@ workbox.routing.registerRoute(
     }
   }
 );
+
+// Phase 14: Push notification handler — display notification when a push event arrives
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  const data = event.data.json();
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/assets/icon-192.png',
+      badge: '/assets/icon-192.png',
+      data: { url: data.url },
+    })
+  );
+});
+
+// Phase 14: Notification click handler — navigate to task URL or open new window
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/tasks';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // If an existing window is open, navigate it and focus
+      for (const client of windowClients) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      // Otherwise open a new window
+      return clients.openWindow(url);
+    })
+  );
+});
