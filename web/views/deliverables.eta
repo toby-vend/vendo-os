@@ -304,8 +304,8 @@
   </table>
 </div>
 
-<!-- Capacity cards -->
-<% if (it.capacity.length) { %>
+<!-- Capacity cards (admin only) -->
+<% if (it.isAdmin && it.capacity.length) { %>
 <h3 style="margin-bottom: 1rem;">Team Capacity — <%= it.serviceLabels[it.serviceType] %></h3>
 <div class="del-capacity">
   <% it.capacity.forEach(p => {
@@ -422,34 +422,45 @@ function editField(cell, configId, field, currentVal) {
   if (cell.querySelector('input') || cell.querySelector('select')) return;
   var orig = cell.textContent.trim();
 
-  // Use dropdown for AM/CM fields
+  // Use multi-select checkbox popup for AM/CM fields
   if (field === 'am' || field === 'cm') {
-    var sel = document.createElement('select');
-    sel.style.cssText = 'width:70px;padding:2px;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid var(--vendo-green);border-radius:4px;font-size:12px;font-family:var(--vendo-font);';
-    sel.innerHTML = '<option value="">—</option>';
+    var current = currentVal.split(/\s*\/\s*/).filter(Boolean);
+    var popup = document.createElement('div');
+    popup.style.cssText = 'position:absolute;z-index:20;background:var(--vendo-surface);border:1px solid var(--vendo-border-strong);border-radius:6px;padding:6px;min-width:100px;box-shadow:0 4px 12px rgba(0,0,0,0.4);';
     teamMembers.forEach(function(m) {
-      var opt = document.createElement('option');
-      opt.value = m.i;
-      opt.textContent = m.i;
-      if (m.i === currentVal) opt.selected = true;
-      sel.appendChild(opt);
+      var lbl = document.createElement('label');
+      lbl.style.cssText = 'display:flex;align-items:center;gap:4px;padding:3px 4px;font-size:12px;color:var(--vendo-text);cursor:pointer;border-radius:3px;white-space:nowrap;';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = m.i;
+      cb.checked = current.indexOf(m.i) >= 0;
+      cb.style.cssText = 'accent-color:#22C55E;';
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode(m.i + ' \u2014 ' + m.n));
+      lbl.addEventListener('mouseenter', function() { lbl.style.background = 'rgba(255,255,255,0.06)'; });
+      lbl.addEventListener('mouseleave', function() { lbl.style.background = 'none'; });
+      popup.appendChild(lbl);
     });
-    var addOpt = document.createElement('option');
-    addOpt.value = '__add__';
-    addOpt.textContent = '+ Add new...';
-    addOpt.style.color = '#22C55E';
-    sel.appendChild(addOpt);
-    cell.textContent = '';
-    cell.appendChild(sel);
-    sel.focus();
-    function saveSel() {
-      var val = sel.value;
-      if (val === '__add__') { window.location.href = '/deliverables/settings'; return; }
-      sel.remove();
-      saveField(cell, configId, field, val, orig);
+    var btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;justify-content:flex-end;margin-top:4px;padding-top:4px;border-top:1px solid var(--vendo-border);';
+    var doneBtn = document.createElement('button');
+    doneBtn.textContent = 'Done';
+    doneBtn.style.cssText = 'padding:3px 10px;font-size:11px;font-weight:600;background:var(--vendo-green);color:#0B0B0B;border:none;border-radius:4px;cursor:pointer;font-family:var(--vendo-font);';
+    btnRow.appendChild(doneBtn);
+    popup.appendChild(btnRow);
+    cell.style.position = 'relative';
+    cell.appendChild(popup);
+    function saveMulti() {
+      var selected = [];
+      popup.querySelectorAll('input[type=checkbox]').forEach(function(cb) { if (cb.checked) selected.push(cb.value); });
+      popup.remove();
+      saveField(cell, configId, field, selected.join(' / '), orig);
     }
-    sel.addEventListener('change', saveSel);
-    sel.addEventListener('blur', function() { if (sel.value !== '__add__') { saveSel(); } });
+    doneBtn.addEventListener('click', function(e) { e.stopPropagation(); saveMulti(); });
+    setTimeout(function() {
+      function closePopup(e) { if (!popup.contains(e.target)) { document.removeEventListener('mousedown', closePopup); saveMulti(); } }
+      document.addEventListener('mousedown', closePopup);
+    }, 0);
     return;
   }
 
