@@ -238,10 +238,13 @@ export async function getMonthlyHoursForService(
       ON CAST(h.client_id AS TEXT) = csm.external_id AND csm.source = 'harvest'
     JOIN clients c ON c.id = csm.client_id
     JOIN client_service_configs csc
-      ON (LOWER(csc.client_name) = LOWER(c.name)
-          OR LOWER(csc.client_name) = LOWER(c.display_name))
-      AND csc.service_type = ?
+      ON csc.service_type = ?
       AND csc.status = 'active'
+      AND (LOWER(csc.client_name) = LOWER(c.name)
+           OR LOWER(csc.client_name) = LOWER(c.display_name)
+           OR INSTR(LOWER(c.name), LOWER(csc.client_name)) > 0
+           OR INSTR(LOWER(COALESCE(c.display_name, '')), LOWER(csc.client_name)) > 0
+           OR INSTR(LOWER(csc.client_name), LOWER(COALESCE(c.display_name, c.name))) > 0)
     WHERE h.spent_date >= ? AND h.spent_date <= ?
     GROUP BY csc.client_name, h.user_name, month
 
@@ -253,7 +256,8 @@ export async function getMonthlyHoursForService(
            ROUND(SUM(h2.hours), 2) as hours
     FROM harvest_time_entries h2
     JOIN client_service_configs csc2
-      ON LOWER(h2.client_name) = LOWER(csc2.client_name)
+      ON (LOWER(h2.client_name) = LOWER(csc2.client_name)
+          OR INSTR(LOWER(h2.client_name), LOWER(csc2.client_name)) > 0)
       AND csc2.service_type = ?
       AND csc2.status = 'active'
     WHERE h2.spent_date >= ? AND h2.spent_date <= ?
@@ -352,10 +356,13 @@ export async function getHarvestAggregatedHours(
       ON CAST(h.client_id AS TEXT) = csm.external_id AND csm.source = 'harvest'
     JOIN clients c ON c.id = csm.client_id
     JOIN client_service_configs csc
-      ON (LOWER(csc.client_name) = LOWER(c.name)
-          OR LOWER(csc.client_name) = LOWER(c.display_name))
-      AND csc.service_type = ?
+      ON csc.service_type = ?
       AND csc.status = 'active'
+      AND (LOWER(csc.client_name) = LOWER(c.name)
+           OR LOWER(csc.client_name) = LOWER(c.display_name)
+           OR INSTR(LOWER(c.name), LOWER(csc.client_name)) > 0
+           OR INSTR(LOWER(COALESCE(c.display_name, '')), LOWER(csc.client_name)) > 0
+           OR INSTR(LOWER(csc.client_name), LOWER(COALESCE(c.display_name, c.name))) > 0)
     WHERE h.spent_date >= ? AND h.spent_date <= ?
     GROUP BY csc.client_name, h.user_name, month
 
@@ -367,7 +374,8 @@ export async function getHarvestAggregatedHours(
            ROUND(SUM(h2.hours), 2) as hours
     FROM harvest_time_entries h2
     JOIN client_service_configs csc2
-      ON LOWER(h2.client_name) = LOWER(csc2.client_name)
+      ON (LOWER(h2.client_name) = LOWER(csc2.client_name)
+          OR INSTR(LOWER(h2.client_name), LOWER(csc2.client_name)) > 0)
       AND csc2.service_type = ?
       AND csc2.status = 'active'
     WHERE h2.spent_date >= ? AND h2.spent_date <= ?
