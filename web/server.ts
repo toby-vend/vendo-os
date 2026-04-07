@@ -219,6 +219,8 @@ app.addHook('onRequest', async (request, reply) => {
 
   // Channel-based route permission check for standard users (deny-by-default)
   if (user.role === 'standard') {
+    // Allow common routes for all authenticated users
+    if (path === '/change-password' || path === '/logout' || path === '/settings') return;
     const routeSlug = getRouteSlug(path);
     // If no route slug mapping exists, deny access (unmapped routes are admin-only)
     if (!routeSlug || !user.allowedRoutes.includes(routeSlug)) {
