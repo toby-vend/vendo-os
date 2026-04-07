@@ -100,6 +100,11 @@
       <option value="9" <%= it.monthCount === 9 ? 'selected' : '' %>>Last 9 months</option>
       <option value="12" <%= it.monthCount === 12 ? 'selected' : '' %>>Last 12 months</option>
     </select>
+    <select name="source" onchange="this.form.submit()">
+      <option value="manual" <%= it.sourceMode === 'manual' ? 'selected' : '' %>>Manual Hours</option>
+      <option value="harvest" <%= it.sourceMode === 'harvest' ? 'selected' : '' %>>Harvest Hours</option>
+      <option value="compare" <%= it.sourceMode === 'compare' ? 'selected' : '' %>>Compare</option>
+    </select>
   </form>
 
   <% if (it.isAdmin) { %>
@@ -198,30 +203,50 @@
         %>
         <% it.months.forEach(m => {
           const key = config.client_name + '::' + m;
+          // Manual hours
           const agg = it.hoursAgg[key];
           const amH = agg?.am?.total || 0;
           const cmH = agg?.cm?.total || 0;
-          const amBreak = (agg?.am?.breakdown || []).map(b => b.user_initials + ': ' + b.hours + 'h').join('\n');
-          const cmBreak = (agg?.cm?.breakdown || []).map(b => b.user_initials + ': ' + b.hours + 'h').join('\n');
-          const totalH = amH + cmH;
+          // Harvest hours
+          const hAgg = (it.harvestAgg || {})[key];
+          const hAmH = hAgg?.am?.total || 0;
+          const hCmH = hAgg?.cm?.total || 0;
+          const hAmBreak = (hAgg?.am?.breakdown || []).map(b => b.user_initials + ': ' + b.hours + 'h').join('\n');
+          const hCmBreak = (hAgg?.cm?.breakdown || []).map(b => b.user_initials + ': ' + b.hours + 'h').join('\n');
+          // Choose display values based on source
+          const showAm = it.sourceMode === 'harvest' ? hAmH : amH;
+          const showCm = it.sourceMode === 'harvest' ? hCmH : cmH;
+          const amBreak = it.sourceMode === 'harvest' ? hAmBreak : (agg?.am?.breakdown || []).map(b => b.user_initials + ': ' + b.hours + 'h').join('\n');
+          const cmBreak = it.sourceMode === 'harvest' ? hCmBreak : (agg?.cm?.breakdown || []).map(b => b.user_initials + ': ' + b.hours + 'h').join('\n');
+          const totalH = showAm + showCm;
           const allocTotal = config.am_hrs + config.cm_hrs;
           const overBudget = allocTotal > 0 && totalH > allocTotal * 1.15;
           const onBudget = totalH > 0 && !overBudget;
           const cellClass = totalH === 0 ? 'no-hours' : overBudget ? 'over-budget' : onBudget ? 'on-budget' : '';
-          const completed = it.completionMap[key];
           const eName = config.client_name.replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
-          const amClick = canEditAM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'am\',\'' + it.userInitials + '\')"' : '';
-          const cmClick = canEditCM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'cm\',\'' + it.userInitials + '\')"' : '';
+          // Only allow editing in manual mode
+          const editable = it.sourceMode === 'manual';
+          const amClick = editable && canEditAM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'am\',\'' + it.userInitials + '\')"' : '';
+          const cmClick = editable && canEditCM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'cm\',\'' + it.userInitials + '\')"' : '';
           const amTitle = amBreak ? ' title="' + amBreak.replace(/"/g,'&quot;') + '"' : '';
           const cmTitle = cmBreak ? ' title="' + cmBreak.replace(/"/g,'&quot;') + '"' : '';
-          const amCls = cellClass + ' ' + (canEditAM ? 'del-hour-cell' : 'del-hour-readonly');
-          const cmCls = cellClass + ' ' + (canEditCM ? 'del-hour-cell' : 'del-hour-readonly');
+          const amCls = cellClass + ' ' + (editable && canEditAM ? 'del-hour-cell' : 'del-hour-readonly');
+          const cmCls = cellClass + ' ' + (editable && canEditCM ? 'del-hour-cell' : 'del-hour-readonly');
+          // Compare mode: show delta
+          const amDelta = it.sourceMode === 'compare' ? (hAmH - amH) : 0;
+          const cmDelta = it.sourceMode === 'compare' ? (hCmH - cmH) : 0;
         %>
           <td class="col-month <%~ amCls %>" id="am-<%= config.id %>-<%= m %>" style="border-left: 2px solid rgba(255,255,255,0.08);"<%~ amClick %><%~ amTitle %>>
-            <span class="del-hour-val"><%= amH > 0 ? amH : '' %></span>
+            <span class="del-hour-val"><%= showAm > 0 ? showAm : '' %></span>
+            <% if (it.sourceMode === 'compare' && (hAmH > 0 || amH > 0)) { %>
+            <div style="font-size: 10px; color: <%= Math.abs(amDelta) < 0.5 ? '#22C55E' : Math.abs(amDelta) <= 2 ? '#F59E0B' : '#EF4444' %>;"><%= hAmH > 0 ? 'H:' + hAmH : '' %></div>
+            <% } %>
           </td>
           <td class="col-month <%~ cmCls %>" id="cm-<%= config.id %>-<%= m %>"<%~ cmClick %><%~ cmTitle %>>
-            <span class="del-hour-val"><%= cmH > 0 ? cmH : '' %></span>
+            <span class="del-hour-val"><%= showCm > 0 ? showCm : '' %></span>
+            <% if (it.sourceMode === 'compare' && (hCmH > 0 || cmH > 0)) { %>
+            <div style="font-size: 10px; color: <%= Math.abs(cmDelta) < 0.5 ? '#22C55E' : Math.abs(cmDelta) <= 2 ? '#F59E0B' : '#EF4444' %>;"><%= hCmH > 0 ? 'H:' + hCmH : '' %></div>
+            <% } %>
           </td>
         <% }) %>
         <% if (it.isAdmin) { %>
@@ -250,10 +275,23 @@
         <td class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %>"></td>
         <% if (it.showBudget) { %><td class="col-sticky col-s8 col-last-sticky"></td><% } %>
         <% it.months.forEach(m => {
-          const t = it.monthTotals[m] || { am: 0, cm: 0 };
+          // Recalculate totals from the active data source
+          let tAm = 0, tCm = 0;
+          it.configs.forEach(c => {
+            const key = c.client_name + '::' + m;
+            if (it.sourceMode === 'harvest') {
+              const h = (it.harvestAgg || {})[key];
+              tAm += h?.am?.total || 0;
+              tCm += h?.cm?.total || 0;
+            } else {
+              const a = it.hoursAgg[key];
+              tAm += a?.am?.total || 0;
+              tCm += a?.cm?.total || 0;
+            }
+          });
         %>
-          <td class="col-month" style="color: var(--vendo-green); border-left: 2px solid rgba(255,255,255,0.08);"><%= t.am > 0 ? t.am.toFixed(1) : '' %></td>
-          <td class="col-month" style="color: #3B82F6;"><%= t.cm > 0 ? t.cm.toFixed(1) : '' %></td>
+          <td class="col-month" style="color: var(--vendo-green); border-left: 2px solid rgba(255,255,255,0.08);"><%= tAm > 0 ? tAm.toFixed(1) : '' %></td>
+          <td class="col-month" style="color: #3B82F6;"><%= tCm > 0 ? tCm.toFixed(1) : '' %></td>
         <% }) %>
         <td></td>
       </tr>
@@ -269,8 +307,18 @@
         <td class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %>" style="<%= !it.showBudget ? 'font-size: 11px; color: var(--vendo-text-muted);' : '' %>"><%= !it.showBudget ? 'Del %' : '' %></td>
         <% if (it.showBudget) { %><td class="col-sticky col-s8 col-last-sticky" style="font-size: 11px; color: var(--vendo-text-muted);">Del %</td><% } %>
         <% it.months.forEach(m => {
-          const t = it.monthTotals[m] || { am: 0, cm: 0 };
-          const totalActual = t.am + t.cm;
+          let pAm = 0, pCm = 0;
+          it.configs.forEach(c => {
+            const key = c.client_name + '::' + m;
+            if (it.sourceMode === 'harvest') {
+              const h = (it.harvestAgg || {})[key];
+              pAm += h?.am?.total || 0; pCm += h?.cm?.total || 0;
+            } else {
+              const a = it.hoursAgg[key];
+              pAm += a?.am?.total || 0; pCm += a?.cm?.total || 0;
+            }
+          });
+          const totalActual = pAm + pCm;
           const totalAlloc = it.totalAllocatedAM + it.totalAllocatedCM;
           const pct = totalAlloc > 0 ? (totalActual / totalAlloc * 100).toFixed(1) : '0';
           const isOver = parseFloat(pct) > 100;

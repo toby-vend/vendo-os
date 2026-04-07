@@ -264,10 +264,12 @@ export async function getMonthlyHoursForService(
     const key = `${config.client_name}::${entry.month}`;
     if (!result[key]) continue;
 
-    // Determine if this person is AM or CM
+    // Determine if this person is AM or CM (supports multi-person e.g. "SF / BD")
     const userInitials = initialsMap[entry.user_name] || '';
-    const isAM = config.am && (config.am === userInitials || config.am === entry.user_name);
-    const isCM = config.cm && (config.cm === userInitials || config.cm === entry.user_name);
+    const amPeople = parseMultiPerson(config.am);
+    const cmPeople = parseMultiPerson(config.cm);
+    const isAM = amPeople.includes(userInitials) || amPeople.includes(entry.user_name);
+    const isCM = cmPeople.includes(userInitials) || cmPeople.includes(entry.user_name);
 
     if (isAM) {
       result[key].am_hours += entry.hours;
@@ -286,6 +288,85 @@ export async function getMonthlyHoursForService(
   }
 
   return Object.values(result);
+}
+
+/**
+ * Harvest hours in the same shape as getAggregatedHours() — keyed by "ClientName::2026-04"
+ * with am/cm breakdown per person. This makes it drop-in compatible with the template.
+ */
+export async function getHarvestAggregatedHours(
+  serviceType: string,
+  months: string[],
+): Promise<Record<string, { am: { total: number; breakdown: HourBreakdown[] }; cm: { total: number; breakdown: HourBreakdown[] } }>> {
+  if (!months.length) return {};
+
+  const configs = await getServiceConfigs({ serviceType });
+  if (!configs.length) return {};
+
+  const initialsMap = await getInitialsMap();
+
+  const minMonth = months[0];
+  const maxMonth = months[months.length - 1];
+  const startDate = `${minMonth}-01`;
+  const endDate = `${maxMonth}-31`;
+
+  const entries = await rows<{
+    client_name: string;
+    user_name: string;
+    month: string;
+    hours: number;
+  }>(`
+    SELECT client_name,
+           user_name,
+           strftime('%Y-%m', spent_date) as month,
+           ROUND(SUM(hours), 2) as hours
+    FROM harvest_time_entries
+    WHERE spent_date >= ? AND spent_date <= ?
+      AND client_name IS NOT NULL
+    GROUP BY client_name, user_name, month
+  `, [startDate, endDate]);
+
+  const result: Record<string, { am: { total: number; breakdown: HourBreakdown[] }; cm: { total: number; breakdown: HourBreakdown[] } }> = {};
+
+  for (const entry of entries) {
+    const config = configs.find(c =>
+      c.client_name.toLowerCase() === entry.client_name.toLowerCase()
+    );
+    if (!config) continue;
+
+    const key = `${config.client_name}::${entry.month}`;
+    if (!result[key]) {
+      result[key] = {
+        am: { total: 0, breakdown: [] },
+        cm: { total: 0, breakdown: [] },
+      };
+    }
+
+    const userInit = initialsMap[entry.user_name] || entry.user_name;
+    const amPeople = parseMultiPerson(config.am);
+    const cmPeople = parseMultiPerson(config.cm);
+    const isAM = amPeople.includes(userInit) || amPeople.includes(entry.user_name);
+    const isCM = cmPeople.includes(userInit) || cmPeople.includes(entry.user_name);
+
+    const bd: HourBreakdown = { user_initials: userInit, user_name: entry.user_name, hours: entry.hours };
+
+    if (isAM) {
+      result[key].am.total += entry.hours;
+      result[key].am.breakdown.push(bd);
+    } else if (isCM) {
+      result[key].cm.total += entry.hours;
+      result[key].cm.breakdown.push(bd);
+    }
+    // Unassigned hours are excluded — only AM/CM-attributed hours show
+  }
+
+  // Round totals
+  for (const v of Object.values(result)) {
+    v.am.total = Math.round(v.am.total * 100) / 100;
+    v.cm.total = Math.round(v.cm.total * 100) / 100;
+  }
+
+  return result;
 }
 
 // ============================================================

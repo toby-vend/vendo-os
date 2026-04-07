@@ -22,6 +22,7 @@ import {
   upsertTeamMember,
   deleteTeamMember,
   getVendoUsers,
+  getHarvestAggregatedHours,
 } from '../lib/queries/deliverables.js';
 
 // --- Input sanitisation helpers ---
@@ -111,8 +112,12 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       });
     }
 
-    const [hoursAgg, completions, people, capacity, teamForService] = await Promise.all([
+    const sourceMode = (['manual', 'harvest', 'compare'].includes(q.source) ? q.source : 'manual') as 'manual' | 'harvest' | 'compare';
+    const needHarvest = sourceMode === 'harvest' || sourceMode === 'compare';
+
+    const [hoursAgg, harvestAgg, completions, people, capacity, teamForService] = await Promise.all([
       getAggregatedHours(serviceType, months),
+      needHarvest ? getHarvestAggregatedHours(serviceType, months) : Promise.resolve({}),
       getCompletions(serviceType, months),
       isAdmin ? getDistinctPeople() : Promise.resolve([]),
       getPersonCapacity(serviceType, months[months.length - 1] || months[0]),
@@ -147,6 +152,8 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       configs,
       months,
       hoursAgg,
+      harvestAgg,
+      sourceMode,
       completionMap,
       monthTotals,
       totalAllocatedAM,
