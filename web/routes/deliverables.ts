@@ -4,6 +4,7 @@ import {
   getServiceConfigsForUser,
   getServiceTypesForUser,
   upsertServiceConfig,
+  updateConfigField,
   deleteServiceConfig,
   getPersonCapacity,
   getCompletions,
@@ -202,7 +203,28 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     );
   });
 
-  // ── Add/Edit config (admin only) ──────────────────────────
+  // ── Update single config field (admin only, HTMX) ─────────
+
+  app.post('/config/:id/field', async (request, reply) => {
+    if ((request as any).user?.role !== 'admin') { reply.code(403).send('Admin only'); return; }
+    const { id } = request.params as { id: string };
+    const body = request.body as Record<string, string>;
+    const field = body.field;
+    const rawValue = body.value?.trim() ?? '';
+
+    const numericFields = ['tier', 'calls', 'am_hrs', 'cm_hrs', 'budget'];
+    const value = numericFields.includes(field) ? parseFloat(rawValue) || 0 : rawValue;
+
+    try {
+      await updateConfigField(parseInt(id, 10), field, value);
+      clearInitialsCache();
+      reply.type('text/html').send(String(rawValue || '—'));
+    } catch (err: any) {
+      reply.code(400).type('text/html').send(err.message);
+    }
+  });
+
+  // ── Add new config (admin only) ──────────────────────────
 
   app.post('/config', async (request, reply) => {
     const body = request.body as Record<string, string>;

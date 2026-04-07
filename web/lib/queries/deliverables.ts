@@ -162,6 +162,16 @@ export async function upsertServiceConfig(config: Omit<ServiceConfig, 'id'>): Pr
   });
 }
 
+export async function updateConfigField(id: number, field: string, value: string | number | null): Promise<void> {
+  const allowed = ['am', 'cm', 'level', 'tier', 'calls', 'am_hrs', 'cm_hrs', 'budget', 'currency'];
+  if (!allowed.includes(field)) throw new Error('Invalid field: ' + field);
+  await ensureSchema();
+  await db.execute({
+    sql: `UPDATE client_service_configs SET ${field} = ?, updated_at = datetime('now') WHERE id = ?`,
+    args: [value, id],
+  });
+}
+
 export async function deleteServiceConfig(id: number): Promise<void> {
   await db.execute({ sql: 'DELETE FROM client_service_configs WHERE id = ?', args: [id] });
 }
