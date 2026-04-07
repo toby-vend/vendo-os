@@ -387,11 +387,19 @@ export async function getHarvestAggregatedHours(
     GROUP BY csc2.client_name, h2.user_name, month
   `, [serviceType, startDate, endDate, serviceType, startDate, endDate]);
 
+  console.log(`[HARVEST] Query returned ${entries.length} entries for ${serviceType}, months ${minMonth}-${maxMonth}`);
+  if (entries.length > 0) {
+    console.log(`[HARVEST] Sample: ${entries[0].config_client_name} | ${entries[0].user_name} | ${entries[0].month} | ${entries[0].hours}`);
+  }
+  console.log(`[HARVEST] Configs: ${configs.length}, InitialsMap keys: ${Object.keys(initialsMap).length}`);
+
   const result: Record<string, { am: { total: number; breakdown: HourBreakdown[] }; cm: { total: number; breakdown: HourBreakdown[] } }> = {};
 
+  let matched = 0, unmatched = 0, amCount = 0, cmCount = 0;
   for (const entry of entries) {
     const config = configs.find(c => c.client_name === entry.config_client_name);
-    if (!config) continue;
+    if (!config) { unmatched++; continue; }
+    matched++;
 
     const key = `${config.client_name}::${entry.month}`;
     if (!result[key]) {
@@ -412,11 +420,15 @@ export async function getHarvestAggregatedHours(
     if (isAM) {
       result[key].am.total += entry.hours;
       result[key].am.breakdown.push(bd);
+      amCount++;
     } else if (isCM) {
       result[key].cm.total += entry.hours;
       result[key].cm.breakdown.push(bd);
+      cmCount++;
     }
   }
+
+  console.log(`[HARVEST] Matched: ${matched}, Unmatched: ${unmatched}, AM: ${amCount}, CM: ${cmCount}, Result keys: ${Object.keys(result).length}`);
 
   // Round totals
   for (const v of Object.values(result)) {
