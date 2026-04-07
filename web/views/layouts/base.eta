@@ -327,6 +327,143 @@
     window._pwaInstallPrompt = e;
   });
 
+  // === Phase 14: Push Notification Toast Banner ===
+  (function() {
+    function urlBase64ToUint8Array(base64String) {
+      var padding = '='.repeat((4 - base64String.length % 4) % 4);
+      var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      var rawData = atob(base64);
+      return Uint8Array.from([...rawData].map(function(c) { return c.charCodeAt(0); }));
+    }
+    function isPushIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+    function isPushStandalone() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    function shouldShowToast() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+      if (Notification.permission === 'granted') return false;
+      if (localStorage.getItem('push-toast-dismissed') === '2') return false;
+      return true;
+    }
+
+    function buildToastHTML() {
+      var msg = '';
+      var actionHTML = '';
+
+      if (isPushIOS() && !isPushStandalone()) {
+        msg = 'To receive notifications, install VendoOS to your home screen first.';
+        actionHTML = '<a href="/settings#install-app-section" style="color:#22C55E;font-size:13px;white-space:nowrap;">Install App</a>';
+      } else if (Notification.permission === 'denied') {
+        msg = 'Notifications are blocked. To enable, open your browser settings for this site.';
+        actionHTML = '';
+      } else {
+        msg = 'Get notified when drafts are ready \u2014';
+        actionHTML = '<button class="push-toast-btn" id="push-toast-enable-btn">Enable notifications</button>';
+      }
+
+      return '<div class="push-toast" id="push-toast-banner">'
+        + '<span style="flex:1;">' + msg + '</span>'
+        + (actionHTML ? '<span>' + actionHTML + '</span>' : '')
+        + '<button class="push-toast-close" id="push-toast-close-btn" aria-label="Dismiss">&times;</button>'
+        + '</div>';
+    }
+
+    function showToast() {
+      if (!shouldShowToast()) return;
+      if (document.getElementById('push-toast-banner')) return; // already shown
+
+      var div = document.createElement('div');
+      div.innerHTML = buildToastHTML();
+      document.body.insertBefore(div.firstChild, document.body.firstChild);
+
+      // Close button
+      var closeBtn = document.getElementById('push-toast-close-btn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          var toast = document.getElementById('push-toast-banner');
+          if (toast) toast.remove();
+          var count = parseInt(localStorage.getItem('push-toast-dismiss-count') || '0', 10) + 1;
+          localStorage.setItem('push-toast-dismiss-count', String(count));
+          if (count >= 2) {
+            localStorage.setItem('push-toast-dismissed', '2');
+          }
+        });
+      }
+
+      // Enable button
+      var enableBtn = document.getElementById('push-toast-enable-btn');
+      if (enableBtn) {
+        enableBtn.addEventListener('click', function() {
+          enableBtn.disabled = true;
+          enableBtn.textContent = 'Enabling…';
+          Notification.requestPermission().then(function(permission) {
+            if (permission !== 'granted') {
+              var toast = document.getElementById('push-toast-banner');
+              if (toast) toast.remove();
+              if (permission === 'denied') {
+                // Re-render toast as informational only
+                showToast();
+              }
+              return;
+            }
+            // Subscribe
+            fetch('/api/push/vapid-public-key')
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                return navigator.serviceWorker.ready.then(function(reg) {
+                  return reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(data.key)
+                  });
+                });
+              })
+              .then(function(sub) {
+                return fetch('/api/push/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(sub.toJSON())
+                });
+              })
+              .then(function() {
+                var toast = document.getElementById('push-toast-banner');
+                if (toast) toast.remove();
+              })
+              .catch(function(err) {
+                console.warn('Push subscribe failed:', err);
+                enableBtn.disabled = false;
+                enableBtn.textContent = 'Enable notifications';
+              });
+          });
+        });
+      }
+    }
+
+    // Trigger: page load on a task detail page showing draft_ready status
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.location.pathname.startsWith('/tasks/')) {
+        var badge = document.querySelector('[data-status="draft_ready"], .status-badge');
+        var bodyText = document.body.innerText || '';
+        if (badge || bodyText.indexOf('draft_ready') !== -1 || bodyText.indexOf('Draft Ready') !== -1) {
+          showToast();
+        }
+      }
+    });
+
+    // Trigger: HTMX swaps that indicate task completion
+    document.addEventListener('htmx:afterSwap', function(e) {
+      var content = e.detail && e.detail.target ? e.detail.target.innerHTML : '';
+      if (content.indexOf('draft_ready') !== -1 || content.indexOf('Draft Ready') !== -1) {
+        showToast();
+      }
+    });
+
+    // Custom event for explicit dispatch from server responses
+    document.addEventListener('vendoos:task-completed', function() {
+      showToast();
+    });
+  })();
+
   // === Phase 11: Touch Gestures (mobile only) ===
   if (window.innerWidth <= 768) {
 
