@@ -222,21 +222,48 @@ export async function getMonthlyHoursForService(
   const startDate = `${minMonth}-01`;
   const endDate = `${maxMonth}-31`;
 
+  // Route through client_source_mappings for proper Harvest → canonical client resolution
   const entries = await rows<{
-    client_name: string;
+    config_client_name: string;
     user_name: string;
     month: string;
     hours: number;
   }>(`
-    SELECT client_name,
-           user_name,
-           strftime('%Y-%m', spent_date) as month,
-           ROUND(SUM(hours), 2) as hours
-    FROM harvest_time_entries
-    WHERE spent_date >= ? AND spent_date <= ?
-      AND client_name IS NOT NULL
-    GROUP BY client_name, user_name, month
-  `, [startDate, endDate]);
+    SELECT csc.client_name as config_client_name,
+           h.user_name,
+           strftime('%Y-%m', h.spent_date) as month,
+           ROUND(SUM(h.hours), 2) as hours
+    FROM harvest_time_entries h
+    JOIN client_source_mappings csm
+      ON CAST(h.client_id AS TEXT) = csm.external_id AND csm.source = 'harvest'
+    JOIN clients c ON c.id = csm.client_id
+    JOIN client_service_configs csc
+      ON (LOWER(csc.client_name) = LOWER(c.name)
+          OR LOWER(csc.client_name) = LOWER(c.display_name))
+      AND csc.service_type = ?
+      AND csc.status = 'active'
+    WHERE h.spent_date >= ? AND h.spent_date <= ?
+    GROUP BY csc.client_name, h.user_name, month
+
+    UNION ALL
+
+    SELECT csc2.client_name as config_client_name,
+           h2.user_name,
+           strftime('%Y-%m', h2.spent_date) as month,
+           ROUND(SUM(h2.hours), 2) as hours
+    FROM harvest_time_entries h2
+    JOIN client_service_configs csc2
+      ON LOWER(h2.client_name) = LOWER(csc2.client_name)
+      AND csc2.service_type = ?
+      AND csc2.status = 'active'
+    WHERE h2.spent_date >= ? AND h2.spent_date <= ?
+      AND h2.client_id NOT IN (
+        SELECT CAST(csm2.external_id AS INTEGER)
+        FROM client_source_mappings csm2
+        WHERE csm2.source = 'harvest'
+      )
+    GROUP BY csc2.client_name, h2.user_name, month
+  `, [serviceType, startDate, endDate, serviceType, startDate, endDate]);
 
   // Map entries to AM/CM based on configs
   const result: Record<string, MonthlyHours> = {};
@@ -255,10 +282,7 @@ export async function getMonthlyHoursForService(
   }
 
   for (const entry of entries) {
-    // Find matching config
-    const config = configs.find(c =>
-      c.client_name.toLowerCase() === entry.client_name.toLowerCase()
-    );
+    const config = configs.find(c => c.client_name === entry.config_client_name);
     if (!config) continue;
 
     const key = `${config.client_name}::${entry.month}`;
@@ -310,28 +334,55 @@ export async function getHarvestAggregatedHours(
   const startDate = `${minMonth}-01`;
   const endDate = `${maxMonth}-31`;
 
+  // Route through client_source_mappings → clients → client_service_configs
+  // to handle Harvest client names that differ from config names.
+  // Also fall back to direct name match for any clients not in the mapping table.
   const entries = await rows<{
-    client_name: string;
+    config_client_name: string;
     user_name: string;
     month: string;
     hours: number;
   }>(`
-    SELECT client_name,
-           user_name,
-           strftime('%Y-%m', spent_date) as month,
-           ROUND(SUM(hours), 2) as hours
-    FROM harvest_time_entries
-    WHERE spent_date >= ? AND spent_date <= ?
-      AND client_name IS NOT NULL
-    GROUP BY client_name, user_name, month
-  `, [startDate, endDate]);
+    SELECT csc.client_name as config_client_name,
+           h.user_name,
+           strftime('%Y-%m', h.spent_date) as month,
+           ROUND(SUM(h.hours), 2) as hours
+    FROM harvest_time_entries h
+    JOIN client_source_mappings csm
+      ON CAST(h.client_id AS TEXT) = csm.external_id AND csm.source = 'harvest'
+    JOIN clients c ON c.id = csm.client_id
+    JOIN client_service_configs csc
+      ON (LOWER(csc.client_name) = LOWER(c.name)
+          OR LOWER(csc.client_name) = LOWER(c.display_name))
+      AND csc.service_type = ?
+      AND csc.status = 'active'
+    WHERE h.spent_date >= ? AND h.spent_date <= ?
+    GROUP BY csc.client_name, h.user_name, month
+
+    UNION ALL
+
+    SELECT csc2.client_name as config_client_name,
+           h2.user_name,
+           strftime('%Y-%m', h2.spent_date) as month,
+           ROUND(SUM(h2.hours), 2) as hours
+    FROM harvest_time_entries h2
+    JOIN client_service_configs csc2
+      ON LOWER(h2.client_name) = LOWER(csc2.client_name)
+      AND csc2.service_type = ?
+      AND csc2.status = 'active'
+    WHERE h2.spent_date >= ? AND h2.spent_date <= ?
+      AND h2.client_id NOT IN (
+        SELECT CAST(csm2.external_id AS INTEGER)
+        FROM client_source_mappings csm2
+        WHERE csm2.source = 'harvest'
+      )
+    GROUP BY csc2.client_name, h2.user_name, month
+  `, [serviceType, startDate, endDate, serviceType, startDate, endDate]);
 
   const result: Record<string, { am: { total: number; breakdown: HourBreakdown[] }; cm: { total: number; breakdown: HourBreakdown[] } }> = {};
 
   for (const entry of entries) {
-    const config = configs.find(c =>
-      c.client_name.toLowerCase() === entry.client_name.toLowerCase()
-    );
+    const config = configs.find(c => c.client_name === entry.config_client_name);
     if (!config) continue;
 
     const key = `${config.client_name}::${entry.month}`;
@@ -357,7 +408,6 @@ export async function getHarvestAggregatedHours(
       result[key].cm.total += entry.hours;
       result[key].cm.breakdown.push(bd);
     }
-    // Unassigned hours are excluded — only AM/CM-attributed hours show
   }
 
   // Round totals
