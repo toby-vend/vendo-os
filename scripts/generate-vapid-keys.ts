@@ -1,4 +1,6 @@
-import webpush from 'web-push';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const webpush = require('web-push');
 
 const keys = webpush.generateVAPIDKeys();
 
