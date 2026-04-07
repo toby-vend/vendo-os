@@ -117,7 +117,7 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
 
     const [hoursAgg, harvestAgg, completions, people, capacity, teamForService] = await Promise.all([
       getAggregatedHours(serviceType, months),
-      needHarvest ? getHarvestAggregatedHours(serviceType, months).catch(err => { console.error('[HARVEST] getHarvestAggregatedHours error:', err); return {}; }) : Promise.resolve({}),
+      needHarvest ? getHarvestAggregatedHours(serviceType, months) : Promise.resolve({}),
       getCompletions(serviceType, months),
       isAdmin ? getDistinctPeople() : Promise.resolve([]),
       getPersonCapacity(serviceType, months[months.length - 1] || months[0]),
