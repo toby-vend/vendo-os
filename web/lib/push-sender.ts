@@ -1,9 +1,12 @@
-import * as webpush from 'web-push';
+import { createRequire } from 'module';
 import {
   getSubscriptionsByUserId,
   deleteSubscriptionByEndpoint,
 } from './queries/push-subscriptions.js';
 import { getUserByEmail } from './queries/auth.js';
+
+const require = createRequire(import.meta.url);
+const webpush = require('web-push');
 
 /**
  * Initialise VAPID details once at server startup.
