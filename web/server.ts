@@ -58,6 +58,7 @@ import { skillsApiRoutes } from './routes/api/skills.js';
 import { onboardPublicRoutes, onboardingInternalRoutes } from './routes/onboarding.js';
 import { videoProductionRoutes } from './routes/video-production.js';
 import { deliverablesRoutes } from './routes/deliverables.js';
+import { pushRoutes } from './routes/push.js';
 import crypto from 'crypto';
 import {
   parseCookies,
@@ -67,11 +68,15 @@ import {
   verifyCsrfToken,
   type SessionUser,
 } from './lib/auth.js';
+import { initVapid } from './lib/push-sender.js';
 import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, hasUserOAuthToken, getClientForUser, migrateSidebarConfig } from './lib/queries.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = Fastify({ logger: process.env.VERCEL ? false : true });
+
+// Initialise VAPID details for push notifications (no-op if env vars are missing)
+initVapid();
 
 // Template engine
 const eta = new Eta({ views: resolve(__dirname, 'views'), cache: process.env.NODE_ENV === 'production' });
@@ -340,6 +345,7 @@ app.register(driveWebhookRoutes, { prefix: '/api/drive' });
 app.register(fathomWebhookRoutes, { prefix: '/api/fathom' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
+app.register(pushRoutes, { prefix: '/api/push' });
 app.register(taskRunsUiRoutes, { prefix: '/tasks' });
 app.register(skillsBrowserRoutes, { prefix: '/skills-drive' });
 app.register(portalRoutes, { prefix: '/portal' });
