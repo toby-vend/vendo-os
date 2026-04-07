@@ -7,12 +7,14 @@ import {
   updateTaskRunOutput,
   updateTaskRunQA,
   incrementAttempts,
+  getTaskRun,
   type SopSnapshot,
 } from './queries/task-runs.js';
 import { scalar } from './queries/base.js';
 import { loadTaskTypeConfig } from './task-types/index.js';
 import { runSOPCheck } from './qa-checker.js';
 import { checkAHPRACompliance } from './ahpra-rules.js';
+import { sendPushToUserByEmail } from './push-sender.js';
 
 /**
  * Resolve the client_slug for a given client_id by querying brand_hub.
@@ -149,6 +151,14 @@ async function generateDraft(
         const critiqueObj = { sop_issues: [], ahpra_violations: ahpraViolations };
         await updateTaskRunQA(taskRunId, { score: 1, critique: JSON.stringify(critiqueObj) });
         await updateTaskRunOutput(taskRunId, JSON.stringify(parsed));
+        getTaskRun(taskRunId).then(run => {
+          if (!run) return;
+          return sendPushToUserByEmail(run.created_by, {
+            title: 'Draft Ready',
+            body: `${taskType} — ${clientName}`,
+            url: `/tasks/${taskRunId}`,
+          });
+        }).catch(e => console.error('[push] draft_ready send failed:', e));
         return;
       }
 
@@ -167,6 +177,14 @@ async function generateDraft(
       const critiqueObj = { sop_issues: sopIssues, ahpra_violations: ahpraViolations };
       await updateTaskRunQA(taskRunId, { score: 0, critique: JSON.stringify(critiqueObj) });
       await updateTaskRunOutput(taskRunId, JSON.stringify(parsed));
+      getTaskRun(taskRunId).then(run => {
+        if (!run) return;
+        return sendPushToUserByEmail(run.created_by, {
+          title: 'Draft Ready',
+          body: `${taskType} — ${clientName}`,
+          url: `/tasks/${taskRunId}`,
+        });
+      }).catch(e => console.error('[push] draft_ready send failed:', e));
       return;
 
     } catch (qaErr) {
@@ -175,6 +193,14 @@ async function generateDraft(
         `[task-matcher] QA check error for taskRunId=${taskRunId} attempt=${attempt}: ${(qaErr as Error).message}`,
       );
       await updateTaskRunStatus(taskRunId, 'failed');
+      getTaskRun(taskRunId).then(run => {
+        if (!run) return;
+        return sendPushToUserByEmail(run.created_by, {
+          title: 'Task Failed',
+          body: `${taskType} — ${clientName} failed QA: QA check error`,
+          url: `/tasks/${taskRunId}`,
+        });
+      }).catch(e => console.error('[push] failed send failed:', e));
       return;
     }
   }
@@ -211,6 +237,17 @@ export async function assembleContext(
     if (skillResponse.gap) {
       console.warn(`[task-matcher] SOP gap detected for taskRunId=${taskRunId} taskType=${taskType} channel=${channel}`);
       await updateTaskRunStatus(taskRunId, 'failed');
+      Promise.all([
+        getTaskRun(taskRunId),
+        scalar<string>('SELECT client_name FROM brand_hub WHERE client_id = ? LIMIT 1', [clientId]),
+      ]).then(([run, name]) => {
+        if (!run) return;
+        return sendPushToUserByEmail(run.created_by, {
+          title: 'Task Failed',
+          body: `${taskType} — ${name ?? 'Unknown client'} failed QA: No matching SOPs found`,
+          url: `/tasks/${taskRunId}`,
+        });
+      }).catch(e => console.error('[push] failed send failed:', e));
       return;
     }
 
@@ -240,6 +277,17 @@ export async function assembleContext(
     if (!limitCheck.allowed) {
       console.warn(`[task-matcher] Token limit exceeded for userId=${userId}, taskRunId=${taskRunId}`);
       await updateTaskRunStatus(taskRunId, 'failed');
+      Promise.all([
+        getTaskRun(taskRunId),
+        scalar<string>('SELECT client_name FROM brand_hub WHERE client_id = ? LIMIT 1', [clientId]),
+      ]).then(([run, name]) => {
+        if (!run) return;
+        return sendPushToUserByEmail(run.created_by, {
+          title: 'Task Failed',
+          body: `${taskType} — ${name ?? 'Unknown client'} failed QA: Generation failed`,
+          url: `/tasks/${taskRunId}`,
+        });
+      }).catch(e => console.error('[push] failed send failed:', e));
       return;
     }
 
@@ -252,6 +300,17 @@ export async function assembleContext(
   } catch (err) {
     // On any error, mark as failed (fire-and-forget — do not mask the original error)
     updateTaskRunStatus(taskRunId, 'failed').catch(() => {});
+    Promise.all([
+      getTaskRun(taskRunId),
+      scalar<string>('SELECT client_name FROM brand_hub WHERE client_id = ? LIMIT 1', [clientId]),
+    ]).then(([run, name]) => {
+      if (!run) return;
+      return sendPushToUserByEmail(run.created_by, {
+        title: 'Task Failed',
+        body: `${taskType} — ${name ?? 'Unknown client'} failed QA: Generation failed`,
+        url: `/tasks/${taskRunId}`,
+      });
+    }).catch(e => console.error('[push] failed send failed:', e));
     throw err;
   }
 }
