@@ -226,8 +226,14 @@
           const eName = config.client_name.replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
           // Only allow editing in manual mode
           const editable = it.sourceMode === 'manual';
-          const amClick = editable && canEditAM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'am\',\'' + it.userInitials + '\')"' : '';
-          const cmClick = editable && canEditCM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'cm\',\'' + it.userInitials + '\')"' : '';
+          // Find current user's own hours in the breakdown
+          const myAmH = (agg?.am?.breakdown || []).find(b => b.user_initials === it.userInitials)?.hours || 0;
+          const myCmH = (agg?.cm?.breakdown || []).find(b => b.user_initials === it.userInitials)?.hours || 0;
+          // Build breakdown strings (initials:hours)
+          const amParts = (agg?.am?.breakdown || []).map(b => b.user_initials + ':' + b.hours);
+          const cmParts = (agg?.cm?.breakdown || []).map(b => b.user_initials + ':' + b.hours);
+          const amClick = editable && canEditAM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'am\',\'' + it.userInitials + '\',' + myAmH + ')"' : '';
+          const cmClick = editable && canEditCM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'cm\',\'' + it.userInitials + '\',' + myCmH + ')"' : '';
           const amTitle = amBreak ? ' title="' + amBreak.replace(/"/g,'&quot;') + '"' : '';
           const cmTitle = cmBreak ? ' title="' + cmBreak.replace(/"/g,'&quot;') + '"' : '';
           const amCls = cellClass + ' ' + (editable && canEditAM ? 'del-hour-cell' : 'del-hour-readonly');
@@ -238,12 +244,18 @@
         %>
           <td class="col-month <%~ amCls %>" id="am-<%= config.id %>-<%= m %>" style="border-left: 2px solid rgba(255,255,255,0.08);"<%~ amClick %><%~ amTitle %>>
             <span class="del-hour-val"><%= showAm > 0 ? showAm : '' %></span>
+            <% if (amParts.length > 1 && showAm > 0) { %>
+            <div style="font-size: 9px; color: #64748B; line-height: 1.2;"><%= amParts.join(' ') %></div>
+            <% } %>
             <% if (it.sourceMode === 'compare' && (hAmH > 0 || amH > 0)) { %>
             <div style="font-size: 10px; color: <%= Math.abs(amDelta) < 0.5 ? '#22C55E' : Math.abs(amDelta) <= 2 ? '#F59E0B' : '#EF4444' %>;"><%= hAmH > 0 ? 'H:' + hAmH : '' %></div>
             <% } %>
           </td>
           <td class="col-month <%~ cmCls %>" id="cm-<%= config.id %>-<%= m %>"<%~ cmClick %><%~ cmTitle %>>
             <span class="del-hour-val"><%= showCm > 0 ? showCm : '' %></span>
+            <% if (cmParts.length > 1 && showCm > 0) { %>
+            <div style="font-size: 9px; color: #64748B; line-height: 1.2;"><%= cmParts.join(' ') %></div>
+            <% } %>
             <% if (it.sourceMode === 'compare' && (hCmH > 0 || cmH > 0)) { %>
             <div style="font-size: 10px; color: <%= Math.abs(cmDelta) < 0.5 ? '#22C55E' : Math.abs(cmDelta) <= 2 ? '#F59E0B' : '#EF4444' %>;"><%= hCmH > 0 ? 'H:' + hCmH : '' %></div>
             <% } %>
@@ -652,22 +664,26 @@ function editField(cell, configId, field, currentVal) {
 }
 
 // --- Inline hour editing ---
-function editHour(cell, clientName, serviceType, month, role, userInitials) {
+function editHour(cell, clientName, serviceType, month, role, userInitials, myHours) {
   if (cell.querySelector('input')) return;
 
   var valSpan = cell.querySelector('.del-hour-val');
   var origHtml = valSpan ? valSpan.innerHTML : '';
-  var currentVal = valSpan ? valSpan.textContent.trim() : '';
+  // Use user's own hours (not the total) for the input
+  var editVal = (typeof myHours === 'number' && myHours > 0) ? myHours : '';
 
   var input = document.createElement('input');
   input.type = 'number';
   input.step = '0.5';
   input.min = '0';
   input.max = '200';
-  input.value = currentVal || '';
+  input.value = editVal;
   input.placeholder = '0';
 
   valSpan.style.display = 'none';
+  // Hide breakdown text while editing
+  var breakdownDiv = cell.querySelector('div');
+  if (breakdownDiv) breakdownDiv.style.display = 'none';
   cell.appendChild(input);
   input.focus();
   input.select();
@@ -676,6 +692,7 @@ function editHour(cell, clientName, serviceType, month, role, userInitials) {
     var hours = parseFloat(input.value) || 0;
     input.remove();
     valSpan.style.display = '';
+    if (breakdownDiv) breakdownDiv.style.display = '';
     queueHour(cell, clientName, serviceType, month, role, userInitials, hours, origHtml);
   }
 
