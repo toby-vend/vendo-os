@@ -173,7 +173,8 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     const serviceType = body.service_type;
     const month = body.month;
     const role = body.role; // 'am' or 'cm'
-    const hours = clampFloat(body.hours, 0, 200, 0);
+    const rawHours = clampFloat(body.hours, 0, 200, 0);
+    const hours = Math.round(rawHours * 2) / 2; // Round to nearest 0.5
     const targetInitials = body.user_initials || userInitials;
 
     // Staff can only edit their own hours
@@ -213,7 +214,12 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     const rawValue = body.value?.trim() ?? '';
 
     const numericFields = ['tier', 'calls', 'am_hrs', 'cm_hrs', 'budget'];
-    const value = numericFields.includes(field) ? parseFloat(rawValue) || 0 : rawValue;
+    let value: string | number = rawValue;
+    if (numericFields.includes(field)) {
+      let n = parseFloat(rawValue) || 0;
+      if (field === 'am_hrs' || field === 'cm_hrs') n = Math.round(n * 2) / 2; // Round to 0.5
+      value = n;
+    }
 
     try {
       await updateConfigField(parseInt(id, 10), field, value);
