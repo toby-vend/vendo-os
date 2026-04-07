@@ -119,23 +119,37 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     reply.redirect('/admin/users');
   });
 
-  // Reset password
+  // Reset password — step 1: generate and preview
   app.post('/:id/reset-password', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const user = await getUserById(id);
+    if (!user) { reply.redirect('/admin/users'); return; }
+
+    // Generate a random compliant password (12 chars, mixed case + digit + symbol)
+    const lower = 'abcdefghijkmnpqrstuvwxyz';
+    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const digits = '23456789';
+    const symbols = '!@#$%&*';
+    const all = lower + upper + digits;
+    let pw = '';
+    pw += upper[Math.floor(Math.random() * upper.length)];
+    pw += lower[Math.floor(Math.random() * lower.length)];
+    pw += digits[Math.floor(Math.random() * digits.length)];
+    pw += symbols[Math.floor(Math.random() * symbols.length)];
+    for (let i = 0; i < 8; i++) pw += all[Math.floor(Math.random() * all.length)];
+    pw = pw.split('').sort(() => Math.random() - 0.5).join('');
+
+    const [users, channels] = await Promise.all([getAllUsers(), getChannels()]);
+    reply.render('admin/users', { users, channels, resetUser: { id: user.id, name: user.name, password: pw } });
+  });
+
+  // Reset password — step 2: confirm
+  app.post('/:id/reset-password/confirm', async (request, reply) => {
     const { id } = request.params as { id: string };
     const body = request.body as Record<string, string | string[]>;
     const password = (typeof body.password === 'string' ? body.password : '').trim();
 
-    if (!password) {
-      reply.redirect('/admin/users');
-      return;
-    }
-
-    const complexityError = validatePasswordComplexity(password);
-    if (complexityError) {
-      const [users, channels] = await Promise.all([getAllUsers(), getChannels()]);
-      reply.render('admin/users', { users, channels, error: complexityError });
-      return;
-    }
+    if (!password) { reply.redirect('/admin/users'); return; }
 
     await updateUserPassword(id, hashPassword(password), true);
     reply.redirect('/admin/users');

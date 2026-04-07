@@ -109,13 +109,9 @@
         <td style="padding: 12px 16px; text-align: right;">
           <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
             <a href="/admin/users/<%= u.id %>/edit" style="font-size: 12px; color: #94A3B8; text-decoration: none; padding: 4px 8px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">Edit</a>
-            <button onclick="if(confirm('Reset password for <%= u.name %>?')) document.getElementById('reset-<%= u.id %>').submit()" style="font-size: 12px; color: #F59E0B; background: none; border: 1px solid rgba(245,158,11,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer;">Reset PW</button>
+            <form method="POST" action="/admin/users/<%= u.id %>/reset-password" style="display:inline;"><input type="hidden" name="_csrf" value="<%= it.csrfToken %>" /><button type="submit" style="font-size: 12px; color: #F59E0B; background: none; border: 1px solid rgba(245,158,11,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer;">Reset PW</button></form>
             <button onclick="if(confirm('Delete <%= u.name %>? This cannot be undone.')) document.getElementById('delete-<%= u.id %>').submit()" style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer;">Delete</button>
           </div>
-          <form id="reset-<%= u.id %>" method="POST" action="/admin/users/<%= u.id %>/reset-password" style="display:none;">
-            <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
-            <input type="hidden" name="password" value="changeme123">
-          </form>
           <form id="delete-<%= u.id %>" method="POST" action="/admin/users/<%= u.id %>/delete" style="display:none;"><input type="hidden" name="_csrf" value="<%= it.csrfToken %>" /></form>
         </td>
       </tr>
@@ -124,3 +120,28 @@
     </tbody>
   </table>
 </div>
+
+<% if (it.resetUser) { %>
+<!-- Reset Password Confirmation Modal -->
+<div id="reset-modal" style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6);">
+  <div style="background: #1E293B; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 2rem; max-width: 440px; width: 90%;">
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.5rem; color: #E2E8F0;">Reset Password</h3>
+    <p style="font-size: 14px; color: #94A3B8; margin-bottom: 1.25rem;">New temporary password for <strong style="color: #E2E8F0;"><%= it.resetUser.name %></strong>:</p>
+
+    <div style="display: flex; align-items: center; gap: 0.5rem; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; margin-bottom: 0.5rem;">
+      <code id="reset-pw-value" style="flex: 1; font-size: 15px; color: #22C55E; letter-spacing: 0.5px; word-break: break-all;"><%= it.resetUser.password %></code>
+      <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('reset-pw-value').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)" style="padding: 4px 10px; font-size: 12px; background: rgba(255,255,255,0.06); color: #94A3B8; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; white-space: nowrap; font-family: var(--vendo-font);">Copy</button>
+    </div>
+    <p style="font-size: 12px; color: #64748B; margin-bottom: 1.5rem;">They will be asked to change this on first login.</p>
+
+    <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+      <a href="/admin/users" style="padding: 8px 16px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; text-decoration: none; cursor: pointer;">Cancel</a>
+      <form method="POST" action="/admin/users/<%= it.resetUser.id %>/reset-password/confirm" style="display:inline;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+        <input type="hidden" name="password" value="<%= it.resetUser.password %>" />
+        <button type="submit" style="padding: 8px 16px; background: #F59E0B; color: #0B0B0B; border: none; border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">Confirm Reset</button>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>
