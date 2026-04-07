@@ -105,9 +105,9 @@ Requirements for milestone v1.1. Each maps to roadmap phases (continuing from Ph
 
 - [x] **PUSH-01**: VAPID keys are generated and stored as environment variables
 - [x] **PUSH-02**: Push subscription endpoint exists and stores subscriptions per user in the database
-- [ ] **PUSH-03**: User receives a push notification when their draft is ready for review
-- [ ] **PUSH-04**: User receives a push notification when a task fails QA
-- [ ] **PUSH-05**: User receives a push notification when a task status changes
+- [x] **PUSH-03**: User receives a push notification when their draft is ready for review
+- [x] **PUSH-04**: User receives a push notification when a task fails QA
+- [x] **PUSH-05**: User receives a push notification when a task status changes
 - [x] **PUSH-06**: Dead subscriptions (HTTP 410) are automatically cleaned up on failed send
 - [ ] **PUSH-07**: On iOS, push subscription is gated behind standalone mode detection with install instructions
 
@@ -220,9 +220,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OFFL-05 | Phase 13 | Complete |
 | PUSH-01 | Phase 14 | Complete |
 | PUSH-02 | Phase 14 | Complete |
-| PUSH-03 | Phase 14 | Pending |
-| PUSH-04 | Phase 14 | Pending |
-| PUSH-05 | Phase 14 | Pending |
+| PUSH-03 | Phase 14 | Complete |
+| PUSH-04 | Phase 14 | Complete |
+| PUSH-05 | Phase 14 | Complete |
 | PUSH-06 | Phase 14 | Complete |
 | PUSH-07 | Phase 14 | Pending |
 

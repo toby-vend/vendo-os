@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order. v1.1 
 - [x] **Phase 11: Responsive Layout** - Mobile viewport, bottom tab bar, touch targets, table reflow, swipe and pull-to-refresh gestures (completed 2026-04-06)
 - [x] **Phase 12: PWA Foundation** - Manifest, service worker shell, static asset caching, home screen install (completed 2026-04-06)
 - [x] **Phase 13: Offline Caching** - Full-page and HTMX partial caching, offline fallback pages, Vary header (completed 2026-04-06)
-- [ ] **Phase 14: Push Notifications** - VAPID keys, push subscriptions, draft-ready/QA-failure/status-change notifications, dead subscription pruning
+- [x] **Phase 14: Push Notifications** - VAPID keys, push subscriptions, draft-ready/QA-failure/status-change notifications, dead subscription pruning (completed 2026-04-07)
 
 ## Phase Details
 
@@ -84,7 +84,7 @@ Plans:
   3. A user on iOS who has installed VendoOS to their home screen on iOS 16.4+ can subscribe to push notifications; a user who has not installed it sees an install prompt with instructions rather than a broken permission request
   4. When a push subscription is no longer valid (HTTP 410 from the push service), it is automatically removed from the database — no stale subscriptions accumulate
   5. A single user can subscribe from multiple devices and receive notifications on all of them independently
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 14-01-PLAN.md — VAPID key generation, push_subscriptions table, subscription queries, push-sender module, API routes
@@ -101,4 +101,4 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | 11. Responsive Layout | 3/3 | Complete    | 2026-04-06 |
 | 12. PWA Foundation | 2/2 | Complete    | 2026-04-06 |
 | 13. Offline Caching | 2/2 | Complete    | 2026-04-06 |
-| 14. Push Notifications | 2/3 | In Progress|  |
+| 14. Push Notifications | 3/3 | Complete   | 2026-04-07 |
