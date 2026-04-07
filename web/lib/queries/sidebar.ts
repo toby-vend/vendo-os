@@ -70,9 +70,9 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
       { id: 'asana-tasks', label: 'Asana Tasks', href: '/asana-tasks', permission: 'asana-tasks' },
       { id: 'content-tasks', label: 'Content Tasks', href: '/tasks', permission: 'tasks' },
       { id: 'video-production', label: 'Video Production', href: '/video-production', permission: 'video-production' },
-      { id: 'deliverables', label: 'Deliverables', href: '/deliverables', permission: 'dashboards' },
-      { id: 'time-tracking', label: 'Time Tracking', href: '/dashboards/time-tracking', permission: 'dashboards' },
-      { id: 'capacity', label: 'Capacity', href: '/dashboards/capacity', permission: 'dashboards' },
+      { id: 'deliverables', label: 'Deliverables', href: '/deliverables', permission: 'deliverables' },
+      { id: 'time-tracking', label: 'Time Tracking', href: '/dashboards/time-tracking', permission: 'time-tracking' },
+      { id: 'capacity', label: 'Capacity', href: '/dashboards/capacity', permission: 'capacity' },
     ],
   },
   {
