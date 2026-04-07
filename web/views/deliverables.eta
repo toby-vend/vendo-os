@@ -70,7 +70,7 @@
   /* Inline hour editing */
   .del-hour-cell { cursor: pointer; position: relative; }
   .del-hour-cell:hover { background: rgba(255,255,255,0.04); }
-  .del-hour-cell input, .del-hour-cell select { width: 55px; padding: 2px 4px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-green); border-radius: 4px; font-size: 16px; font-family: var(--vendo-font); text-align: right; }
+  .del-hour-cell input, .del-hour-cell select { width: 55px; padding: 2px 4px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-green); border-radius: 4px; font-size: 12px; font-family: var(--vendo-font); text-align: right; }
   .del-hour-cell select { width: 70px; text-align: left; }
   .del-hour-cell .del-hour-val { display: inline-block; min-width: 20px; }
   .del-hour-readonly { cursor: default; }
@@ -425,7 +425,7 @@ function editField(cell, configId, field, currentVal) {
   // Use dropdown for AM/CM fields
   if (field === 'am' || field === 'cm') {
     var sel = document.createElement('select');
-    sel.style.cssText = 'width:70px;padding:2px;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid var(--vendo-green);border-radius:4px;font-size:16px;font-family:var(--vendo-font);';
+    sel.style.cssText = 'width:70px;padding:2px;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid var(--vendo-green);border-radius:4px;font-size:12px;font-family:var(--vendo-font);';
     sel.innerHTML = '<option value="">—</option>';
     teamMembers.forEach(function(m) {
       var opt = document.createElement('option');
@@ -434,16 +434,22 @@ function editField(cell, configId, field, currentVal) {
       if (m.i === currentVal) opt.selected = true;
       sel.appendChild(opt);
     });
+    var addOpt = document.createElement('option');
+    addOpt.value = '__add__';
+    addOpt.textContent = '+ Add new...';
+    addOpt.style.color = '#22C55E';
+    sel.appendChild(addOpt);
     cell.textContent = '';
     cell.appendChild(sel);
     sel.focus();
     function saveSel() {
       var val = sel.value;
+      if (val === '__add__') { window.location.href = '/deliverables/settings'; return; }
       sel.remove();
       saveField(cell, configId, field, val, orig);
     }
     sel.addEventListener('change', saveSel);
-    sel.addEventListener('blur', saveSel);
+    sel.addEventListener('blur', function() { if (sel.value !== '__add__') { saveSel(); } });
     return;
   }
 
@@ -451,7 +457,7 @@ function editField(cell, configId, field, currentVal) {
   input.type = (field === 'tier' || field === 'calls' || field === 'am_hrs' || field === 'cm_hrs' || field === 'budget') ? 'number' : 'text';
   if (input.type === 'number') { input.step = (field === 'am_hrs' || field === 'cm_hrs') ? '0.5' : '1'; input.min = '0'; }
   input.value = currentVal || '';
-  input.style.cssText = 'width:60px;padding:2px 4px;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid var(--vendo-green);border-radius:4px;font-size:16px;font-family:var(--vendo-font);';
+  input.style.cssText = 'width:60px;padding:2px 4px;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid var(--vendo-green);border-radius:4px;font-size:12px;font-family:var(--vendo-font);';
   cell.textContent = '';
   cell.appendChild(input);
   input.focus();
