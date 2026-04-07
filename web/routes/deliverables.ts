@@ -304,17 +304,13 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       getTeamMembers(false).catch(() => []),
       getVendoUsers().catch(() => []),
     ]);
-    try {
-      reply.render('deliverables-settings', {
-        members,
-        users,
-        serviceTypes: SERVICE_TYPES,
-        serviceLabels: SERVICE_LABELS,
-        pageTitle: 'Deliverables — Team Settings',
-      });
-    } catch (err: any) {
-      reply.code(500).type('text/html').send(`<h1>Settings render error</h1><pre>${err.message}\n${err.stack?.slice(0, 500)}</pre>`);
-    }
+    reply.render('deliverables-settings', {
+      members,
+      users,
+      serviceTypes: SERVICE_TYPES,
+      serviceLabels: SERVICE_LABELS,
+      pageTitle: 'Deliverables — Team Settings',
+    });
   });
 
   app.post('/settings/member', async (request, reply) => {

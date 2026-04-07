@@ -60,15 +60,15 @@
       <div style="display: grid; grid-template-columns: 80px 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
         <div>
           <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">Initials</label>
-          <input name="initials" required placeholder="SF" maxlength="10" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); box-sizing: border-box;">
+          <input name="initials" required placeholder="SF" maxlength="10" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 16px; font-family: var(--vendo-font); box-sizing: border-box;">
         </div>
         <div>
           <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">Full Name</label>
-          <input name="name" required placeholder="Sam Franks" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); box-sizing: border-box;">
+          <input name="name" required placeholder="Sam Franks" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 16px; font-family: var(--vendo-font); box-sizing: border-box;">
         </div>
         <div>
           <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">Link to VendoOS User</label>
-          <select name="user_id" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); box-sizing: border-box;">
+          <select name="user_id" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 16px; font-family: var(--vendo-font); box-sizing: border-box;">
             <option value="">— None —</option>
             <% it.users.forEach(u => { %>
             <option value="<%= u.id %>"><%= u.name %> (<%= u.email %>)</option>
@@ -131,7 +131,7 @@ function fillForm(initials, name, userId, serviceTypes, roles, isActive) {
   });
   var act = f.querySelector('[name="is_active"]');
   if (act) act.checked = isActive === 1;
-  f.initials.focus();
-  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  f.initials.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  f.initials.focus({ preventScroll: true });
 }
 </script>
