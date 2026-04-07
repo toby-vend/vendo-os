@@ -1,0 +1,330 @@
+<% layout('/layouts/base') %>
+
+<style>
+  .del-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .del-controls select, .del-controls input { background: var(--vendo-surface); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: var(--vendo-font); }
+  .del-tabs { display: flex; gap: 2px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 3px; }
+  .del-tab { padding: 6px 16px; font-size: 13px; font-weight: 500; color: var(--vendo-text-muted); background: transparent; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; font-family: var(--vendo-font); transition: all 0.15s; }
+  .del-tab:hover { color: var(--vendo-text); background: rgba(255,255,255,0.06); }
+  .del-tab.active { color: #0B0B0B; background: var(--vendo-green); font-weight: 600; }
+  .del-actions { margin-left: auto; display: flex; gap: 0.5rem; }
+  .del-btn { padding: 6px 14px; font-size: 12px; font-weight: 500; border-radius: 6px; border: 1px solid var(--vendo-border-strong); background: var(--vendo-surface); color: var(--vendo-text); cursor: pointer; font-family: var(--vendo-font); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .del-btn:hover { border-color: var(--vendo-green); }
+  .del-btn-primary { background: var(--vendo-green); color: #0B0B0B; border-color: var(--vendo-green); }
+  .del-btn-primary:hover { opacity: 0.9; }
+
+  .del-table-wrap { overflow-x: auto; margin-bottom: 2rem; }
+  .del-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+  .del-table th, .del-table td { padding: 6px 10px; border-bottom: 1px solid var(--vendo-border); text-align: left; }
+  .del-table th { background: rgba(255,255,255,0.03); color: var(--vendo-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-size: 11px; position: sticky; top: 0; z-index: 1; }
+  .del-table td { color: var(--vendo-text); }
+  .del-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .del-table .col-client { min-width: 180px; position: sticky; left: 0; background: var(--vendo-bg); z-index: 2; font-weight: 500; }
+  .del-table th.col-client { z-index: 3; background: rgba(255,255,255,0.03); }
+  .del-table .col-center { text-align: center; }
+  .del-table .col-right { text-align: right; }
+  .del-table .col-month { min-width: 55px; text-align: right; }
+
+  .del-table .on-budget { background: rgba(34, 197, 94, 0.08); }
+  .del-table .over-budget { background: rgba(239, 68, 68, 0.08); color: #EF4444; }
+  .del-table .no-hours { color: var(--vendo-text-muted); opacity: 0.4; }
+
+  .del-table tfoot td { font-weight: 600; border-top: 2px solid var(--vendo-border-strong); background: rgba(255,255,255,0.02); }
+
+  .del-completion { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+
+  .del-capacity { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .del-cap-card { background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-radius: 10px; padding: 1rem 1.25rem; }
+  .del-cap-name { font-size: 14px; font-weight: 600; color: var(--vendo-text-heading); margin-bottom: 0.5rem; }
+  .del-cap-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--vendo-text-muted); margin-bottom: 0.25rem; }
+  .del-cap-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-top: 0.5rem; }
+  .del-cap-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+  .del-legend { display: flex; gap: 1.5rem; font-size: 12px; color: var(--vendo-text-muted); margin-bottom: 1rem; }
+  .del-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+
+  /* Add config modal */
+  .del-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; }
+  .del-modal-overlay.open { display: flex; }
+  .del-modal { background: var(--vendo-surface); border: 1px solid var(--vendo-border-strong); border-radius: 12px; padding: 1.5rem; width: 500px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .del-modal h3 { margin: 0 0 1rem; font-size: 16px; color: var(--vendo-text-heading); }
+  .del-modal label { display: block; font-size: 12px; color: var(--vendo-text-muted); margin-bottom: 0.25rem; margin-top: 0.75rem; }
+  .del-modal input, .del-modal select { width: 100%; padding: 6px 10px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); box-sizing: border-box; }
+  .del-modal .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .del-modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem; }
+</style>
+
+<!-- Service type tabs + filters -->
+<div class="del-controls">
+  <div class="del-tabs">
+    <% it.serviceTypes.forEach(st => { %>
+      <a href="?service=<%= st %><%= it.filterPerson ? '&person=' + it.filterPerson : '' %>" class="del-tab<%= st === it.serviceType ? ' active' : '' %>"><%= it.serviceLabels[st] %></a>
+    <% }) %>
+  </div>
+
+  <form method="GET" action="/deliverables" style="display: flex; gap: 0.5rem; align-items: center;">
+    <input type="hidden" name="service" value="<%= it.serviceType %>">
+    <select name="person" onchange="this.form.submit()">
+      <option value="">All People</option>
+      <% it.people.forEach(p => { %>
+        <option value="<%= p %>" <%= it.filterPerson === p ? 'selected' : '' %>><%= p %></option>
+      <% }) %>
+    </select>
+    <select name="months" onchange="this.form.submit()">
+      <option value="3" <%= it.monthCount === 3 ? 'selected' : '' %>>3 months</option>
+      <option value="6" <%= it.monthCount === 6 ? 'selected' : '' %>>6 months</option>
+      <option value="9" <%= it.monthCount === 9 ? 'selected' : '' %>>9 months</option>
+      <option value="12" <%= it.monthCount === 12 ? 'selected' : '' %>>12 months</option>
+    </select>
+  </form>
+
+  <div class="del-actions">
+    <a href="/deliverables/import?service=<%= it.serviceType %>" class="del-btn">Import CSV</a>
+    <button class="del-btn del-btn-primary" onclick="document.getElementById('addModal').classList.add('open')">+ Add Client</button>
+  </div>
+</div>
+
+<% if (typeof it.query !== 'undefined' && it.query?.imported) { %>
+<div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 13px; color: var(--vendo-green);">
+  Imported <%= it.query.imported %> client configurations.
+</div>
+<% } %>
+
+<div class="del-legend">
+  <span><span class="del-legend-dot" style="background: var(--vendo-green);"></span>AM Hrs = Calls, Emails, Reporting</span>
+  <span><span class="del-legend-dot" style="background: #3B82F6;"></span>CM Hrs = Campaign Management, Media Buyer, Optimisations</span>
+  <span><span class="del-legend-dot" style="background: rgba(34,197,94,0.15);"></span>On Budget</span>
+  <span><span class="del-legend-dot" style="background: rgba(239,68,68,0.15);"></span>Over Budget</span>
+</div>
+
+<!-- Main deliverables table -->
+<div class="del-table-wrap">
+  <table class="del-table">
+    <thead>
+      <tr>
+        <th class="col-client">Account</th>
+        <th class="col-center">AM</th>
+        <th class="col-center">CM</th>
+        <th class="col-center">Level</th>
+        <th class="col-center">Calls</th>
+        <th class="col-center">AM Hrs</th>
+        <th class="col-center">CM Hrs</th>
+        <th class="col-center">Tier</th>
+        <th class="col-right">Budget</th>
+        <% it.months.forEach(m => {
+          const label = new Date(m + '-15').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+        %>
+          <th class="col-month" colspan="2"><%= label %></th>
+          <th class="col-center" style="min-width: 30px; font-size: 10px;">Done</th>
+        <% }) %>
+        <th style="min-width: 40px;"></th>
+      </tr>
+      <tr>
+        <th class="col-client"></th>
+        <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+        <% it.months.forEach(m => { %>
+          <th class="col-month" style="color: var(--vendo-green); font-size: 10px;">AM</th>
+          <th class="col-month" style="color: #3B82F6; font-size: 10px;">CM</th>
+          <th></th>
+        <% }) %>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!it.configs.length) { %>
+      <tr><td colspan="<%= 9 + it.months.length * 3 + 1 %>" style="text-align: center; padding: 2rem; color: var(--vendo-text-muted);">
+        No client configurations yet. Click "+ Add Client" to get started, or use "Import CSV" to bulk import from your spreadsheet.
+      </td></tr>
+      <% } %>
+      <% it.configs.forEach(config => { %>
+      <tr>
+        <td class="col-client"><%= config.client_name %></td>
+        <td class="col-center" style="font-weight: 600;"><%= config.am || '—' %></td>
+        <td class="col-center" style="font-weight: 600;"><%= config.cm || '—' %></td>
+        <td class="col-center"><%= config.level %></td>
+        <td class="col-center"><%= config.calls %></td>
+        <td class="col-center"><%= config.am_hrs %></td>
+        <td class="col-center"><%= config.cm_hrs %></td>
+        <td class="col-center"><%= config.tier %></td>
+        <td class="col-right"><%= config.currency === 'EUR' ? '\u20AC' : '\u00A3' %><%= config.budget ? config.budget.toLocaleString('en-GB', { minimumFractionDigits: 0 }) : '—' %></td>
+        <% it.months.forEach(m => {
+          const key = config.client_name + '::' + m;
+          const hours = it.hoursMap[key];
+          const amH = hours?.am || 0;
+          const cmH = hours?.cm || 0;
+          const totalH = amH + cmH;
+          const allocTotal = config.am_hrs + config.cm_hrs;
+          const overBudget = allocTotal > 0 && totalH > allocTotal * 1.15;
+          const onBudget = totalH > 0 && !overBudget;
+          const cellClass = totalH === 0 ? 'no-hours' : overBudget ? 'over-budget' : onBudget ? 'on-budget' : '';
+          const compKey = config.client_name + '::' + m;
+          const completed = it.completionMap[compKey];
+        %>
+          <td class="col-month <%= cellClass %>"><%= amH > 0 ? amH : '' %></td>
+          <td class="col-month <%= cellClass %>"><%= cmH > 0 ? cmH : '' %></td>
+          <td class="col-center">
+            <form method="POST" action="/deliverables/complete" class="del-completion"
+                  hx-post="/deliverables/complete" hx-swap="innerHTML" hx-target="closest .del-completion">
+              <input type="hidden" name="client_name" value="<%= config.client_name %>">
+              <input type="hidden" name="service_type" value="<%= it.serviceType %>">
+              <input type="hidden" name="month" value="<%= m %>">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+              <button type="submit" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <% if (completed) { %>
+                  <svg viewBox="0 0 24 24" fill="var(--vendo-green)" width="18" height="18"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                <% } else { %>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+                <% } %>
+              </button>
+            </form>
+          </td>
+        <% }) %>
+        <td>
+          <form method="POST" action="/deliverables/config/<%= config.id %>/delete?service=<%= it.serviceType %>"
+                onsubmit="return confirm('Remove this client config?')">
+            <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+            <button type="submit" style="background: none; border: none; cursor: pointer; color: #64748B; font-size: 14px;" title="Remove">&times;</button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+    <% if (it.configs.length) { %>
+    <tfoot>
+      <tr>
+        <td class="col-client">Total</td>
+        <td></td><td></td><td></td><td></td>
+        <td class="col-center"><%= it.totalAllocatedAM %></td>
+        <td class="col-center"><%= it.totalAllocatedCM %></td>
+        <td></td><td></td>
+        <% it.months.forEach(m => {
+          const t = it.monthTotals[m] || { am: 0, cm: 0 };
+        %>
+          <td class="col-month" style="color: var(--vendo-green);"><%= t.am > 0 ? t.am.toFixed(1) : '' %></td>
+          <td class="col-month" style="color: #3B82F6;"><%= t.cm > 0 ? t.cm.toFixed(1) : '' %></td>
+          <td></td>
+        <% }) %>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-client" colspan="9" style="text-align: right; font-size: 11px; color: var(--vendo-text-muted);">Deliverables %</td>
+        <% it.months.forEach(m => {
+          const t = it.monthTotals[m] || { am: 0, cm: 0 };
+          const totalActual = t.am + t.cm;
+          const totalAlloc = it.totalAllocatedAM + it.totalAllocatedCM;
+          const pct = totalAlloc > 0 ? (totalActual / totalAlloc * 100).toFixed(1) : '0';
+          const isOver = parseFloat(pct) > 100;
+        %>
+          <td class="col-month" colspan="2" style="text-align: center; <%= isOver ? 'color: #EF4444; font-weight: 700;' : 'color: var(--vendo-green);' %>"><%= pct %>%</td>
+          <td></td>
+        <% }) %>
+        <td></td>
+      </tr>
+    </tfoot>
+    <% } %>
+  </table>
+</div>
+
+<!-- Capacity cards -->
+<% if (it.capacity.length) { %>
+<h3 style="margin-bottom: 1rem;">Team Capacity — <%= it.serviceLabels[it.serviceType] %></h3>
+<div class="del-capacity">
+  <% it.capacity.forEach(p => {
+    const total = p.allocated_am_hrs + p.allocated_cm_hrs;
+    const pct = p.capacity_pct;
+    const barColor = pct > 100 ? '#EF4444' : pct > 80 ? '#F59E0B' : 'var(--vendo-green)';
+  %>
+  <div class="del-cap-card">
+    <div class="del-cap-name"><%= p.user_name %> (<%= p.initials %>)</div>
+    <div class="del-cap-row"><span>Allocated AM Hrs</span><span><%= p.allocated_am_hrs %></span></div>
+    <div class="del-cap-row"><span>Allocated CM Hrs</span><span><%= p.allocated_cm_hrs %></span></div>
+    <div class="del-cap-row"><span>Total Allocated</span><span style="font-weight: 600;"><%= total %></span></div>
+    <div class="del-cap-row"><span>Capacity (80% billable)</span><span><%= p.capacity_hours %> hrs</span></div>
+    <div class="del-cap-row"><span>Capacity Used</span><span style="font-weight: 600; color: <%= barColor %>;"><%= pct %>%</span></div>
+    <div class="del-cap-bar">
+      <div class="del-cap-fill" style="width: <%= Math.min(pct, 100) %>%; background: <%= barColor %>;"></div>
+    </div>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+<!-- Add Client Modal -->
+<div class="del-modal-overlay" id="addModal" onclick="if(event.target===this) this.classList.remove('open')">
+  <div class="del-modal">
+    <h3>Add Client — <%= it.serviceLabels[it.serviceType] %></h3>
+    <form method="POST" action="/deliverables/config">
+      <input type="hidden" name="service_type" value="<%= it.serviceType %>">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+
+      <label>Client Name</label>
+      <input name="client_name" required placeholder="e.g. Abacus Lawrence Group">
+
+      <div class="form-row">
+        <div>
+          <label>AM (initials)</label>
+          <input name="am" placeholder="e.g. SF">
+        </div>
+        <div>
+          <label>CM (initials)</label>
+          <input name="cm" placeholder="e.g. JD">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Level</label>
+          <select name="level">
+            <option>Auto</option>
+            <option>Semi Pro</option>
+            <option>Pro</option>
+          </select>
+        </div>
+        <div>
+          <label>Tier</label>
+          <select name="tier">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Calls / month</label>
+          <input name="calls" type="number" value="1" min="0">
+        </div>
+        <div>
+          <label>Budget</label>
+          <input name="budget" type="number" step="0.01" value="0" min="0">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>AM Hrs / month</label>
+          <input name="am_hrs" type="number" step="0.25" value="2" min="0">
+        </div>
+        <div>
+          <label>CM Hrs / month</label>
+          <input name="cm_hrs" type="number" step="0.25" value="2" min="0">
+        </div>
+      </div>
+
+      <label>Currency</label>
+      <select name="currency">
+        <option value="GBP">GBP</option>
+        <option value="EUR">EUR</option>
+        <option value="DKK">DKK</option>
+      </select>
+
+      <div class="del-modal-actions">
+        <button type="button" class="del-btn" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="del-btn del-btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

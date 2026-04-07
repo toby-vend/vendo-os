@@ -1,0 +1,37 @@
+<% layout('/layouts/base') %>
+
+<div style="max-width: 700px;">
+  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+    <a href="/deliverables?service=<%= it.serviceType %>" style="color: var(--vendo-text-muted); text-decoration: none; font-size: 13px;">&larr; Back to Deliverables</a>
+  </div>
+
+  <div style="background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-radius: 10px; padding: 1.5rem;">
+    <h3 style="margin: 0 0 0.5rem; font-size: 16px; color: var(--vendo-text-heading);">Bulk Import Client Configurations</h3>
+    <p style="font-size: 13px; color: var(--vendo-text-muted); margin-bottom: 1.25rem;">
+      Paste CSV data from your spreadsheet. One row per client.<br>
+      Format: <code style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 12px;">client_name, am, cm, level, tier, calls, am_hrs, cm_hrs, budget, currency</code>
+    </p>
+
+    <form method="POST" action="/deliverables/import">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+
+      <label style="display: block; font-size: 12px; color: var(--vendo-text-muted); margin-bottom: 0.5rem;">Service Type</label>
+      <select name="service_type" style="width: 100%; padding: 6px 10px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); margin-bottom: 1rem;">
+        <% it.serviceTypes.forEach(st => { %>
+          <option value="<%= st %>" <%= st === it.serviceType ? 'selected' : '' %>><%= it.serviceLabels[st] %></option>
+        <% }) %>
+      </select>
+
+      <label style="display: block; font-size: 12px; color: var(--vendo-text-muted); margin-bottom: 0.5rem;">CSV Data</label>
+      <textarea name="csv_data" rows="15" placeholder="Abacus Lawrence Group, JD, JD, Pro, 1, 2, 5, 11, 5250, GBP
+Access Platform Sales, JD, JD, Pro, 1, 2, 4, 6, 4000, GBP
+ARC Dental Surgery, SF, MP, Semi Pro, 2, 1, 2, 3, 1600, GBP"
+        style="width: 100%; padding: 10px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 12px; font-family: 'Menlo', monospace; resize: vertical; box-sizing: border-box;"></textarea>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+        <a href="/deliverables?service=<%= it.serviceType %>" style="padding: 6px 14px; font-size: 12px; font-weight: 500; border-radius: 6px; border: 1px solid var(--vendo-border-strong); background: var(--vendo-surface); color: var(--vendo-text); text-decoration: none;">Cancel</a>
+        <button type="submit" style="padding: 6px 14px; font-size: 12px; font-weight: 500; border-radius: 6px; border: 1px solid var(--vendo-green); background: var(--vendo-green); color: #0B0B0B; cursor: pointer; font-family: var(--vendo-font);">Import</button>
+      </div>
+    </form>
+  </div>
+</div>

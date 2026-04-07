@@ -1403,6 +1403,50 @@ export async function initSchema(): Promise<void> {
 
   db.run('CREATE INDEX IF NOT EXISTS idx_harvest_projects_client ON harvest_projects(client_id)');
 
+  // --- Deliverables tracker ---
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS client_service_configs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      service_type TEXT NOT NULL,
+      am TEXT,
+      cm TEXT,
+      level TEXT DEFAULT 'Auto',
+      tier INTEGER DEFAULT 3,
+      calls INTEGER DEFAULT 1,
+      am_hrs REAL DEFAULT 2,
+      cm_hrs REAL DEFAULT 2,
+      budget REAL DEFAULT 0,
+      currency TEXT DEFAULT 'GBP',
+      status TEXT DEFAULT 'active',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(client_name, service_type)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_csc_client ON client_service_configs(client_name)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_csc_service ON client_service_configs(service_type)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_csc_am ON client_service_configs(am)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_csc_cm ON client_service_configs(cm)');
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS deliverable_completions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      service_type TEXT NOT NULL,
+      month TEXT NOT NULL,
+      completed INTEGER DEFAULT 0,
+      completed_by TEXT,
+      completed_at TEXT,
+      UNIQUE(client_name, service_type, month)
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_dc_month ON deliverable_completions(month)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_dc_client ON deliverable_completions(client_name)');
+
   seedCategories(db);
   saveDb();
 }
