@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Complete
 status: planning
-stopped_at: Phase 14 context gathered
-last_updated: "2026-04-07T09:54:19.246Z"
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-04-07T13:55:24.256Z"
 last_activity: 2026-04-06 — v1.1 roadmap created (4 phases, 26 requirements mapped)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 10
+  completed_plans: 8
   percent: 0
 ---
 
@@ -76,6 +76,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 13-offline-caching P01 | 1 | 1 tasks | 3 files |
 | Phase 13-offline-caching P02 | 2 | 1 tasks | 1 files |
 | Phase 13-offline-caching P02 | 2 | 2 tasks | 1 files |
+| Phase 14-push-notifications P01 | 152 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 13-offline-caching]: Precaching via manual install event — CDN-only Workbox has no manifest injection support
 - [Phase 13-offline-caching]: try/catch on NetworkFirst.handle() is required — it throws on both network and cache miss
 - [Phase 13-offline-caching]: Precaching via manual install event (not workbox.precaching.precacheAndRoute) — CDN-only Workbox has no manifest injection support
+- [Phase 14-push-notifications]: UNIQUE constraint on push_subscriptions.endpoint — one row per device, multiple per user
+- [Phase 14-push-notifications]: On-send 410/404 pruning — dead subscriptions removed at send time via deleteSubscriptionByEndpoint
+- [Phase 14-push-notifications]: sendPushToUserByEmail added because task_runs.created_by stores email, not user_id
 
 ### Research Flags (v1.1)
 
@@ -146,6 +150,6 @@ None blocking v1.1 start.
 
 ## Session Continuity
 
-Last session: 2026-04-07T09:54:19.243Z
-Stopped at: Phase 14 context gathered
-Resume file: .planning/phases/14-push-notifications/14-CONTEXT.md
+Last session: 2026-04-07T13:55:16.345Z
+Stopped at: Completed 14-01-PLAN.md
+Resume file: None
