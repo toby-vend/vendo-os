@@ -18,7 +18,11 @@ export function initVapid(): void {
     return;
   }
 
-  webpush.setVapidDetails('mailto:admin@vendoagency.com.au', publicKey, privateKey);
+  try {
+    webpush.setVapidDetails('mailto:admin@vendoagency.com.au', publicKey, privateKey);
+  } catch (err) {
+    console.error('[push] Failed to set VAPID details — push notifications disabled:', err);
+  }
 }
 
 export interface PushPayload {
