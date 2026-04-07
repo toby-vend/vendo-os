@@ -14,14 +14,27 @@
   .del-btn-primary:hover { opacity: 0.9; }
 
   .del-table-wrap { overflow-x: auto; margin-bottom: 2rem; }
-  .del-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+  .del-table { border-collapse: separate; border-spacing: 0; font-size: 12px; white-space: nowrap; }
   .del-table th, .del-table td { padding: 6px 10px; border-bottom: 1px solid var(--vendo-border); text-align: left; }
-  .del-table th { background: rgba(255,255,255,0.03); color: var(--vendo-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-size: 11px; position: sticky; top: 0; z-index: 1; }
+  .del-table th { background: var(--vendo-bg); color: var(--vendo-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-size: 11px; position: sticky; top: 0; z-index: 3; }
   .del-table td { color: var(--vendo-text); }
-  .del-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .del-table tr:hover td:not(.col-sticky) { background: rgba(255,255,255,0.02); }
+  .del-table tr:hover td.col-sticky { background: var(--vendo-bg); }
 
-  .del-table .col-client { min-width: 180px; position: sticky; left: 0; background: var(--vendo-bg); z-index: 2; font-weight: 500; }
-  .del-table th.col-client { z-index: 3; background: rgba(255,255,255,0.03); }
+  /* Sticky frozen columns: Account(0) AM(1) CM(2) Level(3) Calls(4) AM Hrs(5) CM Hrs(6) Tier(7) Budget(8) */
+  .del-table .col-sticky { position: sticky; background: var(--vendo-bg); z-index: 4; }
+  .del-table th.col-sticky { z-index: 5; background: var(--vendo-bg); }
+  .del-table .col-sticky-border { box-shadow: 2px 0 4px rgba(0,0,0,0.15); }
+  .col-s0 { left: 0; min-width: 180px; font-weight: 500; }
+  .col-s1 { left: 180px; min-width: 40px; text-align: center; }
+  .col-s2 { left: 220px; min-width: 50px; text-align: center; }
+  .col-s3 { left: 270px; min-width: 65px; text-align: center; }
+  .col-s4 { left: 335px; min-width: 45px; text-align: center; }
+  .col-s5 { left: 380px; min-width: 55px; text-align: center; }
+  .col-s6 { left: 435px; min-width: 55px; text-align: center; }
+  .col-s7 { left: 490px; min-width: 40px; text-align: center; }
+  .col-s8 { left: 530px; min-width: 80px; text-align: right; box-shadow: 2px 0 4px rgba(0,0,0,0.15); }
+
   .del-table .col-center { text-align: center; }
   .del-table .col-right { text-align: right; }
   .del-table .col-month { min-width: 55px; text-align: right; }
@@ -103,15 +116,15 @@
   <table class="del-table">
     <thead>
       <tr>
-        <th class="col-client">Account</th>
-        <th class="col-center">AM</th>
-        <th class="col-center">CM</th>
-        <th class="col-center">Level</th>
-        <th class="col-center">Calls</th>
-        <th class="col-center">AM Hrs</th>
-        <th class="col-center">CM Hrs</th>
-        <th class="col-center">Tier</th>
-        <th class="col-right">Budget</th>
+        <th class="col-sticky col-s0">Account</th>
+        <th class="col-sticky col-s1">AM</th>
+        <th class="col-sticky col-s2">CM</th>
+        <th class="col-sticky col-s3">Level</th>
+        <th class="col-sticky col-s4">Calls</th>
+        <th class="col-sticky col-s5">AM Hrs</th>
+        <th class="col-sticky col-s6">CM Hrs</th>
+        <th class="col-sticky col-s7">Tier</th>
+        <th class="col-sticky col-s8">Budget</th>
         <% it.months.forEach(m => {
           const label = new Date(m + '-15').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
         %>
@@ -121,8 +134,15 @@
         <th style="min-width: 40px;"></th>
       </tr>
       <tr>
-        <th class="col-client"></th>
-        <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+        <th class="col-sticky col-s0"></th>
+        <th class="col-sticky col-s1"></th>
+        <th class="col-sticky col-s2"></th>
+        <th class="col-sticky col-s3"></th>
+        <th class="col-sticky col-s4"></th>
+        <th class="col-sticky col-s5"></th>
+        <th class="col-sticky col-s6"></th>
+        <th class="col-sticky col-s7"></th>
+        <th class="col-sticky col-s8"></th>
         <% it.months.forEach(m => { %>
           <th class="col-month" style="color: var(--vendo-green); font-size: 10px;">AM</th>
           <th class="col-month" style="color: #3B82F6; font-size: 10px;">CM</th>
@@ -139,15 +159,15 @@
       <% } %>
       <% it.configs.forEach(config => { %>
       <tr>
-        <td class="col-client"><%= config.client_name %></td>
-        <td class="col-center" style="font-weight: 600;"><%= config.am || '—' %></td>
-        <td class="col-center" style="font-weight: 600;"><%= config.cm || '—' %></td>
-        <td class="col-center"><%= config.level %></td>
-        <td class="col-center"><%= config.calls %></td>
-        <td class="col-center"><%= config.am_hrs %></td>
-        <td class="col-center"><%= config.cm_hrs %></td>
-        <td class="col-center"><%= config.tier %></td>
-        <td class="col-right"><%= config.currency === 'EUR' ? '\u20AC' : '\u00A3' %><%= config.budget ? config.budget.toLocaleString('en-GB', { minimumFractionDigits: 0 }) : '—' %></td>
+        <td class="col-sticky col-s0"><%= config.client_name %></td>
+        <td class="col-sticky col-s1" style="font-weight: 600;"><%= config.am || '—' %></td>
+        <td class="col-sticky col-s2" style="font-weight: 600;"><%= config.cm || '—' %></td>
+        <td class="col-sticky col-s3"><%= config.level %></td>
+        <td class="col-sticky col-s4"><%= config.calls %></td>
+        <td class="col-sticky col-s5"><%= config.am_hrs %></td>
+        <td class="col-sticky col-s6"><%= config.cm_hrs %></td>
+        <td class="col-sticky col-s7"><%= config.tier %></td>
+        <td class="col-sticky col-s8"><%= config.currency === 'EUR' ? '\u20AC' : '\u00A3' %><%= config.budget ? config.budget.toLocaleString('en-GB', { minimumFractionDigits: 0 }) : '—' %></td>
         <% it.months.forEach(m => {
           const key = config.client_name + '::' + m;
           const hours = it.hoursMap[key];
@@ -193,11 +213,15 @@
     <% if (it.configs.length) { %>
     <tfoot>
       <tr>
-        <td class="col-client">Total</td>
-        <td></td><td></td><td></td><td></td>
-        <td class="col-center"><%= it.totalAllocatedAM %></td>
-        <td class="col-center"><%= it.totalAllocatedCM %></td>
-        <td></td><td></td>
+        <td class="col-sticky col-s0">Total</td>
+        <td class="col-sticky col-s1"></td>
+        <td class="col-sticky col-s2"></td>
+        <td class="col-sticky col-s3"></td>
+        <td class="col-sticky col-s4"></td>
+        <td class="col-sticky col-s5"><%= it.totalAllocatedAM %></td>
+        <td class="col-sticky col-s6"><%= it.totalAllocatedCM %></td>
+        <td class="col-sticky col-s7"></td>
+        <td class="col-sticky col-s8"></td>
         <% it.months.forEach(m => {
           const t = it.monthTotals[m] || { am: 0, cm: 0 };
         %>
@@ -208,7 +232,15 @@
         <td></td>
       </tr>
       <tr>
-        <td class="col-client" colspan="9" style="text-align: right; font-size: 11px; color: var(--vendo-text-muted);">Deliverables %</td>
+        <td class="col-sticky col-s0"></td>
+        <td class="col-sticky col-s1"></td>
+        <td class="col-sticky col-s2"></td>
+        <td class="col-sticky col-s3"></td>
+        <td class="col-sticky col-s4"></td>
+        <td class="col-sticky col-s5"></td>
+        <td class="col-sticky col-s6"></td>
+        <td class="col-sticky col-s7"></td>
+        <td class="col-sticky col-s8" style="font-size: 11px; color: var(--vendo-text-muted);">Deliverables %</td>
         <% it.months.forEach(m => {
           const t = it.monthTotals[m] || { am: 0, cm: 0 };
           const totalActual = t.am + t.cm;

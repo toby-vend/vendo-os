@@ -12,6 +12,28 @@ import {
   clearInitialsCache,
 } from '../lib/queries/deliverables.js';
 
+// --- Input sanitisation helpers ---
+
+/** Strip HTML/script tags and trim to max length. */
+function sanitise(val: string | undefined, maxLen: number): string {
+  if (!val) return '';
+  return val.trim().replace(/<[^>]*>/g, '').replace(/[^\x20-\x7E\u00A0-\u00FF]/g, '').slice(0, maxLen);
+}
+
+/** Parse int, clamp between min/max, fallback to def. */
+function clampInt(val: string | undefined, min: number, max: number, def: number): number {
+  const n = parseInt((val || '').trim(), 10);
+  if (isNaN(n)) return def;
+  return Math.max(min, Math.min(max, n));
+}
+
+/** Parse float, clamp between min/max, fallback to def. */
+function clampFloat(val: string | undefined, min: number, max: number, def: number): number {
+  const n = parseFloat((val || '').trim());
+  if (isNaN(n)) return def;
+  return Math.max(min, Math.min(max, n));
+}
+
 /** Parse a CSV line respecting quoted fields (handles commas inside quotes). */
 function parseCsvLine(line: string): string[] {
   const result: string[] = [];
@@ -178,55 +200,111 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       serviceType: q.service || 'paid_search',
       serviceTypes: SERVICE_TYPES,
       serviceLabels: SERVICE_LABELS,
+      errors: [],
       pageTitle: 'Import Deliverables',
     });
   });
 
   app.post('/import', async (request, reply) => {
     const body = request.body as Record<string, string>;
-    const serviceType = body.service_type || 'paid_search';
-    const csvData = body.csv_data || '';
+    const serviceType = SERVICE_TYPES.includes(body.service_type) ? body.service_type : 'paid_search';
+    const csvData = (body.csv_data || '').trim();
+
+    // --- Validation ---
+    const errors: string[] = [];
+
+    if (!csvData) {
+      errors.push('No CSV data provided. Upload a file or paste data.');
+    }
+
+    // Size limit: 1MB
+    if (csvData.length > 1_048_576) {
+      errors.push('CSV data exceeds 1MB limit.');
+    }
+
+    if (errors.length) {
+      reply.render('deliverables-import', {
+        serviceType,
+        serviceTypes: SERVICE_TYPES,
+        serviceLabels: SERVICE_LABELS,
+        errors,
+        pageTitle: 'Import Deliverables',
+      });
+      return;
+    }
 
     const lines = csvData.split('\n').filter(l => l.trim());
     let imported = 0;
+    const rowErrors: string[] = [];
+    const MAX_ROWS = 500;
 
-    for (const line of lines) {
+    for (let i = 0; i < lines.length && i < MAX_ROWS; i++) {
+      const line = lines[i];
       const parts = parseCsvLine(line);
       if (parts.length < 2) continue;
 
       // Skip header rows and legend rows
       const first = parts[0].toLowerCase().trim();
-      if (first === 'client_name' || first === 'account name' || first === '' || first.startsWith('am hrs')) continue;
+      if (first === 'client_name' || first === 'account name' || first === '' || first.startsWith('am hrs') || first.startsWith('cm hrs') || first.startsWith('*')) continue;
 
-      const clientName = parts[0].trim();
+      const clientName = sanitise(parts[0], 100);
       if (!clientName) continue;
+
+      const am = sanitise(parts[1], 20);
+      const cm = sanitise(parts[2], 20);
+      const level = sanitise(parts[3] || 'Auto', 20);
+
+      const calls = clampInt(parts[4], 0, 50, 1);
+      const amHrs = clampFloat(parts[5], 0, 200, 2);
+      const cmHrs = clampFloat(parts[6], 0, 200, 2);
+      const tier = clampInt(parts[7], 1, 4, 3);
 
       // Parse budget — strip currency symbols, commas, quotes
       const budgetRaw = (parts[8] || '0').replace(/[£€$,\s"]/g, '');
-      const budget = parseFloat(budgetRaw) || 0;
+      const budget = clampFloat(budgetRaw, 0, 1_000_000, 0);
 
       // Detect currency from budget string
       const budgetStr = parts[8] || '';
       const currency = budgetStr.includes('€') ? 'EUR' : 'GBP';
 
-      await upsertServiceConfig({
-        client_name: clientName,
-        service_type: serviceType,
-        am: parts[1]?.trim() || null,
-        cm: parts[2]?.trim() || null,
-        level: (parts[3] || 'Auto').trim(),
-        tier: parseInt(parts[7] || '3', 10),
-        calls: parseInt(parts[4] || '1', 10),
-        am_hrs: parseFloat(parts[5] || '2') || 2,
-        cm_hrs: parseFloat(parts[6] || '2') || 2,
-        budget,
-        currency,
-        status: 'active',
-      });
-      imported++;
+      try {
+        await upsertServiceConfig({
+          client_name: clientName,
+          service_type: serviceType,
+          am: am || null,
+          cm: cm || null,
+          level,
+          tier,
+          calls,
+          am_hrs: amHrs,
+          cm_hrs: cmHrs,
+          budget,
+          currency,
+          status: 'active',
+        });
+        imported++;
+      } catch (err: any) {
+        rowErrors.push(`Row ${i + 1} (${clientName}): ${err.message?.slice(0, 80)}`);
+      }
+    }
+
+    if (lines.length > MAX_ROWS) {
+      rowErrors.push(`Only first ${MAX_ROWS} rows processed (${lines.length} total).`);
     }
 
     clearInitialsCache();
+
+    if (rowErrors.length && imported === 0) {
+      reply.render('deliverables-import', {
+        serviceType,
+        serviceTypes: SERVICE_TYPES,
+        serviceLabels: SERVICE_LABELS,
+        errors: rowErrors,
+        pageTitle: 'Import Deliverables',
+      });
+      return;
+    }
+
     reply.redirect(`/deliverables?service=${serviceType}&imported=${imported}`);
   });
 };
