@@ -118,6 +118,9 @@ async function main() {
   // Push data table by table
   const tableNames = tables[0].values.map(r => r[0] as string);
 
+  // Disable FK checks for the duration of the push
+  await remote.execute('PRAGMA foreign_keys = OFF');
+
   // Clear tables where stale rows must be removed (local is source of truth)
   // Order: child tables first to respect foreign key constraints
   for (const tbl of ['client_source_mappings', 'clients']) {
