@@ -59,7 +59,7 @@
         <p style="margin: 0;">Fill in the form and click Generate to create content.</p>
       </div>
       <div id="output-content" style="display: none;">
-        <div id="output-text" style="white-space: pre-wrap; font-size: 14px; line-height: 1.7; color: #E2E8F0;"></div>
+        <div id="output-text" class="prose" style="font-size: 14px; line-height: 1.7; color: #E2E8F0;"></div>
       </div>
       <div id="output-actions" style="display: none; margin-top: 1.5rem; gap: 0.5rem; flex-wrap: wrap;">
         <button onclick="saveOutput()" id="save-btn" style="padding: 8px 16px; font-size: 13px; font-weight: 600; color: #0B0B0B; background: #22C55E; border: none; border-radius: 6px; cursor: pointer;">Save to Client Hub</button>
@@ -70,10 +70,18 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 (function() {
   let generatedOutput = '';
   let isGenerating = false;
+
+  function renderMarkdown(text) {
+    if (typeof marked !== 'undefined' && marked.parse) {
+      return marked.parse(text);
+    }
+    return '<pre style="white-space: pre-wrap;">' + text.replace(/</g, '&lt;') + '</pre>';
+  }
 
   const form = document.getElementById('skill-form');
   const generateBtn = document.getElementById('generate-btn');
@@ -105,7 +113,7 @@
     document.getElementById('output-actions').style.display = 'none';
 
     const outputEl = document.getElementById('output-text');
-    outputEl.textContent = '';
+    outputEl.innerHTML = '';
     generatedOutput = '';
 
     try {
@@ -150,7 +158,7 @@
             }
             if (parsed.text) {
               generatedOutput += parsed.text;
-              outputEl.textContent = generatedOutput;
+              outputEl.innerHTML = renderMarkdown(generatedOutput);
             }
           } catch {}
         }
@@ -195,9 +203,16 @@
       if (result.ok) {
         btn.textContent = 'Saved!';
         btn.style.background = '#16A34A';
+        // Show link to saved output
+        if (result.id) {
+          const link = document.createElement('a');
+          link.href = '/skills/outputs/' + result.id;
+          link.textContent = 'View saved output';
+          link.style.cssText = 'padding: 8px 16px; font-size: 13px; color: #22C55E; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; text-decoration: none; display: inline-block;';
+          document.getElementById('output-actions').appendChild(link);
+        }
         // Refresh past outputs
         loadPastOutputs(data.client_id);
-        setTimeout(function() { btn.textContent = 'Save to Client Hub'; btn.style.background = '#22C55E'; btn.disabled = false; }, 2000);
       } else {
         btn.textContent = 'Save failed';
         setTimeout(function() { btn.textContent = 'Save to Client Hub'; btn.disabled = false; }, 2000);

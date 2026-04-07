@@ -56,11 +56,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const userRows = await rows<{ name: string }>('SELECT name FROM users WHERE id = ?', [payload.userId]);
   const createdBy = userRows[0]?.name ?? payload.userId;
 
-  await db.execute({
+  const result = await db.execute({
     sql: `INSERT INTO skill_outputs (skill_slug, skill_title, client_id, client_name, inputs, output, created_by)
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
     args: [skill_slug, skillTitle, client_id, clientName, JSON.stringify(inputs), output, createdBy],
   });
 
-  res.status(200).json({ ok: true });
+  res.status(200).json({ ok: true, id: Number(result.lastInsertRowid) });
 }

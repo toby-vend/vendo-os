@@ -131,12 +131,12 @@ export const skillsApiRoutes: FastifyPluginAsync = async (app) => {
     const skillRows = await rows<{ title: string }>('SELECT title FROM skills_library WHERE slug = ?', [skill_slug]);
     const clientRows = await rows<{ name: string }>('SELECT COALESCE(display_name, name) as name FROM clients WHERE id = ?', [client_id]);
 
-    await db.execute({
+    const result = await db.execute({
       sql: `INSERT INTO skill_outputs (skill_slug, skill_title, client_id, client_name, inputs, output, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       args: [skill_slug, skillRows[0]?.title ?? skill_slug, client_id, clientRows[0]?.name ?? 'Unknown', JSON.stringify(inputs), output, user.name],
     });
 
-    reply.send({ ok: true });
+    reply.send({ ok: true, id: Number(result.lastInsertRowid) });
   });
 
   // GET /outputs — list saved outputs
