@@ -8,58 +8,35 @@ let _schemaReady = false;
 
 async function ensureSchema(): Promise<void> {
   if (_schemaReady) return;
-  await db.execute({
-    sql: `CREATE TABLE IF NOT EXISTS client_service_configs (
+  // Tables already exist on Turso (created during push/migration).
+  // Use IF NOT EXISTS for local dev safety. Avoid datetime('now') defaults
+  // which Turso/libSQL rejects as non-constant.
+  const schemaSql = [
+    `CREATE TABLE IF NOT EXISTS client_service_configs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      client_name TEXT NOT NULL,
-      service_type TEXT NOT NULL,
-      am TEXT,
-      cm TEXT,
-      level TEXT DEFAULT 'Auto',
-      tier INTEGER DEFAULT 3,
-      calls INTEGER DEFAULT 1,
-      am_hrs REAL DEFAULT 2,
-      cm_hrs REAL DEFAULT 2,
-      budget REAL DEFAULT 0,
-      currency TEXT DEFAULT 'GBP',
-      status TEXT DEFAULT 'active',
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(client_name, service_type)
+      client_name TEXT NOT NULL, service_type TEXT NOT NULL,
+      am TEXT, cm TEXT, level TEXT DEFAULT 'Auto', tier INTEGER DEFAULT 3,
+      calls INTEGER DEFAULT 1, am_hrs REAL DEFAULT 2, cm_hrs REAL DEFAULT 2,
+      budget REAL DEFAULT 0, currency TEXT DEFAULT 'GBP', status TEXT DEFAULT 'active',
+      created_at TEXT, updated_at TEXT, UNIQUE(client_name, service_type)
     )`,
-    args: [],
-  });
-  await db.execute({
-    sql: `CREATE TABLE IF NOT EXISTS deliverable_completions (
+    `CREATE TABLE IF NOT EXISTS deliverable_completions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      client_name TEXT NOT NULL,
-      service_type TEXT NOT NULL,
-      month TEXT NOT NULL,
-      completed INTEGER DEFAULT 0,
-      completed_by TEXT,
-      completed_at TEXT,
+      client_name TEXT NOT NULL, service_type TEXT NOT NULL, month TEXT NOT NULL,
+      completed INTEGER DEFAULT 0, completed_by TEXT, completed_at TEXT,
       UNIQUE(client_name, service_type, month)
     )`,
-    args: [],
-  });
-  await db.execute({
-    sql: `CREATE TABLE IF NOT EXISTS deliverable_hour_entries (
+    `CREATE TABLE IF NOT EXISTS deliverable_hour_entries (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      client_name TEXT NOT NULL,
-      service_type TEXT NOT NULL,
-      month TEXT NOT NULL,
-      user_initials TEXT NOT NULL,
-      user_name TEXT NOT NULL,
-      role TEXT NOT NULL,
-      hours REAL NOT NULL DEFAULT 0,
-      entered_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      client_name TEXT NOT NULL, service_type TEXT NOT NULL, month TEXT NOT NULL,
+      user_initials TEXT NOT NULL, user_name TEXT NOT NULL, role TEXT NOT NULL,
+      hours REAL NOT NULL DEFAULT 0, entered_at TEXT, updated_at TEXT
     )`,
-    args: [],
-  });
-  try {
-    await db.execute({ sql: 'CREATE UNIQUE INDEX IF NOT EXISTS idx_dhe_unique ON deliverable_hour_entries(client_name, service_type, month, user_initials, role)', args: [] });
-  } catch { /* already exists */ }
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_dhe_unique ON deliverable_hour_entries(client_name, service_type, month, user_initials, role)',
+  ];
+  for (const sql of schemaSql) {
+    try { await db.execute({ sql, args: [] }); } catch { /* already exists */ }
+  }
   _schemaReady = true;
 }
 
