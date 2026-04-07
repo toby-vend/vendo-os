@@ -1,5 +1,5 @@
 <% layout('/layouts/base') %>
-
+<!-- v2 -->
 <style>
   .del-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
   .del-controls select, .del-controls input { background: var(--vendo-surface); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: var(--vendo-font); }
