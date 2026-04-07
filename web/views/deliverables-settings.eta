@@ -1,0 +1,113 @@
+<% layout('/layouts/base') %>
+
+<div style="max-width: 800px;">
+  <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+    <a href="/deliverables" style="color: var(--vendo-text-muted); text-decoration: none; font-size: 13px;">&larr; Back to Deliverables</a>
+  </div>
+
+  <div style="background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem;">
+    <h3 style="margin: 0 0 0.5rem; font-size: 16px; color: var(--vendo-text-heading);">Team Members</h3>
+    <p style="font-size: 13px; color: var(--vendo-text-muted); margin-bottom: 1.25rem;">
+      Configure who works on deliverables. Initials are used in the AM/CM dropdowns. Link to a VendoOS account so they see the right data when they log in.
+    </p>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 1.5rem;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--vendo-border);">
+          <th style="text-align: left; padding: 6px 8px; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase;">Initials</th>
+          <th style="text-align: left; padding: 6px 8px; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase;">Name</th>
+          <th style="text-align: left; padding: 6px 8px; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase;">Linked User</th>
+          <th style="text-align: left; padding: 6px 8px; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase;">Services</th>
+          <th style="text-align: left; padding: 6px 8px; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase;">Roles</th>
+          <th style="text-align: center; padding: 6px 8px; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase;">Active</th>
+          <th style="width: 40px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!it.members.length) { %>
+        <tr><td colspan="7" style="text-align: center; padding: 1.5rem; color: var(--vendo-text-muted);">No team members configured yet.</td></tr>
+        <% } %>
+        <% it.members.forEach(m => {
+          const svcs = m.service_types.split(',').map(s => s.trim());
+          const linkedUser = it.users.find(u => u.id === m.user_id);
+        %>
+        <tr style="border-bottom: 1px solid var(--vendo-border);">
+          <td style="padding: 8px; font-weight: 600;"><%= m.initials %></td>
+          <td style="padding: 8px;"><%= m.name %></td>
+          <td style="padding: 8px; font-size: 12px; color: var(--vendo-text-muted);"><%= linkedUser ? linkedUser.name : '—' %></td>
+          <td style="padding: 8px; font-size: 11px;">
+            <% svcs.forEach(s => { %>
+            <span style="display: inline-block; padding: 2px 6px; background: rgba(255,255,255,0.06); border-radius: 4px; margin-right: 3px;"><%= it.serviceLabels[s] || s %></span>
+            <% }) %>
+          </td>
+          <td style="padding: 8px; font-size: 11px;"><%= m.roles.toUpperCase() %></td>
+          <td style="padding: 8px; text-align: center;"><%= m.is_active ? 'Yes' : 'No' %></td>
+          <td style="padding: 8px;">
+            <form method="POST" action="/deliverables/settings/member/<%= m.id %>/delete" onsubmit="return confirm('Remove this team member?')">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+              <button type="submit" style="background: none; border: none; cursor: pointer; color: #64748B; font-size: 14px;">&times;</button>
+            </form>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <h4 style="margin: 0 0 0.75rem; font-size: 14px; color: var(--vendo-text-heading);">Add / Update Team Member</h4>
+    <form method="POST" action="/deliverables/settings/member">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+
+      <div style="display: grid; grid-template-columns: 80px 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+        <div>
+          <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">Initials</label>
+          <input name="initials" required placeholder="SF" maxlength="10" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">Full Name</label>
+          <input name="name" required placeholder="Sam Franks" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); box-sizing: border-box;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">Link to VendoOS User</label>
+          <select name="user_id" style="width: 100%; padding: 6px 8px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); box-sizing: border-box;">
+            <option value="">— None —</option>
+            <% it.users.forEach(u => { %>
+            <option value="<%= u.id %>"><%= u.name %> (<%= u.email %>)</option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 2rem; margin-bottom: 0.75rem;">
+        <div>
+          <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">Services</label>
+          <div style="display: flex; gap: 0.75rem;">
+            <% it.serviceTypes.forEach(st => { %>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--vendo-text); cursor: pointer;">
+              <input type="checkbox" name="service_<%= st %>" checked> <%= it.serviceLabels[st] %>
+            </label>
+            <% }) %>
+          </div>
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">Roles</label>
+          <div style="display: flex; gap: 0.75rem;">
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--vendo-text); cursor: pointer;">
+              <input type="checkbox" name="role_am" checked> AM
+            </label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--vendo-text); cursor: pointer;">
+              <input type="checkbox" name="role_cm" checked> CM
+            </label>
+          </div>
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 0.25rem;">&nbsp;</label>
+          <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--vendo-text); cursor: pointer;">
+            <input type="checkbox" name="is_active" checked> Active
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" style="padding: 6px 16px; font-size: 12px; font-weight: 500; border-radius: 6px; border: 1px solid var(--vendo-green); background: var(--vendo-green); color: #0B0B0B; cursor: pointer; font-family: var(--vendo-font);">Save Member</button>
+    </form>
+  </div>
+</div>

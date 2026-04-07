@@ -17,6 +17,11 @@ import {
   upsertHourEntry,
   deleteHourEntry,
   parseMultiPerson,
+  getTeamMembers,
+  getTeamMembersForService,
+  upsertTeamMember,
+  deleteTeamMember,
+  getVendoUsers,
 } from '../lib/queries/deliverables.js';
 
 // --- Input sanitisation helpers ---
@@ -76,7 +81,7 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     const q = request.query as Record<string, string>;
     const user = (request as any).user;
     const isAdmin = user?.role === 'admin';
-    const userInitials = user ? await getUserInitials(user.name) : '';
+    const userInitials = user ? await getUserInitials(user.name, user.id) : '';
 
     // Determine which service tabs this user can see
     const allowedServiceTypes = isAdmin
@@ -106,11 +111,12 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       });
     }
 
-    const [hoursAgg, completions, people, capacity] = await Promise.all([
+    const [hoursAgg, completions, people, capacity, teamForService] = await Promise.all([
       getAggregatedHours(serviceType, months),
       getCompletions(serviceType, months),
       isAdmin ? getDistinctPeople() : Promise.resolve([]),
       getPersonCapacity(serviceType, months[months.length - 1] || months[0]),
+      getTeamMembersForService(serviceType),
     ]);
 
     const completionMap: Record<string, boolean> = {};
@@ -156,6 +162,7 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       showBudget: serviceType !== 'seo',
       isAdmin,
       userInitials,
+      teamForService,
       userName: user?.name || '',
       pageTitle: `Deliverables — ${SERVICE_LABELS[serviceType]}`,
     });
@@ -288,120 +295,47 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     reply.type('text/html').send(icon);
   });
 
-  // ── Bulk import form ───────────────────────────────────────
+  // ── Team settings (admin only) ──────────────────────────────
 
-  app.get('/import', async (request, reply) => {
-    const q = request.query as Record<string, string>;
-    reply.render('deliverables-import', {
-      serviceType: q.service || 'paid_search',
+  app.get('/settings', async (request, reply) => {
+    if ((request as any).user?.role !== 'admin') { reply.code(403).send('Admin only'); return; }
+    const [members, users] = await Promise.all([
+      getTeamMembers(false),
+      getVendoUsers(),
+    ]);
+    reply.render('deliverables-settings', {
+      members,
+      users,
       serviceTypes: SERVICE_TYPES,
       serviceLabels: SERVICE_LABELS,
-      errors: [],
-      pageTitle: 'Import Deliverables',
+      pageTitle: 'Deliverables — Team Settings',
     });
   });
 
-  app.post('/import', async (request, reply) => {
+  app.post('/settings/member', async (request, reply) => {
     if ((request as any).user?.role !== 'admin') { reply.code(403).send('Admin only'); return; }
     const body = request.body as Record<string, string>;
-    const serviceType = SERVICE_TYPES.includes(body.service_type) ? body.service_type : 'paid_search';
-    const csvData = (body.csv_data || '').trim();
+    const initials = sanitise(body.initials, 10).toUpperCase();
+    if (!initials) { reply.redirect('/deliverables/settings'); return; }
 
-    // --- Validation ---
-    const errors: string[] = [];
+    const serviceTypes = SERVICE_TYPES.filter(st => body['service_' + st] === 'on').join(',') || 'paid_search';
+    const roles = ['am', 'cm'].filter(r => body['role_' + r] === 'on').join(',') || 'am,cm';
 
-    if (!csvData) {
-      errors.push('No CSV data provided. Upload a file or paste data.');
-    }
+    await upsertTeamMember({
+      initials,
+      name: sanitise(body.name, 50) || initials,
+      user_id: body.user_id || null,
+      service_types: serviceTypes,
+      roles,
+      is_active: body.is_active === 'on' ? 1 : 0,
+    });
+    reply.redirect('/deliverables/settings');
+  });
 
-    // Size limit: 1MB
-    if (csvData.length > 1_048_576) {
-      errors.push('CSV data exceeds 1MB limit.');
-    }
-
-    if (errors.length) {
-      reply.render('deliverables-import', {
-        serviceType,
-        serviceTypes: SERVICE_TYPES,
-        serviceLabels: SERVICE_LABELS,
-        errors,
-        pageTitle: 'Import Deliverables',
-      });
-      return;
-    }
-
-    const lines = csvData.split('\n').filter(l => l.trim());
-    let imported = 0;
-    const rowErrors: string[] = [];
-    const MAX_ROWS = 500;
-
-    for (let i = 0; i < lines.length && i < MAX_ROWS; i++) {
-      const line = lines[i];
-      const parts = parseCsvLine(line);
-      if (parts.length < 2) continue;
-
-      // Skip header rows and legend rows
-      const first = parts[0].toLowerCase().trim();
-      if (first === 'client_name' || first === 'account name' || first === '' || first.startsWith('am hrs') || first.startsWith('cm hrs') || first.startsWith('*')) continue;
-
-      const clientName = sanitise(parts[0], 100);
-      if (!clientName) continue;
-
-      const am = sanitise(parts[1], 20);
-      const cm = sanitise(parts[2], 20);
-      const level = sanitise(parts[3] || 'Auto', 20);
-
-      const calls = clampInt(parts[4], 0, 50, 1);
-      const amHrs = clampFloat(parts[5], 0, 200, 2);
-      const cmHrs = clampFloat(parts[6], 0, 200, 2);
-      const tier = clampInt(parts[7], 1, 4, 3);
-
-      // Parse budget — strip currency symbols, commas, quotes
-      const budgetRaw = (parts[8] || '0').replace(/[£€$,\s"]/g, '');
-      const budget = clampFloat(budgetRaw, 0, 1_000_000, 0);
-
-      // Detect currency from budget string
-      const budgetStr = parts[8] || '';
-      const currency = budgetStr.includes('€') ? 'EUR' : 'GBP';
-
-      try {
-        await upsertServiceConfig({
-          client_name: clientName,
-          service_type: serviceType,
-          am: am || null,
-          cm: cm || null,
-          level,
-          tier,
-          calls,
-          am_hrs: amHrs,
-          cm_hrs: cmHrs,
-          budget,
-          currency,
-          status: 'active',
-        });
-        imported++;
-      } catch (err: any) {
-        rowErrors.push(`Row ${i + 1} (${clientName}): ${err.message?.slice(0, 80)}`);
-      }
-    }
-
-    if (lines.length > MAX_ROWS) {
-      rowErrors.push(`Only first ${MAX_ROWS} rows processed (${lines.length} total).`);
-    }
-
-    clearInitialsCache();
-
-    if (rowErrors.length && imported === 0) {
-      reply.render('deliverables-import', {
-        serviceType,
-        serviceTypes: SERVICE_TYPES,
-        serviceLabels: SERVICE_LABELS,
-        errors: rowErrors,
-        pageTitle: 'Import Deliverables',
-      });
-      return;
-    }
-
-    reply.redirect(`/deliverables?service=${serviceType}&imported=${imported}`);
+  app.post('/settings/member/:id/delete', async (request, reply) => {
+    if ((request as any).user?.role !== 'admin') { reply.code(403).send('Admin only'); return; }
+    const { id } = request.params as { id: string };
+    await deleteTeamMember(parseInt(id, 10));
+    reply.redirect('/deliverables/settings');
   });
 };

@@ -33,6 +33,16 @@ async function ensureSchema(): Promise<void> {
       hours REAL NOT NULL DEFAULT 0, entered_at TEXT, updated_at TEXT
     )`,
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_dhe_unique ON deliverable_hour_entries(client_name, service_type, month, user_initials, role)',
+    `CREATE TABLE IF NOT EXISTS deliverable_team_members (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      initials TEXT NOT NULL,
+      name TEXT NOT NULL,
+      user_id TEXT,
+      service_types TEXT NOT NULL DEFAULT 'paid_search,seo,paid_social',
+      roles TEXT NOT NULL DEFAULT 'am,cm',
+      is_active INTEGER DEFAULT 1
+    )`,
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_dtm_initials ON deliverable_team_members(initials)',
   ];
   for (const sql of schemaSql) {
     try { await db.execute({ sql, args: [] }); } catch { /* already exists */ }
@@ -624,13 +634,72 @@ export async function getServiceConfigsForUser(
 }
 
 /**
- * Map a VendoOS user name to initials used in configs.
- * Checks harvest_users first, falls back to first letters of name parts.
+ * Map a VendoOS user name or user_id to initials.
+ * Checks deliverable_team_members first, then harvest_users, then falls back to initials.
  */
-export async function getUserInitials(userName: string): Promise<string> {
+export async function getUserInitials(userName: string, userId?: string): Promise<string> {
+  await ensureSchema();
+  // Check team members table first (by user_id or name)
+  if (userId) {
+    const byId = await rows<{ initials: string }>('SELECT initials FROM deliverable_team_members WHERE user_id = ? AND is_active = 1', [userId]);
+    if (byId.length) return byId[0].initials;
+  }
+  const byName = await rows<{ initials: string }>('SELECT initials FROM deliverable_team_members WHERE name = ? AND is_active = 1', [userName]);
+  if (byName.length) return byName[0].initials;
+
+  // Fall back to harvest/initials map
   const map = await getInitialsMap();
   if (map[userName]) return map[userName];
-  // Fallback: first letter of each word
   const parts = userName.trim().split(/\s+/);
   return parts.map(p => p[0] || '').join('').toUpperCase();
+}
+
+// ============================================================
+// Team member management
+// ============================================================
+
+export interface TeamMember {
+  id: number;
+  initials: string;
+  name: string;
+  user_id: string | null;
+  service_types: string;
+  roles: string;
+  is_active: number;
+}
+
+export async function getTeamMembers(activeOnly = true): Promise<TeamMember[]> {
+  await ensureSchema();
+  const where = activeOnly ? 'WHERE is_active = 1' : '';
+  return rows<TeamMember>(`SELECT * FROM deliverable_team_members ${where} ORDER BY initials`);
+}
+
+export async function getTeamMembersForService(serviceType: string): Promise<TeamMember[]> {
+  const all = await getTeamMembers();
+  return all.filter(m => m.service_types.split(',').map(s => s.trim()).includes(serviceType));
+}
+
+export async function upsertTeamMember(member: Omit<TeamMember, 'id'>): Promise<void> {
+  await ensureSchema();
+  await db.execute({
+    sql: `INSERT INTO deliverable_team_members (initials, name, user_id, service_types, roles, is_active)
+          VALUES (?, ?, ?, ?, ?, ?)
+          ON CONFLICT(initials) DO UPDATE SET
+            name = excluded.name, user_id = excluded.user_id,
+            service_types = excluded.service_types, roles = excluded.roles,
+            is_active = excluded.is_active`,
+    args: [member.initials, member.name, member.user_id, member.service_types, member.roles, member.is_active],
+  });
+  clearInitialsCache();
+}
+
+export async function deleteTeamMember(id: number): Promise<void> {
+  await ensureSchema();
+  await db.execute({ sql: 'DELETE FROM deliverable_team_members WHERE id = ?', args: [id] });
+  clearInitialsCache();
+}
+
+/** Get VendoOS users for linking in settings. */
+export async function getVendoUsers(): Promise<{ id: string; name: string; email: string }[]> {
+  return rows<{ id: string; name: string; email: string }>('SELECT id, name, email FROM users ORDER BY name');
 }

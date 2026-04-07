@@ -103,7 +103,7 @@
 
   <% if (it.isAdmin) { %>
   <div class="del-actions">
-    <a href="/deliverables/import?service=<%= it.serviceType %>" class="del-btn">Import CSV</a>
+    <a href="/deliverables/settings" class="del-btn">Team Settings</a>
     <button class="del-btn del-btn-primary" onclick="document.getElementById('addModal').classList.add('open')">+ Add Client</button>
   </div>
   <% } %>
@@ -408,16 +408,44 @@
 <% } %>
 
 <script>
+// Team members for dropdowns
+var teamMembers = [<% it.teamForService.forEach(function(m, i) { %><% if (i > 0) { %>,<% } %>{ i: '<%~ m.initials %>', n: '<%~ m.name %>' }<% }); %>];
+
 // Inline config field editing (admin only)
 function editField(cell, configId, field, currentVal) {
-  if (cell.querySelector('input')) return;
+  if (cell.querySelector('input') || cell.querySelector('select')) return;
   var orig = cell.textContent.trim();
+
+  // Use dropdown for AM/CM fields
+  if (field === 'am' || field === 'cm') {
+    var sel = document.createElement('select');
+    sel.style.cssText = 'width:70px;padding:2px;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid var(--vendo-green);border-radius:4px;font-size:12px;font-family:var(--vendo-font);';
+    sel.innerHTML = '<option value="">—</option>';
+    teamMembers.forEach(function(m) {
+      var opt = document.createElement('option');
+      opt.value = m.i;
+      opt.textContent = m.i;
+      if (m.i === currentVal) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    cell.textContent = '';
+    cell.appendChild(sel);
+    sel.focus();
+    function saveSel() {
+      var val = sel.value;
+      sel.remove();
+      saveField(cell, configId, field, val, orig);
+    }
+    sel.addEventListener('change', saveSel);
+    sel.addEventListener('blur', saveSel);
+    return;
+  }
+
   var input = document.createElement('input');
   input.type = (field === 'tier' || field === 'calls' || field === 'am_hrs' || field === 'cm_hrs' || field === 'budget') ? 'number' : 'text';
   if (input.type === 'number') { input.step = (field === 'am_hrs' || field === 'cm_hrs') ? '0.5' : '1'; input.min = '0'; }
   input.value = currentVal || '';
   input.style.cssText = 'width:60px;padding:2px 4px;background:var(--vendo-bg);color:var(--vendo-text);border:1px solid var(--vendo-green);border-radius:4px;font-size:12px;font-family:var(--vendo-font);';
-  if (field === 'am' || field === 'cm' || field === 'level') input.style.width = '50px';
   cell.textContent = '';
   cell.appendChild(input);
   input.focus();
@@ -425,21 +453,25 @@ function editField(cell, configId, field, currentVal) {
   function save() {
     var val = input.value.trim();
     input.remove();
-    var formData = new URLSearchParams();
-    formData.append('field', field);
-    formData.append('value', val);
-    formData.append('_csrf', '<%= it.csrfToken %>');
-    fetch('/deliverables/config/' + configId + '/field', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData.toString(),
-    }).then(function(r) { return r.text(); }).then(function(t) { cell.textContent = t || orig; }).catch(function() { cell.textContent = orig; });
+    saveField(cell, configId, field, val, orig);
   }
   input.addEventListener('blur', save);
   input.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); save(); }
     if (e.key === 'Escape') { input.remove(); cell.textContent = orig; }
   });
+}
+
+function saveField(cell, configId, field, val, orig) {
+  var formData = new URLSearchParams();
+  formData.append('field', field);
+  formData.append('value', val);
+  formData.append('_csrf', '<%= it.csrfToken %>');
+  fetch('/deliverables/config/' + configId + '/field', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: formData.toString(),
+  }).then(function(r) { return r.text(); }).then(function(t) { cell.textContent = t || orig; }).catch(function() { cell.textContent = orig; });
 }
 
 // Inline hour editing
