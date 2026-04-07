@@ -202,18 +202,18 @@
           const onBudget = totalH > 0 && !overBudget;
           const cellClass = totalH === 0 ? 'no-hours' : overBudget ? 'over-budget' : onBudget ? 'on-budget' : '';
           const completed = it.completionMap[key];
-          const escapedName = config.client_name.replace(/'/g, '&#39;');
+          const eName = config.client_name.replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+          const amClick = canEditAM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'am\',\'' + it.userInitials + '\')"' : '';
+          const cmClick = canEditCM ? ' onclick="editHour(this,\'' + eName + '\',\'' + it.serviceType + '\',\'' + m + '\',\'cm\',\'' + it.userInitials + '\')"' : '';
+          const amTitle = amBreak ? ' title="' + amBreak.replace(/"/g,'&quot;') + '"' : '';
+          const cmTitle = cmBreak ? ' title="' + cmBreak.replace(/"/g,'&quot;') + '"' : '';
+          const amCls = cellClass + ' ' + (canEditAM ? 'del-hour-cell' : 'del-hour-readonly');
+          const cmCls = cellClass + ' ' + (canEditCM ? 'del-hour-cell' : 'del-hour-readonly');
         %>
-          <td class="col-month <%= cellClass %> <%= canEditAM ? 'del-hour-cell' : 'del-hour-readonly' %>"
-              id="am-<%= config.id %>-<%= m %>"
-              <% if (canEditAM) { %>onclick="editHour(this, '<%= escapedName %>', '<%= it.serviceType %>', '<%= m %>', 'am', '<%= it.userInitials %>')"<% } %>
-              <% if (amBreak) { %>title="<%= amBreak %>"<% } %>>
+          <td class="col-month <%~ amCls %>" id="am-<%= config.id %>-<%= m %>"<%~ amClick %><%~ amTitle %>>
             <span class="del-hour-val"><%= amH > 0 ? amH : '' %></span>
           </td>
-          <td class="col-month <%= cellClass %> <%= canEditCM ? 'del-hour-cell' : 'del-hour-readonly' %>"
-              id="cm-<%= config.id %>-<%= m %>"
-              <% if (canEditCM) { %>onclick="editHour(this, '<%= escapedName %>', '<%= it.serviceType %>', '<%= m %>', 'cm', '<%= it.userInitials %>')"<% } %>
-              <% if (cmBreak) { %>title="<%= cmBreak %>"<% } %>>
+          <td class="col-month <%~ cmCls %>" id="cm-<%= config.id %>-<%= m %>"<%~ cmClick %><%~ cmTitle %>>
             <span class="del-hour-val"><%= cmH > 0 ? cmH : '' %></span>
           </td>
           <td class="col-center">
