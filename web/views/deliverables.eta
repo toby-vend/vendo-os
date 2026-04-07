@@ -413,19 +413,147 @@
 </div>
 <% } %>
 
+<div id="save-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--vendo-surface);border-top:2px solid var(--vendo-green);padding:10px 2rem;display:none;align-items:center;justify-content:space-between;">
+  <span style="font-size:13px;color:var(--vendo-text);"><span id="save-bar-count">0</span> unsaved change(s)</span>
+  <div style="display:flex;gap:0.5rem;">
+    <button onclick="discardChanges()" style="padding:6px 16px;font-size:12px;font-weight:500;border-radius:6px;border:1px solid var(--vendo-border-strong);background:var(--vendo-surface);color:var(--vendo-text);cursor:pointer;font-family:var(--vendo-font);">Discard</button>
+    <button onclick="saveAllChanges()" id="save-bar-btn" style="padding:6px 16px;font-size:12px;font-weight:600;border-radius:6px;border:none;background:var(--vendo-green);color:#0B0B0B;cursor:pointer;font-family:var(--vendo-font);">Save Changes</button>
+  </div>
+</div>
+
 <script>
 // Team members for dropdowns
 var teamMembers = [<% it.teamForService.forEach(function(m, i) { %><% if (i > 0) { %>,<% } %>{ i: '<%~ m.initials %>', n: '<%~ m.name %>' }<% }); %>];
 
-// Inline config field editing (admin only)
+// --- Pending changes store ---
+var pendingFields = []; // { configId, field, value, cell, orig }
+var pendingHours = [];  // { clientName, serviceType, month, role, userInitials, hours, cell, origHtml }
+
+function hasPendingChanges() { return pendingFields.length > 0 || pendingHours.length > 0; }
+
+function updateSaveBar() {
+  var bar = document.getElementById('save-bar');
+  var count = pendingFields.length + pendingHours.length;
+  if (count > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('save-bar-count').textContent = count;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function markChanged(cell) {
+  cell.style.outline = '2px solid var(--vendo-green)';
+  cell.style.outlineOffset = '-2px';
+  cell.dataset.changed = '1';
+}
+
+function unmarkChanged(cell) {
+  cell.style.outline = '';
+  cell.style.outlineOffset = '';
+  delete cell.dataset.changed;
+}
+
+// Prompt on page leave
+window.addEventListener('beforeunload', function(e) {
+  if (hasPendingChanges()) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// --- Save all ---
+function saveAllChanges() {
+  var btn = document.getElementById('save-bar-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  var payload = { fields: [], hours: [] };
+  pendingFields.forEach(function(p) { payload.fields.push({ configId: p.configId, field: p.field, value: p.value }); });
+  pendingHours.forEach(function(p) { payload.hours.push({ clientName: p.clientName, serviceType: p.serviceType, month: p.month, role: p.role, userInitials: p.userInitials, hours: p.hours }); });
+
+  fetch('/deliverables/bulk-save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': '<%= it.csrfToken %>' },
+    body: JSON.stringify(payload),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(result) {
+    if (result.ok) {
+      // Clear changed markers
+      pendingFields.forEach(function(p) { unmarkChanged(p.cell); });
+      pendingHours.forEach(function(p) { unmarkChanged(p.cell); });
+      pendingFields = [];
+      pendingHours = [];
+      updateSaveBar();
+      // Reload to get fresh aggregated data
+      window.location.reload();
+    } else {
+      btn.textContent = 'Save Changes';
+      btn.disabled = false;
+      alert('Some changes failed: ' + (result.errors || []).join(', '));
+    }
+  })
+  .catch(function() {
+    btn.textContent = 'Save Changes';
+    btn.disabled = false;
+    alert('Save failed. Please try again.');
+  });
+}
+
+// --- Discard all ---
+function discardChanges() {
+  pendingFields.forEach(function(p) {
+    p.cell.textContent = p.orig;
+    unmarkChanged(p.cell);
+  });
+  pendingHours.forEach(function(p) {
+    var valSpan = p.cell.querySelector('.del-hour-val');
+    if (valSpan) valSpan.innerHTML = p.origHtml;
+    unmarkChanged(p.cell);
+  });
+  pendingFields = [];
+  pendingHours = [];
+  updateSaveBar();
+}
+
+// --- Queue a field change ---
+function queueField(cell, configId, field, val, orig) {
+  // Remove existing pending for same configId+field
+  pendingFields = pendingFields.filter(function(p) { return !(p.configId === configId && p.field === field); });
+  // If value matches original, don't queue
+  if (val === orig) {
+    unmarkChanged(cell);
+  } else {
+    pendingFields.push({ configId: configId, field: field, value: val, cell: cell, orig: orig });
+    markChanged(cell);
+  }
+  cell.textContent = val || '\u2014';
+  updateSaveBar();
+}
+
+// --- Queue an hour change ---
+function queueHour(cell, clientName, serviceType, month, role, userInitials, hours, origHtml) {
+  var key = clientName + '::' + month + '::' + role;
+  pendingHours = pendingHours.filter(function(p) { return (p.clientName + '::' + p.month + '::' + p.role) !== key; });
+  var valSpan = cell.querySelector('.del-hour-val');
+  if (hours > 0) {
+    if (valSpan) valSpan.textContent = hours;
+  } else {
+    if (valSpan) valSpan.textContent = '';
+  }
+  pendingHours.push({ clientName: clientName, serviceType: serviceType, month: month, role: role, userInitials: userInitials, hours: hours, cell: cell, origHtml: origHtml });
+  markChanged(cell);
+  updateSaveBar();
+}
+
+// --- Inline config field editing ---
 function editField(cell, configId, field, currentVal) {
-  if (cell.querySelector('input') || cell.querySelector('select')) return;
+  if (cell.querySelector('input') || cell.querySelector('select') || cell.querySelector('.del-role-popup')) return;
   var orig = cell.textContent.trim();
 
   // Use multi-select checkbox popup for AM/CM fields
   if (field === 'am' || field === 'cm') {
     var current = currentVal.split(/\s*\/\s*/).filter(Boolean);
     var popup = document.createElement('div');
+    popup.className = 'del-role-popup';
     popup.style.cssText = 'position:absolute;z-index:20;background:var(--vendo-surface);border:1px solid var(--vendo-border-strong);border-radius:6px;padding:6px;min-width:100px;box-shadow:0 4px 12px rgba(0,0,0,0.4);';
     teamMembers.forEach(function(m) {
       var lbl = document.createElement('label');
@@ -450,15 +578,15 @@ function editField(cell, configId, field, currentVal) {
     popup.appendChild(btnRow);
     cell.style.position = 'relative';
     cell.appendChild(popup);
-    function saveMulti() {
+    function commitMulti() {
       var selected = [];
       popup.querySelectorAll('input[type=checkbox]').forEach(function(cb) { if (cb.checked) selected.push(cb.value); });
       popup.remove();
-      saveField(cell, configId, field, selected.join(' / '), orig);
+      queueField(cell, configId, field, selected.join(' / '), orig);
     }
-    doneBtn.addEventListener('click', function(e) { e.stopPropagation(); saveMulti(); });
+    doneBtn.addEventListener('click', function(e) { e.stopPropagation(); commitMulti(); });
     setTimeout(function() {
-      function closePopup(e) { if (!popup.contains(e.target)) { document.removeEventListener('mousedown', closePopup); saveMulti(); } }
+      function closePopup(e) { if (!popup.contains(e.target)) { document.removeEventListener('mousedown', closePopup); commitMulti(); } }
       document.addEventListener('mousedown', closePopup);
     }, 0);
     return;
@@ -473,36 +601,24 @@ function editField(cell, configId, field, currentVal) {
   cell.appendChild(input);
   input.focus();
   input.select();
-  function save() {
+  function commit() {
     var val = input.value.trim();
     input.remove();
-    saveField(cell, configId, field, val, orig);
+    queueField(cell, configId, field, val, orig);
   }
-  input.addEventListener('blur', save);
+  input.addEventListener('blur', commit);
   input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); save(); }
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
     if (e.key === 'Escape') { input.remove(); cell.textContent = orig; }
   });
 }
 
-function saveField(cell, configId, field, val, orig) {
-  var formData = new URLSearchParams();
-  formData.append('field', field);
-  formData.append('value', val);
-  formData.append('_csrf', '<%= it.csrfToken %>');
-  fetch('/deliverables/config/' + configId + '/field', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: formData.toString(),
-  }).then(function(r) { return r.text(); }).then(function(t) { cell.textContent = t || orig; }).catch(function() { cell.textContent = orig; });
-}
-
-// Inline hour editing
+// --- Inline hour editing ---
 function editHour(cell, clientName, serviceType, month, role, userInitials) {
-  // Don't re-open if already editing
   if (cell.querySelector('input')) return;
 
   var valSpan = cell.querySelector('.del-hour-val');
+  var origHtml = valSpan ? valSpan.innerHTML : '';
   var currentVal = valSpan ? valSpan.textContent.trim() : '';
 
   var input = document.createElement('input');
@@ -518,43 +634,16 @@ function editHour(cell, clientName, serviceType, month, role, userInitials) {
   input.focus();
   input.select();
 
-  function save() {
+  function commit() {
     var hours = parseFloat(input.value) || 0;
     input.remove();
     valSpan.style.display = '';
-
-    // Send to server
-    var formData = new URLSearchParams();
-    formData.append('client_name', clientName);
-    formData.append('service_type', serviceType);
-    formData.append('month', month);
-    formData.append('role', role);
-    formData.append('hours', hours.toString());
-    formData.append('user_initials', userInitials);
-    formData.append('_csrf', '<%= it.csrfToken %>');
-
-    fetch('/deliverables/hours', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData.toString(),
-    })
-    .then(function(res) { return res.text(); })
-    .then(function(html) {
-      valSpan.innerHTML = html || '';
-      // Update tooltip
-      if (html) {
-        var tmp = document.createElement('div');
-        tmp.innerHTML = html;
-        var span = tmp.querySelector('span');
-        if (span && span.title) cell.title = span.title;
-      }
-    })
-    .catch(function() { valSpan.textContent = currentVal; });
+    queueHour(cell, clientName, serviceType, month, role, userInitials, hours, origHtml);
   }
 
-  input.addEventListener('blur', save);
+  input.addEventListener('blur', commit);
   input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); save(); }
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
     if (e.key === 'Escape') { input.remove(); valSpan.style.display = ''; }
   });
 }

@@ -291,6 +291,67 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     reply.redirect(`/deliverables?service=${q.service || 'paid_search'}`);
   });
 
+  // ── Bulk save (config fields + hours) ───────────────────────
+
+  app.post('/bulk-save', async (request, reply) => {
+    const user = (request as any).user;
+    const isAdmin = user?.role === 'admin';
+    const userInitials = user ? await getUserInitials(user.name, user.id) : '';
+    const body = request.body as { fields?: any[]; hours?: any[] };
+
+    const errors: string[] = [];
+
+    // Process config field changes (admin only)
+    if (body.fields && Array.isArray(body.fields)) {
+      if (!isAdmin) {
+        errors.push('Only admins can update config fields');
+      } else {
+        const numericFields = ['tier', 'calls', 'am_hrs', 'cm_hrs', 'cs_hrs', 'budget'];
+        for (const f of body.fields) {
+          try {
+            let value: string = (f.value ?? '').toString().trim();
+            let finalValue: string | number = value;
+            if (numericFields.includes(f.field)) {
+              let n = parseFloat(value) || 0;
+              if (['am_hrs', 'cm_hrs', 'cs_hrs'].includes(f.field)) n = Math.round(n * 2) / 2;
+              finalValue = n;
+            }
+            await updateConfigField(parseInt(f.configId, 10), f.field, finalValue);
+          } catch (err: any) {
+            errors.push(`Field ${f.field} for config ${f.configId}: ${err.message}`);
+          }
+        }
+        clearInitialsCache();
+      }
+    }
+
+    // Process hour changes
+    if (body.hours && Array.isArray(body.hours)) {
+      for (const h of body.hours) {
+        const targetInitials = h.userInitials || userInitials;
+        // Staff can only edit their own hours or those they're assigned to
+        if (!isAdmin && targetInitials !== userInitials) {
+          const configs = await getServiceConfigs({ serviceType: h.serviceType });
+          const config = configs.find(c => c.client_name === h.clientName);
+          if (!config) { errors.push(`Not allowed: ${h.clientName}`); continue; }
+          const assignedPeople = parseMultiPerson(h.role === 'am' ? config.am : config.cm);
+          if (!assignedPeople.includes(targetInitials) && !assignedPeople.includes(userInitials)) {
+            errors.push(`Not allowed: ${h.clientName} ${h.role}`);
+            continue;
+          }
+        }
+        const hours = Math.round((parseFloat(h.hours) || 0) * 2) / 2;
+        if (hours > 0) {
+          await upsertHourEntry(h.clientName, h.serviceType, h.month, targetInitials, user?.name || targetInitials, h.role, hours);
+        } else {
+          await deleteHourEntry(h.clientName, h.serviceType, h.month, targetInitials, h.role);
+        }
+      }
+    }
+
+    reply.send({ ok: true, errors });
+  });
+
   // ── Toggle deliverable completion (HTMX) ───────────────────
 
   app.post('/complete', async (request, reply) => {

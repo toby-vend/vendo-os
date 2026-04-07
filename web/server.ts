@@ -284,7 +284,8 @@ app.addHook('preHandler', async (request, reply) => {
   if (!sessionToken) return; // no session = not authenticated, auth hook will handle
 
   const body = request.body as Record<string, string | string[]> | undefined;
-  const csrfToken = typeof body?._csrf === 'string' ? body._csrf : '';
+  const headerToken = request.headers['x-csrf-token'] as string | undefined;
+  const csrfToken = headerToken || (typeof body?._csrf === 'string' ? body._csrf : '');
   if (!verifyCsrfToken(sessionToken, csrfToken)) {
     reply.code(403).send('CSRF token invalid');
     return;
