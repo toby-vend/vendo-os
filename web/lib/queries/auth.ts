@@ -656,6 +656,18 @@ export async function initSchema(): Promise<void> {
   )`, args: [] });
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_growth_log_section ON growth_task_log(section)`, args: [] });
 
+  // Push subscriptions table
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id INTEGER PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    endpoint TEXT NOT NULL UNIQUE,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  )`, args: [] });
+
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_push_subs_user ON push_subscriptions(user_id)`, args: [] });
+
   // Sidebar config
   const { initSidebarSchema } = await import('./sidebar.js');
   await initSidebarSchema();
