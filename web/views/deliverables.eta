@@ -144,8 +144,7 @@
         <% it.months.forEach(m => {
           const label = new Date(m + '-15').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
         %>
-          <th class="col-month" colspan="2"><%= label %></th>
-          <th class="col-center" style="min-width: 30px; font-size: 10px;">Done</th>
+          <th class="col-month" colspan="2" style="border-left: 2px solid rgba(255,255,255,0.08);"><%= label %></th>
         <% }) %>
         <th style="min-width: 40px;"></th>
       </tr>
@@ -161,16 +160,15 @@
         <th class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %>"></th>
         <% if (it.showBudget) { %><th class="col-sticky col-s8 col-last-sticky"></th><% } %>
         <% it.months.forEach(m => { %>
-          <th class="col-month" style="color: var(--vendo-green); font-size: 10px;">AM</th>
+          <th class="col-month" style="color: var(--vendo-green); font-size: 10px; border-left: 2px solid rgba(255,255,255,0.08);">AM</th>
           <th class="col-month" style="color: #3B82F6; font-size: 10px;">CM</th>
-          <th></th>
         <% }) %>
         <th></th>
       </tr>
     </thead>
     <tbody>
       <% if (!it.configs.length) { %>
-      <tr><td colspan="<%= (it.showBudget ? 9 : 8) + it.months.length * 3 + 1 %>" style="text-align: center; padding: 2rem; color: var(--vendo-text-muted);">
+      <tr><td colspan="<%= (it.showBudget ? 9 : 8) + it.months.length * 2 + 1 %>" style="text-align: center; padding: 2rem; color: var(--vendo-text-muted);">
         No client configurations yet. Click "+ Add Client" to get started, or use "Import CSV" to bulk import from your spreadsheet.
       </td></tr>
       <% } %>
@@ -219,27 +217,11 @@
           const amCls = cellClass + ' ' + (canEditAM ? 'del-hour-cell' : 'del-hour-readonly');
           const cmCls = cellClass + ' ' + (canEditCM ? 'del-hour-cell' : 'del-hour-readonly');
         %>
-          <td class="col-month <%~ amCls %>" id="am-<%= config.id %>-<%= m %>"<%~ amClick %><%~ amTitle %>>
+          <td class="col-month <%~ amCls %>" id="am-<%= config.id %>-<%= m %>" style="border-left: 2px solid rgba(255,255,255,0.08);"<%~ amClick %><%~ amTitle %>>
             <span class="del-hour-val"><%= amH > 0 ? amH : '' %></span>
           </td>
           <td class="col-month <%~ cmCls %>" id="cm-<%= config.id %>-<%= m %>"<%~ cmClick %><%~ cmTitle %>>
             <span class="del-hour-val"><%= cmH > 0 ? cmH : '' %></span>
-          </td>
-          <td class="col-center">
-            <form method="POST" action="/deliverables/complete" class="del-completion"
-                  hx-post="/deliverables/complete" hx-swap="innerHTML" hx-target="closest .del-completion">
-              <input type="hidden" name="client_name" value="<%= config.client_name %>">
-              <input type="hidden" name="service_type" value="<%= it.serviceType %>">
-              <input type="hidden" name="month" value="<%= m %>">
-              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
-              <button type="submit" style="background: none; border: none; cursor: pointer; padding: 2px;">
-                <% if (completed) { %>
-                  <svg viewBox="0 0 24 24" fill="var(--vendo-green)" width="18" height="18"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                <% } else { %>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
-                <% } %>
-              </button>
-            </form>
           </td>
         <% }) %>
         <% if (it.isAdmin) { %>
@@ -270,9 +252,8 @@
         <% it.months.forEach(m => {
           const t = it.monthTotals[m] || { am: 0, cm: 0 };
         %>
-          <td class="col-month" style="color: var(--vendo-green);"><%= t.am > 0 ? t.am.toFixed(1) : '' %></td>
+          <td class="col-month" style="color: var(--vendo-green); border-left: 2px solid rgba(255,255,255,0.08);"><%= t.am > 0 ? t.am.toFixed(1) : '' %></td>
           <td class="col-month" style="color: #3B82F6;"><%= t.cm > 0 ? t.cm.toFixed(1) : '' %></td>
-          <td></td>
         <% }) %>
         <td></td>
       </tr>
@@ -294,8 +275,7 @@
           const pct = totalAlloc > 0 ? (totalActual / totalAlloc * 100).toFixed(1) : '0';
           const isOver = parseFloat(pct) > 100;
         %>
-          <td class="col-month" colspan="2" style="text-align: center; <%= isOver ? 'color: #EF4444; font-weight: 700;' : 'color: var(--vendo-green);' %>"><%= pct %>%</td>
-          <td></td>
+          <td class="col-month" colspan="2" style="text-align: center; border-left: 2px solid rgba(255,255,255,0.08); <%= isOver ? 'color: #EF4444; font-weight: 700;' : 'color: var(--vendo-green);' %>"><%= pct %>%</td>
         <% }) %>
         <td></td>
       </tr>
@@ -576,9 +556,14 @@ function editField(cell, configId, field, currentVal) {
     doneBtn.style.cssText = 'padding:3px 10px;font-size:11px;font-weight:600;background:var(--vendo-green);color:#0B0B0B;border:none;border-radius:4px;cursor:pointer;font-family:var(--vendo-font);';
     btnRow.appendChild(doneBtn);
     popup.appendChild(btnRow);
-    cell.style.position = 'relative';
-    cell.appendChild(popup);
-    // Prevent clicks inside popup from bubbling to cell's onclick
+    // Position popup relative to cell but append to body to avoid sticky/z-index clipping
+    var rect = cell.getBoundingClientRect();
+    popup.style.position = 'fixed';
+    popup.style.left = rect.left + 'px';
+    popup.style.top = (rect.bottom + 2) + 'px';
+    popup.style.zIndex = '100';
+    document.body.appendChild(popup);
+    // Prevent clicks inside popup from bubbling
     popup.addEventListener('click', function(e) { e.stopPropagation(); });
     popup.addEventListener('mousedown', function(e) { e.stopPropagation(); });
     var popupClosed = false;
@@ -592,8 +577,8 @@ function editField(cell, configId, field, currentVal) {
       queueField(cell, configId, field, selected.join(' / '), orig);
     }
     doneBtn.addEventListener('click', function(e) { e.stopPropagation(); commitMulti(); });
-    function closeOutside(e) { if (!popup.contains(e.target)) { commitMulti(); } }
-    setTimeout(function() { document.addEventListener('mousedown', closeOutside); }, 0);
+    function closeOutside(e) { if (!popup.contains(e.target) && !cell.contains(e.target)) { commitMulti(); } }
+    setTimeout(function() { document.addEventListener('mousedown', closeOutside); }, 10);
     return;
   }
 
