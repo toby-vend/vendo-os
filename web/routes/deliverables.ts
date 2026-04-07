@@ -69,8 +69,9 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     const q = request.query as Record<string, string>;
     const serviceType = SERVICE_TYPES.includes(q.service) ? q.service : 'paid_search';
     const filterPerson = q.person || '';
-    const monthCount = parseInt(q.months || '6', 10);
-    const months = generateMonths(Math.min(monthCount, 12));
+    const monthCount = parseInt(q.months || '3', 10);
+    // Most recent month first
+    const months = generateMonths(Math.min(monthCount, 12)).reverse();
 
     const filters: { serviceType: string; am?: string; cm?: string } = { serviceType };
     if (filterPerson) {
@@ -136,6 +137,7 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       serviceLabels: SERVICE_LABELS,
       filterPerson,
       monthCount,
+      showBudget: serviceType !== 'seo',
       pageTitle: `Deliverables — ${SERVICE_LABELS[serviceType]}`,
     });
   });
