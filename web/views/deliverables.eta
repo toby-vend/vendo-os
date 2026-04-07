@@ -193,8 +193,8 @@
           // Determine which roles this user can edit for this client
           const cfgAms = (config.am || '').split(/\s*\/\s*/).map(s => s.trim()).filter(Boolean);
           const cfgCms = (config.cm || '').split(/\s*\/\s*/).map(s => s.trim()).filter(Boolean);
-          const canEditAM = it.isAdmin || cfgAms.includes(it.userInitials);
-          const canEditCM = it.isAdmin || cfgCms.includes(it.userInitials);
+          const canEditAM = cfgAms.includes(it.userInitials);
+          const canEditCM = cfgCms.includes(it.userInitials);
         %>
         <% it.months.forEach(m => {
           const key = config.client_name + '::' + m;
