@@ -4957,7 +4957,7 @@ button.growth-sort-btn:hover {
   z-index: 9999;
   background: #1E293B;
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding: 12px 16px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
