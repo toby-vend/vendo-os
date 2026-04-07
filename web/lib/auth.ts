@@ -110,12 +110,14 @@ const ROUTE_MAP: [string, string][] = [
   ['/chat', 'chat'],
   ['/tasks', 'tasks'],
   ['/growth', 'growth'],
+  ['/deliverables', 'deliverables'],
+  ['/dashboards/time-tracking', 'time-tracking'],
+  ['/dashboards/capacity', 'capacity'],
   ['/dashboards', 'dashboards'],
   ['/skills', 'skills'],
   ['/asana-tasks', 'asana-tasks'],
   ['/operations', 'operations'],
   ['/onboarding', 'clients'],
-  ['/skills', 'skills'],
   ['/video-production', 'video-production'],
 ];
 
