@@ -66,24 +66,33 @@
   .del-modal input, .del-modal select { width: 100%; padding: 6px 10px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border-strong); border-radius: 6px; font-size: 13px; font-family: var(--vendo-font); box-sizing: border-box; }
   .del-modal .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
   .del-modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem; }
+
+  /* Inline hour editing */
+  .del-hour-cell { cursor: pointer; position: relative; }
+  .del-hour-cell:hover { background: rgba(255,255,255,0.04); }
+  .del-hour-cell input { width: 45px; padding: 2px 4px; background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-green); border-radius: 4px; font-size: 12px; font-family: var(--vendo-font); text-align: right; }
+  .del-hour-cell .del-hour-val { display: inline-block; min-width: 20px; }
+  .del-hour-readonly { cursor: default; }
 </style>
 
 <!-- Service type tabs + filters -->
 <div class="del-controls">
   <div class="del-tabs">
-    <% it.serviceTypes.forEach(st => { %>
+    <% it.allowedServiceTypes.forEach(st => { %>
       <a href="?service=<%= st %><%= it.filterPerson ? '&person=' + it.filterPerson : '' %>" class="del-tab<%= st === it.serviceType ? ' active' : '' %>"><%= it.serviceLabels[st] %></a>
     <% }) %>
   </div>
 
   <form method="GET" action="/deliverables" style="display: flex; gap: 0.5rem; align-items: center;">
     <input type="hidden" name="service" value="<%= it.serviceType %>">
+    <% if (it.isAdmin) { %>
     <select name="person" onchange="this.form.submit()">
       <option value="">All People</option>
       <% it.people.forEach(p => { %>
         <option value="<%= p %>" <%= it.filterPerson === p ? 'selected' : '' %>><%= p %></option>
       <% }) %>
     </select>
+    <% } %>
     <select name="months" onchange="this.form.submit()">
       <option value="3" <%= it.monthCount === 3 ? 'selected' : '' %>>Last 3 months</option>
       <option value="6" <%= it.monthCount === 6 ? 'selected' : '' %>>Last 6 months</option>
@@ -92,10 +101,12 @@
     </select>
   </form>
 
+  <% if (it.isAdmin) { %>
   <div class="del-actions">
     <a href="/deliverables/import?service=<%= it.serviceType %>" class="del-btn">Import CSV</a>
     <button class="del-btn del-btn-primary" onclick="document.getElementById('addModal').classList.add('open')">+ Add Client</button>
   </div>
+  <% } %>
 </div>
 
 <% if (typeof it.query !== 'undefined' && it.query?.imported) { %>
@@ -171,21 +182,39 @@
         <td class="col-sticky col-s6"><%= config.cm_hrs %></td>
         <td class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %>"><%= config.tier %></td>
         <% if (it.showBudget) { %><td class="col-sticky col-s8 col-last-sticky"><%= config.currency === 'EUR' ? '\u20AC' : '\u00A3' %><%= config.budget ? config.budget.toLocaleString('en-GB', { minimumFractionDigits: 0 }) : '—' %></td><% } %>
+        <%
+          // Determine which roles this user can edit for this client
+          const cfgAms = (config.am || '').split(/\s*\/\s*/).map(s => s.trim()).filter(Boolean);
+          const cfgCms = (config.cm || '').split(/\s*\/\s*/).map(s => s.trim()).filter(Boolean);
+          const canEditAM = it.isAdmin || cfgAms.includes(it.userInitials);
+          const canEditCM = it.isAdmin || cfgCms.includes(it.userInitials);
+        %>
         <% it.months.forEach(m => {
           const key = config.client_name + '::' + m;
-          const hours = it.hoursMap[key];
-          const amH = hours?.am || 0;
-          const cmH = hours?.cm || 0;
+          const agg = it.hoursAgg[key];
+          const amH = agg?.am?.total || 0;
+          const cmH = agg?.cm?.total || 0;
+          const amBreak = (agg?.am?.breakdown || []).map(b => b.user_initials + ': ' + b.hours + 'h').join('\n');
+          const cmBreak = (agg?.cm?.breakdown || []).map(b => b.user_initials + ': ' + b.hours + 'h').join('\n');
           const totalH = amH + cmH;
           const allocTotal = config.am_hrs + config.cm_hrs;
           const overBudget = allocTotal > 0 && totalH > allocTotal * 1.15;
           const onBudget = totalH > 0 && !overBudget;
           const cellClass = totalH === 0 ? 'no-hours' : overBudget ? 'over-budget' : onBudget ? 'on-budget' : '';
-          const compKey = config.client_name + '::' + m;
-          const completed = it.completionMap[compKey];
+          const completed = it.completionMap[key];
         %>
-          <td class="col-month <%= cellClass %>"><%= amH > 0 ? amH : '' %></td>
-          <td class="col-month <%= cellClass %>"><%= cmH > 0 ? cmH : '' %></td>
+          <td class="col-month <%= cellClass %> <%= canEditAM ? 'del-hour-cell' : 'del-hour-readonly' %>"
+              id="am-<%= config.id %>-<%= m %>"
+              <% if (canEditAM) { %>onclick="editHour(this, '<%= config.client_name.replace(/'/g, "\\'") %>', '<%= it.serviceType %>', '<%= m %>', 'am', '<%= it.userInitials %>')"<% } %>
+              <% if (amBreak) { %>title="<%= amBreak %>"<% } %>>
+            <span class="del-hour-val"><%= amH > 0 ? amH : '' %></span>
+          </td>
+          <td class="col-month <%= cellClass %> <%= canEditCM ? 'del-hour-cell' : 'del-hour-readonly' %>"
+              id="cm-<%= config.id %>-<%= m %>"
+              <% if (canEditCM) { %>onclick="editHour(this, '<%= config.client_name.replace(/'/g, "\\'") %>', '<%= it.serviceType %>', '<%= m %>', 'cm', '<%= it.userInitials %>')"<% } %>
+              <% if (cmBreak) { %>title="<%= cmBreak %>"<% } %>>
+            <span class="del-hour-val"><%= cmH > 0 ? cmH : '' %></span>
+          </td>
           <td class="col-center">
             <form method="POST" action="/deliverables/complete" class="del-completion"
                   hx-post="/deliverables/complete" hx-swap="innerHTML" hx-target="closest .del-completion">
@@ -203,6 +232,7 @@
             </form>
           </td>
         <% }) %>
+        <% if (it.isAdmin) { %>
         <td>
           <form method="POST" action="/deliverables/config/<%= config.id %>/delete?service=<%= it.serviceType %>"
                 onsubmit="return confirm('Remove this client config?')">
@@ -210,6 +240,7 @@
             <button type="submit" style="background: none; border: none; cursor: pointer; color: #64748B; font-size: 14px;" title="Remove">&times;</button>
           </form>
         </td>
+        <% } else { %><td></td><% } %>
       </tr>
       <% }) %>
     </tbody>
@@ -285,7 +316,8 @@
 </div>
 <% } %>
 
-<!-- Add Client Modal -->
+<% if (it.isAdmin) { %>
+<!-- Add Client Modal (admin only) -->
 <div class="del-modal-overlay" id="addModal" onclick="if(event.target===this) this.classList.remove('open')">
   <div class="del-modal">
     <h3>Add Client — <%= it.serviceLabels[it.serviceType] %></h3>
@@ -367,3 +399,68 @@
     </form>
   </div>
 </div>
+<% } %>
+
+<script>
+// Inline hour editing
+function editHour(cell, clientName, serviceType, month, role, userInitials) {
+  // Don't re-open if already editing
+  if (cell.querySelector('input')) return;
+
+  var valSpan = cell.querySelector('.del-hour-val');
+  var currentVal = valSpan ? valSpan.textContent.trim() : '';
+
+  var input = document.createElement('input');
+  input.type = 'number';
+  input.step = '0.25';
+  input.min = '0';
+  input.max = '200';
+  input.value = currentVal || '';
+  input.placeholder = '0';
+
+  valSpan.style.display = 'none';
+  cell.appendChild(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    var hours = parseFloat(input.value) || 0;
+    input.remove();
+    valSpan.style.display = '';
+
+    // Send to server
+    var formData = new URLSearchParams();
+    formData.append('client_name', clientName);
+    formData.append('service_type', serviceType);
+    formData.append('month', month);
+    formData.append('role', role);
+    formData.append('hours', hours.toString());
+    formData.append('user_initials', userInitials);
+    formData.append('_csrf', '<%= it.csrfToken %>');
+
+    fetch('/deliverables/hours', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData.toString(),
+    })
+    .then(function(res) { return res.text(); })
+    .then(function(html) {
+      valSpan.innerHTML = html || '';
+      // Update tooltip
+      if (html) {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        var span = tmp.querySelector('span');
+        if (span && span.title) cell.title = span.title;
+      }
+    })
+    .catch(function() { valSpan.textContent = currentVal; });
+  }
+
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); save(); }
+    if (e.key === 'Escape') { input.remove(); valSpan.style.display = ''; }
+  });
+}
+</script>

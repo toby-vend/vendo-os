@@ -1447,6 +1447,25 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_dc_month ON deliverable_completions(month)');
   db.run('CREATE INDEX IF NOT EXISTS idx_dc_client ON deliverable_completions(client_name)');
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS deliverable_hour_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      service_type TEXT NOT NULL,
+      month TEXT NOT NULL,
+      user_initials TEXT NOT NULL,
+      user_name TEXT NOT NULL,
+      role TEXT NOT NULL,
+      hours REAL NOT NULL DEFAULT 0,
+      entered_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
+  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_dhe_unique ON deliverable_hour_entries(client_name, service_type, month, user_initials, role)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_dhe_user ON deliverable_hour_entries(user_initials)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_dhe_month ON deliverable_hour_entries(month)');
+
   seedCategories(db);
   saveDb();
 }

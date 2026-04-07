@@ -42,6 +42,24 @@ async function ensureSchema(): Promise<void> {
     )`,
     args: [],
   });
+  await db.execute({
+    sql: `CREATE TABLE IF NOT EXISTS deliverable_hour_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_name TEXT NOT NULL,
+      service_type TEXT NOT NULL,
+      month TEXT NOT NULL,
+      user_initials TEXT NOT NULL,
+      user_name TEXT NOT NULL,
+      role TEXT NOT NULL,
+      hours REAL NOT NULL DEFAULT 0,
+      entered_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
+    args: [],
+  });
+  try {
+    await db.execute({ sql: 'CREATE UNIQUE INDEX IF NOT EXISTS idx_dhe_unique ON deliverable_hour_entries(client_name, service_type, month, user_initials, role)', args: [] });
+  } catch { /* already exists */ }
   _schemaReady = true;
 }
 
@@ -449,4 +467,183 @@ export function generateMonths(count: number, endMonth?: string): string[] {
     months.push(d.toISOString().slice(0, 7));
   }
   return months;
+}
+
+// ============================================================
+// Multi-person helpers
+// ============================================================
+
+/** Parse "JD / MP" or "JD/MP" into ['JD', 'MP'] */
+export function parseMultiPerson(val: string | null): string[] {
+  if (!val) return [];
+  return val.split(/\s*\/\s*/).map(s => s.trim()).filter(Boolean);
+}
+
+// ============================================================
+// Hour entries CRUD
+// ============================================================
+
+export interface HourEntry {
+  id: number;
+  client_name: string;
+  service_type: string;
+  month: string;
+  user_initials: string;
+  user_name: string;
+  role: string;
+  hours: number;
+}
+
+export interface HourBreakdown {
+  user_initials: string;
+  user_name: string;
+  hours: number;
+}
+
+/** Get all hour entries for a service type and set of months. */
+export async function getHourEntries(
+  serviceType: string,
+  months: string[],
+): Promise<HourEntry[]> {
+  await ensureSchema();
+  if (!months.length) return [];
+  const placeholders = months.map(() => '?').join(',');
+  return rows<HourEntry>(`
+    SELECT * FROM deliverable_hour_entries
+    WHERE service_type = ? AND month IN (${placeholders})
+    ORDER BY client_name, month, role
+  `, [serviceType, ...months]);
+}
+
+/** Get hour entries for a specific user's initials only. */
+export async function getHourEntriesForUser(
+  serviceType: string,
+  months: string[],
+  userInitials: string,
+): Promise<HourEntry[]> {
+  await ensureSchema();
+  if (!months.length) return [];
+  const placeholders = months.map(() => '?').join(',');
+  return rows<HourEntry>(`
+    SELECT * FROM deliverable_hour_entries
+    WHERE service_type = ? AND month IN (${placeholders}) AND user_initials = ?
+    ORDER BY client_name, month
+  `, [serviceType, ...months, userInitials]);
+}
+
+/** Upsert hours for a specific user/client/month/role. */
+export async function upsertHourEntry(
+  clientName: string,
+  serviceType: string,
+  month: string,
+  userInitials: string,
+  userName: string,
+  role: string,
+  hours: number,
+): Promise<void> {
+  await ensureSchema();
+  await db.execute({
+    sql: `INSERT INTO deliverable_hour_entries (client_name, service_type, month, user_initials, user_name, role, hours, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+          ON CONFLICT(client_name, service_type, month, user_initials, role) DO UPDATE SET
+            hours = ?, user_name = ?, updated_at = datetime('now')`,
+    args: [clientName, serviceType, month, userInitials, userName, role, hours, hours, userName],
+  });
+}
+
+/** Delete a user's hour entry (only their own). */
+export async function deleteHourEntry(
+  clientName: string,
+  serviceType: string,
+  month: string,
+  userInitials: string,
+  role: string,
+): Promise<void> {
+  await ensureSchema();
+  await db.execute({
+    sql: `DELETE FROM deliverable_hour_entries
+          WHERE client_name = ? AND service_type = ? AND month = ? AND user_initials = ? AND role = ?`,
+    args: [clientName, serviceType, month, userInitials, role],
+  });
+}
+
+/**
+ * Build aggregated hours map: { "ClientName::2026-04": { am: { total, breakdown }, cm: { total, breakdown } } }
+ */
+export async function getAggregatedHours(
+  serviceType: string,
+  months: string[],
+): Promise<Record<string, { am: { total: number; breakdown: HourBreakdown[] }; cm: { total: number; breakdown: HourBreakdown[] } }>> {
+  const entries = await getHourEntries(serviceType, months);
+  const result: Record<string, { am: { total: number; breakdown: HourBreakdown[] }; cm: { total: number; breakdown: HourBreakdown[] } }> = {};
+
+  for (const e of entries) {
+    const key = `${e.client_name}::${e.month}`;
+    if (!result[key]) {
+      result[key] = {
+        am: { total: 0, breakdown: [] },
+        cm: { total: 0, breakdown: [] },
+      };
+    }
+    const bucket = e.role === 'am' ? result[key].am : result[key].cm;
+    bucket.total += e.hours;
+    bucket.breakdown.push({ user_initials: e.user_initials, user_name: e.user_name, hours: e.hours });
+  }
+
+  // Round totals
+  for (const v of Object.values(result)) {
+    v.am.total = Math.round(v.am.total * 100) / 100;
+    v.cm.total = Math.round(v.cm.total * 100) / 100;
+  }
+
+  return result;
+}
+
+/**
+ * Get service types that a given user (by initials) is assigned to.
+ */
+export async function getServiceTypesForUser(userInitials: string): Promise<string[]> {
+  await ensureSchema();
+  // Check both am and cm columns, handling multi-person like "JD / MP"
+  const configs = await rows<{ service_type: string; am: string | null; cm: string | null }>(`
+    SELECT DISTINCT service_type, am, cm FROM client_service_configs WHERE status = 'active'
+  `);
+
+  const types = new Set<string>();
+  for (const c of configs) {
+    const ams = parseMultiPerson(c.am);
+    const cms = parseMultiPerson(c.cm);
+    if (ams.includes(userInitials) || cms.includes(userInitials)) {
+      types.add(c.service_type);
+    }
+  }
+  return Array.from(types);
+}
+
+/**
+ * Get configs filtered to only those where the user is assigned.
+ */
+export async function getServiceConfigsForUser(
+  serviceType: string,
+  userInitials: string,
+): Promise<ServiceConfig[]> {
+  await ensureSchema();
+  const all = await getServiceConfigs({ serviceType });
+  return all.filter(c => {
+    const ams = parseMultiPerson(c.am);
+    const cms = parseMultiPerson(c.cm);
+    return ams.includes(userInitials) || cms.includes(userInitials);
+  });
+}
+
+/**
+ * Map a VendoOS user name to initials used in configs.
+ * Checks harvest_users first, falls back to first letters of name parts.
+ */
+export async function getUserInitials(userName: string): Promise<string> {
+  const map = await getInitialsMap();
+  if (map[userName]) return map[userName];
+  // Fallback: first letter of each word
+  const parts = userName.trim().split(/\s+/);
+  return parts.map(p => p[0] || '').join('').toUpperCase();
 }

@@ -1,15 +1,21 @@
 import type { FastifyPluginAsync } from 'fastify';
 import {
   getServiceConfigs,
+  getServiceConfigsForUser,
+  getServiceTypesForUser,
   upsertServiceConfig,
   deleteServiceConfig,
-  getMonthlyHoursForService,
   getPersonCapacity,
   getCompletions,
   toggleCompletion,
   getDistinctPeople,
   generateMonths,
   clearInitialsCache,
+  getUserInitials,
+  getAggregatedHours,
+  upsertHourEntry,
+  deleteHourEntry,
+  parseMultiPerson,
 } from '../lib/queries/deliverables.js';
 
 // --- Input sanitisation helpers ---
@@ -67,35 +73,44 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
 
   app.get('/', async (request, reply) => {
     const q = request.query as Record<string, string>;
-    const serviceType = SERVICE_TYPES.includes(q.service) ? q.service : 'paid_search';
+    const user = (request as any).user;
+    const isAdmin = user?.role === 'admin';
+    const userInitials = user ? await getUserInitials(user.name) : '';
+
+    // Determine which service tabs this user can see
+    const allowedServiceTypes = isAdmin
+      ? SERVICE_TYPES
+      : await getServiceTypesForUser(userInitials);
+
+    // Default to first allowed tab, or requested if permitted
+    let serviceType = SERVICE_TYPES.includes(q.service) ? q.service : allowedServiceTypes[0] || 'paid_search';
+    if (!isAdmin && !allowedServiceTypes.includes(serviceType)) {
+      serviceType = allowedServiceTypes[0] || 'paid_search';
+    }
+
     const filterPerson = q.person || '';
     const monthCount = parseInt(q.months || '3', 10);
-    // Most recent month first
     const months = generateMonths(Math.min(monthCount, 12)).reverse();
 
-    const filters: { serviceType: string; am?: string; cm?: string } = { serviceType };
-    if (filterPerson) {
-      // Filter by person — check both AM and CM columns
-      // We'll fetch all and filter in JS since SQL OR is awkward with optional params
+    // Get configs — staff only see their assigned clients
+    let configs = isAdmin
+      ? await getServiceConfigs({ serviceType })
+      : await getServiceConfigsForUser(serviceType, userInitials);
+
+    if (filterPerson && isAdmin) {
+      configs = configs.filter(c => {
+        const ams = parseMultiPerson(c.am);
+        const cms = parseMultiPerson(c.cm);
+        return ams.includes(filterPerson) || cms.includes(filterPerson);
+      });
     }
 
-    let configs = await getServiceConfigs({ serviceType });
-    if (filterPerson) {
-      configs = configs.filter(c => c.am === filterPerson || c.cm === filterPerson);
-    }
-
-    const [monthlyHours, completions, people, capacity] = await Promise.all([
-      getMonthlyHoursForService(serviceType, months),
+    const [hoursAgg, completions, people, capacity] = await Promise.all([
+      getAggregatedHours(serviceType, months),
       getCompletions(serviceType, months),
-      getDistinctPeople(),
-      getPersonCapacity(serviceType, months[months.length - 1]),
+      isAdmin ? getDistinctPeople() : Promise.resolve([]),
+      getPersonCapacity(serviceType, months[months.length - 1] || months[0]),
     ]);
-
-    // Build lookup maps
-    const hoursMap: Record<string, { am: number; cm: number; total: number }> = {};
-    for (const h of monthlyHours) {
-      hoursMap[`${h.client_name}::${h.month}`] = { am: h.am_hours, cm: h.cm_hours, total: h.total_hours };
-    }
 
     const completionMap: Record<string, boolean> = {};
     for (const c of completions) {
@@ -110,22 +125,21 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     for (const config of configs) {
       for (const m of months) {
         const key = `${config.client_name}::${m}`;
-        const hours = hoursMap[key];
-        if (hours) {
-          monthTotals[m].am += hours.am;
-          monthTotals[m].cm += hours.cm;
+        const agg = hoursAgg[key];
+        if (agg) {
+          monthTotals[m].am += agg.am.total;
+          monthTotals[m].cm += agg.cm.total;
         }
       }
     }
 
-    // Total allocated hours
     const totalAllocatedAM = configs.reduce((s, c) => s + c.am_hrs, 0);
     const totalAllocatedCM = configs.reduce((s, c) => s + c.cm_hrs, 0);
 
     reply.render('deliverables', {
       configs,
       months,
-      hoursMap,
+      hoursAgg,
       completionMap,
       monthTotals,
       totalAllocatedAM,
@@ -134,19 +148,70 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       people,
       serviceType,
       serviceTypes: SERVICE_TYPES,
+      allowedServiceTypes,
       serviceLabels: SERVICE_LABELS,
       filterPerson,
       monthCount,
       showBudget: serviceType !== 'seo',
+      isAdmin,
+      userInitials,
+      userName: user?.name || '',
       pageTitle: `Deliverables — ${SERVICE_LABELS[serviceType]}`,
     });
   });
 
-  // ── Add/Edit config (HTMX form) ───────────────────────────
+  // ── Hour entry (HTMX) ───────────────────────────────────────
+
+  app.post('/hours', async (request, reply) => {
+    const body = request.body as Record<string, string>;
+    const user = (request as any).user;
+    const isAdmin = user?.role === 'admin';
+    const userInitials = user ? await getUserInitials(user.name) : '';
+
+    const clientName = body.client_name;
+    const serviceType = body.service_type;
+    const month = body.month;
+    const role = body.role; // 'am' or 'cm'
+    const hours = clampFloat(body.hours, 0, 200, 0);
+    const targetInitials = body.user_initials || userInitials;
+
+    // Staff can only edit their own hours
+    if (!isAdmin && targetInitials !== userInitials) {
+      reply.code(403).type('text/html').send('<span style="color:#EF4444">Not allowed</span>');
+      return;
+    }
+
+    if (hours > 0) {
+      await upsertHourEntry(clientName, serviceType, month, targetInitials, user?.name || targetInitials, role, hours);
+    } else {
+      await deleteHourEntry(clientName, serviceType, month, targetInitials, role);
+    }
+
+    // Return updated cell content
+    const agg = await getAggregatedHours(serviceType, [month]);
+    const key = `${clientName}::${month}`;
+    const data = agg[key];
+    const val = role === 'am' ? data?.am : data?.cm;
+    const total = val?.total || 0;
+    const breakdown = (val?.breakdown || []).map(b => `${b.user_initials}: ${b.hours}h`).join(', ');
+
+    reply.type('text/html').send(
+      total > 0
+        ? `<span title="${breakdown}">${total}</span>`
+        : ''
+    );
+  });
+
+  // ── Add/Edit config (admin only) ──────────────────────────
 
   app.post('/config', async (request, reply) => {
     const body = request.body as Record<string, string>;
     const user = (request as any).user;
+
+    if (user?.role !== 'admin') {
+      reply.code(403).send('Admin only');
+      return;
+    }
 
     await upsertServiceConfig({
       client_name: body.client_name?.trim(),
@@ -170,6 +235,7 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
   // ── Delete config ──────────────────────────────────────────
 
   app.post('/config/:id/delete', async (request, reply) => {
+    if ((request as any).user?.role !== 'admin') { reply.code(403).send('Admin only'); return; }
     const { id } = request.params as { id: string };
     const q = request.query as Record<string, string>;
     await deleteServiceConfig(parseInt(id, 10));
@@ -208,6 +274,7 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
   });
 
   app.post('/import', async (request, reply) => {
+    if ((request as any).user?.role !== 'admin') { reply.code(403).send('Admin only'); return; }
     const body = request.body as Record<string, string>;
     const serviceType = SERVICE_TYPES.includes(body.service_type) ? body.service_type : 'paid_search';
     const csvData = (body.csv_data || '').trim();
