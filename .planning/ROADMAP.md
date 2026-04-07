@@ -84,7 +84,12 @@ Plans:
   3. A user on iOS who has installed VendoOS to their home screen on iOS 16.4+ can subscribe to push notifications; a user who has not installed it sees an install prompt with instructions rather than a broken permission request
   4. When a push subscription is no longer valid (HTTP 410 from the push service), it is automatically removed from the database — no stale subscriptions accumulate
   5. A single user can subscribe from multiple devices and receive notifications on all of them independently
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — VAPID key generation, push_subscriptions table, subscription queries, push-sender module, API routes
+- [ ] 14-02-PLAN.md — Hook push sends into task-matcher.ts for draft_ready and failed, service worker push event handlers
+- [ ] 14-03-PLAN.md — Toast banner permission prompt, Settings push section, iOS standalone gating
 
 ## Progress
 
@@ -96,4 +101,4 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14
 | 11. Responsive Layout | 3/3 | Complete    | 2026-04-06 |
 | 12. PWA Foundation | 2/2 | Complete    | 2026-04-06 |
 | 13. Offline Caching | 2/2 | Complete    | 2026-04-06 |
-| 14. Push Notifications | 0/? | Not started | - |
+| 14. Push Notifications | 0/3 | Not started | - |
