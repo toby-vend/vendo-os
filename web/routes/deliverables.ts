@@ -175,7 +175,7 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     const body = request.body as Record<string, string>;
     const user = (request as any).user;
     const isAdmin = user?.role === 'admin';
-    const userInitials = user ? await getUserInitials(user.name) : '';
+    const userInitials = user ? await getUserInitials(user.name, user.id) : '';
 
     const clientName = body.client_name;
     const serviceType = body.service_type;
@@ -185,10 +185,23 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     const hours = Math.round(rawHours * 2) / 2; // Round to nearest 0.5
     const targetInitials = body.user_initials || userInitials;
 
-    // Staff can only edit their own hours
+    // Staff can only edit their own hours.
+    // targetInitials comes from the frontend (the logged-in user's initials as computed on page load).
+    // userInitials is recomputed here. They should match, but if the user is assigned
+    // to the client (frontend allowed the click), accept it.
     if (!isAdmin && targetInitials !== userInitials) {
-      reply.code(403).type('text/html').send('<span style="color:#EF4444">Not allowed</span>');
-      return;
+      // Double-check: is this user actually assigned to this client?
+      const configs = await getServiceConfigs({ serviceType });
+      const config = configs.find(c => c.client_name === clientName);
+      if (!config) {
+        reply.code(403).type('text/html').send('<span style="color:#EF4444">Not allowed</span>');
+        return;
+      }
+      const assignedPeople = parseMultiPerson(role === 'am' ? config.am : config.cm);
+      if (!assignedPeople.includes(targetInitials) && !assignedPeople.includes(userInitials)) {
+        reply.code(403).type('text/html').send('<span style="color:#EF4444">Not allowed</span>');
+        return;
+      }
     }
 
     if (hours > 0) {
