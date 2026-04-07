@@ -301,16 +301,20 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
   app.get('/settings', async (request, reply) => {
     if ((request as any).user?.role !== 'admin') { reply.code(403).send('Admin only'); return; }
     const [members, users] = await Promise.all([
-      getTeamMembers(false),
-      getVendoUsers(),
+      getTeamMembers(false).catch(() => []),
+      getVendoUsers().catch(() => []),
     ]);
-    reply.render('deliverables-settings', {
-      members,
-      users,
-      serviceTypes: SERVICE_TYPES,
-      serviceLabels: SERVICE_LABELS,
-      pageTitle: 'Deliverables — Team Settings',
-    });
+    try {
+      reply.render('deliverables-settings', {
+        members,
+        users,
+        serviceTypes: SERVICE_TYPES,
+        serviceLabels: SERVICE_LABELS,
+        pageTitle: 'Deliverables — Team Settings',
+      });
+    } catch (err: any) {
+      reply.code(500).type('text/html').send(`<h1>Settings render error</h1><pre>${err.message}\n${err.stack?.slice(0, 500)}</pre>`);
+    }
   });
 
   app.post('/settings/member', async (request, reply) => {
