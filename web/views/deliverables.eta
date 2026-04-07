@@ -202,16 +202,17 @@
           const onBudget = totalH > 0 && !overBudget;
           const cellClass = totalH === 0 ? 'no-hours' : overBudget ? 'over-budget' : onBudget ? 'on-budget' : '';
           const completed = it.completionMap[key];
+          const escapedName = config.client_name.replace(/'/g, '&#39;');
         %>
           <td class="col-month <%= cellClass %> <%= canEditAM ? 'del-hour-cell' : 'del-hour-readonly' %>"
               id="am-<%= config.id %>-<%= m %>"
-              <% if (canEditAM) { %>onclick="editHour(this, '<%= config.client_name.replace(/'/g, "\\'") %>', '<%= it.serviceType %>', '<%= m %>', 'am', '<%= it.userInitials %>')"<% } %>
+              <% if (canEditAM) { %>onclick="editHour(this, '<%= escapedName %>', '<%= it.serviceType %>', '<%= m %>', 'am', '<%= it.userInitials %>')"<% } %>
               <% if (amBreak) { %>title="<%= amBreak %>"<% } %>>
             <span class="del-hour-val"><%= amH > 0 ? amH : '' %></span>
           </td>
           <td class="col-month <%= cellClass %> <%= canEditCM ? 'del-hour-cell' : 'del-hour-readonly' %>"
               id="cm-<%= config.id %>-<%= m %>"
-              <% if (canEditCM) { %>onclick="editHour(this, '<%= config.client_name.replace(/'/g, "\\'") %>', '<%= it.serviceType %>', '<%= m %>', 'cm', '<%= it.userInitials %>')"<% } %>
+              <% if (canEditCM) { %>onclick="editHour(this, '<%= escapedName %>', '<%= it.serviceType %>', '<%= m %>', 'cm', '<%= it.userInitials %>')"<% } %>
               <% if (cmBreak) { %>title="<%= cmBreak %>"<% } %>>
             <span class="del-hour-val"><%= cmH > 0 ? cmH : '' %></span>
           </td>
