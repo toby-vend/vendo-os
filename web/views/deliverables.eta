@@ -574,10 +574,17 @@ function queueHour(cell, clientName, serviceType, month, role, userInitials, hou
   var key = clientName + '::' + month + '::' + role;
   pendingHours = pendingHours.filter(function(p) { return (p.clientName + '::' + p.month + '::' + p.role) !== key; });
   var valSpan = cell.querySelector('.del-hour-val');
-  if (hours > 0) {
-    if (valSpan) valSpan.textContent = hours;
-  } else {
-    if (valSpan) valSpan.textContent = '';
+  // Show the user's edit as "Your hours" below the total, rather than overwriting
+  if (valSpan) {
+    // Update display to show the user's pending value clearly
+    var displayText = hours > 0 ? hours : '';
+    valSpan.textContent = displayText;
+    // Replace breakdown with a note showing this is the user's edit
+    var breakdownDiv = cell.querySelector('div');
+    if (breakdownDiv) {
+      breakdownDiv.textContent = hours > 0 ? userInitials + ':' + hours + ' (pending)' : '';
+      breakdownDiv.style.color = '#F59E0B';
+    }
   }
   pendingHours.push({ clientName: clientName, serviceType: serviceType, month: month, role: role, userInitials: userInitials, hours: hours, cell: cell, origHtml: origHtml });
   markChanged(cell);
