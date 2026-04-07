@@ -164,131 +164,148 @@
     }
 
     // Permission permanently denied
-    if (Notification.permission === 'denied') {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
       container.innerHTML = '<p style="font-size:14px;color:#94A3B8;">Notifications are blocked. To enable, open your browser settings for this site.</p>';
       return;
     }
 
+    // Build the HTML for either subscribed or unsubscribed state
+    function buildPushHTML(sub, count) {
+      var html = '';
+      if (sub) {
+        html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">'
+          + '<span style="font-size:14px;color:#22C55E;font-weight:500;">Enabled on this device</span>'
+          + '</div>';
+        html += '<p style="font-size:12px;color:#64748B;margin-bottom:1rem;">Subscribed on ' + count + ' device' + (count === 1 ? '' : 's') + '</p>';
+        html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">'
+          + '<button id="push-test-btn" style="padding:6px 14px;font-size:13px;color:#0B0B0B;background:#22C55E;border:none;border-radius:6px;cursor:pointer;font-family:var(--vendo-font);font-weight:600;">Send Test</button>'
+          + '<button id="push-disable-btn" style="padding:6px 14px;font-size:13px;color:#EF4444;background:none;border:1px solid rgba(239,68,68,0.2);border-radius:6px;cursor:pointer;font-family:var(--vendo-font);">Disable</button>'
+          + '</div>';
+      } else {
+        html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">'
+          + '<span style="font-size:14px;color:#94A3B8;">Disabled on this device</span>'
+          + '</div>';
+        if (count > 0) {
+          html += '<p style="font-size:12px;color:#64748B;margin-bottom:1rem;">Subscribed on ' + count + ' device' + (count === 1 ? '' : 's') + '</p>';
+        } else {
+          html += '<p style="font-size:12px;color:#64748B;margin-bottom:1rem;">No devices subscribed yet</p>';
+        }
+        html += '<button id="push-enable-btn" style="padding:6px 14px;font-size:13px;color:#0B0B0B;background:#22C55E;border:none;border-radius:6px;cursor:pointer;font-family:var(--vendo-font);font-weight:600;">Enable</button>';
+      }
+      return html;
+    }
+
+    // Wire up button event listeners after rendering
+    function wireButtons(registration, sub) {
+      var enableBtn = document.getElementById('push-enable-btn');
+      if (enableBtn) {
+        enableBtn.addEventListener('click', function() {
+          enableBtn.disabled = true;
+          enableBtn.textContent = 'Enabling…';
+          Notification.requestPermission().then(function(permission) {
+            if (permission !== 'granted') {
+              enableBtn.disabled = false;
+              enableBtn.textContent = 'Enable';
+              if (permission === 'denied') {
+                container.innerHTML = '<p style="font-size:14px;color:#94A3B8;">Notifications are blocked. To enable, open your browser settings for this site.</p>';
+              }
+              return;
+            }
+            fetch('/api/push/vapid-public-key')
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                return registration.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: urlBase64ToUint8Array(data.key)
+                });
+              })
+              .then(function(newSub) {
+                return fetch('/api/push/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(newSub.toJSON())
+                });
+              })
+              .then(function() { renderPushSection(registration); })
+              .catch(function(err) {
+                console.error('Push subscribe failed:', err);
+                enableBtn.disabled = false;
+                enableBtn.textContent = 'Enable';
+              });
+          });
+        });
+      }
+
+      var disableBtn = document.getElementById('push-disable-btn');
+      if (disableBtn && sub) {
+        disableBtn.addEventListener('click', function() {
+          disableBtn.disabled = true;
+          disableBtn.textContent = 'Disabling…';
+          sub.unsubscribe()
+            .then(function() {
+              return fetch('/api/push/subscribe', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ endpoint: sub.endpoint })
+              });
+            })
+            .then(function() { renderPushSection(registration); })
+            .catch(function(err) {
+              console.error('Push unsubscribe failed:', err);
+              disableBtn.disabled = false;
+              disableBtn.textContent = 'Disable';
+            });
+        });
+      }
+
+      var testBtn = document.getElementById('push-test-btn');
+      if (testBtn) {
+        testBtn.addEventListener('click', function() {
+          testBtn.disabled = true;
+          testBtn.textContent = 'Sending…';
+          fetch('/api/push/test', { method: 'POST' })
+            .then(function() {
+              testBtn.textContent = 'Test sent!';
+              setTimeout(function() {
+                testBtn.disabled = false;
+                testBtn.textContent = 'Send Test';
+              }, 2000);
+            })
+            .catch(function() {
+              testBtn.disabled = false;
+              testBtn.textContent = 'Send Test';
+            });
+        });
+      }
+    }
+
     // Render current subscription state
     function renderPushSection(registration) {
-      registration.pushManager.getSubscription().then(function(sub) {
-        fetch('/api/push/subscription-count')
-          .then(function(r) { return r.ok ? r.json() : { count: 0 }; })
-          .then(function(data) {
-            var count = data.count || 0;
-            var html = '';
-            if (sub) {
-              // Subscribed state
-              html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">'
-                + '<span style="font-size:14px;color:#22C55E;font-weight:500;">Enabled on this device</span>'
-                + '</div>';
-              html += '<p style="font-size:12px;color:#64748B;margin-bottom:1rem;">Subscribed on ' + count + ' device' + (count === 1 ? '' : 's') + '</p>';
-              html += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">'
-                + '<button id="push-test-btn" style="padding:6px 14px;font-size:13px;color:#0B0B0B;background:#22C55E;border:none;border-radius:6px;cursor:pointer;font-family:var(--vendo-font);font-weight:600;">Send Test</button>'
-                + '<button id="push-disable-btn" style="padding:6px 14px;font-size:13px;color:#EF4444;background:none;border:1px solid rgba(239,68,68,0.2);border-radius:6px;cursor:pointer;font-family:var(--vendo-font);">Disable</button>'
-                + '</div>';
-            } else {
-              // Not subscribed state
-              html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">'
-                + '<span style="font-size:14px;color:#94A3B8;">Disabled on this device</span>'
-                + '</div>';
-              if (count > 0) {
-                html += '<p style="font-size:12px;color:#64748B;margin-bottom:1rem;">Subscribed on ' + count + ' device' + (count === 1 ? '' : 's') + '</p>';
-              } else {
-                html += '<p style="font-size:12px;color:#64748B;margin-bottom:1rem;">No devices subscribed yet</p>';
-              }
-              html += '<button id="push-enable-btn" style="padding:6px 14px;font-size:13px;color:#0B0B0B;background:#22C55E;border:none;border-radius:6px;cursor:pointer;font-family:var(--vendo-font);font-weight:600;">Enable</button>';
-            }
-            container.innerHTML = html;
-
-            // Wire up buttons
-            var enableBtn = document.getElementById('push-enable-btn');
-            if (enableBtn) {
-              enableBtn.addEventListener('click', function() {
-                enableBtn.disabled = true;
-                enableBtn.textContent = 'Enabling…';
-                Notification.requestPermission().then(function(permission) {
-                  if (permission !== 'granted') {
-                    enableBtn.disabled = false;
-                    enableBtn.textContent = 'Enable';
-                    if (permission === 'denied') {
-                      container.innerHTML = '<p style="font-size:14px;color:#94A3B8;">Notifications are blocked. To enable, open your browser settings for this site.</p>';
-                    }
-                    return;
-                  }
-                  fetch('/api/push/vapid-public-key')
-                    .then(function(r) { return r.json(); })
-                    .then(function(data) {
-                      return registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: urlBase64ToUint8Array(data.key)
-                      });
-                    })
-                    .then(function(newSub) {
-                      return fetch('/api/push/subscribe', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(newSub.toJSON())
-                      });
-                    })
-                    .then(function() { renderPushSection(registration); })
-                    .catch(function(err) {
-                      console.error('Push subscribe failed:', err);
-                      enableBtn.disabled = false;
-                      enableBtn.textContent = 'Enable';
-                    });
-                });
-              });
-            }
-
-            var disableBtn = document.getElementById('push-disable-btn');
-            if (disableBtn) {
-              disableBtn.addEventListener('click', function() {
-                disableBtn.disabled = true;
-                disableBtn.textContent = 'Disabling…';
-                sub.unsubscribe()
-                  .then(function() {
-                    return fetch('/api/push/subscribe', {
-                      method: 'DELETE',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ endpoint: sub.endpoint })
-                    });
-                  })
-                  .then(function() { renderPushSection(registration); })
-                  .catch(function(err) {
-                    console.error('Push unsubscribe failed:', err);
-                    disableBtn.disabled = false;
-                    disableBtn.textContent = 'Disable';
-                  });
-              });
-            }
-
-            var testBtn = document.getElementById('push-test-btn');
-            if (testBtn) {
-              testBtn.addEventListener('click', function() {
-                testBtn.disabled = true;
-                testBtn.textContent = 'Sending…';
-                fetch('/api/push/test', { method: 'POST' })
-                  .then(function() {
-                    testBtn.textContent = 'Test sent!';
-                    setTimeout(function() {
-                      testBtn.disabled = false;
-                      testBtn.textContent = 'Send Test';
-                    }, 2000);
-                  })
-                  .catch(function() {
-                    testBtn.disabled = false;
-                    testBtn.textContent = 'Send Test';
-                  });
-              });
-            }
-          });
-      });
+      var sub = null;
+      registration.pushManager.getSubscription()
+        .then(function(currentSub) {
+          sub = currentSub;
+          return fetch('/api/push/subscription-count')
+            .then(function(r) { return r.ok ? r.json() : { count: 0 }; })
+            .catch(function() { return { count: 0 }; });
+        })
+        .then(function(data) {
+          var count = data.count || 0;
+          container.innerHTML = buildPushHTML(sub, count);
+          wireButtons(registration, sub);
+        })
+        .catch(function(err) {
+          console.error('Push section render failed:', err);
+          // Fallback: show enable button even if we can't determine current state
+          container.innerHTML = buildPushHTML(null, 0);
+          wireButtons(registration, null);
+        });
     }
 
     navigator.serviceWorker.ready.then(function(registration) {
       renderPushSection(registration);
-    }).catch(function() {
+    }).catch(function(err) {
+      console.error('Service worker not ready:', err);
       container.innerHTML = '<p style="font-size:14px;color:#94A3B8;">Service worker not available. Try refreshing the page.</p>';
     });
   })();
