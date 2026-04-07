@@ -12,6 +12,26 @@ import {
   clearInitialsCache,
 } from '../lib/queries/deliverables.js';
 
+/** Parse a CSV line respecting quoted fields (handles commas inside quotes). */
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
 const SERVICE_TYPES = ['paid_search', 'seo', 'paid_social'];
 const SERVICE_LABELS: Record<string, string> = {
   paid_search: 'Paid Search',
@@ -167,27 +187,40 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     const serviceType = body.service_type || 'paid_search';
     const csvData = body.csv_data || '';
 
-    // Parse CSV: client_name, am, cm, level, tier, calls, am_hrs, cm_hrs, budget
     const lines = csvData.split('\n').filter(l => l.trim());
     let imported = 0;
 
     for (const line of lines) {
-      const parts = line.split(',').map(p => p.trim());
+      const parts = parseCsvLine(line);
       if (parts.length < 2) continue;
-      if (parts[0].toLowerCase() === 'client_name' || parts[0].toLowerCase() === 'account name') continue;
+
+      // Skip header rows and legend rows
+      const first = parts[0].toLowerCase().trim();
+      if (first === 'client_name' || first === 'account name' || first === '' || first.startsWith('am hrs')) continue;
+
+      const clientName = parts[0].trim();
+      if (!clientName) continue;
+
+      // Parse budget — strip currency symbols, commas, quotes
+      const budgetRaw = (parts[8] || '0').replace(/[£€$,\s"]/g, '');
+      const budget = parseFloat(budgetRaw) || 0;
+
+      // Detect currency from budget string
+      const budgetStr = parts[8] || '';
+      const currency = budgetStr.includes('€') ? 'EUR' : 'GBP';
 
       await upsertServiceConfig({
-        client_name: parts[0],
+        client_name: clientName,
         service_type: serviceType,
-        am: parts[1] || null,
-        cm: parts[2] || null,
-        level: parts[3] || 'Auto',
-        tier: parseInt(parts[4] || '3', 10),
-        calls: parseInt(parts[5] || '1', 10),
-        am_hrs: parseFloat(parts[6] || '2'),
-        cm_hrs: parseFloat(parts[7] || '2'),
-        budget: parseFloat(parts[8] || '0'),
-        currency: parts[9] || 'GBP',
+        am: parts[1]?.trim() || null,
+        cm: parts[2]?.trim() || null,
+        level: (parts[3] || 'Auto').trim(),
+        tier: parseInt(parts[7] || '3', 10),
+        calls: parseInt(parts[4] || '1', 10),
+        am_hrs: parseFloat(parts[5] || '2') || 2,
+        cm_hrs: parseFloat(parts[6] || '2') || 2,
+        budget,
+        currency,
         status: 'active',
       });
       imported++;
