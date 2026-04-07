@@ -1,75 +1,99 @@
 <% layout('/layouts/base') %>
 
-<div style="max-width: 600px; margin: 0 auto;">
+<style>
+  .ue-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem; }
+  .ue-input { width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 16px; box-sizing: border-box; }
+  .ue-input:focus { border-color: #22C55E; outline: none; }
+  .ue-check { display: flex; align-items: center; gap: 0.5rem; font-size: 14px; color: #E2E8F0; cursor: pointer; }
+  .ue-check input { accent-color: #22C55E; width: 16px; height: 16px; }
+  .ue-override-row { display: flex; align-items: center; gap: 0.75rem; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.02); }
+  .ue-override-row:nth-child(odd) { background: rgba(255,255,255,0.04); }
+  .ue-override-label { flex: 1; font-size: 13px; color: #E2E8F0; font-weight: 500; }
+  .ue-override-select { padding: 5px 8px; font-size: 13px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); min-width: 140px; }
+  .ue-override-select:focus { border-color: #22C55E; outline: none; }
+  .ue-grant { color: #22C55E; }
+  .ue-deny { color: #EF4444; }
+</style>
+
+<div style="max-width: 700px; margin: 0 auto;">
   <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-    <a href="/admin/users" style="color: #94A3B8; text-decoration: none; font-size: 14px;">&larr; Back to Users</a>
+    <a href="/admin/users" style="color: #94A3B8; text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 4px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15,18 9,12 15,6"/></svg>
+      Back to Users
+    </a>
   </div>
 
-  <div class="card" style="padding: 1.5rem;">
-    <h2 style="margin-bottom: 1rem; font-size: 18px; font-weight: 600;">Edit User: <%= it.editUser.name %></h2>
+  <form method="POST" action="/admin/users/<%= it.editUser.id %>">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
 
-    <form method="POST" action="/admin/users/<%= it.editUser.id %>">
-      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+    <!-- Basic Info -->
+    <div class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+      <h3 style="margin: 0 0 1rem; font-size: 16px; font-weight: 600; color: var(--vendo-text-heading);">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(34,197,94,0.1); color: #22C55E; font-weight: 700; font-size: 13px; margin-right: 0.5rem; vertical-align: middle;"><%= it.editUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) %></span>
+        <%= it.editUser.name %>
+      </h3>
+
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
         <div>
-          <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Name</label>
-          <input type="text" name="name" required value="<%= it.editUser.name %>"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
+          <label class="ue-label">Name</label>
+          <input type="text" name="name" required value="<%= it.editUser.name %>" class="ue-input">
         </div>
         <div>
-          <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Email</label>
-          <input type="email" name="email" required value="<%= it.editUser.email %>"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
+          <label class="ue-label">Email</label>
+          <input type="email" name="email" required value="<%= it.editUser.email %>" class="ue-input">
         </div>
       </div>
 
-      <div style="margin-bottom: 1rem;">
-        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Role</label>
-        <select name="role" id="edit-role" onchange="var s = this.value === 'standard' ? 'block' : 'none'; document.getElementById('edit-channels').style.display = s; document.getElementById('edit-overrides').style.display = s;"
-                style="width: 100%; max-width: 280px; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
+      <div>
+        <label class="ue-label">Role</label>
+        <select name="role" id="edit-role" class="ue-input" style="max-width: 200px;"
+                onchange="var s = this.value === 'standard' ? 'block' : 'none'; document.getElementById('edit-channels').style.display = s; document.getElementById('edit-overrides').style.display = s;">
           <option value="standard" <%= it.editUser.role === 'standard' ? 'selected' : '' %>>Standard</option>
           <option value="admin" <%= it.editUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
         </select>
       </div>
+    </div>
 
-      <div id="edit-channels" style="margin-bottom: 1.5rem; <%= it.editUser.role === 'admin' ? 'display: none;' : '' %>">
-        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Channels</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-          <% it.channels.forEach(ch => { %>
-          <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 14px; color: #E2E8F0; cursor: pointer;">
-            <input type="checkbox" name="channels" value="<%= ch.id %>"
-                   <%= (it.userChannelIds || []).includes(ch.id) ? 'checked' : '' %>
-                   style="accent-color: #22C55E;">
-            <%= ch.name %>
-          </label>
-          <% }) %>
+    <!-- Channels -->
+    <div class="card" style="padding: 1.5rem; margin-bottom: 1rem;" id="edit-channels" <%= it.editUser.role === 'admin' ? 'style="display:none;padding:1.5rem;margin-bottom:1rem;"' : '' %>>
+      <h3 style="margin: 0 0 0.75rem; font-size: 14px; font-weight: 600; color: var(--vendo-text-heading);">Channels</h3>
+      <p style="font-size: 12px; color: #64748B; margin: 0 0 0.75rem;">Select which channels this user belongs to. This determines their default page access.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <% it.channels.forEach(ch => { %>
+        <label class="ue-check">
+          <input type="checkbox" name="channels" value="<%= ch.id %>"
+                 <%= (it.userChannelIds || []).includes(ch.id) ? 'checked' : '' %>>
+          <%= ch.name %>
+        </label>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Per-User Page Overrides -->
+    <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;" id="edit-overrides" <%= it.editUser.role === 'admin' ? 'style="display:none;padding:1.5rem;margin-bottom:1.5rem;"' : '' %>>
+      <h3 style="margin: 0 0 0.25rem; font-size: 14px; font-weight: 600; color: var(--vendo-text-heading);">Per-User Page Access</h3>
+      <p style="font-size: 12px; color: #64748B; margin: 0 0 1rem;">Override channel permissions for individual pages. Leave as "Channel default" to inherit from their channels.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <% (it.routeSlugs || []).forEach(r => {
+          const current = (it.overrideMap || {})[r.slug] || '';
+        %>
+        <div class="ue-override-row">
+          <span class="ue-override-label"><%= r.label %></span>
+          <select name="overrides" data-slug="<%= r.slug %>" class="ue-override-select">
+            <option value="">Channel default</option>
+            <option value="grant:<%= r.slug %>" <%= current === 'grant' ? 'selected' : '' %>>Grant</option>
+            <option value="deny:<%= r.slug %>" <%= current === 'deny' ? 'selected' : '' %>>Deny</option>
+          </select>
         </div>
+        <% }) %>
       </div>
+    </div>
 
-      <div id="edit-overrides" style="margin-bottom: 1.5rem; <%= it.editUser.role === 'admin' ? 'display: none;' : '' %>">
-        <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Per-User Page Access</label>
-        <p style="font-size: 12px; color: #64748B; margin: 0 0 0.75rem;">Override channel permissions for this user. Leave as "Channel default" to inherit from their channels.</p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.5rem;">
-          <% (it.routeSlugs || []).forEach(r => {
-            const current = (it.overrideMap || {})[r.slug] || '';
-          %>
-          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 13px; color: #E2E8F0;">
-            <select name="overrides" data-slug="<%= r.slug %>"
-                    style="padding: 4px 6px; font-size: 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font);">
-              <option value="">Channel default</option>
-              <option value="grant:<%= r.slug %>" <%= current === 'grant' ? 'selected' : '' %>>Grant</option>
-              <option value="deny:<%= r.slug %>" <%= current === 'deny' ? 'selected' : '' %>>Deny</option>
-            </select>
-            <span><%= r.label %></span>
-          </div>
-          <% }) %>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 0.75rem;">
-        <button type="submit" style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">Save Changes</button>
-        <a href="/admin/users" style="padding: 8px 20px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; text-decoration: none; display: inline-flex; align-items: center;">Cancel</a>
-      </div>
-    </form>
-  </div>
+    <!-- Actions -->
+    <div style="display: flex; gap: 0.75rem;">
+      <button type="submit" style="padding: 8px 20px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">Save Changes</button>
+      <a href="/admin/users" style="padding: 8px 20px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; text-decoration: none; display: inline-flex; align-items: center;">Cancel</a>
+    </div>
+  </form>
 </div>
