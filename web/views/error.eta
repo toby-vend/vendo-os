@@ -10,5 +10,8 @@
   </div>
   <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin-bottom: 0.5rem;">Something went wrong</h2>
   <p style="color: #94A3B8; font-size: 14px; max-width: 400px;">An unexpected error occurred. Please try again or contact an admin if it persists.</p>
+  <% if (it.errorDetail && it.user?.role === 'admin') { %>
+  <pre style="margin-top: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.04); border-radius: 8px; font-size: 11px; color: #EF4444; max-width: 600px; overflow-x: auto; text-align: left;"><%= it.errorDetail %></pre>
+  <% } %>
   <a href="/" style="margin-top: 1.5rem; padding: 8px 20px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; text-decoration: none; font-size: 14px;">Go to Dashboard</a>
 </div>

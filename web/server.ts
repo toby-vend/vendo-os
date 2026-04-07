@@ -312,7 +312,7 @@ app.setErrorHandler((error, request, reply) => {
     reply.code(statusCode).send('Something went wrong');
   } else {
     reply.code(statusCode).type('text/html').send(
-      eta.render('error', { user: (request as any).user, statusCode }),
+      eta.render('error', { user: (request as any).user, statusCode, errorDetail: error?.message }),
     );
   }
 });
