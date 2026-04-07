@@ -578,17 +578,22 @@ function editField(cell, configId, field, currentVal) {
     popup.appendChild(btnRow);
     cell.style.position = 'relative';
     cell.appendChild(popup);
+    // Prevent clicks inside popup from bubbling to cell's onclick
+    popup.addEventListener('click', function(e) { e.stopPropagation(); });
+    popup.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+    var popupClosed = false;
     function commitMulti() {
+      if (popupClosed) return;
+      popupClosed = true;
       var selected = [];
       popup.querySelectorAll('input[type=checkbox]').forEach(function(cb) { if (cb.checked) selected.push(cb.value); });
       popup.remove();
+      document.removeEventListener('mousedown', closeOutside);
       queueField(cell, configId, field, selected.join(' / '), orig);
     }
     doneBtn.addEventListener('click', function(e) { e.stopPropagation(); commitMulti(); });
-    setTimeout(function() {
-      function closePopup(e) { if (!popup.contains(e.target)) { document.removeEventListener('mousedown', closePopup); commitMulti(); } }
-      document.addEventListener('mousedown', closePopup);
-    }, 0);
+    function closeOutside(e) { if (!popup.contains(e.target)) { commitMulti(); } }
+    setTimeout(function() { document.addEventListener('mousedown', closeOutside); }, 0);
     return;
   }
 
