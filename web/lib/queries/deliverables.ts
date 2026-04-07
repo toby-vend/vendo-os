@@ -17,6 +17,7 @@ async function ensureSchema(): Promise<void> {
       client_name TEXT NOT NULL, service_type TEXT NOT NULL,
       am TEXT, cm TEXT, level TEXT DEFAULT 'Auto', tier INTEGER DEFAULT 3,
       calls INTEGER DEFAULT 1, am_hrs REAL DEFAULT 2, cm_hrs REAL DEFAULT 2,
+      cs_hrs REAL DEFAULT 0,
       budget REAL DEFAULT 0, currency TEXT DEFAULT 'GBP', status TEXT DEFAULT 'active',
       created_at TEXT, updated_at TEXT, UNIQUE(client_name, service_type)
     )`,
@@ -65,6 +66,7 @@ export interface ServiceConfig {
   calls: number;
   am_hrs: number;
   cm_hrs: number;
+  cs_hrs: number;
   budget: number;
   currency: string;
   status: string;
@@ -160,20 +162,20 @@ export async function getServiceConfigs(filters?: {
 export async function upsertServiceConfig(config: Omit<ServiceConfig, 'id'>): Promise<void> {
   await ensureSchema();
   await db.execute({
-    sql: `INSERT INTO client_service_configs (client_name, service_type, am, cm, level, tier, calls, am_hrs, cm_hrs, budget, currency, status, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+    sql: `INSERT INTO client_service_configs (client_name, service_type, am, cm, level, tier, calls, am_hrs, cm_hrs, cs_hrs, budget, currency, status, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
           ON CONFLICT(client_name, service_type) DO UPDATE SET
             am = excluded.am, cm = excluded.cm, level = excluded.level, tier = excluded.tier,
-            calls = excluded.calls, am_hrs = excluded.am_hrs, cm_hrs = excluded.cm_hrs,
+            calls = excluded.calls, am_hrs = excluded.am_hrs, cm_hrs = excluded.cm_hrs, cs_hrs = excluded.cs_hrs,
             budget = excluded.budget, currency = excluded.currency, status = excluded.status,
             updated_at = datetime('now')`,
     args: [config.client_name, config.service_type, config.am, config.cm, config.level,
-           config.tier, config.calls, config.am_hrs, config.cm_hrs, config.budget, config.currency, config.status],
+           config.tier, config.calls, config.am_hrs, config.cm_hrs, config.cs_hrs ?? 0, config.budget, config.currency, config.status],
   });
 }
 
 export async function updateConfigField(id: number, field: string, value: string | number | null): Promise<void> {
-  const allowed = ['am', 'cm', 'level', 'tier', 'calls', 'am_hrs', 'cm_hrs', 'budget', 'currency'];
+  const allowed = ['am', 'cm', 'level', 'tier', 'calls', 'am_hrs', 'cm_hrs', 'cs_hrs', 'budget', 'currency'];
   if (!allowed.includes(field)) throw new Error('Invalid field: ' + field);
   await ensureSchema();
   await db.execute({

@@ -137,6 +137,7 @@
         <th class="col-sticky col-s4">Calls</th>
         <th class="col-sticky col-s5">AM Hrs</th>
         <th class="col-sticky col-s6">CM Hrs</th>
+        <% if (it.showCS) { %><th class="col-center" style="min-width: 55px;">CS Hrs</th><% } %>
         <th class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %>">Tier</th>
         <% if (it.showBudget) { %><th class="col-sticky col-s8 col-last-sticky">Budget</th><% } %>
         <% it.months.forEach(m => {
@@ -155,6 +156,7 @@
         <th class="col-sticky col-s4"></th>
         <th class="col-sticky col-s5"></th>
         <th class="col-sticky col-s6"></th>
+        <% if (it.showCS) { %><th></th><% } %>
         <th class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %>"></th>
         <% if (it.showBudget) { %><th class="col-sticky col-s8 col-last-sticky"></th><% } %>
         <% it.months.forEach(m => { %>
@@ -185,6 +187,7 @@
         <td class="col-sticky col-s4 <%~ ec %>"<%~ fClick('calls', config.calls) %>><%= config.calls %></td>
         <td class="col-sticky col-s5 <%~ ec %>"<%~ fClick('am_hrs', config.am_hrs) %>><%= config.am_hrs %></td>
         <td class="col-sticky col-s6 <%~ ec %>"<%~ fClick('cm_hrs', config.cm_hrs) %>><%= config.cm_hrs %></td>
+        <% if (it.showCS) { %><td class="col-center <%~ ec %>"<%~ fClick('cs_hrs', config.cs_hrs || 0) %>><%= config.cs_hrs || 0 %></td><% } %>
         <td class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %> <%~ ec %>"<%~ fClick('tier', config.tier) %>><%= config.tier %></td>
         <% if (it.showBudget) { %><td class="col-sticky col-s8 col-last-sticky <%~ ec %>"<%~ fClick('budget', config.budget) %>><%~ budgetDisplay %></td><% } %>
         <%
@@ -260,6 +263,7 @@
         <td class="col-sticky col-s4"></td>
         <td class="col-sticky col-s5"><%= it.totalAllocatedAM %></td>
         <td class="col-sticky col-s6"><%= it.totalAllocatedCM %></td>
+        <% if (it.showCS) { %><td class="col-center"><%= it.configs.reduce((s, c) => s + (c.cs_hrs || 0), 0) %></td><% } %>
         <td class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %>"></td>
         <% if (it.showBudget) { %><td class="col-sticky col-s8 col-last-sticky"></td><% } %>
         <% it.months.forEach(m => {
@@ -279,6 +283,7 @@
         <td class="col-sticky col-s4"></td>
         <td class="col-sticky col-s5"></td>
         <td class="col-sticky col-s6"></td>
+        <% if (it.showCS) { %><td></td><% } %>
         <td class="col-sticky col-s7 <%= !it.showBudget ? 'col-last-sticky' : '' %>" style="<%= !it.showBudget ? 'font-size: 11px; color: var(--vendo-text-muted);' : '' %>"><%= !it.showBudget ? 'Del %' : '' %></td>
         <% if (it.showBudget) { %><td class="col-sticky col-s8 col-last-sticky" style="font-size: 11px; color: var(--vendo-text-muted);">Del %</td><% } %>
         <% it.months.forEach(m => {

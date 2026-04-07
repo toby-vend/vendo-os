@@ -31,7 +31,7 @@
           const svcs = m.service_types.split(',').map(s => s.trim());
           const linkedUser = it.users.find(u => u.id === m.user_id);
         %>
-        <tr style="border-bottom: 1px solid var(--vendo-border);">
+        <tr style="border-bottom: 1px solid var(--vendo-border); cursor: pointer;" onclick="fillForm('<%= m.initials %>','<%= m.name %>','<%= m.user_id || '' %>','<%= m.service_types %>','<%= m.roles %>',<%= m.is_active %>)">
           <td style="padding: 8px; font-weight: 600;"><%= m.initials %></td>
           <td style="padding: 8px;"><%= m.name %></td>
           <td style="padding: 8px; font-size: 12px; color: var(--vendo-text-muted);"><%= linkedUser ? linkedUser.name : '—' %></td>
@@ -42,7 +42,7 @@
           </td>
           <td style="padding: 8px; font-size: 11px;"><%= m.roles.toUpperCase() %></td>
           <td style="padding: 8px; text-align: center;"><%= m.is_active ? 'Yes' : 'No' %></td>
-          <td style="padding: 8px;">
+          <td style="padding: 8px;" onclick="event.stopPropagation()">
             <form method="POST" action="/deliverables/settings/member/<%= m.id %>/delete" onsubmit="return confirm('Remove this team member?')">
               <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
               <button type="submit" style="background: none; border: none; cursor: pointer; color: #64748B; font-size: 14px;">&times;</button>
@@ -108,6 +108,30 @@
       </div>
 
       <button type="submit" style="padding: 6px 16px; font-size: 12px; font-weight: 500; border-radius: 6px; border: 1px solid var(--vendo-green); background: var(--vendo-green); color: #0B0B0B; cursor: pointer; font-family: var(--vendo-font);">Save Member</button>
+      <span style="margin-left: 0.75rem; font-size: 11px; color: var(--vendo-text-muted);">Click a row above to edit an existing member</span>
     </form>
   </div>
 </div>
+
+<script>
+function fillForm(initials, name, userId, serviceTypes, roles, isActive) {
+  var f = document.forms[document.forms.length - 1];
+  f.initials.value = initials;
+  f.name.value = name;
+  f.user_id.value = userId;
+  var svcs = serviceTypes.split(',');
+  ['paid_search','seo','paid_social'].forEach(function(st) {
+    var cb = f.querySelector('[name="service_' + st + '"]');
+    if (cb) cb.checked = svcs.indexOf(st) >= 0;
+  });
+  var rls = roles.split(',');
+  ['am','cm'].forEach(function(r) {
+    var cb = f.querySelector('[name="role_' + r + '"]');
+    if (cb) cb.checked = rls.indexOf(r) >= 0;
+  });
+  var act = f.querySelector('[name="is_active"]');
+  if (act) act.checked = isActive === 1;
+  f.initials.focus();
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+</script>

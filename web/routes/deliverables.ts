@@ -160,6 +160,7 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
       filterPerson,
       monthCount,
       showBudget: serviceType !== 'seo',
+      showCS: serviceType === 'paid_social',
       isAdmin,
       userInitials,
       teamForService,
@@ -220,11 +221,11 @@ export const deliverablesRoutes: FastifyPluginAsync = async (app) => {
     const field = body.field;
     const rawValue = body.value?.trim() ?? '';
 
-    const numericFields = ['tier', 'calls', 'am_hrs', 'cm_hrs', 'budget'];
+    const numericFields = ['tier', 'calls', 'am_hrs', 'cm_hrs', 'cs_hrs', 'budget'];
     let value: string | number = rawValue;
     if (numericFields.includes(field)) {
       let n = parseFloat(rawValue) || 0;
-      if (field === 'am_hrs' || field === 'cm_hrs') n = Math.round(n * 2) / 2; // Round to 0.5
+      if (field === 'am_hrs' || field === 'cm_hrs' || field === 'cs_hrs') n = Math.round(n * 2) / 2;
       value = n;
     }
 
