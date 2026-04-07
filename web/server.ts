@@ -116,7 +116,7 @@ let sidebarMigrated = false;
 app.addHook('onRequest', async () => {
   if (!sidebarMigrated) {
     sidebarMigrated = true;
-    migrateSidebarConfig().catch(() => {});
+    try { await migrateSidebarConfig(); } catch { /* table may not exist yet */ }
   }
 });
 

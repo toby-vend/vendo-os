@@ -201,12 +201,18 @@ export async function migrateSidebarConfig(): Promise<void> {
           changed = true;
         }
       }
-      // Rename items whose labels changed in the default
+      // Sync labels and permissions from defaults
       for (const defaultItem of defaultGroup.items) {
         const savedItem = savedGroup.items.find(i => i.id === defaultItem.id);
-        if (savedItem && savedItem.label !== defaultItem.label) {
-          savedItem.label = defaultItem.label;
-          changed = true;
+        if (savedItem) {
+          if (savedItem.label !== defaultItem.label) {
+            savedItem.label = defaultItem.label;
+            changed = true;
+          }
+          if (savedItem.permission !== defaultItem.permission) {
+            savedItem.permission = defaultItem.permission;
+            changed = true;
+          }
         }
       }
     }
