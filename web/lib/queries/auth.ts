@@ -169,13 +169,53 @@ export async function setUserChannels(userId: string, channelIds: string[]): Pro
 // --- Permissions ---
 
 export async function getUserAllowedRoutes(userId: string): Promise<string[]> {
-  const result = await rows<{ route_slug: string }>(`
+  // Channel-based permissions
+  const channelRoutes = await rows<{ route_slug: string }>(`
     SELECT DISTINCT cp.route_slug
     FROM channel_permissions cp
     JOIN user_channels uc ON cp.channel_id = uc.channel_id
     WHERE uc.user_id = ?
   `, [userId]);
-  return result.map(r => r.route_slug);
+  const routeSet = new Set(channelRoutes.map(r => r.route_slug));
+
+  // Per-user overrides (grant/deny individual routes)
+  try {
+    const overrides = await rows<{ route_slug: string; mode: string }>(
+      'SELECT route_slug, mode FROM user_route_overrides WHERE user_id = ?',
+      [userId],
+    );
+    for (const o of overrides) {
+      if (o.mode === 'grant') routeSet.add(o.route_slug);
+      else if (o.mode === 'deny') routeSet.delete(o.route_slug);
+    }
+  } catch {
+    // Table may not exist yet
+  }
+
+  return [...routeSet];
+}
+
+// --- Per-user route overrides ---
+
+export async function getUserRouteOverrides(userId: string): Promise<{ route_slug: string; mode: string }[]> {
+  try {
+    return await rows<{ route_slug: string; mode: string }>(
+      'SELECT route_slug, mode FROM user_route_overrides WHERE user_id = ?',
+      [userId],
+    );
+  } catch {
+    return [];
+  }
+}
+
+export async function setUserRouteOverrides(userId: string, overrides: { routeSlug: string; mode: 'grant' | 'deny' }[]): Promise<void> {
+  await db.execute({ sql: 'DELETE FROM user_route_overrides WHERE user_id = ?', args: [userId] });
+  for (const o of overrides) {
+    await db.execute({
+      sql: 'INSERT INTO user_route_overrides (user_id, route_slug, mode) VALUES (?, ?, ?)',
+      args: [userId, o.routeSlug, o.mode],
+    });
+  }
 }
 
 export async function getAllPermissions(): Promise<{ channel_id: string; route_slug: string }[]> {
@@ -667,6 +707,14 @@ export async function initSchema(): Promise<void> {
   )`, args: [] });
 
   await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_push_subs_user ON push_subscriptions(user_id)`, args: [] });
+
+  // Per-user route overrides (grant/deny individual routes beyond channel permissions)
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS user_route_overrides (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    route_slug TEXT NOT NULL,
+    mode TEXT NOT NULL DEFAULT 'grant',
+    PRIMARY KEY (user_id, route_slug)
+  )`, args: [] });
 
   // Sidebar config
   const { initSidebarSchema } = await import('./sidebar.js');

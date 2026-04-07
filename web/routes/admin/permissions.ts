@@ -1,16 +1,23 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { getChannels, getAllPermissions, setAllPermissions } from '../../lib/queries.js';
 
-const ROUTE_SLUGS = [
+export const ROUTE_SLUGS = [
   { slug: 'dashboard', label: 'Dashboard' },
-  { slug: 'meetings', label: 'Meetings' },
-  { slug: 'action-items', label: 'Actions' },
   { slug: 'clients', label: 'Clients' },
   { slug: 'pipeline', label: 'Pipeline' },
+  { slug: 'dashboards', label: 'Dashboards' },
   { slug: 'ads', label: 'Ads' },
+  { slug: 'action-items', label: 'Actions' },
+  { slug: 'asana-tasks', label: 'Asana Tasks' },
+  { slug: 'tasks', label: 'Content Tasks' },
+  { slug: 'video-production', label: 'Video Production' },
+  { slug: 'meetings', label: 'Meetings' },
+  { slug: 'skills', label: 'Skills' },
+  { slug: 'chat', label: 'Chat' },
   { slug: 'briefs', label: 'Briefs' },
+  { slug: 'growth', label: 'Growth' },
   { slug: 'drive', label: 'Drive' },
-  { slug: 'sync-status', label: 'Sync Status' },
+  { slug: 'operations', label: 'Operations' },
 ];
 
 export const adminPermissionsRoutes: FastifyPluginAsync = async (app) => {

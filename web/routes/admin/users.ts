@@ -9,9 +9,12 @@ import {
   updateUserPassword,
   getUserById,
   getUserByEmail,
+  getUserRouteOverrides,
+  setUserRouteOverrides,
 } from '../../lib/queries.js';
 import { hashPassword, generateId, validatePasswordComplexity, type SessionUser } from '../../lib/auth.js';
 import { sendInviteNotifications } from '../../lib/notifications.js';
+import { ROUTE_SLUGS } from './permissions.js';
 
 export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
   // List all users
@@ -77,7 +80,12 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     const result = await db.execute({ sql: 'SELECT channel_id FROM user_channels WHERE user_id = ?', args: [id] });
     const userChannelIds = result.rows.map((r: any) => r.channel_id as string);
 
-    reply.render('admin/user-edit', { editUser: user, channels, userChannelIds });
+    // Get per-user route overrides
+    const overrides = await getUserRouteOverrides(id);
+    const overrideMap: Record<string, string> = {};
+    for (const o of overrides) overrideMap[o.route_slug] = o.mode;
+
+    reply.render('admin/user-edit', { editUser: user, channels, userChannelIds, routeSlugs: ROUTE_SLUGS, overrideMap });
   });
 
   // Update user
@@ -101,6 +109,18 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
 
     await updateUser(id, { name, role, email });
     await setUserChannels(id, channelIds);
+
+    // Save per-user route overrides
+    const overrideValues = Array.isArray(body.overrides) ? body.overrides : (body.overrides ? [body.overrides] : []);
+    const overrides: { routeSlug: string; mode: 'grant' | 'deny' }[] = [];
+    for (const val of overrideValues as string[]) {
+      const [mode, slug] = val.split(':');
+      if ((mode === 'grant' || mode === 'deny') && slug) {
+        overrides.push({ routeSlug: slug, mode });
+      }
+    }
+    await setUserRouteOverrides(id, overrides);
+
     reply.redirect('/admin/users');
   });
 
