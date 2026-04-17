@@ -18,9 +18,9 @@ export async function run(): Promise<MonitorRunResult> {
     sql: `SELECT c.name AS client_name, gs.spend, gs.clicks, gs.conversions, gs.date
           FROM gads_campaign_spend gs
           JOIN client_source_mappings csm
-            ON gs.account_id = csm.source_id AND csm.source_type = 'gads'
+            ON gs.account_id = csm.external_id AND csm.source = 'gads'
           JOIN clients c ON csm.client_id = c.id
-          WHERE c.category LIKE '%dental%' AND gs.date >= ?`,
+          WHERE c.vertical LIKE '%dental%' AND gs.date >= ?`,
     args: [fourteenDaysAgo],
   });
 

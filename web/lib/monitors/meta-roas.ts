@@ -32,12 +32,12 @@ export async function run(): Promise<MonitorRunResult> {
   const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const { rows } = await db.execute({
-    sql: `SELECT c.name AS client_name, mi.spend, mi.actions_json, mi.date
+    sql: `SELECT c.name AS client_name, mi.spend, mi.actions AS actions_json, mi.date
           FROM meta_insights mi
           JOIN client_source_mappings csm
-            ON mi.account_id = csm.source_id AND csm.source_type = 'meta'
+            ON mi.account_id = csm.external_id AND csm.source = 'meta'
           JOIN clients c ON csm.client_id = c.id
-          WHERE c.category LIKE '%ecom%' AND mi.date >= ?`,
+          WHERE c.vertical LIKE '%ecom%' AND mi.date >= ?`,
     args: [thirtyDaysAgo],
   });
 

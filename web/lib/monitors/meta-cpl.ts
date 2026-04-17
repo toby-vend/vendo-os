@@ -23,12 +23,12 @@ export async function run(): Promise<MonitorRunResult> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const { rows } = await db.execute({
-    sql: `SELECT c.name AS client_name, mi.spend, mi.actions_json
+    sql: `SELECT c.name AS client_name, mi.spend, mi.actions AS actions_json
           FROM meta_insights mi
           JOIN client_source_mappings csm
-            ON mi.account_id = csm.source_id AND csm.source_type = 'meta'
+            ON mi.account_id = csm.external_id AND csm.source = 'meta'
           JOIN clients c ON csm.client_id = c.id
-          WHERE c.category LIKE '%dental%' AND mi.date >= ?`,
+          WHERE c.vertical LIKE '%dental%' AND mi.date >= ?`,
     args: [sevenDaysAgo],
   });
 

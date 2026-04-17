@@ -19,8 +19,17 @@ export async function run(): Promise<MonitorRunResult> {
   const monthStart = `${year}-${String(month).padStart(2, '0')}-01`;
   const expectedPacePct = dayOfMonth / totalDays;
 
+  // Turso's clients table has no monthly_budget column (a sql.js-era field).
+  // Detect the column at runtime and skip gracefully if it's still missing.
+  try {
+    await db.execute('SELECT monthly_budget FROM clients LIMIT 1');
+  } catch {
+    consoleLog(MONITOR_NAME, 'clients.monthly_budget column missing in Turso — skipping pacing monitor');
+    return { checked: 0, flagged: 0 };
+  }
+
   const { rows: clients } = await db.execute({
-    sql: `SELECT c.id, c.name, c.monthly_budget, c.account_manager
+    sql: `SELECT c.id, c.name, c.monthly_budget, c.am AS account_manager
           FROM clients c
           WHERE c.status = 'active'
             AND c.monthly_budget IS NOT NULL
@@ -45,7 +54,7 @@ export async function run(): Promise<MonitorRunResult> {
       sql: `SELECT COALESCE(SUM(mi.spend), 0) as total
             FROM meta_insights mi
             JOIN client_source_mappings csm
-              ON mi.account_id = csm.source_id AND csm.source_type = 'meta'
+              ON mi.account_id = csm.external_id AND csm.source = 'meta'
             WHERE csm.client_id = ? AND mi.date >= ?`,
       args: [clientId, monthStart],
     });
@@ -53,7 +62,7 @@ export async function run(): Promise<MonitorRunResult> {
       sql: `SELECT COALESCE(SUM(gs.spend), 0) as total
             FROM gads_campaign_spend gs
             JOIN client_source_mappings csm
-              ON gs.account_id = csm.source_id AND csm.source_type = 'gads'
+              ON gs.account_id = csm.external_id AND csm.source = 'gads'
             WHERE csm.client_id = ? AND gs.date >= ?`,
       args: [clientId, monthStart],
     });
