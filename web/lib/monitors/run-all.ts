@@ -6,6 +6,7 @@ import { run as runMetaRoas } from './meta-roas.js';
 import { run as runGadsCpa } from './gads-cpa.js';
 import { run as runAdSpendPacing } from './ad-spend-pacing.js';
 import { run as runContractRenewal } from './contract-renewal.js';
+import { run as runCronHeartbeat } from './cron-heartbeat.js';
 
 /**
  * In-process orchestrator for the hourly monitor cron. Replaces the old
@@ -78,6 +79,8 @@ export async function runAllMonitors(): Promise<RunAllResult> {
     { name: 'gads-cpa', fn: runGadsCpa },
     { name: 'ad-spend-pacing', fn: runAdSpendPacing },
     { name: 'contract-renewal', fn: runContractRenewal },
+    // Meta-monitor runs LAST so it can check the heartbeats the others just wrote.
+    { name: 'cron-heartbeat', fn: runCronHeartbeat },
   ];
 
   const start = Date.now();
