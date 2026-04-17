@@ -100,13 +100,17 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
 
     request.log.info({ recordingId, event: payload.event }, 'Fathom webhook received');
 
-    // Acknowledge immediately, process in background
-    reply.code(200).send({ ok: true });
-
-    // Process asynchronously so we don't block the webhook response
-    processRecording(recordingId, apiKey, request.log).catch((err) => {
+    // Process inline — serverless functions terminate on response, so we can't fire-and-forget.
+    // Fathom allows up to 30s for webhook responses; Fathom API + Turso upsert easily fits.
+    try {
+      await processRecording(recordingId, apiKey, request.log);
+      return reply.code(200).send({ ok: true });
+    } catch (err) {
       request.log.error({ err, recordingId }, 'Failed to process Fathom recording');
-    });
+      // Return 200 anyway so Fathom doesn't retry forever on genuine data issues.
+      // The failsafe sync (sync-meetings) will backfill anything missed.
+      return reply.code(200).send({ ok: true, processed: false });
+    }
   });
 };
 
