@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { runAllMonitors } from '../../lib/monitors/run-all.js';
+import { syncActionsToAsana } from '../../lib/jobs/sync-actions-to-asana.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -84,14 +85,12 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
    * GET /sync-actions-to-asana — Create Asana tasks from meeting actions, escalations, NPS (Vercel Cron)
    */
   app.get('/sync-actions-to-asana', async (_request, reply) => {
-    const scriptPath = resolve(PROJECT_ROOT, 'scripts/automation/fathom-to-asana.ts');
-
     try {
-      const { stdout } = await runScript(scriptPath);
+      const result = await syncActionsToAsana();
       return reply.send({
         ok: true,
         message: 'Action-to-Asana sync completed',
-        output: stdout.slice(-2000),
+        ...result,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
