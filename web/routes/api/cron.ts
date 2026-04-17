@@ -2,12 +2,20 @@ import type { FastifyPluginAsync } from 'fastify';
 import { exec } from 'child_process';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { runAllMonitors } from '../../lib/monitors/run-all.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
 
 /**
  * Run a script and return a promise with stdout/stderr.
+ *
+ * NOTE: this pattern only works for scripts we haven't yet ported to Turso.
+ * On Vercel serverless, `npx tsx` is unavailable and the local sql.js file
+ * doesn't exist — any script that depends on those will silently fail. The
+ * /monitors route now runs in-process; daily-brief, health-score,
+ * traffic-light, and sync-actions-to-asana remain on this shim as a known
+ * follow-up (they mostly hit external APIs + Turso, similar port needed).
  */
 function runScript(scriptPath: string): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
@@ -27,14 +35,14 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
    * Auth handled by the server.ts onRequest hook for /api/cron/* paths.
    */
   app.get('/monitors', async (_request, reply) => {
-    const scriptPath = resolve(PROJECT_ROOT, 'scripts/monitors/run-all-monitors.ts');
-
     try {
-      const { stdout } = await runScript(scriptPath);
+      const { results, totalFlagged, durationMs } = await runAllMonitors();
       return reply.send({
         ok: true,
         message: 'All monitors completed',
-        output: stdout.slice(-2000), // Last 2k chars of output
+        durationMs,
+        totalFlagged,
+        results,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
