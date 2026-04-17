@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import type { FastifyPluginAsync } from 'fastify';
 import { db } from '../lib/queries/base.js';
 import { analyseAndAlert } from '../lib/concern-detection.js';
+import { enrichMeeting } from '../lib/meeting-enrichment.js';
 
 /**
  * Fathom Webhook Handler
@@ -175,13 +176,44 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(500).send({ error: 'Upsert failed' });
     }
 
-    // Concern detection runs after the upsert. Failures here must not fail
-    // the webhook — the meeting is already safely stored and Fathom shouldn't
-    // retry the delivery just because an AI call timed out.
+    // Enrichment + concern detection run after the upsert. Neither should
+    // fail the webhook — the meeting is already safely stored, and Fathom
+    // shouldn't retry for an AI timeout or context build error.
     const transcriptText = (meeting.transcript ?? [])
       .map((e) => `[${e.timestamp}] ${e.speaker.display_name}: ${e.text}`)
       .join('\n') || null;
     const summary = meeting.default_summary?.markdown_formatted || null;
+    const inviteesJson = meeting.calendar_invitees?.length
+      ? JSON.stringify(
+          meeting.calendar_invitees.map((i) => ({
+            name: i.name,
+            email: i.email,
+            domain: i.email_domain,
+          })),
+        )
+      : null;
+    const actionItemsJson = meeting.action_items?.length
+      ? JSON.stringify(meeting.action_items)
+      : null;
+
+    let enrichedClientName: string | null = null;
+    try {
+      const enriched = await enrichMeeting(
+        {
+          meetingId: String(meeting.recording_id),
+          title: meeting.title || meeting.meeting_title || 'Untitled',
+          summary,
+          transcript: transcriptText,
+          calendarInviteesJson: inviteesJson,
+          rawActionItemsJson: actionItemsJson,
+          inviteeDomainsType: meeting.calendar_invitees_domains_type || null,
+        },
+        request.log,
+      );
+      enrichedClientName = enriched.clientName;
+    } catch (err) {
+      request.log.error({ err, recordingId: meeting.recording_id }, 'Meeting enrichment threw');
+    }
 
     try {
       const outcome = await analyseAndAlert(
@@ -189,6 +221,7 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
           meetingId: String(meeting.recording_id),
           title: meeting.title || meeting.meeting_title || 'Untitled',
           date: meeting.created_at,
+          clientName: enrichedClientName,
           fathomUrl: meeting.url || meeting.share_url || null,
           shareUrl: meeting.share_url || null,
           transcript: transcriptText,
