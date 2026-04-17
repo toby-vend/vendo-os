@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import type { FastifyPluginAsync } from 'fastify';
 import { db } from '../lib/queries/base.js';
+import { analyseAndAlert } from '../lib/concern-detection.js';
 
 /**
  * Fathom Webhook Handler
@@ -51,6 +52,13 @@ interface Invitee {
   is_external: boolean;
 }
 
+interface CrmMatches {
+  contacts?: Array<{ name: string; email: string; record_url?: string | null }>;
+  companies?: Array<{ name: string; record_url?: string | null }>;
+  deals?: Array<{ name: string; amount?: number | null; record_url?: string | null }>;
+  error?: string | null;
+}
+
 interface MeetingPayload {
   title: string;
   meeting_title: string | null;
@@ -68,6 +76,7 @@ interface MeetingPayload {
   default_summary?: { template_name: string | null; markdown_formatted: string | null } | null;
   action_items?: ActionItem[] | null;
   calendar_invitees: Invitee[];
+  crm_matches?: CrmMatches | null;
 }
 
 function decodeSecret(secret: string): Buffer {
@@ -156,7 +165,6 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
         { recordingId: meeting.recording_id, title: meeting.title },
         'Fathom meeting synced from webhook',
       );
-      return reply.code(200).send({ ok: true });
     } catch (err) {
       request.log.error(
         { err, recordingId: meeting.recording_id },
@@ -166,6 +174,36 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
       // that's the right signal — better than silently dropping meetings.
       return reply.code(500).send({ error: 'Upsert failed' });
     }
+
+    // Concern detection runs after the upsert. Failures here must not fail
+    // the webhook — the meeting is already safely stored and Fathom shouldn't
+    // retry the delivery just because an AI call timed out.
+    const transcriptText = (meeting.transcript ?? [])
+      .map((e) => `[${e.timestamp}] ${e.speaker.display_name}: ${e.text}`)
+      .join('\n') || null;
+    const summary = meeting.default_summary?.markdown_formatted || null;
+
+    try {
+      const outcome = await analyseAndAlert(
+        {
+          meetingId: String(meeting.recording_id),
+          title: meeting.title || meeting.meeting_title || 'Untitled',
+          date: meeting.created_at,
+          fathomUrl: meeting.url || meeting.share_url || null,
+          shareUrl: meeting.share_url || null,
+          transcript: transcriptText,
+          summary,
+          domainsType: meeting.calendar_invitees_domains_type || null,
+          crmMatches: meeting.crm_matches ?? null,
+        },
+        request.log,
+      );
+      request.log.info({ recordingId: meeting.recording_id, outcome }, 'Concern detection complete');
+    } catch (err) {
+      request.log.error({ err, recordingId: meeting.recording_id }, 'Concern detection threw');
+    }
+
+    return reply.code(200).send({ ok: true });
   });
 };
 
