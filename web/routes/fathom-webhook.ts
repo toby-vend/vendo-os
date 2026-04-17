@@ -1,72 +1,128 @@
 import crypto from 'crypto';
 import type { FastifyPluginAsync } from 'fastify';
-import { db, rows } from '../lib/queries/base.js';
+import { db } from '../lib/queries/base.js';
 
 /**
  * Fathom Webhook Handler
  *
- * Receives POST notifications from Fathom when a recording is complete.
- * Fetches the meeting data + transcript from the Fathom API and upserts
- * it directly into Turso so the web app sees it immediately.
+ * Receives the "New meeting content ready" webhook from Fathom whenever a
+ * recording finishes processing. The payload contains the full meeting
+ * (transcript, summary, action items, invitees) so we upsert directly —
+ * no secondary Fathom API call is required.
+ *
+ * Auth follows the Standard Webhooks spec (standardwebhooks.com):
+ *   webhook-id          unique message identifier
+ *   webhook-timestamp   unix seconds
+ *   webhook-signature   one or more "<version>,<base64 HMAC-SHA256>" tokens,
+ *                       space-separated
  *
  * Env vars:
- *   FATHOM_WEBHOOK_SECRET — shared secret for request validation
- *   FATHOM_API_KEY        — API key for fetching meeting data
+ *   FATHOM_WEBHOOK_SECRET — Fathom-generated secret (starts `whsec_…`)
  */
 
-const FATHOM_API = 'https://api.fathom.ai/external/v1';
+const SIGNATURE_TOLERANCE_SECONDS = 5 * 60;
 
-interface FathomWebhookPayload {
-  event: string;
-  recording_id: number;
-  [key: string]: unknown;
-}
-
-interface FathomMeeting {
-  title: string;
-  meeting_title: string;
-  url: string;
-  created_at: string;
-  recording_id: number;
-  recording_start_time: string | null;
-  recording_end_time: string | null;
-  calendar_invitees_domains_type: string;
-  default_summary: {
-    template_name: string | null;
-    markdown_formatted: string | null;
-  } | null;
-  action_items: Array<{
-    description: string;
-    user_generated: boolean;
-    completed: boolean;
-    recording_timestamp: string;
-    recording_playback_url: string;
-    assignee: {
-      name: string;
-      email: string;
-      team: string;
-    } | null;
-  }> | null;
-}
-
-interface TranscriptEntry {
+interface TranscriptItem {
   speaker: { display_name: string; matched_calendar_invitee_email: string | null };
   text: string;
   timestamp: string;
 }
 
-async function fathomGet<T>(path: string, apiKey: string): Promise<T> {
-  const res = await fetch(`${FATHOM_API}${path}`, {
-    headers: { 'X-Api-Key': apiKey },
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`Fathom API ${res.status}: ${body.slice(0, 200)}`);
+interface ActionItemAssignee {
+  name: string;
+  email: string;
+  team: string | null;
+}
+
+interface ActionItem {
+  description: string;
+  user_generated: boolean;
+  completed: boolean;
+  recording_timestamp: string;
+  recording_playback_url: string;
+  assignee: ActionItemAssignee | null;
+}
+
+interface Invitee {
+  name: string | null;
+  matched_speaker_display_name?: string | null;
+  email: string;
+  email_domain: string;
+  is_external: boolean;
+}
+
+interface MeetingPayload {
+  title: string;
+  meeting_title: string | null;
+  recording_id: number;
+  url: string;
+  share_url: string;
+  created_at: string;
+  scheduled_start_time: string;
+  scheduled_end_time: string;
+  recording_start_time: string;
+  recording_end_time: string;
+  calendar_invitees_domains_type: string;
+  transcript_language?: string;
+  transcript?: TranscriptItem[] | null;
+  default_summary?: { template_name: string | null; markdown_formatted: string | null } | null;
+  action_items?: ActionItem[] | null;
+  calendar_invitees: Invitee[];
+}
+
+function decodeSecret(secret: string): Buffer {
+  const raw = secret.startsWith('whsec_') ? secret.slice('whsec_'.length) : secret;
+  try {
+    return Buffer.from(raw, 'base64');
+  } catch {
+    return Buffer.from(raw, 'utf8');
   }
-  return res.json() as Promise<T>;
+}
+
+function verifySignature(opts: {
+  secret: string;
+  id: string;
+  timestamp: string;
+  body: string;
+  signatureHeader: string;
+}): boolean {
+  const ts = Number(opts.timestamp);
+  if (!Number.isFinite(ts)) return false;
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - ts) > SIGNATURE_TOLERANCE_SECONDS) return false;
+
+  const key = decodeSecret(opts.secret);
+  const toSign = `${opts.id}.${opts.timestamp}.${opts.body}`;
+  const expected = crypto.createHmac('sha256', key).update(toSign).digest('base64');
+
+  const tokens = opts.signatureHeader.split(/\s+/).filter(Boolean);
+  for (const token of tokens) {
+    const [, sig] = token.split(',', 2);
+    if (!sig) continue;
+    const received = Buffer.from(sig, 'base64');
+    const expectedBuf = Buffer.from(expected, 'base64');
+    if (received.length !== expectedBuf.length) continue;
+    if (crypto.timingSafeEqual(received, expectedBuf)) return true;
+  }
+  return false;
 }
 
 export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
+  // Scoped JSON parser that preserves the raw body string — required to
+  // compute a matching HMAC signature.
+  app.addContentTypeParser(
+    'application/json',
+    { parseAs: 'string' },
+    (req, body: string, done) => {
+      (req as { rawBody?: string }).rawBody = body;
+      try {
+        done(null, body.length ? JSON.parse(body) : {});
+      } catch (err) {
+        done(err as Error, undefined);
+      }
+    },
+  );
+
   app.post('/webhook', async (request, reply) => {
     const secret = process.env.FATHOM_WEBHOOK_SECRET;
     if (!secret) {
@@ -74,134 +130,73 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(500).send({ error: 'Webhook not configured' });
     }
 
-    // Validate shared secret via Authorization header
-    const auth = request.headers['authorization'];
-    const token = auth?.startsWith('Bearer ') ? auth.slice(7) : (auth ?? '');
-    if (
-      !token ||
-      token.length !== secret.length ||
-      !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(secret))
-    ) {
-      return reply.code(403).send({ error: 'Forbidden' });
+    const headers = request.headers;
+    const id = (headers['webhook-id'] as string) || '';
+    const timestamp = (headers['webhook-timestamp'] as string) || '';
+    const signatureHeader = (headers['webhook-signature'] as string) || '';
+    const rawBody = (request as { rawBody?: string }).rawBody ?? '';
+
+    if (!id || !timestamp || !signatureHeader) {
+      return reply.code(400).send({ error: 'Missing webhook headers' });
     }
 
-    const apiKey = process.env.FATHOM_API_KEY;
-    if (!apiKey) {
-      request.log.error('FATHOM_API_KEY not configured');
-      return reply.code(500).send({ error: 'API key not configured' });
+    if (!verifySignature({ secret, id, timestamp, body: rawBody, signatureHeader })) {
+      request.log.warn({ id }, 'Fathom webhook signature failed verification');
+      return reply.code(403).send({ error: 'Invalid signature' });
     }
 
-    const payload = request.body as FathomWebhookPayload;
-    const recordingId = payload?.recording_id;
-
-    if (!recordingId) {
-      return reply.code(400).send({ error: 'Missing recording_id' });
+    const meeting = request.body as MeetingPayload;
+    if (!meeting?.recording_id) {
+      return reply.code(400).send({ error: 'Missing recording_id in payload' });
     }
 
-    request.log.info({ recordingId, event: payload.event }, 'Fathom webhook received');
-
-    // Process inline — serverless functions terminate on response, so we can't fire-and-forget.
-    // Fathom allows up to 30s for webhook responses; Fathom API + Turso upsert easily fits.
     try {
-      await processRecording(recordingId, apiKey, request.log);
+      await upsertMeeting(meeting);
+      request.log.info(
+        { recordingId: meeting.recording_id, title: meeting.title },
+        'Fathom meeting synced from webhook',
+      );
       return reply.code(200).send({ ok: true });
     } catch (err) {
-      request.log.error({ err, recordingId }, 'Failed to process Fathom recording');
-      // Return 200 anyway so Fathom doesn't retry forever on genuine data issues.
-      // The failsafe sync (sync-meetings) will backfill anything missed.
-      return reply.code(200).send({ ok: true, processed: false });
+      request.log.error(
+        { err, recordingId: meeting.recording_id },
+        'Failed to upsert Fathom meeting',
+      );
+      // 5xx so Fathom retries. A persistent DB issue will burn retries but
+      // that's the right signal — better than silently dropping meetings.
+      return reply.code(500).send({ error: 'Upsert failed' });
     }
   });
 };
 
-async function processRecording(
-  recordingId: number,
-  apiKey: string,
-  log: { info: (...args: unknown[]) => void; error: (...args: unknown[]) => void },
-): Promise<void> {
-  // Fetch meeting metadata (summary + action items)
-  const meetings = await fathomGet<{ items: FathomMeeting[] }>(
-    `/meetings?include_summary=true&include_action_items=true`,
-    apiKey,
-  );
+async function upsertMeeting(meeting: MeetingPayload): Promise<void> {
+  const id = String(meeting.recording_id);
+  const now = new Date().toISOString();
 
-  // The list endpoint doesn't filter by ID, so find our recording
-  // If not on the first page, page through
-  let meeting: FathomMeeting | undefined;
-  let cursor: string | null = null;
-  let response = meetings;
+  const transcriptText = (meeting.transcript ?? [])
+    .map((e) => `[${e.timestamp}] ${e.speaker.display_name}: ${e.text}`)
+    .join('\n') || null;
 
-  while (!meeting) {
-    meeting = response.items.find((m) => m.recording_id === recordingId);
-    cursor = (response as any).next_cursor ?? null;
-    if (meeting || !cursor) break;
-    response = await fathomGet<{ items: FathomMeeting[]; next_cursor: string | null }>(
-      `/meetings?include_summary=true&include_action_items=true&cursor=${cursor}`,
-      apiKey,
-    );
-  }
+  const summary = meeting.default_summary?.markdown_formatted || null;
+  const actionItems = meeting.action_items?.length ? JSON.stringify(meeting.action_items) : null;
 
-  if (!meeting) {
-    log.error({ recordingId }, 'Recording not found in Fathom meeting list');
-    return;
-  }
+  const inviteesForStorage = (meeting.calendar_invitees ?? []).map((i) => ({
+    name: i.name,
+    email: i.email,
+    domain: i.email_domain,
+  }));
+  const inviteesJson = inviteesForStorage.length ? JSON.stringify(inviteesForStorage) : null;
 
-  // Fetch transcript
-  let transcriptText = '';
-  const invitees: Array<{ name: string; email: string | null; domain: string | null }> = [];
-  const seenEmails = new Set<string>();
-
-  try {
-    const data = await fathomGet<{ transcript: TranscriptEntry[] }>(
-      `/recordings/${recordingId}/transcript`,
-      apiKey,
-    );
-    if (data.transcript && Array.isArray(data.transcript)) {
-      transcriptText = data.transcript
-        .map((e) => `[${e.timestamp}] ${e.speaker.display_name}: ${e.text}`)
-        .join('\n');
-
-      // Extract speaker emails
-      for (const entry of data.transcript) {
-        const email = entry.speaker.matched_calendar_invitee_email;
-        if (email && !seenEmails.has(email)) {
-          seenEmails.add(email);
-          const domain = email.split('@')[1]?.toLowerCase() || null;
-          invitees.push({ name: entry.speaker.display_name, email, domain });
-        }
-      }
-    }
-  } catch (err) {
-    log.error({ err, recordingId }, 'Failed to fetch transcript — saving meeting without it');
-  }
-
-  // Also extract invitees from action items
-  if (meeting.action_items) {
-    for (const item of meeting.action_items) {
-      if (item.assignee?.email && !seenEmails.has(item.assignee.email)) {
-        seenEmails.add(item.assignee.email);
-        const domain = item.assignee.email.split('@')[1]?.toLowerCase() || null;
-        invitees.push({ name: item.assignee.name, email: item.assignee.email, domain });
-      }
-    }
-  }
-
-  // Calculate duration
   let durationSeconds: number | null = null;
   if (meeting.recording_start_time && meeting.recording_end_time) {
-    const start = new Date(meeting.recording_start_time).getTime();
-    const end = new Date(meeting.recording_end_time).getTime();
-    durationSeconds = Math.round((end - start) / 1000);
-    if (durationSeconds < 0 || durationSeconds > 18000) durationSeconds = null;
+    const d = Math.round(
+      (new Date(meeting.recording_end_time).getTime() -
+        new Date(meeting.recording_start_time).getTime()) /
+        1000,
+    );
+    if (d >= 0 && d <= 18_000) durationSeconds = d;
   }
 
-  const id = String(recordingId);
-  const now = new Date().toISOString();
-  const summary = meeting.default_summary?.markdown_formatted || null;
-  const actionItems = meeting.action_items ? JSON.stringify(meeting.action_items) : null;
-  const inviteesJson = invitees.length > 0 ? JSON.stringify(invitees) : null;
-
-  // Upsert into Turso
   await db.execute({
     sql: `INSERT INTO meetings (id, title, date, duration_seconds, url, summary, transcript,
             raw_action_items, synced_at, calendar_invitees, invitee_domains_type)
@@ -222,7 +217,7 @@ async function processRecording(
       durationSeconds,
       meeting.url || null,
       summary,
-      transcriptText || null,
+      transcriptText,
       actionItems,
       now,
       inviteesJson,
@@ -230,13 +225,13 @@ async function processRecording(
     ],
   });
 
-  // Rebuild FTS for this meeting
-  await db.execute({ sql: 'DELETE FROM meetings_fts WHERE rowid = (SELECT rowid FROM meetings WHERE id = ?)', args: [id] });
+  await db.execute({
+    sql: 'DELETE FROM meetings_fts WHERE rowid = (SELECT rowid FROM meetings WHERE id = ?)',
+    args: [id],
+  });
   await db.execute({
     sql: `INSERT INTO meetings_fts (rowid, title, summary, transcript)
           SELECT rowid, title, summary, transcript FROM meetings WHERE id = ?`,
     args: [id],
   });
-
-  log.info({ recordingId, title: meeting.title || meeting.meeting_title }, 'Meeting synced from Fathom webhook');
 }
