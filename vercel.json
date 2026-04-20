@@ -55,11 +55,15 @@
     },
     {
       "path": "/api/cron/health-score",
-      "schedule": "0 1 1 * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/cron/traffic-light",
-      "schedule": "0 2 1 * *"
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/traffic-light-digest",
+      "schedule": "0 8 * * 1"
     },
     {
       "path": "/api/cron/sync-xero",

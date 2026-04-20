@@ -6,6 +6,7 @@ import { runAllMonitors } from '../../lib/monitors/run-all.js';
 import { syncActionsToAsana } from '../../lib/jobs/sync-actions-to-asana.js';
 import { runClientHealthScoring } from '../../lib/jobs/client-health.js';
 import { runTrafficLightAlerts } from '../../lib/jobs/traffic-light.js';
+import { runOrangeDigest } from '../../lib/jobs/orange-digest.js';
 import { syncXero } from '../../lib/jobs/sync-xero.js';
 import { syncGoogleAds } from '../../lib/jobs/sync-google-ads.js';
 import { syncMetaAds } from '../../lib/jobs/sync-meta-ads.js';
@@ -124,7 +125,8 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
   });
 
   /**
-   * GET /traffic-light — Run traffic light alerts (Vercel Cron — 1st of month, after scoring)
+   * GET /traffic-light — Run traffic light alerts (Vercel Cron — nightly,
+   * post-scoring). Catches Red/Orange absolute + trajectory triggers.
    */
   app.get('/traffic-light', async (_request, reply) => {
     try {
@@ -134,6 +136,21 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/traffic-light] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Traffic light alerts failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /traffic-light-digest — Weekly Monday digest of Orange clients
+   * grouped by AM. Cron: '0 8 * * 1'. Skips already-acknowledged alerts.
+   */
+  app.get('/traffic-light-digest', async (_request, reply) => {
+    try {
+      const result = await runOrangeDigest();
+      return reply.send({ ok: true, message: 'Orange digest completed', ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/traffic-light-digest] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Orange digest failed', error: msg });
     }
   });
 
