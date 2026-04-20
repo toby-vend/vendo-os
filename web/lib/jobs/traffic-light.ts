@@ -86,40 +86,12 @@ export async function ensureAlertTable(): Promise<void> {
   );
 }
 
-async function alreadyAlerted(clientName: string, period: string, trigger: string): Promise<boolean> {
-  const r = await db.execute({
-    sql: 'SELECT 1 FROM traffic_light_alerts WHERE client_name = ? AND period = ? AND trigger = ? LIMIT 1',
-    args: [clientName, period, trigger],
-  });
-  return r.rows.length > 0;
-}
-
-/**
- * Suppress a would-be alert if an identical trigger was acknowledged in a
- * previous period AND the current score hasn't dropped further. Drops
- * always re-fire regardless.
- */
-async function shouldSuppressAckedAlert(
-  clientName: string,
-  triggerPrefix: string,
-  currentScore: number,
-): Promise<boolean> {
-  try {
-    // Match any trigger starting with the prefix — 'tier-drop' catches
-    // 'tier-drop-amber-to-orange', 'precipitous-drop' catches variants with
-    // the size in the string.
-    const r = await db.execute({
-      sql: `SELECT score FROM traffic_light_alerts
-            WHERE client_name = ? AND trigger LIKE ? AND acknowledged_at IS NOT NULL
-            ORDER BY created_at DESC LIMIT 1`,
-      args: [clientName, `${triggerPrefix}%`],
-    });
-    if (!r.rows.length) return false;
-    const lastAckedScore = r.rows[0].score as number;
-    return currentScore >= lastAckedScore;
-  } catch {
-    return false;
-  }
+// alreadyAlerted + shouldSuppressAckedAlert have been replaced by in-memory
+// caches built from fetchAlertedKeys() and fetchAcknowledgedScores() — see
+// runTrafficLightAlerts. Keeping them as async one-offs wasted a round-trip
+// per client per trigger (~1000 queries on a 159-client run).
+function _removed_oldDedupeHelpers(): void {
+  void 0;
 }
 
 async function sendSltAlert(message: string): Promise<void> {
@@ -318,67 +290,89 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
   let tierDropCount = 0;
   let precipitousDropCount = 0;
 
-  // Preload prev-period scores in one query so we can detect drops without
-  // per-client round-trips.
-  const prevMap = await fetchPreviousScores(period);
+  // Preload everything we need to decide dedupe/suppression for every
+  // client in bulk. Avoids N round-trips per trigger.
+  const [prevMap, alertedSet, ackedByTriggerPrefix] = await Promise.all([
+    fetchPreviousScores(period),
+    fetchAlertedKeys(period),
+    fetchAcknowledgedScores(),
+  ]);
+
+  const alreadyAlertedCached = (clientName: string, trigger: string): boolean =>
+    alertedSet.has(`${clientName}:${period}:${trigger}`);
+  const shouldSuppressAckedCached = (clientName: string, triggerPrefix: string, currentScore: number): boolean => {
+    const last = ackedByTriggerPrefix.get(`${clientName}:${triggerPrefix}`);
+    if (last == null) return false;
+    return currentScore >= last;
+  };
+
+  // First pass: decide which clients will actually fire alerts (pure CPU,
+  // no queries). Then only look up AMs + fire alerts for that subset.
+  interface ToFire {
+    row: HealthRow;
+    tier: HealthTier;
+    trigger: string;
+    prevScore: number | null;
+  }
+  const toFire: ToFire[] = [];
 
   for (const row of rows as unknown as HealthRow[]) {
     const tier = scoreToTier(row.score);
     if (tier === 'healthy') { healthyCount++; }
     else if (tier === 'amber') { amberCount++; }
 
-    // New clients (<90 days since first contact) are scored and shown in
-    // the dashboard but don't trigger alerts — not enough data to judge.
     if (row.grace_period) { skippedCount++; continue; }
 
-    // AM for the Asana assignee — prefer Deliverables module then Asana lookup.
-    const amName = await getClientAM(row.client_name);
-    const amGid = amName ? await resolveAssignee(amName) : undefined;
-    void amGid; // Asana client accepts name as assigneeEmail fallback
-
     const prev = prevMap.get(row.client_name) ?? null;
-    const rowWithPrev = { ...row, prev_score: prev };
 
-    // --- Trigger 1: absolute tier (Orange + Red) ---
     if (
       tierAlerts(tier)
-      && !(await alreadyAlerted(row.client_name, row.period, 'absolute'))
-      && !(await shouldSuppressAckedAlert(row.client_name, 'absolute', row.score))
+      && !alreadyAlertedCached(row.client_name, 'absolute')
+      && !shouldSuppressAckedCached(row.client_name, 'absolute', row.score)
     ) {
-      await fireAlert({ row: rowWithPrev, tier, trigger: 'absolute', accountManager: amName });
-      if (tier === 'red') redCount++; else orangeCount++;
+      toFire.push({ row, tier, trigger: 'absolute', prevScore: prev });
     }
 
-    // --- Trigger 2: tier-drop (crossed a boundary downward) ---
     if (prev != null) {
       const prevTier = scoreToTier(prev);
       if (
         tierDropped(prevTier, tier)
-        && !(await alreadyAlerted(row.client_name, row.period, 'tier-drop'))
-        && !(await shouldSuppressAckedAlert(row.client_name, 'tier-drop', row.score))
+        && !alreadyAlertedCached(row.client_name, `tier-drop-${prevTier}-to-${tier}`)
+        && !shouldSuppressAckedCached(row.client_name, 'tier-drop', row.score)
       ) {
-        await fireAlert({ row: rowWithPrev, tier, trigger: `tier-drop-${prevTier}-to-${tier}`, accountManager: amName });
-        tierDropCount++;
+        toFire.push({ row, tier, trigger: `tier-drop-${prevTier}-to-${tier}`, prevScore: prev });
       }
 
-      // --- Trigger 3: precipitous drop (≥15pt drop, any tier) ---
       const drop = prev - row.score;
       if (
         drop >= PRECIPITOUS_DROP_POINTS
-        && !(await alreadyAlerted(row.client_name, row.period, 'precipitous-drop'))
-        && !(await shouldSuppressAckedAlert(row.client_name, 'precipitous-drop', row.score))
+        && !alreadyAlertedCached(row.client_name, `precipitous-drop-${drop}pts`)
+        && !shouldSuppressAckedCached(row.client_name, 'precipitous-drop', row.score)
       ) {
-        await fireAlert({
-          row: rowWithPrev,
-          tier,
-          trigger: `precipitous-drop-${drop}pts`,
-          accountManager: amName,
-        });
-        precipitousDropCount++;
+        toFire.push({ row, tier, trigger: `precipitous-drop-${drop}pts`, prevScore: prev });
       }
     }
 
     if (!tierAlerts(tier) && prev == null) { skippedCount++; }
+  }
+
+  // Second pass: fire alerts. Parallelise because the per-alert cost is
+  // dominated by Asana + Slack HTTP calls rather than Turso.
+  const FIRE_CONCURRENCY = 6;
+  for (let i = 0; i < toFire.length; i += FIRE_CONCURRENCY) {
+    const chunk = toFire.slice(i, i + FIRE_CONCURRENCY);
+    await Promise.all(chunk.map(async ({ row, tier, trigger, prevScore }) => {
+      const amName = await getClientAM(row.client_name);
+      const rowWithPrev = { ...row, prev_score: prevScore };
+      await fireAlert({ row: rowWithPrev, tier, trigger, accountManager: amName });
+      if (trigger === 'absolute') {
+        if (tier === 'red') redCount++; else orangeCount++;
+      } else if (trigger.startsWith('tier-drop')) {
+        tierDropCount++;
+      } else if (trigger.startsWith('precipitous-drop')) {
+        precipitousDropCount++;
+      }
+    }));
   }
 
   const durationMs = Date.now() - start;
@@ -417,5 +411,53 @@ async function fetchPreviousScores(currentPeriod: string): Promise<Map<string, n
       map.set(row.client_name as string, row.score as number);
     }
   } catch { /* no prior data */ }
+  return map;
+}
+
+/**
+ * Load every "already fired" alert key for this period in one query.
+ * Key shape: `${client_name}:${period}:${trigger}` — matches the
+ * per-trigger identity so dedupe is O(1) in-memory.
+ */
+async function fetchAlertedKeys(period: string): Promise<Set<string>> {
+  const set = new Set<string>();
+  try {
+    const r = await db.execute({
+      sql: 'SELECT client_name, period, trigger FROM traffic_light_alerts WHERE period = ?',
+      args: [period],
+    });
+    for (const row of r.rows) {
+      set.add(`${row.client_name}:${row.period}:${row.trigger}`);
+    }
+  } catch { /* table missing */ }
+  return set;
+}
+
+/**
+ * Load the latest acknowledged score per (client, trigger-prefix) so the
+ * suppression check is O(1). The key is `${client_name}:${prefix}`, value
+ * is the score at the time of the acknowledged alert.
+ */
+async function fetchAcknowledgedScores(): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  try {
+    const r = await db.execute(
+      `SELECT client_name, trigger, score
+       FROM traffic_light_alerts
+       WHERE acknowledged_at IS NOT NULL
+       ORDER BY created_at DESC`,
+    );
+    for (const row of r.rows) {
+      const trigger = row.trigger as string;
+      // Match the prefixes we dedupe against in the main loop.
+      const prefixes = ['absolute', 'tier-drop', 'precipitous-drop'];
+      for (const prefix of prefixes) {
+        if (trigger === prefix || trigger.startsWith(prefix + '-')) {
+          const key = `${row.client_name}:${prefix}`;
+          if (!map.has(key)) map.set(key, row.score as number);
+        }
+      }
+    }
+  } catch { /* table missing */ }
   return map;
 }
