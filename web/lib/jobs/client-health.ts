@@ -447,27 +447,36 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
     return { period, total: 0, healthy: 0, amber: 0, orange: 0, red: 0, gracePeriod: 0, overdueInvoices: [], durationMs: Date.now() - start };
   }
 
+  // Parallelise per-client scoring. Each client does ~24 sequential DB
+  // round-trips; running them all sequentially for 159 clients took 213s.
+  // Turso handles a dozen or so concurrent queries comfortably, so we
+  // process clients in chunks of CONCURRENCY to hit the sweet spot of
+  // throughput-vs-contention.
+  const CONCURRENCY = 12;
   const overdueInvoices: string[] = [];
-  let healthy = 0, amber = 0, orange = 0, red = 0, graceCount = 0;
+  const tierCounters = { healthy: 0, amber: 0, orange: 0, red: 0, grace: 0 };
 
-  for (const client of clientRows) {
+  async function scoreOne(client: Record<string, unknown>): Promise<void> {
     const clientId = client.id as number;
     const name = client.name as string;
     const xeroId = (client.xero_contact_id as string) || null;
     const mrr = (client.mrr as number) || 0;
 
-    // Performance
-    const hasAds = await hasAdAccounts(clientId);
-    const hasSeo = !hasAds && (await hasSeoAccounts(clientId));
+    // Parallelise the independent reads for this client.
+    const [hasAds, hasSeoRaw, relationship, financial, criticalConcernPenalty, gracePeriod, priors] = await Promise.all([
+      hasAdAccounts(clientId),
+      hasSeoAccounts(clientId),
+      scoreRelationship(name, now, ninetyDaysAgo),
+      scoreFinancial(xeroId, name, ninetyDaysAgo),
+      getCriticalConcernPenalty(name),
+      isGracePeriod(clientId),
+      getPriorBreakdowns(name, period),
+    ]);
+    const hasSeo = !hasAds && hasSeoRaw;
     const perfApplicable = hasAds || hasSeo;
     let perf = { adSpend: 0, ctr: 0, spendConsistency: 0 };
     if (hasAds) perf = await scoreAdsPerformance(clientId, thirtyDaysAgo, ninetyDaysAgo);
     else if (hasSeo) perf = await scoreSeoPerformance(clientId, thirtyDaysAgo);
-
-    const relationship = await scoreRelationship(name, now, ninetyDaysAgo);
-    const financial = await scoreFinancial(xeroId, name, ninetyDaysAgo);
-    const criticalConcernPenalty = await getCriticalConcernPenalty(name);
-    const gracePeriod = await isGracePeriod(clientId);
 
     const rawBreakdown: HealthBreakdownV2 = {
       ...perf,
@@ -478,13 +487,9 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
       graceperiod: gracePeriod,
       topDrivers: [],
     };
-
-    // 3-month rolling smoothing on the numeric sub-scores (not flags).
-    const priors = await getPriorBreakdowns(name, period);
     const smoothed = rollingAverage(rawBreakdown, priors);
 
-    // Top-driver diagnostic for the alert. Compare each dimension to its max.
-    const driverChecks: Array<{ name: string; value: number; max: number }> = [
+    const driverChecks = [
       { name: 'adSpend', value: smoothed.adSpend, max: 20 },
       { name: 'meetingCadence', value: smoothed.meetingCadence, max: 10 },
       { name: 'meetingSentiment', value: smoothed.meetingSentiment, max: 10 },
@@ -492,14 +497,12 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
       { name: 'overdueSeverity', value: smoothed.overdueSeverity, max: 15 },
       { name: 'overdueAge', value: smoothed.overdueAge, max: 15 },
     ];
-    const drivers = driverChecks
+    smoothed.topDrivers = driverChecks
       .sort((a, b) => (a.value / a.max) - (b.value / b.max))
       .slice(0, 2)
       .filter((d) => d.value < d.max)
       .map((d) => `${d.name}: ${d.value}/${d.max}`);
-    smoothed.topDrivers = drivers;
 
-    // Totals
     const performanceScore = smoothed.adSpend + smoothed.ctr + smoothed.spendConsistency;
     const relationshipScore = smoothed.meetingCadence + smoothed.meetingSentiment + smoothed.actionsResolved;
     const financialScore = smoothed.overdueSeverity + smoothed.overdueAge;
@@ -507,9 +510,6 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
       ? performanceScore + relationshipScore + financialScore
       : Math.round(((relationshipScore + financialScore) / 60) * 100);
     totalScore = Math.max(0, totalScore - criticalConcernPenalty);
-
-    // MRR-weighted priority for dashboard triage ordering.
-    // priority = (100 - score) × log10(mrr + 1). Higher = more urgent.
     const priority = (100 - totalScore) * Math.log10(mrr + 1);
 
     await db.execute({
@@ -534,18 +534,23 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
       ],
     });
 
-    // Overdue list for summary
     if (smoothed.overdueSeverity < 15 || smoothed.overdueAge < 15) {
       overdueInvoices.push(`${name}: severity ${smoothed.overdueSeverity}/15, age ${smoothed.overdueAge}/15`);
     }
-
-    // Tier counters (use shared tiers.ts)
-    if (gracePeriod) graceCount++;
-    if (totalScore >= 70) healthy++;
-    else if (totalScore >= 55) amber++;
-    else if (totalScore >= 40) orange++;
-    else red++;
+    if (gracePeriod) tierCounters.grace++;
+    if (totalScore >= 70) tierCounters.healthy++;
+    else if (totalScore >= 55) tierCounters.amber++;
+    else if (totalScore >= 40) tierCounters.orange++;
+    else tierCounters.red++;
   }
+
+  for (let i = 0; i < clientRows.length; i += CONCURRENCY) {
+    const chunk = clientRows.slice(i, i + CONCURRENCY);
+    await Promise.all(chunk.map((c) => scoreOne(c).catch((err) => {
+      consoleLog('health', `scoreOne failed for ${c.name}: ${err instanceof Error ? err.message : err}`);
+    })));
+  }
+  const { healthy, amber, orange, red, grace: graceCount } = tierCounters;
 
   const durationMs = Date.now() - start;
   consoleLog('health', `Period ${period}: ${healthy} healthy, ${amber} amber, ${orange} orange, ${red} red (${graceCount} in grace) in ${durationMs}ms`);
