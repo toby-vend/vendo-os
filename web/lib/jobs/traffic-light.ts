@@ -69,12 +69,17 @@ async function ensureAlertTable(): Promise<void> {
       created_at TEXT NOT NULL
     )
   `);
-  // Add trigger column if coming from an older schema.
-  try {
-    await db.execute(`ALTER TABLE traffic_light_alerts ADD COLUMN trigger TEXT NOT NULL DEFAULT 'absolute'`);
-  } catch { /* already added */ }
-  // New dedupe key replaces the old UNIQUE(client_name, period). Using a
-  // unique index so we can migrate without dropping the old table.
+  // Schema migrations — each wrapped in try/catch since ALTER TABLE ADD
+  // COLUMN isn't idempotent on Turso/libSQL.
+  for (const sql of [
+    `ALTER TABLE traffic_light_alerts ADD COLUMN trigger TEXT NOT NULL DEFAULT 'absolute'`,
+    `ALTER TABLE traffic_light_alerts ADD COLUMN acknowledged_at TEXT`,
+    `ALTER TABLE traffic_light_alerts ADD COLUMN acknowledged_by TEXT`,
+    `ALTER TABLE traffic_light_alerts ADD COLUMN resolution_type TEXT`,
+    `ALTER TABLE traffic_light_alerts ADD COLUMN resolution_notes TEXT`,
+  ]) {
+    try { await db.execute(sql); } catch { /* already added */ }
+  }
   await db.execute(
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_tla_client_period_trigger
      ON traffic_light_alerts(client_name, period, trigger)`,
@@ -87,6 +92,34 @@ async function alreadyAlerted(clientName: string, period: string, trigger: strin
     args: [clientName, period, trigger],
   });
   return r.rows.length > 0;
+}
+
+/**
+ * Suppress a would-be alert if an identical trigger was acknowledged in a
+ * previous period AND the current score hasn't dropped further. Drops
+ * always re-fire regardless.
+ */
+async function shouldSuppressAckedAlert(
+  clientName: string,
+  triggerPrefix: string,
+  currentScore: number,
+): Promise<boolean> {
+  try {
+    // Match any trigger starting with the prefix — 'tier-drop' catches
+    // 'tier-drop-amber-to-orange', 'precipitous-drop' catches variants with
+    // the size in the string.
+    const r = await db.execute({
+      sql: `SELECT score FROM traffic_light_alerts
+            WHERE client_name = ? AND trigger LIKE ? AND acknowledged_at IS NOT NULL
+            ORDER BY created_at DESC LIMIT 1`,
+      args: [clientName, `${triggerPrefix}%`],
+    });
+    if (!r.rows.length) return false;
+    const lastAckedScore = r.rows[0].score as number;
+    return currentScore >= lastAckedScore;
+  } catch {
+    return false;
+  }
 }
 
 async function sendSltAlert(message: string): Promise<void> {
@@ -307,7 +340,11 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
     const rowWithPrev = { ...row, prev_score: prev };
 
     // --- Trigger 1: absolute tier (Orange + Red) ---
-    if (tierAlerts(tier) && !(await alreadyAlerted(row.client_name, row.period, 'absolute'))) {
+    if (
+      tierAlerts(tier)
+      && !(await alreadyAlerted(row.client_name, row.period, 'absolute'))
+      && !(await shouldSuppressAckedAlert(row.client_name, 'absolute', row.score))
+    ) {
       await fireAlert({ row: rowWithPrev, tier, trigger: 'absolute', accountManager: amName });
       if (tier === 'red') redCount++; else orangeCount++;
     }
@@ -315,14 +352,22 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
     // --- Trigger 2: tier-drop (crossed a boundary downward) ---
     if (prev != null) {
       const prevTier = scoreToTier(prev);
-      if (tierDropped(prevTier, tier) && !(await alreadyAlerted(row.client_name, row.period, 'tier-drop'))) {
+      if (
+        tierDropped(prevTier, tier)
+        && !(await alreadyAlerted(row.client_name, row.period, 'tier-drop'))
+        && !(await shouldSuppressAckedAlert(row.client_name, 'tier-drop', row.score))
+      ) {
         await fireAlert({ row: rowWithPrev, tier, trigger: `tier-drop-${prevTier}-to-${tier}`, accountManager: amName });
         tierDropCount++;
       }
 
       // --- Trigger 3: precipitous drop (≥15pt drop, any tier) ---
       const drop = prev - row.score;
-      if (drop >= PRECIPITOUS_DROP_POINTS && !(await alreadyAlerted(row.client_name, row.period, 'precipitous-drop'))) {
+      if (
+        drop >= PRECIPITOUS_DROP_POINTS
+        && !(await alreadyAlerted(row.client_name, row.period, 'precipitous-drop'))
+        && !(await shouldSuppressAckedAlert(row.client_name, 'precipitous-drop', row.score))
+      ) {
         await fireAlert({
           row: rowWithPrev,
           tier,
