@@ -457,7 +457,7 @@ async function syncClientsFromXero(): Promise<number> {
 
     upserts.push({
       sql: `INSERT INTO clients (name, display_name, xero_contact_id, email, source, status, total_invoiced, outstanding, first_invoice_date, last_invoice_date)
-            VALUES (?, ?, ?, ?, 'xero', 'pending', ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, 'xero', 'active', ?, ?, ?, ?)
             ON CONFLICT(name) DO UPDATE SET
               display_name = COALESCE(clients.display_name, excluded.display_name),
               xero_contact_id = excluded.xero_contact_id,
