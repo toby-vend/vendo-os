@@ -162,8 +162,44 @@ async function recordSync(
   });
 }
 
+/**
+ * Look up the AM for a client, preferring the Deliverables module's
+ * client_service_configs (where AMs are managed day-to-day) over the
+ * legacy clients.am column. Resolves initials → full name using
+ * deliverable_team_members so the returned value is ready for Asana user
+ * matching. Handles multi-person AM fields like "MP / SF" by picking the
+ * first entry.
+ */
 async function getClientAM(clientName: string | null): Promise<string | null> {
   if (!clientName) return null;
+
+  // 1. Deliverables module — authoritative per-client AM
+  try {
+    const r = await db.execute({
+      sql: `SELECT am FROM client_service_configs
+            WHERE client_name = ? AND status = 'active' AND am IS NOT NULL AND am != ''
+            ORDER BY id DESC LIMIT 1`,
+      args: [clientName],
+    });
+    const rawAm = r.rows[0]?.am as string | undefined;
+    if (rawAm) {
+      const initials = rawAm.split(/[\/,]/)[0].trim().toUpperCase();
+      if (initials) {
+        const m = await db.execute({
+          sql: 'SELECT name FROM deliverable_team_members WHERE UPPER(initials) = ? AND is_active = 1 LIMIT 1',
+          args: [initials],
+        });
+        const name = m.rows[0]?.name as string | undefined;
+        if (name) return name;
+      }
+      // Fallback: if it's already a full name, return as-is
+      if (/[a-z]/.test(rawAm)) return rawAm;
+    }
+  } catch {
+    /* table may not exist — continue to legacy fallback */
+  }
+
+  // 2. Legacy fallback — clients.am column
   try {
     const r = await db.execute({
       sql: `SELECT am FROM clients
@@ -225,6 +261,53 @@ interface SyncCount {
   skipped: number;
 }
 
+/**
+ * Create Asana tasks for a single meeting's action items. Called in
+ * real-time from the Fathom webhook so tasks appear as soon as the
+ * meeting finishes processing. Idempotent — re-sending the same webhook
+ * won't duplicate tasks thanks to the fathom_asana_synced dedupe table.
+ *
+ * Returns counts so the webhook can log, but never throws — task creation
+ * failures should not fail the webhook.
+ */
+export async function createTasksForMeeting(input: {
+  meetingId: string;
+  title: string;
+  rawActionItems: string | null;
+  clientName: string | null;
+}): Promise<SyncCount> {
+  if (!ASANA_API_KEY || !input.rawActionItems) return { created: 0, skipped: 0 };
+  await ensureSyncTable();
+  if (!userMap.size) await loadAsanaUsers();
+
+  const items = parseActionItems(input.rawActionItems);
+  if (!items.length) return { created: 0, skipped: 0 };
+
+  const projectGid = await getAsanaProjectForClient(input.clientName);
+  let created = 0;
+  let skipped = 0;
+
+  for (const item of items) {
+    if (!item.description || item.description.length < 5) continue;
+    const sourceId = `meeting-${input.meetingId}-${item.description.slice(0, 50)}`;
+    if (await alreadySynced('meeting', sourceId)) { skipped++; continue; }
+    const legacy = await db.execute({
+      sql: 'SELECT 1 FROM fathom_asana_synced WHERE meeting_id = ? AND action_description = ? LIMIT 1',
+      args: [input.meetingId, item.description],
+    });
+    if (legacy.rows.length) { skipped++; continue; }
+
+    try {
+      const taskGid = await createAsanaTaskFromAction(`Meeting: ${input.title}`, item, input.clientName, projectGid);
+      await recordSync(input.meetingId, item.description, taskGid, item.assignee || null, 'meeting', sourceId);
+      created++;
+    } catch (err) {
+      consoleLog(LOG_SOURCE, `Meeting task failed: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+  return { created, skipped };
+}
+
 async function syncMeetingActions(): Promise<SyncCount> {
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   let created = 0;
@@ -239,29 +322,14 @@ async function syncMeetingActions(): Promise<SyncCount> {
   if (!rows.length) return { created, skipped };
 
   for (const row of rows) {
-    const meetingId = row.id as string;
-    const title = row.title as string;
-    const rawItems = row.raw_action_items as string;
-    const clientName = (row.client_name as string) || null;
-    const items = parseActionItems(rawItems);
-    const projectGid = await getAsanaProjectForClient(clientName);
-    for (const item of items) {
-      if (!item.description || item.description.length < 5) continue;
-      const sourceId = `meeting-${meetingId}-${item.description.slice(0, 50)}`;
-      if (await alreadySynced('meeting', sourceId)) { skipped++; continue; }
-      const legacy = await db.execute({
-        sql: 'SELECT 1 FROM fathom_asana_synced WHERE meeting_id = ? AND action_description = ? LIMIT 1',
-        args: [meetingId, item.description],
-      });
-      if (legacy.rows.length) { skipped++; continue; }
-      try {
-        const taskGid = await createAsanaTaskFromAction(`Meeting: ${title}`, item, clientName, projectGid);
-        await recordSync(meetingId, item.description, taskGid, item.assignee || null, 'meeting', sourceId);
-        created++;
-      } catch (err) {
-        consoleLog(LOG_SOURCE, `Meeting task failed: ${err instanceof Error ? err.message : err}`);
-      }
-    }
+    const result = await createTasksForMeeting({
+      meetingId: row.id as string,
+      title: row.title as string,
+      rawActionItems: row.raw_action_items as string,
+      clientName: (row.client_name as string) || null,
+    });
+    created += result.created;
+    skipped += result.skipped;
   }
   return { created, skipped };
 }

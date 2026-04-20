@@ -3,6 +3,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import { db } from '../lib/queries/base.js';
 import { analyseAndAlert } from '../lib/concern-detection.js';
 import { enrichMeeting } from '../lib/meeting-enrichment.js';
+import { createTasksForMeeting } from '../lib/jobs/sync-actions-to-asana.js';
 
 /**
  * Fathom Webhook Handler
@@ -234,6 +235,26 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
       request.log.info({ recordingId: meeting.recording_id, outcome }, 'Concern detection complete');
     } catch (err) {
       request.log.error({ err, recordingId: meeting.recording_id }, 'Concern detection threw');
+    }
+
+    // Create Asana tasks for any action items attached to this meeting.
+    // Runs in real-time so tasks appear within seconds of the meeting ending.
+    // The daily /api/cron/sync-actions-to-asana route remains as a backfill.
+    if (actionItemsJson) {
+      try {
+        const result = await createTasksForMeeting({
+          meetingId: String(meeting.recording_id),
+          title: meeting.title || meeting.meeting_title || 'Untitled',
+          rawActionItems: actionItemsJson,
+          clientName: enrichedClientName,
+        });
+        request.log.info(
+          { recordingId: meeting.recording_id, asanaResult: result },
+          'Asana tasks created from meeting action items',
+        );
+      } catch (err) {
+        request.log.error({ err, recordingId: meeting.recording_id }, 'Asana task creation threw');
+      }
     }
 
     return reply.code(200).send({ ok: true });
