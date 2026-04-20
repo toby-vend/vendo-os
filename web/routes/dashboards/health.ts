@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { rows } from '../../lib/queries/base.js';
 import { tierCaseSql, type HealthTier } from '../../lib/health/tiers.js';
+import { ensureAlertTable } from '../../lib/jobs/traffic-light.js';
 
 interface HealthRow {
   client_name: string;
@@ -34,6 +35,13 @@ export const healthRoutes: FastifyPluginAsync = async (app) => {
       const filter: FilterSlug = request.query.filter || 'all';
       const tierFilter = request.query.tier || 'all';
 
+      // Make sure the alerts table is there before we try to LEFT JOIN it
+      // — new environments won't have it until the cron fires for the first
+      // time, and the dashboard shouldn't 500 in that state.
+      await ensureAlertTable();
+
+      // One query, four CTEs — avoids the N+1 correlated-subquery pattern
+      // that made the dashboard render slow (and 500 on missing tables).
       const clients = await rows<HealthRow>(`
         WITH latest AS (
           SELECT MAX(period) AS p FROM client_health
@@ -41,6 +49,34 @@ export const healthRoutes: FastifyPluginAsync = async (app) => {
         prev AS (
           SELECT MAX(period) AS p FROM client_health
           WHERE period < (SELECT p FROM latest)
+        ),
+        last_meeting AS (
+          SELECT client_name, MAX(date) AS d FROM meetings GROUP BY client_name
+        ),
+        overdue AS (
+          SELECT
+            COALESCE(c.xero_contact_id, c.name) AS key_xero,
+            c.name AS key_name,
+            c.id AS client_id,
+            COUNT(*) AS n
+          FROM xero_invoices xi
+          JOIN clients c
+            ON (xi.contact_id = c.xero_contact_id AND c.xero_contact_id IS NOT NULL)
+            OR (xi.contact_name = c.name AND c.xero_contact_id IS NULL)
+          WHERE xi.status = 'AUTHORISED' AND xi.due_date < date('now') AND xi.amount_due > 0
+          GROUP BY c.id
+        ),
+        mapped AS (
+          SELECT client_id FROM client_source_mappings
+          WHERE source IN ('meta','gads','ga4','gsc')
+          GROUP BY client_id
+        ),
+        latest_alert AS (
+          SELECT tla.*
+          FROM traffic_light_alerts tla
+          JOIN (
+            SELECT client_name, MAX(id) AS id FROM traffic_light_alerts GROUP BY client_name
+          ) m ON m.id = tla.id
         )
         SELECT
           c.name AS client_name,
@@ -55,27 +91,26 @@ export const healthRoutes: FastifyPluginAsync = async (app) => {
           ${tierCaseSql('ch.score')} AS tier,
           prev.score AS prev_score,
           c.am,
-          (SELECT COUNT(*) FROM xero_invoices xi
-            WHERE (xi.contact_id = c.xero_contact_id OR xi.contact_name = c.name)
-              AND xi.status = 'AUTHORISED' AND xi.due_date < date('now') AND xi.amount_due > 0) AS overdue_invoices,
-          (SELECT MAX(date) FROM meetings WHERE client_name = c.name) AS last_meeting_date,
-          CASE WHEN (SELECT MAX(date) FROM meetings WHERE client_name = c.name) IS NOT NULL
-               THEN CAST(julianday('now') - julianday((SELECT MAX(date) FROM meetings WHERE client_name = c.name)) AS INTEGER)
+          COALESCE(overdue.n, 0) AS overdue_invoices,
+          last_meeting.d AS last_meeting_date,
+          CASE WHEN last_meeting.d IS NOT NULL
+               THEN CAST(julianday('now') - julianday(last_meeting.d) AS INTEGER)
                ELSE NULL
           END AS days_since_meeting,
-          CASE WHEN EXISTS (
-            SELECT 1 FROM client_source_mappings csm
-            WHERE csm.client_id = c.id AND csm.source IN ('meta','gads','ga4','gsc')
-          ) THEN 1 ELSE 0 END AS has_mapping,
-          (SELECT id FROM traffic_light_alerts WHERE client_name = c.name ORDER BY id DESC LIMIT 1) AS latest_alert_id,
-          (SELECT trigger FROM traffic_light_alerts WHERE client_name = c.name ORDER BY id DESC LIMIT 1) AS latest_alert_trigger,
-          (SELECT acknowledged_at FROM traffic_light_alerts WHERE client_name = c.name ORDER BY id DESC LIMIT 1) AS latest_alert_acknowledged_at,
-          (SELECT asana_task_gid FROM traffic_light_alerts WHERE client_name = c.name ORDER BY id DESC LIMIT 1) AS asana_task_gid
+          CASE WHEN mapped.client_id IS NOT NULL THEN 1 ELSE 0 END AS has_mapping,
+          latest_alert.id AS latest_alert_id,
+          latest_alert.trigger AS latest_alert_trigger,
+          latest_alert.acknowledged_at AS latest_alert_acknowledged_at,
+          latest_alert.asana_task_gid AS asana_task_gid
         FROM clients c
         LEFT JOIN client_health ch
           ON ch.client_name = c.name AND ch.period = (SELECT p FROM latest)
         LEFT JOIN client_health prev
           ON prev.client_name = c.name AND prev.period = (SELECT p FROM prev)
+        LEFT JOIN last_meeting ON last_meeting.client_name = c.name
+        LEFT JOIN overdue ON overdue.client_id = c.id
+        LEFT JOIN mapped ON mapped.client_id = c.id
+        LEFT JOIN latest_alert ON latest_alert.client_name = c.name
         WHERE c.status = 'active'
         ORDER BY COALESCE(ch.priority, 0) DESC, ch.score ASC
       `);

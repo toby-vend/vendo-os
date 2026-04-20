@@ -56,7 +56,7 @@ function buildSummary(row: HealthRow): string {
   return issues.length ? issues.join('; ') : 'Low scores across multiple dimensions';
 }
 
-async function ensureAlertTable(): Promise<void> {
+export async function ensureAlertTable(): Promise<void> {
   await db.execute(`
     CREATE TABLE IF NOT EXISTS traffic_light_alerts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
