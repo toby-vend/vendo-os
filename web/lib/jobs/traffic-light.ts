@@ -8,8 +8,11 @@ import {
   tierLabel,
   tierAlerts,
   tierEscalatesToSlt,
+  tierDropped,
   type HealthTier,
 } from '../health/tiers.js';
+
+const PRECIPITOUS_DROP_POINTS = 15;
 
 /**
  * Turso-native client health traffic-light. Reads the latest client_health
@@ -160,6 +163,8 @@ export interface TrafficLightResult {
   amber: number; // dashboard-only count, included for visibility
   healthy: number;
   skipped: number;
+  tierDrop: number;
+  precipitousDrop: number;
   durationMs: number;
 }
 
@@ -171,7 +176,7 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
   const period = periodR.rows[0]?.p as string | null;
   if (!period) {
     consoleLog(LOG_SOURCE, 'No client_health data — run health-score first');
-    return { period: null, red: 0, orange: 0, amber: 0, healthy: 0, skipped: 0, durationMs: Date.now() - start };
+    return { period: null, red: 0, orange: 0, amber: 0, healthy: 0, skipped: 0, tierDrop: 0, precipitousDrop: 0, durationMs: Date.now() - start };
   }
 
   const { rows } = await db.execute({
@@ -185,7 +190,7 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
     args: [period],
   });
   if (!rows.length) {
-    return { period, red: 0, orange: 0, amber: 0, healthy: 0, skipped: 0, durationMs: Date.now() - start };
+    return { period, red: 0, orange: 0, amber: 0, healthy: 0, skipped: 0, tierDrop: 0, precipitousDrop: 0, durationMs: Date.now() - start };
   }
 
   let redCount = 0;
@@ -193,46 +198,93 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
   let amberCount = 0;
   let healthyCount = 0;
   let skippedCount = 0;
+  let tierDropCount = 0;
+  let precipitousDropCount = 0;
+
+  // Preload prev-period scores in one query so we can detect drops without
+  // per-client round-trips.
+  const prevMap = await fetchPreviousScores(period);
 
   for (const row of rows as unknown as HealthRow[]) {
     const tier = scoreToTier(row.score);
-    if (tier === 'healthy') { healthyCount++; continue; }
-    if (tier === 'amber') { amberCount++; continue; }
+    if (tier === 'healthy') { healthyCount++; }
+    else if (tier === 'amber') { amberCount++; }
 
     // New clients (<90 days since first contact) are scored and shown in
     // the dashboard but don't trigger alerts — not enough data to judge.
     if (row.grace_period) { skippedCount++; continue; }
 
-    if (await alreadyAlerted(row.client_name, row.period, 'absolute')) {
-      skippedCount++;
-      continue;
+    // AM for the Asana assignee — prefer Deliverables module then Asana lookup.
+    const amName = await getClientAM(row.client_name);
+    const amGid = amName ? await resolveAssignee(amName) : undefined;
+    void amGid; // Asana client accepts name as assigneeEmail fallback
+
+    // --- Trigger 1: absolute tier (Orange + Red) ---
+    if (tierAlerts(tier) && !(await alreadyAlerted(row.client_name, row.period, 'absolute'))) {
+      await fireAlert({ row, tier, trigger: 'absolute', accountManager: amName });
+      if (tier === 'red') redCount++; else orangeCount++;
     }
 
-    if (!tierAlerts(tier)) { skippedCount++; continue; }
+    // --- Trigger 2: tier-drop (crossed a boundary downward) ---
+    const prev = prevMap.get(row.client_name);
+    if (prev) {
+      const prevTier = scoreToTier(prev);
+      if (tierDropped(prevTier, tier) && !(await alreadyAlerted(row.client_name, row.period, 'tier-drop'))) {
+        await fireAlert({ row, tier, trigger: `tier-drop-${prevTier}-to-${tier}`, accountManager: amName });
+        tierDropCount++;
+      }
 
-    // AM for the Asana assignee — prefer Deliverables module then Asana lookup.
-    let amName = await getClientAM(row.client_name);
-    let amGid: string | undefined;
-    if (amName) amGid = await resolveAssignee(amName);
-    // createAsanaTask treats `assigneeEmail` as whatever string is passed —
-    // we'll pass either the resolved GID or the name; Asana's PUT endpoint
-    // accepts both but prefers GIDs. Keep as name for legacy behaviour.
-    void amGid;
+      // --- Trigger 3: precipitous drop (≥15pt drop, any tier) ---
+      const drop = prev - row.score;
+      if (drop >= PRECIPITOUS_DROP_POINTS && !(await alreadyAlerted(row.client_name, row.period, 'precipitous-drop'))) {
+        await fireAlert({
+          row,
+          tier,
+          trigger: `precipitous-drop-${drop}pts`,
+          accountManager: amName,
+        });
+        precipitousDropCount++;
+      }
+    }
 
-    await fireAlert({
-      row,
-      tier,
-      trigger: 'absolute',
-      accountManager: amName,
-    });
-
-    if (tier === 'red') redCount++; else orangeCount++;
+    if (!tierAlerts(tier) && !prev) { skippedCount++; continue; }
   }
 
   const durationMs = Date.now() - start;
   consoleLog(
     LOG_SOURCE,
-    `Period ${period}: ${redCount} red, ${orangeCount} orange, ${amberCount} amber (dashboard-only), ${healthyCount} healthy, ${skippedCount} skipped in ${durationMs}ms`,
+    `Period ${period}: ${redCount} red, ${orangeCount} orange, ${amberCount} amber (dashboard-only), ${healthyCount} healthy, ${skippedCount} skipped, ${tierDropCount} tier-drops, ${precipitousDropCount} precipitous-drops in ${durationMs}ms`,
   );
-  return { period, red: redCount, orange: orangeCount, amber: amberCount, healthy: healthyCount, skipped: skippedCount, durationMs };
+  return {
+    period,
+    red: redCount,
+    orange: orangeCount,
+    amber: amberCount,
+    healthy: healthyCount,
+    skipped: skippedCount,
+    tierDrop: tierDropCount,
+    precipitousDrop: precipitousDropCount,
+    durationMs,
+  };
+}
+
+/**
+ * Load the most recent prior score for every client in one query, so the
+ * main loop doesn't do N round-trips. Returns client_name → prev score.
+ */
+async function fetchPreviousScores(currentPeriod: string): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  try {
+    const r = await db.execute({
+      sql: `SELECT client_name, score FROM client_health
+            WHERE period = (
+              SELECT MAX(period) FROM client_health WHERE period < ?
+            )`,
+      args: [currentPeriod],
+    });
+    for (const row of r.rows) {
+      map.set(row.client_name as string, row.score as number);
+    }
+  } catch { /* no prior data */ }
+  return map;
 }
