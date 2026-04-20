@@ -6,6 +6,10 @@ import { runAllMonitors } from '../../lib/monitors/run-all.js';
 import { syncActionsToAsana } from '../../lib/jobs/sync-actions-to-asana.js';
 import { runClientHealthScoring } from '../../lib/jobs/client-health.js';
 import { runTrafficLightAlerts } from '../../lib/jobs/traffic-light.js';
+import { syncXero } from '../../lib/jobs/sync-xero.js';
+import { syncGoogleAds } from '../../lib/jobs/sync-google-ads.js';
+import { syncMetaAds } from '../../lib/jobs/sync-meta-ads.js';
+import { syncGhl } from '../../lib/jobs/sync-ghl.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -130,6 +134,62 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/traffic-light] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Traffic light alerts failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /sync-xero — Pull Xero invoices/contacts/P&L/bank and refresh clients (Vercel Cron)
+   */
+  app.get('/sync-xero', async (_request, reply) => {
+    try {
+      const result = await syncXero();
+      return reply.send({ ok: true, message: 'Xero sync completed', ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/sync-xero] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Xero sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /sync-google-ads — Pull Google Ads campaign + keyword spend (Vercel Cron)
+   */
+  app.get('/sync-google-ads', async (_request, reply) => {
+    try {
+      const result = await syncGoogleAds();
+      return reply.send({ ok: true, message: 'Google Ads sync completed', ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/sync-google-ads] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Google Ads sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /sync-meta-ads — Pull Meta Ads account-level insights (Vercel Cron)
+   */
+  app.get('/sync-meta-ads', async (_request, reply) => {
+    try {
+      const result = await syncMetaAds();
+      return reply.send({ ok: true, message: 'Meta Ads sync completed', ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/sync-meta-ads] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Meta Ads sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /sync-ghl — Pull GHL pipelines + opportunities per location (Vercel Cron)
+   */
+  app.get('/sync-ghl', async (_request, reply) => {
+    try {
+      const result = await syncGhl();
+      return reply.send({ ok: true, message: 'GHL sync completed', ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/sync-ghl] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'GHL sync failed', error: msg });
     }
   });
 };

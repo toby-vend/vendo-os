@@ -60,6 +60,22 @@
     {
       "path": "/api/cron/traffic-light",
       "schedule": "0 2 1 * *"
+    },
+    {
+      "path": "/api/cron/sync-xero",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/sync-google-ads",
+      "schedule": "15 */4 * * *"
+    },
+    {
+      "path": "/api/cron/sync-meta-ads",
+      "schedule": "30 */4 * * *"
+    },
+    {
+      "path": "/api/cron/sync-ghl",
+      "schedule": "45 */4 * * *"
     }
   ],
   "routes": [
