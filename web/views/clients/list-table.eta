@@ -6,7 +6,7 @@
       <th>Vertical</th>
       <th><%= it.isAdmin ? 'Health Score' : 'Health' %></th>
       <% if (it.isAdmin) { %><th title="Trailing 90 days of paid invoices ÷ 3">MRR</th><% } %>
-      <% if (it.isAdmin) { %><th title="Lifetime total invoiced">Revenue</th><% } %>
+      <% if (it.isAdmin) { %><th title="Lifetime total invoiced">Lifetime Revenue</th><% } %>
       <% if (it.isAdmin) { %><th>Outstanding</th><% } %>
       <% if (it.isAdmin) { %><th>Last Meeting</th><% } %>
       <% if (it.isAdmin) { %><th>Invoices</th><% } %>
