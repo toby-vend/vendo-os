@@ -41,7 +41,13 @@ export const clientsRoutes: FastifyPluginAsync = async (app) => {
     }
 
     if (tierFilter) {
+      // 4-tier model: healthy ≥70, amber 55–69, orange 40–54, red <40.
+      // See web/lib/health/tiers.ts — keep in sync.
       if (tierFilter === 'healthy') conditions.push('ch.score >= 70');
+      else if (tierFilter === 'amber') conditions.push('ch.score >= 55 AND ch.score < 70');
+      else if (tierFilter === 'orange') conditions.push('ch.score >= 40 AND ch.score < 55');
+      else if (tierFilter === 'red') conditions.push('ch.score < 40');
+      // Legacy aliases — kept so existing bookmarked URLs keep working.
       else if (tierFilter === 'at-risk') conditions.push('ch.score >= 40 AND ch.score < 70');
       else if (tierFilter === 'critical') conditions.push('ch.score < 40');
       else if (tierFilter === 'no-score') conditions.push('ch.score IS NULL');
@@ -72,8 +78,9 @@ export const clientsRoutes: FastifyPluginAsync = async (app) => {
              CASE
                WHEN ch.score IS NULL THEN NULL
                WHEN ch.score >= 70 THEN 'healthy'
-               WHEN ch.score >= 40 THEN 'at-risk'
-               ELSE 'critical'
+               WHEN ch.score >= 55 THEN 'amber'
+               WHEN ch.score >= 40 THEN 'orange'
+               ELSE 'red'
              END as health_tier,
              prev.score as health_prev_score,
              CASE
