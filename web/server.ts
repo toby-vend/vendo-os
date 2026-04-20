@@ -50,6 +50,7 @@ import { unifiedAdsRoutes } from './routes/dashboards/ads.js';
 import { profitabilityRoutes } from './routes/dashboards/profitability.js';
 import { pipelineTrackerRoutes } from './routes/dashboards/pipeline.js';
 import { reviewsRoutes } from './routes/dashboards/reviews.js';
+import { healthRoutes } from './routes/dashboards/health.js';
 // client-database merged into /clients — see routes/clients.ts
 import { operationsRoutes } from './routes/operations.js';
 import { skillsLibraryRoutes } from './routes/skills-library.js';
@@ -378,6 +379,7 @@ app.register(gadsEcomRoutes, { prefix: '/dashboards/gads-ecom' });
 app.register(profitabilityRoutes, { prefix: '/dashboards/profitability' });
 app.register(pipelineTrackerRoutes, { prefix: '/dashboards/pipeline' });
 app.register(reviewsRoutes, { prefix: '/dashboards/reviews' });
+app.register(healthRoutes, { prefix: '/dashboards/health' });
 
 // Export for Vercel
 export default app;

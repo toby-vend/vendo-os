@@ -1,0 +1,132 @@
+<% layout('/layouts/base') %>
+
+<h2>Client Health</h2>
+<p class="subtle">
+  MRR-prioritised triage for the current period. Tiers: Healthy ≥70, Amber 55-69 (dashboard only), Orange 40-54, Red &lt;40.
+</p>
+
+<div class="stat-grid">
+  <article class="stat-card">
+    <p class="stat-value"><%= it.counts.total %></p>
+    <p class="stat-label">Active Clients</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="color: #22C55E;"><%= it.counts.healthy %></p>
+    <p class="stat-label">Healthy</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="color: #EAB308;"><%= it.counts.amber %></p>
+    <p class="stat-label">Amber</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="color: #F97316;"><%= it.counts.orange %></p>
+    <p class="stat-label">Orange</p>
+  </article>
+  <article class="stat-card">
+    <p class="stat-value" style="color: #EF4444;"><%= it.counts.red %></p>
+    <p class="stat-label">Red</p>
+  </article>
+</div>
+
+<h3>Filters</h3>
+<div class="filter-row" style="display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 20px;">
+  <% const mkBtn = (slug, label, count) => {
+    const active = it.filter === slug;
+    const style = active
+      ? 'background:#1e293b; color:#fff; padding:6px 12px; border-radius:16px; text-decoration:none; font-size:13px;'
+      : 'background:#f1f5f9; color:#1e293b; padding:6px 12px; border-radius:16px; text-decoration:none; font-size:13px;';
+    return `<a href="?filter=${slug}" style="${style}">${label}${count != null ? ` (${count})` : ''}</a>`;
+  }; %>
+  <%~ mkBtn('all', 'All', it.counts.total) %>
+  <%~ mkBtn('trending-down', 'Trending down', it.counts.trendingDown) %>
+  <%~ mkBtn('dropped-tier', 'Dropped a tier', it.counts.droppedTier) %>
+  <%~ mkBtn('overdue', 'Overdue invoices', it.counts.overdue) %>
+  <%~ mkBtn('no-recent-meeting', 'No recent meeting', it.counts.noRecentMeeting) %>
+  <%~ mkBtn('unmapped', 'Unmapped (config gap)', it.counts.unmapped) %>
+  <%~ mkBtn('grace', 'New / grace period', it.counts.grace) %>
+</div>
+
+<% if (!it.clients.length) { %>
+  <p>No clients match this filter.</p>
+<% } else { %>
+<table class="compact">
+  <thead>
+    <tr>
+      <th>Tier</th>
+      <th>Client</th>
+      <th>Score</th>
+      <th>Trend</th>
+      <th>MRR</th>
+      <th>Top driver</th>
+      <th>AM</th>
+      <th>Overdue</th>
+      <th>Last meeting</th>
+      <th>Alert</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.clients.forEach(c => {
+      const tierColor = c.tier === 'red' ? '#EF4444' : c.tier === 'orange' ? '#F97316' : c.tier === 'amber' ? '#EAB308' : c.tier === 'healthy' ? '#22C55E' : '#94A3B8';
+      const tierLabel = (c.tier || 'none').toUpperCase();
+      const graceTag = c.grace_period ? ' <span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-size:11px;">NEW</span>' : '';
+    %>
+    <tr>
+      <td>
+        <span style="display:inline-block; padding:2px 8px; border-radius:10px; background:<%= tierColor %>; color:white; font-size:11px; font-weight:600;"><%= tierLabel %></span>
+      </td>
+      <td>
+        <a href="/clients/<%= encodeURIComponent(c.client_name) %>"><%= c.client_name %></a><%~ graceTag %>
+      </td>
+      <td><%= c.score ?? '—' %></td>
+      <td>
+        <% if (c.prev_score != null && c.score != null) { %>
+          <span style="color: <%= c.score < c.prev_score ? '#EF4444' : c.score > c.prev_score ? '#22C55E' : '#94A3B8' %>;"><%= c.trend_arrow %> <%= c.prev_score %>→<%= c.score %></span>
+        <% } else { %>
+          —
+        <% } %>
+      </td>
+      <td><%= c.mrr ? '£' + Math.round(c.mrr).toLocaleString() : '—' %></td>
+      <td><%= c.top_driver || '—' %></td>
+      <td><%= c.am || '—' %></td>
+      <td>
+        <% if (c.overdue_invoices > 0) { %>
+          <span style="color: #EF4444; font-weight: 600;"><%= c.overdue_invoices %></span>
+        <% } else { %>
+          —
+        <% } %>
+      </td>
+      <td>
+        <% if (c.days_since_meeting != null) { %>
+          <%= c.days_since_meeting %>d
+        <% } else { %>
+          —
+        <% } %>
+      </td>
+      <td>
+        <% if (c.alert_status === 'open') { %>
+          <span style="color: #EF4444; font-size: 12px;">open</span>
+          <% if (c.latest_alert_id) { %>
+            <button
+              hx-post="/api/alerts/<%= c.latest_alert_id %>/acknowledge"
+              hx-confirm="Mark this alert acknowledged?"
+              hx-swap="outerHTML"
+              style="margin-left:6px; background:#f1f5f9; border:none; padding:2px 8px; border-radius:4px; font-size:11px; cursor:pointer;"
+            >ACK</button>
+          <% } %>
+        <% } else if (c.alert_status === 'acknowledged') { %>
+          <span style="color: #22C55E; font-size: 12px;">ack'd</span>
+        <% } else { %>
+          —
+        <% } %>
+      </td>
+      <td>
+        <% if (c.asana_url) { %>
+          <a href="<%= c.asana_url %>" target="_blank" style="font-size:12px;">Asana ↗</a>
+        <% } %>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
