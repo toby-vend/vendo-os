@@ -21,10 +21,15 @@ const LOG_SOURCE = 'sync-actions-to-asana';
 interface ActionItem {
   description: string;
   assignee?: string;
+  assigneeEmail?: string;
   dueDate?: string;
 }
 
+// userMap holds multiple keys (full name, first name, last name, email, initials)
+// → same Asana user GID, so resolveAssignee can match on whatever Fathom
+// reported.
 const userMap: Map<string, string> = new Map();
+let _usersLoaded = false;
 
 async function asanaFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${ASANA_BASE_URL}${path}`, {
@@ -44,26 +49,85 @@ async function asanaFetch<T>(path: string, options: RequestInit = {}): Promise<T
   return json.data;
 }
 
+/**
+ * Build a many-to-one map: full name, first name, last name, email, and —
+ * via deliverable_team_members — initials all point to the same Asana GID.
+ * Cached in-process per cold-start container so we don't refetch on every
+ * webhook.
+ */
 async function loadAsanaUsers(): Promise<void> {
+  if (_usersLoaded) return;
   if (!ASANA_WORKSPACE_GID) return;
+
+  // Fuzzy-normalise to catch common typo/spelling variants (e.g. Casillas vs
+  // Casallas): strip non-letters, lowercase.
+  const norm = (s: string): string => s.toLowerCase().replace(/[^a-z]+/g, '');
+
   try {
-    const users = await asanaFetch<Array<{ gid: string; name: string }>>(
-      `/users?workspace=${ASANA_WORKSPACE_GID}&opt_fields=name`,
+    const users = await asanaFetch<Array<{ gid: string; name: string; email?: string }>>(
+      `/users?workspace=${ASANA_WORKSPACE_GID}&opt_fields=name,email`,
     );
     for (const u of users) {
-      userMap.set(u.name.toLowerCase(), u.gid);
-      const firstName = u.name.split(' ')[0].toLowerCase();
-      if (!userMap.has(firstName)) userMap.set(firstName, u.gid);
+      const full = u.name.toLowerCase().trim();
+      userMap.set(full, u.gid);
+      userMap.set(norm(u.name), u.gid);
+      const parts = u.name.split(/\s+/);
+      if (parts[0]) userMap.set(parts[0].toLowerCase(), u.gid);
+      if (parts.length > 1) userMap.set(parts[parts.length - 1].toLowerCase(), u.gid);
+      if (u.email) userMap.set(u.email.toLowerCase(), u.gid);
     }
-    consoleLog(LOG_SOURCE, `Loaded ${users.length} Asana users`);
+
+    // Enrich with deliverable_team_members: initials → name → GID (via the
+    // Asana users we just loaded).
+    try {
+      const r = await db.execute(
+        'SELECT initials, name FROM deliverable_team_members WHERE is_active = 1',
+      );
+      let initialsLinked = 0;
+      for (const row of r.rows) {
+        const initials = (row.initials as string).toLowerCase();
+        const name = (row.name as string).toLowerCase();
+        const gid =
+          userMap.get(name) ||
+          userMap.get(norm(row.name as string)) ||
+          userMap.get(name.split(/\s+/)[0]);
+        if (gid) {
+          userMap.set(initials, gid);
+          initialsLinked++;
+        }
+      }
+      consoleLog(
+        LOG_SOURCE,
+        `Loaded ${users.length} Asana users + ${initialsLinked}/${r.rows.length} deliverables-team initials linked`,
+      );
+    } catch {
+      consoleLog(LOG_SOURCE, `Loaded ${users.length} Asana users (no deliverables data)`);
+    }
+
+    _usersLoaded = true;
   } catch (err) {
     consoleLog(LOG_SOURCE, `Failed to load Asana users: ${err instanceof Error ? err.message : err}`);
   }
 }
 
-function resolveAssignee(name?: string): string | undefined {
-  if (!name) return undefined;
-  return userMap.get(name.toLowerCase().trim());
+function resolveAssignee(nameOrEmail?: string, email?: string): string | undefined {
+  const candidates: string[] = [];
+  if (email) candidates.push(email.toLowerCase().trim());
+  if (nameOrEmail) {
+    const trimmed = nameOrEmail.trim();
+    candidates.push(trimmed.toLowerCase());
+    candidates.push(trimmed.toLowerCase().replace(/[^a-z]+/g, ''));
+    // Try just last word (last name) and first word (first name) too
+    const parts = trimmed.split(/\s+/);
+    if (parts[0]) candidates.push(parts[0].toLowerCase());
+    if (parts.length > 1) candidates.push(parts[parts.length - 1].toLowerCase());
+  }
+  for (const c of candidates) {
+    if (!c) continue;
+    const gid = userMap.get(c);
+    if (gid) return gid;
+  }
+  return undefined;
 }
 
 function parseActionLine(line: string): ActionItem {
@@ -97,7 +161,8 @@ function parseActionItems(raw: string | null): ActionItem[] {
         } else if (item?.description || item?.text) {
           items.push({
             description: item.description || item.text,
-            assignee: item.assignee?.name || item.assignee || item.owner,
+            assignee: item.assignee?.name || (typeof item.assignee === 'string' ? item.assignee : undefined) || item.owner,
+            assigneeEmail: item.assignee?.email || item.assigneeEmail,
             dueDate: item.due_date || item.dueDate,
           });
         }
@@ -234,7 +299,11 @@ async function createAsanaTaskFromAction(
   clientName: string | null,
   projectGid?: string,
 ): Promise<string> {
-  let assigneeGid = resolveAssignee(item.assignee);
+  // Resolution order:
+  //   1. Explicit assignee from Fathom (name + email, tried in every case variant)
+  //   2. Deliverables-module AM for this client (initials → full name)
+  //   3. Leave unassigned — human triage in the Vendo OS Alerts project
+  let assigneeGid = resolveAssignee(item.assignee, item.assigneeEmail);
   if (!assigneeGid && clientName) {
     const am = await getClientAM(clientName);
     if (am) assigneeGid = resolveAssignee(am);
@@ -278,7 +347,7 @@ export async function createTasksForMeeting(input: {
 }): Promise<SyncCount> {
   if (!ASANA_API_KEY || !input.rawActionItems) return { created: 0, skipped: 0 };
   await ensureSyncTable();
-  if (!userMap.size) await loadAsanaUsers();
+  await loadAsanaUsers();
 
   const items = parseActionItems(input.rawActionItems);
   if (!items.length) return { created: 0, skipped: 0 };
