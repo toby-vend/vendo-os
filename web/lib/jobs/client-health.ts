@@ -171,7 +171,7 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const { rows: clientRows } = await db.execute(
-    "SELECT id, name FROM clients WHERE status = 'active'",
+    "SELECT id, name, xero_contact_id FROM clients WHERE status = 'active'",
   );
   if (!clientRows.length) {
     consoleLog('health', 'No active clients');
@@ -184,16 +184,22 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
   for (const client of clientRows) {
     const clientId = client.id as number;
     const name = client.name as string;
+    const xeroId = (client.xero_contact_id as string) || null;
     const breakdown: HealthBreakdown = {
       adSpend: 0, ctr: 0, spendConsistency: 0,
       recentMeeting: 0, actionsResolved: 0,
       noOverdue: 0, paidOnTime: 0,
     };
 
-    // Performance
-    if (await hasAdAccounts(clientId)) {
+    // Performance — only scored when a data source is mapped; otherwise
+    // excluded from the denominator so clients without ads/SEO mappings
+    // aren't penalised for missing config data.
+    const hasAds = await hasAdAccounts(clientId);
+    const hasSeo = !hasAds && (await hasSeoAccounts(clientId));
+    const perfApplicable = hasAds || hasSeo;
+    if (hasAds) {
       Object.assign(breakdown, await scoreAdsPerformance(clientId, thirtyDaysAgo));
-    } else if (await hasSeoAccounts(clientId)) {
+    } else if (hasSeo) {
       Object.assign(breakdown, await scoreSeoPerformance(clientId, thirtyDaysAgo));
     }
 
@@ -229,19 +235,21 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
       breakdown.actionsResolved = 15;
     }
 
-    // Financial
-    const overdueCount = await scalar(
-      "SELECT COUNT(*) FROM xero_invoices WHERE contact_name = ? AND status = 'AUTHORISED' AND due_date < date('now') AND amount_due > 0",
-      [name],
-    );
+    // Financial — prefer xero_contact_id matching (handles invisible chars,
+    // trading-name mismatches etc.). Fall back to contact_name lookup for
+    // the ~3/75 clients that don't have xero_contact_id populated yet.
+    const overdueSql = xeroId
+      ? "SELECT COUNT(*) FROM xero_invoices WHERE contact_id = ? AND status = 'AUTHORISED' AND due_date < date('now') AND amount_due > 0"
+      : "SELECT COUNT(*) FROM xero_invoices WHERE contact_name = ? AND status = 'AUTHORISED' AND due_date < date('now') AND amount_due > 0";
+    const overdueCount = await scalar(overdueSql, [xeroId || name]);
     if (overdueCount === 0) breakdown.noOverdue = 15;
     else overdueInvoices.push(`${name}: ${overdueCount} overdue`);
 
     try {
-      const r = await db.execute({
-        sql: "SELECT amount_due FROM xero_invoices WHERE contact_name = ? AND type = 'ACCREC' ORDER BY date DESC LIMIT 1",
-        args: [name],
-      });
+      const lastInvoiceSql = xeroId
+        ? "SELECT amount_due FROM xero_invoices WHERE contact_id = ? AND type = 'ACCREC' ORDER BY date DESC LIMIT 1"
+        : "SELECT amount_due FROM xero_invoices WHERE contact_name = ? AND type = 'ACCREC' ORDER BY date DESC LIMIT 1";
+      const r = await db.execute({ sql: lastInvoiceSql, args: [xeroId || name] });
       if (!r.rows.length || (r.rows[0].amount_due as number) === 0) {
         breakdown.paidOnTime = 15;
       }
@@ -250,7 +258,15 @@ export async function runClientHealthScoring(): Promise<HealthScoreResult> {
     const performanceScore = breakdown.adSpend + breakdown.ctr + breakdown.spendConsistency;
     const relationshipScore = breakdown.recentMeeting + breakdown.actionsResolved;
     const financialScore = breakdown.noOverdue + breakdown.paidOnTime;
-    const totalScore = performanceScore + relationshipScore + financialScore;
+
+    // When no performance data source is mapped for this client (no ads, no
+    // GA4/GSC), exclude the 40-point performance block from the denominator
+    // and scale the remaining 60 points to 100. Otherwise clients without
+    // the right config get labelled Critical even when everything else is
+    // fine, which is the calibration issue 19/75 hit on first run.
+    const totalScore = perfApplicable
+      ? performanceScore + relationshipScore + financialScore
+      : Math.round(((relationshipScore + financialScore) / 60) * 100);
 
     await db.execute({
       sql: `INSERT INTO client_health (client_name, score, performance_score, relationship_score, financial_score, breakdown, period, created_at)
