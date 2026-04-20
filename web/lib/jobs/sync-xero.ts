@@ -409,8 +409,38 @@ async function syncBankSummary(http: XeroHttp): Promise<number> {
  * THIS IS THE CRITICAL STEP the user is complaining about — it populates
  * the `clients` table from Xero contacts + invoices.
  */
+async function ensureClientsMrrColumn(): Promise<void> {
+  try {
+    await db.execute('ALTER TABLE clients ADD COLUMN mrr REAL DEFAULT 0');
+  } catch {
+    // Column already exists — idempotent ignore
+  }
+}
+
+/**
+ * Trailing-90-day MRR = sum of ACCREC paid/authorised invoice totals from
+ * the last 90 days ÷ 3. Churned/finished clients naturally fall to 0 as
+ * their window rolls past. Derived straight from xero_invoices so it
+ * refreshes every sync without any schema assumptions about "recurring".
+ */
+async function refreshClientsMrr(): Promise<void> {
+  await db.execute(`
+    UPDATE clients
+    SET mrr = COALESCE((
+      SELECT SUM(i.total) / 3.0
+      FROM xero_invoices i
+      WHERE i.contact_id = clients.xero_contact_id
+        AND i.type = 'ACCREC'
+        AND i.status IN ('PAID', 'AUTHORISED')
+        AND i.date >= date('now', '-90 days')
+    ), 0)
+    WHERE xero_contact_id IS NOT NULL
+  `);
+}
+
 async function syncClientsFromXero(): Promise<number> {
   consoleLog(LOG, 'Syncing clients from Xero customers...');
+  await ensureClientsMrrColumn();
 
   const customers = await db.execute(
     `SELECT id, name, email, outstanding_receivable
@@ -477,7 +507,9 @@ async function syncClientsFromXero(): Promise<number> {
     "UPDATE clients SET source = 'fathom' WHERE xero_contact_id IS NULL AND source != 'fathom'",
   );
 
-  consoleLog(LOG, `Clients synced: ${upserts.length} from Xero`);
+  await refreshClientsMrr();
+
+  consoleLog(LOG, `Clients synced: ${upserts.length} from Xero (MRR refreshed)`);
   return upserts.length;
 }
 

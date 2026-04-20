@@ -9,6 +9,7 @@ interface ClientListRow {
   status: string;
   vertical: string | null;
   total_invoiced: number;
+  mrr: number;
   outstanding: number;
   last_meeting_date: string | null;
   health_score: number | null;
@@ -64,6 +65,7 @@ export const clientsRoutes: FastifyPluginAsync = async (app) => {
              COALESCE(c.status, 'active') as status,
              c.vertical,
              COALESCE(c.total_invoiced, 0) as total_invoiced,
+             COALESCE(c.mrr, 0) as mrr,
              COALESCE(c.outstanding, 0) as outstanding,
              c.last_meeting_date,
              ch.score as health_score,
