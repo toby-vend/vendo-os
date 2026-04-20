@@ -31,6 +31,7 @@ interface HealthRow {
   financial_score: number;
   breakdown: string;
   period: string;
+  grace_period: number;
 }
 
 function buildSummary(row: HealthRow): string {
@@ -175,7 +176,8 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
 
   const { rows } = await db.execute({
     sql: `SELECT ch.client_name, ch.score, ch.performance_score, ch.relationship_score,
-                 ch.financial_score, ch.breakdown, ch.period
+                 ch.financial_score, ch.breakdown, ch.period,
+                 COALESCE(ch.grace_period, 0) AS grace_period
           FROM client_health ch
           JOIN clients c ON c.name = ch.client_name
           WHERE ch.period = ? AND c.status = 'active'
@@ -196,6 +198,10 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
     const tier = scoreToTier(row.score);
     if (tier === 'healthy') { healthyCount++; continue; }
     if (tier === 'amber') { amberCount++; continue; }
+
+    // New clients (<90 days since first contact) are scored and shown in
+    // the dashboard but don't trigger alerts — not enough data to judge.
+    if (row.grace_period) { skippedCount++; continue; }
 
     if (await alreadyAlerted(row.client_name, row.period, 'absolute')) {
       skippedCount++;
