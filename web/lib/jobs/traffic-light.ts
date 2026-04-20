@@ -103,8 +103,48 @@ async function sendSltAlert(message: string): Promise<void> {
   }
 }
 
+/**
+ * Map the dominant driver of a score drop to a one-line suggested next
+ * step. Heuristic only — the AM is still the judge, but this removes a
+ * "what do I do with this alert?" step for the easy cases.
+ */
+function suggestNextStep(topDrivers: string[]): string {
+  if (!topDrivers.length) return 'Review dashboard breakdown and open a conversation with the client.';
+  const first = topDrivers[0].split(':')[0];
+  switch (first) {
+    case 'adSpend': return 'Investigate ad delivery — campaigns paused, budget depleted, or tracking broken.';
+    case 'ctr': return 'Review creative performance and audience targeting.';
+    case 'spendConsistency': return 'Check for campaign pauses or account-level issues.';
+    case 'meetingCadence': return 'Schedule a catch-up call — >45 days since last touchpoint.';
+    case 'meetingSentiment': return 'Read the last 3 meeting summaries; AI has flagged concerns you should address.';
+    case 'actionsResolved': return 'Clear outstanding action items from recent calls before next check-in.';
+    case 'overdueSeverity': return 'Chase overdue invoices with the client or your accounts team.';
+    case 'overdueAge': return 'Escalate overdue payments — oldest invoice is aging fast.';
+    default: return 'Review dashboard breakdown and open a conversation with the client.';
+  }
+}
+
+function clientDetailUrl(clientName: string): string {
+  const base = process.env.VERCEL_PROJECT_URL ? `https://${process.env.VERCEL_PROJECT_URL}` : '';
+  if (!base) return '';
+  return `${base}/clients/${encodeURIComponent(clientName)}`;
+}
+
+function asanaTaskUrl(taskGid: string | null): string {
+  if (!taskGid) return '';
+  return `https://app.asana.com/0/0/${taskGid}`;
+}
+
+function buildDeltaLine(row: HealthRow & { prev_score?: number | null }): string {
+  if (row.prev_score == null) return `Score: ${row.score}/100`;
+  const delta = row.score - row.prev_score;
+  const arrow = delta > 0 ? ':arrow_up:' : delta < 0 ? ':arrow_down:' : ':arrow_right:';
+  const sign = delta > 0 ? '+' : '';
+  return `Score: ${row.prev_score} → ${row.score}/100 ${arrow} (${sign}${delta})`;
+}
+
 async function fireAlert(opts: {
-  row: HealthRow;
+  row: HealthRow & { prev_score?: number | null };
   tier: HealthTier;
   trigger: string;
   accountManager: string | null;
@@ -112,38 +152,82 @@ async function fireAlert(opts: {
   const { row, tier, trigger, accountManager } = opts;
   const { label, emoji } = tierLabel(tier);
   const summary = buildSummary(row);
+  const deltaLine = buildDeltaLine(row);
+
+  // Top drivers come from client_health.breakdown.topDrivers (set in Phase 2
+  // scoring) — lowest-scoring sub-dimensions for this client.
+  let topDrivers: string[] = [];
+  try {
+    const parsed = JSON.parse(row.breakdown);
+    if (Array.isArray(parsed?.topDrivers)) topDrivers = parsed.topDrivers;
+  } catch { /* breakdown parse failed */ }
+  const suggestion = suggestNextStep(topDrivers);
+  const driversLine = topDrivers.length ? `Top drivers: ${topDrivers.join(' · ')}` : '';
+  const clientLink = clientDetailUrl(row.client_name);
+
   const dueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
+  const taskNotes = [
+    `Client: ${row.client_name}`,
+    deltaLine,
+    `Tier: ${label}`,
+    `Performance: ${row.performance_score}/40 | Relationship: ${row.relationship_score}/30 | Financial: ${row.financial_score}/30`,
+    driversLine,
+    '',
+    `Issues: ${summary}`,
+    '',
+    `Trigger: ${trigger}`,
+    `Suggested next step: ${suggestion}`,
+    clientLink ? `\nDashboard: ${clientLink}` : '',
+    accountManager ? `Account Manager: ${accountManager}` : '',
+    '',
+    '---',
+    'Checklist:',
+    '  [ ] Review breakdown on the dashboard',
+    '  [ ] Read the last 3 meeting summaries',
+    '  [ ] Reach out to the client or decide intervention',
+    '  [ ] Log resolution on this task when done',
+  ].filter(Boolean).join('\n');
+
   const task = await createAsanaTask({
-    name: `[${label}] Client health alert: ${row.client_name} (${row.score}/100)`,
-    notes: [
-      `Client: ${row.client_name}`,
-      `Health Score: ${row.score}/100 (${label})`,
-      `Performance: ${row.performance_score}/40 | Relationship: ${row.relationship_score}/30 | Financial: ${row.financial_score}/30`,
-      '',
-      `Issues: ${summary}`,
-      '',
-      `Trigger: ${trigger}`,
-      'Action required: Review client status and create intervention plan.',
-      accountManager ? `\nAccount Manager: ${accountManager}` : '',
-    ].join('\n'),
+    name: `[${label}] ${row.client_name} — ${row.score}/100`,
+    notes: taskNotes,
     dueDate,
     assigneeEmail: accountManager || undefined,
   });
   const taskGid = task?.gid ?? null;
 
+  const slackLines = [
+    `${emoji} *${label} Alert — ${row.client_name}*`,
+    deltaLine,
+    driversLine,
+    `Issues: ${summary}`,
+    `Suggested next step: ${suggestion}`,
+  ].filter(Boolean);
+  const taskUrl = asanaTaskUrl(taskGid);
+  if (clientLink || taskUrl) {
+    const links: string[] = [];
+    if (clientLink) links.push(`<${clientLink}|dashboard>`);
+    if (taskUrl) links.push(`<${taskUrl}|asana task>`);
+    slackLines.push(links.join(' · '));
+  }
+
   await sendSlackAlert(
     LOG_SOURCE,
-    `${emoji} *${label} Alert — ${row.client_name}*\nScore: ${row.score}/100 | ${summary}`,
+    slackLines.join('\n'),
     tier === 'red' ? 'error' : 'warning',
   );
 
   if (tierEscalatesToSlt(tier)) {
     await sendSltAlert(
       `:rotating_light: *CRITICAL CLIENT ALERT — ${row.client_name}*\n` +
-      `Health Score: ${row.score}/100\n` +
+      `${deltaLine}\n` +
       `Performance: ${row.performance_score}/40 | Relationship: ${row.relationship_score}/30 | Financial: ${row.financial_score}/30\n` +
-      `Issues: ${summary}\nImmediate intervention required.`,
+      `${driversLine}\n` +
+      `Issues: ${summary}\n` +
+      `Suggested next step: ${suggestion}\n` +
+      (clientLink ? `Dashboard: ${clientLink}\n` : '') +
+      'Immediate intervention required.',
     );
   }
 
@@ -219,18 +303,20 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
     const amGid = amName ? await resolveAssignee(amName) : undefined;
     void amGid; // Asana client accepts name as assigneeEmail fallback
 
+    const prev = prevMap.get(row.client_name) ?? null;
+    const rowWithPrev = { ...row, prev_score: prev };
+
     // --- Trigger 1: absolute tier (Orange + Red) ---
     if (tierAlerts(tier) && !(await alreadyAlerted(row.client_name, row.period, 'absolute'))) {
-      await fireAlert({ row, tier, trigger: 'absolute', accountManager: amName });
+      await fireAlert({ row: rowWithPrev, tier, trigger: 'absolute', accountManager: amName });
       if (tier === 'red') redCount++; else orangeCount++;
     }
 
     // --- Trigger 2: tier-drop (crossed a boundary downward) ---
-    const prev = prevMap.get(row.client_name);
-    if (prev) {
+    if (prev != null) {
       const prevTier = scoreToTier(prev);
       if (tierDropped(prevTier, tier) && !(await alreadyAlerted(row.client_name, row.period, 'tier-drop'))) {
-        await fireAlert({ row, tier, trigger: `tier-drop-${prevTier}-to-${tier}`, accountManager: amName });
+        await fireAlert({ row: rowWithPrev, tier, trigger: `tier-drop-${prevTier}-to-${tier}`, accountManager: amName });
         tierDropCount++;
       }
 
@@ -238,7 +324,7 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
       const drop = prev - row.score;
       if (drop >= PRECIPITOUS_DROP_POINTS && !(await alreadyAlerted(row.client_name, row.period, 'precipitous-drop'))) {
         await fireAlert({
-          row,
+          row: rowWithPrev,
           tier,
           trigger: `precipitous-drop-${drop}pts`,
           accountManager: amName,
@@ -247,7 +333,7 @@ export async function runTrafficLightAlerts(): Promise<TrafficLightResult> {
       }
     }
 
-    if (!tierAlerts(tier) && !prev) { skippedCount++; continue; }
+    if (!tierAlerts(tier) && prev == null) { skippedCount++; }
   }
 
   const durationMs = Date.now() - start;
