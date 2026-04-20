@@ -456,9 +456,10 @@ async function syncClientsFromXero(): Promise<number> {
     const stats = invoiceMap.get(xeroId);
 
     upserts.push({
-      sql: `INSERT INTO clients (name, xero_contact_id, email, source, status, total_invoiced, outstanding, first_invoice_date, last_invoice_date)
-            VALUES (?, ?, ?, 'xero', 'pending', ?, ?, ?, ?)
+      sql: `INSERT INTO clients (name, display_name, xero_contact_id, email, source, status, total_invoiced, outstanding, first_invoice_date, last_invoice_date)
+            VALUES (?, ?, ?, ?, 'xero', 'pending', ?, ?, ?, ?)
             ON CONFLICT(name) DO UPDATE SET
+              display_name = COALESCE(clients.display_name, excluded.display_name),
               xero_contact_id = excluded.xero_contact_id,
               email = COALESCE(excluded.email, clients.email),
               source = 'xero',
@@ -466,7 +467,7 @@ async function syncClientsFromXero(): Promise<number> {
               outstanding = excluded.outstanding,
               first_invoice_date = excluded.first_invoice_date,
               last_invoice_date = excluded.last_invoice_date`,
-      args: [name, xeroId, email, stats?.total ?? 0, outstanding, stats?.first ?? null, stats?.last ?? null],
+      args: [name, name, xeroId, email, stats?.total ?? 0, outstanding, stats?.first ?? null, stats?.last ?? null],
     });
   }
 
