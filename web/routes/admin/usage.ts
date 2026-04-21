@@ -10,7 +10,7 @@ import {
   estimateCostGbp,
 } from '../../lib/queries/usage.js';
 import { getRejectionSummary } from '../../lib/queries/auto-tasks.js';
-import { getQaSkipSummary } from '../../lib/qa/auto-task-qa.js';
+import { getQaSkipSummary, getQaAccuracy } from '../../lib/qa/auto-task-qa.js';
 
 const adminUsageRoutes: FastifyPluginAsync = async (app) => {
   // GET / — usage dashboard
@@ -18,7 +18,7 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
     const { from, to } = request.query as { from?: string; to?: string };
     const filter = { from: from || undefined, to: to || undefined };
 
-    const [summary, usersWithUsage, byModel, byFeature, forecast, asanaVolume, rejections, qaSkipped] = await Promise.all([
+    const [summary, usersWithUsage, byModel, byFeature, forecast, asanaVolume, rejections, qaSkipped, qaAccuracy] = await Promise.all([
       getUsageSummary(filter),
       getAllUsersWithUsage(filter),
       getUsageByModel(filter),
@@ -27,6 +27,7 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
       getAsanaTaskVolume(),
       getRejectionSummary(),
       getQaSkipSummary(),
+      getQaAccuracy(),
     ]);
 
     reply.render('admin/usage', {
@@ -38,6 +39,7 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
       asanaVolume,
       rejections,
       qaSkipped,
+      qaAccuracy,
       estimateCostGbp,
       from: from || '',
       to: to || '',

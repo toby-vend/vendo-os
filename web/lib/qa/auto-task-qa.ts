@@ -212,6 +212,20 @@ async function ensureSkipSchema(): Promise<void> {
       skipped_at TEXT NOT NULL
     )
   `);
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS auto_task_qa_overrides (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      qa_skip_id INTEGER NOT NULL,
+      decision TEXT NOT NULL,
+      note TEXT,
+      created_task_gid TEXT,
+      overridden_by_user_id TEXT,
+      overridden_at TEXT NOT NULL
+    )
+  `);
+  await db.execute(
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_atqo_skip ON auto_task_qa_overrides(qa_skip_id)',
+  );
   _skipSchemaReady = true;
 }
 
@@ -261,5 +275,118 @@ export async function getQaSkipSummary(): Promise<QaSkipSummary> {
     return { totalSkipped, thisMonth };
   } catch {
     return { totalSkipped: 0, thisMonth: 0 };
+  }
+}
+
+// --- Agent accuracy (overrides) ---
+
+export interface QaSkipRow {
+  id: number;
+  task_name: string;
+  client_name: string | null;
+  assignee: string | null;
+  source: string | null;
+  reason: string;
+  skipped_at: string;
+  override_decision: 'correct_call' | 'wrong_call' | null;
+  override_note: string | null;
+  override_created_task_gid: string | null;
+  overridden_at: string | null;
+}
+
+/**
+ * Recent agent blocks joined with any admin override. Newest first.
+ */
+export async function getRecentQaSkips(limit = 50): Promise<QaSkipRow[]> {
+  try {
+    await ensureSkipSchema();
+    const r = await db.execute({
+      sql: `SELECT s.id, s.task_name, s.client_name, s.assignee, s.source, s.reason, s.skipped_at,
+                   o.decision         as override_decision,
+                   o.note             as override_note,
+                   o.created_task_gid as override_created_task_gid,
+                   o.overridden_at    as overridden_at
+              FROM auto_task_qa_skipped s
+              LEFT JOIN auto_task_qa_overrides o ON o.qa_skip_id = s.id
+             ORDER BY s.skipped_at DESC
+             LIMIT ?`,
+      args: [limit],
+    });
+    return r.rows as unknown as QaSkipRow[];
+  } catch {
+    return [];
+  }
+}
+
+export async function getQaSkipById(id: number): Promise<QaSkipRow | null> {
+  try {
+    await ensureSkipSchema();
+    const r = await db.execute({
+      sql: `SELECT s.id, s.task_name, s.client_name, s.assignee, s.source, s.reason, s.skipped_at,
+                   o.decision         as override_decision,
+                   o.note             as override_note,
+                   o.created_task_gid as override_created_task_gid,
+                   o.overridden_at    as overridden_at
+              FROM auto_task_qa_skipped s
+              LEFT JOIN auto_task_qa_overrides o ON o.qa_skip_id = s.id
+             WHERE s.id = ?
+             LIMIT 1`,
+      args: [id],
+    });
+    return (r.rows[0] as unknown as QaSkipRow) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function recordQaOverride(input: {
+  qaSkipId: number;
+  decision: 'correct_call' | 'wrong_call';
+  note: string | null;
+  createdTaskGid: string | null;
+  userId: string | null;
+}): Promise<void> {
+  await ensureSkipSchema();
+  await db.execute({
+    sql: 'DELETE FROM auto_task_qa_overrides WHERE qa_skip_id = ?',
+    args: [input.qaSkipId],
+  });
+  await db.execute({
+    sql: `INSERT INTO auto_task_qa_overrides
+            (qa_skip_id, decision, note, created_task_gid, overridden_by_user_id, overridden_at)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [
+      input.qaSkipId,
+      input.decision,
+      input.note,
+      input.createdTaskGid,
+      input.userId,
+      new Date().toISOString(),
+    ],
+  });
+}
+
+export interface QaAccuracy {
+  totalDecided: number;
+  correct: number;
+  wrong: number;
+  /** Fraction — null when no decisions have been recorded yet. */
+  accuracy: number | null;
+}
+
+export async function getQaAccuracy(): Promise<QaAccuracy> {
+  try {
+    await ensureSkipSchema();
+    const correct = (await scalar<number>(
+      "SELECT COUNT(*) FROM auto_task_qa_overrides WHERE decision = 'correct_call'",
+    )) ?? 0;
+    const wrong = (await scalar<number>(
+      "SELECT COUNT(*) FROM auto_task_qa_overrides WHERE decision = 'wrong_call'",
+    )) ?? 0;
+    const totalDecided = correct + wrong;
+    const accuracy = totalDecided > 0 ? correct / totalDecided : null;
+    return { totalDecided, correct, wrong, accuracy };
+  } catch {
+    return { totalDecided: 0, correct: 0, wrong: 0, accuracy: null };
   }
 }

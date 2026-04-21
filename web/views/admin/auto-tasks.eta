@@ -94,24 +94,36 @@
             <button type="submit" style="font-size: 12px; color: #94A3B8; background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 10px; cursor: pointer;">Undo</button>
           </form>
           <% } else { %>
+          <%
+            const labelStyle = 'display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#64748B;margin-bottom:3px;';
+            const inputStyle = 'width:100%;padding:5px 10px;background:#0B0B0B;border:1px solid rgba(255,255,255,0.10);border-radius:6px;color:#E2E8F0;font-family:var(--vendo-font);font-size:12px;box-sizing:border-box;';
+          %>
           <form method="POST" action="/admin/auto-tasks/reject"
-                style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; max-width: 520px;">
+                style="display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 0.5rem; align-items: end; max-width: 560px;">
             <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
             <input type="hidden" name="task_gid" value="<%= t.asana_task_gid %>" />
             <input type="hidden" name="task_name" value="<%= t.action_description %>" />
-            <input type="text" name="reason" placeholder="Reason *" required
-                   style="flex: 1 1 200px; min-width: 160px; padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
-            <input type="text" name="client_name" list="auto-task-client-options"
-                   placeholder="Client (blank = all)" value="<%= t.client_name || '' %>"
-                   title="Only reject this task for this client. Blank = reject for all clients."
-                   autocomplete="off"
-                   style="flex: 1 1 150px; min-width: 120px; padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
-            <input type="text" name="assignee" list="auto-task-assignee-options"
-                   placeholder="Assignee (blank = all)" value="<%= t.assignee || '' %>"
-                   title="Only reject this task for this assignee. Blank = reject for all assignees."
-                   autocomplete="off"
-                   style="flex: 1 1 140px; min-width: 120px; padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
-            <button type="submit" style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 5px 10px; cursor: pointer; white-space: nowrap;">Not relevant</button>
+            <label>
+              <span style="<%= labelStyle %>">Reason *</span>
+              <input type="text" name="reason" required
+                     placeholder="Why is this not relevant?"
+                     style="<%= inputStyle %>">
+            </label>
+            <label>
+              <span style="<%= labelStyle %>">Client <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(blank = all)</span></span>
+              <input type="text" name="client_name" list="auto-task-client-options"
+                     value="<%= t.client_name || '' %>"
+                     autocomplete="off"
+                     style="<%= inputStyle %>">
+            </label>
+            <label>
+              <span style="<%= labelStyle %>">Assignee <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(blank = all)</span></span>
+              <input type="text" name="assignee" list="auto-task-assignee-options"
+                     value="<%= t.assignee || '' %>"
+                     autocomplete="off"
+                     style="<%= inputStyle %>">
+            </label>
+            <button type="submit" style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 6px 12px; cursor: pointer; white-space: nowrap; height: 30px;">Not relevant</button>
           </form>
           <% } %>
         </td>
@@ -126,3 +138,70 @@
   When you mark a task as not relevant, any future task with the same text will be auto-skipped.
   Rejections can be undone at any time.
 </p>
+
+<% if (it.qaSkips && it.qaSkips.length > 0) { %>
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin: 2rem 0 0.75rem;">
+  <h3 style="font-size: 16px; font-weight: 600; color: #E2E8F0; margin: 0;">Recently blocked by the agent</h3>
+  <span style="font-size: 12px; color: #94A3B8;">Tell the agent whether it got these right — its accuracy is tracked on <a href="/admin/usage" style="color: #6366F1; text-decoration: none;">/admin/usage</a>.</span>
+</div>
+<div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Blocked task</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Scope</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Agent reason</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">When</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.qaSkips.forEach(s => {
+        const decided = !!s.override_decision;
+        const isWrong = s.override_decision === 'wrong_call';
+        const isRight = s.override_decision === 'correct_call';
+        const scope = [];
+        if (s.client_name) scope.push(s.client_name);
+        if (s.assignee) scope.push(s.assignee);
+        const scopeLabel = scope.length ? scope.join(' · ') : 'Any client / assignee';
+      %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); <%= isWrong ? 'background: rgba(251,146,60,0.04);' : isRight ? 'background: rgba(34,197,94,0.04);' : '' %>">
+        <td style="padding: 12px 16px; font-size: 13px; color: #E2E8F0; max-width: 360px;">
+          <div><%= s.task_name %></div>
+          <% if (s.source) { %><div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;"><%= s.source %></div><% } %>
+        </td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8;"><%= scopeLabel %></td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #FB923C; max-width: 260px;"><%= s.reason %></td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8; white-space: nowrap;"><%= fmt(s.skipped_at) %></td>
+        <td style="padding: 12px 16px;">
+          <% if (isWrong) { %>
+            <div style="font-size: 12px; color: #FB923C;">Created anyway
+              <% if (s.override_created_task_gid) { %>
+              · <a href="https://app.asana.com/0/0/<%= s.override_created_task_gid %>" target="_blank" rel="noopener noreferrer" style="color: #6366F1; text-decoration: none;">open</a>
+              <% } %>
+            </div>
+            <div style="font-size: 11px; color: #64748B; margin-top: 0.2rem;"><%= fmt(s.overridden_at) %></div>
+          <% } else if (isRight) { %>
+            <div style="font-size: 12px; color: #22C55E;">Agent was right</div>
+            <div style="font-size: 11px; color: #64748B; margin-top: 0.2rem;"><%= fmt(s.overridden_at) %></div>
+          <% } else { %>
+            <div style="display: flex; gap: 0.4rem; align-items: center;">
+              <form method="POST" action="/admin/auto-tasks/override/<%= s.id %>" style="display: inline;">
+                <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+                <input type="hidden" name="decision" value="correct_call" />
+                <button type="submit" style="font-size: 12px; color: #22C55E; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 4px 10px; cursor: pointer; white-space: nowrap;">Agent was right</button>
+              </form>
+              <form method="POST" action="/admin/auto-tasks/override/<%= s.id %>" style="display: inline;">
+                <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+                <input type="hidden" name="decision" value="wrong_call" />
+                <button type="submit" style="font-size: 12px; color: #FB923C; background: none; border: 1px solid rgba(251,146,60,0.4); border-radius: 6px; padding: 4px 10px; cursor: pointer; white-space: nowrap;">Create anyway</button>
+              </form>
+            </div>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>

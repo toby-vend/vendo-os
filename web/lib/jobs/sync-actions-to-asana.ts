@@ -446,6 +446,11 @@ interface CreateTaskOptions {
   forceDueDate?: string;
   /** Fallback Fathom meeting URL (when the action item itself has no deep link). */
   meetingUrl?: string | null;
+  /**
+   * Skip the rejection-rule and QA-agent checks. Used by the admin "Create
+   * anyway" flow on /admin/auto-tasks — the admin is explicitly overriding.
+   */
+  bypassQa?: boolean;
 }
 
 async function createAsanaTaskFromAction(
@@ -482,30 +487,33 @@ async function createAsanaTaskFromAction(
 
   const nameKey = normaliseForMatch(ukName);
 
-  // QA rejection — two layers, fast then thoughtful:
-  //   1. Exact normalised-text match against past rejection rules (free).
-  //   2. LLM QA (Haiku) for semantic near-duplicates when the exact check
-  //      misses. Fails open on any error so a hiccup never blocks a sync.
-  const rejectionReason = await getRejectionReason(nameKey, clientName, item.assignee || null);
-  if (rejectionReason) {
-    throw new TaskRejectedError(rejectionReason);
-  }
-  const qaVerdict = await validateTaskWithQa({
-    taskName: ukName,
-    clientName,
-    assignee: item.assignee || null,
-    source,
-  });
-  if (!qaVerdict.approve) {
-    const qaReason = qaVerdict.reason || 'QA agent flagged as duplicate or irrelevant';
-    void recordQaSkip({
+  // QA rejection — two layers, fast then thoughtful. Skipped entirely when
+  // the caller explicitly asks us to bypass (admin override flow).
+  if (!options.bypassQa) {
+    //   1. Exact normalised-text match against past rejection rules (free).
+    //   2. LLM QA (Haiku) for semantic near-duplicates when the exact check
+    //      misses. Fails open on any error so a hiccup never blocks a sync.
+    const rejectionReason = await getRejectionReason(nameKey, clientName, item.assignee || null);
+    if (rejectionReason) {
+      throw new TaskRejectedError(rejectionReason);
+    }
+    const qaVerdict = await validateTaskWithQa({
       taskName: ukName,
       clientName,
       assignee: item.assignee || null,
       source,
-      reason: qaReason,
     });
-    throw new TaskRejectedError(qaReason);
+    if (!qaVerdict.approve) {
+      const qaReason = qaVerdict.reason || 'QA agent flagged as duplicate or irrelevant';
+      void recordQaSkip({
+        taskName: ukName,
+        clientName,
+        assignee: item.assignee || null,
+        source,
+        reason: qaReason,
+      });
+      throw new TaskRejectedError(qaReason);
+    }
   }
 
   // Layer B dedupe: if a task with the same normalised name exists in ANY of
@@ -546,6 +554,31 @@ async function createAsanaTaskFromAction(
 interface SyncCount {
   created: number;
   skipped: number;
+}
+
+/**
+ * Admin "Create anyway" helper — creates a task in Asana for something the
+ * QA agent previously blocked. Bypasses both rejection rules and the agent;
+ * still runs project routing, UK English, and Layer B dedupe.
+ */
+export async function createTaskFromOverride(input: {
+  taskName: string;
+  clientName: string | null;
+  assignee: string | null;
+  source: string;
+}): Promise<string> {
+  const projects = await resolveProjects({
+    clientName: input.clientName,
+    invitees: [],
+    forceClientProject: !!input.clientName,
+  });
+  return createAsanaTaskFromAction(
+    input.source,
+    { description: input.taskName, assignee: input.assignee || undefined },
+    input.clientName,
+    projects,
+    { bypassQa: true },
+  );
 }
 
 /**

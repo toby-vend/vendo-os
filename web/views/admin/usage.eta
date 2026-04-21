@@ -119,6 +119,27 @@
   </div>
   <% } %>
 </div>
+
+<% if (it.qaAccuracy) { %>
+<%
+  const acc = it.qaAccuracy.accuracy;
+  const accPct = acc === null ? '—' : (acc * 100).toFixed(0) + '%';
+  const accColor = acc === null ? '#94A3B8' : (acc >= 0.9 ? '#22C55E' : acc >= 0.7 ? '#FACC15' : '#EF4444');
+%>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="card" style="padding: 1.25rem; border-left: 3px solid <%= accColor %>;">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Agent Accuracy</div>
+    <div style="font-size: 22px; font-weight: 700; color: <%= accColor %>;"><%= accPct %></div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">
+      <% if (it.qaAccuracy.totalDecided === 0) { %>
+        No verdicts yet — review agent blocks on <a href="/admin/auto-tasks" style="color: #6366F1; text-decoration: none;">the QA page</a>
+      <% } else { %>
+        <%= it.qaAccuracy.correct %> correct / <%= it.qaAccuracy.wrong %> wrong
+      <% } %>
+    </div>
+  </div>
+</div>
+<% } %>
 <% if (it.asanaVolume.bySource && it.asanaVolume.bySource.length > 0) { %>
 <div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">
   <table style="width: 100%; border-collapse: collapse;">
