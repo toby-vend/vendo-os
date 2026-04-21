@@ -189,6 +189,48 @@ export async function getRecentAutoTasks(limit = 100): Promise<AutoTaskRow[]> {
   );
 }
 
+// --- Dropdown options for the rejection form ---
+
+/** Active client labels for the searchable client dropdown. */
+export async function getClientOptions(): Promise<string[]> {
+  try {
+    const r = await db.execute(
+      "SELECT DISTINCT COALESCE(display_name, name) as label FROM clients WHERE status = 'active' ORDER BY label COLLATE NOCASE",
+    );
+    return r.rows.map((row) => (row.label as string) || '').filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Assignee names drawn from two sources, deduplicated:
+ *  - deliverable_team_members.name (active internal team)
+ *  - fathom_asana_synced.assignee  (past Fathom-supplied assignees)
+ */
+export async function getAssigneeOptions(): Promise<string[]> {
+  const seen = new Set<string>();
+  try {
+    const r = await db.execute(
+      'SELECT name FROM deliverable_team_members WHERE is_active = 1 ORDER BY name COLLATE NOCASE',
+    );
+    for (const row of r.rows) {
+      const n = ((row.name as string) || '').trim();
+      if (n) seen.add(n);
+    }
+  } catch { /* table may not exist yet */ }
+  try {
+    const r = await db.execute(
+      "SELECT DISTINCT assignee FROM fathom_asana_synced WHERE assignee IS NOT NULL AND assignee != '' ORDER BY assignee COLLATE NOCASE",
+    );
+    for (const row of r.rows) {
+      const n = ((row.assignee as string) || '').trim();
+      if (n) seen.add(n);
+    }
+  } catch { /* table may not exist yet */ }
+  return Array.from(seen).sort((a, b) => a.localeCompare(b));
+}
+
 // --- Summary counts for /admin/usage ---
 
 export async function getRejectionSummary(): Promise<{ totalRejected: number; thisMonth: number }> {

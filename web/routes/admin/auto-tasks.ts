@@ -4,6 +4,8 @@ import {
   recordRejection,
   undoRejection,
   normaliseForMatch,
+  getClientOptions,
+  getAssigneeOptions,
 } from '../../lib/queries/auto-tasks.js';
 
 /**
@@ -14,8 +16,12 @@ import {
 const adminAutoTasksRoutes: FastifyPluginAsync = async (app) => {
   // GET / — list recent auto-tasks with rejection status
   app.get('/', async (_request, reply) => {
-    const tasks = await getRecentAutoTasks(150);
-    reply.render('admin/auto-tasks', { tasks });
+    const [tasks, clientOptions, assigneeOptions] = await Promise.all([
+      getRecentAutoTasks(150),
+      getClientOptions(),
+      getAssigneeOptions(),
+    ]);
+    reply.render('admin/auto-tasks', { tasks, clientOptions, assigneeOptions });
   });
 
   // POST /reject — mark an auto-created task as "not relevant". Optional
