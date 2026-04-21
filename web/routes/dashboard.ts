@@ -1,7 +1,7 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { getDashboardStats } from '../lib/queries.js';
 import { getFinanceOverview, getRevenueTrend } from '../lib/queries/dashboards.js';
-import { getPipelineOverview, getStalledDeals } from '../lib/queries/pipeline.js';
+import { getPipelineOverview, countStalledDeals, VENDO_LOCATION_ID } from '../lib/queries/pipeline.js';
 
 export const dashboardRoutes: FastifyPluginAsync = async (app) => {
   app.get('/', async (request, reply) => {
@@ -13,13 +13,17 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
       getDashboardStats(),
     ]);
 
-    // Additional queries for admin users
+    // Additional queries for admin users.
+    // Pipeline data is scoped to Vendo's own GHL location so client sub-account
+    // pipelines (Invisalign, General Dentistry, etc.) don't bloat agency figures.
+    // Revenue trend pulls 4 months so we have two completed months to compare
+    // even when the current month's partial P&L row exists.
     const adminQueries = isAdmin
       ? Promise.all([
           getFinanceOverview(),
-          getPipelineOverview(),
-          getStalledDeals(14),
-          getRevenueTrend(2),
+          getPipelineOverview(undefined, VENDO_LOCATION_ID),
+          countStalledDeals(14, undefined, VENDO_LOCATION_ID),
+          getRevenueTrend(4),
         ])
       : Promise.resolve(null);
 
@@ -29,8 +33,8 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
     const data: Record<string, unknown> = { stats, isAdmin };
 
     if (adminResults) {
-      const [finance, pipelineOverviews, stalledDeals, revenueTrend] = adminResults;
-      // Aggregate across all pipelines
+      const [finance, pipelineOverviews, stalledCount, revenueTrend] = adminResults;
+      // Aggregate across Vendo's sales pipelines
       const pipeline = {
         totalOpen: pipelineOverviews.reduce((s, p) => s + p.totalOpen, 0),
         totalOpenValue: pipelineOverviews.reduce((s, p) => s + p.totalOpenValue, 0),
@@ -41,11 +45,19 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
         proposalsOut: pipelineOverviews.reduce((s, p) =>
           s + p.stages.filter(st => st.name.toLowerCase().includes('proposal')).reduce((ss, st) => ss + st.count, 0), 0),
       };
-      // Revenue trend: compare last 2 months
-      const current = revenueTrend.length > 0 ? revenueTrend[revenueTrend.length - 1] : null;
-      const previous = revenueTrend.length > 1 ? revenueTrend[revenueTrend.length - 2] : null;
+
+      // Separate the current (partial) month from completed months so the
+      // "vs last month" comparison is between two full completed months.
+      const nowMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+      const completed = revenueTrend.filter(r => r.period.slice(0, 7) !== nowMonth);
+      const currentMonthRow = revenueTrend.find(r => r.period.slice(0, 7) === nowMonth) ?? null;
+      const current = completed.length > 0 ? completed[completed.length - 1] : null;
+      const previous = completed.length > 1 ? completed[completed.length - 2] : null;
+
+      // Margin from last completed month; computed from income/expenses so a
+      // zero `net_profit` column (historical sync bug) doesn't mask the truth.
       const marginPct = current && current.income > 0
-        ? Math.round(current.net / current.income * 1000) / 10
+        ? Math.round((current.income - current.expenses) / current.income * 1000) / 10
         : 0;
       const revChange = current && previous && previous.income > 0
         ? Math.round((current.income - previous.income) / previous.income * 1000) / 10
@@ -53,10 +65,12 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
 
       data.finance = finance;
       data.pipeline = pipeline;
-      data.stalledCount = stalledDeals.length;
+      data.stalledCount = stalledCount;
       data.marginPct = marginPct;
       data.revChange = revChange;
-      data.currentIncome = current?.income ?? 0;
+      // Dashboard shows this under "vs Last Month" — use current month-to-date
+      // if available, else fall back to last completed month.
+      data.currentIncome = currentMonthRow?.income ?? current?.income ?? 0;
     }
 
     reply.render('dashboard', data);

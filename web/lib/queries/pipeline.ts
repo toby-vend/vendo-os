@@ -1,5 +1,10 @@
 import { rows, scalar } from './base.js';
 
+// Vendo's own GHL location (the agency's sales pipeline lives here).
+// Other location IDs in ghl_opportunities belong to client sub-accounts and
+// should be excluded from agency-level dashboards.
+export const VENDO_LOCATION_ID = 'IqXxEPhxyRi8uv1SvjN8';
+
 // --- Interfaces ---
 
 export interface PipelineOverview {
@@ -36,40 +41,54 @@ export interface OpportunityRow {
 
 // --- Pipeline ---
 
-export async function getPipelineOverview(pipelineId?: string): Promise<PipelineOverview[]> {
-  const pipelines = await rows<{ id: string; name: string }>(
-    pipelineId
-      ? 'SELECT id, name FROM ghl_pipelines WHERE id = ?'
-      : 'SELECT id, name FROM ghl_pipelines ORDER BY name',
-    pipelineId ? [pipelineId] : []
-  );
+export async function getPipelineOverview(pipelineId?: string, locationId?: string): Promise<PipelineOverview[]> {
+  // When locationId is provided, only return pipelines that actually contain
+  // opportunities belonging to that GHL location (i.e. Vendo's own sales pipelines,
+  // not client sub-account pipelines synced under the same tenant).
+  const pipelineSql = pipelineId
+    ? 'SELECT id, name FROM ghl_pipelines WHERE id = ?'
+    : locationId
+      ? `SELECT DISTINCT p.id, p.name FROM ghl_pipelines p
+         JOIN ghl_opportunities o ON o.pipeline_id = p.id
+         WHERE o.location_id = ?
+         ORDER BY p.name`
+      : 'SELECT id, name FROM ghl_pipelines ORDER BY name';
+  const pipelineArgs: string[] = pipelineId ? [pipelineId] : locationId ? [locationId] : [];
+  const pipelines = await rows<{ id: string; name: string }>(pipelineSql, pipelineArgs);
+
+  const locFilter = locationId ? 'AND o.location_id = ?' : '';
+  const locArg = (extra: (string | number)[]): (string | number)[] => locationId ? [...extra, locationId] : extra;
 
   const overviews: PipelineOverview[] = [];
 
   for (const p of pipelines) {
-    const stageData = await rows<{ id: string; name: string; position: number; count: number; value: number }>(`
+    const stageSql = `
       SELECT s.id, s.name, s.position,
              COUNT(o.id) as count,
              COALESCE(SUM(o.monetary_value), 0) as value
       FROM ghl_stages s
-      LEFT JOIN ghl_opportunities o ON o.stage_id = s.id AND o.status = 'open'
+      LEFT JOIN ghl_opportunities o ON o.stage_id = s.id AND o.status = 'open' ${locFilter}
       WHERE s.pipeline_id = ?
       GROUP BY s.id, s.name, s.position
       ORDER BY s.position
-    `, [p.id]);
+    `;
+    const stageData = await rows<{ id: string; name: string; position: number; count: number; value: number }>(
+      stageSql,
+      locationId ? [locationId, p.id] : [p.id]
+    );
 
-    const totalOpen = await scalar('SELECT COUNT(*) FROM ghl_opportunities WHERE pipeline_id = ? AND status = ?', [p.id, 'open']) ?? 0;
-    const totalOpenValue = await scalar('SELECT COALESCE(SUM(monetary_value), 0) FROM ghl_opportunities WHERE pipeline_id = ? AND status = ?', [p.id, 'open']) ?? 0;
+    const totalOpen = await scalar(`SELECT COUNT(*) FROM ghl_opportunities o WHERE o.pipeline_id = ? AND o.status = ? ${locFilter}`, locArg([p.id, 'open'])) ?? 0;
+    const totalOpenValue = await scalar(`SELECT COALESCE(SUM(monetary_value), 0) FROM ghl_opportunities o WHERE o.pipeline_id = ? AND o.status = ? ${locFilter}`, locArg([p.id, 'open'])) ?? 0;
 
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
     const monthStr = monthStart.toISOString();
 
-    const wonThisMonth = await scalar('SELECT COUNT(*) FROM ghl_opportunities WHERE pipeline_id = ? AND status = ? AND updated_at >= ?', [p.id, 'won', monthStr]) ?? 0;
-    const wonThisMonthValue = await scalar('SELECT COALESCE(SUM(monetary_value), 0) FROM ghl_opportunities WHERE pipeline_id = ? AND status = ? AND updated_at >= ?', [p.id, 'won', monthStr]) ?? 0;
-    const lostThisMonth = await scalar('SELECT COUNT(*) FROM ghl_opportunities WHERE pipeline_id = ? AND status = ? AND updated_at >= ?', [p.id, 'lost', monthStr]) ?? 0;
-    const totalDeals = await scalar('SELECT COUNT(*) FROM ghl_opportunities WHERE pipeline_id = ?', [p.id]) ?? 0;
+    const wonThisMonth = await scalar(`SELECT COUNT(*) FROM ghl_opportunities o WHERE o.pipeline_id = ? AND o.status = ? AND o.updated_at >= ? ${locFilter}`, locArg([p.id, 'won', monthStr])) ?? 0;
+    const wonThisMonthValue = await scalar(`SELECT COALESCE(SUM(monetary_value), 0) FROM ghl_opportunities o WHERE o.pipeline_id = ? AND o.status = ? AND o.updated_at >= ? ${locFilter}`, locArg([p.id, 'won', monthStr])) ?? 0;
+    const lostThisMonth = await scalar(`SELECT COUNT(*) FROM ghl_opportunities o WHERE o.pipeline_id = ? AND o.status = ? AND o.updated_at >= ? ${locFilter}`, locArg([p.id, 'lost', monthStr])) ?? 0;
+    const totalDeals = await scalar(`SELECT COUNT(*) FROM ghl_opportunities o WHERE o.pipeline_id = ? ${locFilter}`, locArg([p.id])) ?? 0;
 
     overviews.push({
       pipeline_id: p.id,
@@ -113,9 +132,11 @@ export async function getWonDeals(days = 30, pipelineId?: string): Promise<Oppor
   `, args);
 }
 
-export async function getStalledDeals(days = 14, pipelineId?: string): Promise<OpportunityRow[]> {
-  const where = pipelineId ? 'AND o.pipeline_id = ?' : '';
-  const args: (string | number)[] = pipelineId ? [days, pipelineId] : [days];
+export async function getStalledDeals(days = 14, pipelineId?: string, locationId?: string): Promise<OpportunityRow[]> {
+  const clauses: string[] = [];
+  const args: (string | number)[] = [days];
+  if (pipelineId) { clauses.push('AND o.pipeline_id = ?'); args.push(pipelineId); }
+  if (locationId) { clauses.push('AND o.location_id = ?'); args.push(locationId); }
   return rows<OpportunityRow>(`
     SELECT o.*, s.name as stage_name, p.name as pipeline_name,
            CAST(julianday('now') - julianday(COALESCE(o.last_stage_change_at, o.created_at)) AS INTEGER) as days_in_stage
@@ -123,10 +144,23 @@ export async function getStalledDeals(days = 14, pipelineId?: string): Promise<O
     LEFT JOIN ghl_stages s ON o.stage_id = s.id
     LEFT JOIN ghl_pipelines p ON o.pipeline_id = p.id
     WHERE o.status = 'open'
-      AND julianday('now') - julianday(COALESCE(o.last_stage_change_at, o.created_at)) >= ? ${where}
+      AND julianday('now') - julianday(COALESCE(o.last_stage_change_at, o.created_at)) >= ? ${clauses.join(' ')}
     ORDER BY days_in_stage DESC
     LIMIT 20
   `, args);
+}
+
+export async function countStalledDeals(days = 14, pipelineId?: string, locationId?: string): Promise<number> {
+  const clauses: string[] = [];
+  const args: (string | number)[] = [days];
+  if (pipelineId) { clauses.push('AND o.pipeline_id = ?'); args.push(pipelineId); }
+  if (locationId) { clauses.push('AND o.location_id = ?'); args.push(locationId); }
+  const n = await scalar<number>(`
+    SELECT COUNT(*) FROM ghl_opportunities o
+    WHERE o.status = 'open'
+      AND julianday('now') - julianday(COALESCE(o.last_stage_change_at, o.created_at)) >= ? ${clauses.join(' ')}
+  `, args);
+  return n ?? 0;
 }
 
 export async function getOpportunityDetail(id: string): Promise<OpportunityRow | null> {

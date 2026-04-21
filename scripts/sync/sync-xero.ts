@@ -204,19 +204,23 @@ async function syncPnl(client: XeroClient): Promise<void> {
       const totalCos = parsePnlValue(rows, 'Less Cost of Sales');
       const grossProfit = parsePnlValue(rows, 'Gross Profit');
       const totalExpenses = parsePnlValue(rows, 'Less Operating Expenses') || parsePnlValue(rows, 'Expenses');
-      const netProfit = parsePnlValue(rows, 'Net Profit');
+      // Xero doesn't always emit a "Net Profit" row at the section level; fall
+      // back to income - expenses so the column is never silently zero.
+      const parsedNet = parsePnlValue(rows, 'Net Profit');
+      const netProfit = parsedNet !== 0 ? parsedNet : totalIncome - totalExpenses;
+
+      // Clear any existing rows for this calendar month before inserting.
+      // Historical bad data wrote duplicate rows (e.g. period_start=2026-03-31
+      // alongside 2026-03-01) because ON CONFLICT(period_start, period_end)
+      // doesn't fire when either date differs. Keying on month kills dupes.
+      db.run(
+        `DELETE FROM xero_pnl_monthly WHERE strftime('%Y-%m', period_start) = ?`,
+        [fromDate.slice(0, 7)]
+      );
 
       db.run(`
         INSERT INTO xero_pnl_monthly (period_start, period_end, total_income, total_cost_of_sales, gross_profit, total_expenses, net_profit, raw_report, synced_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(period_start, period_end) DO UPDATE SET
-          total_income = excluded.total_income,
-          total_cost_of_sales = excluded.total_cost_of_sales,
-          gross_profit = excluded.gross_profit,
-          total_expenses = excluded.total_expenses,
-          net_profit = excluded.net_profit,
-          raw_report = excluded.raw_report,
-          synced_at = excluded.synced_at
       `, [fromDate, toDate, totalIncome, totalCos, grossProfit, totalExpenses, netProfit, JSON.stringify(report), now]);
 
       log('XERO', `  P&L ${fromDate}: income=${totalIncome}, expenses=${totalExpenses}, net=${netProfit}`);
@@ -241,32 +245,49 @@ async function syncBankSummary(client: XeroClient): Promise<void> {
   try {
     const resp = await client.getBankSummary(fromDate, toDate);
     const report = resp.Reports?.[0];
-    if (!report?.Rows) return;
+    if (!report?.Rows) {
+      logError('XERO', 'Bank summary returned no rows. Likely missing scope — re-authorise: npm run xero:auth');
+      return;
+    }
 
     // Clear existing for this period
     db.run('DELETE FROM xero_bank_summary WHERE period_start = ? AND period_end = ?', [fromDate, toDate]);
 
-    for (const row of report.Rows) {
-      if (row.RowType === 'Section' && row.Rows) {
-        for (const subRow of row.Rows) {
-          if (subRow.Cells && subRow.Cells.length >= 3) {
-            const accountName = subRow.Cells[0]?.Value;
-            const opening = parseFloat(subRow.Cells[1]?.Value || '0') || 0;
-            const closing = parseFloat(subRow.Cells[2]?.Value || '0') || 0;
-
-            if (accountName && !accountName.startsWith('Total')) {
-              db.run(`
-                INSERT INTO xero_bank_summary (account_name, opening_balance, closing_balance, period_start, period_end, synced_at)
-                VALUES (?, ?, ?, ?, ?, ?)
-              `, [accountName, opening, closing, fromDate, toDate, now]);
-            }
-          }
+    // Xero bank summary report has a variable structure: header row(s), one or
+    // more Section rows containing account rows, and a totals row. Walk every
+    // row/subrow and treat anything with 3+ cells and a non-header label as an
+    // account line. The final "Total" row is explicitly skipped.
+    let inserted = 0;
+    const visit = (rowList: Array<{ RowType: string; Title?: string; Cells?: Array<{ Value: string }>; Rows?: Array<unknown> }>): void => {
+      for (const row of rowList) {
+        if (row.Rows && Array.isArray(row.Rows)) {
+          // Nested section
+          visit(row.Rows as typeof rowList);
         }
+        if (row.RowType !== 'Row') continue;
+        const cells = row.Cells;
+        if (!cells || cells.length < 3) continue;
+        const accountName = cells[0]?.Value;
+        if (!accountName || accountName.startsWith('Total') || accountName === 'Bank Accounts') continue;
+        // Detect header row ("Opening Balance" etc.) by non-numeric values
+        const opening = parseFloat(cells[1]?.Value || '');
+        const closing = parseFloat(cells[cells.length - 1]?.Value || '');
+        if (Number.isNaN(opening) && Number.isNaN(closing)) continue;
+        db.run(`
+          INSERT INTO xero_bank_summary (account_name, opening_balance, closing_balance, period_start, period_end, synced_at)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `, [accountName, Number.isNaN(opening) ? 0 : opening, Number.isNaN(closing) ? 0 : closing, fromDate, toDate, now]);
+        inserted++;
       }
-    }
+    };
+    visit(report.Rows);
 
     saveDb();
-    log('XERO', 'Bank summary synced');
+    if (inserted === 0) {
+      logError('XERO', 'Bank summary parsed but wrote 0 accounts — report structure may have changed, inspect raw response');
+    } else {
+      log('XERO', `Bank summary synced (${inserted} accounts)`);
+    }
   } catch (err) {
     logError('XERO', 'Bank summary failed', err);
   }

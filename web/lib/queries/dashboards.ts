@@ -408,10 +408,21 @@ export async function getClientMER(clientId: number, months = 6): Promise<Client
 // ============================================================
 
 export async function getFinanceOverview(): Promise<FinanceOverview> {
+  // MRR = last completed calendar month's total income from P&L.
+  // MAX() collapses duplicate period_start rows that the sync has historically created.
+  // Falls back to current month's ACCREC invoice total if P&L is unavailable.
   const [mrrRow, cashRow, invoicedRow, paidRow, outstandingRow, overdueRow] = await Promise.all([
-    scalar<number>(`SELECT COALESCE(SUM(total), 0) / NULLIF(
-      (SELECT COUNT(DISTINCT strftime('%Y-%m', date)) FROM xero_invoices WHERE type = 'ACCREC' AND status IN ('PAID','AUTHORISED')), 0
-    ) FROM xero_invoices WHERE type = 'ACCREC' AND status IN ('PAID','AUTHORISED')`),
+    scalar<number>(`
+      WITH monthly AS (
+        SELECT strftime('%Y-%m', period_start) AS month,
+               MAX(total_income) AS income
+        FROM xero_pnl_monthly
+        GROUP BY month
+      )
+      SELECT income FROM monthly
+      WHERE month < strftime('%Y-%m', 'now')
+      ORDER BY month DESC LIMIT 1
+    `),
     scalar<number>(`SELECT COALESCE(SUM(closing_balance), 0) FROM xero_bank_summary`),
     scalar<number>(`SELECT COALESCE(SUM(total), 0) FROM xero_invoices WHERE type = 'ACCREC' AND date >= date('now', '-30 days')`),
     scalar<number>(`SELECT COALESCE(SUM(total), 0) FROM xero_invoices WHERE type = 'ACCREC' AND status = 'PAID' AND date >= date('now', '-30 days')`),
@@ -435,14 +446,17 @@ export async function getFinanceOverview(): Promise<FinanceOverview> {
 }
 
 export async function getRevenueTrend(months = 12): Promise<RevenueTrendRow[]> {
+  // Collapse duplicate period_start rows by month, and recompute net from income - expenses
+  // because the P&L sync has historically written net_profit = 0.
   return rows<RevenueTrendRow>(`
-    SELECT period_start as period,
-           COALESCE(total_income, 0) as income,
-           COALESCE(total_expenses, 0) as expenses,
-           COALESCE(net_profit, 0) as net
+    SELECT strftime('%Y-%m-01', period_start) AS period,
+           COALESCE(MAX(total_income), 0) AS income,
+           COALESCE(MAX(total_expenses), 0) AS expenses,
+           COALESCE(MAX(total_income), 0) - COALESCE(MAX(total_expenses), 0) AS net
     FROM xero_pnl_monthly
     WHERE period_start >= date('now', '-' || ? || ' months')
-    ORDER BY period_start
+    GROUP BY strftime('%Y-%m', period_start)
+    ORDER BY period
   `, [months]);
 }
 
