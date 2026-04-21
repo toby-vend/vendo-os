@@ -33,6 +33,7 @@ import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
 import { tasksRoutes } from './routes/tasks.js';
 import { driveWebhookRoutes } from './routes/drive-webhook.js';
+import { slackInteractRoutes } from './routes/slack-interact.js';
 import { fathomWebhookRoutes } from './routes/fathom-webhook.js';
 import { driveCronRoutes } from './routes/drive-cron.js';
 import { taskRunRoutes } from './routes/task-runs.js';
@@ -258,7 +259,9 @@ app.addHook('onSend', async (_request, reply) => {
 });
 
 // Form body parser — supports multi-value fields (e.g. checkboxes with same name)
-app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (_req, body, done) => {
+app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (req, body, done) => {
+  // Stash the raw body for signature-verifying endpoints (Slack interactions).
+  (req as unknown as { rawBody?: string }).rawBody = String(body);
   const parsed: Record<string, string[]> = {};
   String(body).split('&').forEach(pair => {
     const [key, val] = pair.split('=');
@@ -349,6 +352,7 @@ app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });
 app.register(tasksRoutes, { prefix: '/asana-tasks' });
 app.register(driveWebhookRoutes, { prefix: '/api/drive' });
+app.register(slackInteractRoutes, { prefix: '/api/slack' });
 app.register(fathomWebhookRoutes, { prefix: '/api/fathom' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
