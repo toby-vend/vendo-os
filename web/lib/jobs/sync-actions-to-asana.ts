@@ -52,7 +52,7 @@ class TaskRejectedError extends Error {
   }
 }
 
-interface ActionItem {
+export interface ActionItem {
   description: string;
   assignee?: string;
   assigneeEmail?: string;
@@ -268,7 +268,7 @@ function parseActionLine(line: string): ActionItem {
   return { description: text, assignee, dueDate };
 }
 
-function parseActionItems(raw: string | null): ActionItem[] {
+export function parseActionItems(raw: string | null): ActionItem[] {
   if (!raw) return [];
   const items: ActionItem[] = [];
   try {

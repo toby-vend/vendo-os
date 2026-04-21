@@ -6,6 +6,8 @@ import { enrichMeeting } from '../lib/meeting-enrichment.js';
 import { createTasksForMeeting } from '../lib/jobs/sync-actions-to-asana.js';
 import { classifyMeeting } from '../lib/classification/meeting-classifier.js';
 import { logRoutingDecision } from '../lib/classification/router.js';
+import { postDirectorActionItems, dmTobyFailsafe } from '../lib/classification/slack.js';
+import { parseActionItems } from '../lib/jobs/sync-actions-to-asana.js';
 
 /**
  * Fathom Webhook Handler
@@ -285,6 +287,37 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
         );
       } catch (err) {
         request.log.error({ err, recordingId: meeting.recording_id }, 'Asana task creation threw');
+      }
+    }
+
+    // DIRECTOR: one Slack message per action item to #claude-director-meetings.
+    // Button on each message lets the viewer copy it to their own Asana.
+    if (classification.type === 'DIRECTOR' && actionItemsJson) {
+      try {
+        const actionItems = parseActionItems(actionItemsJson);
+        const { posted } = await postDirectorActionItems({
+          meetingId: String(meeting.recording_id),
+          meetingTitle: meeting.title || meeting.meeting_title || 'Untitled',
+          meetingUrl: meeting.share_url || meeting.url || null,
+          actionItems,
+        });
+        if (posted > 0) routedTo.push(`slack_director_${posted}_actions`);
+      } catch (err) {
+        request.log.error({ err, recordingId: meeting.recording_id }, 'Director Slack post failed');
+      }
+    }
+
+    // FAILSAFE: DM Toby so he can review the unparseable meeting manually.
+    if (classification.type === 'FAILSAFE') {
+      try {
+        const sent = await dmTobyFailsafe({
+          meetingTitle: meeting.title || meeting.meeting_title || 'Untitled',
+          meetingUrl: meeting.share_url || meeting.url || null,
+          reason: classification.reason,
+        });
+        if (sent) routedTo.push('dm_toby_failsafe');
+      } catch (err) {
+        request.log.error({ err, recordingId: meeting.recording_id }, 'Fail-safe DM failed');
       }
     }
 
