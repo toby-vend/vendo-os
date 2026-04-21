@@ -241,6 +241,96 @@ export async function checkUserWithinLimit(userId: string): Promise<{ allowed: b
   return { allowed: true };
 }
 
+// --- Monthly forecast ---
+
+export interface MonthlyForecast {
+  monthStart: string;
+  todayIso: string;
+  daysElapsed: number;
+  daysInMonth: number;
+  monthToDatePence: number;
+  projectedMonthPence: number;
+  annualisedPence: number;
+}
+
+/**
+ * Project the current month's full spend based on pro-rating the spend
+ * recorded so far. Annualised figure is projected-month × 12 — a naive but
+ * useful ceiling for budget conversations.
+ */
+export async function getMonthlyForecast(): Promise<MonthlyForecast> {
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const monthStart = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+  const todayIso = now.toISOString().slice(0, 10);
+  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const daysElapsed = Math.max(1, now.getUTCDate());
+
+  const monthToDatePence = (await scalar<number>(
+    `SELECT COALESCE(SUM(${COST_PENCE_SQL}), 0) FROM api_usage WHERE created_at >= ?`,
+    [monthStart],
+  )) ?? 0;
+
+  const projectedMonthPence = Math.round((monthToDatePence / daysElapsed) * daysInMonth);
+  const annualisedPence = projectedMonthPence * 12;
+
+  return {
+    monthStart,
+    todayIso,
+    daysElapsed,
+    daysInMonth,
+    monthToDatePence,
+    projectedMonthPence,
+    annualisedPence,
+  };
+}
+
+// --- Asana task volume (fed from fathom_asana_synced) ---
+
+export interface AsanaVolumeRow {
+  source_type: string;
+  total: number;
+  today: number;
+  month: number;
+}
+
+export interface AsanaVolumeSummary {
+  totalAllTime: number;
+  totalToday: number;
+  totalThisMonth: number;
+  projectedThisMonth: number;
+  bySource: AsanaVolumeRow[];
+}
+
+export async function getAsanaTaskVolume(): Promise<AsanaVolumeSummary> {
+  const now = new Date();
+  const monthStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-01`;
+  const today = now.toISOString().slice(0, 10);
+  const daysInMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate();
+  const daysElapsed = Math.max(1, now.getUTCDate());
+
+  try {
+    const bySource = await rows<AsanaVolumeRow>(
+      `SELECT COALESCE(source_type, 'unknown') as source_type,
+              COUNT(*) as total,
+              SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as today,
+              SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as month
+         FROM fathom_asana_synced
+         GROUP BY source_type
+         ORDER BY total DESC`,
+      [today, monthStart],
+    );
+    const totalAllTime = bySource.reduce((sum, r) => sum + Number(r.total), 0);
+    const totalToday = bySource.reduce((sum, r) => sum + Number(r.today), 0);
+    const totalThisMonth = bySource.reduce((sum, r) => sum + Number(r.month), 0);
+    const projectedThisMonth = Math.round((totalThisMonth / daysElapsed) * daysInMonth);
+    return { totalAllTime, totalToday, totalThisMonth, projectedThisMonth, bySource };
+  } catch {
+    return { totalAllTime: 0, totalToday: 0, totalThisMonth: 0, projectedThisMonth: 0, bySource: [] };
+  }
+}
+
 // --- Per-user limit info for admin view ---
 
 export interface UserWithUsageRow {

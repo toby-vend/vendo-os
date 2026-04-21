@@ -1,9 +1,17 @@
 import { recordUsage, checkUserWithinLimit } from './queries/usage.js';
 
+export type UsageFeature =
+  | 'chat'
+  | 'task_generation'
+  | 'qa_check'
+  | 'classification'
+  | 'concern_detection'
+  | 'meeting_enrichment';
+
 export async function trackUsage(params: {
   userId: string | null;
   model: string;
-  feature: 'chat' | 'task_generation' | 'qa_check' | 'classification';
+  feature: UsageFeature;
   inputTokens: number;
   outputTokens: number;
 }): Promise<void> {

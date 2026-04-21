@@ -4,6 +4,8 @@ import {
   getUsageByModel,
   getUsageByFeature,
   getAllUsersWithUsage,
+  getMonthlyForecast,
+  getAsanaTaskVolume,
   setUserCostLimits,
   estimateCostGbp,
 } from '../../lib/queries/usage.js';
@@ -14,11 +16,13 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
     const { from, to } = request.query as { from?: string; to?: string };
     const filter = { from: from || undefined, to: to || undefined };
 
-    const [summary, usersWithUsage, byModel, byFeature] = await Promise.all([
+    const [summary, usersWithUsage, byModel, byFeature, forecast, asanaVolume] = await Promise.all([
       getUsageSummary(filter),
       getAllUsersWithUsage(filter),
       getUsageByModel(filter),
       getUsageByFeature(filter),
+      getMonthlyForecast(),
+      getAsanaTaskVolume(),
     ]);
 
     reply.render('admin/usage', {
@@ -26,6 +30,8 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
       usersWithUsage,
       byModel,
       byFeature,
+      forecast,
+      asanaVolume,
       estimateCostGbp,
       from: from || '',
       to: to || '',

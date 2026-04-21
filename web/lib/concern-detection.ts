@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { randomUUID } from 'crypto';
 import { db } from './queries/base.js';
+import { trackUsage } from './usage-tracker.js';
 
 /**
  * Real-time client concern detection.
@@ -99,6 +100,15 @@ async function runHaiku(summary: string | null, transcript: string | null): Prom
     messages: [{ role: 'user', content: parts.join('\n\n') }],
     max_tokens: 300,
     temperature: 0,
+  });
+
+  // Feed the /admin/usage dashboard (fire-and-forget).
+  void trackUsage({
+    userId: null,
+    model: MODEL,
+    feature: 'concern_detection',
+    inputTokens: response.usage?.input_tokens ?? 0,
+    outputTokens: response.usage?.output_tokens ?? 0,
   });
 
   const textBlock = response.content.find((b) => b.type === 'text');
