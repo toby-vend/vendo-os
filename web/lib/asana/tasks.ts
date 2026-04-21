@@ -53,3 +53,33 @@ export async function removeAsanaTaskFromProject(taskGid: string, projectGid: st
     body: JSON.stringify({ data: { project: projectGid } }),
   });
 }
+
+/**
+ * Create a private personal task in the assignee's "My Tasks". No projects
+ * are attached so the task is only visible to the assignee (Asana's
+ * semantics for an effectively private task).
+ */
+export async function createPrivateAsanaTask(input: {
+  name: string;
+  assigneeGid: string;
+  dueOn: string;
+  notes?: string;
+}): Promise<string> {
+  const workspaceGid = process.env.ASANA_WORKSPACE_GID || process.env.ASANA_WORKSPACE_ID || '';
+  if (!workspaceGid) throw new Error('ASANA_WORKSPACE_GID not configured');
+  const res = await asanaFetch('/tasks', {
+    method: 'POST',
+    body: JSON.stringify({
+      data: {
+        name: input.name.slice(0, 200),
+        notes: input.notes || '',
+        due_on: input.dueOn,
+        assignee: input.assigneeGid,
+        workspace: workspaceGid,
+        // No `projects` — task stays in the assignee's "My Tasks" only.
+      },
+    }),
+  });
+  const json = (await res.json()) as { data: { gid: string } };
+  return json.data.gid;
+}

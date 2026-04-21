@@ -17,7 +17,9 @@ import {
   assignAsanaTask,
   addAsanaTaskToProject,
   removeAsanaTaskFromProject,
+  createPrivateAsanaTask,
 } from '../../lib/asana/tasks.js';
+import type { SessionUser } from '../../lib/auth.js';
 import { resolveAssignee } from '../../lib/asana/assignee.js';
 import { db } from '../../lib/queries/base.js';
 
@@ -66,6 +68,42 @@ const adminAutoTasksRoutes: FastifyPluginAsync = async (app) => {
       userId: session?.userId || null,
     });
     reply.redirect('/admin/auto-tasks?rejected=1');
+  });
+
+  // POST /add-to-my-asana — copy a task into the current user's private
+  // Asana "My Tasks" (no projects → only visible to them). Due today.
+  app.post('/add-to-my-asana', async (request, reply) => {
+    const body = request.body as { task_name?: string; source?: string };
+    const taskName = (body.task_name || '').trim();
+    if (!taskName) {
+      reply.redirect('/admin/auto-tasks?error=missing_fields');
+      return;
+    }
+    const currentUser = (request as unknown as { user?: SessionUser }).user;
+    if (!currentUser?.email) {
+      reply.redirect('/admin/auto-tasks?error=not_logged_in');
+      return;
+    }
+    const assigneeGid = await resolveAssignee(currentUser.name, currentUser.email);
+    if (!assigneeGid) {
+      reply.redirect('/admin/auto-tasks?error=asana_user_not_found');
+      return;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const sourceLine = body.source ? `Copied from: ${body.source}\n\n` : '';
+    const notes = `${sourceLine}Original task: ${taskName}\n\nAdded from Vendo OS /admin/auto-tasks on ${today}.`;
+    try {
+      await createPrivateAsanaTask({
+        name: taskName,
+        assigneeGid,
+        dueOn: today,
+        notes,
+      });
+      reply.redirect('/admin/auto-tasks?added_to_my_asana=1');
+    } catch (err) {
+      request.log.error({ err, taskName }, 'Add to personal Asana failed');
+      reply.redirect('/admin/auto-tasks?error=add_failed');
+    }
   });
 
   // POST /update-assignee — reassign the Asana task and persist the new
