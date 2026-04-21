@@ -25,6 +25,8 @@ interface ActionItem {
   assignee?: string;
   assigneeEmail?: string;
   dueDate?: string;
+  /** Fathom deep link to the exact moment this action item was captured. */
+  playbackUrl?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -249,6 +251,7 @@ function parseActionItems(raw: string | null): ActionItem[] {
             assignee: item.assignee?.name || (typeof item.assignee === 'string' ? item.assignee : undefined) || item.owner,
             assigneeEmail: item.assignee?.email || item.assigneeEmail,
             dueDate: item.due_date || item.dueDate,
+            playbackUrl: item.recording_playback_url || item.playback_url || item.playbackUrl,
           });
         }
       }
@@ -337,6 +340,8 @@ interface CreateTaskOptions {
   meetingDate?: string | null;
   /** Override the derived due date (used by escalations/NPS where "today"/"+3 days" wins). */
   forceDueDate?: string;
+  /** Fallback Fathom meeting URL (when the action item itself has no deep link). */
+  meetingUrl?: string | null;
 }
 
 async function createAsanaTaskFromAction(
@@ -357,7 +362,19 @@ async function createAsanaTaskFromAction(
   }
 
   const ukName = toUkEnglish(item.description).slice(0, 200);
-  const ukNotes = toUkEnglish(`Source: ${source}\n\nOriginal: ${item.description}`);
+  // Prefer the per-action playback URL (jumps to the exact moment) and fall
+  // back to the meeting URL for sources without one (escalations / NPS).
+  const fathomUrl = item.playbackUrl || options.meetingUrl || null;
+  const notesLines = [
+    `Source: ${source}`,
+    '',
+    `Original: ${item.description}`,
+  ];
+  if (fathomUrl) {
+    notesLines.push('');
+    notesLines.push(item.playbackUrl ? `Fathom — jump to moment: ${fathomUrl}` : `Fathom recording: ${fathomUrl}`);
+  }
+  const ukNotes = toUkEnglish(notesLines.join('\n'));
   const resolvedProject = projectGid || ASANA_DEFAULT_PROJECT_GID;
 
   // Layer B dedupe: if a task with the same normalised name already exists in
@@ -416,6 +433,8 @@ export async function createTasksForMeeting(input: {
   clientName: string | null;
   /** Meeting start time (ISO) — drives the due-on rule (meeting day / next day after 3pm London). */
   meetingDate?: string | null;
+  /** Fathom recording URL — used as a fallback when an action item has no per-timestamp link. */
+  meetingUrl?: string | null;
 }): Promise<SyncCount> {
   if (!ASANA_API_KEY || !input.rawActionItems) return { created: 0, skipped: 0 };
   await ensureSyncTable();
@@ -443,7 +462,7 @@ export async function createTasksForMeeting(input: {
         item,
         input.clientName,
         projectGid,
-        { meetingDate: input.meetingDate },
+        { meetingDate: input.meetingDate, meetingUrl: input.meetingUrl },
       );
       await recordSync(input.meetingId, item.description, taskGid, item.assignee || null, 'meeting', sourceId);
       created++;
@@ -459,7 +478,7 @@ async function syncMeetingActions(): Promise<SyncCount> {
   let created = 0;
   let skipped = 0;
   const { rows } = await db.execute({
-    sql: `SELECT id, title, raw_action_items, client_name, date
+    sql: `SELECT id, title, raw_action_items, client_name, date, url
           FROM meetings
           WHERE date >= ? AND raw_action_items IS NOT NULL AND raw_action_items != ''
           ORDER BY date DESC`,
@@ -474,6 +493,7 @@ async function syncMeetingActions(): Promise<SyncCount> {
       rawActionItems: row.raw_action_items as string,
       clientName: (row.client_name as string) || null,
       meetingDate: (row.date as string) || null,
+      meetingUrl: (row.url as string) || null,
     });
     created += result.created;
     skipped += result.skipped;
