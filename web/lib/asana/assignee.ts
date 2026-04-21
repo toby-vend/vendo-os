@@ -18,6 +18,25 @@ const ASANA_BASE_URL = 'https://app.asana.com/api/1.0';
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
+/**
+ * Only Asana users whose email sits in one of these domains can be assigned
+ * auto-tasks. Guests / clients added to the Asana workspace must never be
+ * picked up as an assignee by the sync pipeline. Mirrors
+ * scripts/matching/team.ts' VENDO_TEAM_DOMAINS so there's one source of truth.
+ */
+const VENDO_EMAIL_DOMAINS = new Set([
+  'vendodigital.co.uk',
+  'vendodigital.com',
+  'vendo.digital',
+]);
+
+function isVendoEmail(email: string | undefined | null): boolean {
+  if (!email) return false;
+  const at = email.lastIndexOf('@');
+  if (at === -1) return false;
+  return VENDO_EMAIL_DOMAINS.has(email.slice(at + 1).toLowerCase().trim());
+}
+
 interface AsanaUser { gid: string; name: string; email?: string }
 
 let _userMap: Map<string, string> | null = null;
@@ -41,7 +60,11 @@ async function fetchAsanaUsers(): Promise<AsanaUser[]> {
 async function buildUserMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   const users = await fetchAsanaUsers();
+  // Guests / clients in the workspace must not be picked up as assignees —
+  // only include users whose email is a Vendo domain. A user with no email
+  // exposed via the API is dropped to err on the side of safety.
   for (const u of users) {
+    if (!isVendoEmail(u.email)) continue;
     const full = u.name.toLowerCase().trim();
     map.set(full, u.gid);
     map.set(norm(u.name), u.gid);
@@ -91,6 +114,10 @@ export function resetUserCache(): void {
  * (full name, first name, last name, email, normalised letters-only, initials).
  */
 export async function resolveAssignee(nameOrInitials?: string, email?: string): Promise<string | undefined> {
+  // Hard guard: if the caller supplied an email and it isn't on a Vendo
+  // domain, refuse to resolve. Without this, a same-named external contact
+  // could fall through to the name lookup and land on a Vendo staff member.
+  if (email && !isVendoEmail(email)) return undefined;
   const map = await getUserMap();
   const candidates: string[] = [];
   if (email) candidates.push(email.toLowerCase().trim());
