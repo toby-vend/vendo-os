@@ -1,0 +1,98 @@
+<% layout('/layouts/base') %>
+
+<%
+  const sourceLabels = {
+    meeting: 'Meeting',
+    escalation: 'Escalation',
+    nps: 'NPS',
+  };
+  const fmt = (iso) => {
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }); }
+    catch { return iso.slice(0, 16).replace('T', ' '); }
+  };
+  const q = (typeof it.query === 'object' && it.query) ? it.query : {};
+%>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <div>
+    <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600;">Auto-Task QA</h2>
+    <p style="font-size: 13px; color: #94A3B8; margin-top: 0.25rem;">Tasks auto-created by the Fathom pipeline. Mark irrelevant ones so they're skipped next time.</p>
+  </div>
+</div>
+
+<div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Task</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Source</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Client / Meeting</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Assignee</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Created</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!it.tasks || it.tasks.length === 0) { %>
+      <tr><td colspan="6" style="padding: 2rem; text-align: center; color: #64748B;">No auto-tasks recorded yet.</td></tr>
+      <% } else { %>
+      <% it.tasks.forEach(t => {
+        const isRejected = !!t.rejection_reason;
+      %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); <%= isRejected ? 'background: rgba(239,68,68,0.04);' : '' %>">
+        <td style="padding: 12px 16px; font-size: 13px; color: #E2E8F0; max-width: 420px;">
+          <div style="<%= isRejected ? 'text-decoration: line-through; color: #94A3B8;' : '' %>"><%= t.action_description %></div>
+          <% if (t.asana_task_gid) { %>
+          <a href="https://app.asana.com/0/0/<%= t.asana_task_gid %>" target="_blank" rel="noopener noreferrer"
+             style="font-size: 11px; color: #6366F1; text-decoration: none;">Open in Asana →</a>
+          <% } %>
+          <% if (isRejected) { %>
+          <div style="margin-top: 0.5rem; padding: 6px 10px; background: rgba(239,68,68,0.10); border-radius: 6px; font-size: 12px; color: #FCA5A5;">
+            <strong>Rejected:</strong> <%= t.rejection_reason %>
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 0.25rem;"><%= fmt(t.rejected_at) %></div>
+          </div>
+          <% } %>
+        </td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8;">
+          <%= sourceLabels[t.source_type] || t.source_type %>
+        </td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #E2E8F0;">
+          <% if (t.client_name) { %>
+            <div style="font-weight: 500;"><%= t.client_name %></div>
+          <% } %>
+          <% if (t.meeting_title) { %>
+            <div style="font-size: 11px; color: #64748B;"><%= t.meeting_title %></div>
+          <% } %>
+        </td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8;"><%= t.assignee || '—' %></td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8; white-space: nowrap;"><%= fmt(t.created_at) %></td>
+        <td style="padding: 12px 16px;">
+          <% if (isRejected) { %>
+          <form method="POST" action="/admin/auto-tasks/undo" style="display: inline;">
+            <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+            <input type="hidden" name="task_name" value="<%= t.action_description %>" />
+            <button type="submit" style="font-size: 12px; color: #94A3B8; background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 10px; cursor: pointer;">Undo</button>
+          </form>
+          <% } else { %>
+          <form method="POST" action="/admin/auto-tasks/reject" style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+            <input type="hidden" name="task_gid" value="<%= t.asana_task_gid %>" />
+            <input type="hidden" name="task_name" value="<%= t.action_description %>" />
+            <input type="text" name="reason" placeholder="Why is this not relevant?" required
+                   style="width: 220px; padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
+            <button type="submit" style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 5px 10px; cursor: pointer; white-space: nowrap;">Not relevant</button>
+          </form>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<p style="font-size: 12px; color: #64748B;">
+  When you mark a task as not relevant, any future task with the same text will be auto-skipped.
+  Rejections can be undone at any time.
+</p>

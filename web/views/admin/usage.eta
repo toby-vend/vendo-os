@@ -82,8 +82,11 @@
     unknown: 'Other',
   };
 %>
-<h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.75rem; color: #E2E8F0;">Auto-Asana Tasks</h3>
-<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem;">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem;">
+  <h3 style="font-size: 16px; font-weight: 600; color: #E2E8F0; margin: 0;">Auto-Asana Tasks</h3>
+  <a href="/admin/auto-tasks" style="font-size: 12px; color: #6366F1; text-decoration: none;">QA review →</a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1rem;">
   <div class="card" style="padding: 1.25rem;">
     <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Created Today</div>
     <div style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= Number(it.asanaVolume.totalToday).toLocaleString() %></div>
@@ -101,6 +104,13 @@
     <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Projected Month</div>
     <div style="font-size: 22px; font-weight: 700; color: #818CF8;"><%= Number(it.asanaVolume.projectedThisMonth).toLocaleString() %></div>
   </div>
+  <% if (it.rejections) { %>
+  <div class="card" style="padding: 1.25rem; border-left: 3px solid rgba(239,68,68,0.4);">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Rejected (QA)</div>
+    <div style="font-size: 22px; font-weight: 700; color: #FCA5A5;"><%= Number(it.rejections.totalRejected).toLocaleString() %></div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;"><%= Number(it.rejections.thisMonth).toLocaleString() %> this month</div>
+  </div>
+  <% } %>
 </div>
 <% if (it.asanaVolume.bySource && it.asanaVolume.bySource.length > 0) { %>
 <div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">

@@ -1,6 +1,7 @@
 import { db } from '../queries/base.js';
 import { consoleLog } from '../monitors/base.js';
 import { getClientAM as sharedGetClientAM, resolveAssignee as sharedResolveAssignee } from '../asana/assignee.js';
+import { getRejectionReason } from '../queries/auto-tasks.js';
 
 /**
  * Turso-native port of scripts/automation/fathom-to-asana.ts. Runs from the
@@ -39,6 +40,16 @@ const SLT_NAMES: Set<string> = new Set([
   'alfie wakelin',
   'rhiannon larkman',
 ]);
+
+/** Signal used to abort task creation when a QA rejection matches. */
+class TaskRejectedError extends Error {
+  readonly reason: string;
+  constructor(reason: string) {
+    super(`Task rejected: ${reason}`);
+    this.name = 'TaskRejectedError';
+    this.reason = reason;
+  }
+}
 
 interface ActionItem {
   description: string;
@@ -468,9 +479,18 @@ async function createAsanaTaskFromAction(
   }
   const ukNotes = toUkEnglish(notesLines.join('\n'));
 
+  const nameKey = normaliseForMatch(ukName);
+
+  // QA rejection: skip if this exact task text has been marked "not relevant"
+  // via /admin/auto-tasks. Signalled by throwing a well-known marker that the
+  // caller treats as "skipped, not an error".
+  const rejectionReason = await getRejectionReason(nameKey);
+  if (rejectionReason) {
+    throw new TaskRejectedError(rejectionReason);
+  }
+
   // Layer B dedupe: if a task with the same normalised name exists in ANY of
   // the target projects, reuse it instead of creating a duplicate.
-  const nameKey = normaliseForMatch(ukName);
   for (const p of projects) {
     const index = await getProjectTaskIndex(p);
     const existing = index.get(nameKey);
@@ -562,6 +582,11 @@ export async function createTasksForMeeting(input: {
       await recordSync(input.meetingId, item.description, taskGid, item.assignee || null, 'meeting', sourceId);
       created++;
     } catch (err) {
+      if (err instanceof TaskRejectedError) {
+        skipped++;
+        consoleLog(LOG_SOURCE, `Skipped (rejected): "${item.description.slice(0, 80)}" — ${err.reason}`);
+        continue;
+      }
       consoleLog(LOG_SOURCE, `Meeting task failed: ${err instanceof Error ? err.message : err}`);
     }
   }
@@ -629,6 +654,11 @@ async function syncEscalations(): Promise<SyncCount> {
       await recordSync(sourceId, taskName, taskGid, null, 'escalation', sourceId);
       created++;
     } catch (err) {
+      if (err instanceof TaskRejectedError) {
+        skipped++;
+        consoleLog(LOG_SOURCE, `Skipped escalation (rejected): ${err.reason}`);
+        continue;
+      }
       consoleLog(LOG_SOURCE, `Escalation task failed: ${err instanceof Error ? err.message : err}`);
     }
   }
@@ -665,6 +695,11 @@ async function syncNpsDetractors(): Promise<SyncCount> {
       await recordSync(sourceId, taskName, taskGid, null, 'nps', sourceId);
       created++;
     } catch (err) {
+      if (err instanceof TaskRejectedError) {
+        skipped++;
+        consoleLog(LOG_SOURCE, `Skipped NPS (rejected): ${err.reason}`);
+        continue;
+      }
       consoleLog(LOG_SOURCE, `NPS task failed: ${err instanceof Error ? err.message : err}`);
     }
   }

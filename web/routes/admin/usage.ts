@@ -9,6 +9,7 @@ import {
   setUserCostLimits,
   estimateCostGbp,
 } from '../../lib/queries/usage.js';
+import { getRejectionSummary } from '../../lib/queries/auto-tasks.js';
 
 const adminUsageRoutes: FastifyPluginAsync = async (app) => {
   // GET / — usage dashboard
@@ -16,13 +17,14 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
     const { from, to } = request.query as { from?: string; to?: string };
     const filter = { from: from || undefined, to: to || undefined };
 
-    const [summary, usersWithUsage, byModel, byFeature, forecast, asanaVolume] = await Promise.all([
+    const [summary, usersWithUsage, byModel, byFeature, forecast, asanaVolume, rejections] = await Promise.all([
       getUsageSummary(filter),
       getAllUsersWithUsage(filter),
       getUsageByModel(filter),
       getUsageByFeature(filter),
       getMonthlyForecast(),
       getAsanaTaskVolume(),
+      getRejectionSummary(),
     ]);
 
     reply.render('admin/usage', {
@@ -32,6 +34,7 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
       byFeature,
       forecast,
       asanaVolume,
+      rejections,
       estimateCostGbp,
       from: from || '',
       to: to || '',
