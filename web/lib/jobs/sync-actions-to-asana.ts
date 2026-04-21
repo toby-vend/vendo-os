@@ -16,9 +16,29 @@ import { getClientAM as sharedGetClientAM, resolveAssignee as sharedResolveAssig
 const ASANA_API_KEY = process.env.ASANA_API_KEY || process.env.ASANA_PAT || '';
 const ASANA_WORKSPACE_GID = process.env.ASANA_WORKSPACE_GID || process.env.ASANA_WORKSPACE_ID || '';
 const ASANA_DEFAULT_PROJECT_GID = process.env.ASANA_DEFAULT_PROJECT_GID || '';
+const ASANA_SENIOR_LEADER_PROJECT_GID = process.env.ASANA_SENIOR_LEADER_PROJECT_GID || '';
+const ASANA_VENDO_OS_PROJECT_GID = process.env.ASANA_VENDO_OS_PROJECT_GID || '';
 const ASANA_BASE_URL = 'https://app.asana.com/api/1.0';
 const LOG_SOURCE = 'sync-actions-to-asana';
 const AFTER_HOUR_CUTOFF = 15; // meetings starting ≥ 15:00 Europe/London → due next day
+
+interface Invitee {
+  name?: string | null;
+  email?: string | null;
+  is_external?: boolean;
+}
+
+/**
+ * Senior Leadership team. Meetings without an external invitee but with one
+ * of these attendees route to the Senior Leader Tasks project. Update this
+ * list when SLT membership changes.
+ */
+const SLT_NAMES: Set<string> = new Set([
+  'toby raeburn',
+  'max rivens',
+  'alfie wakelin',
+  'rhiannon larkman',
+]);
 
 interface ActionItem {
   description: string;
@@ -335,6 +355,78 @@ async function getAsanaProjectForClient(clientName: string | null): Promise<stri
   }
 }
 
+function hasExternalInvitee(invitees?: Invitee[] | null): boolean {
+  return !!invitees?.some((i) => i?.is_external === true);
+}
+
+/** Check whether any Senior Leadership team member is on the meeting. */
+function isSltOnMeeting(invitees?: Invitee[] | null): boolean {
+  if (!invitees?.length) return false;
+  for (const inv of invitees) {
+    const n = (inv.name || '').toLowerCase().trim();
+    if (n && SLT_NAMES.has(n)) return true;
+  }
+  return false;
+}
+
+/**
+ * Resolve the list of Asana project GIDs a task should be attached to.
+ *
+ *  - Primary project:
+ *      1. Client project — only if the client is actually on the meeting
+ *         (external invitee present AND clientName resolved).
+ *      2. Senior Leader Tasks — if an SLT member is on the meeting.
+ *      3. Default project fallback.
+ *  - Always also appends the Vendo OS oversight project so everything is
+ *    visible in one place.
+ */
+async function resolveProjects(input: {
+  clientName: string | null;
+  invitees?: Invitee[] | null;
+  /**
+   * When true, the client project is preferred even if we have no external
+   * invitee (e.g. escalations / NPS follow-ups that are *about* a client but
+   * didn't happen in a client meeting).
+   */
+  forceClientProject?: boolean;
+}): Promise<string[]> {
+  const projects: string[] = [];
+  const shouldTryClient = input.forceClientProject || hasExternalInvitee(input.invitees);
+
+  if (shouldTryClient && input.clientName) {
+    const clientProject = await getAsanaProjectForClient(input.clientName);
+    if (clientProject) projects.push(clientProject);
+  }
+
+  if (projects.length === 0) {
+    if (ASANA_SENIOR_LEADER_PROJECT_GID && isSltOnMeeting(input.invitees)) {
+      projects.push(ASANA_SENIOR_LEADER_PROJECT_GID);
+    } else if (ASANA_DEFAULT_PROJECT_GID) {
+      projects.push(ASANA_DEFAULT_PROJECT_GID);
+    }
+  }
+
+  if (ASANA_VENDO_OS_PROJECT_GID && !projects.includes(ASANA_VENDO_OS_PROJECT_GID)) {
+    projects.push(ASANA_VENDO_OS_PROJECT_GID);
+  }
+
+  return projects;
+}
+
+function parseInvitees(raw: unknown): Invitee[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw as Invitee[];
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? (parsed as Invitee[]) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 interface CreateTaskOptions {
   /** Meeting start ISO — used to derive due-on (same day, or next day if ≥ 15:00 London). */
   meetingDate?: string | null;
@@ -348,7 +440,7 @@ async function createAsanaTaskFromAction(
   source: string,
   item: ActionItem,
   clientName: string | null,
-  projectGid?: string,
+  projects: string[],
   options: CreateTaskOptions = {},
 ): Promise<string> {
   // Resolution order:
@@ -375,14 +467,14 @@ async function createAsanaTaskFromAction(
     notesLines.push(item.playbackUrl ? `Fathom — jump to moment: ${fathomUrl}` : `Fathom recording: ${fathomUrl}`);
   }
   const ukNotes = toUkEnglish(notesLines.join('\n'));
-  const resolvedProject = projectGid || ASANA_DEFAULT_PROJECT_GID;
 
-  // Layer B dedupe: if a task with the same normalised name already exists in
-  // the target project, reuse it instead of creating a duplicate.
-  if (resolvedProject) {
-    const index = await getProjectTaskIndex(resolvedProject);
-    const existingGid = index.get(normaliseForMatch(ukName));
-    if (existingGid) return existingGid;
+  // Layer B dedupe: if a task with the same normalised name exists in ANY of
+  // the target projects, reuse it instead of creating a duplicate.
+  const nameKey = normaliseForMatch(ukName);
+  for (const p of projects) {
+    const index = await getProjectTaskIndex(p);
+    const existing = index.get(nameKey);
+    if (existing) return existing;
   }
 
   const dueOn = options.forceDueDate
@@ -397,17 +489,17 @@ async function createAsanaTaskFromAction(
     workspace: ASANA_WORKSPACE_GID,
   };
   if (assigneeGid) taskData.assignee = assigneeGid;
-  if (resolvedProject) taskData.projects = [resolvedProject];
+  if (projects.length) taskData.projects = projects;
 
   const result = await asanaFetch<{ gid: string }>('/tasks', {
     method: 'POST',
     body: JSON.stringify({ data: taskData }),
   });
 
-  // Update the in-memory index so follow-up items in the same run match.
-  if (resolvedProject) {
-    const index = _projectTaskIndex.get(resolvedProject);
-    if (index) index.set(normaliseForMatch(ukName), result.gid);
+  // Update every project's in-memory index so follow-up items in this run match.
+  for (const p of projects) {
+    const index = _projectTaskIndex.get(p);
+    if (index) index.set(nameKey, result.gid);
   }
   return result.gid;
 }
@@ -435,6 +527,8 @@ export async function createTasksForMeeting(input: {
   meetingDate?: string | null;
   /** Fathom recording URL — used as a fallback when an action item has no per-timestamp link. */
   meetingUrl?: string | null;
+  /** Calendar invitees (from Fathom or from meetings.calendar_invitees). Drives project routing. */
+  invitees?: Invitee[] | string | null;
 }): Promise<SyncCount> {
   if (!ASANA_API_KEY || !input.rawActionItems) return { created: 0, skipped: 0 };
   await ensureSyncTable();
@@ -442,7 +536,8 @@ export async function createTasksForMeeting(input: {
   const items = parseActionItems(input.rawActionItems);
   if (!items.length) return { created: 0, skipped: 0 };
 
-  const projectGid = await getAsanaProjectForClient(input.clientName);
+  const invitees = parseInvitees(input.invitees);
+  const projects = await resolveProjects({ clientName: input.clientName, invitees });
   let created = 0;
   let skipped = 0;
 
@@ -461,7 +556,7 @@ export async function createTasksForMeeting(input: {
         `Meeting: ${input.title}`,
         item,
         input.clientName,
-        projectGid,
+        projects,
         { meetingDate: input.meetingDate, meetingUrl: input.meetingUrl },
       );
       await recordSync(input.meetingId, item.description, taskGid, item.assignee || null, 'meeting', sourceId);
@@ -478,7 +573,7 @@ async function syncMeetingActions(): Promise<SyncCount> {
   let created = 0;
   let skipped = 0;
   const { rows } = await db.execute({
-    sql: `SELECT id, title, raw_action_items, client_name, date, url
+    sql: `SELECT id, title, raw_action_items, client_name, date, url, calendar_invitees
           FROM meetings
           WHERE date >= ? AND raw_action_items IS NOT NULL AND raw_action_items != ''
           ORDER BY date DESC`,
@@ -494,6 +589,7 @@ async function syncMeetingActions(): Promise<SyncCount> {
       clientName: (row.client_name as string) || null,
       meetingDate: (row.date as string) || null,
       meetingUrl: (row.url as string) || null,
+      invitees: (row.calendar_invitees as string) || null,
     });
     created += result.created;
     skipped += result.skipped;
@@ -519,14 +615,15 @@ async function syncEscalations(): Promise<SyncCount> {
     const description = (row.description as string) || '';
     const sourceId = `escalation-${id}`;
     if (await alreadySynced('escalation', sourceId)) { skipped++; continue; }
-    const projectGid = await getAsanaProjectForClient(clientName);
+    // No invitees here — force the client project when we know the client.
+    const projects = await resolveProjects({ clientName, forceClientProject: true });
     const taskName = `[ESCALATION] ${clientName ?? 'Unknown'} — ${description}`.slice(0, 200);
     try {
       const taskGid = await createAsanaTaskFromAction(
         `Escalation (${tier.toUpperCase()})`,
         { description: taskName },
         clientName,
-        projectGid,
+        projects,
         { forceDueDate: today },
       );
       await recordSync(sourceId, taskName, taskGid, null, 'escalation', sourceId);
@@ -555,14 +652,14 @@ async function syncNpsDetractors(): Promise<SyncCount> {
     const score = row.score as number;
     const sourceId = `nps-${id}`;
     if (await alreadySynced('nps', sourceId)) { skipped++; continue; }
-    const projectGid = await getAsanaProjectForClient(clientName);
+    const projects = await resolveProjects({ clientName, forceClientProject: true });
     const taskName = `[NPS] ${clientName ?? 'Unknown'} scored ${score}/10 — follow up required`;
     try {
       const taskGid = await createAsanaTaskFromAction(
         `NPS detractor (${score}/10)`,
         { description: taskName },
         clientName,
-        projectGid,
+        projects,
         { forceDueDate: threeDays },
       );
       await recordSync(sourceId, taskName, taskGid, null, 'nps', sourceId);
