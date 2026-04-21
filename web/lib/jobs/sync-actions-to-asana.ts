@@ -18,12 +18,179 @@ const ASANA_WORKSPACE_GID = process.env.ASANA_WORKSPACE_GID || process.env.ASANA
 const ASANA_DEFAULT_PROJECT_GID = process.env.ASANA_DEFAULT_PROJECT_GID || '';
 const ASANA_BASE_URL = 'https://app.asana.com/api/1.0';
 const LOG_SOURCE = 'sync-actions-to-asana';
+const AFTER_HOUR_CUTOFF = 15; // meetings starting ≥ 15:00 Europe/London → due next day
 
 interface ActionItem {
   description: string;
   assignee?: string;
   assigneeEmail?: string;
   dueDate?: string;
+}
+
+// ---------------------------------------------------------------------------
+// UK English normalisation
+// ---------------------------------------------------------------------------
+
+const US_UK: Array<[string, string]> = [
+  // -ize → -ise family
+  ['organize', 'organise'], ['organizes', 'organises'], ['organized', 'organised'], ['organizing', 'organising'], ['organization', 'organisation'], ['organizations', 'organisations'], ['organizational', 'organisational'],
+  ['analyze', 'analyse'], ['analyzes', 'analyses'], ['analyzed', 'analysed'], ['analyzing', 'analysing'], ['analyzer', 'analyser'],
+  ['prioritize', 'prioritise'], ['prioritizes', 'prioritises'], ['prioritized', 'prioritised'], ['prioritizing', 'prioritising'], ['prioritization', 'prioritisation'],
+  ['optimize', 'optimise'], ['optimizes', 'optimises'], ['optimized', 'optimised'], ['optimizing', 'optimising'], ['optimization', 'optimisation'], ['optimizations', 'optimisations'],
+  ['realize', 'realise'], ['realizes', 'realises'], ['realized', 'realised'], ['realizing', 'realising'],
+  ['summarize', 'summarise'], ['summarizes', 'summarises'], ['summarized', 'summarised'], ['summarizing', 'summarising'],
+  ['recognize', 'recognise'], ['recognizes', 'recognises'], ['recognized', 'recognised'], ['recognizing', 'recognising'],
+  ['utilize', 'utilise'], ['utilizes', 'utilises'], ['utilized', 'utilised'], ['utilizing', 'utilising'], ['utilization', 'utilisation'],
+  ['finalize', 'finalise'], ['finalizes', 'finalises'], ['finalized', 'finalised'], ['finalizing', 'finalising'],
+  ['maximize', 'maximise'], ['maximizes', 'maximises'], ['maximized', 'maximised'], ['maximizing', 'maximising'],
+  ['minimize', 'minimise'], ['minimizes', 'minimises'], ['minimized', 'minimised'], ['minimizing', 'minimising'],
+  ['standardize', 'standardise'], ['standardizes', 'standardises'], ['standardized', 'standardised'], ['standardizing', 'standardising'],
+  ['categorize', 'categorise'], ['categorizes', 'categorises'], ['categorized', 'categorised'], ['categorizing', 'categorising'],
+  ['customize', 'customise'], ['customizes', 'customises'], ['customized', 'customised'], ['customizing', 'customising'],
+  ['specialize', 'specialise'], ['specializes', 'specialises'], ['specialized', 'specialised'], ['specializing', 'specialising'],
+  ['emphasize', 'emphasise'], ['emphasizes', 'emphasises'], ['emphasized', 'emphasised'], ['emphasizing', 'emphasising'],
+  ['apologize', 'apologise'], ['apologizes', 'apologises'], ['apologized', 'apologised'], ['apologizing', 'apologising'],
+  ['memorize', 'memorise'], ['memorizes', 'memorises'], ['memorized', 'memorised'], ['memorizing', 'memorising'],
+  ['sanitize', 'sanitise'], ['sanitized', 'sanitised'], ['sanitizing', 'sanitising'],
+  ['modernize', 'modernise'], ['modernized', 'modernised'], ['modernizing', 'modernising'],
+  ['initialize', 'initialise'], ['initialized', 'initialised'], ['initializing', 'initialising'],
+  ['familiarize', 'familiarise'], ['familiarized', 'familiarised'], ['familiarizing', 'familiarising'],
+  ['synchronize', 'synchronise'], ['synchronized', 'synchronised'], ['synchronizing', 'synchronising'],
+  ['mobilize', 'mobilise'], ['mobilized', 'mobilised'], ['mobilizing', 'mobilising'],
+  ['monetize', 'monetise'], ['monetized', 'monetised'], ['monetizing', 'monetising'], ['monetization', 'monetisation'],
+  ['strategize', 'strategise'], ['strategized', 'strategised'], ['strategizing', 'strategising'],
+  // -or → -our
+  ['color', 'colour'], ['colors', 'colours'], ['colored', 'coloured'], ['coloring', 'colouring'],
+  ['favor', 'favour'], ['favors', 'favours'], ['favored', 'favoured'], ['favoring', 'favouring'], ['favorite', 'favourite'], ['favorites', 'favourites'],
+  ['flavor', 'flavour'], ['flavors', 'flavours'], ['flavored', 'flavoured'], ['flavoring', 'flavouring'],
+  ['honor', 'honour'], ['honors', 'honours'], ['honored', 'honoured'], ['honoring', 'honouring'],
+  ['labor', 'labour'], ['labors', 'labours'], ['labored', 'laboured'], ['laboring', 'labouring'],
+  ['behavior', 'behaviour'], ['behaviors', 'behaviours'], ['behavioral', 'behavioural'],
+  ['neighbor', 'neighbour'], ['neighbors', 'neighbours'], ['neighboring', 'neighbouring'], ['neighborhood', 'neighbourhood'],
+  ['rumor', 'rumour'], ['rumors', 'rumours'],
+  ['humor', 'humour'], ['humors', 'humours'],
+  ['vigor', 'vigour'],
+  ['vapor', 'vapour'], ['vapors', 'vapours'],
+  ['harbor', 'harbour'], ['harbors', 'harbours'],
+  ['endeavor', 'endeavour'], ['endeavors', 'endeavours'],
+  // -er → -re
+  ['center', 'centre'], ['centers', 'centres'], ['centered', 'centred'], ['centering', 'centring'],
+  ['meter', 'metre'], ['meters', 'metres'],
+  ['theater', 'theatre'], ['theaters', 'theatres'],
+  ['liter', 'litre'], ['liters', 'litres'],
+  ['fiber', 'fibre'], ['fibers', 'fibres'],
+  // -eled/-elled
+  ['traveled', 'travelled'], ['traveling', 'travelling'], ['traveler', 'traveller'], ['travelers', 'travellers'],
+  ['canceled', 'cancelled'], ['canceling', 'cancelling'],
+  ['labeled', 'labelled'], ['labeling', 'labelling'],
+  ['modeled', 'modelled'], ['modeling', 'modelling'],
+  ['signaled', 'signalled'], ['signaling', 'signalling'],
+  // -ense → -ence
+  ['defense', 'defence'], ['defenses', 'defences'],
+  ['offense', 'offence'], ['offenses', 'offences'],
+  ['pretense', 'pretence'],
+  // misc
+  ['gray', 'grey'], ['grays', 'greys'],
+  ['fulfill', 'fulfil'], ['fulfillment', 'fulfilment'],
+  ['enroll', 'enrol'], ['enrollment', 'enrolment'],
+  ['skillful', 'skilful'],
+  ['aluminum', 'aluminium'],
+  ['mustache', 'moustache'],
+  ['plow', 'plough'],
+  ['dialog', 'dialogue'], ['dialogs', 'dialogues'],
+  ['catalog', 'catalogue'], ['catalogs', 'catalogues'],
+];
+
+const UK_MAP: Map<string, string> = new Map(US_UK.map(([us, uk]) => [us, uk]));
+const UK_REGEX = new RegExp(`\\b(${US_UK.map(([us]) => us).join('|')})\\b`, 'gi');
+
+function matchCase(source: string, target: string): string {
+  if (source === source.toUpperCase()) return target.toUpperCase();
+  if (source[0] === source[0].toUpperCase()) return target[0].toUpperCase() + target.slice(1);
+  return target;
+}
+
+function toUkEnglish(text: string): string {
+  if (!text) return text;
+  return text.replace(UK_REGEX, (match) => {
+    const uk = UK_MAP.get(match.toLowerCase());
+    return uk ? matchCase(match, uk) : match;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Due-date computation — meeting day, or next day if call ≥ 15:00 Europe/London
+// ---------------------------------------------------------------------------
+
+function computeMeetingDueDate(meetingIso: string | null | undefined): string {
+  if (!meetingIso) return defaultDueDate();
+  const d = new Date(meetingIso);
+  if (Number.isNaN(d.getTime())) return defaultDueDate();
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', hour12: false,
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  const year = get('year');
+  const month = get('month');
+  const day = get('day');
+  const hour = parseInt(get('hour'), 10);
+  const base = new Date(`${year}-${month}-${day}T00:00:00Z`);
+  if (!Number.isNaN(hour) && hour >= AFTER_HOUR_CUTOFF) {
+    base.setUTCDate(base.getUTCDate() + 1);
+  }
+  return base.toISOString().slice(0, 10);
+}
+
+// ---------------------------------------------------------------------------
+// Layer B dedupe — pre-check Asana for an existing task with the same name
+// ---------------------------------------------------------------------------
+
+const _projectTaskIndex: Map<string, Map<string, string>> = new Map();
+
+function normaliseForMatch(s: string): string {
+  return (s || '').toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+async function getProjectTaskIndex(projectGid: string): Promise<Map<string, string>> {
+  const cached = _projectTaskIndex.get(projectGid);
+  if (cached) return cached;
+  const index = new Map<string, string>();
+  let offset: string | undefined;
+  for (let page = 0; page < 20; page++) {
+    const qs = new URLSearchParams({
+      project: projectGid,
+      opt_fields: 'name',
+      limit: '100',
+    });
+    if (offset) qs.set('offset', offset);
+    try {
+      const res = await fetch(`${ASANA_BASE_URL}/tasks?${qs}`, {
+        headers: { Authorization: `Bearer ${ASANA_API_KEY}`, Accept: 'application/json' },
+      });
+      if (!res.ok) break;
+      const json = (await res.json()) as {
+        data: Array<{ gid: string; name: string }>;
+        next_page?: { offset: string } | null;
+      };
+      for (const t of json.data || []) {
+        const key = normaliseForMatch(t.name);
+        if (key && !index.has(key)) index.set(key, t.gid);
+      }
+      if (!json.next_page) break;
+      offset = json.next_page.offset;
+    } catch {
+      break;
+    }
+  }
+  _projectTaskIndex.set(projectGid, index);
+  return index;
+}
+
+/** Reset the per-container project task cache. Exposed for tests. */
+export function resetAsanaDedupeCache(): void {
+  _projectTaskIndex.clear();
 }
 
 async function asanaFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -165,11 +332,19 @@ async function getAsanaProjectForClient(clientName: string | null): Promise<stri
   }
 }
 
+interface CreateTaskOptions {
+  /** Meeting start ISO — used to derive due-on (same day, or next day if ≥ 15:00 London). */
+  meetingDate?: string | null;
+  /** Override the derived due date (used by escalations/NPS where "today"/"+3 days" wins). */
+  forceDueDate?: string;
+}
+
 async function createAsanaTaskFromAction(
   source: string,
   item: ActionItem,
   clientName: string | null,
   projectGid?: string,
+  options: CreateTaskOptions = {},
 ): Promise<string> {
   // Resolution order:
   //   1. Explicit assignee from Fathom (name + email, tried in every case variant)
@@ -180,20 +355,43 @@ async function createAsanaTaskFromAction(
     const am = await getClientAM(clientName);
     if (am) assigneeGid = await resolveAssignee(am);
   }
+
+  const ukName = toUkEnglish(item.description).slice(0, 200);
+  const ukNotes = toUkEnglish(`Source: ${source}\n\nOriginal: ${item.description}`);
+  const resolvedProject = projectGid || ASANA_DEFAULT_PROJECT_GID;
+
+  // Layer B dedupe: if a task with the same normalised name already exists in
+  // the target project, reuse it instead of creating a duplicate.
+  if (resolvedProject) {
+    const index = await getProjectTaskIndex(resolvedProject);
+    const existingGid = index.get(normaliseForMatch(ukName));
+    if (existingGid) return existingGid;
+  }
+
+  const dueOn = options.forceDueDate
+    || computeMeetingDueDate(options.meetingDate)
+    || item.dueDate
+    || defaultDueDate();
+
   const taskData: Record<string, unknown> = {
-    name: item.description.slice(0, 200),
-    notes: `Source: ${source}\n\nOriginal: ${item.description}`,
-    due_on: item.dueDate || defaultDueDate(),
+    name: ukName,
+    notes: ukNotes,
+    due_on: dueOn,
     workspace: ASANA_WORKSPACE_GID,
   };
   if (assigneeGid) taskData.assignee = assigneeGid;
-  const resolvedProject = projectGid || ASANA_DEFAULT_PROJECT_GID;
   if (resolvedProject) taskData.projects = [resolvedProject];
 
   const result = await asanaFetch<{ gid: string }>('/tasks', {
     method: 'POST',
     body: JSON.stringify({ data: taskData }),
   });
+
+  // Update the in-memory index so follow-up items in the same run match.
+  if (resolvedProject) {
+    const index = _projectTaskIndex.get(resolvedProject);
+    if (index) index.set(normaliseForMatch(ukName), result.gid);
+  }
   return result.gid;
 }
 
@@ -216,6 +414,8 @@ export async function createTasksForMeeting(input: {
   title: string;
   rawActionItems: string | null;
   clientName: string | null;
+  /** Meeting start time (ISO) — drives the due-on rule (meeting day / next day after 3pm London). */
+  meetingDate?: string | null;
 }): Promise<SyncCount> {
   if (!ASANA_API_KEY || !input.rawActionItems) return { created: 0, skipped: 0 };
   await ensureSyncTable();
@@ -238,7 +438,13 @@ export async function createTasksForMeeting(input: {
     if (legacy.rows.length) { skipped++; continue; }
 
     try {
-      const taskGid = await createAsanaTaskFromAction(`Meeting: ${input.title}`, item, input.clientName, projectGid);
+      const taskGid = await createAsanaTaskFromAction(
+        `Meeting: ${input.title}`,
+        item,
+        input.clientName,
+        projectGid,
+        { meetingDate: input.meetingDate },
+      );
       await recordSync(input.meetingId, item.description, taskGid, item.assignee || null, 'meeting', sourceId);
       created++;
     } catch (err) {
@@ -253,7 +459,7 @@ async function syncMeetingActions(): Promise<SyncCount> {
   let created = 0;
   let skipped = 0;
   const { rows } = await db.execute({
-    sql: `SELECT id, title, raw_action_items, client_name
+    sql: `SELECT id, title, raw_action_items, client_name, date
           FROM meetings
           WHERE date >= ? AND raw_action_items IS NOT NULL AND raw_action_items != ''
           ORDER BY date DESC`,
@@ -267,6 +473,7 @@ async function syncMeetingActions(): Promise<SyncCount> {
       title: row.title as string,
       rawActionItems: row.raw_action_items as string,
       clientName: (row.client_name as string) || null,
+      meetingDate: (row.date as string) || null,
     });
     created += result.created;
     skipped += result.skipped;
@@ -297,9 +504,10 @@ async function syncEscalations(): Promise<SyncCount> {
     try {
       const taskGid = await createAsanaTaskFromAction(
         `Escalation (${tier.toUpperCase()})`,
-        { description: taskName, dueDate: today },
+        { description: taskName },
         clientName,
         projectGid,
+        { forceDueDate: today },
       );
       await recordSync(sourceId, taskName, taskGid, null, 'escalation', sourceId);
       created++;
@@ -332,9 +540,10 @@ async function syncNpsDetractors(): Promise<SyncCount> {
     try {
       const taskGid = await createAsanaTaskFromAction(
         `NPS detractor (${score}/10)`,
-        { description: taskName, dueDate: threeDays },
+        { description: taskName },
         clientName,
         projectGid,
+        { forceDueDate: threeDays },
       );
       await recordSync(sourceId, taskName, taskGid, null, 'nps', sourceId);
       created++;

@@ -247,6 +247,7 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
           title: meeting.title || meeting.meeting_title || 'Untitled',
           rawActionItems: actionItemsJson,
           clientName: enrichedClientName,
+          meetingDate: meeting.recording_start_time || meeting.created_at || null,
         });
         request.log.info(
           { recordingId: meeting.recording_id, asanaResult: result },
