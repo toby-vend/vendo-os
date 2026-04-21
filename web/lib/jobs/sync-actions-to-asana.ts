@@ -481,10 +481,11 @@ async function createAsanaTaskFromAction(
 
   const nameKey = normaliseForMatch(ukName);
 
-  // QA rejection: skip if this exact task text has been marked "not relevant"
-  // via /admin/auto-tasks. Signalled by throwing a well-known marker that the
-  // caller treats as "skipped, not an error".
-  const rejectionReason = await getRejectionReason(nameKey);
+  // QA rejection: skip if a rule for this task text matches this task's
+  // client/assignee scope. More specific rules (client + assignee) win over
+  // wildcards. Signalled via TaskRejectedError — the caller counts it as
+  // skipped, not an error.
+  const rejectionReason = await getRejectionReason(nameKey, clientName, item.assignee || null);
   if (rejectionReason) {
     throw new TaskRejectedError(rejectionReason);
   }

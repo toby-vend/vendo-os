@@ -48,9 +48,15 @@
              style="font-size: 11px; color: #6366F1; text-decoration: none;">Open in Asana →</a>
           <% } %>
           <% if (isRejected) { %>
+          <%
+            const scope = [];
+            if (t.rejection_client) scope.push('Client: ' + t.rejection_client);
+            if (t.rejection_assignee) scope.push('Assignee: ' + t.rejection_assignee);
+            const scopeLabel = scope.length ? scope.join(' · ') : 'All clients / assignees';
+          %>
           <div style="margin-top: 0.5rem; padding: 6px 10px; background: rgba(239,68,68,0.10); border-radius: 6px; font-size: 12px; color: #FCA5A5;">
             <strong>Rejected:</strong> <%= t.rejection_reason %>
-            <div style="font-size: 11px; color: #94A3B8; margin-top: 0.25rem;"><%= fmt(t.rejected_at) %></div>
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 0.25rem;"><%= scopeLabel %> — <%= fmt(t.rejected_at) %></div>
           </div>
           <% } %>
         </td>
@@ -72,15 +78,24 @@
           <form method="POST" action="/admin/auto-tasks/undo" style="display: inline;">
             <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
             <input type="hidden" name="task_name" value="<%= t.action_description %>" />
+            <input type="hidden" name="client_name" value="<%= t.rejection_client || '' %>" />
+            <input type="hidden" name="assignee" value="<%= t.rejection_assignee || '' %>" />
             <button type="submit" style="font-size: 12px; color: #94A3B8; background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 10px; cursor: pointer;">Undo</button>
           </form>
           <% } else { %>
-          <form method="POST" action="/admin/auto-tasks/reject" style="display: flex; gap: 0.5rem; align-items: center;">
+          <form method="POST" action="/admin/auto-tasks/reject"
+                style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; max-width: 520px;">
             <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
             <input type="hidden" name="task_gid" value="<%= t.asana_task_gid %>" />
             <input type="hidden" name="task_name" value="<%= t.action_description %>" />
-            <input type="text" name="reason" placeholder="Why is this not relevant?" required
-                   style="width: 220px; padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
+            <input type="text" name="reason" placeholder="Reason *" required
+                   style="flex: 1 1 200px; min-width: 160px; padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
+            <input type="text" name="client_name" placeholder="Client (blank = all)" value="<%= t.client_name || '' %>"
+                   title="Only reject this task for this client. Blank = reject for all clients."
+                   style="flex: 1 1 150px; min-width: 120px; padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
+            <input type="text" name="assignee" placeholder="Assignee (blank = all)" value="<%= t.assignee || '' %>"
+                   title="Only reject this task for this assignee. Blank = reject for all assignees."
+                   style="flex: 1 1 140px; min-width: 120px; padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
             <button type="submit" style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 5px 10px; cursor: pointer; white-space: nowrap;">Not relevant</button>
           </form>
           <% } %>

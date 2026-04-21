@@ -21,8 +21,18 @@ export async function ensureRejectionSchema(): Promise<void> {
       rejected_at TEXT NOT NULL
     )
   `);
+  // Idempotent migration to scope-aware rejections (client + assignee).
+  for (const sql of [
+    'ALTER TABLE asana_task_rejections ADD COLUMN client_name TEXT',
+    'ALTER TABLE asana_task_rejections ADD COLUMN assignee TEXT',
+  ]) {
+    try { await db.execute(sql); } catch { /* column already exists */ }
+  }
+  // Swap the name-only index for the scope-aware one.
+  try { await db.execute('DROP INDEX IF EXISTS idx_atr_name'); } catch { /* ignore */ }
   await db.execute(
-    'CREATE UNIQUE INDEX IF NOT EXISTS idx_atr_name ON asana_task_rejections(name_normalised)',
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_atr_scope
+       ON asana_task_rejections(name_normalised, COALESCE(client_name, ''), COALESCE(assignee, ''))`,
   );
   _schemaReady = true;
 }
@@ -35,17 +45,36 @@ export function normaliseForMatch(s: string): string {
 // --- Rejection checks ---
 
 /**
- * Returns the rejection reason if a task with this normalised name has been
- * rejected, else null. Cheap indexed lookup — called from the sync hot path.
+ * Returns the rejection reason if any rule matches this task, else null.
+ *
+ * A rule matches when:
+ *   - name_normalised == normalisedName
+ *   - client_name IS NULL (wildcard) OR == clientName
+ *   - assignee    IS NULL (wildcard) OR == assignee
+ *
+ * When multiple rules match, the most specific one wins (rule with both
+ * client + assignee set beats a client-only rule, which beats a global one).
  */
-export async function getRejectionReason(normalisedName: string): Promise<string | null> {
+export async function getRejectionReason(
+  normalisedName: string,
+  clientName: string | null,
+  assignee: string | null,
+): Promise<string | null> {
   try {
     await ensureRejectionSchema();
-    const r = await scalar<string>(
-      'SELECT reason FROM asana_task_rejections WHERE name_normalised = ? LIMIT 1',
-      [normalisedName],
+    const r = await rows<{ reason: string }>(
+      `SELECT reason,
+              (CASE WHEN client_name IS NOT NULL THEN 1 ELSE 0 END
+             + CASE WHEN assignee    IS NOT NULL THEN 1 ELSE 0 END) AS specificity
+         FROM asana_task_rejections
+        WHERE name_normalised = ?
+          AND (client_name IS NULL OR client_name = ?)
+          AND (assignee    IS NULL OR assignee = ?)
+        ORDER BY specificity DESC, rejected_at DESC
+        LIMIT 1`,
+      [normalisedName, clientName ?? '', assignee ?? ''],
     );
-    return r || null;
+    return r[0]?.reason || null;
   } catch {
     return null;
   }
@@ -56,28 +85,50 @@ export async function getRejectionReason(normalisedName: string): Promise<string
 export async function recordRejection(input: {
   taskGid: string | null;
   taskName: string;
+  clientName: string | null;
+  assignee: string | null;
   reason: string;
   userId: string | null;
 }): Promise<void> {
   await ensureRejectionSchema();
   const normalised = normaliseForMatch(input.taskName);
+  // Manual upsert — SQLite's ON CONFLICT can't target a COALESCE'd index
+  // cleanly, so delete-then-insert keeps this readable.
   await db.execute({
-    sql: `INSERT INTO asana_task_rejections (task_gid, name_normalised, reason, rejected_by_user_id, rejected_at)
-          VALUES (?, ?, ?, ?, ?)
-          ON CONFLICT(name_normalised) DO UPDATE SET
-            task_gid = excluded.task_gid,
-            reason = excluded.reason,
-            rejected_by_user_id = excluded.rejected_by_user_id,
-            rejected_at = excluded.rejected_at`,
-    args: [input.taskGid, normalised, input.reason, input.userId, new Date().toISOString()],
+    sql: `DELETE FROM asana_task_rejections
+           WHERE name_normalised = ?
+             AND COALESCE(client_name, '') = COALESCE(?, '')
+             AND COALESCE(assignee, '')    = COALESCE(?, '')`,
+    args: [normalised, input.clientName, input.assignee],
+  });
+  await db.execute({
+    sql: `INSERT INTO asana_task_rejections
+            (task_gid, name_normalised, client_name, assignee, reason, rejected_by_user_id, rejected_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      input.taskGid,
+      normalised,
+      input.clientName,
+      input.assignee,
+      input.reason,
+      input.userId,
+      new Date().toISOString(),
+    ],
   });
 }
 
-export async function undoRejection(normalisedName: string): Promise<void> {
+export async function undoRejection(
+  normalisedName: string,
+  clientName: string | null,
+  assignee: string | null,
+): Promise<void> {
   await ensureRejectionSchema();
   await db.execute({
-    sql: 'DELETE FROM asana_task_rejections WHERE name_normalised = ?',
-    args: [normalisedName],
+    sql: `DELETE FROM asana_task_rejections
+           WHERE name_normalised = ?
+             AND COALESCE(client_name, '') = COALESCE(?, '')
+             AND COALESCE(assignee, '')    = COALESCE(?, '')`,
+    args: [normalisedName, clientName, assignee],
   });
 }
 
@@ -97,11 +148,14 @@ export interface AutoTaskRow {
   client_name: string | null;
   rejection_reason: string | null;
   rejected_at: string | null;
+  rejection_client: string | null;
+  rejection_assignee: string | null;
 }
 
 /**
  * Recent auto-created tasks joined with meeting context and rejection status.
- * Returns the last `limit` rows ordered by creation time, newest first.
+ * A task shows as rejected when any rule matches its (name, client, assignee)
+ * tuple — global wildcards and client/assignee-scoped rules both count.
  */
 export async function getRecentAutoTasks(limit = 100): Promise<AutoTaskRow[]> {
   await ensureRejectionSchema();
@@ -117,14 +171,18 @@ export async function getRecentAutoTasks(limit = 100): Promise<AutoTaskRow[]> {
             m.title       as meeting_title,
             m.date        as meeting_date,
             m.client_name as client_name,
-            r.reason      as rejection_reason,
-            r.rejected_at as rejected_at
+            r.reason       as rejection_reason,
+            r.rejected_at  as rejected_at,
+            r.client_name  as rejection_client,
+            r.assignee     as rejection_assignee
        FROM fathom_asana_synced fas
        LEFT JOIN meetings m
               ON m.id = fas.meeting_id
              AND fas.source_type = 'meeting'
        LEFT JOIN asana_task_rejections r
-              ON r.name_normalised = LOWER(fas.action_description)
+              ON LOWER(fas.action_description) = r.name_normalised
+             AND (r.client_name IS NULL OR r.client_name = m.client_name)
+             AND (r.assignee    IS NULL OR r.assignee    = fas.assignee)
       ORDER BY fas.created_at DESC
       LIMIT ?`,
     [limit],
