@@ -114,6 +114,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
       { id: 'admin-portal-users', label: 'Portal Users', href: '/admin/portal-users' },
       { id: 'admin-onboarding', label: 'Account Setup', href: '/admin/onboarding' },
       { id: 'admin-usage', label: 'Usage', href: '/admin/usage' },
+      { id: 'admin-auto-tasks', label: 'Auto-Task QA', href: '/admin/auto-tasks' },
       { id: 'admin-sidebar', label: 'Sidebar', href: '/admin/sidebar' },
       { id: 'sync-status', label: 'Sync Status', href: '/sync-status' },
     ],
