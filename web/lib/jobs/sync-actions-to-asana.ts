@@ -2,6 +2,7 @@ import { db } from '../queries/base.js';
 import { consoleLog } from '../monitors/base.js';
 import { getClientAM as sharedGetClientAM, resolveAssignee as sharedResolveAssignee } from '../asana/assignee.js';
 import { getRejectionReason } from '../queries/auto-tasks.js';
+import { validateTaskWithQa, recordQaSkip } from '../qa/auto-task-qa.js';
 
 /**
  * Turso-native port of scripts/automation/fathom-to-asana.ts. Runs from the
@@ -481,13 +482,30 @@ async function createAsanaTaskFromAction(
 
   const nameKey = normaliseForMatch(ukName);
 
-  // QA rejection: skip if a rule for this task text matches this task's
-  // client/assignee scope. More specific rules (client + assignee) win over
-  // wildcards. Signalled via TaskRejectedError — the caller counts it as
-  // skipped, not an error.
+  // QA rejection — two layers, fast then thoughtful:
+  //   1. Exact normalised-text match against past rejection rules (free).
+  //   2. LLM QA (Haiku) for semantic near-duplicates when the exact check
+  //      misses. Fails open on any error so a hiccup never blocks a sync.
   const rejectionReason = await getRejectionReason(nameKey, clientName, item.assignee || null);
   if (rejectionReason) {
     throw new TaskRejectedError(rejectionReason);
+  }
+  const qaVerdict = await validateTaskWithQa({
+    taskName: ukName,
+    clientName,
+    assignee: item.assignee || null,
+    source,
+  });
+  if (!qaVerdict.approve) {
+    const qaReason = qaVerdict.reason || 'QA agent flagged as duplicate or irrelevant';
+    void recordQaSkip({
+      taskName: ukName,
+      clientName,
+      assignee: item.assignee || null,
+      source,
+      reason: qaReason,
+    });
+    throw new TaskRejectedError(qaReason);
   }
 
   // Layer B dedupe: if a task with the same normalised name exists in ANY of

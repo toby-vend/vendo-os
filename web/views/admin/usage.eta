@@ -86,7 +86,7 @@
   <h3 style="font-size: 16px; font-weight: 600; color: #E2E8F0; margin: 0;">Auto-Asana Tasks</h3>
   <a href="/admin/auto-tasks" style="font-size: 12px; color: #6366F1; text-decoration: none;">QA review →</a>
 </div>
-<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1rem;">
+<div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; margin-bottom: 1rem;">
   <div class="card" style="padding: 1.25rem;">
     <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Created Today</div>
     <div style="font-size: 22px; font-weight: 700; color: #E2E8F0;"><%= Number(it.asanaVolume.totalToday).toLocaleString() %></div>
@@ -106,9 +106,16 @@
   </div>
   <% if (it.rejections) { %>
   <div class="card" style="padding: 1.25rem; border-left: 3px solid rgba(239,68,68,0.4);">
-    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Rejected (QA)</div>
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Rules (QA)</div>
     <div style="font-size: 22px; font-weight: 700; color: #FCA5A5;"><%= Number(it.rejections.totalRejected).toLocaleString() %></div>
     <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;"><%= Number(it.rejections.thisMonth).toLocaleString() %> this month</div>
+  </div>
+  <% } %>
+  <% if (it.qaSkipped) { %>
+  <div class="card" style="padding: 1.25rem; border-left: 3px solid rgba(251,146,60,0.5);">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Blocked by Agent</div>
+    <div style="font-size: 22px; font-weight: 700; color: #FB923C;"><%= Number(it.qaSkipped.totalSkipped).toLocaleString() %></div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;"><%= Number(it.qaSkipped.thisMonth).toLocaleString() %> this month</div>
   </div>
   <% } %>
 </div>
@@ -268,6 +275,7 @@
           classification: 'Meeting Classification',
           concern_detection: 'Client Concern Detection',
           meeting_enrichment: 'Meeting Enrichment',
+          auto_task_qa: 'Auto-Task QA Agent',
         };
       %>
       <% it.byFeature.forEach(f => { %>
