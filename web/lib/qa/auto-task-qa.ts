@@ -36,6 +36,13 @@ interface QaInput {
   source: string;
 }
 
+interface WrongCallExample {
+  task_name: string;
+  client_name: string | null;
+  assignee: string | null;
+  agent_reason: string;
+}
+
 export interface QaResult {
   approve: boolean;
   reason?: string;
@@ -96,9 +103,42 @@ function filterRelevantRules(
   });
 }
 
+// --- Few-shot "agent was too aggressive" examples ---
+
+const MAX_EXAMPLES_IN_PROMPT = 3;
+let _examplesCache: WrongCallExample[] | null = null;
+let _examplesLoadedAt = 0;
+
+async function loadWrongCallExamples(): Promise<WrongCallExample[]> {
+  if (_examplesCache && Date.now() - _examplesLoadedAt < CACHE_TTL_MS) return _examplesCache;
+  try {
+    const r = await db.execute({
+      sql: `SELECT s.task_name, s.client_name, s.assignee, s.reason as agent_reason
+              FROM auto_task_qa_skipped s
+              JOIN auto_task_qa_overrides o ON o.qa_skip_id = s.id
+             WHERE o.decision = 'wrong_call'
+             ORDER BY o.overridden_at DESC
+             LIMIT ?`,
+      args: [MAX_EXAMPLES_IN_PROMPT * 4],
+    });
+    _examplesCache = r.rows.map((row) => ({
+      task_name: (row.task_name as string) || '',
+      client_name: (row.client_name as string | null) ?? null,
+      assignee: (row.assignee as string | null) ?? null,
+      agent_reason: (row.agent_reason as string) || '',
+    }));
+    _examplesLoadedAt = Date.now();
+    return _examplesCache;
+  } catch {
+    return [];
+  }
+}
+
 export function resetQaCache(): void {
   _rulesCache = null;
   _rulesLoadedAt = 0;
+  _examplesCache = null;
+  _examplesLoadedAt = 0;
 }
 
 // --- Prompting ---
@@ -122,7 +162,11 @@ or
 
 Bias toward APPROVE when uncertain — only reject on clear semantic match.`;
 
-function buildUserMessage(input: QaInput, rules: RejectionRule[]): string {
+function buildUserMessage(
+  input: QaInput,
+  rules: RejectionRule[],
+  examples: WrongCallExample[],
+): string {
   const rulesBlock = rules
     .map((r, i) => {
       const scopeParts: string[] = [];
@@ -133,7 +177,7 @@ function buildUserMessage(input: QaInput, rules: RejectionRule[]): string {
     })
     .join('\n');
 
-  return [
+  const lines: string[] = [
     '## Proposed task',
     `- Name: ${input.taskName}`,
     `- Client: ${input.clientName || '(none)'}`,
@@ -142,7 +186,22 @@ function buildUserMessage(input: QaInput, rules: RejectionRule[]): string {
     '',
     `## Past rejections (${rules.length})`,
     rulesBlock || '(none)',
-  ].join('\n');
+  ];
+
+  if (examples.length) {
+    const exBlock = examples
+      .map((ex, i) => {
+        const scopeParts: string[] = [];
+        if (ex.client_name) scopeParts.push(`client=${ex.client_name}`);
+        if (ex.assignee) scopeParts.push(`assignee=${ex.assignee}`);
+        const scope = scopeParts.length ? ` [${scopeParts.join(', ')}]` : '';
+        return `${i + 1}. "${ex.task_name}"${scope} — you said: "${ex.agent_reason}". Admin overrode — this was NOT a duplicate.`;
+      })
+      .join('\n');
+    lines.push('', `## Recent over-blocks (learn not to repeat)`, exBlock);
+  }
+
+  return lines.join('\n');
 }
 
 function parseResult(text: string): QaResult {
@@ -173,11 +232,23 @@ export async function validateTaskWithQa(input: QaInput): Promise<QaResult> {
     .slice(0, MAX_RULES_IN_PROMPT);
   if (!relevant.length) return { approve: true };
 
+  // Pull a few "you were wrong here" examples so the agent learns from past
+  // over-blocks. Prefer examples that share this task's client if we have
+  // some — they're more relevant than random ones.
+  const allExamples = await loadWrongCallExamples();
+  const preferred = input.clientName
+    ? allExamples.filter((e) => e.client_name === input.clientName)
+    : [];
+  const examples = [
+    ...preferred,
+    ...allExamples.filter((e) => !preferred.includes(e)),
+  ].slice(0, MAX_EXAMPLES_IN_PROMPT);
+
   try {
     const response = await anthropic().messages.create({
       model: MODEL,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildUserMessage(input, relevant) }],
+      messages: [{ role: 'user', content: buildUserMessage(input, relevant, examples) }],
       max_tokens: 200,
       temperature: 0,
     });
