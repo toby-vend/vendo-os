@@ -4,6 +4,8 @@ import { db } from '../lib/queries/base.js';
 import { analyseAndAlert } from '../lib/concern-detection.js';
 import { enrichMeeting } from '../lib/meeting-enrichment.js';
 import { createTasksForMeeting } from '../lib/jobs/sync-actions-to-asana.js';
+import { classifyMeeting } from '../lib/classification/meeting-classifier.js';
+import { logRoutingDecision } from '../lib/classification/router.js';
 
 /**
  * Fathom Webhook Handler
@@ -216,31 +218,53 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
       request.log.error({ err, recordingId: meeting.recording_id }, 'Meeting enrichment threw');
     }
 
-    try {
-      const outcome = await analyseAndAlert(
-        {
-          meetingId: String(meeting.recording_id),
-          title: meeting.title || meeting.meeting_title || 'Untitled',
-          date: meeting.created_at,
-          clientName: enrichedClientName,
-          fathomUrl: meeting.url || meeting.share_url || null,
-          shareUrl: meeting.share_url || null,
-          transcript: transcriptText,
-          summary,
-          domainsType: meeting.calendar_invitees_domains_type || null,
-          crmMatches: meeting.crm_matches ?? null,
-        },
-        request.log,
-      );
-      request.log.info({ recordingId: meeting.recording_id, outcome }, 'Concern detection complete');
-    } catch (err) {
-      request.log.error({ err, recordingId: meeting.recording_id }, 'Concern detection threw');
+    // --- Classification gates everything below ---
+    // Routes the meeting into one of DIRECTOR / SLT / STANDARD / FAILSAFE
+    // and branches accordingly. Phase 2 will add the Slack side-effects;
+    // right now we just gate task creation + concern analysis.
+    const classification = classifyMeeting(
+      meeting.title || meeting.meeting_title,
+      (meeting.calendar_invitees ?? []).map((i) => ({
+        name: i.name,
+        email: i.email,
+        is_external: i.is_external,
+      })),
+    );
+    const routedTo: string[] = [];
+
+    // STANDARD: run concern detection as today. DIRECTOR / SLT / FAILSAFE
+    // all suppress public concern alerts (SLT + DIRECTOR are private;
+    // FAILSAFE needs manual review first).
+    if (classification.type === 'STANDARD') {
+      try {
+        const outcome = await analyseAndAlert(
+          {
+            meetingId: String(meeting.recording_id),
+            title: meeting.title || meeting.meeting_title || 'Untitled',
+            date: meeting.created_at,
+            clientName: enrichedClientName,
+            fathomUrl: meeting.url || meeting.share_url || null,
+            shareUrl: meeting.share_url || null,
+            transcript: transcriptText,
+            summary,
+            domainsType: meeting.calendar_invitees_domains_type || null,
+            crmMatches: meeting.crm_matches ?? null,
+          },
+          request.log,
+        );
+        if (outcome.alerted) routedTo.push('slack_concern_alert');
+        request.log.info({ recordingId: meeting.recording_id, outcome }, 'Concern detection complete');
+      } catch (err) {
+        request.log.error({ err, recordingId: meeting.recording_id }, 'Concern detection threw');
+      }
     }
 
-    // Create Asana tasks for any action items attached to this meeting.
-    // Runs in real-time so tasks appear within seconds of the meeting ending.
-    // The daily /api/cron/sync-actions-to-asana route remains as a backfill.
-    if (actionItemsJson) {
+    // Asana task creation:
+    //   STANDARD → normal multi-project routing
+    //   SLT      → SLT project only (forceProjectMode)
+    //   DIRECTOR → no tasks (Phase 2 adds Slack summary with buttons)
+    //   FAILSAFE → no tasks (Phase 2 adds DM-Toby)
+    if (actionItemsJson && (classification.type === 'STANDARD' || classification.type === 'SLT')) {
       try {
         const result = await createTasksForMeeting({
           meetingId: String(meeting.recording_id),
@@ -250,9 +274,13 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
           meetingDate: meeting.recording_start_time || meeting.created_at || null,
           meetingUrl: meeting.share_url || meeting.url || null,
           invitees: meeting.calendar_invitees || null,
+          forceProjectMode: classification.type === 'SLT' ? 'slt_only' : undefined,
         });
+        if (result.created > 0) {
+          routedTo.push(classification.type === 'SLT' ? 'asana_slt_only' : 'asana_standard');
+        }
         request.log.info(
-          { recordingId: meeting.recording_id, asanaResult: result },
+          { recordingId: meeting.recording_id, classification: classification.type, asanaResult: result },
           'Asana tasks created from meeting action items',
         );
       } catch (err) {
@@ -260,7 +288,19 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
       }
     }
 
-    return reply.code(200).send({ ok: true });
+    await logRoutingDecision({
+      meetingId: String(meeting.recording_id),
+      classification: classification.type,
+      reason: classification.reason,
+      routedTo,
+    });
+
+    request.log.info(
+      { recordingId: meeting.recording_id, classification: classification.type, reason: classification.reason, routedTo },
+      'Meeting routed',
+    );
+
+    return reply.code(200).send({ ok: true, classification: classification.type });
   });
 };
 

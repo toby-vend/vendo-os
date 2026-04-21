@@ -401,7 +401,17 @@ async function resolveProjects(input: {
    * didn't happen in a client meeting).
    */
   forceClientProject?: boolean;
+  /**
+   * Classification-driven override. When set to 'slt_only', the task lands
+   * in the SLT project and nothing else — no client, no Vendo OS. Used for
+   * meetings classified as SLT by the classification layer.
+   */
+  forceProjectMode?: 'slt_only';
 }): Promise<string[]> {
+  if (input.forceProjectMode === 'slt_only') {
+    return ASANA_SENIOR_LEADER_PROJECT_GID ? [ASANA_SENIOR_LEADER_PROJECT_GID] : [];
+  }
+
   const projects: string[] = [];
   const shouldTryClient = input.forceClientProject || hasExternalInvitee(input.invitees);
 
@@ -601,6 +611,8 @@ export async function createTasksForMeeting(input: {
   meetingUrl?: string | null;
   /** Calendar invitees (from Fathom or from meetings.calendar_invitees). Drives project routing. */
   invitees?: Invitee[] | string | null;
+  /** Classification override — 'slt_only' means the task lands in the SLT project only. */
+  forceProjectMode?: 'slt_only';
 }): Promise<SyncCount> {
   if (!ASANA_API_KEY || !input.rawActionItems) return { created: 0, skipped: 0 };
   await ensureSyncTable();
@@ -609,7 +621,11 @@ export async function createTasksForMeeting(input: {
   if (!items.length) return { created: 0, skipped: 0 };
 
   const invitees = parseInvitees(input.invitees);
-  const projects = await resolveProjects({ clientName: input.clientName, invitees });
+  const projects = await resolveProjects({
+    clientName: input.clientName,
+    invitees,
+    forceProjectMode: input.forceProjectMode,
+  });
   let created = 0;
   let skipped = 0;
 
