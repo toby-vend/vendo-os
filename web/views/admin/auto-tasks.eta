@@ -75,14 +75,53 @@
           <%= sourceLabels[t.source_type] || t.source_type %>
         </td>
         <td style="padding: 12px 16px; font-size: 12px; color: #E2E8F0;">
-          <% if (t.client_name) { %>
-            <div style="font-weight: 500;"><%= t.client_name %></div>
+          <% if (t.asana_task_gid && t.meeting_id) { %>
+          <details class="inline-edit">
+            <summary style="cursor: pointer; list-style: none; font-weight: 500; color: #E2E8F0; text-decoration: underline dotted; text-decoration-color: rgba(99,102,241,0.4); text-underline-offset: 2px;">
+              <%= t.client_name || 'No client — click to assign' %>
+            </summary>
+            <form method="POST" action="/admin/auto-tasks/update-client"
+                  onsubmit="return confirm('Reassign the task to a different client in Asana?') && confirm('This will update Asana immediately. Continue?');"
+                  style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+              <input type="hidden" name="task_gid" value="<%= t.asana_task_gid %>" />
+              <input type="hidden" name="meeting_id" value="<%= t.meeting_id %>" />
+              <input type="hidden" name="old_client" value="<%= t.client_name || '' %>" />
+              <input type="text" name="new_client" list="auto-task-client-options" required
+                     placeholder="Search clients…" autocomplete="off" value="<%= t.client_name || '' %>"
+                     style="padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
+              <button type="submit" style="font-size: 12px; color: #22C55E; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 5px 10px; cursor: pointer;">Save</button>
+            </form>
+          </details>
+          <% } else { %>
+            <div style="font-weight: 500;"><%= t.client_name || '—' %></div>
           <% } %>
           <% if (t.meeting_title) { %>
-            <div style="font-size: 11px; color: #64748B;"><%= t.meeting_title %></div>
+            <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;"><%= t.meeting_title %></div>
           <% } %>
         </td>
-        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8;"><%= t.assignee || '—' %></td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8;">
+          <% if (t.asana_task_gid) { %>
+          <details class="inline-edit">
+            <summary style="cursor: pointer; list-style: none; color: #E2E8F0; text-decoration: underline dotted; text-decoration-color: rgba(99,102,241,0.4); text-underline-offset: 2px;">
+              <%= t.assignee || 'Unassigned — click to set' %>
+            </summary>
+            <form method="POST" action="/admin/auto-tasks/update-assignee"
+                  onsubmit="return confirm('Reassign this task in Asana?') && confirm('This will update Asana immediately. Continue?');"
+                  style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+              <input type="hidden" name="task_gid" value="<%= t.asana_task_gid %>" />
+              <input type="hidden" name="sync_id" value="<%= t.id %>" />
+              <input type="text" name="new_assignee" list="auto-task-assignee-options" required
+                     placeholder="Search people…" autocomplete="off" value="<%= t.assignee || '' %>"
+                     style="padding: 5px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
+              <button type="submit" style="font-size: 12px; color: #22C55E; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 5px 10px; cursor: pointer;">Save</button>
+            </form>
+          </details>
+          <% } else { %>
+            <%= t.assignee || '—' %>
+          <% } %>
+        </td>
         <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8; white-space: nowrap;"><%= fmt(t.created_at) %></td>
         <td style="padding: 12px 16px;">
           <% if (isRejected) { %>
@@ -94,36 +133,17 @@
             <button type="submit" style="font-size: 12px; color: #94A3B8; background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 10px; cursor: pointer;">Undo</button>
           </form>
           <% } else { %>
-          <%
-            const labelStyle = 'display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#64748B;margin-bottom:3px;';
-            const inputStyle = 'width:100%;padding:5px 10px;background:#0B0B0B;border:1px solid rgba(255,255,255,0.10);border-radius:6px;color:#E2E8F0;font-family:var(--vendo-font);font-size:12px;box-sizing:border-box;';
-          %>
           <form method="POST" action="/admin/auto-tasks/reject"
-                style="display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 0.5rem; align-items: end; max-width: 560px;">
+                style="display: flex; gap: 0.5rem; align-items: center; min-width: 360px;">
             <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
             <input type="hidden" name="task_gid" value="<%= t.asana_task_gid %>" />
             <input type="hidden" name="task_name" value="<%= t.action_description %>" />
-            <label>
-              <span style="<%= labelStyle %>">Reason *</span>
-              <input type="text" name="reason" required
-                     placeholder="Why is this not relevant?"
-                     style="<%= inputStyle %>">
-            </label>
-            <label>
-              <span style="<%= labelStyle %>">Client <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(blank = all)</span></span>
-              <input type="text" name="client_name" list="auto-task-client-options"
-                     value="<%= t.client_name || '' %>"
-                     autocomplete="off"
-                     style="<%= inputStyle %>">
-            </label>
-            <label>
-              <span style="<%= labelStyle %>">Assignee <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(blank = all)</span></span>
-              <input type="text" name="assignee" list="auto-task-assignee-options"
-                     value="<%= t.assignee || '' %>"
-                     autocomplete="off"
-                     style="<%= inputStyle %>">
-            </label>
-            <button type="submit" style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 6px 12px; cursor: pointer; white-space: nowrap; height: 30px;">Not relevant</button>
+            <input type="hidden" name="client_name" value="<%= t.client_name || '' %>" />
+            <input type="hidden" name="assignee" value="<%= t.assignee || '' %>" />
+            <input type="text" name="reason" required
+                   placeholder="Why is this not relevant?"
+                   style="flex: 1; padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 12px;">
+            <button type="submit" style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; padding: 6px 12px; cursor: pointer; white-space: nowrap;">Not relevant</button>
           </form>
           <% } %>
         </td>

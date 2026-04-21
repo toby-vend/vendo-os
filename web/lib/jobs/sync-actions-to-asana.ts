@@ -351,7 +351,7 @@ async function recordSync(
 // historic call sites in this module.
 const getClientAM = sharedGetClientAM;
 
-async function getAsanaProjectForClient(clientName: string | null): Promise<string | undefined> {
+export async function getAsanaProjectForClient(clientName: string | null): Promise<string | undefined> {
   if (!clientName) return undefined;
   try {
     const r = await db.execute({

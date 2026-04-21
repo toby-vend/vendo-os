@@ -12,7 +12,14 @@ import {
   getQaSkipById,
   recordQaOverride,
 } from '../../lib/qa/auto-task-qa.js';
-import { createTaskFromOverride } from '../../lib/jobs/sync-actions-to-asana.js';
+import { createTaskFromOverride, getAsanaProjectForClient } from '../../lib/jobs/sync-actions-to-asana.js';
+import {
+  assignAsanaTask,
+  addAsanaTaskToProject,
+  removeAsanaTaskFromProject,
+} from '../../lib/asana/tasks.js';
+import { resolveAssignee } from '../../lib/asana/assignee.js';
+import { db } from '../../lib/queries/base.js';
 
 /**
  * QA dashboard for auto-created Asana tasks. Lets the user flag irrelevant
@@ -59,6 +66,87 @@ const adminAutoTasksRoutes: FastifyPluginAsync = async (app) => {
       userId: session?.userId || null,
     });
     reply.redirect('/admin/auto-tasks?rejected=1');
+  });
+
+  // POST /update-assignee — reassign the Asana task and persist the new
+  // name on the sync row. Expects double-confirm client-side.
+  app.post('/update-assignee', async (request, reply) => {
+    const body = request.body as { sync_id?: string; task_gid?: string; new_assignee?: string };
+    const syncId = parseInt(body.sync_id || '', 10);
+    const taskGid = (body.task_gid || '').trim();
+    const newAssignee = (body.new_assignee || '').trim();
+    if (!Number.isFinite(syncId) || !taskGid || !newAssignee) {
+      reply.redirect('/admin/auto-tasks?error=missing_fields');
+      return;
+    }
+    const assigneeGid = await resolveAssignee(newAssignee);
+    if (!assigneeGid) {
+      reply.redirect('/admin/auto-tasks?error=assignee_not_found');
+      return;
+    }
+    try {
+      await assignAsanaTask(taskGid, assigneeGid);
+      await db.execute({
+        sql: 'UPDATE fathom_asana_synced SET assignee = ? WHERE id = ?',
+        args: [newAssignee, syncId],
+      });
+      reply.redirect('/admin/auto-tasks?updated=assignee');
+    } catch (err) {
+      request.log.error({ err, syncId, taskGid }, 'Assignee update failed');
+      reply.redirect('/admin/auto-tasks?error=update_failed');
+    }
+  });
+
+  // POST /update-client — move the task to a different client's Asana
+  // project AND patch meetings.client_name so future auto-tasks route
+  // correctly. Expects double-confirm client-side.
+  app.post('/update-client', async (request, reply) => {
+    const body = request.body as {
+      task_gid?: string;
+      meeting_id?: string;
+      new_client?: string;
+      old_client?: string;
+    };
+    const taskGid = (body.task_gid || '').trim();
+    const meetingId = (body.meeting_id || '').trim();
+    const newClient = (body.new_client || '').trim();
+    const oldClient = (body.old_client || '').trim();
+    if (!taskGid || !newClient) {
+      reply.redirect('/admin/auto-tasks?error=missing_fields');
+      return;
+    }
+    if (newClient === oldClient) {
+      reply.redirect('/admin/auto-tasks?error=no_change');
+      return;
+    }
+    try {
+      const newProject = await getAsanaProjectForClient(newClient);
+      if (!newProject) {
+        reply.redirect('/admin/auto-tasks?error=client_project_missing');
+        return;
+      }
+      await addAsanaTaskToProject(taskGid, newProject);
+      if (oldClient) {
+        const oldProject = await getAsanaProjectForClient(oldClient);
+        if (oldProject && oldProject !== newProject) {
+          try {
+            await removeAsanaTaskFromProject(taskGid, oldProject);
+          } catch (err) {
+            request.log.warn({ err, taskGid, oldProject }, 'Could not remove from old project — likely already removed');
+          }
+        }
+      }
+      if (meetingId) {
+        await db.execute({
+          sql: 'UPDATE meetings SET client_name = ? WHERE id = ?',
+          args: [newClient, meetingId],
+        });
+      }
+      reply.redirect('/admin/auto-tasks?updated=client');
+    } catch (err) {
+      request.log.error({ err, taskGid, meetingId }, 'Client update failed');
+      reply.redirect('/admin/auto-tasks?error=update_failed');
+    }
   });
 
   // POST /override/:id — record an admin decision on an agent block. If
