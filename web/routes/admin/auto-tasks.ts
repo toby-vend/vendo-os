@@ -12,6 +12,10 @@ import {
   getQaSkipById,
   recordQaOverride,
 } from '../../lib/qa/auto-task-qa.js';
+import {
+  getRecentRoutingDecisions,
+  rerunMeetingAsStandard,
+} from '../../lib/classification/router.js';
 import { createTaskFromOverride, getAsanaProjectForClient } from '../../lib/jobs/sync-actions-to-asana.js';
 import {
   assignAsanaTask,
@@ -29,15 +33,38 @@ import { db } from '../../lib/queries/base.js';
  * normalised text.
  */
 const adminAutoTasksRoutes: FastifyPluginAsync = async (app) => {
-  // GET / — list recent auto-tasks with rejection status + recent agent blocks
+  // GET / — list recent auto-tasks with rejection status + recent agent blocks + routing decisions
   app.get('/', async (_request, reply) => {
-    const [tasks, clientOptions, assigneeOptions, qaSkips] = await Promise.all([
+    const [tasks, clientOptions, assigneeOptions, qaSkips, routingDecisions] = await Promise.all([
       getRecentAutoTasks(150),
       getClientOptions(),
       getAssigneeOptions(),
       getRecentQaSkips(50),
+      getRecentRoutingDecisions(30),
     ]);
-    reply.render('admin/auto-tasks', { tasks, clientOptions, assigneeOptions, qaSkips });
+    reply.render('admin/auto-tasks', { tasks, clientOptions, assigneeOptions, qaSkips, routingDecisions });
+  });
+
+  // POST /rerun/:meetingId — manual override: re-run a DIRECTOR/SLT/
+  // FAILSAFE meeting through STANDARD routing (normal multi-project
+  // Asana task creation). Idempotent via fathom_asana_synced dedupe.
+  app.post<{ Params: { meetingId: string } }>('/rerun/:meetingId', async (request, reply) => {
+    const meetingId = request.params.meetingId;
+    if (!meetingId) {
+      reply.redirect('/admin/auto-tasks?error=missing_meeting_id');
+      return;
+    }
+    try {
+      const result = await rerunMeetingAsStandard(meetingId);
+      if (!result) {
+        reply.redirect('/admin/auto-tasks?error=meeting_not_found');
+        return;
+      }
+      reply.redirect(`/admin/auto-tasks?rerun_created=${result.created}&rerun_skipped=${result.skipped}`);
+    } catch (err) {
+      request.log.error({ err, meetingId }, 'Rerun as STANDARD failed');
+      reply.redirect('/admin/auto-tasks?error=rerun_failed');
+    }
   });
 
   // POST /reject — mark an auto-created task as "not relevant". Optional

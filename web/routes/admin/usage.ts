@@ -11,6 +11,7 @@ import {
 } from '../../lib/queries/usage.js';
 import { getRejectionSummary } from '../../lib/queries/auto-tasks.js';
 import { getQaSkipSummary, getQaAccuracy } from '../../lib/qa/auto-task-qa.js';
+import { getRoutingCounts } from '../../lib/classification/router.js';
 
 const adminUsageRoutes: FastifyPluginAsync = async (app) => {
   // GET / — usage dashboard
@@ -18,7 +19,8 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
     const { from, to } = request.query as { from?: string; to?: string };
     const filter = { from: from || undefined, to: to || undefined };
 
-    const [summary, usersWithUsage, byModel, byFeature, forecast, asanaVolume, rejections, qaSkipped, qaAccuracy] = await Promise.all([
+    const monthStartIso = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString();
+    const [summary, usersWithUsage, byModel, byFeature, forecast, asanaVolume, rejections, qaSkipped, qaAccuracy, routingCounts] = await Promise.all([
       getUsageSummary(filter),
       getAllUsersWithUsage(filter),
       getUsageByModel(filter),
@@ -28,6 +30,7 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
       getRejectionSummary(),
       getQaSkipSummary(),
       getQaAccuracy(),
+      getRoutingCounts(monthStartIso),
     ]);
 
     reply.render('admin/usage', {
@@ -40,6 +43,7 @@ const adminUsageRoutes: FastifyPluginAsync = async (app) => {
       rejections,
       qaSkipped,
       qaAccuracy,
+      routingCounts,
       estimateCostGbp,
       from: from || '',
       to: to || '',

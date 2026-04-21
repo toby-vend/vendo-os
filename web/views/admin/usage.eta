@@ -120,6 +120,32 @@
   <% } %>
 </div>
 
+<% if (it.routingCounts) { %>
+<h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.75rem; color: #E2E8F0;">Meeting routing (this month)</h3>
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="card" style="padding: 1.25rem; border-left: 3px solid rgba(34,197,94,0.4);">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Standard</div>
+    <div style="font-size: 22px; font-weight: 700; color: #22C55E;"><%= Number(it.routingCounts.standard).toLocaleString() %></div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">Normal routing</div>
+  </div>
+  <div class="card" style="padding: 1.25rem; border-left: 3px solid rgba(167,139,250,0.5);">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Director</div>
+    <div style="font-size: 22px; font-weight: 700; color: #A78BFA;"><%= Number(it.routingCounts.director).toLocaleString() %></div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">#claude-director-meetings</div>
+  </div>
+  <div class="card" style="padding: 1.25rem; border-left: 3px solid rgba(250,204,21,0.5);">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">SLT</div>
+    <div style="font-size: 22px; font-weight: 700; color: #FACC15;"><%= Number(it.routingCounts.slt).toLocaleString() %></div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">SLT project only</div>
+  </div>
+  <div class="card" style="padding: 1.25rem; border-left: 3px solid rgba(239,68,68,0.5);">
+    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.5rem;">Fail-safe</div>
+    <div style="font-size: 22px; font-weight: 700; color: #EF4444;"><%= Number(it.routingCounts.failsafe).toLocaleString() %></div>
+    <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">DM Toby — manual review</div>
+  </div>
+</div>
+<% } %>
+
 <% if (it.qaAccuracy) { %>
 <%
   const acc = it.qaAccuracy.accuracy;

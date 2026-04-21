@@ -170,6 +170,72 @@
   Rejections can be undone at any time.
 </p>
 
+<% if (it.routingDecisions && it.routingDecisions.length > 0) { %>
+<%
+  const classColors = {
+    DIRECTOR: '#A78BFA',
+    SLT: '#FACC15',
+    STANDARD: '#22C55E',
+    FAILSAFE: '#EF4444',
+  };
+%>
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin: 2rem 0 0.75rem;">
+  <h3 style="font-size: 16px; font-weight: 600; color: #E2E8F0; margin: 0;">Meeting routing decisions</h3>
+  <span style="font-size: 12px; color: #94A3B8;">Recent classifier decisions. If the classifier got it wrong, re-run the meeting through STANDARD routing.</span>
+</div>
+<div class="card" style="overflow-x: auto; margin-bottom: 1.5rem;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Meeting</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Class</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Reason</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Routed to</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">When</th>
+        <th style="text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Override</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.routingDecisions.forEach(d => {
+        const color = classColors[d.classification] || '#94A3B8';
+        const rerun = !!d.manually_rerun_at;
+        const canRerun = !rerun && (d.classification === 'DIRECTOR' || d.classification === 'FAILSAFE');
+      %>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <td style="padding: 12px 16px; font-size: 13px; color: #E2E8F0;">
+          <div style="font-weight: 500;"><%= d.meeting_title || d.meeting_id %></div>
+          <% if (d.client_name) { %><div style="font-size: 11px; color: #64748B;"><%= d.client_name %></div><% } %>
+        </td>
+        <td style="padding: 12px 16px;">
+          <span style="padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: <%= color %>22; color: <%= color %>;">
+            <%= d.classification %>
+          </span>
+        </td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8; max-width: 260px;"><%= d.reason || '—' %></td>
+        <td style="padding: 12px 16px; font-size: 11px; color: #94A3B8;"><%= d.routed_to || '—' %></td>
+        <td style="padding: 12px 16px; font-size: 12px; color: #94A3B8; white-space: nowrap;"><%= fmt(d.created_at) %></td>
+        <td style="padding: 12px 16px;">
+          <% if (rerun) { %>
+            <div style="font-size: 12px; color: #22C55E;">Re-run as STANDARD</div>
+            <div style="font-size: 11px; color: #64748B; margin-top: 0.2rem;"><%= fmt(d.manually_rerun_at) %></div>
+          <% } else if (canRerun) { %>
+            <form method="POST" action="/admin/auto-tasks/rerun/<%= d.meeting_id %>"
+                  onsubmit="return confirm('Re-run this meeting through STANDARD routing? Tasks will be created in the normal client + Vendo OS projects.');"
+                  style="display: inline;">
+              <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+              <button type="submit" style="font-size: 12px; color: #22C55E; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 4px 10px; cursor: pointer; white-space: nowrap;">Re-run as STANDARD</button>
+            </form>
+          <% } else { %>
+            <span style="font-size: 11px; color: #64748B;">—</span>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
 <% if (it.qaSkips && it.qaSkips.length > 0) { %>
 <div style="display: flex; justify-content: space-between; align-items: baseline; margin: 2rem 0 0.75rem;">
   <h3 style="font-size: 16px; font-weight: 600; color: #E2E8F0; margin: 0;">Recently blocked by the agent</h3>

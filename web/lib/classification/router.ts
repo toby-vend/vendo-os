@@ -142,3 +142,34 @@ export async function markRoutingRerun(meetingId: string): Promise<void> {
     /* ignore */
   }
 }
+
+/**
+ * Manual override: re-run a meeting's action items through the STANDARD
+ * routing path (normal multi-project creation). Used when the classifier
+ * mistakenly routed a meeting to DIRECTOR/SLT/FAILSAFE. Idempotent because
+ * fathom_asana_synced dedupes on (meeting_id, action_description).
+ */
+export async function rerunMeetingAsStandard(
+  meetingId: string,
+): Promise<{ created: number; skipped: number } | null> {
+  // Lazy import to avoid a circular dep between router.ts and the sync job.
+  const { createTasksForMeeting } = await import('../jobs/sync-actions-to-asana.js');
+  const r = await db.execute({
+    sql: `SELECT id, title, raw_action_items, client_name, date, url, calendar_invitees
+            FROM meetings WHERE id = ? LIMIT 1`,
+    args: [meetingId],
+  });
+  if (!r.rows.length) return null;
+  const row = r.rows[0];
+  const result = await createTasksForMeeting({
+    meetingId: row.id as string,
+    title: (row.title as string) || 'Untitled',
+    rawActionItems: (row.raw_action_items as string) || null,
+    clientName: (row.client_name as string) || null,
+    meetingDate: (row.date as string) || null,
+    meetingUrl: (row.url as string) || null,
+    invitees: (row.calendar_invitees as string) || null,
+  });
+  await markRoutingRerun(meetingId);
+  return result;
+}
