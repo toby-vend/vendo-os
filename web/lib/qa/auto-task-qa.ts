@@ -19,7 +19,8 @@ import { ensureRejectionSchema } from '../queries/auto-tasks.js';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const CACHE_TTL_MS = 5 * 60 * 1000;
-const MAX_RULES_IN_PROMPT = 40;
+const MAX_CACHE_ROWS = 500;      // upper bound on rules loaded into memory
+const MAX_RULES_IN_PROMPT = 40;  // upper bound on rules actually sent to Haiku
 
 interface RejectionRule {
   name_normalised: string;
@@ -60,7 +61,7 @@ async function loadRules(): Promise<RejectionRule[]> {
               FROM asana_task_rejections
           ORDER BY rejected_at DESC
              LIMIT ?`,
-      args: [MAX_RULES_IN_PROMPT],
+      args: [MAX_CACHE_ROWS],
     });
     _rulesCache = r.rows.map((row) => ({
       name_normalised: (row.name_normalised as string) || '',
@@ -73,6 +74,26 @@ async function loadRules(): Promise<RejectionRule[]> {
   } catch {
     return [];
   }
+}
+
+/**
+ * Keep only rules whose scope could apply to the proposed task:
+ *  - wildcard rules (no client, no assignee) → apply to everything
+ *  - client-scoped rules → only when the proposed task shares that client
+ *  - assignee-scoped rules → only when the proposed task shares that assignee
+ *  - both-scoped rules → both must match
+ * Filtered in-memory so the cache stays single-shape.
+ */
+function filterRelevantRules(
+  rules: RejectionRule[],
+  clientName: string | null,
+  assignee: string | null,
+): RejectionRule[] {
+  return rules.filter((r) => {
+    const clientOk = !r.client_name || r.client_name === clientName;
+    const assigneeOk = !r.assignee || r.assignee === assignee;
+    return clientOk && assigneeOk;
+  });
 }
 
 export function resetQaCache(): void {
@@ -143,14 +164,20 @@ function parseResult(text: string): QaResult {
  */
 export async function validateTaskWithQa(input: QaInput): Promise<QaResult> {
   if (!process.env.ANTHROPIC_API_KEY) return { approve: true };
-  const rules = await loadRules();
-  if (!rules.length) return { approve: true }; // no baseline — nothing to enforce yet
+  const allRules = await loadRules();
+  if (!allRules.length) return { approve: true }; // no baseline — nothing to enforce yet
+
+  // Only send rules that could possibly apply to this task. Trims noise,
+  // shortens prompt, and sharpens the match signal.
+  const relevant = filterRelevantRules(allRules, input.clientName, input.assignee)
+    .slice(0, MAX_RULES_IN_PROMPT);
+  if (!relevant.length) return { approve: true };
 
   try {
     const response = await anthropic().messages.create({
       model: MODEL,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: buildUserMessage(input, rules) }],
+      messages: [{ role: 'user', content: buildUserMessage(input, relevant) }],
       max_tokens: 200,
       temperature: 0,
     });
