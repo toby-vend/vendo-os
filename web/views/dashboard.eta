@@ -21,9 +21,9 @@
     <p class="stat-label">Monthly Revenue</p>
   </article>
   <article class="stat-card">
-    <p class="stat-value">&pound;<%= (runRate / 1000).toFixed(0) %>k</p>
+    <p class="stat-value">&pound;<%= (runRate / 1_000_000).toFixed(2) %>M</p>
     <p class="stat-label">Annual Run Rate</p>
-    <p class="stat-breakdown">Target: &pound;2,000k</p>
+    <p class="stat-breakdown">Target: &pound;2M</p>
   </article>
   <article class="stat-card">
     <p class="stat-value" style="<%= it.marginPct < 20 ? 'color: #EF4444;' : '' %>"><%= it.marginPct %>%</p>

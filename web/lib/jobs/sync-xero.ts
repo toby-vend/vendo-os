@@ -331,19 +331,21 @@ async function syncPnl(http: XeroHttp): Promise<number> {
       const grossProfit = parsePnlValue(report.Rows, 'Gross Profit');
       const totalExpenses =
         parsePnlValue(report.Rows, 'Less Operating Expenses') || parsePnlValue(report.Rows, 'Expenses');
-      const netProfit = parsePnlValue(report.Rows, 'Net Profit');
+      // Xero omits a "Net Profit" summary row in some report variants, so fall
+      // back to income - expenses to avoid writing a silent zero.
+      const parsedNet = parsePnlValue(report.Rows, 'Net Profit');
+      const netProfit = parsedNet !== 0 ? parsedNet : totalIncome - totalExpenses;
 
+      // Historical syncs wrote duplicate rows per month (different period_end
+      // values bypass ON CONFLICT). Delete by calendar month before insert so
+      // there is at most one row per YYYY-MM.
+      await db.execute({
+        sql: `DELETE FROM xero_pnl_monthly WHERE strftime('%Y-%m', period_start) = ?`,
+        args: [fromDate.slice(0, 7)],
+      });
       await db.execute({
         sql: `INSERT INTO xero_pnl_monthly (period_start, period_end, total_income, total_cost_of_sales, gross_profit, total_expenses, net_profit, raw_report, synced_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-              ON CONFLICT(period_start, period_end) DO UPDATE SET
-                total_income = excluded.total_income,
-                total_cost_of_sales = excluded.total_cost_of_sales,
-                gross_profit = excluded.gross_profit,
-                total_expenses = excluded.total_expenses,
-                net_profit = excluded.net_profit,
-                raw_report = excluded.raw_report,
-                synced_at = excluded.synced_at`,
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [fromDate, toDate, totalIncome, totalCos, grossProfit, totalExpenses, netProfit, JSON.stringify(report), now],
       });
       monthsSynced++;
@@ -378,27 +380,35 @@ async function syncBankSummary(http: XeroHttp): Promise<number> {
     });
 
     const inserts: Array<{ sql: string; args: unknown[] }> = [];
-    for (const row of report.Rows) {
-      if (row.RowType === 'Section' && row.Rows) {
-        for (const subRow of row.Rows) {
-          if (subRow.Cells && subRow.Cells.length >= 3) {
-            const accountName = subRow.Cells[0]?.Value;
-            const opening = parseFloat(subRow.Cells[1]?.Value || '0') || 0;
-            const closing = parseFloat(subRow.Cells[2]?.Value || '0') || 0;
-            if (accountName && !accountName.startsWith('Total')) {
-              inserts.push({
-                sql: `INSERT INTO xero_bank_summary (account_name, opening_balance, closing_balance, period_start, period_end, synced_at)
-                      VALUES (?, ?, ?, ?, ?, ?)`,
-                args: [accountName, opening, closing, fromDate, toDate, now],
-              });
-            }
-          }
-        }
+    // Walk nested Sections; accept any row with 3+ cells where opening/closing
+    // values parse to numbers. Header rows with non-numeric cells are skipped
+    // so schema variations don't silently drop data.
+    const visit = (rowList: XeroReportRow[]): void => {
+      for (const row of rowList) {
+        if (row.Rows && Array.isArray(row.Rows)) visit(row.Rows);
+        if (row.RowType !== 'Row') continue;
+        const cells = row.Cells;
+        if (!cells || cells.length < 3) continue;
+        const accountName = cells[0]?.Value;
+        if (!accountName || accountName.startsWith('Total') || accountName === 'Bank Accounts') continue;
+        const opening = parseFloat(cells[1]?.Value || '');
+        const closing = parseFloat(cells[cells.length - 1]?.Value || '');
+        if (Number.isNaN(opening) && Number.isNaN(closing)) continue;
+        inserts.push({
+          sql: `INSERT INTO xero_bank_summary (account_name, opening_balance, closing_balance, period_start, period_end, synced_at)
+                VALUES (?, ?, ?, ?, ?, ?)`,
+          args: [accountName, Number.isNaN(opening) ? 0 : opening, Number.isNaN(closing) ? 0 : closing, fromDate, toDate, now],
+        });
       }
-    }
+    };
+    visit(report.Rows);
     if (inserts.length) await db.batch(inserts as Array<{ sql: string; args: (string | number | null)[] }>);
     written = inserts.length;
-    consoleLog(LOG, `Bank summary: ${written} accounts`);
+    if (written === 0) {
+      consoleLog(LOG, 'Bank summary: 0 accounts written — report structure unexpected or missing scope. Re-authorise if needed.');
+    } else {
+      consoleLog(LOG, `Bank summary: ${written} accounts`);
+    }
   } catch (err) {
     consoleLog(LOG, `Bank summary failed: ${err instanceof Error ? err.message : err}`);
   }
