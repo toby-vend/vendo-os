@@ -3,9 +3,9 @@
   <div class="sg-chat-log" id="sg-chat-log">
     <% (it.transcript || []).forEach(function(turn) { %>
       <% if (turn.role === 'assistant') { %>
-        <div class="sg-bubble sg-bubble-ai"><%~ (it.mdAssistant ? it.mdAssistant(turn.content) : turn.content) %></div>
+        <div class="sg-bubble sg-bubble-ai"><%~ it.md(turn.content) %></div>
       <% } else { %>
-        <div class="sg-bubble sg-bubble-user"><%= turn.content %></div>
+        <div class="sg-bubble sg-bubble-user"><div class="sg-bubble-text"><%= turn.content %></div></div>
       <% } %>
     <% }) %>
   </div>
@@ -15,7 +15,6 @@
     hx-post="/api/suggestions/chat"
     hx-target="#sg-chat-log"
     hx-swap="beforeend"
-    hx-on::after-request="if(event.detail.successful){this.querySelector('[name=message]').value='';}"
   >
     <input type="hidden" name="session_id" value="<%= it.sessionId %>">
 

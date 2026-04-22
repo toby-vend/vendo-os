@@ -5108,11 +5108,38 @@ button.growth-sort-btn:hover {
 .sg-chat { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .sg-chat-log { flex: 1 1 auto; overflow-y: auto; padding: 4px 2px; display: flex; flex-direction: column; gap: 8px; }
 
-.sg-bubble { padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.45; max-width: 85%; }
+.sg-bubble { padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; max-width: 85%; word-wrap: break-word; overflow-wrap: anywhere; }
 .sg-bubble-ai { background: rgba(255,255,255,0.04); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.05); align-self: flex-start; }
 .sg-bubble-user { background: rgba(34,197,94,0.1); color: #E2E8F0; border: 1px solid rgba(34,197,94,0.2); align-self: flex-end; }
+.sg-bubble-text { white-space: pre-wrap; }
 .sg-bubble-thumbs { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .sg-bubble-thumbs img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); }
+
+/* Markdown rendering inside AI bubbles */
+.sg-bubble-ai p { margin: 0 0 8px 0; }
+.sg-bubble-ai p:last-child { margin-bottom: 0; }
+.sg-bubble-ai strong { color: #F1F5F9; font-weight: 600; }
+.sg-bubble-ai em { font-style: italic; color: #CBD5E1; }
+.sg-bubble-ai code {
+  background: rgba(34,197,94,0.12);
+  color: #86EFAC;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 12px;
+}
+.sg-bubble-ai pre {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.sg-bubble-ai pre code { background: transparent; color: #E2E8F0; padding: 0; font-size: 12px; }
+.sg-bubble-ai ul, .sg-bubble-ai ol { margin: 4px 0 8px 0; padding-left: 20px; }
+.sg-bubble-ai li { margin: 2px 0; }
+.sg-bubble-ai a { color: #86EFAC; text-decoration: underline; }
 
 .sg-chat-form { padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 8px; }
 .sg-input-row { display: flex; gap: 8px; align-items: flex-end; }

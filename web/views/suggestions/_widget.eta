@@ -151,6 +151,42 @@
     for (var i = 0; i < files.length; i++) SG_uploadFile(files[i]);
   });
 
+  // Enter-to-send (Shift+Enter keeps newline). Global so it survives HTMX swaps.
+  document.body.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter' || e.shiftKey) return;
+    var ta = e.target;
+    if (!ta || ta.tagName !== 'TEXTAREA') return;
+    var form = ta.closest && ta.closest('.sg-chat-form');
+    if (!form) return;
+    e.preventDefault();
+    var btn = form.querySelector('button[type=submit]');
+    if (btn) btn.click();
+  });
+
+  // Clear the chat textarea + chips after any successful chat turn
+  document.body.addEventListener('htmx:afterRequest', function(e) {
+    if (!e.detail || !e.detail.successful) return;
+    var form = e.target && e.target.closest ? e.target.closest('.sg-chat-form') : null;
+    if (!form) return;
+    var ta = form.querySelector('[name=message]');
+    if (ta) { ta.value = ''; ta.focus(); }
+    var chipList = document.getElementById('sg-attachments');
+    if (chipList) chipList.innerHTML = '';
+  });
+
+  // Auto-scroll the chat log to the bottom after swaps. Re-run after a tick so
+  // image thumbs that just got inserted are included in the height calculation.
+  function sgScrollChatToBottom() {
+    var log = document.getElementById('sg-chat-log');
+    if (!log) return;
+    log.scrollTop = log.scrollHeight;
+  }
+  document.body.addEventListener('htmx:afterSwap', function() {
+    sgScrollChatToBottom();
+    setTimeout(sgScrollChatToBottom, 80);
+    setTimeout(sgScrollChatToBottom, 300);
+  });
+
   window.SG_uploadFile = function(file) {
     var sidInput = document.querySelector('#sg-panel [name="session_id"]');
     if (!sidInput || !sidInput.value) return; // chat hasn't started yet — ignore

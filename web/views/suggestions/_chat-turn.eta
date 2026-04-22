@@ -1,6 +1,6 @@
 <!-- Fragment appended after each chat turn. Renders user message (with any thumbs) + assistant response. -->
 <div class="sg-bubble sg-bubble-user">
-  <%= it.lastUserMessage %>
+  <div class="sg-bubble-text"><%= it.lastUserMessage %></div>
   <% if (it.newAttachments && it.newAttachments.length) { %>
   <div class="sg-bubble-thumbs">
     <% it.newAttachments.forEach(function(a) { %>
@@ -10,7 +10,7 @@
   <% } %>
 </div>
 
-<div class="sg-bubble sg-bubble-ai"><%= it.assistantMessage %></div>
+<div class="sg-bubble sg-bubble-ai"><%~ it.md(it.assistantMessage) %></div>
 
 <% if (!it.canStillAttach) { %>
 <script>
