@@ -274,6 +274,30 @@ export async function getAssigneeOptions(): Promise<string[]> {
   return Array.from(seen).sort((a, b) => a.localeCompare(b));
 }
 
+// --- Full rules dump (for the /learnings page) ---
+
+export interface RejectionRuleRow {
+  id: number;
+  task_gid: string | null;
+  name_normalised: string;
+  client_name: string | null;
+  assignee: string | null;
+  reason: string;
+  rejected_at: string;
+  rejected_by_user_id: string | null;
+}
+
+/** Every rejection rule, newest first. Used by the learnings page. */
+export async function getAllRejections(): Promise<RejectionRuleRow[]> {
+  await ensureRejectionSchema();
+  return rows<RejectionRuleRow>(
+    `SELECT id, task_gid, name_normalised, client_name, assignee,
+            reason, rejected_at, rejected_by_user_id
+       FROM asana_task_rejections
+      ORDER BY rejected_at DESC`,
+  );
+}
+
 // --- Summary counts for /admin/usage ---
 
 export async function getRejectionSummary(): Promise<{ totalRejected: number; thisMonth: number }> {

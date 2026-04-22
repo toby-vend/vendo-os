@@ -6,6 +6,7 @@ import {
   normaliseForMatch,
   getClientOptions,
   getAssigneeOptions,
+  getAllRejections,
 } from '../../lib/queries/auto-tasks.js';
 import {
   getRecentQaSkips,
@@ -44,6 +45,17 @@ const adminAutoTasksRoutes: FastifyPluginAsync = async (app) => {
       getRecentRoutingDecisions(30),
     ]);
     reply.render('admin/auto-tasks', { tasks, clientOptions, assigneeOptions, qaSkips, routingDecisions });
+  });
+
+  // GET /learnings — readable dump of every rejection rule + recent QA
+  // agent blocks with admin verdicts. This is what the Haiku QA agent
+  // consumes as context, rendered so you can scan it without SQL.
+  app.get('/learnings', async (_request, reply) => {
+    const [rejections, qaSkips] = await Promise.all([
+      getAllRejections(),
+      getRecentQaSkips(200),
+    ]);
+    reply.render('admin/auto-task-learnings', { rejections, qaSkips });
   });
 
   // POST /rerun/:meetingId — manual override: re-run a DIRECTOR/SLT/
