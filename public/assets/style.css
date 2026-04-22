@@ -5001,31 +5001,54 @@ button.growth-sort-btn:hover {
 .sg-pill {
   position: fixed; bottom: 24px; right: 24px; z-index: 60;
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 16px; border-radius: 999px;
-  background: #22C55E; color: #0B0B0B;
-  font-size: 13px; font-weight: 600; border: none; cursor: pointer;
-  box-shadow: 0 6px 20px rgba(34,197,94,0.25);
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  padding: 11px 18px; border-radius: 999px;
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: #0B0B0B;
+  font-family: var(--vendo-font, 'Manrope', sans-serif);
+  font-size: 13px; font-weight: 600; letter-spacing: 0.01em;
+  border: none; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(34,197,94,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 140ms ease, box-shadow 140ms ease;
 }
-.sg-pill:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(34,197,94,0.35); }
+.sg-pill:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(34,197,94,0.4), inset 0 1px 0 rgba(255,255,255,0.2); }
+.sg-pill:active { transform: translateY(0); }
 
 .sg-panel {
   position: fixed; bottom: 24px; right: 24px; z-index: 61;
-  width: 400px; max-height: 560px; height: min(560px, calc(100vh - 48px));
-  background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
-  box-shadow: 0 20px 48px rgba(0,0,0,0.5);
+  width: 420px; max-height: 600px; height: min(600px, calc(100vh - 48px));
+  background: #0F0F10;
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+  box-shadow: 0 28px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(34,197,94,0.04);
   display: none; flex-direction: column; overflow: hidden;
   color: #E2E8F0;
+  font-family: var(--vendo-font, 'Manrope', sans-serif);
 }
-.sg-panel.open { display: flex; }
+.sg-panel.open { display: flex; animation: sg-panel-in 180ms ease; }
 .sg-panel.sg-dragover { outline: 2px dashed #22C55E; outline-offset: -8px; }
+@keyframes sg-panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 .sg-panel-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(34,197,94,0.04) 0%, rgba(34,197,94,0) 100%);
 }
-.sg-panel-title { display: flex; flex-direction: column; font-size: 14px; font-weight: 600; }
-.sg-panel-title small { font-size: 11px; font-weight: 400; }
+.sg-panel-title { display: flex; align-items: center; gap: 10px; }
+.sg-panel-title-text { display: flex; flex-direction: column; line-height: 1.2; }
+.sg-panel-title-text span { font-size: 14px; font-weight: 600; color: #F1F5F9; }
+.sg-panel-title-text small { font-size: 11px; font-weight: 400; margin-top: 2px; }
+
+.sg-panel-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: #0B0B0B;
+  font-weight: 700; font-size: 13px; letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(34,197,94,0.3), inset 0 1px 0 rgba(255,255,255,0.25);
+  flex-shrink: 0;
+}
 
 .sg-icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -5033,6 +5056,26 @@ button.growth-sort-btn:hover {
   background: transparent; border: none; color: #94A3B8; cursor: pointer;
 }
 .sg-icon-btn:hover { background: rgba(255,255,255,0.04); color: #E2E8F0; }
+
+/* Close button — distinct from generic icon button, sits in panel header */
+.sg-close-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #94A3B8; cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+.sg-close-btn:hover {
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.35);
+  color: #FCA5A5;
+}
+.sg-close-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.45);
+}
+.sg-close-btn:active { transform: scale(0.95); }
 
 .sg-panel-body { flex: 1 1 auto; overflow-y: auto; padding: 16px; }
 .sg-muted { color: #94A3B8; font-size: 12px; }
