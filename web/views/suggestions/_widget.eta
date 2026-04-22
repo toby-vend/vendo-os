@@ -1,0 +1,216 @@
+<!-- Floating Suggestions widget — renders on every authed page via HTMX include in base.eta -->
+<div id="sg-root" class="sg-root" data-max-files="<%= it.maxFilesPerDraft %>" data-max-mb="<%= it.maxFileMB %>">
+  <!-- Collapsed pill -->
+  <button type="button" class="sg-pill" id="sg-pill" aria-label="Open suggestions" onclick="SG_open()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true">
+      <path d="M12 2a7 7 0 017 7c0 3-2 4-2 6v1H7v-1c0-2-2-3-2-6a7 7 0 017-7z"/>
+      <line x1="9" y1="21" x2="15" y2="21"/>
+    </svg>
+    <span>Suggest</span>
+  </button>
+
+  <!-- Expanded panel -->
+  <section class="sg-panel" id="sg-panel" aria-hidden="true" aria-label="Submit a suggestion">
+    <header class="sg-panel-header">
+      <div class="sg-panel-title">
+        <span class="sg-panel-badge" aria-hidden="true">V</span>
+        <div class="sg-panel-title-text">
+          <span>New suggestion</span>
+          <small id="sg-panel-subtitle" class="sg-muted">Help shape Vendo OS</small>
+        </div>
+      </div>
+      <button type="button" class="sg-close-btn" aria-label="Close" title="Close" onclick="SG_close()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="18" y1="6" x2="6" y2="18"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="sg-panel-body" id="sg-panel-body">
+      <!-- Step 0: scope picker -->
+      <div id="sg-scope" class="sg-scope">
+        <p class="sg-scope-lede">Is this about this page, or about the whole site?</p>
+        <form
+          hx-post="/api/suggestions/chat/start"
+          hx-target="#sg-panel-body"
+          hx-swap="innerHTML"
+          hx-indicator="#sg-starting"
+        >
+          <input type="hidden" name="page_url" id="sg-page-url">
+          <input type="hidden" name="page_label" id="sg-page-label">
+
+          <label class="sg-scope-option">
+            <input type="radio" name="scope" value="page" checked>
+            <div>
+              <strong>About this page</strong>
+              <span class="sg-muted" id="sg-page-hint">—</span>
+            </div>
+          </label>
+          <label class="sg-scope-option">
+            <input type="radio" name="scope" value="sitewide">
+            <div>
+              <strong>Site-wide</strong>
+              <span class="sg-muted">Not tied to one page</span>
+            </div>
+          </label>
+
+          <button type="submit" class="sg-btn sg-btn-primary">Start</button>
+          <span id="sg-starting" class="htmx-indicator sg-muted" style="margin-left: 0.5rem;">Starting…</span>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function() {
+  if (window.__SG_INIT) return;
+  window.__SG_INIT = true;
+
+  var PAGE_NAMES = window.__VENDO_PAGE_NAMES || {};
+
+  function resolvePageLabel() {
+    // 1. Prefer the rendered topbar title (set by base.eta's pageNames map)
+    var topbarEl = document.querySelector('.topbar-title');
+    if (topbarEl) {
+      var t = (topbarEl.textContent || '').trim();
+      if (t && t !== 'Vendo OS') return t;
+    }
+    // 2. Fallback to document.title
+    var dt = (document.title || '').trim();
+    if (dt && dt !== 'Vendo OS') return dt.replace(/\s*[—|]\s*Vendo OS.*$/, '').trim() || null;
+    return null;
+  }
+
+  function seedScopeInputs() {
+    var pathEl = document.getElementById('sg-page-url');
+    var labelEl = document.getElementById('sg-page-label');
+    var hintEl = document.getElementById('sg-page-hint');
+    if (!pathEl || !labelEl || !hintEl) return;
+    var path = window.location.pathname || '/';
+    pathEl.value = path;
+    var label = resolvePageLabel();
+    labelEl.value = label || '';
+    hintEl.textContent = label ? label : 'This page';
+  }
+
+  window.SG_open = function() {
+    var panel = document.getElementById('sg-panel');
+    var pill = document.getElementById('sg-pill');
+    if (!panel || !pill) return;
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    pill.style.display = 'none';
+    seedScopeInputs();
+  };
+
+  window.SG_close = function() {
+    var panel = document.getElementById('sg-panel');
+    var pill = document.getElementById('sg-pill');
+    if (!panel || !pill) return;
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    pill.style.display = '';
+  };
+
+  // --- Paste + drag-drop binding (delegated; works after HTMX swaps) ---
+  document.addEventListener('paste', function(e) {
+    var panel = document.getElementById('sg-panel');
+    if (!panel || !panel.classList.contains('open')) return;
+    var items = (e.clipboardData || {}).items || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.indexOf('image/') === 0) {
+        var file = items[i].getAsFile();
+        if (file) SG_uploadFile(file);
+        e.preventDefault();
+        break;
+      }
+    }
+  });
+
+  document.addEventListener('dragover', function(e) {
+    var panel = document.getElementById('sg-panel');
+    if (!panel || !panel.classList.contains('open')) return;
+    if (!panel.contains(e.target)) return;
+    e.preventDefault();
+    panel.classList.add('sg-dragover');
+  });
+  document.addEventListener('dragleave', function(e) {
+    var panel = document.getElementById('sg-panel');
+    if (!panel) return;
+    if (e.target === panel) panel.classList.remove('sg-dragover');
+  });
+  document.addEventListener('drop', function(e) {
+    var panel = document.getElementById('sg-panel');
+    if (!panel || !panel.classList.contains('open')) return;
+    if (!panel.contains(e.target)) return;
+    e.preventDefault();
+    panel.classList.remove('sg-dragover');
+    var files = (e.dataTransfer || {}).files || [];
+    for (var i = 0; i < files.length; i++) SG_uploadFile(files[i]);
+  });
+
+  // Enter-to-send (Shift+Enter keeps newline). Global so it survives HTMX swaps.
+  document.body.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter' || e.shiftKey) return;
+    var ta = e.target;
+    if (!ta || ta.tagName !== 'TEXTAREA') return;
+    var form = ta.closest && ta.closest('.sg-chat-form');
+    if (!form) return;
+    e.preventDefault();
+    var btn = form.querySelector('button[type=submit]');
+    if (btn) btn.click();
+  });
+
+  // Clear the chat textarea + chips after any successful chat turn
+  document.body.addEventListener('htmx:afterRequest', function(e) {
+    if (!e.detail || !e.detail.successful) return;
+    var form = e.target && e.target.closest ? e.target.closest('.sg-chat-form') : null;
+    if (!form) return;
+    var ta = form.querySelector('[name=message]');
+    if (ta) { ta.value = ''; ta.focus(); }
+    var chipList = document.getElementById('sg-attachments');
+    if (chipList) chipList.innerHTML = '';
+  });
+
+  // Auto-scroll the chat log to the bottom after swaps. Re-run after a tick so
+  // image thumbs that just got inserted are included in the height calculation.
+  function sgScrollChatToBottom() {
+    var log = document.getElementById('sg-chat-log');
+    if (!log) return;
+    log.scrollTop = log.scrollHeight;
+  }
+  document.body.addEventListener('htmx:afterSwap', function() {
+    sgScrollChatToBottom();
+    setTimeout(sgScrollChatToBottom, 80);
+    setTimeout(sgScrollChatToBottom, 300);
+  });
+
+  window.SG_uploadFile = function(file) {
+    var sidInput = document.querySelector('#sg-panel [name="session_id"]');
+    if (!sidInput || !sidInput.value) return; // chat hasn't started yet — ignore
+    var chipList = document.getElementById('sg-attachments');
+    if (!chipList) return;
+    var fd = new FormData();
+    fd.append('session_id', sidInput.value);
+    fd.append('file', file, file.name || 'screenshot.png');
+    fetch('/api/suggestions/chat/upload', { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function(r) { return r.text().then(function(html) { return { html: html, ok: r.ok }; }); })
+      .then(function(res) {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = res.html.trim();
+        if (res.ok && tmp.firstChild) {
+          chipList.appendChild(tmp.firstChild);
+        } else {
+          var err = document.getElementById('sg-upload-error');
+          if (err) err.innerHTML = res.html;
+        }
+      })
+      .catch(function() {
+        var err = document.getElementById('sg-upload-error');
+        if (err) err.textContent = 'Upload failed.';
+      });
+  };
+})();
+</script>

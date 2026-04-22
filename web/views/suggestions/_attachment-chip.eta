@@ -1,0 +1,12 @@
+<div class="sg-chip" id="sg-chip-<%= it.attachment.id %>">
+  <img src="<%= it.attachment.blob_url %>" alt="<%= it.attachment.filename || 'screenshot' %>" loading="lazy">
+  <button
+    type="button"
+    class="sg-chip-remove"
+    aria-label="Remove attachment"
+    hx-post="/api/suggestions/chat/attachment/<%= it.attachment.id %>/delete"
+    hx-vals='js:{session_id: document.querySelector("#sg-chat [name=session_id]").value}'
+    hx-target="#sg-chip-<%= it.attachment.id %>"
+    hx-swap="outerHTML"
+  >×</button>
+</div>

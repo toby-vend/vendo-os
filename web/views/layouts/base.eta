@@ -642,5 +642,10 @@
 
   } // end mobile-only guard
   </script>
+
+  <!-- Suggestions widget (lazy-loads via HTMX; returns empty 204 for client users or when disabled) -->
+  <% if (it.user && (it.user.role === 'admin' || it.user.role === 'standard')) { %>
+  <div id="sg-slot" hx-get="/api/suggestions/widget" hx-trigger="load" hx-swap="outerHTML"></div>
+  <% } %>
 </body>
 </html>

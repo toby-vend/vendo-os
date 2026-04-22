@@ -1,0 +1,52 @@
+<!-- Chat-session shell returned after scope pick. Replaces the body of the panel. -->
+<div class="sg-chat" id="sg-chat">
+  <div class="sg-chat-log" id="sg-chat-log">
+    <% (it.transcript || []).forEach(function(turn) { %>
+      <% if (turn.role === 'assistant') { %>
+        <div class="sg-bubble sg-bubble-ai"><%~ it.md(turn.content) %></div>
+      <% } else { %>
+        <div class="sg-bubble sg-bubble-user"><div class="sg-bubble-text"><%= turn.content %></div></div>
+      <% } %>
+    <% }) %>
+  </div>
+
+  <form
+    class="sg-chat-form"
+    hx-post="/api/suggestions/chat"
+    hx-target="#sg-chat-log"
+    hx-swap="beforeend"
+  >
+    <input type="hidden" name="session_id" value="<%= it.sessionId %>">
+
+    <!-- Attachment chips (populated on upload) -->
+    <div class="sg-attachments" id="sg-attachments"></div>
+    <div class="sg-error-slot" id="sg-upload-error"></div>
+
+    <div class="sg-input-row">
+      <label class="sg-icon-btn sg-attach-btn" title="Attach screenshot" aria-label="Attach screenshot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          multiple
+          style="display:none"
+          onchange="(function(inp){ for (var i=0;i<inp.files.length;i++) window.SG_uploadFile(inp.files[i]); inp.value=''; })(this)"
+        >
+      </label>
+
+      <textarea
+        name="message"
+        class="sg-textarea"
+        placeholder="Type your answer…"
+        rows="2"
+        required
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}"
+      ></textarea>
+
+      <button type="submit" class="sg-btn sg-btn-primary" aria-label="Send">Send</button>
+    </div>
+    <div class="sg-chat-meta sg-muted">
+      Shift+Enter for newline · paste or drop screenshots to attach
+    </div>
+  </form>
+</div>

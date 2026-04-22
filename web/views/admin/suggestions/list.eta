@@ -1,0 +1,78 @@
+<% layout('/layouts/base') %>
+
+<div style="max-width: 1100px;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;">
+    <div>
+      <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin-bottom: 0.25rem;">Suggestions</h2>
+      <p class="sg-muted" style="margin: 0;">Team submissions via the floating widget.</p>
+    </div>
+    <form method="POST" action="/admin/suggestions/settings/toggle" style="display: inline-flex; gap: 0.5rem; align-items: center;">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+      <span class="sg-muted" style="font-size: 13px;">Submissions:</span>
+      <% if (it.suggestionsEnabled) { %>
+        <span style="color:#22C55E; font-size: 13px; font-weight: 600;">OPEN</span>
+        <button type="submit" class="sg-btn sg-btn-ghost">Close</button>
+      <% } else { %>
+        <span style="color:#94A3B8; font-size: 13px; font-weight: 600;">CLOSED</span>
+        <button type="submit" class="sg-btn">Re-open</button>
+      <% } %>
+    </form>
+  </div>
+
+  <!-- Filters -->
+  <form method="GET" style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
+    <select name="status" class="growth-select" onchange="this.form.submit()">
+      <option value="all" <%= it.filters.status === 'all' ? 'selected' : '' %>>All statuses</option>
+      <option value="submitted" <%= it.filters.status === 'submitted' ? 'selected' : '' %>>Submitted</option>
+      <option value="accepted" <%= it.filters.status === 'accepted' ? 'selected' : '' %>>Accepted</option>
+      <option value="rejected" <%= it.filters.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+      <option value="implemented" <%= it.filters.status === 'implemented' ? 'selected' : '' %>>Implemented</option>
+    </select>
+    <select name="scope" class="growth-select" onchange="this.form.submit()">
+      <option value="all" <%= it.filters.scope === 'all' ? 'selected' : '' %>>All scopes</option>
+      <option value="page" <%= it.filters.scope === 'page' ? 'selected' : '' %>>Page-specific</option>
+      <option value="sitewide" <%= it.filters.scope === 'sitewide' ? 'selected' : '' %>>Site-wide</option>
+    </select>
+  </form>
+
+  <% if (!it.items || it.items.length === 0) { %>
+    <div class="card" style="padding: 2rem; text-align: center; color: #94A3B8;">No suggestions match these filters.</div>
+  <% } else { %>
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: rgba(255,255,255,0.02); text-align: left;">
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Title</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Submitter</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Scope</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Attach</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Priority</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Status</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% it.items.forEach(function(s) {
+            var structured = {};
+            try { structured = JSON.parse(s.structured_output); } catch(e) {}
+          %>
+          <tr style="border-top: 1px solid rgba(255,255,255,0.04); cursor: pointer;" onclick="window.location='/admin/suggestions/<%= s.id %>'">
+            <td style="padding: 0.75rem 1rem; font-size: 14px; color: #E2E8F0; max-width: 320px;">
+              <div style="font-weight: 500;"><%= s.title %></div>
+              <% if (s.scope === 'page' && structured.page_label) { %>
+              <div class="sg-muted" style="font-size: 12px;"><%= structured.page_label %></div>
+              <% } %>
+            </td>
+            <td style="padding: 0.75rem 1rem; font-size: 13px; color: #94A3B8;"><%= s.submitted_by_name %></td>
+            <td style="padding: 0.75rem 1rem; font-size: 13px; color: #94A3B8;"><%= s.scope === 'page' ? 'Page' : 'Site-wide' %></td>
+            <td style="padding: 0.75rem 1rem; font-size: 13px; color: #94A3B8;"><%= s.attachment_count || 0 %></td>
+            <td style="padding: 0.75rem 1rem; font-size: 13px; color: #94A3B8;"><%= s.priority || '—' %></td>
+            <td style="padding: 0.75rem 1rem;"><span class="sg-status sg-status-<%= s.status %>"><%= s.status %></span></td>
+            <td style="padding: 0.75rem 1rem; font-size: 13px; color: #94A3B8;"><%= s.created_at.slice(0, 10) %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

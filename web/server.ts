@@ -63,6 +63,8 @@ import { onboardPublicRoutes, onboardingInternalRoutes } from './routes/onboardi
 import { videoProductionRoutes } from './routes/video-production.js';
 import { deliverablesRoutes } from './routes/deliverables.js';
 import { pushRoutes } from './routes/push.js';
+import { suggestionsApiRoutes, suggestionsUiRoutes } from './routes/suggestions.js';
+import { adminSuggestionsRoutes } from './routes/admin/suggestions.js';
 import crypto from 'crypto';
 import {
   parseCookies,
@@ -225,6 +227,8 @@ app.addHook('onRequest', async (request, reply) => {
   if (user.role === 'standard') {
     // Allow common routes for all authenticated users
     if (path === '/change-password' || path === '/logout' || path === '/settings') return;
+    // Suggestions box — open to admin + standard; feature toggle is enforced inside the handlers
+    if (path === '/suggestions/mine' || path.startsWith('/api/suggestions/')) return;
     const routeSlug = getRouteSlug(path);
     // If no route slug mapping exists, deny access (unmapped routes are admin-only)
     if (!routeSlug || !user.allowedRoutes.includes(routeSlug)) {
@@ -371,6 +375,9 @@ app.register(alertsRoutes, { prefix: '/api/alerts' });
 app.register(skillsApiRoutes, { prefix: '/api/skills' });
 app.register(videoProductionRoutes, { prefix: '/video-production' });
 app.register(deliverablesRoutes, { prefix: '/deliverables' });
+app.register(suggestionsApiRoutes, { prefix: '/api/suggestions' });
+app.register(suggestionsUiRoutes, { prefix: '/suggestions' });
+app.register(adminSuggestionsRoutes, { prefix: '/admin/suggestions' });
 
 // Dashboard modules
 app.register(unifiedAdsRoutes, { prefix: '/dashboards/ads' });

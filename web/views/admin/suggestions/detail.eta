@@ -1,0 +1,131 @@
+<% layout('/layouts/base') %>
+
+<div style="max-width: 1000px;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <div>
+      <div style="font-size: 12px; color: #94A3B8; margin-bottom: 0.25rem;">
+        <a href="/admin/suggestions" style="color:#94A3B8; text-decoration: none;">← All suggestions</a>
+      </div>
+      <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin: 0 0 0.25rem 0;"><%= it.structured.title || it.suggestion.title %></h2>
+      <p class="sg-muted" style="margin: 0;">
+        #<%= it.suggestion.id %> · <%= it.suggestion.submitted_by_name %> · <%= it.suggestion.created_at.slice(0, 10) %>
+        <% if (it.structured.scope === 'page' && it.structured.page_label) { %> · on <strong><%= it.structured.page_label %></strong> (<%= it.structured.page_url %>)<% } %>
+      </p>
+    </div>
+    <span class="sg-status sg-status-<%= it.suggestion.status %>"><%= it.suggestion.status %></span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;" class="sg-detail-grid">
+    <!-- Left: structured content -->
+    <div>
+      <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+        <h3 style="font-size: 14px; margin: 0 0 1rem 0; color: #94A3B8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Details</h3>
+        <dl class="sg-review-fields">
+          <dt>Problem</dt><dd><%= it.structured.problem %></dd>
+          <dt>Where in the app</dt><dd><%= it.structured.where_in_app %></dd>
+          <dt>Desired outcome</dt><dd><%= it.structured.desired_outcome %></dd>
+          <% if (it.structured.user_journey && it.structured.user_journey.length) { %>
+          <dt>User journey</dt>
+          <dd>
+            <ol class="sg-list"><% it.structured.user_journey.forEach(function(s) { %><li><%= s %></li><% }) %></ol>
+          </dd>
+          <% } %>
+          <% if (it.structured.acceptance_criteria && it.structured.acceptance_criteria.length) { %>
+          <dt>Acceptance criteria</dt>
+          <dd>
+            <ul class="sg-list"><% it.structured.acceptance_criteria.forEach(function(s) { %><li><%= s %></li><% }) %></ul>
+          </dd>
+          <% } %>
+          <% if (it.structured.edge_cases) { %><dt>Edge cases</dt><dd><%= it.structured.edge_cases %></dd><% } %>
+          <% if (it.structured.out_of_scope) { %><dt>Out of scope</dt><dd><%= it.structured.out_of_scope %></dd><% } %>
+          <% if (it.structured.examples) { %><dt>Examples</dt><dd><%= it.structured.examples %></dd><% } %>
+          <% if (it.structured.priority_signal) { %><dt>Priority signal</dt><dd><%= it.structured.priority_signal %></dd><% } %>
+        </dl>
+      </div>
+
+      <% if (it.attachments && it.attachments.length) { %>
+      <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+        <h3 style="font-size: 14px; margin: 0 0 1rem 0; color: #94A3B8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Attachments</h3>
+        <div class="sg-gallery">
+          <% it.attachments.forEach(function(a) { %>
+          <a href="<%= a.blob_url %>" target="_blank" rel="noopener"><img src="<%= a.blob_url %>" alt="<%= a.filename || 'screenshot' %>" loading="lazy"></a>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Plan brief -->
+      <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="font-size: 14px; margin: 0; color: #94A3B8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Plan brief</h3>
+          <button type="button" class="sg-btn sg-btn-primary" onclick="SG_copyBrief()">Copy to clipboard</button>
+        </div>
+        <pre id="sg-plan-brief" style="background: rgba(255,255,255,0.02); border-radius: 8px; padding: 1rem; overflow-x: auto; font-size: 12px; color: #CBD5E1; white-space: pre-wrap; word-break: break-word;"><%= it.planBrief %></pre>
+      </div>
+
+      <!-- Transcript (collapsible) -->
+      <details class="card" style="padding: 1.5rem;">
+        <summary style="cursor: pointer; font-size: 14px; color: #94A3B8;">Full chat transcript (<%= it.transcript.length %> turns)</summary>
+        <div style="margin-top: 1rem;">
+          <% it.transcript.forEach(function(turn) { %>
+            <div class="sg-bubble sg-bubble-<%= turn.role === 'assistant' ? 'ai' : 'user' %>" style="margin-bottom: 0.5rem;">
+              <strong style="font-size: 11px; color: #64748B; text-transform: uppercase;"><%= turn.role %>:</strong>
+              <div><%= turn.content %></div>
+            </div>
+          <% }) %>
+        </div>
+      </details>
+    </div>
+
+    <!-- Right: review sidebar -->
+    <div>
+      <form method="POST" action="/admin/suggestions/<%= it.suggestion.id %>/status" class="card" style="padding: 1.5rem;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+        <h3 style="font-size: 14px; margin: 0 0 1rem 0; color: #94A3B8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Review</h3>
+
+        <label style="display:block; font-size: 13px; color: #94A3B8; margin-bottom: 0.25rem;">Status</label>
+        <select name="status" class="growth-select" style="width:100%; margin-bottom: 0.75rem;">
+          <option value="submitted" <%= it.suggestion.status === 'submitted' ? 'selected' : '' %>>Submitted</option>
+          <option value="accepted" <%= it.suggestion.status === 'accepted' ? 'selected' : '' %>>Accepted</option>
+          <option value="rejected" <%= it.suggestion.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+          <option value="implemented" <%= it.suggestion.status === 'implemented' ? 'selected' : '' %>>Implemented</option>
+        </select>
+
+        <label style="display:block; font-size: 13px; color: #94A3B8; margin-bottom: 0.25rem;">Priority</label>
+        <select name="priority" class="growth-select" style="width:100%; margin-bottom: 0.75rem;">
+          <option value="" <%= !it.suggestion.priority ? 'selected' : '' %>>—</option>
+          <option value="low" <%= it.suggestion.priority === 'low' ? 'selected' : '' %>>Low</option>
+          <option value="medium" <%= it.suggestion.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+          <option value="high" <%= it.suggestion.priority === 'high' ? 'selected' : '' %>>High</option>
+        </select>
+
+        <label style="display:block; font-size: 13px; color: #94A3B8; margin-bottom: 0.25rem;">Notes</label>
+        <textarea name="review_notes" rows="4" style="width:100%; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 0.5rem; color: #E2E8F0; font-size: 13px; margin-bottom: 0.75rem;"><%= it.suggestion.review_notes || '' %></textarea>
+
+        <button type="submit" class="sg-btn sg-btn-primary" style="width:100%;">Save</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function SG_copyBrief() {
+  var el = document.getElementById('sg-plan-brief');
+  if (!el) return;
+  var text = el.innerText;
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.reject())
+    .then(function() {
+      var btn = event.target;
+      var old = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(function() { btn.textContent = old; }, 1600);
+    })
+    .catch(function() {
+      // Fallback: select text
+      var range = document.createRange();
+      range.selectNode(el);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    });
+}
+</script>

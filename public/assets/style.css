@@ -4992,3 +4992,218 @@ button.growth-sort-btn:hover {
   line-height: 1;
 }
 .prose img { max-width: 100%; border-radius: 6px; }
+
+/* ============================================================================
+ * Suggestions Box widget — prefixed with .sg- to avoid collisions
+ * ========================================================================= */
+.sg-root { font-family: var(--vendo-font, 'Manrope', sans-serif); }
+
+.sg-pill {
+  position: fixed; bottom: 24px; right: 24px; z-index: 60;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 18px; border-radius: 999px;
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: #0B0B0B;
+  font-family: var(--vendo-font, 'Manrope', sans-serif);
+  font-size: 13px; font-weight: 600; letter-spacing: 0.01em;
+  border: none; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(34,197,94,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+.sg-pill:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(34,197,94,0.4), inset 0 1px 0 rgba(255,255,255,0.2); }
+.sg-pill:active { transform: translateY(0); }
+
+.sg-panel {
+  position: fixed; bottom: 24px; right: 24px; z-index: 61;
+  width: 420px; max-height: 600px; height: min(600px, calc(100vh - 48px));
+  background: #0F0F10;
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+  box-shadow: 0 28px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(34,197,94,0.04);
+  display: none; flex-direction: column; overflow: hidden;
+  color: #E2E8F0;
+  font-family: var(--vendo-font, 'Manrope', sans-serif);
+}
+.sg-panel.open { display: flex; animation: sg-panel-in 180ms ease; }
+.sg-panel.sg-dragover { outline: 2px dashed #22C55E; outline-offset: -8px; }
+@keyframes sg-panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sg-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(34,197,94,0.04) 0%, rgba(34,197,94,0) 100%);
+}
+.sg-panel-title { display: flex; align-items: center; gap: 10px; }
+.sg-panel-title-text { display: flex; flex-direction: column; line-height: 1.2; }
+.sg-panel-title-text span { font-size: 14px; font-weight: 600; color: #F1F5F9; }
+.sg-panel-title-text small { font-size: 11px; font-weight: 400; margin-top: 2px; }
+
+.sg-panel-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  color: #0B0B0B;
+  font-weight: 700; font-size: 13px; letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(34,197,94,0.3), inset 0 1px 0 rgba(255,255,255,0.25);
+  flex-shrink: 0;
+}
+
+.sg-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: transparent; border: none; color: #94A3B8; cursor: pointer;
+}
+.sg-icon-btn:hover { background: rgba(255,255,255,0.04); color: #E2E8F0; }
+
+/* Close button — distinct from generic icon button, sits in panel header */
+.sg-close-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #F1F5F9; cursor: pointer;
+  flex-shrink: 0;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+.sg-close-btn svg { display: block; stroke: currentColor; }
+.sg-close-btn:hover {
+  background: rgba(239,68,68,0.18);
+  border-color: rgba(239,68,68,0.55);
+  color: #FCA5A5;
+}
+.sg-close-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.45);
+}
+.sg-close-btn:active { transform: scale(0.95); }
+
+.sg-panel-body { flex: 1 1 auto; overflow-y: auto; padding: 16px; }
+.sg-muted { color: #94A3B8; font-size: 12px; }
+
+/* Scope picker */
+.sg-scope-lede { font-size: 14px; margin: 0 0 12px 0; }
+.sg-scope-option {
+  display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 8px; cursor: pointer;
+}
+.sg-scope-option:has(input:checked) { border-color: #22C55E; background: rgba(34,197,94,0.06); }
+.sg-scope-option input { margin-top: 3px; }
+.sg-scope-option strong { display: block; font-size: 13px; }
+.sg-scope-option .sg-muted { display: block; margin-top: 2px; }
+
+/* Buttons */
+.sg-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.12); background: transparent; color: #E2E8F0; cursor: pointer;
+}
+.sg-btn:hover { background: rgba(255,255,255,0.04); }
+.sg-btn-primary { background: #22C55E; color: #0B0B0B; border-color: #22C55E; }
+.sg-btn-primary:hover { background: #16A34A; }
+.sg-btn-ghost { background: transparent; border-color: rgba(255,255,255,0.12); color: #94A3B8; }
+
+/* Chat */
+.sg-chat { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.sg-chat-log { flex: 1 1 auto; overflow-y: auto; padding: 4px 2px; display: flex; flex-direction: column; gap: 8px; }
+
+.sg-bubble { padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; max-width: 85%; word-wrap: break-word; overflow-wrap: anywhere; }
+.sg-bubble-ai { background: rgba(255,255,255,0.04); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.05); align-self: flex-start; }
+.sg-bubble-user { background: rgba(34,197,94,0.1); color: #E2E8F0; border: 1px solid rgba(34,197,94,0.2); align-self: flex-end; }
+.sg-bubble-text { white-space: pre-wrap; }
+.sg-bubble-thumbs { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.sg-bubble-thumbs img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); }
+
+/* Markdown rendering inside AI bubbles */
+.sg-bubble-ai p { margin: 0 0 8px 0; }
+.sg-bubble-ai p:last-child { margin-bottom: 0; }
+.sg-bubble-ai strong { color: #F1F5F9; font-weight: 600; }
+.sg-bubble-ai em { font-style: italic; color: #CBD5E1; }
+.sg-bubble-ai code {
+  background: rgba(34,197,94,0.12);
+  color: #86EFAC;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 12px;
+}
+.sg-bubble-ai pre {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.sg-bubble-ai pre code { background: transparent; color: #E2E8F0; padding: 0; font-size: 12px; }
+.sg-bubble-ai ul, .sg-bubble-ai ol { margin: 4px 0 8px 0; padding-left: 20px; }
+.sg-bubble-ai li { margin: 2px 0; }
+.sg-bubble-ai a { color: #86EFAC; text-decoration: underline; }
+
+.sg-chat-form { padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 8px; }
+.sg-input-row { display: flex; gap: 8px; align-items: flex-end; }
+.sg-textarea {
+  flex: 1 1 auto; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; padding: 8px 10px; color: #E2E8F0; font-size: 13px; font-family: inherit; resize: none;
+}
+.sg-textarea:focus { outline: none; border-color: rgba(34,197,94,0.5); }
+
+.sg-attach-btn { position: relative; cursor: pointer; }
+.sg-chat-meta { margin-top: 6px; font-size: 11px; }
+
+/* Attachments */
+.sg-attachments { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.sg-attachments:empty { display: none; }
+.sg-chip {
+  position: relative; width: 64px; height: 64px; border-radius: 6px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.sg-chip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sg-chip-remove {
+  position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border-radius: 999px;
+  background: rgba(0,0,0,0.7); color: #fff; border: none; font-size: 12px; cursor: pointer; line-height: 1;
+}
+
+.sg-error-slot:empty { display: none; }
+.sg-error {
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #FCA5A5;
+  padding: 6px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 8px;
+}
+
+/* Review panel */
+.sg-review-title { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; }
+.sg-review-fields { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 13px; margin: 12px 0; }
+.sg-review-fields dt { color: #94A3B8; font-weight: 500; }
+.sg-review-fields dd { margin: 0; color: #E2E8F0; }
+.sg-list { margin: 4px 0; padding-left: 20px; }
+.sg-review-attachments { margin: 12px 0; }
+.sg-review-thumbs { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.sg-review-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); }
+.sg-review-actions { margin-top: 12px; text-align: right; }
+
+/* Submitted */
+.sg-submitted { text-align: center; padding: 24px 8px; }
+.sg-submitted-icon { color: #22C55E; margin-bottom: 12px; }
+.sg-submitted h3 { margin: 0 0 4px 0; font-size: 16px; }
+.sg-submitted-actions { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+
+/* Status badges (admin + mine pages) */
+.sg-status {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.sg-status-submitted { background: rgba(148,163,184,0.12); color: #CBD5E1; }
+.sg-status-accepted { background: rgba(34,197,94,0.15); color: #86EFAC; }
+.sg-status-rejected { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+.sg-status-implemented { background: rgba(59,130,246,0.15); color: #93C5FD; }
+
+/* Gallery on admin detail */
+.sg-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.sg-gallery img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); display: block; }
+
+/* Mobile drawer behaviour */
+@media (max-width: 640px) {
+  .sg-panel { left: 12px; right: 12px; bottom: 12px; width: auto; height: 80vh; }
+  .sg-detail-grid { grid-template-columns: 1fr !important; }
+}
