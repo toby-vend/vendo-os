@@ -5060,15 +5060,17 @@ button.growth-sort-btn:hover {
 /* Close button — distinct from generic icon button, sits in panel header */
 .sg-close-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: #94A3B8; cursor: pointer;
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #F1F5F9; cursor: pointer;
+  flex-shrink: 0;
   transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
+.sg-close-btn svg { display: block; stroke: currentColor; }
 .sg-close-btn:hover {
-  background: rgba(239,68,68,0.12);
-  border-color: rgba(239,68,68,0.35);
+  background: rgba(239,68,68,0.18);
+  border-color: rgba(239,68,68,0.55);
   color: #FCA5A5;
 }
 .sg-close-btn:focus-visible {

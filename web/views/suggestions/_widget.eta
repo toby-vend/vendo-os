@@ -71,10 +71,15 @@
   var PAGE_NAMES = window.__VENDO_PAGE_NAMES || {};
 
   function resolvePageLabel() {
-    var p = window.location.pathname;
-    // 1. Prefer document.title if it exists and isn't just "Vendo OS"
-    var t = document.title || '';
-    if (t && t !== 'Vendo OS') return t.replace(/\s*[—|]\s*Vendo OS.*$/, '').trim() || null;
+    // 1. Prefer the rendered topbar title (set by base.eta's pageNames map)
+    var topbarEl = document.querySelector('.topbar-title');
+    if (topbarEl) {
+      var t = (topbarEl.textContent || '').trim();
+      if (t && t !== 'Vendo OS') return t;
+    }
+    // 2. Fallback to document.title
+    var dt = (document.title || '').trim();
+    if (dt && dt !== 'Vendo OS') return dt.replace(/\s*[—|]\s*Vendo OS.*$/, '').trim() || null;
     return null;
   }
 
@@ -87,7 +92,7 @@
     pathEl.value = path;
     var label = resolvePageLabel();
     labelEl.value = label || '';
-    hintEl.textContent = label ? (label + '  ·  ' + path) : path;
+    hintEl.textContent = label ? label : 'This page';
   }
 
   window.SG_open = function() {
