@@ -19,12 +19,7 @@
           <small id="sg-panel-subtitle" class="sg-muted">Help shape Vendo OS</small>
         </div>
       </div>
-      <button type="button" class="sg-close-btn" aria-label="Close" title="Close" onclick="SG_close()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" aria-hidden="true">
-          <line x1="6" y1="6" x2="18" y2="18"/>
-          <line x1="18" y1="6" x2="6" y2="18"/>
-        </svg>
-      </button>
+      <button type="button" class="sg-close-btn" aria-label="Close" title="Close" onclick="SG_close()">&times;</button>
     </header>
 
     <div class="sg-panel-body" id="sg-panel-body">

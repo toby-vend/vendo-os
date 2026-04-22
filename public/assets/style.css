@@ -5057,17 +5057,20 @@ button.growth-sort-btn:hover {
 }
 .sg-icon-btn:hover { background: rgba(255,255,255,0.04); color: #E2E8F0; }
 
-/* Close button — distinct from generic icon button, sits in panel header */
+/* Close button — big, obvious × character. Avoids SVG-rendering issues. */
 .sg-close-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 36px; height: 36px; border-radius: 10px;
   background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.14);
-  color: #F1F5F9; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #F1F5F9;
+  font-family: var(--vendo-font, 'Manrope', sans-serif);
+  font-size: 22px; font-weight: 400; line-height: 1;
+  cursor: pointer;
   flex-shrink: 0;
+  padding: 0;
   transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
-.sg-close-btn svg { display: block; stroke: currentColor; }
 .sg-close-btn:hover {
   background: rgba(239,68,68,0.18);
   border-color: rgba(239,68,68,0.55);
