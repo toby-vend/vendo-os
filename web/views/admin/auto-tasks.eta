@@ -19,6 +19,10 @@
     <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600;">Auto-Task QA</h2>
     <p style="font-size: 13px; color: #94A3B8; margin-top: 0.25rem;">Tasks auto-created by the Fathom pipeline. Mark irrelevant ones so they're skipped next time.</p>
   </div>
+  <a href="/admin/auto-tasks/learnings"
+     style="font-size: 13px; color: #6366F1; text-decoration: none; padding: 8px 14px; border: 1px solid rgba(99,102,241,0.3); border-radius: 6px;">
+    View all learnings →
+  </a>
 </div>
 
 <% if (it.clientOptions && it.clientOptions.length) { %>

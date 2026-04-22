@@ -1,0 +1,144 @@
+<% layout('/layouts/base') %>
+
+<%
+  const fmt = (iso) => {
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }); }
+    catch { return iso.slice(0, 16).replace('T', ' '); }
+  };
+
+  // Bucket rejections by scope so the agent's "rulebook" reads cleanly.
+  const rejections = it.rejections || [];
+  const byScope = { wildcard: [], client: [], assignee: [], both: [] };
+  for (const r of rejections) {
+    if (r.client_name && r.assignee) byScope.both.push(r);
+    else if (r.client_name)          byScope.client.push(r);
+    else if (r.assignee)             byScope.assignee.push(r);
+    else                              byScope.wildcard.push(r);
+  }
+
+  const qaSkips = it.qaSkips || [];
+  const wrongCalls = qaSkips.filter(s => s.override_decision === 'wrong_call');
+  const correctCalls = qaSkips.filter(s => s.override_decision === 'correct_call');
+  const pending = qaSkips.filter(s => !s.override_decision);
+%>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <div>
+    <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600;">Auto-Task Learnings</h2>
+    <p style="font-size: 13px; color: #94A3B8; margin-top: 0.25rem;">
+      Everything the QA agent uses to decide what to block. Live — updates the moment you reject a task.
+    </p>
+  </div>
+  <a href="/admin/auto-tasks" style="font-size: 13px; color: #6366F1; text-decoration: none;">← Back to QA</a>
+</div>
+
+<%
+  const section = (title, subtitle) => `
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin: 2rem 0 0.75rem;">
+      <h3 style="font-size: 16px; font-weight: 600; color: #E2E8F0; margin: 0;">${title}</h3>
+      <span style="font-size: 12px; color: #94A3B8;">${subtitle}</span>
+    </div>
+  `;
+
+  const renderRejectionList = (list) => {
+    if (!list.length) return '<div class="card" style="padding: 1rem; color: #64748B; font-size: 13px;">None yet.</div>';
+    const items = list.map(r => {
+      const scopeParts = [];
+      if (r.client_name) scopeParts.push(`Client: ${r.client_name}`);
+      if (r.assignee)    scopeParts.push(`Assignee: ${r.assignee}`);
+      const scope = scopeParts.length ? scopeParts.join(' · ') : 'Applies to everyone';
+      return `
+        <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+          <div style="font-size: 13px; color: #E2E8F0; font-weight: 500;">&ldquo;${r.name_normalised}&rdquo;</div>
+          <div style="font-size: 12px; color: #FCA5A5; margin-top: 0.25rem;">${r.reason}</div>
+          <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">${scope} — ${fmt(r.rejected_at)}</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="card" style="margin-bottom: 1rem;">${items}</div>`;
+  };
+%>
+
+<div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;">
+  <div class="card" style="padding: 12px 16px; min-width: 140px;">
+    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Rules total</div>
+    <div style="font-size: 20px; font-weight: 600; color: #E2E8F0; margin-top: 0.25rem;"><%= rejections.length %></div>
+  </div>
+  <div class="card" style="padding: 12px 16px; min-width: 140px;">
+    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Agent blocks</div>
+    <div style="font-size: 20px; font-weight: 600; color: #E2E8F0; margin-top: 0.25rem;"><%= qaSkips.length %></div>
+  </div>
+  <div class="card" style="padding: 12px 16px; min-width: 140px;">
+    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Agent was right</div>
+    <div style="font-size: 20px; font-weight: 600; color: #22C55E; margin-top: 0.25rem;"><%= correctCalls.length %></div>
+  </div>
+  <div class="card" style="padding: 12px 16px; min-width: 140px;">
+    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Over-blocks</div>
+    <div style="font-size: 20px; font-weight: 600; color: #FB923C; margin-top: 0.25rem;"><%= wrongCalls.length %></div>
+  </div>
+</div>
+
+<%~ section('Wildcard rules', 'Apply to every client and every assignee') %>
+<%~ renderRejectionList(byScope.wildcard) %>
+
+<%~ section('Client-scoped rules', 'Only apply when the proposed task is for this client') %>
+<%~ renderRejectionList(byScope.client) %>
+
+<%~ section('Assignee-scoped rules', 'Only apply when this person is the assignee') %>
+<%~ renderRejectionList(byScope.assignee) %>
+
+<%~ section('Client + assignee rules', 'Most specific — both conditions must match') %>
+<%~ renderRejectionList(byScope.both) %>
+
+<%~ section('Few-shot examples the agent is learning from', 'Tasks the agent wrongly blocked that admins overrode — fed into the QA prompt so Haiku stops repeating the mistake') %>
+<% if (!wrongCalls.length) { %>
+  <div class="card" style="padding: 1rem; color: #64748B; font-size: 13px;">None yet — the agent hasn&rsquo;t been over-blocked.</div>
+<% } else { %>
+  <div class="card" style="margin-bottom: 1rem;">
+    <% wrongCalls.forEach(s => {
+      const scopeParts = [];
+      if (s.client_name) scopeParts.push('Client: ' + s.client_name);
+      if (s.assignee)    scopeParts.push('Assignee: ' + s.assignee);
+      const scope = scopeParts.length ? scopeParts.join(' · ') : 'Any client / assignee';
+    %>
+    <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+      <div style="font-size: 13px; color: #E2E8F0; font-weight: 500;"><%= s.task_name %></div>
+      <div style="font-size: 12px; color: #FB923C; margin-top: 0.25rem;">Agent said: &ldquo;<%= s.reason %>&rdquo; — admin overrode.</div>
+      <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;"><%= scope %> — blocked <%= fmt(s.skipped_at) %>, overridden <%= fmt(s.overridden_at) %></div>
+    </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%~ section('Agent blocks the admin agreed with', 'Haiku correctly caught these') %>
+<% if (!correctCalls.length) { %>
+  <div class="card" style="padding: 1rem; color: #64748B; font-size: 13px;">None yet.</div>
+<% } else { %>
+  <div class="card" style="margin-bottom: 1rem;">
+    <% correctCalls.forEach(s => { %>
+    <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+      <div style="font-size: 13px; color: #E2E8F0;"><%= s.task_name %></div>
+      <div style="font-size: 12px; color: #22C55E; margin-top: 0.25rem;"><%= s.reason %></div>
+      <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">Confirmed correct <%= fmt(s.overridden_at) %></div>
+    </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<% if (pending.length) { %>
+<%~ section('Awaiting your verdict', 'Haiku blocked these — mark each &ldquo;Agent was right&rdquo; or &ldquo;Create anyway&rdquo; on the main QA page so the agent can learn') %>
+  <div class="card" style="margin-bottom: 2rem;">
+    <% pending.forEach(s => { %>
+    <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+      <div style="font-size: 13px; color: #E2E8F0;"><%= s.task_name %></div>
+      <div style="font-size: 12px; color: #FB923C; margin-top: 0.25rem;"><%= s.reason %></div>
+      <div style="font-size: 11px; color: #64748B; margin-top: 0.25rem;">Blocked <%= fmt(s.skipped_at) %></div>
+    </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<p style="font-size: 12px; color: #64748B;">
+  Wildcard and scope-matching rules are loaded fresh on every sync (or within 5 minutes, cache-invalidated the moment you add/remove one). The top 3 over-blocks are added as few-shot examples to sharpen Haiku&rsquo;s judgement.
+</p>
