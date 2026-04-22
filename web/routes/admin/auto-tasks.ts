@@ -11,6 +11,7 @@ import {
   getRecentQaSkips,
   getQaSkipById,
   recordQaOverride,
+  resetQaCache,
 } from '../../lib/qa/auto-task-qa.js';
 import {
   getRecentRoutingDecisions,
@@ -94,6 +95,9 @@ const adminAutoTasksRoutes: FastifyPluginAsync = async (app) => {
       reason,
       userId: session?.userId || null,
     });
+    // Invalidate the Haiku QA rules cache so the new rejection is picked up
+    // on the very next sync, not after the 5-minute TTL expires.
+    resetQaCache();
     reply.redirect('/admin/auto-tasks?rejected=1');
   });
 
@@ -268,6 +272,7 @@ const adminAutoTasksRoutes: FastifyPluginAsync = async (app) => {
     const clientName = (body.client_name || '').trim() || null;
     const assignee = (body.assignee || '').trim() || null;
     await undoRejection(normaliseForMatch(taskName), clientName, assignee);
+    resetQaCache();
     reply.redirect('/admin/auto-tasks?undone=1');
   });
 };

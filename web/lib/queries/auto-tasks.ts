@@ -156,10 +156,16 @@ export interface AutoTaskRow {
  * Recent auto-created tasks joined with meeting context and rejection status.
  * A task shows as rejected when any rule matches its (name, client, assignee)
  * tuple — global wildcards and client/assignee-scoped rules both count.
+ *
+ * The rejection join is done in JS, not SQL, because `normaliseForMatch`
+ * strips punctuation and collapses whitespace — a straight `LOWER()` compare
+ * misses every task with any punctuation in its name.
  */
 export async function getRecentAutoTasks(limit = 100): Promise<AutoTaskRow[]> {
   await ensureRejectionSchema();
-  return rows<AutoTaskRow>(
+
+  type TaskBase = Omit<AutoTaskRow, 'rejection_reason' | 'rejected_at' | 'rejection_client' | 'rejection_assignee'>;
+  const tasks = await rows<TaskBase>(
     `SELECT fas.id,
             fas.asana_task_gid,
             fas.meeting_id,
@@ -170,23 +176,60 @@ export async function getRecentAutoTasks(limit = 100): Promise<AutoTaskRow[]> {
             fas.source_id,
             m.title       as meeting_title,
             m.date        as meeting_date,
-            m.client_name as client_name,
-            r.reason       as rejection_reason,
-            r.rejected_at  as rejected_at,
-            r.client_name  as rejection_client,
-            r.assignee     as rejection_assignee
+            m.client_name as client_name
        FROM fathom_asana_synced fas
        LEFT JOIN meetings m
               ON m.id = fas.meeting_id
              AND fas.source_type = 'meeting'
-       LEFT JOIN asana_task_rejections r
-              ON LOWER(fas.action_description) = r.name_normalised
-             AND (r.client_name IS NULL OR r.client_name = m.client_name)
-             AND (r.assignee    IS NULL OR r.assignee    = fas.assignee)
       ORDER BY fas.created_at DESC
       LIMIT ?`,
     [limit],
   );
+
+  interface RejectionLookupRow {
+    name_normalised: string;
+    client_name: string | null;
+    assignee: string | null;
+    reason: string;
+    rejected_at: string;
+  }
+  const rejections = await rows<RejectionLookupRow>(
+    `SELECT name_normalised, client_name, assignee, reason, rejected_at
+       FROM asana_task_rejections
+      ORDER BY rejected_at DESC`,
+  );
+  const byName = new Map<string, RejectionLookupRow[]>();
+  for (const r of rejections) {
+    const bucket = byName.get(r.name_normalised) ?? [];
+    bucket.push(r);
+    byName.set(r.name_normalised, bucket);
+  }
+
+  return tasks.map((t) => {
+    const key = normaliseForMatch(t.action_description);
+    const candidates = byName.get(key) ?? [];
+    // Pick the most specific rule that applies (both-scoped > single-scoped
+    // > wildcard). Ties break on most recent, which the ORDER BY above gives.
+    let best: RejectionLookupRow | null = null;
+    let bestSpecificity = -1;
+    for (const r of candidates) {
+      const clientOk = !r.client_name || r.client_name === t.client_name;
+      const assigneeOk = !r.assignee || r.assignee === t.assignee;
+      if (!clientOk || !assigneeOk) continue;
+      const specificity = (r.client_name ? 1 : 0) + (r.assignee ? 1 : 0);
+      if (specificity > bestSpecificity) {
+        best = r;
+        bestSpecificity = specificity;
+      }
+    }
+    return {
+      ...t,
+      rejection_reason: best?.reason ?? null,
+      rejected_at: best?.rejected_at ?? null,
+      rejection_client: best?.client_name ?? null,
+      rejection_assignee: best?.assignee ?? null,
+    };
+  });
 }
 
 // --- Dropdown options for the rejection form ---
