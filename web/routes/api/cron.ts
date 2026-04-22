@@ -11,6 +11,7 @@ import { syncXero } from '../../lib/jobs/sync-xero.js';
 import { syncGoogleAds } from '../../lib/jobs/sync-google-ads.js';
 import { syncMetaAds } from '../../lib/jobs/sync-meta-ads.js';
 import { syncGhl } from '../../lib/jobs/sync-ghl.js';
+import { purgeSuggestionDrafts } from '../../lib/jobs/purge-suggestion-drafts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -207,6 +208,20 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/sync-ghl] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'GHL sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /purge-suggestion-drafts — Delete stale suggestion_drafts and orphan blob attachments (Vercel Cron)
+   */
+  app.get('/purge-suggestion-drafts', async (_request, reply) => {
+    try {
+      const result = await purgeSuggestionDrafts();
+      return reply.send({ ok: true, message: 'Suggestion drafts purged', ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/purge-suggestion-drafts] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Purge failed', error: msg });
     }
   });
 };

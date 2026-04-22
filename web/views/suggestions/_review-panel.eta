@@ -1,0 +1,59 @@
+<!-- Final-review panel. Replaces the chat body when Claude emits submit_suggestion. -->
+<div class="sg-review">
+  <h3 class="sg-review-title">Ready to submit</h3>
+  <p class="sg-muted">Here's what I'll hand to Toby. Tweak if you want, then submit.</p>
+
+  <form
+    hx-post="/api/suggestions/submit"
+    hx-target="#sg-chat"
+    hx-swap="outerHTML"
+  >
+    <input type="hidden" name="session_id" value="<%= it.sessionId %>">
+    <input type="hidden" name="structured" id="sg-structured" value='<%= JSON.stringify(it.structured).replace(/\x27/g, "&#39;") %>'>
+
+    <dl class="sg-review-fields">
+      <dt>Title</dt><dd><%= it.structured.title %></dd>
+      <% if (it.structured.scope === 'page' && it.structured.page_label) { %>
+      <dt>Page</dt><dd><%= it.structured.page_label %> <span class="sg-muted">(<%= it.structured.page_url %>)</span></dd>
+      <% } %>
+      <dt>Problem</dt><dd><%= it.structured.problem %></dd>
+      <dt>Where in the app</dt><dd><%= it.structured.where_in_app %></dd>
+      <dt>Desired outcome</dt><dd><%= it.structured.desired_outcome %></dd>
+      <% if (it.structured.user_journey && it.structured.user_journey.length) { %>
+      <dt>User journey</dt>
+      <dd>
+        <ol class="sg-list">
+          <% it.structured.user_journey.forEach(function(s) { %><li><%= s %></li><% }) %>
+        </ol>
+      </dd>
+      <% } %>
+      <% if (it.structured.acceptance_criteria && it.structured.acceptance_criteria.length) { %>
+      <dt>Acceptance criteria</dt>
+      <dd>
+        <ul class="sg-list">
+          <% it.structured.acceptance_criteria.forEach(function(s) { %><li><%= s %></li><% }) %>
+        </ul>
+      </dd>
+      <% } %>
+      <% if (it.structured.edge_cases) { %><dt>Edge cases</dt><dd><%= it.structured.edge_cases %></dd><% } %>
+      <% if (it.structured.out_of_scope) { %><dt>Out of scope</dt><dd><%= it.structured.out_of_scope %></dd><% } %>
+      <% if (it.structured.examples) { %><dt>Examples</dt><dd><%= it.structured.examples %></dd><% } %>
+      <% if (it.structured.priority_signal) { %><dt>Priority</dt><dd><%= it.structured.priority_signal %></dd><% } %>
+    </dl>
+
+    <% if (it.attachments && it.attachments.length) { %>
+    <div class="sg-review-attachments">
+      <strong>Attachments</strong>
+      <div class="sg-review-thumbs">
+        <% it.attachments.forEach(function(a) { %>
+        <a href="<%= a.blob_url %>" target="_blank" rel="noopener"><img src="<%= a.blob_url %>" alt="<%= a.filename || 'screenshot' %>" loading="lazy"></a>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="sg-review-actions">
+      <button type="submit" class="sg-btn sg-btn-primary">Submit</button>
+    </div>
+  </form>
+</div>

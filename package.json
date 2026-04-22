@@ -112,9 +112,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
+    "@fastify/multipart": "^10.0.0",
     "@fastify/static": "^9.0.0",
     "@libsql/client": "^0.17.2",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/blob": "^2.3.3",
     "bcryptjs": "^3.0.3",
     "dotenv": "^16.4.0",
     "eta": "^4.5.1",

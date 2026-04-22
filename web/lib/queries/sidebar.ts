@@ -116,6 +116,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
       { id: 'admin-usage', label: 'Usage', href: '/admin/usage' },
       { id: 'admin-auto-tasks', label: 'Auto-Task QA', href: '/admin/auto-tasks' },
       { id: 'admin-sidebar', label: 'Sidebar', href: '/admin/sidebar' },
+      { id: 'admin-suggestions', label: 'Suggestions', href: '/admin/suggestions' },
       { id: 'sync-status', label: 'Sync Status', href: '/sync-status' },
     ],
   },

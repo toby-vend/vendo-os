@@ -1,0 +1,13 @@
+<!-- Returned after /api/suggestions/submit. Replaces the chat body. -->
+<div class="sg-submitted">
+  <div class="sg-submitted-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  </div>
+  <h3>Thanks — logged.</h3>
+  <p class="sg-muted">Submission #<%= it.suggestionId %>. Toby will take it from here.</p>
+  <div class="sg-submitted-actions">
+    <a class="sg-btn sg-btn-ghost" href="/suggestions/mine">See my suggestions</a>
+    <button type="button" class="sg-btn" onclick="SG_close()">Close</button>
+  </div>
+</div>
+<script>setTimeout(function(){ var p = document.getElementById('sg-pill'); if (p) p.style.display=''; }, 1200);</script>

@@ -1,0 +1,22 @@
+<!-- Fragment appended after each chat turn. Renders user message (with any thumbs) + assistant response. -->
+<div class="sg-bubble sg-bubble-user">
+  <%= it.lastUserMessage %>
+  <% if (it.newAttachments && it.newAttachments.length) { %>
+  <div class="sg-bubble-thumbs">
+    <% it.newAttachments.forEach(function(a) { %>
+    <a href="<%= a.blob_url %>" target="_blank" rel="noopener"><img src="<%= a.blob_url %>" alt="screenshot" loading="lazy"></a>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+
+<div class="sg-bubble sg-bubble-ai"><%= it.assistantMessage %></div>
+
+<% if (!it.canStillAttach) { %>
+<script>
+  (function() {
+    var btn = document.querySelector('.sg-attach-btn');
+    if (btn) { btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; btn.title = 'Attachment limit reached'; }
+  })();
+</script>
+<% } %>

@@ -1,0 +1,39 @@
+<% layout('/layouts/base') %>
+
+<div style="max-width: 960px;">
+  <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin-bottom: 0.5rem;">My suggestions</h2>
+  <p class="sg-muted" style="margin-bottom: 1.5rem;">Suggestions you've submitted and their review status.</p>
+
+  <% if (!it.items || it.items.length === 0) { %>
+    <div class="card" style="padding: 2rem; text-align: center; color: #94A3B8;">
+      You haven't submitted any suggestions yet. Use the <strong>Suggest</strong> pill on any page to start.
+    </div>
+  <% } else { %>
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: rgba(255,255,255,0.02); text-align: left;">
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Title</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Scope</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Attach</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Status</th>
+            <th style="padding: 0.75rem 1rem; font-size: 12px; color: #94A3B8; font-weight: 500;">Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% it.items.forEach(function(s) { %>
+          <tr style="border-top: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.75rem 1rem; font-size: 14px; color: #E2E8F0;"><%= s.title %></td>
+            <td style="padding: 0.75rem 1rem; font-size: 13px; color: #94A3B8;"><%= s.scope === 'page' ? 'Page' : 'Site-wide' %></td>
+            <td style="padding: 0.75rem 1rem; font-size: 13px; color: #94A3B8;"><%= s.attachment_count || 0 %></td>
+            <td style="padding: 0.75rem 1rem;">
+              <span class="sg-status sg-status-<%= s.status %>"><%= s.status %></span>
+            </td>
+            <td style="padding: 0.75rem 1rem; font-size: 13px; color: #94A3B8;"><%= s.created_at.slice(0, 10) %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
