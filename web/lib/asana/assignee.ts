@@ -30,7 +30,7 @@ const VENDO_EMAIL_DOMAINS = new Set([
   'vendo.digital',
 ]);
 
-function isVendoEmail(email: string | undefined | null): boolean {
+export function isVendoEmail(email: string | undefined | null): boolean {
   if (!email) return false;
   const at = email.lastIndexOf('@');
   if (at === -1) return false;

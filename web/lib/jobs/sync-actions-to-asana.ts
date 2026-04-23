@@ -1,6 +1,6 @@
 import { db } from '../queries/base.js';
 import { consoleLog } from '../monitors/base.js';
-import { getClientAM as sharedGetClientAM, resolveAssignee as sharedResolveAssignee } from '../asana/assignee.js';
+import { getClientAM as sharedGetClientAM, resolveAssignee as sharedResolveAssignee, isVendoEmail } from '../asana/assignee.js';
 import { getRejectionReason } from '../queries/auto-tasks.js';
 import { validateTaskWithQa, recordQaSkip } from '../qa/auto-task-qa.js';
 
@@ -471,10 +471,16 @@ async function createAsanaTaskFromAction(
   options: CreateTaskOptions = {},
 ): Promise<string> {
   // Resolution order:
-  //   1. Explicit assignee from Fathom (name + email, tried in every case variant)
-  //   2. Deliverables-module AM for this client (initials → full name)
-  //   3. Leave unassigned — human triage in the Vendo OS Alerts project
-  let assigneeGid = await resolveAssignee(item.assignee, item.assigneeEmail);
+  //   1. Fathom-supplied assignee, but ONLY when Fathom gave us a Vendo-domain
+  //      email. Fathom action items often target client-side people; without
+  //      the email gate, a first-name collision (client "Sam" vs Vendo "Sam")
+  //      could silently assign the task to the wrong person.
+  //   2. Deliverables-module AM for this client (initials → full name).
+  //   3. Leave unassigned — human triage in the Vendo OS Alerts project.
+  const fathomEmailIsVendo = isVendoEmail(item.assigneeEmail);
+  let assigneeGid = fathomEmailIsVendo
+    ? await resolveAssignee(item.assignee, item.assigneeEmail)
+    : undefined;
   if (!assigneeGid && clientName) {
     const am = await getClientAM(clientName);
     if (am) assigneeGid = await resolveAssignee(am);
