@@ -39,7 +39,22 @@ export function isVendoEmail(email: string | undefined | null): boolean {
 
 interface AsanaUser { gid: string; name: string; email?: string }
 
+/** Subset of meeting invitee shape we care about here. */
+export interface InviteeLike {
+  name?: string | null;
+  email?: string | null;
+  is_external?: boolean;
+}
+
+/** Resolved Vendo assignee, as returned by the on-call gate. */
+export interface VendoAssignee {
+  gid: string;
+  name: string;
+  email: string;
+}
+
 let _userMap: Map<string, string> | null = null;
+let _vendoUsers: AsanaUser[] = [];
 let _loadedAt = 0;
 
 function norm(s: string): string {
@@ -57,14 +72,16 @@ async function fetchAsanaUsers(): Promise<AsanaUser[]> {
   return json.data || [];
 }
 
-async function buildUserMap(): Promise<Map<string, string>> {
+async function buildUserMap(): Promise<{ map: Map<string, string>; vendoUsers: AsanaUser[] }> {
   const map = new Map<string, string>();
+  const vendoUsers: AsanaUser[] = [];
   const users = await fetchAsanaUsers();
   // Guests / clients in the workspace must not be picked up as assignees —
   // only include users whose email is a Vendo domain. A user with no email
   // exposed via the API is dropped to err on the side of safety.
   for (const u of users) {
     if (!isVendoEmail(u.email)) continue;
+    vendoUsers.push(u);
     const full = u.name.toLowerCase().trim();
     map.set(full, u.gid);
     map.set(norm(u.name), u.gid);
@@ -92,20 +109,28 @@ async function buildUserMap(): Promise<Map<string, string>> {
     /* table may not exist */
   }
 
-  return map;
+  return { map, vendoUsers };
 }
 
 async function getUserMap(): Promise<Map<string, string>> {
   const now = Date.now();
   if (_userMap && now - _loadedAt < CACHE_TTL_MS) return _userMap;
-  _userMap = await buildUserMap();
+  const { map, vendoUsers } = await buildUserMap();
+  _userMap = map;
+  _vendoUsers = vendoUsers;
   _loadedAt = now;
   return _userMap;
+}
+
+async function getVendoUsers(): Promise<AsanaUser[]> {
+  await getUserMap(); // ensures both caches are warm
+  return _vendoUsers;
 }
 
 /** Force a reload on next call. Used in tests. */
 export function resetUserCache(): void {
   _userMap = null;
+  _vendoUsers = [];
   _loadedAt = 0;
 }
 
@@ -193,4 +218,100 @@ export async function resolveClientAMGid(clientName: string | null): Promise<str
   const am = await getClientAM(clientName);
   if (!am) return undefined;
   return resolveAssignee(am);
+}
+
+/**
+ * Strict resolver: only returns an assignee whose email is on a Vendo domain
+ * AND who was on the call (in `invitees`). Used by the meeting → Asana sync
+ * to ensure tasks are never assigned to someone who wasn't actually present.
+ *
+ * Two gates, in order:
+ *   1. The call must contain at least one Vendo-domain invitee — otherwise
+ *      we have nobody to assign to, and the task is left for human triage.
+ *   2. The supplied name / email / initials must resolve to one of those
+ *      on-call Vendo invitees specifically.
+ *
+ * Returns `{gid, name, email}` so callers can store the *actual* assignee in
+ * the local sync table (not the original Fathom-supplied name).
+ */
+export async function resolveAssigneeFromCall(
+  invitees: InviteeLike[] | undefined | null,
+  nameOrInitials?: string | null,
+  email?: string | null,
+): Promise<VendoAssignee | undefined> {
+  // If a non-Vendo email was supplied (Fathom often points at client contacts),
+  // refuse straight away — no name fallback against a wrong-domain hint.
+  if (email && !isVendoEmail(email)) return undefined;
+
+  // Gate 1: collect Vendo emails actually present on the call.
+  const onCallEmails = new Set<string>();
+  for (const inv of invitees || []) {
+    const ie = inv?.email;
+    if (isVendoEmail(ie)) onCallEmails.add(ie!.toLowerCase().trim());
+  }
+  if (onCallEmails.size === 0) return undefined;
+
+  // Filter the cached Vendo user list to only those who were on the call.
+  const all = await getVendoUsers();
+  const onCall = all.filter(
+    (u) => u.email && onCallEmails.has(u.email.toLowerCase().trim()),
+  );
+  if (onCall.length === 0) return undefined;
+
+  // Build a name/email/initials lookup limited to on-call users.
+  const map = new Map<string, VendoAssignee>();
+  for (const u of onCall) {
+    if (!u.email) continue;
+    const record: VendoAssignee = { gid: u.gid, name: u.name, email: u.email };
+    map.set(u.name.toLowerCase().trim(), record);
+    map.set(norm(u.name), record);
+    const parts = u.name.split(/\s+/);
+    if (parts[0]) map.set(parts[0].toLowerCase(), record);
+    if (parts.length > 1) map.set(parts[parts.length - 1].toLowerCase(), record);
+    map.set(u.email.toLowerCase(), record);
+  }
+
+  // Initials enrichment, scoped to on-call users only — so "SF" never
+  // resolves to a Vendo "Sam Franks" who wasn't on the call.
+  try {
+    const r = await db.execute(
+      'SELECT initials, name FROM deliverable_team_members WHERE is_active = 1',
+    );
+    for (const row of r.rows) {
+      const initials = (row.initials as string).toLowerCase();
+      const fullName = (row.name as string).toLowerCase();
+      const existing =
+        map.get(fullName) ||
+        map.get(norm(row.name as string)) ||
+        map.get(fullName.split(/\s+/)[0]);
+      if (existing) map.set(initials, existing);
+    }
+  } catch {
+    /* table may not exist */
+  }
+
+  const candidates: string[] = [];
+  if (email) candidates.push(email.toLowerCase().trim());
+  if (nameOrInitials) {
+    const trimmed = nameOrInitials.trim();
+    candidates.push(trimmed.toLowerCase());
+    candidates.push(norm(trimmed));
+    const parts = trimmed.split(/\s+/);
+    if (parts[0]) candidates.push(parts[0].toLowerCase());
+    if (parts.length > 1) candidates.push(parts[parts.length - 1].toLowerCase());
+  }
+  for (const c of candidates) {
+    if (!c) continue;
+    const hit = map.get(c);
+    if (hit) return hit;
+  }
+  return undefined;
+}
+
+/** Are any Vendo-domain invitees on this call? Used to short-circuit the gate. */
+export function hasVendoInviteeOnCall(invitees: InviteeLike[] | undefined | null): boolean {
+  for (const inv of invitees || []) {
+    if (isVendoEmail(inv?.email)) return true;
+  }
+  return false;
 }

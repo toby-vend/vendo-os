@@ -1,6 +1,14 @@
 import { db } from '../queries/base.js';
 import { consoleLog } from '../monitors/base.js';
-import { getClientAM as sharedGetClientAM, resolveAssignee as sharedResolveAssignee, isVendoEmail } from '../asana/assignee.js';
+import {
+  getClientAM as sharedGetClientAM,
+  resolveAssignee as sharedResolveAssignee,
+  resolveAssigneeFromCall,
+  hasVendoInviteeOnCall,
+  isVendoEmail,
+  type InviteeLike,
+  type VendoAssignee,
+} from '../asana/assignee.js';
 import { getRejectionReason } from '../queries/auto-tasks.js';
 import { validateTaskWithQa, recordQaSkip } from '../qa/auto-task-qa.js';
 
@@ -457,6 +465,13 @@ interface CreateTaskOptions {
   /** Fallback Fathom meeting URL (when the action item itself has no deep link). */
   meetingUrl?: string | null;
   /**
+   * Calendar invitees for this meeting. When supplied, assignment is gated
+   * by "has a Vendo-domain email on the call" — Fathom-supplied or AM
+   * fallback alike must resolve to someone actually on the call.
+   * Omitted for non-meeting sources (escalation / NPS / admin override).
+   */
+  invitees?: InviteeLike[] | null;
+  /**
    * Skip the rejection-rule and QA-agent checks. Used by the admin "Create
    * anyway" flow on /admin/auto-tasks — the admin is explicitly overriding.
    */
@@ -469,21 +484,71 @@ async function createAsanaTaskFromAction(
   clientName: string | null,
   projects: string[],
   options: CreateTaskOptions = {},
-): Promise<string> {
-  // Resolution order:
-  //   1. Fathom-supplied assignee, but ONLY when Fathom gave us a Vendo-domain
-  //      email. Fathom action items often target client-side people; without
-  //      the email gate, a first-name collision (client "Sam" vs Vendo "Sam")
-  //      could silently assign the task to the wrong person.
-  //   2. Deliverables-module AM for this client (initials → full name).
-  //   3. Leave unassigned — human triage in the Vendo OS Alerts project.
-  const fathomEmailIsVendo = isVendoEmail(item.assigneeEmail);
-  let assigneeGid = fathomEmailIsVendo
-    ? await resolveAssignee(item.assignee, item.assigneeEmail)
-    : undefined;
-  if (!assigneeGid && clientName) {
-    const am = await getClientAM(clientName);
-    if (am) assigneeGid = await resolveAssignee(am);
+): Promise<{ taskGid: string; resolvedAssignee: string | null }> {
+  // Assignment is two different shapes depending on context:
+  //
+  //   A) Meeting tasks (options.invitees supplied) — STRICT GATE.
+  //      The first check is: does the call include at least one
+  //      @vendodigital.co.uk invitee? If not, the task lands unassigned in
+  //      the Vendo OS Alerts project for human triage. If yes, the
+  //      Fathom-supplied assignee — and the AM fallback — must each resolve
+  //      to someone whose email is in that on-call invitee set. This stops
+  //      a first-name collision (client "Sam" vs Vendo "Sam Franks") from
+  //      silently landing the task on the wrong staffer, and stops the AM
+  //      from receiving tasks for meetings they didn't attend.
+  //
+  //   B) Non-meeting tasks (escalations, NPS, admin overrides) — no call
+  //      context exists. Use the legacy resolver, which still rejects any
+  //      non-Vendo email but allows name-based AM fallback.
+  let assigneeGid: string | undefined;
+  let resolvedAssigneeName: string | null = null;
+
+  if (options.invitees !== undefined && options.invitees !== null) {
+    // ── Meeting path: strict on-call gate ────────────────────────────────
+    if (!hasVendoInviteeOnCall(options.invitees)) {
+      consoleLog(
+        LOG_SOURCE,
+        `Unassigned (no Vendo invitee on call) — "${item.description.slice(0, 80)}" · client=${clientName ?? '—'}`,
+      );
+    } else {
+      // Try the Fathom-supplied assignee first — must match an on-call Vendo user.
+      let resolved: VendoAssignee | undefined = await resolveAssigneeFromCall(
+        options.invitees,
+        item.assignee,
+        item.assigneeEmail,
+      );
+      // Fall through to the client's AM, but only if the AM was on the call.
+      if (!resolved && clientName) {
+        const am = await getClientAM(clientName);
+        if (am) {
+          resolved = await resolveAssigneeFromCall(options.invitees, am);
+          if (!resolved) {
+            consoleLog(
+              LOG_SOURCE,
+              `AM "${am}" not on the call — leaving unassigned · client=${clientName} · task="${item.description.slice(0, 80)}"`,
+            );
+          }
+        }
+      }
+      if (resolved) {
+        assigneeGid = resolved.gid;
+        resolvedAssigneeName = resolved.name;
+      }
+    }
+  } else {
+    // ── Non-meeting path: escalations / NPS / admin overrides ────────────
+    const fathomEmailIsVendo = isVendoEmail(item.assigneeEmail);
+    if (fathomEmailIsVendo) {
+      assigneeGid = await resolveAssignee(item.assignee, item.assigneeEmail);
+      if (assigneeGid && item.assignee) resolvedAssigneeName = item.assignee;
+    }
+    if (!assigneeGid && clientName) {
+      const am = await getClientAM(clientName);
+      if (am) {
+        assigneeGid = await resolveAssignee(am);
+        if (assigneeGid) resolvedAssigneeName = am;
+      }
+    }
   }
 
   const ukName = toUkEnglish(item.description).slice(0, 200);
@@ -537,7 +602,7 @@ async function createAsanaTaskFromAction(
   for (const p of projects) {
     const index = await getProjectTaskIndex(p);
     const existing = index.get(nameKey);
-    if (existing) return existing;
+    if (existing) return { taskGid: existing, resolvedAssignee: resolvedAssigneeName };
   }
 
   const dueOn = options.forceDueDate
@@ -564,7 +629,7 @@ async function createAsanaTaskFromAction(
     const index = _projectTaskIndex.get(p);
     if (index) index.set(nameKey, result.gid);
   }
-  return result.gid;
+  return { taskGid: result.gid, resolvedAssignee: resolvedAssigneeName };
 }
 
 interface SyncCount {
@@ -588,13 +653,14 @@ export async function createTaskFromOverride(input: {
     invitees: [],
     forceClientProject: !!input.clientName,
   });
-  return createAsanaTaskFromAction(
+  const { taskGid } = await createAsanaTaskFromAction(
     input.source,
     { description: input.taskName, assignee: input.assignee || undefined },
     input.clientName,
     projects,
     { bypassQa: true },
   );
+  return taskGid;
 }
 
 /**
@@ -646,14 +712,21 @@ export async function createTasksForMeeting(input: {
     if (legacy.rows.length) { skipped++; continue; }
 
     try {
-      const taskGid = await createAsanaTaskFromAction(
+      const { taskGid, resolvedAssignee } = await createAsanaTaskFromAction(
         `Meeting: ${input.title}`,
         item,
         input.clientName,
         projects,
-        { meetingDate: input.meetingDate, meetingUrl: input.meetingUrl },
+        {
+          meetingDate: input.meetingDate,
+          meetingUrl: input.meetingUrl,
+          // Pass invitees through so the strict on-call gate runs.
+          invitees,
+        },
       );
-      await recordSync(input.meetingId, item.description, taskGid, item.assignee || null, 'meeting', sourceId);
+      // Store the *actual* resolved Vendo assignee, not Fathom's suggestion —
+      // the QA UI's "Assignee" column should reflect who really has the task.
+      await recordSync(input.meetingId, item.description, taskGid, resolvedAssignee, 'meeting', sourceId);
       created++;
     } catch (err) {
       if (err instanceof TaskRejectedError) {
@@ -718,14 +791,14 @@ async function syncEscalations(): Promise<SyncCount> {
     const projects = await resolveProjects({ clientName, forceClientProject: true });
     const taskName = `[ESCALATION] ${clientName ?? 'Unknown'} — ${description}`.slice(0, 200);
     try {
-      const taskGid = await createAsanaTaskFromAction(
+      const { taskGid, resolvedAssignee } = await createAsanaTaskFromAction(
         `Escalation (${tier.toUpperCase()})`,
         { description: taskName },
         clientName,
         projects,
         { forceDueDate: today },
       );
-      await recordSync(sourceId, taskName, taskGid, null, 'escalation', sourceId);
+      await recordSync(sourceId, taskName, taskGid, resolvedAssignee, 'escalation', sourceId);
       created++;
     } catch (err) {
       if (err instanceof TaskRejectedError) {
@@ -759,14 +832,14 @@ async function syncNpsDetractors(): Promise<SyncCount> {
     const projects = await resolveProjects({ clientName, forceClientProject: true });
     const taskName = `[NPS] ${clientName ?? 'Unknown'} scored ${score}/10 — follow up required`;
     try {
-      const taskGid = await createAsanaTaskFromAction(
+      const { taskGid, resolvedAssignee } = await createAsanaTaskFromAction(
         `NPS detractor (${score}/10)`,
         { description: taskName },
         clientName,
         projects,
         { forceDueDate: threeDays },
       );
-      await recordSync(sourceId, taskName, taskGid, null, 'nps', sourceId);
+      await recordSync(sourceId, taskName, taskGid, resolvedAssignee, 'nps', sourceId);
       created++;
     } catch (err) {
       if (err instanceof TaskRejectedError) {
