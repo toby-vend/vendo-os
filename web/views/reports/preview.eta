@@ -18,7 +18,7 @@
   <% if (it.report.exec_summary_md) { %>
     <section class="r-preview-section">
       <h2>Executive summary</h2>
-      <div class="r-prose"><%~ md(it.report.exec_summary_md) %></div>
+      <div class="r-prose"><%~ it.md(it.report.exec_summary_md) %></div>
     </section>
   <% } %>
 
@@ -41,35 +41,35 @@
   <% if (it.report.worked_on_md) { %>
     <section class="r-preview-section">
       <h2>What we worked on</h2>
-      <div class="r-prose"><%~ md(it.report.worked_on_md) %></div>
+      <div class="r-prose"><%~ it.md(it.report.worked_on_md) %></div>
     </section>
   <% } %>
 
   <% if (it.report.wins_md) { %>
     <section class="r-preview-section">
       <h2>Wins</h2>
-      <div class="r-prose"><%~ md(it.report.wins_md) %></div>
+      <div class="r-prose"><%~ it.md(it.report.wins_md) %></div>
     </section>
   <% } %>
 
   <% if (it.report.risks_md) { %>
     <section class="r-preview-section">
       <h2>Risks</h2>
-      <div class="r-prose"><%~ md(it.report.risks_md) %></div>
+      <div class="r-prose"><%~ it.md(it.report.risks_md) %></div>
     </section>
   <% } %>
 
   <% if (it.report.focus_next_md) { %>
     <section class="r-preview-section">
       <h2>Focus next period</h2>
-      <div class="r-prose"><%~ md(it.report.focus_next_md) %></div>
+      <div class="r-prose"><%~ it.md(it.report.focus_next_md) %></div>
     </section>
   <% } %>
 
   <% if (it.report.recommendations_md) { %>
     <section class="r-preview-section">
       <h2>Recommendations</h2>
-      <div class="r-prose"><%~ md(it.report.recommendations_md) %></div>
+      <div class="r-prose"><%~ it.md(it.report.recommendations_md) %></div>
     </section>
   <% } %>
 

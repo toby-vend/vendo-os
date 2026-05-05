@@ -449,7 +449,7 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
           periodLabel: report.period_label,
           workedOnMd: report.worked_on_md,
           focusNextMd: report.focus_next_md,
-          screenshots: screenshots.map(s => ({ platform: s.platform, caption: s.caption })),
+          screenshots: screenshots.map(s => ({ platform: s.platform, caption: s.caption, url: s.blob_url })),
         },
         user.id,
       );

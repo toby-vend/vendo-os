@@ -4,10 +4,16 @@
  * Takes the structured report inputs (screenshots, narrative) and produces four
  * polished markdown blocks: executive summary, wins, risks, recommendations.
  *
- * Conservative by design — the prompt explicitly forbids fabricating numbers.
- * The model can only reason from what's in the screenshot captions and narrative.
+ * The screenshots themselves are sent to Claude as image content blocks (URL
+ * sources pointing at Vercel Blob), so the model can read metrics directly off
+ * the charts — spend, conversions, ROAS, CTR, etc. — and weave those numbers
+ * into the narrative.
+ *
+ * The prompt still forbids fabricating numbers: anything Claude states must
+ * either appear in the screenshot, the caption, or the narrative.
  */
 import Anthropic from '@anthropic-ai/sdk';
+import type { ImageBlockParam, TextBlockParam } from '@anthropic-ai/sdk/resources/messages.js';
 import { trackUsage } from './usage-tracker.js';
 import { PLATFORM_OPTIONS, type ScreenshotPlatform } from './queries/reports.js';
 
@@ -21,6 +27,7 @@ export interface ReportAiInput {
   screenshots: Array<{
     platform: ScreenshotPlatform;
     caption: string;
+    url: string;
   }>;
 }
 
@@ -35,19 +42,20 @@ const SYSTEM_PROMPT = `You are a senior account director at Vendo Digital, a UK 
 
 You will be given:
 - Client name and reporting period
-- A list of performance screenshots, each tagged with a platform (e.g. Google Ads, Meta) and an optional caption written by the account team
+- One or more performance screenshots — each prefixed with a header line that names the platform (e.g. Google Ads, Meta) and any caption the account team wrote. **Read the actual numbers off the charts and tables in the images** (spend, conversions, CTR, ROAS, impressions, CPC, lead counts, comparison-period deltas, etc.) and use them in your output.
 - A "What we worked on" narrative
 - A "Focus next period" narrative
 
 Produce four short, polished markdown sections in UK English:
-1. **Executive summary** — 2–4 sentences pulling out the headline story from the period. Reference platforms by name. If the captions or narrative mention specific numbers, you may quote them; do not invent any.
-2. **Wins** — bullet list of 2–5 wins. Each bullet starts with a strong verb and is grounded in the captions/narrative.
-3. **Risks** — bullet list of 1–4 risks or concerns. If there are none signalled in the inputs, write a single bullet: "No material risks flagged for this period." Do not invent risks.
-4. **Recommendations** — bullet list of 2–4 specific, actionable next steps that follow from the risks and the focus-next narrative.
+1. **Executive summary** — 2–4 sentences pulling out the headline story. Quote the most important specific numbers visible in the screenshots (with units / currency / period: e.g. "Google Ads spend hit £4,210 in May, +18% MoM"). Reference platforms by name.
+2. **Wins** — bullet list of 2–5 wins. Each bullet starts with a strong verb and cites a concrete metric from the screenshots or narrative wherever possible.
+3. **Risks** — bullet list of 1–4 risks or concerns spotted in the data (e.g. CPL trending up, conversion volume falling, channel spend rising without conversions, dropped impressions). If genuinely nothing concerning shows up, write a single bullet: "No material risks flagged for this period." Do not invent risks.
+4. **Recommendations** — bullet list of 2–4 specific, actionable next steps that follow from the risks, the metrics, and the focus-next narrative.
 
 Hard rules:
-- Use ONLY information present in the inputs. Do not fabricate metrics, percentages, monetary values, or claims.
-- Where data is sparse, say so clearly rather than padding.
+- Use ONLY information visible in the screenshots, captions, or narrative. Do not fabricate metrics, percentages, monetary values, or claims.
+- If a number is unclear or partly cut off in a screenshot, omit it rather than guessing.
+- Where the inputs are genuinely sparse, say so clearly rather than padding.
 - Tone: confident, plain English, no marketing fluff. Address the client directly ("you", "your campaigns").
 - Keep each section tight — no rambling paragraphs.
 
@@ -64,28 +72,51 @@ function platformLabel(value: ScreenshotPlatform): string {
   return PLATFORM_OPTIONS.find(p => p.value === value)?.label ?? value;
 }
 
-function buildUserMessage(input: ReportAiInput): string {
-  const parts: string[] = [];
-  parts.push(`Client: ${input.clientName}`);
-  parts.push(`Reporting period: ${input.periodLabel}`);
+/**
+ * Build a multimodal message: a header text block, then for each screenshot
+ * a labelled text block followed by the image itself, then the narrative.
+ *
+ * Interleaving the platform/caption text immediately before each image gives
+ * Claude a clear "this chart is Google Ads, here's what the AM said about it"
+ * grouping rather than dumping all images and then all text.
+ */
+function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlockParam> {
+  const blocks: Array<TextBlockParam | ImageBlockParam> = [];
+
+  blocks.push({
+    type: 'text',
+    text: `Client: ${input.clientName}\nReporting period: ${input.periodLabel}`,
+  });
 
   if (input.screenshots.length === 0) {
-    parts.push('\n## Performance screenshots\n_No screenshots uploaded for this period._');
+    blocks.push({ type: 'text', text: '\n## Performance screenshots\n_No screenshots uploaded for this period._' });
   } else {
-    parts.push('\n## Performance screenshots');
-    for (const s of input.screenshots) {
+    blocks.push({ type: 'text', text: `\n## Performance screenshots (${input.screenshots.length})` });
+    for (let i = 0; i < input.screenshots.length; i++) {
+      const s = input.screenshots[i];
       const cap = s.caption.trim() || '(no caption provided)';
-      parts.push(`- **${platformLabel(s.platform)}**: ${cap}`);
+      blocks.push({
+        type: 'text',
+        text: `\n### Screenshot ${i + 1} — ${platformLabel(s.platform)}\nCaption: ${cap}`,
+      });
+      blocks.push({
+        type: 'image',
+        source: { type: 'url', url: s.url },
+      });
     }
   }
 
-  parts.push('\n## What we worked on');
-  parts.push(input.workedOnMd.trim() || '_(not provided)_');
+  blocks.push({
+    type: 'text',
+    text: `\n## What we worked on\n${input.workedOnMd.trim() || '_(not provided)_'}`,
+  });
 
-  parts.push('\n## Focus next period');
-  parts.push(input.focusNextMd.trim() || '_(not provided)_');
+  blocks.push({
+    type: 'text',
+    text: `\n## Focus next period\n${input.focusNextMd.trim() || '_(not provided)_'}`,
+  });
 
-  return parts.join('\n');
+  return blocks;
 }
 
 function parseResponse(text: string): ReportAiOutput {
@@ -119,13 +150,13 @@ export async function generateReportInsights(
     throw new Error('ANTHROPIC_API_KEY not configured');
   }
 
-  const userMessage = buildUserMessage(input);
+  const content = buildUserContent(input);
 
   const response = await anthropic().messages.create({
     model: MODEL,
     system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: userMessage }],
-    max_tokens: 1500,
+    messages: [{ role: 'user', content }],
+    max_tokens: 2000,
     temperature: 0.4,
   });
 
