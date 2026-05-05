@@ -14,7 +14,7 @@
  * either appear in the screenshot, the caption, or the narrative.
  */
 import Anthropic from '@anthropic-ai/sdk';
-import type { ImageBlockParam, TextBlockParam } from '@anthropic-ai/sdk/resources/messages.js';
+import type { ImageBlockParam, TextBlockParam, Tool } from '@anthropic-ai/sdk/resources/messages.js';
 import { trackUsage } from './usage-tracker.js';
 import { PLATFORM_OPTIONS, type ScreenshotPlatform } from './queries/reports.js';
 
@@ -40,57 +40,63 @@ export interface ReportAiOutput {
   recommendations: string;
 }
 
-const SYSTEM_PROMPT = `You are a senior account director at Vendo Digital, a UK digital marketing agency. You are drafting the AI-generated sections of a monthly client performance report that will be sent as an email-style report to the client.
+const SYSTEM_PROMPT = `You are a senior account director at Vendo Digital, a UK digital marketing agency. You are drafting the AI-generated sections of a monthly client performance report.
 
 You will be given:
 - Client name and reporting period
-- One or more performance screenshots — each prefixed with a header line that names the platform (e.g. Google Ads, Meta) and any caption the account team wrote. **Read the actual numbers off the charts and tables in the images** (spend, clicks, impressions, conversions, purchases, CTR, ROAS, CPC, CPL, lead counts, revenue, comparison-period deltas, per-campaign breakdowns, etc.) and use them in your output.
+- One or more performance screenshots — each prefixed with a header naming the platform (Google Ads, Meta, etc.) and any caption the account team wrote. **Read the actual numbers off the charts and tables in the images** — spend, clicks, impressions, conversions, purchases, CTR, ROAS, CPC, CPL, lead counts, revenue, comparison-period deltas, per-campaign breakdowns — and use them in your output.
 - A "What we worked on" narrative
 - A "Focus next period" narrative
 
-Produce FIVE markdown sections in UK English:
-
-1. **exec_summary** — 2–4 sentences pulling out the headline story. Quote the most important specific numbers visible in the screenshots. Reference platforms by name.
-
-2. **performance_summary** — A structured metric breakdown that mirrors this style:
-
-\`\`\`
-**Overall [Platform] Performance:**
-- Amount Spent: £X
-- Clicks: X
-- Revenue: £X
-- ROAS: X.XX
-(other top-level metrics visible)
-
-**Individual Campaign Performance:**
-
-*Campaign Name 1*
-- Spend: £X
-- Purchases: X
-- Revenue: £X
-- ROAS: X.XX
-
-*Campaign Name 2*
-- Spend: £X
-...
-\`\`\`
-
-Cover EVERY platform present in the screenshots (Meta, Google Ads, etc.) — give each its own "Overall [Platform] Performance" subsection. Include per-campaign breakdowns when individual campaign rows are visible in the screenshots. Use the exact campaign names shown. List the metrics that actually appear; don't pad with metrics that aren't there.
-
-3. **wins** — bullet list of 2–5 wins. Each bullet starts with a strong verb and cites a concrete metric from the screenshots or narrative wherever possible.
-
-4. **risks** — bullet list of 1–4 risks or concerns spotted in the data (CPL trending up, conversion volume falling, spend rising without conversions, dropped impressions, etc.). If genuinely nothing concerning shows up, write a single bullet: "No material risks flagged for this period." Do not invent risks.
-
-5. **recommendations** — bullet list of 2–4 specific, actionable next steps that follow from the risks, the metrics, and the focus-next narrative.
+Use UK English throughout. Currency is GBP (£) unless a screenshot clearly shows otherwise.
 
 Hard rules:
 - Use ONLY information visible in the screenshots, captions, or narrative. Do not fabricate metrics, percentages, monetary values, campaign names, or claims.
 - If a number is unclear or partly cut off in a screenshot, omit it rather than guessing.
-- Currency: assume GBP (£) unless a screenshot clearly shows another currency.
 - Tone: confident, plain English, friendly but professional. Address the client directly ("you", "your campaigns").
 
-Respond with ONLY valid JSON, no markdown fences:
-{"exec_summary":"...","performance_summary":"...","wins":"- ...\\n- ...","risks":"- ...","recommendations":"- ...\\n- ..."}`;
+Call the \`submit_report\` tool with all five fields filled in. Every field is required — do not return an empty string for any of them. The performance_summary field MUST contain a structured metric breakdown extracted from the screenshots; the others are short narrative blocks.`;
+
+/**
+ * Tool definition for the structured report output. Using tool-use rather
+ * than free-text JSON guarantees Claude returns exactly the five fields we
+ * need, in the right shape, and prevents JSON-truncation issues.
+ */
+const SUBMIT_REPORT_TOOL: Tool = {
+  name: 'submit_report',
+  description: 'Submit the five generated sections of a monthly client performance report. Every field is required.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      performance_summary: {
+        type: 'string',
+        description:
+          'Markdown metric breakdown extracted from the screenshots. Cover EVERY platform that appears (Meta, Google Ads, etc.) — give each its own "Overall [Platform] Performance" subsection followed by an "Individual Campaign Performance" block listing per-campaign rows. Use the exact campaign names shown. Format example:\n\n**Overall Meta Performance:**\n- Amount Spent: £10,568.74\n- Clicks: 20,480\n- Revenue: £115,937.93\n- ROAS: 10.97\n\n**Individual Campaign Performance:**\n\n*VD | Sales | All Products | Broad | CBO*\n- Spend: £2,551.85\n- Purchases: 66\n- Revenue: £36,214.83\n- Purchase ROAS: 14.19\n\nList the metrics that actually appear in the screenshots; do not pad with metrics that are not there.',
+      },
+      exec_summary: {
+        type: 'string',
+        description:
+          'Two to four sentences summarising the headline story for the period. Quote the most important specific numbers visible in the screenshots. Reference platforms by name. Markdown.',
+      },
+      wins: {
+        type: 'string',
+        description:
+          'Markdown bullet list of 2–5 wins. Each bullet starts with a strong verb and cites a concrete metric from the screenshots or narrative wherever possible.',
+      },
+      risks: {
+        type: 'string',
+        description:
+          'Markdown bullet list of 1–4 risks or concerns spotted in the data (CPL trending up, conversion volume falling, spend rising without conversions, dropped impressions, etc.). If genuinely nothing concerning shows up, return a single bullet: "- No material risks flagged for this period." Do not invent risks.',
+      },
+      recommendations: {
+        type: 'string',
+        description:
+          'Markdown bullet list of 2–4 specific, actionable next steps that follow from the risks, the metrics, and the focus-next narrative.',
+      },
+    },
+    required: ['performance_summary', 'exec_summary', 'wins', 'risks', 'recommendations'],
+  },
+};
 
 let _anthropic: Anthropic | null = null;
 function anthropic(): Anthropic {
@@ -149,30 +155,6 @@ function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlo
   return blocks;
 }
 
-function parseResponse(text: string): ReportAiOutput {
-  const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
-  let parsed: any;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch (err) {
-    throw new Error(`Model returned non-JSON: ${cleaned.slice(0, 200)}`);
-  }
-
-  const requiredKeys: (keyof ReportAiOutput)[] = ['exec_summary', 'performance_summary', 'wins', 'risks', 'recommendations'];
-  for (const key of requiredKeys) {
-    if (typeof parsed[key] !== 'string') {
-      throw new Error(`Model response missing or invalid field: ${key}`);
-    }
-  }
-  return {
-    exec_summary: parsed.exec_summary,
-    performance_summary: parsed.performance_summary,
-    wins: parsed.wins,
-    risks: parsed.risks,
-    recommendations: parsed.recommendations,
-  };
-}
-
 export async function generateReportInsights(
   input: ReportAiInput,
   userId: string | null,
@@ -187,8 +169,10 @@ export async function generateReportInsights(
     model: MODEL,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content }],
-    max_tokens: 4000,
+    max_tokens: 6000,
     temperature: 0.4,
+    tools: [SUBMIT_REPORT_TOOL],
+    tool_choice: { type: 'tool', name: 'submit_report' },
   });
 
   void trackUsage({
@@ -199,7 +183,41 @@ export async function generateReportInsights(
     outputTokens: response.usage?.output_tokens ?? 0,
   });
 
-  const textBlock = response.content.find(b => b.type === 'text');
-  const raw = textBlock && 'text' in textBlock ? textBlock.text : '';
-  return parseResponse(raw);
+  // Diagnostics: log token usage + stop reason so Vercel logs surface
+  // truncation issues if the model runs out of room mid-response.
+  console.log('[report-ai] generated', {
+    stop_reason: response.stop_reason,
+    input_tokens: response.usage?.input_tokens,
+    output_tokens: response.usage?.output_tokens,
+    screenshots: input.screenshots.length,
+  });
+
+  const toolBlock = response.content.find(b => b.type === 'tool_use');
+  if (!toolBlock || toolBlock.type !== 'tool_use' || toolBlock.name !== 'submit_report') {
+    const textBlock = response.content.find(b => b.type === 'text');
+    const text = textBlock && 'text' in textBlock ? textBlock.text : '';
+    throw new Error(
+      `Model did not call submit_report (stop_reason=${response.stop_reason}, text="${text.slice(0, 200)}")`,
+    );
+  }
+
+  const args = toolBlock.input as Partial<ReportAiOutput>;
+  const out: ReportAiOutput = {
+    exec_summary: typeof args.exec_summary === 'string' ? args.exec_summary : '',
+    performance_summary: typeof args.performance_summary === 'string' ? args.performance_summary : '',
+    wins: typeof args.wins === 'string' ? args.wins : '',
+    risks: typeof args.risks === 'string' ? args.risks : '',
+    recommendations: typeof args.recommendations === 'string' ? args.recommendations : '',
+  };
+
+  // If performance_summary came back empty despite required:true, surface it
+  // — usually means tokens ran out. Don't silently swallow.
+  if (!out.performance_summary.trim()) {
+    console.warn('[report-ai] empty performance_summary returned', {
+      stop_reason: response.stop_reason,
+      output_tokens: response.usage?.output_tokens,
+    });
+  }
+
+  return out;
 }
