@@ -8,72 +8,76 @@
   <a href="/reports/<%= it.report.id %>/text" class="r-btn r-btn-ghost">Copy as text</a>
 </div>
 
-<article class="r-preview">
-  <header class="r-preview-header">
-    <div class="r-brand">Vendo Digital</div>
-    <h1><%= it.report.client_display_name || it.report.client_name %></h1>
-    <p class="r-period"><%= it.report.period_label %> · Performance Report</p>
-  </header>
+<%
+  // Build the platforms list seen in this report — used in the intro line
+  // ("your monthly Meta + Google Ads Report").
+  var seen = [];
+  it.screenshots.forEach(function(s){
+    var lbl = (it.platforms.find(function(p){ return p.value === s.platform; }) || { label: s.platform }).label;
+    if (seen.indexOf(lbl) === -1) seen.push(lbl);
+  });
+  var platformPhrase = seen.length === 0 ? 'performance'
+    : seen.length === 1 ? seen[0] + ' Ads'
+    : seen.length === 2 ? seen.join(' & ')
+    : seen.slice(0, -1).join(', ') + ' & ' + seen[seen.length - 1];
 
-  <% if (it.report.exec_summary_md) { %>
-    <section class="r-preview-section">
-      <h2>Executive summary</h2>
-      <div class="r-prose"><%~ it.md(it.report.exec_summary_md) %></div>
-    </section>
+  var senderName = (it.user && it.user.name) ? it.user.name : 'The Vendo Team';
+  var senderFirstName = senderName.split(/\s+/)[0];
+%>
+
+<article class="r-preview r-preview-email">
+
+  <p class="r-greeting">Hi <%= it.report.contact_name || 'there' %>,</p>
+
+  <p>Hope you're well!</p>
+
+  <p>Please find your monthly <%= platformPhrase %> Report for <%= it.report.period_label %> below:</p>
+
+  <% if (it.report.performance_summary_md) { %>
+    <h2 class="r-email-h"><%= it.report.period_label %> <%= seen.length ? seen.join(' / ') + ' ' : '' %>Performance</h2>
+    <div class="r-prose"><%~ it.md(it.report.performance_summary_md) %></div>
   <% } %>
 
   <% if (it.screenshots.length) { %>
-    <section class="r-preview-section">
-      <h2>Performance</h2>
-      <div class="r-preview-screenshots">
-        <% it.screenshots.forEach(function(s){
-             var label = (it.platforms.find(function(p){ return p.value === s.platform; }) || { label: s.platform }).label;
-        %>
-          <figure class="r-preview-shot">
-            <img src="<%= s.blob_url %>" alt="<%= s.caption || label %>" />
-            <figcaption><strong><%= label %></strong><%= s.caption ? ' — ' + s.caption : '' %></figcaption>
-          </figure>
-        <% }); %>
-      </div>
-    </section>
+    <h2 class="r-email-h">Screenshots</h2>
+    <div class="r-preview-screenshots">
+      <% it.screenshots.forEach(function(s){
+           var label = (it.platforms.find(function(p){ return p.value === s.platform; }) || { label: s.platform }).label;
+      %>
+        <figure class="r-preview-shot">
+          <img src="<%= s.blob_url %>" alt="<%= s.caption || label %>" />
+          <figcaption><strong><%= label %></strong><%= s.caption ? ' — ' + s.caption : '' %></figcaption>
+        </figure>
+      <% }); %>
+    </div>
   <% } %>
 
-  <% if (it.report.worked_on_md) { %>
-    <section class="r-preview-section">
-      <h2>What we worked on</h2>
-      <div class="r-prose"><%~ it.md(it.report.worked_on_md) %></div>
-    </section>
+  <h2 class="r-email-h">This Month</h2>
+  <% if (it.report.exec_summary_md) { %>
+    <div class="r-prose"><%~ it.md(it.report.exec_summary_md) %></div>
   <% } %>
-
   <% if (it.report.wins_md) { %>
-    <section class="r-preview-section">
-      <h2>Wins</h2>
-      <div class="r-prose"><%~ it.md(it.report.wins_md) %></div>
-    </section>
+    <div class="r-prose"><%~ it.md(it.report.wins_md) %></div>
+  <% } %>
+  <% if (it.report.worked_on_md) { %>
+    <div class="r-prose"><%~ it.md(it.report.worked_on_md) %></div>
   <% } %>
 
-  <% if (it.report.risks_md) { %>
-    <section class="r-preview-section">
-      <h2>Risks</h2>
-      <div class="r-prose"><%~ it.md(it.report.risks_md) %></div>
-    </section>
+  <% if (it.report.risks_md && !/^\s*-?\s*no material risks/i.test(it.report.risks_md)) { %>
+    <h2 class="r-email-h">Things to keep an eye on</h2>
+    <div class="r-prose"><%~ it.md(it.report.risks_md) %></div>
   <% } %>
 
+  <h2 class="r-email-h">Next Month &amp; Ongoing</h2>
   <% if (it.report.focus_next_md) { %>
-    <section class="r-preview-section">
-      <h2>Focus next period</h2>
-      <div class="r-prose"><%~ it.md(it.report.focus_next_md) %></div>
-    </section>
+    <div class="r-prose"><%~ it.md(it.report.focus_next_md) %></div>
   <% } %>
-
   <% if (it.report.recommendations_md) { %>
-    <section class="r-preview-section">
-      <h2>Recommendations</h2>
-      <div class="r-prose"><%~ it.md(it.report.recommendations_md) %></div>
-    </section>
+    <div class="r-prose"><%~ it.md(it.report.recommendations_md) %></div>
   <% } %>
 
-  <footer class="r-preview-footer">
-    <p>Prepared by Vendo Digital · vendodigital.co.uk</p>
-  </footer>
+  <p class="r-signoff">Let us know if you have any questions at all!</p>
+
+  <p class="r-signoff">Thanks,<br/><%= senderFirstName %></p>
+
 </article>

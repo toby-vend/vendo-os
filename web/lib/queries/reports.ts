@@ -44,9 +44,11 @@ export interface ClientReportRow {
   period_start: string;
   period_end: string;
   status: ReportStatus;
+  contact_name: string;
   worked_on_md: string;
   focus_next_md: string;
   exec_summary_md: string;
+  performance_summary_md: string;
   wins_md: string;
   risks_md: string;
   recommendations_md: string;
@@ -89,8 +91,10 @@ const REPORT_SELECT = `
   SELECT r.id, r.client_id,
          c.name AS client_name, c.display_name AS client_display_name,
          r.period_label, r.period_start, r.period_end, r.status,
+         r.contact_name,
          r.worked_on_md, r.focus_next_md,
-         r.exec_summary_md, r.wins_md, r.risks_md, r.recommendations_md,
+         r.exec_summary_md, r.performance_summary_md,
+         r.wins_md, r.risks_md, r.recommendations_md,
          r.ai_generated_at, r.created_by, r.created_at, r.updated_at
   FROM client_reports r
   JOIN clients c ON c.id = r.client_id
@@ -176,11 +180,13 @@ export async function findReport(clientId: number, periodStart: string, periodEn
 export async function updateNarrative(id: number, params: {
   workedOnMd?: string;
   focusNextMd?: string;
+  contactName?: string;
 }): Promise<void> {
   const sets: string[] = [];
   const args: (string | number)[] = [];
   if (params.workedOnMd !== undefined) { sets.push('worked_on_md = ?'); args.push(params.workedOnMd); }
   if (params.focusNextMd !== undefined) { sets.push('focus_next_md = ?'); args.push(params.focusNextMd); }
+  if (params.contactName !== undefined) { sets.push('contact_name = ?'); args.push(params.contactName.slice(0, 100)); }
   if (!sets.length) return;
   sets.push("updated_at = datetime('now')");
   args.push(id);
@@ -192,6 +198,7 @@ export async function updateNarrative(id: number, params: {
 
 export async function updateAiBlocks(id: number, params: {
   execSummaryMd: string;
+  performanceSummaryMd: string;
   winsMd: string;
   risksMd: string;
   recommendationsMd: string;
@@ -199,17 +206,25 @@ export async function updateAiBlocks(id: number, params: {
   await db.execute({
     sql: `UPDATE client_reports SET
             exec_summary_md = ?,
+            performance_summary_md = ?,
             wins_md = ?,
             risks_md = ?,
             recommendations_md = ?,
             ai_generated_at = datetime('now'),
             updated_at = datetime('now')
           WHERE id = ?`,
-    args: [params.execSummaryMd, params.winsMd, params.risksMd, params.recommendationsMd, id],
+    args: [params.execSummaryMd, params.performanceSummaryMd, params.winsMd, params.risksMd, params.recommendationsMd, id],
   });
 }
 
-export async function updateAiBlock(id: number, field: 'exec_summary_md' | 'wins_md' | 'risks_md' | 'recommendations_md', value: string): Promise<void> {
+export type AiBlockField =
+  | 'exec_summary_md'
+  | 'performance_summary_md'
+  | 'wins_md'
+  | 'risks_md'
+  | 'recommendations_md';
+
+export async function updateAiBlock(id: number, field: AiBlockField, value: string): Promise<void> {
   await db.execute({
     sql: `UPDATE client_reports SET ${field} = ?, updated_at = datetime('now') WHERE id = ?`,
     args: [value, id],

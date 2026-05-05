@@ -6,10 +6,11 @@
   <% } %>
 
   <% var blocks = [
-    { key: 'exec_summary', label: 'Executive summary', value: it.report.exec_summary_md },
-    { key: 'wins',         label: 'Wins',              value: it.report.wins_md },
-    { key: 'risks',        label: 'Risks',             value: it.report.risks_md },
-    { key: 'recommendations', label: 'Recommendations', value: it.report.recommendations_md },
+    { key: 'exec_summary',        label: 'Executive summary',        value: it.report.exec_summary_md,        rows: 4 },
+    { key: 'performance_summary', label: 'Performance breakdown',    value: it.report.performance_summary_md, rows: 14 },
+    { key: 'wins',                label: 'Wins',                     value: it.report.wins_md,                rows: 6 },
+    { key: 'risks',               label: 'Risks',                    value: it.report.risks_md,               rows: 4 },
+    { key: 'recommendations',     label: 'Recommendations',          value: it.report.recommendations_md,     rows: 5 },
   ]; %>
 
   <% blocks.forEach(function(b){ %>
@@ -17,7 +18,7 @@
       <label class="r-ai-label"><%= b.label %></label>
       <textarea class="r-textarea r-textarea-sm"
                 name="content"
-                rows="<%= b.key === 'exec_summary' ? 4 : 5 %>"
+                rows="<%= b.rows %>"
                 placeholder="<%= it.report.ai_generated_at ? '' : 'Will be generated…' %>"
                 hx-post="/api/reports/<%= it.report.id %>/ai/<%= b.key %>"
                 hx-trigger="blur changed delay:500ms"

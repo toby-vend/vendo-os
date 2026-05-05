@@ -184,34 +184,64 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     const platformLabel = (v: ScreenshotPlatform) =>
       PLATFORM_OPTIONS.find(p => p.value === v)?.label ?? v;
 
-    const screenshotLines = screenshots.length
-      ? screenshots.map(s => `- **${platformLabel(s.platform)}**${s.caption ? ` — ${s.caption}` : ''} (${s.blob_url})`).join('\n')
-      : '_No screenshots uploaded._';
+    // Same email-style structure as the preview page so a copy-paste lands in
+    // a client's inbox looking like the reference report.
+    const seenPlatforms: string[] = [];
+    for (const s of screenshots) {
+      const lbl = platformLabel(s.platform);
+      if (!seenPlatforms.includes(lbl)) seenPlatforms.push(lbl);
+    }
+    const platformPhrase = seenPlatforms.length === 0
+      ? 'performance'
+      : seenPlatforms.length === 1
+        ? `${seenPlatforms[0]} Ads`
+        : seenPlatforms.length === 2
+          ? seenPlatforms.join(' & ')
+          : `${seenPlatforms.slice(0, -1).join(', ')} & ${seenPlatforms[seenPlatforms.length - 1]}`;
+
+    const senderFirstName = (user.name ?? '').split(/\s+/)[0] || 'Vendo';
 
     const sections: string[] = [
-      `# ${report.client_display_name || report.client_name} — ${report.period_label}`,
+      `Hi ${report.contact_name || 'there'},`,
       '',
-      '## Executive summary',
-      report.exec_summary_md.trim() || '_(not generated yet)_',
+      `Hope you're well!`,
       '',
-      '## Performance screenshots',
-      screenshotLines,
+      `Please find your monthly ${platformPhrase} Report for ${report.period_label} below:`,
       '',
-      '## What we worked on',
-      report.worked_on_md.trim() || '_(not provided)_',
-      '',
-      '## Wins',
-      report.wins_md.trim() || '_(not generated yet)_',
-      '',
-      '## Risks',
-      report.risks_md.trim() || '_(not generated yet)_',
-      '',
-      '## Focus next period',
-      report.focus_next_md.trim() || '_(not provided)_',
-      '',
-      '## Recommendations',
-      report.recommendations_md.trim() || '_(not generated yet)_',
     ];
+
+    if (report.performance_summary_md.trim()) {
+      sections.push(
+        `## ${report.period_label}${seenPlatforms.length ? ' ' + seenPlatforms.join(' / ') : ''} Performance`,
+        '',
+        report.performance_summary_md.trim(),
+        '',
+      );
+    }
+
+    if (screenshots.length) {
+      sections.push('## Screenshots');
+      for (const s of screenshots) {
+        const cap = s.caption ? ` — ${s.caption}` : '';
+        sections.push(`- **${platformLabel(s.platform)}**${cap} (${s.blob_url})`);
+      }
+      sections.push('');
+    }
+
+    sections.push('## This Month', '');
+    if (report.exec_summary_md.trim()) sections.push(report.exec_summary_md.trim(), '');
+    if (report.wins_md.trim()) sections.push(report.wins_md.trim(), '');
+    if (report.worked_on_md.trim()) sections.push(report.worked_on_md.trim(), '');
+
+    if (report.risks_md.trim() && !/^\s*-?\s*no material risks/i.test(report.risks_md)) {
+      sections.push('## Things to keep an eye on', '', report.risks_md.trim(), '');
+    }
+
+    sections.push('## Next Month & Ongoing', '');
+    if (report.focus_next_md.trim()) sections.push(report.focus_next_md.trim(), '');
+    if (report.recommendations_md.trim()) sections.push(report.recommendations_md.trim(), '');
+
+    sections.push('', `Let us know if you have any questions at all!`, '', `Thanks,`, senderFirstName);
 
     return reply.render('reports/text', {
       report,
@@ -269,10 +299,12 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
 
     const workedOnMd = field(request.body, 'worked_on_md');
     const focusNextMd = field(request.body, 'focus_next_md');
+    const contactName = field(request.body, 'contact_name');
 
     const params: Parameters<typeof updateNarrative>[1] = {};
     if ('worked_on_md' in (request.body as object)) params.workedOnMd = workedOnMd;
     if ('focus_next_md' in (request.body as object)) params.focusNextMd = focusNextMd;
+    if ('contact_name' in (request.body as object)) params.contactName = contactName;
 
     await updateNarrative(id, params);
 
@@ -290,7 +322,7 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     const id = Number(request.params.id);
     if (!Number.isFinite(id)) return reply.code(404).send('Not found');
     const fieldName = request.params.field;
-    const allowed = ['exec_summary', 'wins', 'risks', 'recommendations'] as const;
+    const allowed = ['exec_summary', 'performance_summary', 'wins', 'risks', 'recommendations'] as const;
     if (!allowed.includes(fieldName as typeof allowed[number])) {
       return reply.code(400).send('Bad field');
     }
@@ -455,6 +487,7 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
       );
       await updateAiBlocks(id, {
         execSummaryMd: out.exec_summary,
+        performanceSummaryMd: out.performance_summary,
         winsMd: out.wins,
         risksMd: out.risks,
         recommendationsMd: out.recommendations,

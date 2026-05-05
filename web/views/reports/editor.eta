@@ -41,10 +41,28 @@
     </div>
   </div>
 
+  <!-- Recipient -->
+  <section class="card r-section">
+    <header class="r-section-head">
+      <h3>1. Who's the report addressed to?</h3>
+      <p class="r-muted">First name of the client contact (e.g. "Adam"). Used in the email-style greeting on the preview page. Leave blank to skip the greeting.</p>
+    </header>
+    <input class="r-textarea"
+           type="text"
+           name="contact_name"
+           value="<%= it.report.contact_name %>"
+           placeholder="e.g. Adam"
+           maxlength="100"
+           style="max-width: 320px;"
+           hx-post="/api/reports/<%= it.report.id %>/narrative"
+           hx-trigger="blur changed delay:500ms"
+           hx-swap="none" />
+  </section>
+
   <!-- Performance screenshots -->
   <section class="card r-section">
     <header class="r-section-head">
-      <h3>1. Performance screenshots</h3>
+      <h3>2. Performance screenshots</h3>
       <p class="r-muted">Upload screenshots from each platform. Tag the platform and add a short caption (e.g. "Spend up 12% MoM, conversions flat"). The AI uses captions to write insights — give it something to work with.</p>
     </header>
 
@@ -87,7 +105,7 @@
   <!-- What we worked on -->
   <section class="card r-section">
     <header class="r-section-head">
-      <h3>2. What we worked on</h3>
+      <h3>3. What we worked on</h3>
       <p class="r-muted">Plain language. Bullets. Markdown supported.</p>
     </header>
     <textarea class="r-textarea"
@@ -103,7 +121,7 @@
   <!-- Focus next period -->
   <section class="card r-section">
     <header class="r-section-head">
-      <h3>3. Focus next period</h3>
+      <h3>4. Focus next period</h3>
       <p class="r-muted">What's the plan for next month?</p>
     </header>
     <textarea class="r-textarea"
@@ -120,8 +138,8 @@
   <section class="card r-section">
     <header class="r-section-head" style="display:flex; justify-content:space-between; align-items:center;">
       <div>
-        <h3>4. AI insights</h3>
-        <p class="r-muted">Executive summary, wins, risks, and recommendations — generated from the inputs above.</p>
+        <h3>5. AI insights</h3>
+        <p class="r-muted">Executive summary, performance breakdown, wins, risks, and recommendations — generated from the screenshots and narrative above.</p>
       </div>
       <button id="r-generate-btn"
               class="r-btn r-btn-primary"

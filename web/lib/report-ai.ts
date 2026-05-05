@@ -1,8 +1,9 @@
 /**
  * AI generation for client reports.
  *
- * Takes the structured report inputs (screenshots, narrative) and produces four
- * polished markdown blocks: executive summary, wins, risks, recommendations.
+ * Takes the structured report inputs (screenshots, narrative) and produces five
+ * polished markdown blocks: executive summary, performance summary (overall +
+ * per-campaign metric breakdown), wins, risks, recommendations.
  *
  * The screenshots themselves are sent to Claude as image content blocks (URL
  * sources pointing at Vercel Blob), so the model can read metrics directly off
@@ -33,34 +34,63 @@ export interface ReportAiInput {
 
 export interface ReportAiOutput {
   exec_summary: string;
+  performance_summary: string;
   wins: string;
   risks: string;
   recommendations: string;
 }
 
-const SYSTEM_PROMPT = `You are a senior account director at Vendo Digital, a UK digital marketing agency. You are drafting four sections of a monthly client performance report.
+const SYSTEM_PROMPT = `You are a senior account director at Vendo Digital, a UK digital marketing agency. You are drafting the AI-generated sections of a monthly client performance report that will be sent as an email-style report to the client.
 
 You will be given:
 - Client name and reporting period
-- One or more performance screenshots — each prefixed with a header line that names the platform (e.g. Google Ads, Meta) and any caption the account team wrote. **Read the actual numbers off the charts and tables in the images** (spend, conversions, CTR, ROAS, impressions, CPC, lead counts, comparison-period deltas, etc.) and use them in your output.
+- One or more performance screenshots — each prefixed with a header line that names the platform (e.g. Google Ads, Meta) and any caption the account team wrote. **Read the actual numbers off the charts and tables in the images** (spend, clicks, impressions, conversions, purchases, CTR, ROAS, CPC, CPL, lead counts, revenue, comparison-period deltas, per-campaign breakdowns, etc.) and use them in your output.
 - A "What we worked on" narrative
 - A "Focus next period" narrative
 
-Produce four short, polished markdown sections in UK English:
-1. **Executive summary** — 2–4 sentences pulling out the headline story. Quote the most important specific numbers visible in the screenshots (with units / currency / period: e.g. "Google Ads spend hit £4,210 in May, +18% MoM"). Reference platforms by name.
-2. **Wins** — bullet list of 2–5 wins. Each bullet starts with a strong verb and cites a concrete metric from the screenshots or narrative wherever possible.
-3. **Risks** — bullet list of 1–4 risks or concerns spotted in the data (e.g. CPL trending up, conversion volume falling, channel spend rising without conversions, dropped impressions). If genuinely nothing concerning shows up, write a single bullet: "No material risks flagged for this period." Do not invent risks.
-4. **Recommendations** — bullet list of 2–4 specific, actionable next steps that follow from the risks, the metrics, and the focus-next narrative.
+Produce FIVE markdown sections in UK English:
+
+1. **exec_summary** — 2–4 sentences pulling out the headline story. Quote the most important specific numbers visible in the screenshots. Reference platforms by name.
+
+2. **performance_summary** — A structured metric breakdown that mirrors this style:
+
+\`\`\`
+**Overall [Platform] Performance:**
+- Amount Spent: £X
+- Clicks: X
+- Revenue: £X
+- ROAS: X.XX
+(other top-level metrics visible)
+
+**Individual Campaign Performance:**
+
+*Campaign Name 1*
+- Spend: £X
+- Purchases: X
+- Revenue: £X
+- ROAS: X.XX
+
+*Campaign Name 2*
+- Spend: £X
+...
+\`\`\`
+
+Cover EVERY platform present in the screenshots (Meta, Google Ads, etc.) — give each its own "Overall [Platform] Performance" subsection. Include per-campaign breakdowns when individual campaign rows are visible in the screenshots. Use the exact campaign names shown. List the metrics that actually appear; don't pad with metrics that aren't there.
+
+3. **wins** — bullet list of 2–5 wins. Each bullet starts with a strong verb and cites a concrete metric from the screenshots or narrative wherever possible.
+
+4. **risks** — bullet list of 1–4 risks or concerns spotted in the data (CPL trending up, conversion volume falling, spend rising without conversions, dropped impressions, etc.). If genuinely nothing concerning shows up, write a single bullet: "No material risks flagged for this period." Do not invent risks.
+
+5. **recommendations** — bullet list of 2–4 specific, actionable next steps that follow from the risks, the metrics, and the focus-next narrative.
 
 Hard rules:
-- Use ONLY information visible in the screenshots, captions, or narrative. Do not fabricate metrics, percentages, monetary values, or claims.
+- Use ONLY information visible in the screenshots, captions, or narrative. Do not fabricate metrics, percentages, monetary values, campaign names, or claims.
 - If a number is unclear or partly cut off in a screenshot, omit it rather than guessing.
-- Where the inputs are genuinely sparse, say so clearly rather than padding.
-- Tone: confident, plain English, no marketing fluff. Address the client directly ("you", "your campaigns").
-- Keep each section tight — no rambling paragraphs.
+- Currency: assume GBP (£) unless a screenshot clearly shows another currency.
+- Tone: confident, plain English, friendly but professional. Address the client directly ("you", "your campaigns").
 
 Respond with ONLY valid JSON, no markdown fences:
-{"exec_summary":"...","wins":"- ...\\n- ...","risks":"- ...","recommendations":"- ...\\n- ..."}`;
+{"exec_summary":"...","performance_summary":"...","wins":"- ...\\n- ...","risks":"- ...","recommendations":"- ...\\n- ..."}`;
 
 let _anthropic: Anthropic | null = null;
 function anthropic(): Anthropic {
@@ -128,7 +158,7 @@ function parseResponse(text: string): ReportAiOutput {
     throw new Error(`Model returned non-JSON: ${cleaned.slice(0, 200)}`);
   }
 
-  const requiredKeys: (keyof ReportAiOutput)[] = ['exec_summary', 'wins', 'risks', 'recommendations'];
+  const requiredKeys: (keyof ReportAiOutput)[] = ['exec_summary', 'performance_summary', 'wins', 'risks', 'recommendations'];
   for (const key of requiredKeys) {
     if (typeof parsed[key] !== 'string') {
       throw new Error(`Model response missing or invalid field: ${key}`);
@@ -136,6 +166,7 @@ function parseResponse(text: string): ReportAiOutput {
   }
   return {
     exec_summary: parsed.exec_summary,
+    performance_summary: parsed.performance_summary,
     wins: parsed.wins,
     risks: parsed.risks,
     recommendations: parsed.recommendations,
@@ -156,7 +187,7 @@ export async function generateReportInsights(
     model: MODEL,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content }],
-    max_tokens: 2000,
+    max_tokens: 4000,
     temperature: 0.4,
   });
 

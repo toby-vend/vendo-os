@@ -207,6 +207,21 @@
 .r-preview-shot figcaption { font-size: 13px; color: #475569; margin-top: 0.4rem; }
 .r-preview-footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #E2E8F0; font-size: 12px; color: #64748B; text-align: center; }
 
+/* Email-style preview — friendlier, no big banner; reads like a sent message */
+.r-preview-email { font-size: 15px; line-height: 1.7; color: #1E293B; }
+.r-preview-email > p { margin: 0 0 1rem; }
+.r-preview-email .r-greeting { font-weight: 600; }
+.r-preview-email .r-signoff { margin-top: 1.5rem; }
+.r-email-h {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 1.6rem 0 0.6rem;
+  color: #0F172A;
+}
+.r-preview-email .r-prose { font-size: 15px; }
+.r-preview-email .r-prose ul { padding-left: 1.2rem; }
+.r-preview-email .r-prose li { margin-bottom: 0.25rem; }
+
 /* Print rules — hides chrome, ensures preview prints clean */
 @media print {
   body { background: #FFFFFF !important; }
