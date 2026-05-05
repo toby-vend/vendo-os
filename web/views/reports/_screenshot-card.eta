@@ -1,0 +1,28 @@
+<div class="r-screenshot-card" id="r-shot-<%= it.screenshot.id %>">
+  <a href="<%= it.screenshot.blob_url %>" target="_blank" class="r-shot-thumb">
+    <img src="<%= it.screenshot.blob_url %>" alt="<%= it.screenshot.caption || it.screenshot.platform %>" loading="lazy" />
+  </a>
+  <div class="r-shot-meta">
+    <select name="platform"
+            hx-post="/api/reports/<%= it.screenshot.report_id %>/screenshots/<%= it.screenshot.id %>"
+            hx-trigger="change"
+            hx-swap="none">
+      <% it.platforms.forEach(function(p){ %>
+        <option value="<%= p.value %>" <%= p.value === it.screenshot.platform ? 'selected' : '' %>><%= p.label %></option>
+      <% }); %>
+    </select>
+    <input type="text"
+           name="caption"
+           value="<%= it.screenshot.caption %>"
+           placeholder="Caption…"
+           maxlength="500"
+           hx-post="/api/reports/<%= it.screenshot.report_id %>/screenshots/<%= it.screenshot.id %>"
+           hx-trigger="blur changed delay:500ms"
+           hx-swap="none" />
+    <button class="r-btn r-btn-ghost r-btn-sm"
+            hx-post="/api/reports/<%= it.screenshot.report_id %>/screenshots/<%= it.screenshot.id %>/delete"
+            hx-target="#r-shot-<%= it.screenshot.id %>"
+            hx-swap="outerHTML"
+            hx-confirm="Remove this screenshot?">Remove</button>
+  </div>
+</div>

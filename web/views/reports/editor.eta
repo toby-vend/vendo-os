@@ -1,0 +1,149 @@
+<% layout('/layouts/base') %>
+
+<link rel="stylesheet" href="/assets/reports.css" />
+
+<div style="max-width: 1100px; margin: 0 auto;" class="r-editor">
+
+  <div class="r-editor-header card">
+    <div>
+      <h2 style="font-size: 22px; font-weight: 600; margin: 0;">
+        <%= it.report.client_display_name || it.report.client_name %>
+        <span class="r-muted" style="font-weight: 400;">— <%= it.report.period_label %></span>
+      </h2>
+      <p class="r-muted" style="margin: 0.25rem 0 0; font-size: 13px;">
+        <span class="r-status r-status-<%= it.report.status %>"><%= it.report.status %></span>
+        · Created by <%= it.report.created_by %>
+        · Updated <%= it.report.updated_at.slice(0, 16).replace('T', ' ') %>
+      </p>
+    </div>
+    <div class="r-header-actions">
+      <span id="r-save-flash" class="r-saved" style="opacity: 0;">Saved</span>
+      <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/text" target="_blank">Copy text</a>
+      <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/preview" target="_blank">Preview / PDF</a>
+      <% if (it.report.status === 'draft') { %>
+        <button class="r-btn r-btn-primary"
+                hx-post="/api/reports/<%= it.report.id %>/status"
+                hx-vals='{"status":"final"}'>
+          Mark final
+        </button>
+      <% } else { %>
+        <button class="r-btn r-btn-ghost"
+                hx-post="/api/reports/<%= it.report.id %>/status"
+                hx-vals='{"status":"draft"}'>
+          Reopen as draft
+        </button>
+      <% } %>
+      <button class="r-btn r-btn-danger"
+              hx-post="/api/reports/<%= it.report.id %>/delete"
+              hx-confirm="Delete this report and all screenshots? This can't be undone.">
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <!-- Performance screenshots -->
+  <section class="card r-section">
+    <header class="r-section-head">
+      <h3>1. Performance screenshots</h3>
+      <p class="r-muted">Upload screenshots from each platform. Tag the platform and add a short caption (e.g. "Spend up 12% MoM, conversions flat"). The AI uses captions to write insights — give it something to work with.</p>
+    </header>
+
+    <form id="r-upload-form"
+          hx-post="/api/reports/<%= it.report.id %>/screenshots"
+          hx-target="#r-screenshots-list"
+          hx-swap="beforeend"
+          hx-encoding="multipart/form-data"
+          hx-on:htmx:after-request="if(event.detail.successful){this.reset();}"
+          class="r-upload-form">
+      <label class="r-field" style="flex: 0 0 180px;">
+        <span>Platform</span>
+        <select name="platform" required>
+          <option value="">Pick…</option>
+          <% it.platforms.forEach(function(p){ %>
+            <option value="<%= p.value %>"><%= p.label %></option>
+          <% }); %>
+        </select>
+      </label>
+      <label class="r-field" style="flex: 1;">
+        <span>Caption (optional)</span>
+        <input type="text" name="caption" placeholder="e.g. Spend up 12% MoM, ROAS 3.4 → 4.1" maxlength="500" />
+      </label>
+      <label class="r-field" style="flex: 0 0 220px;">
+        <span>Image (PNG / JPEG / WebP, max 5MB)</span>
+        <input type="file" name="file" accept="image/png,image/jpeg,image/webp" required />
+      </label>
+      <button type="submit" class="r-btn r-btn-primary">Add</button>
+    </form>
+
+    <div id="r-screenshots-list" class="r-screenshots">
+      <% it.screenshots.forEach(function(s){ %>
+        <%~ include('/reports/_screenshot-card', { screenshot: s, platforms: it.platforms }) %>
+      <% }); %>
+    </div>
+  </section>
+
+  <!-- What we worked on -->
+  <section class="card r-section">
+    <header class="r-section-head">
+      <h3>2. What we worked on</h3>
+      <p class="r-muted">Plain language. Bullets. Markdown supported.</p>
+    </header>
+    <textarea class="r-textarea"
+              name="worked_on_md"
+              rows="8"
+              placeholder="- Launched the new high-intent search campaign on May 3rd…&#10;- Refreshed Meta creatives — 6 new variants live"
+              hx-post="/api/reports/<%= it.report.id %>/narrative"
+              hx-trigger="blur changed delay:500ms"
+              hx-swap="none"
+    ><%= it.report.worked_on_md %></textarea>
+  </section>
+
+  <!-- Focus next period -->
+  <section class="card r-section">
+    <header class="r-section-head">
+      <h3>3. Focus next period</h3>
+      <p class="r-muted">What's the plan for next month?</p>
+    </header>
+    <textarea class="r-textarea"
+              name="focus_next_md"
+              rows="8"
+              placeholder="- Test broad-match expansion on Google Ads&#10;- Brief two new UGC creators for Meta"
+              hx-post="/api/reports/<%= it.report.id %>/narrative"
+              hx-trigger="blur changed delay:500ms"
+              hx-swap="none"
+    ><%= it.report.focus_next_md %></textarea>
+  </section>
+
+  <!-- AI Insights -->
+  <section class="card r-section">
+    <header class="r-section-head" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h3>4. AI insights</h3>
+        <p class="r-muted">Executive summary, wins, risks, and recommendations — generated from the inputs above.</p>
+      </div>
+      <button id="r-generate-btn"
+              class="r-btn r-btn-primary"
+              hx-post="/api/reports/<%= it.report.id %>/generate"
+              hx-target="#r-ai-blocks"
+              hx-swap="outerHTML"
+              hx-indicator="#r-generate-spinner">
+        <span class="r-generate-label"><%= it.report.ai_generated_at ? 'Regenerate' : 'Generate' %></span>
+        <span id="r-generate-spinner" class="htmx-indicator">…thinking</span>
+      </button>
+    </header>
+
+    <%~ include('/reports/_ai-blocks', { report: it.report }) %>
+  </section>
+
+</div>
+
+<script>
+  // Save flash — show "Saved" briefly when an HTMX swap returns one.
+  document.body.addEventListener('htmx:afterSwap', function(){
+    var f = document.getElementById('r-save-flash');
+    if (!f) return;
+    f.style.opacity = '1';
+    clearTimeout(window._rSaveTimer);
+    window._rSaveTimer = setTimeout(function(){ f.style.opacity = '0'; }, 1200);
+  });
+</script>

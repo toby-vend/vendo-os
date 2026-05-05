@@ -49,6 +49,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
     items: [
       { id: 'ads-dashboard', label: 'Ads Dashboard', href: '/dashboards/ads', permission: 'dashboards' },
       { id: 'reporting-hub', label: 'Reporting Hub', href: '/dashboards/reporting-hub', permission: 'dashboards' },
+      { id: 'client-reports', label: 'Client Reports', href: '/reports', permission: 'reports' },
       { id: 'ads-manager', label: 'Ads Manager', href: '/ads', permission: 'ads' },
     ],
   },

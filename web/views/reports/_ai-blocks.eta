@@ -1,0 +1,28 @@
+<div id="r-ai-blocks" class="r-ai-blocks">
+  <% if (!it.report.ai_generated_at) { %>
+    <p class="r-muted r-ai-empty">No AI insights generated yet. Click <strong>Generate</strong> above once you've added screenshots and narrative.</p>
+  <% } else { %>
+    <p class="r-muted" style="font-size: 12px; margin-bottom: 1rem;">Generated <%= it.report.ai_generated_at.slice(0,16).replace('T',' ') %> · edit any block; changes save on blur.</p>
+  <% } %>
+
+  <% var blocks = [
+    { key: 'exec_summary', label: 'Executive summary', value: it.report.exec_summary_md },
+    { key: 'wins',         label: 'Wins',              value: it.report.wins_md },
+    { key: 'risks',        label: 'Risks',             value: it.report.risks_md },
+    { key: 'recommendations', label: 'Recommendations', value: it.report.recommendations_md },
+  ]; %>
+
+  <% blocks.forEach(function(b){ %>
+    <div class="r-ai-block">
+      <label class="r-ai-label"><%= b.label %></label>
+      <textarea class="r-textarea r-textarea-sm"
+                name="content"
+                rows="<%= b.key === 'exec_summary' ? 4 : 5 %>"
+                placeholder="<%= it.report.ai_generated_at ? '' : 'Will be generated…' %>"
+                hx-post="/api/reports/<%= it.report.id %>/ai/<%= b.key %>"
+                hx-trigger="blur changed delay:500ms"
+                hx-swap="none"
+      ><%= b.value %></textarea>
+    </div>
+  <% }); %>
+</div>

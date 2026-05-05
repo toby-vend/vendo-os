@@ -7,7 +7,8 @@ export type UsageFeature =
   | 'classification'
   | 'concern_detection'
   | 'meeting_enrichment'
-  | 'auto_task_qa';
+  | 'auto_task_qa'
+  | 'report_generation';
 
 export async function trackUsage(params: {
   userId: string | null;
