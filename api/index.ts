@@ -12,14 +12,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     else if (Array.isArray(val)) headers[key] = val.join(', ');
   }
 
-  // Read body for POST requests
-  let payload: string | undefined;
+  // Read body for POST/PUT/PATCH requests.
+  // IMPORTANT: keep this as a Buffer, not a string — multipart/form-data
+  // bodies contain raw binary (image bytes etc.) that gets corrupted by a
+  // UTF-8 decode. Fastify's body parsers happily accept a Buffer for
+  // text-based content types too.
+  let payload: Buffer | undefined;
   if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
     const chunks: Buffer[] = [];
     for await (const chunk of req) {
       chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
     }
-    payload = Buffer.concat(chunks).toString();
+    payload = Buffer.concat(chunks);
   }
 
   const response = await app.inject({
