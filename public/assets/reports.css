@@ -242,3 +242,49 @@
 .htmx-indicator { display: none; font-size: 13px; color: #94A3B8; }
 .htmx-request .htmx-indicator { display: inline; }
 .htmx-request.htmx-indicator { display: inline; }
+
+/* Copy-report tabs */
+.r-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 1rem;
+}
+.r-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #94A3B8;
+  padding: 0.6rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.r-tab:hover { color: #E2E8F0; }
+.r-tab-active { color: #5EEAD4; border-bottom-color: #5EEAD4; }
+.r-tab-pane { display: none; }
+.r-tab-pane-active { display: block; }
+
+/* Rich-text preview pane (the source of truth for the rich-text copy).
+   Styled to look pasteable — light card on dark background. */
+.r-rich-source {
+  background: #FFFFFF;
+  color: #0F172A;
+  padding: 2rem 2.5rem;
+  border-radius: 10px;
+  font-family: 'Manrope', -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.r-rich-source p { margin: 0 0 1rem; }
+.r-rich-source h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 1.4rem 0 0.5rem;
+  color: #0F172A;
+}
+.r-rich-source ul, .r-rich-source ol { padding-left: 1.4rem; margin: 0.4rem 0 1rem; }
+.r-rich-source li { margin-bottom: 0.3rem; }
+.r-rich-source a { color: #0F172A; text-decoration: underline; word-break: break-all; }
+.r-rich-source strong { color: #0F172A; }

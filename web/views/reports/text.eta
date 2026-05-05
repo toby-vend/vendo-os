@@ -3,30 +3,149 @@
 <link rel="stylesheet" href="/assets/reports.css" />
 
 <div style="max-width: 900px; margin: 0 auto;">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-    <h2 style="font-size: 22px; font-weight: 600; margin: 0;">Report as text</h2>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;">
+    <h2 style="font-size: 22px; font-weight: 600; margin: 0;">Copy report</h2>
     <div style="display:flex; gap:0.5rem;">
       <a href="/reports/<%= it.report.id %>" class="r-btn r-btn-ghost">← Back to editor</a>
-      <button onclick="copyReport()" class="r-btn r-btn-primary" id="r-copy-btn">Copy to clipboard</button>
     </div>
   </div>
-  <p class="r-muted" style="margin-bottom: 1rem;">Markdown — paste anywhere (Slack, email, Notion). Screenshot images aren't embedded; their links are included for reference.</p>
 
-  <textarea id="r-report-text" class="r-textarea"
-            style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; line-height: 1.6; min-height: 70vh;"
-            readonly><%= it.markdown %></textarea>
+  <p class="r-muted" style="margin-bottom: 1rem;">
+    <strong>Rich text</strong> keeps the formatting (bold, bullets, links) when pasted into Gmail, Outlook, Slack, Notion, Word, etc.
+    <strong>Markdown</strong> is plain text with markdown syntax — useful for Notion blocks, README files, or systems that render markdown.
+  </p>
+
+  <div class="r-tabs">
+    <button class="r-tab r-tab-active" data-tab="rich">Rich text</button>
+    <button class="r-tab" data-tab="md">Markdown</button>
+  </div>
+
+  <!-- Rich text pane -->
+  <div id="r-tab-rich" class="r-tab-pane r-tab-pane-active">
+    <div style="display:flex; justify-content:flex-end; margin-bottom: 0.75rem;">
+      <button onclick="copyRich()" class="r-btn r-btn-primary" id="r-copy-rich">Copy rich text</button>
+    </div>
+    <article id="r-report-rich" class="r-rich-source">
+
+      <p>Hi <%= it.report.contact_name || 'there' %>,</p>
+
+      <p>Hope you're well!</p>
+
+      <p>Please find your monthly <%= it.platformPhrase %> Report for <%= it.report.period_label %> below:</p>
+
+      <% if (it.report.performance_summary_md) { %>
+        <h2><%= it.report.period_label %><%= it.seenPlatforms.length ? ' ' + it.seenPlatforms.join(' / ') : '' %> Performance</h2>
+        <%~ it.md(it.report.performance_summary_md) %>
+      <% } %>
+
+      <% if (it.screenshots.length) { %>
+        <h2>Screenshots</h2>
+        <ul>
+          <% it.screenshots.forEach(function(s){
+               var label = (it.platforms.find(function(p){ return p.value === s.platform; }) || { label: s.platform }).label;
+          %>
+            <li><strong><%= label %></strong><%= s.caption ? ' — ' + s.caption : '' %> — <a href="<%= s.blob_url %>"><%= s.blob_url %></a></li>
+          <% }); %>
+        </ul>
+      <% } %>
+
+      <h2>This Month</h2>
+      <% if (it.report.exec_summary_md) { %><%~ it.md(it.report.exec_summary_md) %><% } %>
+      <% if (it.report.wins_md) { %><%~ it.md(it.report.wins_md) %><% } %>
+      <% if (it.report.worked_on_md) { %><%~ it.md(it.report.worked_on_md) %><% } %>
+
+      <% if (it.report.risks_md && !/^\s*-?\s*no material risks/i.test(it.report.risks_md)) { %>
+        <h2>Things to keep an eye on</h2>
+        <%~ it.md(it.report.risks_md) %>
+      <% } %>
+
+      <h2>Next Month &amp; Ongoing</h2>
+      <% if (it.report.focus_next_md) { %><%~ it.md(it.report.focus_next_md) %><% } %>
+      <% if (it.report.recommendations_md) { %><%~ it.md(it.report.recommendations_md) %><% } %>
+
+      <p>Let us know if you have any questions at all!</p>
+
+      <p>Thanks,<br/><%= it.senderFirstName %></p>
+
+    </article>
+  </div>
+
+  <!-- Markdown pane -->
+  <div id="r-tab-md" class="r-tab-pane">
+    <div style="display:flex; justify-content:flex-end; margin-bottom: 0.75rem;">
+      <button onclick="copyMd()" class="r-btn r-btn-primary" id="r-copy-md">Copy markdown</button>
+    </div>
+    <textarea id="r-report-text" class="r-textarea"
+              style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; line-height: 1.6; min-height: 60vh;"
+              readonly><%= it.markdown %></textarea>
+  </div>
 </div>
 
 <script>
-  function copyReport(){
+  // Tab switching
+  document.querySelectorAll('.r-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var key = tab.getAttribute('data-tab');
+      document.querySelectorAll('.r-tab').forEach(function(t){ t.classList.remove('r-tab-active'); });
+      document.querySelectorAll('.r-tab-pane').forEach(function(p){ p.classList.remove('r-tab-pane-active'); });
+      tab.classList.add('r-tab-active');
+      document.getElementById('r-tab-' + key).classList.add('r-tab-pane-active');
+    });
+  });
+
+  function flash(btn, msg){
+    var orig = btn.textContent;
+    btn.textContent = msg;
+    setTimeout(function(){ btn.textContent = orig; }, 1400);
+  }
+
+  // Copy rich text — writes both text/html and text/plain so it pastes
+  // formatted into rich apps (Gmail, Slack, Notion, Word) and as plain
+  // text into terminals or plain editors.
+  async function copyRich(){
+    var btn = document.getElementById('r-copy-rich');
+    var src = document.getElementById('r-report-rich');
+    var html = src.innerHTML;
+    var plain = src.innerText;
+    try {
+      if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([plain], { type: 'text/plain' }),
+          }),
+        ]);
+        flash(btn, 'Copied — paste into Gmail / Slack / Word');
+        return;
+      }
+    } catch (err) {
+      console.warn('Clipboard API failed, falling back to selection copy', err);
+    }
+    // Fallback: select + execCommand (legacy)
+    var range = document.createRange();
+    range.selectNodeContents(src);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    try {
+      document.execCommand('copy');
+      flash(btn, 'Copied!');
+    } catch (e) {
+      flash(btn, 'Copy failed — select & copy manually');
+    }
+    sel.removeAllRanges();
+  }
+
+  function copyMd(){
+    var btn = document.getElementById('r-copy-md');
     var ta = document.getElementById('r-report-text');
     ta.select();
     ta.setSelectionRange(0, ta.value.length);
     navigator.clipboard.writeText(ta.value).then(function(){
-      var b = document.getElementById('r-copy-btn');
-      var orig = b.textContent;
-      b.textContent = 'Copied!';
-      setTimeout(function(){ b.textContent = orig; }, 1200);
+      flash(btn, 'Copied!');
+    }).catch(function(){
+      try { document.execCommand('copy'); flash(btn, 'Copied!'); } catch (e) { flash(btn, 'Copy failed'); }
     });
   }
 </script>

@@ -245,6 +245,11 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
 
     return reply.render('reports/text', {
       report,
+      screenshots,
+      platforms: PLATFORM_OPTIONS,
+      seenPlatforms,
+      platformPhrase,
+      senderFirstName,
       markdown: sections.join('\n'),
     });
   });
