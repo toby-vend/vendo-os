@@ -9,7 +9,9 @@
 import { put } from '@vercel/blob';
 import crypto from 'crypto';
 
-export const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB
+// 4MB — Vercel serverless functions cap request bodies at ~4.5MB by default,
+// so anything over this would 413 before reaching the handler.
+export const MAX_FILE_BYTES = 4 * 1024 * 1024;
 export const ALLOWED_CONTENT_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const;
 export type AllowedContentType = (typeof ALLOWED_CONTENT_TYPES)[number];
 

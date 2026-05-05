@@ -53,7 +53,8 @@
           hx-target="#r-screenshots-list"
           hx-swap="beforeend"
           hx-encoding="multipart/form-data"
-          hx-on:htmx:after-request="if(event.detail.successful){this.reset();}"
+          hx-target-4xx="#r-upload-error"
+          hx-target-5xx="#r-upload-error"
           class="r-upload-form">
       <label class="r-field" style="flex: 0 0 180px;">
         <span>Platform</span>
@@ -69,11 +70,12 @@
         <input type="text" name="caption" placeholder="e.g. Spend up 12% MoM, ROAS 3.4 → 4.1" maxlength="500" />
       </label>
       <label class="r-field" style="flex: 0 0 220px;">
-        <span>Image (PNG / JPEG / WebP, max 5MB)</span>
+        <span>Image (PNG / JPEG / WebP, max 4MB)</span>
         <input type="file" name="file" accept="image/png,image/jpeg,image/webp" required />
       </label>
-      <button type="submit" class="r-btn r-btn-primary">Add</button>
+      <button type="submit" class="r-btn r-btn-primary" id="r-upload-btn">Add</button>
     </form>
+    <div id="r-upload-error" style="margin-top: 0.5rem;"></div>
 
     <div id="r-screenshots-list" class="r-screenshots">
       <% it.screenshots.forEach(function(s){ %>
@@ -146,4 +148,43 @@
     clearTimeout(window._rSaveTimer);
     window._rSaveTimer = setTimeout(function(){ f.style.opacity = '0'; }, 1200);
   });
+
+  // Upload form lifecycle — clear the error chip on submit, reset file input
+  // after a successful upload, and show a fallback error if the request
+  // never reached the server (e.g. Vercel rejected with 413 before our route
+  // ran, in which case responseError fires with a generic message).
+  (function(){
+    var form = document.getElementById('r-upload-form');
+    var errBox = document.getElementById('r-upload-error');
+    var btn = document.getElementById('r-upload-btn');
+    if (!form || !errBox || !btn) return;
+
+    form.addEventListener('htmx:beforeRequest', function(){
+      errBox.innerHTML = '';
+      btn.disabled = true;
+      btn.textContent = 'Uploading…';
+    });
+    form.addEventListener('htmx:afterRequest', function(evt){
+      btn.disabled = false;
+      btn.textContent = 'Add';
+      var xhr = evt.detail.xhr;
+      if (evt.detail.successful) {
+        // Reset file input + caption; keep platform selection for next shot.
+        var fileInput = form.querySelector('input[type="file"]');
+        var captionInput = form.querySelector('input[name="caption"]');
+        if (fileInput) fileInput.value = '';
+        if (captionInput) captionInput.value = '';
+      } else if (xhr) {
+        var status = xhr.status;
+        if (status === 0) {
+          errBox.innerHTML = '<div class="r-error">Network error. Check your connection and try again.</div>';
+        } else if (status === 413) {
+          errBox.innerHTML = '<div class="r-error">File too large. Resize the screenshot or save it at lower quality and try again (max 4MB).</div>';
+        } else if (!xhr.responseText) {
+          errBox.innerHTML = '<div class="r-error">Upload failed (HTTP ' + status + ').</div>';
+        }
+        // For other 4xx/5xx, the response body is already swapped into errBox by hx-target-{4xx,5xx}.
+      }
+    });
+  })();
 </script>
