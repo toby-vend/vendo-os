@@ -40,6 +40,7 @@ export interface ClientReportRow {
   client_id: number;
   client_name: string;
   client_display_name: string | null;
+  client_vertical: string | null;
   period_label: string;
   period_start: string;
   period_end: string;
@@ -90,6 +91,7 @@ export interface ScreenshotRow {
 const REPORT_SELECT = `
   SELECT r.id, r.client_id,
          c.name AS client_name, c.display_name AS client_display_name,
+         c.vertical AS client_vertical,
          r.period_label, r.period_start, r.period_end, r.status,
          r.contact_name,
          r.worked_on_md, r.focus_next_md,

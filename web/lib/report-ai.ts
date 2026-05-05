@@ -22,6 +22,7 @@ const MODEL = 'claude-sonnet-4-6';
 
 export interface ReportAiInput {
   clientName: string;
+  vertical: string | null;
   periodLabel: string;
   workedOnMd: string;
   focusNextMd: string;
@@ -54,6 +55,7 @@ Hard rules:
 - Use ONLY information visible in the screenshots, captions, or narrative. Do not fabricate metrics, percentages, monetary values, campaign names, or claims.
 - If a number is unclear or partly cut off in a screenshot, omit it rather than guessing.
 - **Skip inactive campaigns.** If a campaign row shows £0 spend (or zero/blank impressions/clicks) for the period, do NOT include it in the performance breakdown, wins, risks, or recommendations — it was not active and is not relevant to this report. Only discuss campaigns that actually ran during the period.
+- **Dental clients:** if the client's vertical is "dental" (or the client is a dental practice), the conversion event tracked in Meta Ads is **View Content**. Treat View Content as the lead / conversion metric — that's what drives results for these accounts. Display it as "Leads" in the breakdown (or use "View Content" if labelled that way in the screenshot). NEVER define or explain what View Content is — the client already knows.
 - Tone: confident, plain English, friendly but professional. Address the client directly ("you", "your campaigns").
 
 Call the \`submit_report\` tool with all five fields filled in. Every field is required — do not return an empty string for any of them. The performance_summary field MUST contain a structured metric breakdown extracted from the screenshots; the others are short narrative blocks.`;
@@ -120,9 +122,10 @@ function platformLabel(value: ScreenshotPlatform): string {
 function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlockParam> {
   const blocks: Array<TextBlockParam | ImageBlockParam> = [];
 
+  const verticalLine = input.vertical ? `\nVertical: ${input.vertical}` : '';
   blocks.push({
     type: 'text',
-    text: `Client: ${input.clientName}\nReporting period: ${input.periodLabel}`,
+    text: `Client: ${input.clientName}${verticalLine}\nReporting period: ${input.periodLabel}`,
   });
 
   if (input.screenshots.length === 0) {

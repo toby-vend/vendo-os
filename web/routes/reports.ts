@@ -483,6 +483,7 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
       const out = await generateReportInsights(
         {
           clientName: report.client_display_name || report.client_name,
+          vertical: report.client_vertical,
           periodLabel: report.period_label,
           workedOnMd: report.worked_on_md,
           focusNextMd: report.focus_next_md,
