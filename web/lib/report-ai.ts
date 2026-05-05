@@ -53,6 +53,7 @@ Use UK English throughout. Currency is GBP (£) unless a screenshot clearly show
 Hard rules:
 - Use ONLY information visible in the screenshots, captions, or narrative. Do not fabricate metrics, percentages, monetary values, campaign names, or claims.
 - If a number is unclear or partly cut off in a screenshot, omit it rather than guessing.
+- **Skip inactive campaigns.** If a campaign row shows £0 spend (or zero/blank impressions/clicks) for the period, do NOT include it in the performance breakdown, wins, risks, or recommendations — it was not active and is not relevant to this report. Only discuss campaigns that actually ran during the period.
 - Tone: confident, plain English, friendly but professional. Address the client directly ("you", "your campaigns").
 
 Call the \`submit_report\` tool with all five fields filled in. Every field is required — do not return an empty string for any of them. The performance_summary field MUST contain a structured metric breakdown extracted from the screenshots; the others are short narrative blocks.`;
@@ -71,7 +72,7 @@ const SUBMIT_REPORT_TOOL: Tool = {
       performance_summary: {
         type: 'string',
         description:
-          'Markdown metric breakdown extracted from the screenshots. Cover EVERY platform that appears (Meta, Google Ads, etc.) — give each its own "Overall [Platform] Performance" subsection followed by an "Individual Campaign Performance" block listing per-campaign rows. Use the exact campaign names shown. Format example:\n\n**Overall Meta Performance:**\n- Amount Spent: £10,568.74\n- Clicks: 20,480\n- Revenue: £115,937.93\n- ROAS: 10.97\n\n**Individual Campaign Performance:**\n\n*VD | Sales | All Products | Broad | CBO*\n- Spend: £2,551.85\n- Purchases: 66\n- Revenue: £36,214.83\n- Purchase ROAS: 14.19\n\nList the metrics that actually appear in the screenshots; do not pad with metrics that are not there.',
+          'Markdown metric breakdown extracted from the screenshots. Cover EVERY platform that appears (Meta, Google Ads, etc.) — give each its own "Overall [Platform] Performance" subsection followed by an "Individual Campaign Performance" block listing per-campaign rows. Use the exact campaign names shown. EXCLUDE any campaign row with £0 spend (or zero/blank impressions and clicks) — those campaigns were not active in the period and should not appear here. Format example:\n\n**Overall Meta Performance:**\n- Amount Spent: £10,568.74\n- Clicks: 20,480\n- Revenue: £115,937.93\n- ROAS: 10.97\n\n**Individual Campaign Performance:**\n\n*VD | Sales | All Products | Broad | CBO*\n- Spend: £2,551.85\n- Purchases: 66\n- Revenue: £36,214.83\n- Purchase ROAS: 14.19\n\nList the metrics that actually appear in the screenshots; do not pad with metrics that are not there.',
       },
       exec_summary: {
         type: 'string',
