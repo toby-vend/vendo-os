@@ -2,16 +2,63 @@
  * AI generation for client reports.
  *
  * Takes the structured report inputs (screenshots, narrative) and produces five
- * polished markdown blocks: executive summary, performance summary (overall +
- * per-campaign metric breakdown), wins, risks, recommendations.
+ * polished markdown blocks via Claude's tool-use API:
+ *   - exec_summary
+ *   - performance_summary (overall + per-campaign metric breakdown)
+ *   - wins
+ *   - risks
+ *   - recommendations
  *
  * The screenshots themselves are sent to Claude as image content blocks (URL
  * sources pointing at Vercel Blob), so the model can read metrics directly off
- * the charts — spend, conversions, ROAS, CTR, etc. — and weave those numbers
- * into the narrative.
+ * the charts and weave those numbers into the output.
  *
- * The prompt still forbids fabricating numbers: anything Claude states must
- * either appear in the screenshot, the caption, or the narrative.
+ * ----------------------------------------------------------------------------
+ * REPORT RULES — read before changing the prompt or tool description.
+ * Each rule below comes from a Toby correction during the v1 rollout. Do not
+ * water them down without checking with him first.
+ * ----------------------------------------------------------------------------
+ *
+ * 1. ANTI-FABRICATION
+ *    Use only numbers visible in screenshots / captions / narrative. If a
+ *    number is unclear, omit it. Currency: GBP unless the screenshot shows
+ *    otherwise.
+ *
+ * 2. CAMPAIGN BREAKDOWN — bottom-funnel only
+ *    Per-campaign rows show ONLY: Spend / Purchases (or Leads / Conversions) /
+ *    Cost per Purchase (CPA / CPL) / ROAS (or Conversion Rate for lead-gen).
+ *    Vanity metrics (impressions, reach, frequency, CTR, CPC) DO NOT appear
+ *    in the campaign rows. They can appear in the narrative blocks (wins /
+ *    risks / This Month) when they tell a real story.
+ *    "Overall [Platform] Performance" allows slightly more breadth (total
+ *    spend, total conversions, revenue, blended ROAS) — same anti-vanity rule.
+ *
+ * 3. SKIP INACTIVE CAMPAIGNS
+ *    Any campaign row with £0 spend / zero impressions / zero clicks is
+ *    excluded from the breakdown, wins, risks, and recommendations.
+ *
+ * 4. DENTAL CLIENTS — View Content IS the leads campaign
+ *    When `vertical === 'dental'`, the Meta conversion event tracked is
+ *    "View Content", and the View Content campaign IS the leads campaign.
+ *    - Treat it as the lead/conversion metric in the breakdown.
+ *    - Display as "Leads" (or "View Content" if labelled that way).
+ *    - NEVER explain what View Content is.
+ *    - NEVER recommend switching away from View Content to a Leads /
+ *      Conversions objective. Build recommendations on top of it.
+ *
+ * 5. TONE — positive, mirror the team's framing
+ *    Default is constructive, momentum-focused, friendly. If the team's
+ *    narrative says "almost done" / "in final stages", reflect that — do
+ *    NOT recast it as a delay or risk. Reserve cautionary language
+ *    ("delays", "blocking", "cannot launch", "risk to revenue") for issues
+ *    the team has explicitly flagged in the inputs OR clear deterioration
+ *    in the data (CPL up sharply, conversion volume falling, etc.). No
+ *    invented urgency. No catastrophising.
+ *
+ * Cross-reference:
+ *   - Memory: feedback_client_reports_rules.md (in
+ *     ~/.claude/projects/-Users-Toby-1-Vendo-OS/memory/) keeps the same
+ *     rules canonical for future Claude Code sessions.
  */
 import Anthropic from '@anthropic-ai/sdk';
 import type { ImageBlockParam, TextBlockParam, Tool } from '@anthropic-ai/sdk/resources/messages.js';
