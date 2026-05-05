@@ -1,0 +1,32 @@
+<% layout('/layouts/base') %>
+
+<link rel="stylesheet" href="/assets/reports.css" />
+
+<div style="max-width: 900px; margin: 0 auto;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+    <h2 style="font-size: 22px; font-weight: 600; margin: 0;">Report as text</h2>
+    <div style="display:flex; gap:0.5rem;">
+      <a href="/reports/<%= it.report.id %>" class="r-btn r-btn-ghost">← Back to editor</a>
+      <button onclick="copyReport()" class="r-btn r-btn-primary" id="r-copy-btn">Copy to clipboard</button>
+    </div>
+  </div>
+  <p class="r-muted" style="margin-bottom: 1rem;">Markdown — paste anywhere (Slack, email, Notion). Screenshot images aren't embedded; their links are included for reference.</p>
+
+  <textarea id="r-report-text" class="r-textarea"
+            style="font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 13px; line-height: 1.6; min-height: 70vh;"
+            readonly><%= it.markdown %></textarea>
+</div>
+
+<script>
+  function copyReport(){
+    var ta = document.getElementById('r-report-text');
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    navigator.clipboard.writeText(ta.value).then(function(){
+      var b = document.getElementById('r-copy-btn');
+      var orig = b.textContent;
+      b.textContent = 'Copied!';
+      setTimeout(function(){ b.textContent = orig; }, 1200);
+    });
+  }
+</script>

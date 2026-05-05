@@ -1,0 +1,73 @@
+<% layout('/layouts/base') %>
+
+<link rel="stylesheet" href="/assets/reports.css" />
+
+<div style="max-width: 1200px; margin: 0 auto;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap: 1rem; margin-bottom: 1.5rem;">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 600; margin: 0;">Client Reports</h2>
+      <p class="r-muted" style="margin: 0.25rem 0 0;">Monthly performance reports — manual screenshots + AI-assisted insights.</p>
+    </div>
+    <a class="r-btn r-btn-primary" href="/reports/new">+ New report</a>
+  </div>
+
+  <form method="get" action="/reports" class="card r-filter-bar">
+    <label class="r-field">
+      <span>Client</span>
+      <select name="client" onchange="this.form.submit()">
+        <option value="">All clients</option>
+        <% it.clients.forEach(function(c){ %>
+          <option value="<%= c.id %>" <%= String(it.filterClientId) === String(c.id) ? 'selected' : '' %>><%= c.label %></option>
+        <% }); %>
+      </select>
+    </label>
+    <label class="r-field">
+      <span>Status</span>
+      <select name="status" onchange="this.form.submit()">
+        <option value="">Any</option>
+        <option value="draft" <%= it.filterStatus === 'draft' ? 'selected' : '' %>>Draft</option>
+        <option value="final" <%= it.filterStatus === 'final' ? 'selected' : '' %>>Final</option>
+      </select>
+    </label>
+    <% if (it.filterClientId || it.filterStatus) { %>
+      <a href="/reports" class="r-btn r-btn-ghost">Clear</a>
+    <% } %>
+  </form>
+
+  <% if (!it.items.length) { %>
+    <div class="card" style="padding: 3rem; text-align:center; color:#94A3B8;">
+      No reports yet. <a href="/reports/new" style="color:#5EEAD4;">Start one</a>.
+    </div>
+  <% } else { %>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <table class="r-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Period</th>
+            <th>Status</th>
+            <th>Screenshots</th>
+            <th>AI</th>
+            <th>Updated</th>
+            <th>By</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% it.items.forEach(function(r){ %>
+            <tr>
+              <td><strong><%= r.client_display_name || r.client_name %></strong></td>
+              <td><%= r.period_label %></td>
+              <td><span class="r-status r-status-<%= r.status %>"><%= r.status %></span></td>
+              <td style="text-align:center;"><%= r.screenshot_count %></td>
+              <td><%= r.ai_generated_at ? '✓' : '—' %></td>
+              <td class="r-muted"><%= r.updated_at.slice(0, 16).replace('T', ' ') %></td>
+              <td class="r-muted" style="font-size: 12px;"><%= r.created_by %></td>
+              <td><a href="/reports/<%= r.id %>" class="r-btn r-btn-ghost">Open →</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

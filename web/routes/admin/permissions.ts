@@ -21,6 +21,7 @@ export const ROUTE_SLUGS = [
   { slug: 'growth', label: 'Growth' },
   { slug: 'drive', label: 'Drive' },
   { slug: 'operations', label: 'Operations' },
+  { slug: 'reports', label: 'Client Reports' },
 ];
 
 export const adminPermissionsRoutes: FastifyPluginAsync = async (app) => {

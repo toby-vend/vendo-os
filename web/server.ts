@@ -65,6 +65,7 @@ import { deliverablesRoutes } from './routes/deliverables.js';
 import { pushRoutes } from './routes/push.js';
 import { suggestionsApiRoutes, suggestionsUiRoutes } from './routes/suggestions.js';
 import { adminSuggestionsRoutes } from './routes/admin/suggestions.js';
+import { reportsApiRoutes, reportsUiRoutes } from './routes/reports.js';
 import crypto from 'crypto';
 import {
   parseCookies,
@@ -378,6 +379,8 @@ app.register(deliverablesRoutes, { prefix: '/deliverables' });
 app.register(suggestionsApiRoutes, { prefix: '/api/suggestions' });
 app.register(suggestionsUiRoutes, { prefix: '/suggestions' });
 app.register(adminSuggestionsRoutes, { prefix: '/admin/suggestions' });
+app.register(reportsApiRoutes, { prefix: '/api/reports' });
+app.register(reportsUiRoutes, { prefix: '/reports' });
 
 // Dashboard modules
 app.register(unifiedAdsRoutes, { prefix: '/dashboards/ads' });

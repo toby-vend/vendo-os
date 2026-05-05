@@ -1,0 +1,79 @@
+<% layout('/layouts/base') %>
+
+<link rel="stylesheet" href="/assets/reports.css" />
+
+<div class="r-preview-toolbar no-print">
+  <a href="/reports/<%= it.report.id %>" class="r-btn r-btn-ghost">← Back to editor</a>
+  <button onclick="window.print()" class="r-btn r-btn-primary">Print / Save as PDF</button>
+  <a href="/reports/<%= it.report.id %>/text" class="r-btn r-btn-ghost">Copy as text</a>
+</div>
+
+<article class="r-preview">
+  <header class="r-preview-header">
+    <div class="r-brand">Vendo Digital</div>
+    <h1><%= it.report.client_display_name || it.report.client_name %></h1>
+    <p class="r-period"><%= it.report.period_label %> · Performance Report</p>
+  </header>
+
+  <% if (it.report.exec_summary_md) { %>
+    <section class="r-preview-section">
+      <h2>Executive summary</h2>
+      <div class="r-prose"><%~ md(it.report.exec_summary_md) %></div>
+    </section>
+  <% } %>
+
+  <% if (it.screenshots.length) { %>
+    <section class="r-preview-section">
+      <h2>Performance</h2>
+      <div class="r-preview-screenshots">
+        <% it.screenshots.forEach(function(s){
+             var label = (it.platforms.find(function(p){ return p.value === s.platform; }) || { label: s.platform }).label;
+        %>
+          <figure class="r-preview-shot">
+            <img src="<%= s.blob_url %>" alt="<%= s.caption || label %>" />
+            <figcaption><strong><%= label %></strong><%= s.caption ? ' — ' + s.caption : '' %></figcaption>
+          </figure>
+        <% }); %>
+      </div>
+    </section>
+  <% } %>
+
+  <% if (it.report.worked_on_md) { %>
+    <section class="r-preview-section">
+      <h2>What we worked on</h2>
+      <div class="r-prose"><%~ md(it.report.worked_on_md) %></div>
+    </section>
+  <% } %>
+
+  <% if (it.report.wins_md) { %>
+    <section class="r-preview-section">
+      <h2>Wins</h2>
+      <div class="r-prose"><%~ md(it.report.wins_md) %></div>
+    </section>
+  <% } %>
+
+  <% if (it.report.risks_md) { %>
+    <section class="r-preview-section">
+      <h2>Risks</h2>
+      <div class="r-prose"><%~ md(it.report.risks_md) %></div>
+    </section>
+  <% } %>
+
+  <% if (it.report.focus_next_md) { %>
+    <section class="r-preview-section">
+      <h2>Focus next period</h2>
+      <div class="r-prose"><%~ md(it.report.focus_next_md) %></div>
+    </section>
+  <% } %>
+
+  <% if (it.report.recommendations_md) { %>
+    <section class="r-preview-section">
+      <h2>Recommendations</h2>
+      <div class="r-prose"><%~ md(it.report.recommendations_md) %></div>
+    </section>
+  <% } %>
+
+  <footer class="r-preview-footer">
+    <p>Prepared by Vendo Digital · vendodigital.co.uk</p>
+  </footer>
+</article>

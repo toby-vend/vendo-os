@@ -1,0 +1,33 @@
+<% layout('/layouts/base') %>
+
+<link rel="stylesheet" href="/assets/reports.css" />
+
+<div style="max-width: 640px; margin: 0 auto;">
+  <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 0.5rem;">New report</h2>
+  <p class="r-muted" style="margin-bottom: 1.5rem;">Pick the client and the month you're reporting on.</p>
+
+  <form method="post" action="/api/reports" class="card r-form">
+    <label class="r-field">
+      <span>Client</span>
+      <select name="client_id" required>
+        <option value="">Choose a client…</option>
+        <% it.clients.forEach(function(c){ %>
+          <option value="<%= c.id %>"><%= c.label %></option>
+        <% }); %>
+      </select>
+    </label>
+
+    <label class="r-field">
+      <span>Reporting month</span>
+      <input type="month" name="month" value="<%= it.defaultMonth %>" required />
+    </label>
+
+    <div class="r-form-actions">
+      <a href="/reports" class="r-btn r-btn-ghost">Cancel</a>
+      <button type="submit" class="r-btn r-btn-primary">Create draft</button>
+    </div>
+    <p class="r-muted" style="font-size: 12px; margin-top: 0.5rem;">
+      Tip: if a report already exists for this client and month, you'll be sent to the existing one rather than creating a duplicate.
+    </p>
+  </form>
+</div>
