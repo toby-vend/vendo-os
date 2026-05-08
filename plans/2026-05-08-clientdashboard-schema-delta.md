@@ -87,13 +87,18 @@ contactEmail: text('contact_email'),
 
 ### Verticals seeding
 
-Pull distinct values from VendoOS `clients.vertical`, hand-curate into a clean enum:
+**Confirmed (2026-05-08):** the only verticals that matter are **dental**, **ecom**, **plant hire**, plus a fallback **other** for outliers.
 
-```sql
-SELECT DISTINCT vertical FROM clients WHERE vertical IS NOT NULL ORDER BY 1;
-```
+Seed rows for migration `00016_external_bridge.sql`:
 
-Expected verticals (from current data layer + skills): `dental`, `home-services`, `e-commerce`, `professional-services`, `b2b-saas`, `health-wellness`, `food-beverage`, `other`. Seed these into `verticals` with stable slugs before any client sync runs.
+| name | slug | colour | icon |
+|---|---|---|---|
+| Dental | `dental` | `#3EC97A` | `tooth` |
+| E-commerce | `ecom` | `#F59E0B` | `shopping-bag` |
+| Plant Hire | `plant-hire` | `#6366F1` | `truck` |
+| Other | `other` | `#6B7280` | `tag` |
+
+Sync script maps VendoOS `clients.vertical` text → CD `verticals.slug` (case-insensitive, trim). Anything that doesn't match gets `other` and a stderr warning.
 
 ### Out of scope for the bridge
 
