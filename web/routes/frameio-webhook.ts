@@ -53,13 +53,15 @@ let schemaEnsured = false;
  */
 async function ensureSchema(): Promise<void> {
   if (schemaEnsured) return;
-  // Each statement runs separately. SQLite UNIQUE allows multiple NULLs, so a
-  // plain unique index handles deduplication for the (rare) events without an
-  // event_id without breaking inserts.
+  // Phase 1 ships INSERT OR IGNORE inserts which don't require a named
+  // ON CONFLICT target — any UNIQUE-violating row is skipped silently.
+  // The column-level UNIQUE on event_id provides the dedup; SQLite/libSQL
+  // both allow multiple NULLs through a UNIQUE column, so events without an
+  // event_id will all land as separate rows (which is fine for archive use).
   const stmts = [
     `CREATE TABLE IF NOT EXISTS frameio_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      event_id TEXT,
+      event_id TEXT UNIQUE,
       event_type TEXT,
       resource_type TEXT,
       resource_id TEXT,
@@ -76,7 +78,6 @@ async function ensureSchema(): Promise<void> {
     'CREATE INDEX IF NOT EXISTS idx_frameio_events_type ON frameio_events(event_type)',
     'CREATE INDEX IF NOT EXISTS idx_frameio_events_received ON frameio_events(received_at)',
     'CREATE INDEX IF NOT EXISTS idx_frameio_events_resource ON frameio_events(resource_type, resource_id)',
-    'CREATE UNIQUE INDEX IF NOT EXISTS idx_frameio_events_event_id ON frameio_events(event_id)',
   ];
   for (const sql of stmts) {
     try {
@@ -86,6 +87,31 @@ async function ensureSchema(): Promise<void> {
       throw new Error(`frameio_events DDL failed: ${(err as Error).message} | sql: ${sql.slice(0, 80)}`);
     }
   }
+
+  // The table may have been created by an earlier deploy without the UNIQUE
+  // constraint on event_id. Detect that case and rebuild — Phase 1 has no
+  // real data to preserve. Idempotent: safe to call on every cold start.
+  try {
+    const probe = await db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='frameio_events'");
+    const ddl = (probe.rows?.[0]?.sql as string | undefined) ?? '';
+    const hasUnique = /event_id\s+TEXT\s+UNIQUE/i.test(ddl);
+    if (!hasUnique) {
+      const count = await db.execute('SELECT COUNT(*) AS n FROM frameio_events');
+      const n = Number((count.rows?.[0]?.n as number | bigint | undefined) ?? 0);
+      if (n === 0) {
+        await db.execute('DROP TABLE frameio_events');
+        await db.execute(stmts[0]);
+        await db.execute(stmts[1]);
+        await db.execute(stmts[2]);
+        await db.execute(stmts[3]);
+      }
+      // If n > 0 we leave it alone — operator can decide later. INSERT OR
+      // IGNORE will still work; dedup just won't apply for the legacy rows.
+    }
+  } catch (err) {
+    throw new Error(`frameio_events probe failed: ${(err as Error).message}`);
+  }
+
   schemaEnsured = true;
 }
 
@@ -235,11 +261,10 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
 
     try {
       await db.execute({
-        sql: `INSERT INTO frameio_events
+        sql: `INSERT OR IGNORE INTO frameio_events
                 (event_id, event_type, resource_type, resource_id, account_id,
                  workspace_id, project_id, payload, headers, received_at, processing_status)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')
-              ON CONFLICT(event_id) DO NOTHING`,
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
         args: [
           eventId,
           eventType,

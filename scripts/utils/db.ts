@@ -1473,7 +1473,7 @@ export async function initSchema(): Promise<void> {
   db.run(`
     CREATE TABLE IF NOT EXISTS frameio_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      event_id TEXT,
+      event_id TEXT UNIQUE,
       event_type TEXT,
       resource_type TEXT,
       resource_id TEXT,
@@ -1492,7 +1492,6 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_frameio_events_type ON frameio_events(event_type)');
   db.run('CREATE INDEX IF NOT EXISTS idx_frameio_events_received ON frameio_events(received_at)');
   db.run('CREATE INDEX IF NOT EXISTS idx_frameio_events_resource ON frameio_events(resource_type, resource_id)');
-  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_frameio_events_event_id ON frameio_events(event_id) WHERE event_id IS NOT NULL');
 
   seedCategories(db);
   saveDb();
