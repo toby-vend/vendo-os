@@ -31,6 +31,11 @@ export class FrameioApiError extends Error {
   get isRateLimited() { return this.status === 429; }
 }
 
+/**
+ * V4 wraps every single-resource response in `{ data: {...} }`. We unwrap
+ * here so callers get the resource directly. Use `getJsonRaw` for envelope-
+ * sensitive endpoints (e.g. paginated lists).
+ */
 async function getJson<T>(path: string): Promise<T | null> {
   const token = await getValidAccessToken();
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -44,55 +49,74 @@ async function getJson<T>(path: string): Promise<T | null> {
     const body = await res.text().catch(() => '');
     throw new FrameioApiError(res.status, `${BASE_URL}${path}`, body);
   }
-  return (await res.json()) as T;
+  const json = (await res.json()) as { data?: T } | T;
+  return ((json as { data?: T }).data ?? (json as T)) ?? null;
 }
 
 // --- Domain types (only the fields we use) ---
+// Confirmed against live V4 responses on 2026-05-08.
 
 export interface FrameioComment {
   id: string;
   text: string;
-  completed: boolean;
-  inserted_at: string;
-  owner: { id: string; email: string | null; name: string | null } | null;
-  file_id?: string | null;
-  asset_id?: string | null;
-  timestamp?: number | null;
+  file_id: string | null;
+  completer_id: string | null;
+  completed_at: string | null;
+  text_edited_at: string | null;
+  timestamp: number | null;
+  duration: number | null;
+  annotation: unknown | null;
+  attachments: Array<{ id: string; url?: string }>;
+  mentions: Array<{ id: string; type?: string }>;
+  links: Array<{ url?: string; text?: string }>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface FrameioFile {
   id: string;
   name: string;
-  status: string | null;
-  filetype: string | null;
-  filesize: number | null;
-  inserted_at: string;
-  parent_id: string | null;
-  project_id: string | null;
-  uploaded_at: string | null;
-  view_count?: number | null;
+  status?: string | null;
+  type?: string | null;
+  filesize?: number | null;
+  parent_id?: string | null;
+  project_id?: string | null;
+  workspace_id?: string | null;
+  account_id?: string | null;
+  view_url?: string | null;
+  thumbnail_url?: string | null;
   versions_count?: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface FrameioProject {
   id: string;
   name: string;
+  status: string | null;
+  description: string | null;
+  restricted: boolean;
+  storage: number;
   workspace_id: string | null;
-  account_id: string | null;
-  inserted_at: string;
+  root_folder_id: string;
+  view_url: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface FrameioWorkspace {
   id: string;
   name: string;
   account_id: string | null;
-  inserted_at: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface FrameioUser {
   id: string;
   email: string | null;
   name: string | null;
+  avatar_url?: string | null;
 }
 
 // --- Endpoints ---
