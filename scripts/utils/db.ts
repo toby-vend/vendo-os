@@ -1466,6 +1466,34 @@ export async function initSchema(): Promise<void> {
   db.run('CREATE INDEX IF NOT EXISTS idx_dhe_user ON deliverable_hour_entries(user_initials)');
   db.run('CREATE INDEX IF NOT EXISTS idx_dhe_month ON deliverable_hour_entries(month)');
 
+  // --- Frame.io webhook events ---
+  // Raw archive of every webhook delivery from Frame.io. Phase-1 sink so we
+  // can observe the actual payload + headers Frame.io sends before wiring
+  // events into creative_reviews / Slack / dashboards.
+  db.run(`
+    CREATE TABLE IF NOT EXISTS frameio_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT,
+      event_type TEXT,
+      resource_type TEXT,
+      resource_id TEXT,
+      account_id TEXT,
+      workspace_id TEXT,
+      project_id TEXT,
+      payload TEXT NOT NULL,
+      headers TEXT NOT NULL,
+      received_at TEXT NOT NULL,
+      processed_at TEXT,
+      processing_status TEXT NOT NULL DEFAULT 'received',
+      processing_error TEXT
+    )
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_frameio_events_type ON frameio_events(event_type)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_frameio_events_received ON frameio_events(received_at)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_frameio_events_resource ON frameio_events(resource_type, resource_id)');
+  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_frameio_events_event_id ON frameio_events(event_id) WHERE event_id IS NOT NULL');
+
   seedCategories(db);
   saveDb();
 }

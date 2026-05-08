@@ -35,6 +35,7 @@ import { tasksRoutes } from './routes/tasks.js';
 import { driveWebhookRoutes } from './routes/drive-webhook.js';
 import { slackInteractRoutes } from './routes/slack-interact.js';
 import { fathomWebhookRoutes } from './routes/fathom-webhook.js';
+import { frameioWebhookRoutes } from './routes/frameio-webhook.js';
 import { driveCronRoutes } from './routes/drive-cron.js';
 import { taskRunRoutes } from './routes/task-runs.js';
 import { taskRunsUiRoutes } from './routes/task-runs-ui.js';
@@ -132,7 +133,7 @@ app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
   // Public routes (no session required)
-  if (path.startsWith('/assets/') || path === '/login' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook') return;
+  if (path.startsWith('/assets/') || path === '/login' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook' || path === '/api/frameio/webhook') return;
 
   // Cron routes — validate Vercel cron secret
   if (path.startsWith('/api/cron/')) {
@@ -359,6 +360,7 @@ app.register(tasksRoutes, { prefix: '/asana-tasks' });
 app.register(driveWebhookRoutes, { prefix: '/api/drive' });
 app.register(slackInteractRoutes, { prefix: '/api/slack' });
 app.register(fathomWebhookRoutes, { prefix: '/api/fathom' });
+app.register(frameioWebhookRoutes, { prefix: '/api/frameio' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(pushRoutes, { prefix: '/api/push' });
