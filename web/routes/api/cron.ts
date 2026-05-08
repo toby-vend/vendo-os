@@ -12,6 +12,7 @@ import { syncGoogleAds } from '../../lib/jobs/sync-google-ads.js';
 import { syncMetaAds } from '../../lib/jobs/sync-meta-ads.js';
 import { syncGhl } from '../../lib/jobs/sync-ghl.js';
 import { purgeSuggestionDrafts } from '../../lib/jobs/purge-suggestion-drafts.js';
+import { processFrameioEvents } from '../../lib/frameio/processor.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -222,6 +223,22 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/purge-suggestion-drafts] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Purge failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /frameio-process — Drain pending frameio_events and fan out
+   *   into creative_reviews. Phase 2 of the Frame.io integration.
+   *   Schedule: every minute (vercel.json `*​/1 * * * *`).
+   */
+  app.get('/frameio-process', async (_request, reply) => {
+    try {
+      const result = await processFrameioEvents();
+      return reply.send({ ok: true, message: 'Frame.io events processed', ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/frameio-process] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Frame.io processing failed', error: msg });
     }
   });
 };

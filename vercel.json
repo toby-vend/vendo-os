@@ -84,6 +84,10 @@
     {
       "path": "/api/cron/purge-suggestion-drafts",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/frameio-process",
+      "schedule": "*/2 * * * *"
     }
   ],
   "routes": [
