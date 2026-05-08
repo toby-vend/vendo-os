@@ -1,6 +1,8 @@
 import { db } from '../queries/base.js';
 import { getComment, getFile, FrameioApiError } from './client.js';
 import { resolveProject } from './projects.js';
+import { resolveUser } from './users.js';
+import { postCommentAlert } from './slack.js';
 
 /**
  * Frame.io event processor.
@@ -171,6 +173,11 @@ async function processOne(row: PendingEventRow): Promise<OneOutcome> {
     return { status: 'skipped', kind: 'awaiting_client_mapping' };
   }
 
+  const projectCtx = {
+    name: project.projectName,
+    viewUrl: project.viewUrl,
+    clientName: project.client.name,
+  };
   const eventType = row.event_type ?? '';
   switch (eventType) {
     case 'file.created':
@@ -181,9 +188,9 @@ async function processOne(row: PendingEventRow): Promise<OneOutcome> {
     case 'file.versioned':
       return await handleFileVersioned(row, project.client.name);
     case 'comment.created':
-      return await handleCommentCreated(row, project.client.name, project.viewUrl);
+      return await handleCommentCreated(row, projectCtx);
     case 'comment.completed':
-      return await handleCommentCompleted(row, project.client.name);
+      return await handleCommentCompleted(row, projectCtx);
     default:
       return { status: 'processed', kind: `noop_${eventType.replace('.', '_')}` };
   }
@@ -252,8 +259,7 @@ async function handleFileVersioned(row: PendingEventRow, _clientName: string): P
 
 async function handleCommentCreated(
   row: PendingEventRow,
-  clientName: string,
-  viewUrl: string | null,
+  project: { name: string; viewUrl: string | null; clientName: string },
 ): Promise<OneOutcome> {
   if (!row.resource_id || !row.account_id) return { status: 'skipped', kind: 'no_comment_id' };
   const comment = await getComment(row.account_id, row.resource_id);
@@ -263,11 +269,15 @@ async function handleCommentCreated(
   if (!fileId) return { status: 'skipped', kind: 'comment_has_no_file' };
 
   // Append the comment to the review's feedback. We keep a structured-ish
-  // text trail rather than a separate table for now — Phase 3 may break
+  // text trail rather than a separate table for now — Phase 4 may break
   // this out if the dashboard needs it.
   const stamp = new Date(comment.created_at).toISOString();
   const note = `[${stamp}] ${truncate(comment.text, 500)}`;
   const now = new Date().toISOString();
+
+  // Fetch the file metadata once — used both for the creative_review row
+  // (proper asset_name) and for the Slack alert deep-link.
+  const file = await getFile(row.account_id, fileId);
 
   // Ensure a review row exists for this file (create on demand if comments
   // arrive before file.created, which can happen on cold-start backfills).
@@ -283,13 +293,13 @@ async function handleCommentCreated(
                created_at, updated_at)
             VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?)`,
       args: [
-        clientName,
-        '(awaiting file metadata)',
-        'creative_asset',
+        project.clientName,
+        file?.name ?? '(awaiting file metadata)',
+        file ? classifyAssetType(file) : 'creative_asset',
         note,
         fileId,
         row.project_id,
-        viewUrl,
+        file?.view_url ?? project.viewUrl,
         now,
         now,
       ],
@@ -302,14 +312,73 @@ async function handleCommentCreated(
       args: [newFeedback, now, r.id],
     });
   }
+
+  // Slack alert — only for *external* (non-Vendo) commenters. We resolve
+  // the user from the webhook payload's `user.id`. If the resolver fails
+  // (auth, rate limit), we still mark the event processed; the alert is
+  // best-effort.
+  await maybePostSlackAlert(row, 'comment.created', project, comment.text, comment.timestamp, comment.created_at, file);
+
   return { status: 'processed', kind: 'comment_appended' };
 }
 
-async function handleCommentCompleted(row: PendingEventRow, _clientName: string): Promise<OneOutcome> {
-  // Frame.io marks a comment as completed when the user resolves it. We
-  // don't store individual comments yet, so for now this is a no-op other
-  // than acknowledging the event.
-  return { status: 'processed', kind: 'comment_completed_noop' };
+async function handleCommentCompleted(
+  row: PendingEventRow,
+  project: { name: string; viewUrl: string | null; clientName: string },
+): Promise<OneOutcome> {
+  if (!row.resource_id || !row.account_id) return { status: 'skipped', kind: 'no_comment_id' };
+  const comment = await getComment(row.account_id, row.resource_id);
+  if (!comment) return { status: 'skipped', kind: 'comment_not_found' };
+
+  const file = comment.file_id ? await getFile(row.account_id, comment.file_id) : null;
+  await maybePostSlackAlert(
+    row,
+    'comment.completed',
+    project,
+    comment.text,
+    comment.timestamp,
+    comment.completed_at ?? comment.updated_at ?? comment.created_at,
+    file,
+  );
+  return { status: 'processed', kind: 'comment_completed' };
+}
+
+/** Fire a Slack alert iff the actor is external. Best-effort; never throws. */
+async function maybePostSlackAlert(
+  row: PendingEventRow,
+  kind: 'comment.created' | 'comment.completed',
+  project: { name: string; viewUrl: string | null; clientName: string },
+  commentText: string,
+  commentTimestamp: number | null,
+  commentAt: string,
+  file: Awaited<ReturnType<typeof getFile>>,
+): Promise<void> {
+  try {
+    if (!row.account_id) return;
+    let envelope: { user?: { id?: string } } = {};
+    try { envelope = JSON.parse(row.payload) as { user?: { id?: string } }; } catch { /* malformed — skip alert */ return; }
+    const actorId = envelope.user?.id;
+    if (!actorId) return;
+
+    const author = await resolveUser({ accountId: row.account_id, userId: actorId });
+    if (!author) return;
+    if (!author.isExternal) return;
+
+    await postCommentAlert({
+      kind,
+      clientName: project.clientName,
+      projectName: project.name,
+      projectViewUrl: project.viewUrl,
+      commentText,
+      commentTimestampSeconds: commentTimestamp,
+      commentCreatedAt: commentAt,
+      file: file ? { id: file.id, name: file.name, view_url: file.view_url ?? null } : null,
+      author,
+    });
+  } catch (err) {
+    // Slack failures must not break event processing.
+    console.error('[frameio/processor] Slack alert failed:', (err as Error).message);
+  }
 }
 
 // --- Helpers ---
