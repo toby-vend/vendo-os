@@ -121,42 +121,46 @@ function timingSafeEqualString(a: string, b: string): boolean {
 }
 
 /**
- * Optional Phase-1.5 HMAC check — only runs if `FRAMEIO_WEBHOOK_SECRET` is
- * set. Tries the most common header / format combinations Frame.io is
- * likely to emit, since the public docs don't pin one down. Any single
- * match passes.
+ * Verify a Frame.io webhook signature.
+ *
+ * Frame.io V4 signs requests in the Slack-style versioned scheme:
+ *   - Header `x-frameio-signature` carries `v0=<sha256-hex>`
+ *   - Header `x-frameio-request-timestamp` carries the Unix-seconds timestamp
+ *     used in the signed string (also covers replay protection)
+ *   - Signed string: `v0:<timestamp>:<raw-body>` (literal colons, no JSON re-encoding)
+ *   - Algorithm: HMAC-SHA256, hex-encoded, compared case-insensitively
+ *
+ * Returns one of: 'ok', 'missing', 'stale', 'mismatch'.
  */
-function verifyOptionalSignature(opts: {
+const FRAMEIO_REPLAY_TOLERANCE_SECONDS = 5 * 60;
+
+function verifyFrameioSignature(opts: {
   secret: string;
   rawBody: string;
   headers: Record<string, string | undefined>;
-}): boolean {
-  const candidates = [
-    opts.headers['frameio-signature'],
-    opts.headers['x-frameio-signature'],
-    opts.headers['frame-io-signature'],
-    opts.headers['x-frame-io-signature'],
-  ].filter((h): h is string => Boolean(h));
+}): 'ok' | 'missing' | 'stale' | 'mismatch' {
+  const sigHeader = opts.headers['x-frameio-signature'] ?? opts.headers['frameio-signature'];
+  const tsHeader = opts.headers['x-frameio-request-timestamp'] ?? opts.headers['frameio-request-timestamp'];
+  if (!sigHeader || !tsHeader) return 'missing';
 
-  if (candidates.length === 0) return false;
+  const ts = Number(tsHeader);
+  if (!Number.isFinite(ts)) return 'missing';
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - ts) > FRAMEIO_REPLAY_TOLERANCE_SECONDS) return 'stale';
 
-  const macHex = crypto.createHmac('sha256', opts.secret).update(opts.rawBody).digest('hex');
-  const macB64 = crypto.createHmac('sha256', opts.secret).update(opts.rawBody).digest('base64');
+  // Header format: `v0=<hex>`. We tolerate spaces and accept either the bare
+  // hex or the prefixed form, since other v-prefixes may appear in future.
+  const expected = crypto
+    .createHmac('sha256', opts.secret)
+    .update(`v0:${ts}:${opts.rawBody}`)
+    .digest('hex');
 
-  for (const header of candidates) {
-    // Bare hex / base64
-    if (timingSafeEqualString(header.trim(), macHex)) return true;
-    if (timingSafeEqualString(header.trim(), macB64)) return true;
-
-    // `t=…,v0=…` or `sha256=…` framings
-    for (const part of header.split(/[,\s]+/)) {
-      const [, value] = part.includes('=') ? part.split('=', 2) : ['', part];
-      if (!value) continue;
-      if (timingSafeEqualString(value, macHex)) return true;
-      if (timingSafeEqualString(value, macB64)) return true;
-    }
+  for (const part of sigHeader.split(/[,\s]+/)) {
+    const value = part.includes('=') ? part.split('=', 2)[1] : part;
+    if (!value) continue;
+    if (timingSafeEqualString(value.toLowerCase(), expected)) return 'ok';
   }
-  return false;
+  return 'mismatch';
 }
 
 function pickResourceType(p: FrameioPayload): string | null {
@@ -211,25 +215,37 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(403).send({ error: 'Invalid token' });
     }
 
-    // HMAC verification — advisory in Phase 1. We don't yet know Frame.io's
-    // exact signing scheme (their public docs don't pin it down), so we
-    // archive every authenticated request and tag rows we couldn't verify
-    // with `processing_status = 'signature_failed'`. Phase 2 fan-out logic
-    // will gate side-effects on the verified rows, and once we observe a
-    // few real deliveries we'll harden the verifier and flip this to
-    // strict. The URL-token check above remains mandatory.
+    // HMAC verification using Frame.io's Slack-style v0 scheme.
+    // - If FRAMEIO_WEBHOOK_SECRET isn't set, we skip verification entirely
+    //   (rows tagged `received`).
+    // - If it is set, we verify and tag the row with the outcome:
+    //     'received'                — verified
+    //     'signature_failed'        — header present but HMAC mismatch
+    //     'signature_missing'       — secret configured, but headers absent
+    //     'signature_stale'         — timestamp outside ±5 min replay window
+    //   Phase-2 fan-out logic will gate side-effects on `received`.
+    //   We always 200 once the URL token is good — Frame.io shouldn't retry
+    //   our own integration mistakes.
     const optionalSecret = process.env.FRAMEIO_WEBHOOK_SECRET;
-    let signatureStatus: 'received' | 'signature_failed' = 'received';
+    let signatureStatus: 'received' | 'signature_failed' | 'signature_missing' | 'signature_stale' = 'received';
     if (optionalSecret) {
       const rawBody = (request as { rawBody?: string }).rawBody ?? '';
-      const verified = verifyOptionalSignature({
+      const verdict = verifyFrameioSignature({
         secret: optionalSecret,
         rawBody,
         headers: request.headers as Record<string, string | undefined>,
       });
-      if (!verified) {
+      if (verdict === 'ok') {
+        signatureStatus = 'received';
+      } else if (verdict === 'missing') {
+        signatureStatus = 'signature_missing';
+        request.log.warn('Frame.io webhook missing signature/timestamp headers');
+      } else if (verdict === 'stale') {
+        signatureStatus = 'signature_stale';
+        request.log.warn('Frame.io webhook timestamp outside replay window');
+      } else {
         signatureStatus = 'signature_failed';
-        request.log.warn('Frame.io webhook signature did not verify — archiving as signature_failed');
+        request.log.warn('Frame.io webhook signature mismatch');
       }
     }
 
