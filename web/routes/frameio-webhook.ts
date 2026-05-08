@@ -211,8 +211,15 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(403).send({ error: 'Invalid token' });
     }
 
-    // Optional HMAC verification (only if secret is configured).
+    // HMAC verification — advisory in Phase 1. We don't yet know Frame.io's
+    // exact signing scheme (their public docs don't pin it down), so we
+    // archive every authenticated request and tag rows we couldn't verify
+    // with `processing_status = 'signature_failed'`. Phase 2 fan-out logic
+    // will gate side-effects on the verified rows, and once we observe a
+    // few real deliveries we'll harden the verifier and flip this to
+    // strict. The URL-token check above remains mandatory.
     const optionalSecret = process.env.FRAMEIO_WEBHOOK_SECRET;
+    let signatureStatus: 'received' | 'signature_failed' = 'received';
     if (optionalSecret) {
       const rawBody = (request as { rawBody?: string }).rawBody ?? '';
       const verified = verifyOptionalSignature({
@@ -221,8 +228,8 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
         headers: request.headers as Record<string, string | undefined>,
       });
       if (!verified) {
-        request.log.warn('Frame.io webhook signature verification failed');
-        return reply.code(403).send({ error: 'Invalid signature' });
+        signatureStatus = 'signature_failed';
+        request.log.warn('Frame.io webhook signature did not verify — archiving as signature_failed');
       }
     }
 
@@ -264,7 +271,7 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
         sql: `INSERT OR IGNORE INTO frameio_events
                 (event_id, event_type, resource_type, resource_id, account_id,
                  workspace_id, project_id, payload, headers, received_at, processing_status)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`,
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           eventId,
           eventType,
@@ -276,6 +283,7 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
           rawBody,
           JSON.stringify(headers),
           receivedAt,
+          signatureStatus,
         ],
       });
     } catch (err) {
@@ -287,9 +295,9 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
     }
 
     request.log.info(
-      { eventId, eventType, resourceType, resourceId },
+      { eventId, eventType, resourceType, resourceId, signatureStatus },
       'Frame.io event archived',
     );
-    return reply.code(200).send({ ok: true });
+    return reply.code(200).send({ ok: true, signature: signatureStatus });
   });
 };
