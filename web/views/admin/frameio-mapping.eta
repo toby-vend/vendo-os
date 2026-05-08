@@ -1,0 +1,157 @@
+<% layout('/layouts/base') %>
+
+<%
+  const statBy = {};
+  for (const s of it.stats) statBy[s.processing_status] = Number(s.n);
+  const totalEvents24h = Object.values(statBy).reduce((a, b) => a + b, 0);
+  const fmtConf = (c) => c == null ? '—' : (Number(c) * 100).toFixed(0) + '%';
+  const fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+%>
+
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+  <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin: 0;">Frame.io Mapping</h2>
+  <div style="font-size: 13px; color: #94A3B8;">
+    <% if (it.connection.connected) { %>
+      <span style="color: #22C55E;">●</span> Connected as <code><%= it.connection.connectedUserEmail %></code> — token expires <%= fmtDate(it.connection.tokenExpiresAt) %>
+    <% } else { %>
+      <span style="color: #EF4444;">●</span> Not connected — <a href="/api/frameio/oauth/start">connect Frame.io</a>
+    <% } %>
+  </div>
+</div>
+
+<!-- 24h stats -->
+<div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+  <div style="display: flex; gap: 2rem; align-items: center;">
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.05em;">Last 24 h</div>
+      <div style="font-size: 18px; font-weight: 600;"><%= totalEvents24h %> events</div>
+    </div>
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.05em;">Processed</div>
+      <div style="font-size: 18px; font-weight: 600; color: #22C55E;"><%= statBy.processed || 0 %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.05em;">Awaiting mapping</div>
+      <div style="font-size: 18px; font-weight: 600; color: #F59E0B;"><%= statBy.skipped || 0 %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.05em;">Failed</div>
+      <div style="font-size: 18px; font-weight: 600; color: <%= (statBy.processing_failed || 0) > 0 ? '#EF4444' : '#94A3B8' %>;"><%= statBy.processing_failed || 0 %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.05em;">Sig failed</div>
+      <div style="font-size: 18px; font-weight: 600; color: <%= (statBy.signature_failed || 0) > 0 ? '#EF4444' : '#94A3B8' %>;"><%= statBy.signature_failed || 0 %></div>
+    </div>
+  </div>
+</div>
+
+<!-- Queue -->
+<h3 style="font-size: 16px; font-weight: 600; margin: 0 0 0.75rem 0;">Awaiting mapping <span style="color: #94A3B8; font-weight: 400;">(<%= it.queue.length %>)</span></h3>
+
+<% if (it.queue.length === 0) { %>
+  <div style="padding: 1.5rem; background: #0B0B0B; border: 1px dashed rgba(255,255,255,0.10); border-radius: 8px; color: #94A3B8; font-size: 14px; text-align: center; margin-bottom: 2rem;">
+    Nothing in the queue. New Frame.io projects will appear here when their name doesn't auto-match a Vendo client.
+  </div>
+<% } else { %>
+  <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem;">
+    <% for (const p of it.queue) { %>
+      <div class="card" style="padding: 1rem 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 0.75rem;">
+          <div>
+            <div style="font-size: 16px; font-weight: 600;"><%= p.project_name %></div>
+            <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">
+              <%= p.event_count %> event<%= Number(p.event_count) === 1 ? '' : 's' %> ·
+              last seen <%= fmtDate(p.last_seen_at) %>
+              <% if (p.view_url) { %> · <a href="<%= p.view_url %>" target="_blank" style="color: #94A3B8; text-decoration: underline;">open in Frame.io</a><% } %>
+            </div>
+          </div>
+          <% if (p.best_client_id != null) { %>
+            <div style="text-align: right;">
+              <div style="font-size: 11px; text-transform: uppercase; color: #94A3B8;">Best guess</div>
+              <div style="font-size: 14px; font-weight: 500;"><%= p.best_client_name %></div>
+              <div style="font-size: 11px; color: #94A3B8;"><%= fmtConf(p.best_confidence) %> · <%= p.best_method %></div>
+            </div>
+          <% } %>
+        </div>
+
+        <form method="POST" action="/admin/frameio-mapping/link" style="display: flex; gap: 0.5rem; align-items: center;">
+          <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+          <input type="hidden" name="project_id" value="<%= p.project_id %>">
+          <select name="client_id" required
+                  style="flex: 1; padding: 8px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 13px;">
+            <option value="">Pick a Vendo client…</option>
+            <% for (const c of it.clients) { %>
+              <option value="<%= c.id %>" <%= p.best_client_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+            <% } %>
+          </select>
+          <button type="submit"
+                  style="padding: 8px 16px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">
+            Link
+          </button>
+        </form>
+        <form method="POST" action="/admin/frameio-mapping/dismiss" style="margin-top: 0.5rem;">
+          <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+          <input type="hidden" name="project_id" value="<%= p.project_id %>">
+          <button type="submit"
+                  style="background: none; border: none; color: #94A3B8; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0;">
+            Dismiss (don't map)
+          </button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+<% } %>
+
+<!-- Mapped -->
+<h3 style="font-size: 16px; font-weight: 600; margin: 0 0 0.75rem 0;">Mapped projects <span style="color: #94A3B8; font-weight: 400;">(<%= it.mapped.length %>)</span></h3>
+
+<% if (it.mapped.length === 0) { %>
+  <div style="padding: 1.5rem; background: #0B0B0B; border: 1px dashed rgba(255,255,255,0.10); border-radius: 8px; color: #94A3B8; font-size: 14px; text-align: center;">
+    No mapped projects yet.
+  </div>
+<% } else { %>
+  <div class="card" style="padding: 0;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <thead>
+        <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: #94A3B8; font-size: 11px; text-transform: uppercase;">Project</th>
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: #94A3B8; font-size: 11px; text-transform: uppercase;">Client</th>
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: #94A3B8; font-size: 11px; text-transform: uppercase;">Last seen</th>
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: #94A3B8; font-size: 11px; text-transform: uppercase;">Processed</th>
+          <th style="padding: 0.75rem 1rem;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (const m of it.mapped) { %>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.75rem 1rem;">
+              <%= m.project_name || m.project_id %>
+              <% if (m.view_url) { %>
+                <a href="<%= m.view_url %>" target="_blank" style="margin-left: 6px; color: #94A3B8; font-size: 11px;">↗</a>
+              <% } %>
+            </td>
+            <td style="padding: 0.75rem 1rem;"><%= m.client_name %></td>
+            <td style="padding: 0.75rem 1rem; color: #94A3B8;"><%= fmtDate(m.last_seen_at) %></td>
+            <td style="padding: 0.75rem 1rem;"><%= m.processed_count %></td>
+            <td style="padding: 0.75rem 1rem;">
+              <form method="POST" action="/admin/frameio-mapping/link" style="display: flex; gap: 0.4rem; align-items: center; justify-content: flex-end;">
+                <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+                <input type="hidden" name="project_id" value="<%= m.project_id %>">
+                <select name="client_id"
+                        style="padding: 4px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 4px; color: #E2E8F0; font-size: 12px;">
+                  <% for (const c of it.clients) { %>
+                    <option value="<%= c.id %>" <%= m.client_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+                  <% } %>
+                </select>
+                <button type="submit"
+                        style="padding: 4px 10px; background: rgba(255,255,255,0.06); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.10); border-radius: 4px; font-size: 11px; cursor: pointer;">
+                  Override
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
