@@ -53,8 +53,11 @@ let schemaEnsured = false;
  */
 async function ensureSchema(): Promise<void> {
   if (schemaEnsured) return;
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS frameio_events (
+  // Each statement runs separately. SQLite UNIQUE allows multiple NULLs, so a
+  // plain unique index handles deduplication for the (rare) events without an
+  // event_id without breaking inserts.
+  const stmts = [
+    `CREATE TABLE IF NOT EXISTS frameio_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       event_id TEXT,
       event_type TEXT,
@@ -69,14 +72,20 @@ async function ensureSchema(): Promise<void> {
       processed_at TEXT,
       processing_status TEXT NOT NULL DEFAULT 'received',
       processing_error TEXT
-    )
-  `);
-  await db.execute('CREATE INDEX IF NOT EXISTS idx_frameio_events_type ON frameio_events(event_type)');
-  await db.execute('CREATE INDEX IF NOT EXISTS idx_frameio_events_received ON frameio_events(received_at)');
-  await db.execute('CREATE INDEX IF NOT EXISTS idx_frameio_events_resource ON frameio_events(resource_type, resource_id)');
-  await db.execute(
-    'CREATE UNIQUE INDEX IF NOT EXISTS idx_frameio_events_event_id ON frameio_events(event_id) WHERE event_id IS NOT NULL',
-  );
+    )`,
+    'CREATE INDEX IF NOT EXISTS idx_frameio_events_type ON frameio_events(event_type)',
+    'CREATE INDEX IF NOT EXISTS idx_frameio_events_received ON frameio_events(received_at)',
+    'CREATE INDEX IF NOT EXISTS idx_frameio_events_resource ON frameio_events(resource_type, resource_id)',
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_frameio_events_event_id ON frameio_events(event_id)',
+  ];
+  for (const sql of stmts) {
+    try {
+      await db.execute(sql);
+    } catch (err) {
+      // Surface the failing statement so we can diagnose Turso DDL quirks.
+      throw new Error(`frameio_events DDL failed: ${(err as Error).message} | sql: ${sql.slice(0, 80)}`);
+    }
+  }
   schemaEnsured = true;
 }
 
@@ -194,10 +203,13 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
     try {
       await ensureSchema();
     } catch (err) {
+      const msg = (err as Error)?.message ?? String(err);
       request.log.error({ err }, 'Failed to ensure frameio_events schema');
+      console.error('[frameio] ensureSchema failed:', msg);
       // Don't 5xx — Frame.io will retry forever. Better to ack and lose
-      // visibility temporarily than hammer the DB.
-      return reply.code(200).send({ ok: true, persisted: false });
+      // visibility temporarily than hammer the DB. The error is echoed back
+      // (token-gated endpoint, so this leaks nothing meaningful).
+      return reply.code(200).send({ ok: true, persisted: false, reason: 'schema', detail: msg });
     }
 
     const payload = (request.body ?? {}) as FrameioPayload;
@@ -242,10 +254,11 @@ export const frameioWebhookRoutes: FastifyPluginAsync = async (app) => {
         ],
       });
     } catch (err) {
+      const msg = (err as Error)?.message ?? String(err);
       request.log.error({ err, eventId, eventType }, 'Failed to insert frameio_event');
+      console.error('[frameio] insert failed:', msg);
       // 200 anyway — we don't want Frame.io to retry indefinitely.
-      // The error is logged for investigation.
-      return reply.code(200).send({ ok: true, persisted: false });
+      return reply.code(200).send({ ok: true, persisted: false, reason: 'insert', detail: msg });
     }
 
     request.log.info(
