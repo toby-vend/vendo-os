@@ -91,31 +91,103 @@ export interface FolderEntry {
   viewUrl: string | null;
   createdAt: string | null;
   updatedAt: string | null;
+  /** For folder rows: total videos in this folder *and all its descendants*.
+   *  Always 0 for file rows. Helps users avoid drilling into empty branches. */
+  descendantVideos: number;
+}
+
+/**
+ * Walk the entire subtree rooted at `folderId` and tally how many videos
+ * sit beneath each *immediate* child folder. Done in JS rather than a
+ * recursive CTE because libSQL CTE support varies and our trees are
+ * tiny (max depth ~10, max ~1000 nodes).
+ */
+async function videosByImmediateChildFolder(folderId: string): Promise<Map<string, number>> {
+  // First, fetch the project_id for the starting folder so we can scope the
+  // walk to a single project (folder ids are globally unique but this keeps
+  // the SQL cheap and tidy).
+  const root = await db.execute({
+    sql: 'SELECT project_id FROM frameio_assets WHERE id = ? LIMIT 1',
+    args: [folderId],
+  });
+  const projectId = (root.rows[0] as unknown as { project_id?: string } | undefined)?.project_id;
+  if (!projectId) return new Map();
+
+  // Pull every node in the project. ~24 to ~120 rows per project, trivial.
+  const r = await db.execute({
+    sql: `SELECT id, parent_id, type FROM frameio_assets
+            WHERE project_id = ? AND deleted_at IS NULL`,
+    args: [projectId],
+  });
+
+  const parentOf = new Map<string, string | null>();
+  const isVideo = new Map<string, boolean>();
+  for (const row of r.rows) {
+    const x = row as unknown as { id: string; parent_id: string | null; type: string };
+    parentOf.set(x.id, x.parent_id);
+    if (x.type === 'file') isVideo.set(x.id, true);
+  }
+
+  // Find immediate child folders of the starting folder.
+  const immediateChildren = Array.from(parentOf.entries())
+    .filter(([, p]) => p === folderId)
+    .map(([id]) => id);
+  const counts = new Map<string, number>(immediateChildren.map((id) => [id, 0]));
+
+  // For every video, walk up parents until we either hit one of the
+  // immediate children (record under it) or run off the top (skip).
+  for (const videoId of isVideo.keys()) {
+    let cursor: string | null = videoId;
+    // Walk up. When parent is the starting folder, the previous step is one
+    // of the immediate children (or it's directly under the starting folder
+    // — in which case it's a leaf video, not a descendant of a sub-folder).
+    let prev: string | null = null;
+    let safety = 50;
+    while (cursor && safety-- > 0) {
+      if (cursor === folderId) {
+        if (prev && counts.has(prev)) counts.set(prev, (counts.get(prev) ?? 0) + 1);
+        break;
+      }
+      prev = cursor;
+      cursor = parentOf.get(cursor) ?? null;
+    }
+  }
+  return counts;
 }
 
 /** Immediate children of a folder, with folders first, then videos by name. */
 export async function getFolderChildren(folderId: string): Promise<FolderEntry[]> {
   return safe(async () => {
-    const r = await db.execute({
-      sql: `SELECT id, type, name, file_size, media_type, view_url, created_at, updated_at
-              FROM frameio_assets
-             WHERE parent_id = ?
-               AND type IN ('folder', 'file')
-               AND deleted_at IS NULL
-          ORDER BY (CASE type WHEN 'folder' THEN 0 ELSE 1 END), name`,
-      args: [folderId],
-    });
+    const [r, descendantCounts] = await Promise.all([
+      db.execute({
+        sql: `SELECT id, type, name, file_size, media_type, view_url, created_at, updated_at
+                FROM frameio_assets
+               WHERE parent_id = ?
+                 AND type IN ('folder', 'file')
+                 AND deleted_at IS NULL
+            ORDER BY (CASE type WHEN 'folder' THEN 0 ELSE 1 END), name`,
+        args: [folderId],
+      }),
+      videosByImmediateChildFolder(folderId),
+    ]);
     return r.rows.map((row) => {
       const x = row as unknown as Record<string, unknown>;
+      const id = String(x.id);
+      const typed = x.type === 'folder' ? 'folder' : 'file';
+      // Count immediate-child videos in this folder too (not just descendants
+      // of *sub*-folders), so a folder containing 5 direct videos shows '5'.
+      let descendantVideos = 0;
+      if (typed === 'folder') descendantVideos = descendantCounts.get(id) ?? 0;
       return {
-        id: String(x.id),
-        type: x.type === 'folder' ? 'folder' : 'file',
+        id,
+        type: typed,
         name: String(x.name),
         fileSize: (x.file_size as number | null) ?? null,
         mediaType: (x.media_type as string | null) ?? null,
         viewUrl: (x.view_url as string | null) ?? null,
         createdAt: (x.created_at as string | null) ?? null,
         updatedAt: (x.updated_at as string | null) ?? null,
+        descendantVideos,
       } as FolderEntry;
     });
   }, []);
@@ -181,4 +253,90 @@ export async function getLibraryStats(): Promise<LibraryStats> {
       lastSyncAt: (x.last_sync_at as string | null) ?? null,
     };
   }, { totalProjects: 0, totalFolders: 0, totalVideos: 0, totalSize: 0, lastSyncAt: null });
+}
+
+export interface SearchHit {
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  mediaType: string | null;
+  viewUrl: string | null;
+  parentId: string | null;
+  projectId: string;
+  projectName: string;
+  /** Folder breadcrumb from project root → parent folder, joined with ' › '. */
+  path: string;
+}
+
+/**
+ * Substring search across all mirrored Frame.io assets (videos + folders).
+ *
+ * Walks each project's tree once to build a path string per matching node,
+ * because joining all the parent rows in SQL is awkward and the dataset is
+ * tiny (~1k rows). Limited to 30 hits to keep responses snappy.
+ */
+export async function searchLibrary(query: string, limit = 30): Promise<SearchHit[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+
+  return safe(async () => {
+    const matches = await db.execute({
+      sql: `SELECT id, name, type, media_type, view_url, parent_id, project_id
+              FROM frameio_assets
+             WHERE deleted_at IS NULL
+               AND type IN ('folder', 'file')
+               AND LOWER(name) LIKE LOWER(?)
+          ORDER BY (CASE type WHEN 'file' THEN 0 ELSE 1 END), name
+             LIMIT ?`,
+      args: [`%${q}%`, limit * 2], // overfetch a bit; we'll trim once paths resolve
+    });
+    if (matches.rows.length === 0) return [];
+
+    // Pull every project + folder for path resolution. Cheap.
+    const all = await db.execute({
+      sql: `SELECT id, name, parent_id, type, project_id
+              FROM frameio_assets WHERE deleted_at IS NULL AND type IN ('project', 'folder')`,
+      args: [],
+    });
+    const byId = new Map<string, { name: string; parent_id: string | null; type: string; project_id: string }>();
+    for (const row of all.rows) {
+      const x = row as unknown as { id: string; name: string; parent_id: string | null; type: string; project_id: string };
+      byId.set(x.id, { name: x.name, parent_id: x.parent_id, type: x.type, project_id: x.project_id });
+    }
+
+    const hits: SearchHit[] = [];
+    for (const row of matches.rows) {
+      const x = row as unknown as {
+        id: string; name: string; type: string; media_type: string | null;
+        view_url: string | null; parent_id: string | null; project_id: string;
+      };
+      const projectMeta = byId.get(x.project_id);
+      const projectName = projectMeta?.name ?? '(unknown project)';
+
+      // Walk up from parent_id to project to build the path. Skip 'root'.
+      const segments: string[] = [];
+      let cursor: string | null = x.parent_id;
+      let safety = 30;
+      while (cursor && safety-- > 0) {
+        const node = byId.get(cursor);
+        if (!node) break;
+        if (node.type === 'project') break;
+        if (node.name !== 'root') segments.unshift(node.name);
+        cursor = node.parent_id;
+      }
+      hits.push({
+        id: x.id,
+        name: x.name,
+        type: x.type === 'folder' ? 'folder' : 'file',
+        mediaType: x.media_type,
+        viewUrl: x.view_url,
+        parentId: x.parent_id,
+        projectId: x.project_id,
+        projectName,
+        path: segments.join(' › '),
+      });
+      if (hits.length >= limit) break;
+    }
+    return hits;
+  }, []);
 }

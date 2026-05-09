@@ -4,6 +4,7 @@ import {
   getFolderChildren,
   getBreadcrumb,
   getLibraryStats,
+  searchLibrary,
 } from '../../lib/queries/frameio-library.js';
 import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
 import { db } from '../../lib/queries/base.js';
@@ -86,5 +87,48 @@ export const frameIoLibraryRoutes: FastifyPluginAsync = async (app) => {
     if (!user || user.role !== 'admin') return reply.code(403).send({ error: 'Admin only' });
     const result = await syncFrameioLibrary();
     return reply.send({ ok: true, ...result });
+  });
+
+  /**
+   * GET /search?q=… — HTMX-friendly substring search.
+   * Returns an HTML fragment listing matching videos (and folders) with
+   * their full project › folder path, suitable for inline swap into the
+   * library index page.
+   */
+  app.get<{ Querystring: { q?: string } }>('/search', async (request, reply) => {
+    const q = (request.query.q ?? '').trim();
+    const hits = q.length >= 2 ? await searchLibrary(q, 30) : [];
+
+    const escape = (s: string) => s.replace(/[<>&"']/g, (ch) => ({
+      '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;',
+    }[ch] as string));
+
+    if (q.length < 2) {
+      return reply.type('text/html').send('');
+    }
+    if (hits.length === 0) {
+      return reply.type('text/html').send(
+        `<div style="padding:0.75rem 1rem;color:#94A3B8;font-size:13px;">No matches for <code>${escape(q)}</code>.</div>`,
+      );
+    }
+    const rows = hits.map((h) => {
+      const icon = h.type === 'folder' ? '📂' : '🎬';
+      const linkTarget = h.type === 'folder'
+        ? `/dashboards/frame-io/library/folder/${h.id}`
+        : (h.parentId ? `/dashboards/frame-io/library/folder/${h.parentId}` : '#');
+      return `
+        <a href="${linkTarget}" style="display:block;padding:0.5rem 0.75rem;border-bottom:1px solid rgba(255,255,255,0.04);text-decoration:none;color:#E2E8F0;">
+          <div style="font-size:13px;"><span style="margin-right:6px;">${icon}</span>${escape(h.name)}</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">${escape(h.projectName)}${h.path ? ' › ' + escape(h.path) : ''}</div>
+        </a>`;
+    }).join('');
+    return reply.type('text/html').send(`
+      <div style="border:1px solid rgba(255,255,255,0.10);border-radius:8px;background:#0B0B0B;max-height:480px;overflow-y:auto;">
+        <div style="padding:0.5rem 0.75rem;font-size:11px;color:#94A3B8;border-bottom:1px solid rgba(255,255,255,0.08);text-transform:uppercase;letter-spacing:0.05em;">
+          ${hits.length} result${hits.length === 1 ? '' : 's'}
+        </div>
+        ${rows}
+      </div>
+    `);
   });
 };

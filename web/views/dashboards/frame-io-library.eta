@@ -56,6 +56,22 @@
 
 <% if (it.view === 'index') { %>
 
+  <!-- Search bar -->
+  <div style="margin-bottom: 1.5rem; position: relative;">
+    <input
+      type="search"
+      name="q"
+      placeholder="Search videos by name…"
+      autocomplete="off"
+      hx-get="/dashboards/frame-io/library/search"
+      hx-trigger="input changed delay:300ms, search"
+      hx-target="#library-search-results"
+      hx-swap="innerHTML"
+      style="width: 100%; padding: 10px 14px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-size: 14px; box-sizing: border-box;"
+    >
+    <div id="library-search-results" style="margin-top: 0.5rem;"></div>
+  </div>
+
   <% if (it.projects.length === 0) { %>
     <div class="card" style="padding: 2rem; text-align: center;">
       <p style="margin: 0 0 1rem 0; font-size: 14px;">The Frame.io library hasn't been synced yet.</p>
@@ -123,11 +139,17 @@
         </thead>
         <tbody>
           <% for (const c of it.children) { %>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <% const isEmptyFolder = c.type === 'folder' && c.descendantVideos === 0; %>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); <%= isEmptyFolder ? 'opacity: 0.45;' : '' %>">
               <td style="padding: 0.55rem 1rem; font-size: 16px;"><%= c.type === 'folder' ? '📂' : '🎬' %></td>
               <td style="padding: 0.55rem 1rem;">
                 <% if (c.type === 'folder') { %>
                   <a href="/dashboards/frame-io/library/folder/<%= c.id %>" style="color: #E2E8F0; text-decoration: none; font-weight: 500;"><%= c.name %></a>
+                  <% if (c.descendantVideos > 0) { %>
+                    <span style="font-size: 11px; color: #22C55E; margin-left: 6px;"><%= c.descendantVideos %> 🎬</span>
+                  <% } else { %>
+                    <span style="font-size: 11px; color: #475569; margin-left: 6px;">empty</span>
+                  <% } %>
                 <% } else { %>
                   <span style="color: #E2E8F0; font-weight: 500;"><%= c.name %></span>
                 <% } %>
