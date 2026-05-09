@@ -50,6 +50,10 @@ import {
   recToCard,
   isDeliveryChannel,
 } from '../../web/lib/agents/channels';
+import {
+  insertChunk,
+  searchSimilar,
+} from '../../web/lib/agents/memory/long-term';
 import type { ToolCtx, AgentDef, ChannelName } from '../../web/lib/agents/types';
 import type { SessionUser } from '../../web/lib/auth';
 
@@ -113,6 +117,10 @@ async function reset(): Promise<void> {
   await db.execute({
     sql: `DELETE FROM agent_graduations WHERE agent = ?`,
     args: [SMOKE_AGENT],
+  });
+  await db.execute({
+    sql: `DELETE FROM agent_memory_chunks WHERE scope_id LIKE 'smoke-%'`,
+    args: [],
   });
 }
 
@@ -416,6 +424,56 @@ async function main(): Promise<void> {
     assert(isDeliveryChannel('telegram') === true, "'telegram' is a delivery channel");
     assert(isDeliveryChannel('cron') === false, "'cron' is not a delivery channel");
     assert(isDeliveryChannel('garbage') === false, 'unknown name rejected');
+  }
+
+  // -------------------------------------------------------------------------
+  // Long-term memory — round-trip via real embeddings if the gateway has a
+  // key; logs "skipped" otherwise so dev environments without
+  // AI_GATEWAY_API_KEY still run clean.
+  // -------------------------------------------------------------------------
+
+  console.log('\n[20] long-term memory: insert + searchSimilar round-trip');
+  {
+    const matchId = await insertChunk({
+      scope: 'meeting',
+      scope_id: 'smoke-match',
+      content:
+        'Smoke memory match: Meeting with Smile Dental about ad-spend pacing. The campaign overshot budget by 12% in October.',
+      metadata: { client: 'Smile Dental' },
+    });
+
+    if (!matchId) {
+      console.log('  ⚠ embedding unavailable (no AI_GATEWAY_API_KEY?) — skipping recall assertion');
+    } else {
+      assert(matchId === 'meeting:smoke-match', 'deterministic id derived from scope:scope_id');
+
+      // Insert a deliberately-distant chunk so the ranking has something to differentiate.
+      await insertChunk({
+        scope: 'meeting',
+        scope_id: 'smoke-distant',
+        content:
+          'Smoke memory distant: A Tuesday afternoon stand-up about office plant rotation policy. Nothing to do with marketing.',
+      });
+
+      const hits = await searchSimilar({
+        query: 'Smile Dental ad spend overspend',
+        scope: 'meeting',
+        limit: 5,
+      });
+      assert(hits.length >= 1, 'searchSimilar returns at least one hit');
+      assert(hits[0].scope_id === 'smoke-match', 'top hit is the matching chunk');
+      assert(
+        hits[0].distance < (hits[1]?.distance ?? Infinity),
+        'matching chunk is strictly closer than the distant one',
+      );
+      assert(hits[0].metadata?.client === 'Smile Dental', 'metadata round-trips through JSON column');
+    }
+
+    // Clean up only smoke rows — never broader scope (seed data lives there)
+    await db.execute({
+      sql: `DELETE FROM agent_memory_chunks WHERE scope_id LIKE 'smoke-%'`,
+      args: [],
+    });
   }
 
   console.log('\n--- Smoke test passed.');
