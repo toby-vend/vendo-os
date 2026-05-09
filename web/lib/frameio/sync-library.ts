@@ -211,6 +211,32 @@ export async function syncFrameioLibrary(opts?: { accountId?: string; logger?: (
       const rootFolderId = p.root_folder_id;
       if (!rootFolderId) continue;
 
+      // Upsert the root folder explicitly. It doesn't appear in any
+      // listFolderChildren response (it's the *parent* of the listed
+      // children, not a child itself), but downstream queries need it
+      // present so navigation from project → root works.
+      await upsertAsset(
+        {
+          id: rootFolderId,
+          accountId,
+          projectId: p.id,
+          workspaceId: ws.id,
+          parentId: null,
+          type: 'folder',
+          name: 'root',
+          status: null,
+          fileSize: null,
+          mediaType: null,
+          viewUrl: p.view_url,
+          thumbnailUrl: null,
+          createdAt: p.created_at,
+          updatedAt: p.updated_at,
+        },
+        syncedAt,
+      );
+      seen.add(rootFolderId);
+      result.rowsUpserted += 1;
+
       const queue: Array<{ id: string; depth: number }> = [{ id: rootFolderId, depth: 0 }];
       while (queue.length > 0) {
         const { id: folderId, depth } = queue.shift()!;
