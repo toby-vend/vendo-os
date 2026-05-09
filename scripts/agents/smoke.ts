@@ -64,6 +64,12 @@ import {
 import { runAgentBackground } from '../../web/lib/agents/runtime';
 import { MODELS } from '../../web/lib/agents/models';
 import { TOOL_FACTORIES } from '../../web/lib/agents/tools';
+import {
+  verifySlackSignature,
+  parseSlackForm,
+} from '../../web/lib/agents/channels/slack-verify';
+import { parseAgentActionId } from '../../web/lib/agents/channels/slack';
+import crypto from 'node:crypto';
 import type { ToolCtx, AgentDef, ChannelName } from '../../web/lib/agents/types';
 import type { SessionUser } from '../../web/lib/auth';
 
@@ -641,6 +647,97 @@ async function main(): Promise<void> {
         `     Haiku said: "${result.text.trim().slice(0, 60)}"  (${result.inputTokens}+${result.outputTokens} tok, $${result.costUsd?.toFixed(5)})`,
       );
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Slack inbound — HMAC signature verification and action_id parsing.
+  // No live Slack calls; all assertions are pure-local.
+  // -------------------------------------------------------------------------
+
+  console.log('\n[26] Slack HMAC verifySlackSignature');
+  {
+    const secret = 'smoke-signing-secret';
+    const ts = String(Math.floor(Date.now() / 1000));
+    const body = '{"type":"event_callback","event":{"type":"message"}}';
+    const sig = 'v0=' + crypto.createHmac('sha256', secret).update(`v0:${ts}:${body}`).digest('hex');
+
+    assert(
+      verifySlackSignature({ signingSecret: secret, timestamp: ts, signature: sig, rawBody: body }),
+      'accepts a valid signature',
+    );
+
+    assert(
+      !verifySlackSignature({
+        signingSecret: secret,
+        timestamp: ts,
+        signature: 'v0=deadbeef'.padEnd(sig.length, '0'),
+        rawBody: body,
+      }),
+      'rejects a wrong signature',
+    );
+
+    const stale = String(Math.floor(Date.now() / 1000) - 60 * 60); // 1 hour ago
+    const staleSig = 'v0=' + crypto.createHmac('sha256', secret).update(`v0:${stale}:${body}`).digest('hex');
+    assert(
+      !verifySlackSignature({
+        signingSecret: secret,
+        timestamp: stale,
+        signature: staleSig,
+        rawBody: body,
+      }),
+      'rejects a stale timestamp (replay protection)',
+    );
+
+    assert(
+      !verifySlackSignature({
+        signingSecret: secret,
+        timestamp: 'not-a-number',
+        signature: sig,
+        rawBody: body,
+      }),
+      'rejects a non-numeric timestamp',
+    );
+
+    // Tampered body → recomputed sig differs.
+    const tampered = body.replace('"event_callback"', '"url_verification"');
+    assert(
+      !verifySlackSignature({
+        signingSecret: secret,
+        timestamp: ts,
+        signature: sig,
+        rawBody: tampered,
+      }),
+      'rejects when body changed under the original signature',
+    );
+  }
+
+  console.log('\n[27] Slack parseAgentActionId');
+  {
+    const approve = parseAgentActionId('agent:approve:rec_abc123');
+    assert(approve !== null, 'parses approve');
+    assert(approve!.decision === 'approved', 'maps approve → approved');
+    assert(approve!.recId === 'rec_abc123', 'recovers rec id');
+
+    const edit = parseAgentActionId('agent:edit:rec_abc123');
+    assert(edit?.decision === 'edited', 'maps edit → edited');
+
+    const reject = parseAgentActionId('agent:reject:rec_abc123');
+    assert(reject?.decision === 'rejected', 'maps reject → rejected');
+
+    assert(parseAgentActionId('add_to_asana') === null, 'returns null for add_to_asana');
+    assert(parseAgentActionId('agent:approve:') === null, 'returns null when recId is empty');
+    assert(parseAgentActionId('agent:unknown:rec_abc') === null, 'returns null for unknown verb');
+    assert(parseAgentActionId('') === null, 'returns null for empty input');
+  }
+
+  console.log('\n[28] Slack parseSlackForm decodes urlencoded slash command body');
+  {
+    const body = 'command=%2Fvendo&text=hello+world&user_id=U123&response_url=https%3A%2F%2Fhooks.slack.com%2Fcommands%2Fxxx';
+    const form = parseSlackForm(body);
+    assert(form.command === '/vendo', 'percent-decoded command');
+    assert(form.text === 'hello world', 'plus-encoded space → space');
+    assert(form.user_id === 'U123', 'user_id preserved');
+    assert(form.response_url === 'https://hooks.slack.com/commands/xxx', 'response_url decoded');
   }
 
   console.log('\n--- Smoke test passed.');
