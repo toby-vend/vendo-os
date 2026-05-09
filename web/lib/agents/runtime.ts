@@ -188,7 +188,14 @@ export async function streamAgent(input: StreamAgentInput): Promise<Response> {
 export interface RunAgentBackgroundInput {
   agent: AgentDef;
   ctx: ToolCtx;
-  prompt: string;
+  /** Single-shot prompt. Mutually exclusive with `history`. */
+  prompt?: string;
+  /**
+   * Multi-turn history reconstructed from agent_messages. The runtime turns
+   * this into AI SDK ModelMessages and persists the latest user message
+   * before calling the model so it shows up in the next turn's reload.
+   */
+  history?: { role: 'user' | 'assistant'; text: string }[];
   trigger: string; // e.g. 'cron:daily-brief', 'webhook:fathom'
   conversationId?: string | null;
 }
@@ -221,11 +228,38 @@ export async function runAgentBackground(
   const stopWhen = stepCountIs(input.agent.maxSteps ?? 8) as StopCondition<typeof tools>;
   const startedAt = Date.now();
 
+  // Build the model input. Either `history` (multi-turn, with latest user
+  // message at the end) or `prompt` (single-shot, no history). For history
+  // mode, persist the latest user turn before the model call so it'll be
+  // visible to the next reload.
+  const useHistory = Array.isArray(input.history) && input.history.length > 0;
+  const modelMessages = useHistory
+    ? input.history!.map(m => ({ role: m.role, content: m.text }))
+    : undefined;
+
+  if (useHistory) {
+    const latest = input.history![input.history!.length - 1];
+    if (latest.role === 'user') {
+      try {
+        await recordMessage({
+          runId,
+          step: 0,
+          role: 'user',
+          parts: { text: latest.text, toolCalls: [], finishReason: null },
+        });
+      } catch (err) {
+        console.error('[agent-runtime] failed to record user message:', err);
+      }
+    }
+  }
+
   try {
     const result = await generateText({
       model,
       system: input.agent.systemPrompt(runCtx),
-      prompt: input.prompt,
+      ...(useHistory
+        ? { messages: modelMessages as never }
+        : { prompt: input.prompt ?? '' }),
       tools,
       stopWhen,
       onStepFinish: async (step) => {

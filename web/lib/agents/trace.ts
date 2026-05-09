@@ -149,3 +149,58 @@ export async function getRunToolCalls(runId: string) {
   });
   return result.rows;
 }
+
+// ---------------------------------------------------------------------------
+// Conversation reconstruction — joins agent_messages back into a UIMessage[]
+// for any conversation_id (Slack DM channel id, app_mention thread_ts, web
+// /chat conversation id, etc). Returns oldest-first.
+//
+// Used by Slack inbound handlers to rebuild context across messages — Slack
+// doesn't echo previous turns to us, so we have to reload them ourselves.
+// ---------------------------------------------------------------------------
+
+export interface ConversationMessage {
+  role: 'user' | 'assistant';
+  text: string;
+  step: number;
+  runStartedAt: string;
+}
+
+export async function loadConversation(
+  conversationId: string,
+  limit = 40,
+): Promise<ConversationMessage[]> {
+  const result = await db.execute({
+    sql: `SELECT m.role, m.parts, m.step, r.started_at
+            FROM agent_messages m
+            JOIN agent_runs r ON m.run_id = r.id
+           WHERE r.conversation_id = ?
+             AND m.role IN ('user','assistant')
+           ORDER BY r.started_at ASC, m.step ASC
+           LIMIT ?`,
+    args: [conversationId, limit],
+  });
+  const out: ConversationMessage[] = [];
+  for (const row of result.rows as unknown as {
+    role: 'user' | 'assistant';
+    parts: string;
+    step: number;
+    started_at: string;
+  }[]) {
+    let text = '';
+    try {
+      const parts = JSON.parse(row.parts) as { text?: string };
+      text = parts.text ?? '';
+    } catch {
+      text = '';
+    }
+    if (!text.trim()) continue; // skip empty steps (tool-only)
+    out.push({
+      role: row.role,
+      text,
+      step: row.step,
+      runStartedAt: row.started_at,
+    });
+  }
+  return out;
+}

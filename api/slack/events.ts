@@ -27,6 +27,7 @@ import {
 } from '../../web/lib/agents/channels/slack.js';
 import { getAgentForUser } from '../../web/lib/agents/agents/index.js';
 import { runAgentBackground } from '../../web/lib/agents/runtime.js';
+import { loadConversation } from '../../web/lib/agents/trace.js';
 import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
 
 // Disable @vercel/node's body parser — we need the raw bytes Slack signed.
@@ -159,6 +160,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const slackUserId = event.user;
   const inboundText = stripBotMention(event.text);
 
+  // Conversation key for history reconstruction.
+  //  - DMs: the channel id itself (whole DM is one rolling conversation).
+  //  - Mentions / threaded: the thread_ts.
+  // This is what we passed to startRun's conversation_id and what
+  // loadConversation() will key on when we reload the next turn.
+  const conversationId = isDM ? channel : (threadTs ?? channel);
+
   waitUntil(
     runAgentAndDeliver({
       slackUserId,
@@ -166,6 +174,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       threadTs,
       inboundText,
       isMention,
+      conversationId,
     }),
   );
 
@@ -178,8 +187,9 @@ async function runAgentAndDeliver(opts: {
   threadTs: string | undefined;
   inboundText: string;
   isMention: boolean;
+  conversationId: string;
 }): Promise<void> {
-  const { slackUserId, channel, threadTs, inboundText, isMention } = opts;
+  const { slackUserId, channel, threadTs, inboundText, isMention, conversationId } = opts;
   try {
     const user = await slackUserIdToVendoUser(slackUserId);
     if (!user) {
@@ -205,16 +215,23 @@ async function runAgentAndDeliver(opts: {
       runId: '', // runtime stamps the real id on a fresh copy
       user,
       channel: 'slack' as ChannelName,
-      conversationId: threadTs ?? null,
+      conversationId,
       graduations: new Set(),
     };
+
+    // Reload prior turns from agent_messages so Atlas sees the full DM thread.
+    const prior = await loadConversation(conversationId, 40);
+    const history = [
+      ...prior.map(m => ({ role: m.role, text: m.text })),
+      { role: 'user' as const, text: inboundText },
+    ];
 
     const result = await runAgentBackground({
       agent,
       ctx,
-      prompt: inboundText,
+      history,
       trigger: isMention ? 'slack:app_mention' : 'slack:dm',
-      conversationId: threadTs ?? null,
+      conversationId,
     });
 
     const reply = result.text?.trim()
