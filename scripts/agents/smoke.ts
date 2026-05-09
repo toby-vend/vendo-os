@@ -45,6 +45,11 @@ import {
   loadGraduations,
 } from '../../web/lib/agents/permissions';
 import { buildToolset } from '../../web/lib/agents/tools';
+import {
+  getChannel,
+  recToCard,
+  isDeliveryChannel,
+} from '../../web/lib/agents/channels';
 import type { ToolCtx, AgentDef, ChannelName } from '../../web/lib/agents/types';
 import type { SessionUser } from '../../web/lib/auth';
 
@@ -363,6 +368,54 @@ async function main(): Promise<void> {
       String(toolCalls.rows[0].error).includes('permission_denied'),
       'error column carries permission_denied detail',
     );
+  }
+
+  // -------------------------------------------------------------------------
+  // Channel adapters — render-time checks only (no network calls)
+  // -------------------------------------------------------------------------
+
+  console.log('\n[17] recToCard shape from a fresh recommendation row');
+  {
+    const fetched = await getById(recId);
+    assert(fetched !== null, 'recommendation row readable');
+    const card = recToCard(fetched!);
+    assert(card.id === recId, 'card.id === recommendation id');
+    assert(card.title === fetched!.title, 'card.title carried through');
+    assert(card.reasoning === fetched!.reasoning, 'card.reasoning carried through');
+    assert(Array.isArray(card.fields), 'card.fields is an array');
+    assert(card.fields.length > 0, 'payload rendered as at least one field');
+    assert(
+      !card.fields.some(f => f.label === 'mode'),
+      "internal 'mode' field excluded from card",
+    );
+    assert(
+      Array.isArray(card.sourceLinks) && card.sourceLinks!.length === 1,
+      'sourceLinks parsed from JSON column',
+    );
+  }
+
+  console.log('\n[18] channel registry returns the right adapters');
+  {
+    const web = getChannel('web');
+    const slack = getChannel('slack');
+    const telegram = getChannel('telegram');
+    assert(web.name === 'web', "getChannel('web') has name='web'");
+    assert(slack.name === 'slack', "getChannel('slack') has name='slack'");
+    assert(telegram.name === 'telegram', "getChannel('telegram') has name='telegram'");
+    for (const c of [web, slack, telegram]) {
+      assert(typeof c.sendMessage === 'function', `${c.name}.sendMessage exists`);
+      assert(typeof c.requestApproval === 'function', `${c.name}.requestApproval exists`);
+      assert(typeof c.deliverProactive === 'function', `${c.name}.deliverProactive exists`);
+    }
+  }
+
+  console.log('\n[19] isDeliveryChannel narrows correctly');
+  {
+    assert(isDeliveryChannel('web') === true, "'web' is a delivery channel");
+    assert(isDeliveryChannel('slack') === true, "'slack' is a delivery channel");
+    assert(isDeliveryChannel('telegram') === true, "'telegram' is a delivery channel");
+    assert(isDeliveryChannel('cron') === false, "'cron' is not a delivery channel");
+    assert(isDeliveryChannel('garbage') === false, 'unknown name rejected');
   }
 
   console.log('\n--- Smoke test passed.');
