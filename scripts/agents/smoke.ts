@@ -1,0 +1,238 @@
+/**
+ * Agent runtime smoke test — exercises the trace store + recommendations
+ * helpers end-to-end against the configured database.
+ *
+ * Writes rows tagged with agent='smoke-test'. Re-running the script first
+ * deletes prior smoke rows so the database stays tidy.
+ *
+ * Usage (loads .env.local before any module evaluation, so the import of
+ * web/lib/queries/base picks up TURSO_DATABASE_URL):
+ *
+ *   node --env-file=.env.local --import tsx/esm scripts/agents/smoke.ts
+ *
+ * To inspect the resulting trace by hand:
+ *   SELECT * FROM agent_runs            WHERE agent='smoke-test';
+ *   SELECT * FROM agent_messages        WHERE run_id IN (SELECT id FROM agent_runs WHERE agent='smoke-test');
+ *   SELECT * FROM agent_tool_calls      WHERE run_id IN (SELECT id FROM agent_runs WHERE agent='smoke-test');
+ *   SELECT * FROM agent_recommendations WHERE agent='smoke-test';
+ */
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+
+import { db } from '../../web/lib/queries/base';
+import { generateId } from '../../web/lib/auth';
+import {
+  startRun,
+  endRun,
+  recordMessage,
+  recordToolCall,
+  getRun,
+  getRunMessages,
+  getRunToolCalls,
+} from '../../web/lib/agents/trace';
+import {
+  create as createRecommendation,
+  decide,
+  markExecuted,
+  recordOutcome,
+  getById,
+  listPendingForInbox,
+  acceptanceRate,
+} from '../../web/lib/agents/recommendations';
+
+const SMOKE_AGENT = 'smoke-test';
+const SMOKE_USER = 'smoke-user';
+const SMOKE_TOOL = 'smoke.draftAsanaTask';
+
+async function reset(): Promise<void> {
+  // Delete in dependency order. recommendations references runs; outcomes
+  // cascades from recommendations; messages and tool_calls cascade from runs.
+  await db.execute({
+    sql: `DELETE FROM agent_outcomes WHERE recommendation_id IN
+            (SELECT id FROM agent_recommendations WHERE agent = ?)`,
+    args: [SMOKE_AGENT],
+  });
+  await db.execute({
+    sql: `DELETE FROM agent_recommendations WHERE agent = ?`,
+    args: [SMOKE_AGENT],
+  });
+  await db.execute({
+    sql: `DELETE FROM agent_runs WHERE agent = ?`,
+    args: [SMOKE_AGENT],
+  });
+}
+
+function assert(condition: unknown, message: string): asserts condition {
+  if (!condition) {
+    console.error('  ✗', message);
+    throw new Error('Smoke assertion failed: ' + message);
+  }
+  console.log('  ✓', message);
+}
+
+async function main(): Promise<void> {
+  console.log('Resetting prior smoke rows...');
+  await reset();
+
+  console.log('\n[1] startRun');
+  const runId = await startRun({
+    agent: SMOKE_AGENT,
+    user_id: SMOKE_USER,
+    channel: 'cron',
+    conversation_id: null,
+    trigger: 'smoke-test',
+    model: 'anthropic/claude-haiku-4.5',
+  });
+  assert(typeof runId === 'string' && runId.length > 0, 'returns a run id');
+
+  console.log('\n[2] recordMessage × 2');
+  await recordMessage({
+    runId,
+    step: 0,
+    role: 'user',
+    parts: [{ type: 'text', text: 'Draft a follow-up Asana task' }],
+  });
+  await recordMessage({
+    runId,
+    step: 1,
+    role: 'assistant',
+    parts: [{ type: 'text', text: 'Drafting...' }],
+  });
+  const messages = await getRunMessages(runId);
+  assert(messages.length === 2, 'persisted 2 messages');
+
+  console.log('\n[3] recordToolCall × 2 (start + end)');
+  const callId = generateId();
+  await recordToolCall({
+    runId,
+    callId,
+    step: 1,
+    toolName: SMOKE_TOOL,
+    mode: 'dry-run',
+    phase: 'start',
+    input: { project: 'client-ops', title: 'Follow up with smoke client' },
+  });
+  await recordToolCall({
+    runId,
+    callId,
+    step: 1,
+    toolName: SMOKE_TOOL,
+    mode: 'dry-run',
+    phase: 'end',
+    output: { mode: 'dry-run', payload: { title: 'Follow up' }, asanaUrl: null },
+    durationMs: 12,
+  });
+  const toolCalls = await getRunToolCalls(runId);
+  assert(toolCalls.length === 2, 'persisted 2 tool-call rows');
+  assert(
+    toolCalls[0].phase === 'start' && toolCalls[1].phase === 'end',
+    'phases ordered start then end',
+  );
+
+  console.log('\n[4] endRun');
+  await endRun({
+    runId,
+    status: 'completed',
+    inputTokens: 120,
+    outputTokens: 38,
+    costUsd: 0.0009,
+  });
+  const run = (await getRun(runId)) as unknown as
+    | { status: string; ended_at: string | null }
+    | null;
+  assert(run !== null, 'run row readable');
+  assert(run!.status === 'completed', 'run status is completed');
+  assert(run!.ended_at !== null, 'ended_at is populated');
+
+  console.log('\n[5] createRecommendation');
+  const recId = await createRecommendation({
+    runId,
+    agent: SMOKE_AGENT,
+    userId: SMOKE_USER,
+    title: 'Smoke: Draft Asana follow-up',
+    reasoning: 'The smoke test asks us to draft a follow-up. Fictional context only.',
+    toolName: SMOKE_TOOL,
+    payload: { project: 'client-ops', title: 'Follow up' },
+    sourceLinks: [{ label: 'Smoke source', url: 'https://example.com' }],
+  });
+  assert(typeof recId === 'string' && recId.length > 0, 'returns a recommendation id');
+
+  console.log('\n[6] listPendingForInbox');
+  const pending = await listPendingForInbox(SMOKE_USER);
+  assert(pending.some(r => r.id === recId), 'recommendation appears in inbox');
+  assert(pending[0].status === 'pending', 'status defaults to pending');
+
+  console.log('\n[7] decide (edited)');
+  const edited = await decide({
+    id: recId,
+    decidedBy: SMOKE_USER,
+    decision: 'edited',
+    editDiff: { title: { from: 'Follow up', to: 'Follow up — urgent' } },
+  });
+  assert(edited !== null, 'decided row readable');
+  assert(edited!.status === 'edited', 'status updated to edited');
+  assert(edited!.decided_by === SMOKE_USER, 'decided_by set');
+  assert(edited!.edit_diff !== null, 'edit_diff captured');
+
+  console.log('\n[8] markExecuted');
+  await markExecuted(recId, { asanaUrl: 'https://app.asana.com/0/0/smoke' });
+  const executed = await getById(recId);
+  assert(executed?.executed_at !== null, 'executed_at set');
+  assert(executed?.execute_result !== null, 'execute_result captured');
+
+  console.log('\n[9] recordOutcome');
+  await recordOutcome({
+    recommendationId: recId,
+    outcome: 'success',
+    notes: 'Smoke run — outcome rated success.',
+    reviewedBy: SMOKE_USER,
+  });
+  // recordOutcome upserts; running it twice should be safe.
+  await recordOutcome({
+    recommendationId: recId,
+    outcome: 'neutral',
+    notes: 'Smoke run — re-rated neutral (idempotency check).',
+    reviewedBy: SMOKE_USER,
+  });
+  const outcomeRow = await db.execute({
+    sql: `SELECT * FROM agent_outcomes WHERE recommendation_id = ?`,
+    args: [recId],
+  });
+  assert(outcomeRow.rows.length === 1, 'exactly one outcome row (idempotent upsert)');
+  assert(outcomeRow.rows[0].outcome === 'neutral', 'outcome reflects latest write');
+
+  console.log('\n[10] decide on already-decided recommendation is a no-op');
+  await decide({
+    id: recId,
+    decidedBy: 'someone-else',
+    decision: 'rejected',
+  });
+  const stillEdited = await getById(recId);
+  assert(stillEdited?.status === 'edited', 'second decide() did not change status');
+  assert(stillEdited?.decided_by === SMOKE_USER, 'decided_by preserved');
+
+  console.log('\n[11] acceptanceRate calculates correctly');
+  const rate = await acceptanceRate({
+    agent: SMOKE_AGENT,
+    toolName: SMOKE_TOOL,
+    windowDays: 30,
+  });
+  assert(rate.total === 1, 'one decided recommendation in window');
+  assert(rate.approved === 1, 'edited counts toward approved');
+  assert(rate.rate === 1, 'acceptance rate is 1.0');
+
+  console.log('\n--- Smoke test passed.');
+  console.log(`Run id: ${runId}`);
+  console.log(`Recommendation id: ${recId}`);
+  console.log(
+    `Inspect: SELECT * FROM agent_runs WHERE id='${runId}';`,
+  );
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch(err => {
+    console.error('\n--- Smoke test failed.');
+    console.error(err);
+    process.exit(1);
+  });
