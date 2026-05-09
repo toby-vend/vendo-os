@@ -20,11 +20,10 @@
  */
 import type { UIMessage } from 'ai';
 import { parseCookies, verifySessionToken, generateId } from '../../web/lib/auth';
-import { getUserById } from '../../web/lib/queries/auth';
+import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth';
 import { getAgentForUser } from '../../web/lib/agents/agents';
 import { loadGraduations } from '../../web/lib/agents/permissions';
 import { streamAgent } from '../../web/lib/agents/runtime';
-import type { SessionUser } from '../../web/lib/auth';
 import type { ChannelName } from '../../web/lib/agents/types';
 
 export const config = {
@@ -50,27 +49,6 @@ function badRequest(message: string): Response {
     status: 400,
     headers: { 'Content-Type': 'application/json' },
   });
-}
-
-function userRowToSessionUser(row: {
-  id: string;
-  email: string;
-  name: string;
-  role: 'admin' | 'standard' | 'client';
-  must_change_password: number;
-}): SessionUser {
-  return {
-    id: row.id,
-    email: row.email,
-    name: row.name,
-    role: row.role,
-    mustChangePassword: row.must_change_password === 1,
-    channels: [],
-    allowedRoutes: [],
-    googleConnected: false,
-    clientId: null,
-    clientName: null,
-  };
 }
 
 export default async function handler(request: Request): Promise<Response> {

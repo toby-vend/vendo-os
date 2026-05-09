@@ -1,4 +1,5 @@
 import { rows, scalar, db } from './base.js';
+import type { SessionUser } from '../auth.js';
 
 // --- Interfaces ---
 
@@ -11,6 +12,27 @@ export interface UserRow {
   must_change_password: number;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * Convert a UserRow to a minimal SessionUser. Channels, route overrides,
+ * and Google-connected status are left at safe defaults — fully hydrate
+ * those separately at login. Used by entrypoints that authenticate
+ * out-of-band (Slack inbound, /api/agent/chat, /api/agent/approve).
+ */
+export function userRowToSessionUser(row: UserRow): SessionUser {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    role: row.role,
+    mustChangePassword: row.must_change_password === 1,
+    channels: [],
+    allowedRoutes: [],
+    googleConnected: false,
+    clientId: null,
+    clientName: null,
+  };
 }
 
 export interface ClientUserMapRow {

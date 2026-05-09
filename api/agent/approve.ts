@@ -17,7 +17,7 @@
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { parseCookies, verifySessionToken } from '../../web/lib/auth';
-import { getUserById } from '../../web/lib/queries/auth';
+import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth';
 import {
   getById,
   decide,
@@ -25,7 +25,6 @@ import {
 } from '../../web/lib/agents/recommendations';
 import { TOOL_FACTORIES, type ToolName } from '../../web/lib/agents/tools';
 import type { ChannelName, ToolCtx } from '../../web/lib/agents/types';
-import type { SessionUser } from '../../web/lib/auth';
 
 interface ApproveBody {
   recId: string;
@@ -33,27 +32,6 @@ interface ApproveBody {
   editDiff?: Record<string, unknown>;
   /** Optional patched payload for 'edited' — fields override the original. */
   payload?: Record<string, unknown>;
-}
-
-function userRowToSessionUser(row: {
-  id: string;
-  email: string;
-  name: string;
-  role: 'admin' | 'standard' | 'client';
-  must_change_password: number;
-}): SessionUser {
-  return {
-    id: row.id,
-    email: row.email,
-    name: row.name,
-    role: row.role,
-    mustChangePassword: row.must_change_password === 1,
-    channels: [],
-    allowedRoutes: [],
-    googleConnected: false,
-    clientId: null,
-    clientName: null,
-  };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
