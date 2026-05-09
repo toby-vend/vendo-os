@@ -42,6 +42,7 @@ import { tool, zodSchema } from 'ai';
 import { z } from 'zod';
 import { generateId } from '../../auth.js';
 import { recordToolCall } from '../trace.js';
+import { hasCapability } from '../permissions.js';
 import type { ToolCtx, ToolMode } from '../types.js';
 
 // ---------------------------------------------------------------------------
@@ -95,18 +96,6 @@ export interface DefineToolSpec<TIn, TOut> {
 }
 
 // ---------------------------------------------------------------------------
-// Permission check — channels and allowedRoutes both contain capability
-// slugs in this codebase. A capability is held if either array contains it.
-// ---------------------------------------------------------------------------
-
-function hasCapability(ctx: ToolCtx, capability: string): boolean {
-  return (
-    ctx.user.channels.includes(capability) ||
-    ctx.user.allowedRoutes.includes(capability)
-  );
-}
-
-// ---------------------------------------------------------------------------
 // defineTool — returns an ai SDK Tool that the model can call.
 // The factory pattern (closing over ctx) is intentional: each agent run
 // builds its own toolset against a fresh ctx; tools cannot leak across runs.
@@ -130,7 +119,7 @@ export function defineTool<TIn, TOut>(
       const startedAt = Date.now();
 
       // -- 1. Permission gate ---------------------------------------------
-      if (!hasCapability(ctx, spec.capability)) {
+      if (!hasCapability(ctx.user, spec.capability)) {
         await recordToolCall({
           runId: ctx.runId,
           callId,

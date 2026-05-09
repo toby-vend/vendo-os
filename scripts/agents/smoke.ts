@@ -81,12 +81,12 @@ const SMOKE_TOOL = 'smoke.draftAsanaTask';
 // Helpers used by the defineTool contract assertions.
 // ---------------------------------------------------------------------------
 
-function mockUser(opts: { channels?: string[]; allowedRoutes?: string[] } = {}): SessionUser {
+function mockUser(opts: { channels?: string[]; allowedRoutes?: string[]; role?: 'admin' | 'standard' | 'client' } = {}): SessionUser {
   return {
     id: SMOKE_USER,
     email: 'smoke@vendodigital.co.uk',
     name: 'Smoke User',
-    role: 'admin',
+    role: opts.role ?? 'admin',
     mustChangePassword: false,
     channels: opts.channels ?? [],
     allowedRoutes: opts.allowedRoutes ?? [],
@@ -307,7 +307,9 @@ async function main(): Promise<void> {
 
   console.log('\n[12] defineTool — permission denied returns ToolErrorResult');
   {
-    const ctx = mockCtx(runId, mockUser({ channels: [] }), new Set());
+    // Admin role bypasses capability gates, so test denial with a standard
+    // user who has no channels granted.
+    const ctx = mockCtx(runId, mockUser({ role: 'standard', channels: [] }), new Set());
     const tools = buildToolset(TEST_AGENT, ctx);
     const result = (await tools.searchClients.execute!(
       { query: 'smoke' },
@@ -319,13 +321,25 @@ async function main(): Promise<void> {
 
   console.log('\n[13] defineTool — read tool succeeds with capability');
   {
-    const ctx = mockCtx(runId, mockUser({ channels: ['clients:read'] }), new Set());
+    const ctx = mockCtx(runId, mockUser({ role: 'standard', channels: ['clients:read'] }), new Set());
     const tools = buildToolset(TEST_AGENT, ctx);
     const result = (await tools.searchClients.execute!(
       { query: '__smoke_test_no_match__' },
       TOOL_CALL_OPTS,
     )) as { hits?: unknown[] };
     assert(Array.isArray(result.hits), 'returns hits array');
+  }
+
+  console.log('\n[13a] defineTool — admin role bypasses capability gate');
+  {
+    const ctx = mockCtx(runId, mockUser({ role: 'admin', channels: [] }), new Set());
+    const tools = buildToolset(TEST_AGENT, ctx);
+    const result = (await tools.searchClients.execute!(
+      { query: '__smoke_test_no_match__' },
+      TOOL_CALL_OPTS,
+    )) as { hits?: unknown[]; error?: string };
+    assert(Array.isArray(result.hits), 'admin can call read tool with no channels');
+    assert(result.error === undefined, 'no permission_denied for admin');
   }
 
   console.log('\n[14] graduation gate — execute coerced to dry-run when ungraduated');

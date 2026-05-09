@@ -41,6 +41,10 @@ export type Capability = (typeof CAPABILITIES)[keyof typeof CAPABILITIES];
 // ---------------------------------------------------------------------------
 
 export function hasCapability(user: SessionUser, capability: string): boolean {
+  // Admins have every capability. Writes still default to dry-run via the
+  // graduation gate, so this only widens what admins can DRAFT, not what
+  // they can EXECUTE without approval.
+  if (user.role === 'admin') return true;
   return (
     user.channels.includes(capability) ||
     user.allowedRoutes.includes(capability)
