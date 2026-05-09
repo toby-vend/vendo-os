@@ -54,6 +54,7 @@ import {
   insertChunk,
   searchSimilar,
 } from '../../web/lib/agents/memory/long-term';
+import { atlasAgent, getAgent, listAgents } from '../../web/lib/agents/agents';
 import type { ToolCtx, AgentDef, ChannelName } from '../../web/lib/agents/types';
 import type { SessionUser } from '../../web/lib/auth';
 
@@ -474,6 +475,57 @@ async function main(): Promise<void> {
       sql: `DELETE FROM agent_memory_chunks WHERE scope_id LIKE 'smoke-%'`,
       args: [],
     });
+  }
+
+  // -------------------------------------------------------------------------
+  // Atlas — structural checks. Live model exercise is deferred to Block 7
+  // (api/agent/chat.ts) where the React island consumes the stream.
+  // -------------------------------------------------------------------------
+
+  console.log('\n[21] Atlas agent definition is valid');
+  {
+    const a = atlasAgent;
+    assert(a.name === 'atlas', "name === 'atlas'");
+    assert(a.model === 'anthropic/claude-sonnet-4.6', 'model is Sonnet 4.6');
+    assert(a.maxSteps === 8, 'maxSteps === 8');
+    assert(Array.isArray(a.tools) && a.tools.length === 10, 'declares 10 tools');
+    const expectedTools = [
+      'searchMeetings', 'searchClients', 'getClientHealth',
+      'getCampaignPerformance', 'queryDecisions', 'searchKnowledge',
+      'draftAsanaTask', 'draftSlackMessage', 'draftPushNotification', 'draftEmail',
+    ];
+    for (const t of expectedTools) {
+      assert(a.tools.includes(t), `tools[] includes ${t}`);
+    }
+  }
+
+  console.log('\n[22] Atlas systemPrompt renders today + caller');
+  {
+    const ctx = mockCtx(runId, mockUser({ channels: ['meetings:read'] }), new Set());
+    const prompt = atlasAgent.systemPrompt(ctx);
+    const today = new Date().toISOString().slice(0, 10);
+    assert(prompt.includes('Atlas'), "system prompt names 'Atlas'");
+    assert(prompt.includes('UK English'), 'enforces UK English');
+    assert(prompt.includes('Vendo Digital'), 'mentions Vendo Digital');
+    assert(prompt.includes(today), "includes today's date");
+    assert(prompt.includes('Smoke User'), "includes user's name");
+    assert(prompt.includes(ctx.channel), 'includes channel');
+  }
+
+  console.log('\n[23] buildToolset(atlas, ctx) returns exactly the declared tools');
+  {
+    const ctx = mockCtx(runId, mockUser({ channels: ['meetings:read'] }), new Set());
+    const tools = buildToolset(atlasAgent, ctx);
+    const names = Object.keys(tools).sort();
+    const expected = [...atlasAgent.tools].sort();
+    assert(JSON.stringify(names) === JSON.stringify(expected), 'toolset matches declared list exactly');
+  }
+
+  console.log('\n[24] agents registry getAgent / listAgents');
+  {
+    assert(getAgent('atlas') === atlasAgent, "getAgent('atlas') returns atlasAgent");
+    assert(getAgent('does-not-exist') === null, 'unknown agent returns null');
+    assert(listAgents().includes('atlas'), 'listAgents includes atlas');
   }
 
   console.log('\n--- Smoke test passed.');
