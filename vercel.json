@@ -32,6 +32,20 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/slack/events.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 120
+      }
+    },
+    {
+      "src": "api/slack/commands.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 120
+      }
+    },
+    {
       "src": "public/**",
       "use": "@vercel/static"
     }
@@ -98,6 +112,8 @@
     { "src": "/api/skills/generate", "dest": "/api/skills-generate.ts", "methods": ["POST"] },
     { "src": "/api/skills/save", "dest": "/api/skills-save.ts", "methods": ["POST"] },
     { "src": "/api/skills/outputs", "dest": "/api/skills-outputs.ts", "methods": ["GET"] },
+    { "src": "/api/slack/events", "dest": "/api/slack/events.ts", "methods": ["POST"] },
+    { "src": "/api/slack/commands", "dest": "/api/slack/commands.ts", "methods": ["POST"] },
     { "src": "/(.*)", "dest": "/api/index.ts" }
   ]
 }
