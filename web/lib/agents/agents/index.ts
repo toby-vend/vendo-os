@@ -11,10 +11,13 @@
  * AGENTS.
  */
 import type { AgentDef } from '../types';
+import type { SessionUser } from '../../auth';
 import { atlasAgent } from './atlas';
+import { atlasStaffAgent } from './atlas-staff';
 
 const AGENTS: Record<string, AgentDef> = {
   atlas: atlasAgent,
+  'atlas-staff': atlasStaffAgent,
 };
 
 export type AgentName = keyof typeof AGENTS;
@@ -27,5 +30,21 @@ export function listAgents(): string[] {
   return Object.keys(AGENTS);
 }
 
+/**
+ * Tier router — picks the right Atlas variant for a logged-in user.
+ *
+ *   role === 'admin'    → atlasAgent (full toolset, sees finance + decisions)
+ *   role === 'standard' → atlasStaffAgent (no finance, no decisions)
+ *   role === 'client'   → null (client-portal users don't get Atlas)
+ *
+ * The user-facing brand is "Atlas" in both tiers; only the tool list
+ * and system prompt differ.
+ */
+export function getAgentForUser(user: SessionUser): AgentDef | null {
+  if (user.role === 'admin') return atlasAgent;
+  if (user.role === 'client') return null;
+  return atlasStaffAgent;
+}
+
 // Direct re-exports for callers that prefer named imports.
-export { atlasAgent };
+export { atlasAgent, atlasStaffAgent };

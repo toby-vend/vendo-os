@@ -54,9 +54,16 @@ import {
   insertChunk,
   searchSimilar,
 } from '../../web/lib/agents/memory/long-term';
-import { atlasAgent, getAgent, listAgents } from '../../web/lib/agents/agents';
+import {
+  atlasAgent,
+  atlasStaffAgent,
+  getAgent,
+  getAgentForUser,
+  listAgents,
+} from '../../web/lib/agents/agents';
 import { runAgentBackground } from '../../web/lib/agents/runtime';
 import { MODELS } from '../../web/lib/agents/models';
+import { TOOL_FACTORIES } from '../../web/lib/agents/tools';
 import type { ToolCtx, AgentDef, ChannelName } from '../../web/lib/agents/types';
 import type { SessionUser } from '../../web/lib/auth';
 
@@ -526,8 +533,56 @@ async function main(): Promise<void> {
   console.log('\n[24] agents registry getAgent / listAgents');
   {
     assert(getAgent('atlas') === atlasAgent, "getAgent('atlas') returns atlasAgent");
+    assert(getAgent('atlas-staff') === atlasStaffAgent, "getAgent('atlas-staff') returns staff");
     assert(getAgent('does-not-exist') === null, 'unknown agent returns null');
     assert(listAgents().includes('atlas'), 'listAgents includes atlas');
+    assert(listAgents().includes('atlas-staff'), 'listAgents includes atlas-staff');
+  }
+
+  console.log('\n[24a] tier router: getAgentForUser');
+  {
+    const adminUser: SessionUser = { ...mockUser(), role: 'admin' };
+    const standardUser: SessionUser = { ...mockUser(), role: 'standard' };
+    const clientUser: SessionUser = { ...mockUser(), role: 'client' };
+    assert(getAgentForUser(adminUser) === atlasAgent, "admin → atlasAgent");
+    assert(getAgentForUser(standardUser) === atlasStaffAgent, "standard → atlasStaffAgent");
+    assert(getAgentForUser(clientUser) === null, "client → null (no Atlas)");
+  }
+
+  console.log('\n[24b] staff agent has reduced toolset');
+  {
+    const adminTools = new Set(atlasAgent.tools);
+    const staffTools = new Set(atlasStaffAgent.tools);
+    assert(!staffTools.has('queryDecisions'), 'staff has no queryDecisions');
+    assert(!staffTools.has('searchKnowledge'), 'staff has no searchKnowledge');
+    assert(!staffTools.has('getClientHealth'), 'staff has no full getClientHealth');
+    assert(staffTools.has('getClientHealthStaff'), 'staff has getClientHealthStaff');
+    assert(staffTools.has('searchMeetings'), 'staff still has searchMeetings');
+    assert(staffTools.has('getCampaignPerformance'), 'staff still has campaign perf');
+    assert(adminTools.has('queryDecisions'), 'admin retains queryDecisions');
+    assert(adminTools.has('searchKnowledge'), 'admin retains searchKnowledge');
+    assert(adminTools.has('getClientHealth'), 'admin retains full getClientHealth');
+  }
+
+  console.log('\n[24c] staff getClientHealthStaff strips financial fields');
+  {
+    const ctx = mockCtx(
+      runId,
+      mockUser({ channels: ['health:read'] }),
+      new Set(),
+    );
+    const tool = TOOL_FACTORIES.getClientHealthStaff(ctx);
+    // Bogus client name — tool returns the "not found" shape, which still
+    // exercises the output schema and proves financial fields aren't there.
+    const result = (await tool.execute!(
+      { clientName: '__smoke_no_match__' },
+      { toolCallId: generateId(), messages: [] as never[] },
+    )) as Record<string, unknown>;
+    assert(typeof result === 'object' && result !== null, 'returned object');
+    assert(!('financialScore' in result), "no 'financialScore' field");
+    assert(!('prevScore' in result), "no 'prevScore' field");
+    assert('performanceScore' in result, "still has 'performanceScore'");
+    assert('relationshipScore' in result, "still has 'relationshipScore'");
   }
 
   // -------------------------------------------------------------------------

@@ -24,7 +24,6 @@ import {
   markExecuted,
 } from '../../web/lib/agents/recommendations';
 import { TOOL_FACTORIES, type ToolName } from '../../web/lib/agents/tools';
-import { atlasAgent } from '../../web/lib/agents/agents';
 import type { ChannelName, ToolCtx } from '../../web/lib/agents/types';
 import type { SessionUser } from '../../web/lib/auth';
 

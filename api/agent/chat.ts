@@ -21,7 +21,7 @@
 import type { UIMessage } from 'ai';
 import { parseCookies, verifySessionToken, generateId } from '../../web/lib/auth';
 import { getUserById } from '../../web/lib/queries/auth';
-import { atlasAgent } from '../../web/lib/agents/agents';
+import { getAgentForUser } from '../../web/lib/agents/agents';
 import { loadGraduations } from '../../web/lib/agents/permissions';
 import { streamAgent } from '../../web/lib/agents/runtime';
 import type { SessionUser, ChannelName } from '../../web/lib/agents/types';
@@ -102,12 +102,24 @@ export default async function handler(request: Request): Promise<Response> {
     return badRequest('messages array required');
   }
 
+  // -- Tier router ---------------------------------------------------------
+  // role === 'admin'    → atlasAgent (full toolset)
+  // role === 'standard' → atlasStaffAgent (no finance, no decisions)
+  // role === 'client'   → 403 (client-portal users don't get Atlas)
+  const agent = getAgentForUser(user);
+  if (!agent) {
+    return new Response(JSON.stringify({ error: 'No Atlas tier for your role.' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   // -- Stream ---------------------------------------------------------------
-  const graduations = await loadGraduations(atlasAgent.name);
+  const graduations = await loadGraduations(agent.name);
   const conversationId = body.conversationId ?? generateId();
 
   return streamAgent({
-    agent: atlasAgent,
+    agent,
     ctx: {
       runId: '', // stamped by the runtime
       user,

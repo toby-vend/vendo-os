@@ -3,6 +3,7 @@ import type { ToolCtx, AgentDef } from '../types';
 import { searchMeetings } from './search-meetings';
 import { searchClients } from './search-clients';
 import { getClientHealth } from './get-client-health';
+import { getClientHealthStaff } from './get-client-health-staff';
 import { getCampaignPerformance } from './get-campaign-performance';
 import { queryDecisions } from './query-decisions';
 import { searchKnowledge } from './search-knowledge';
@@ -15,6 +16,7 @@ export const TOOL_FACTORIES = {
   searchMeetings,
   searchClients,
   getClientHealth,
+  getClientHealthStaff,
   getCampaignPerformance,
   queryDecisions,
   searchKnowledge,
