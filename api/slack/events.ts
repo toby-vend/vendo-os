@@ -64,6 +64,7 @@ interface SlackEvent {
 // ---------------------------------------------------------------------------
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  console.error('[slack/events] invoked', { method: req.method, ua: req.headers['user-agent'] });
   if (req.method !== 'POST') {
     res.status(405).end('method not allowed');
     return;
@@ -104,6 +105,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(400).end('bad json');
     return;
   }
+
+  console.error('[slack/events] verified', { envType: env.type, eventType: env.event?.type, channelType: env.event?.channel_type });
 
   // 4) URL verification — one-off when the Slack App config is saved.
   if (env.type === 'url_verification') {
