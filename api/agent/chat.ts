@@ -24,7 +24,8 @@ import { getUserById } from '../../web/lib/queries/auth';
 import { getAgentForUser } from '../../web/lib/agents/agents';
 import { loadGraduations } from '../../web/lib/agents/permissions';
 import { streamAgent } from '../../web/lib/agents/runtime';
-import type { SessionUser, ChannelName } from '../../web/lib/agents/types';
+import type { SessionUser } from '../../web/lib/auth';
+import type { ChannelName } from '../../web/lib/agents/types';
 
 export const config = {
   runtime: 'nodejs',
