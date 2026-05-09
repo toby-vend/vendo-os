@@ -39,10 +39,55 @@ import {
   listPendingForInbox,
   acceptanceRate,
 } from '../../web/lib/agents/recommendations';
+import {
+  graduate,
+  revokeGraduation,
+  loadGraduations,
+} from '../../web/lib/agents/permissions';
+import { buildToolset } from '../../web/lib/agents/tools';
+import type { ToolCtx, AgentDef, ChannelName } from '../../web/lib/agents/types';
+import type { SessionUser } from '../../web/lib/auth';
 
 const SMOKE_AGENT = 'smoke-test';
 const SMOKE_USER = 'smoke-user';
 const SMOKE_TOOL = 'smoke.draftAsanaTask';
+
+// ---------------------------------------------------------------------------
+// Helpers used by the defineTool contract assertions.
+// ---------------------------------------------------------------------------
+
+function mockUser(opts: { channels?: string[]; allowedRoutes?: string[] } = {}): SessionUser {
+  return {
+    id: SMOKE_USER,
+    email: 'smoke@vendodigital.co.uk',
+    name: 'Smoke User',
+    role: 'admin',
+    mustChangePassword: false,
+    channels: opts.channels ?? [],
+    allowedRoutes: opts.allowedRoutes ?? [],
+    googleConnected: false,
+    clientId: null,
+    clientName: null,
+  };
+}
+
+function mockCtx(runId: string, user: SessionUser, graduations: Set<string>): ToolCtx {
+  return {
+    runId,
+    user,
+    channel: 'cron' as ChannelName,
+    conversationId: null,
+    graduations,
+  };
+}
+
+// Minimal AgentDef wrapper used to drive buildToolset() in smoke.
+const TEST_AGENT: AgentDef = {
+  name: SMOKE_AGENT,
+  model: 'anthropic/claude-haiku-4.5',
+  tools: ['searchClients', 'draftPushNotification'],
+  systemPrompt: () => 'smoke',
+};
 
 async function reset(): Promise<void> {
   // Delete in dependency order. recommendations references runs; outcomes
@@ -58,6 +103,10 @@ async function reset(): Promise<void> {
   });
   await db.execute({
     sql: `DELETE FROM agent_runs WHERE agent = ?`,
+    args: [SMOKE_AGENT],
+  });
+  await db.execute({
+    sql: `DELETE FROM agent_graduations WHERE agent = ?`,
     args: [SMOKE_AGENT],
   });
 }
@@ -220,6 +269,101 @@ async function main(): Promise<void> {
   assert(rate.total === 1, 'one decided recommendation in window');
   assert(rate.approved === 1, 'edited counts toward approved');
   assert(rate.rate === 1, 'acceptance rate is 1.0');
+
+  // -------------------------------------------------------------------------
+  // defineTool contract — permission gate, graduation gate, dry-run vs execute
+  // -------------------------------------------------------------------------
+
+  const TOOL_CALL_OPTS = { toolCallId: generateId(), messages: [] as never[] };
+
+  console.log('\n[12] defineTool — permission denied returns ToolErrorResult');
+  {
+    const ctx = mockCtx(runId, mockUser({ channels: [] }), new Set());
+    const tools = buildToolset(TEST_AGENT, ctx);
+    const result = (await tools.searchClients.execute!(
+      { query: 'smoke' },
+      TOOL_CALL_OPTS,
+    )) as { ok?: boolean; error?: string };
+    assert(result.ok === false, 'returns ok=false');
+    assert(result.error === 'permission_denied', 'error is permission_denied');
+  }
+
+  console.log('\n[13] defineTool — read tool succeeds with capability');
+  {
+    const ctx = mockCtx(runId, mockUser({ channels: ['clients:read'] }), new Set());
+    const tools = buildToolset(TEST_AGENT, ctx);
+    const result = (await tools.searchClients.execute!(
+      { query: '__smoke_test_no_match__' },
+      TOOL_CALL_OPTS,
+    )) as { hits?: unknown[] };
+    assert(Array.isArray(result.hits), 'returns hits array');
+  }
+
+  console.log('\n[14] graduation gate — execute coerced to dry-run when ungraduated');
+  {
+    const ctx = mockCtx(runId, mockUser({ channels: ['push:write'] }), new Set());
+    const tools = buildToolset(TEST_AGENT, ctx);
+    const result = (await tools.draftPushNotification.execute!(
+      {
+        mode: 'execute',
+        userId: 'never-existed',
+        title: 'smoke',
+        body: 'smoke body',
+        url: 'https://vendodigital.co.uk/',
+      },
+      TOOL_CALL_OPTS,
+    )) as { mode?: string; sent?: boolean };
+    assert(result.mode === 'dry-run', 'mode coerced from execute to dry-run');
+    assert(result.sent === false, 'sent=false in dry-run');
+  }
+
+  console.log('\n[15] graduation gate — execute respected when graduated');
+  {
+    await graduate({
+      agent: SMOKE_AGENT,
+      toolName: 'draftPushNotification',
+      graduatedBy: SMOKE_USER,
+      notes: 'smoke-test graduation',
+    });
+    const graduations = await loadGraduations(SMOKE_AGENT);
+    assert(graduations.has('draftPushNotification'), 'graduation row loadable');
+
+    const ctx = mockCtx(runId, mockUser({ channels: ['push:write'] }), graduations);
+    const tools = buildToolset(TEST_AGENT, ctx);
+    const result = (await tools.draftPushNotification.execute!(
+      {
+        mode: 'execute',
+        userId: 'never-existed',
+        title: 'smoke graduated',
+        body: 'smoke body',
+        url: 'https://vendodigital.co.uk/',
+      },
+      TOOL_CALL_OPTS,
+    )) as { mode?: string; sent?: boolean };
+    assert(result.mode === 'execute', 'mode is execute when graduated');
+    assert(typeof result.sent === 'boolean', 'sent is boolean');
+
+    await revokeGraduation(SMOKE_AGENT, 'draftPushNotification');
+    const after = await loadGraduations(SMOKE_AGENT);
+    assert(!after.has('draftPushNotification'), 'revokeGraduation clears the row');
+  }
+
+  console.log('\n[16] tool error path is logged to agent_tool_calls');
+  {
+    const toolCalls = await db.execute({
+      sql: `SELECT phase, error, tool_name FROM agent_tool_calls
+            WHERE run_id = ? AND tool_name = 'searchClients' AND phase = 'error'`,
+      args: [runId],
+    });
+    assert(
+      toolCalls.rows.length >= 1,
+      'permission_denied recorded as error phase in trace',
+    );
+    assert(
+      String(toolCalls.rows[0].error).includes('permission_denied'),
+      'error column carries permission_denied detail',
+    );
+  }
 
   console.log('\n--- Smoke test passed.');
   console.log(`Run id: ${runId}`);
