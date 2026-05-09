@@ -19,6 +19,7 @@
  * users:read.email.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { waitUntil } from '@vercel/functions';
 import { verifySlackSignature, readRawBody } from '../../web/lib/agents/channels/slack-verify.js';
 import {
   slackUserIdToVendoUser,
@@ -152,19 +153,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  // 7) Ack Slack within the 3-second budget. Everything below this line
-  //    keeps running on the same function instance until the handler
-  //    promise resolves; @vercel/node does not freeze the function
-  //    after res.end().
-  res.status(200).end();
-
-  // 8) Resolve the speaker → Vendo user. If unknown, post a polite reply
-  //    so the human sees what's happened.
+  // 7) Schedule the agent run as a background task and ack within the
+  //    3-second budget. Vercel's Fluid Compute freezes the function the
+  //    moment we send the response, so any work that needs to outlive
+  //    the ack must be inside waitUntil().
   const channel = event.channel;
   const threadTs = event.thread_ts || (isMention ? event.ts : undefined);
   const slackUserId = event.user;
   const inboundText = stripBotMention(event.text);
 
+  waitUntil(
+    runAgentAndDeliver({
+      slackUserId,
+      channel,
+      threadTs,
+      inboundText,
+      isMention,
+    }),
+  );
+
+  res.status(200).end();
+}
+
+async function runAgentAndDeliver(opts: {
+  slackUserId: string;
+  channel: string;
+  threadTs: string | undefined;
+  inboundText: string;
+  isMention: boolean;
+}): Promise<void> {
+  const { slackUserId, channel, threadTs, inboundText, isMention } = opts;
   try {
     const user = await slackUserIdToVendoUser(slackUserId);
     if (!user) {
@@ -191,7 +209,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       user,
       channel: 'slack' as ChannelName,
       conversationId: threadTs ?? null,
-      graduations: new Set(), // load real graduations? for v1, keep all writes as drafts
+      graduations: new Set(),
     };
 
     const result = await runAgentBackground({
@@ -209,8 +227,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[slack/events] handler failed:', message);
-    // Best-effort error notice to the user — already 200'd, so no failure
-    // can be signalled to Slack itself.
     try {
       await postSlackMessage({
         channel,

@@ -122,6 +122,7 @@
     "@supabase/supabase-js": "^2.105.4",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.3.3",
+    "@vercel/functions": "^3.5.1",
     "ai": "^6.0.177",
     "bcryptjs": "^3.0.3",
     "dotenv": "^16.4.0",

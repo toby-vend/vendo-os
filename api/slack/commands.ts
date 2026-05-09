@@ -16,6 +16,7 @@
  * Bot scopes required: commands, users:read.email.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { waitUntil } from '@vercel/functions';
 import {
   verifySlackSignature,
   readRawBody,
@@ -80,14 +81,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  // Schedule the agent run as a post-response background task. Vercel's
+  // Fluid Compute freezes the function the moment we send the response,
+  // so anything we do before waitUntil() must be the response itself —
+  // and anything after must be inside waitUntil() for the platform to
+  // keep the instance alive.
+  waitUntil(runAgentAndDeliver({ slackUserId, text, responseUrl }));
+
   // ACK ephemerally so the user sees something within 3 s. The final
   // answer comes via response_url once the agent finishes.
   res.status(200).json({
     response_type: 'ephemeral',
     text: ':hourglass_flowing_sand: Atlas is thinking…',
   });
+}
 
-  // -- Background work ------------------------------------------------------
+async function runAgentAndDeliver(opts: {
+  slackUserId: string;
+  text: string;
+  responseUrl: string;
+}): Promise<void> {
+  const { slackUserId, text, responseUrl } = opts;
   try {
     const user = await slackUserIdToVendoUser(slackUserId);
     if (!user) {
@@ -113,7 +127,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       agent,
       ctx,
       prompt: text,
-      trigger: 'slack:command:/vendo',
+      trigger: 'slack:command:/atlas',
       conversationId: null,
     });
 
