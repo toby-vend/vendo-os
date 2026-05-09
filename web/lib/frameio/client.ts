@@ -189,3 +189,73 @@ export async function listAccountUsers(accountId: string): Promise<FrameioAccoun
 export async function getMe(): Promise<{ id: string; email: string | null } | null> {
   return getJson<{ id: string; email: string | null }>('/me');
 }
+
+// --- Library walk (Phase 6) ---
+
+export interface FrameioWorkspaceListEntry {
+  id: string;
+  name: string;
+  account_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FrameioFolderChild {
+  id: string;
+  name: string;
+  /** 'folder' | 'file' | 'version_stack' | etc. */
+  type: string;
+  status?: string | null;
+  file_size?: number | null;
+  /** MIME-style on files (e.g. 'video/quicktime'); null for folders. */
+  media_type?: string | null;
+  project_id: string;
+  parent_id: string | null;
+  view_url?: string | null;
+  thumbnail_url?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Generic paginator over a `{ data: T[], links: { next? } }` envelope.
+ * Mirrors listAccountUsers' next-link normalisation.
+ */
+async function listAll<T>(initialPath: string): Promise<T[]> {
+  const all: T[] = [];
+  let path: string | null = initialPath;
+  for (let i = 0; i < 100 && path; i += 1) {
+    const token = await getValidAccessToken();
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new FrameioApiError(res.status, `${BASE_URL}${path}`, body);
+    }
+    const json = (await res.json()) as { data: T[]; links?: { next?: string | null } };
+    all.push(...json.data);
+    path = json.links?.next ?? null;
+    if (path && path.startsWith('http')) path = new URL(path).pathname + new URL(path).search;
+    if (path && path.startsWith('/v4')) path = path.slice(3);
+  }
+  return all;
+}
+
+export async function listWorkspaces(accountId: string): Promise<FrameioWorkspaceListEntry[]> {
+  return listAll<FrameioWorkspaceListEntry>(`/accounts/${accountId}/workspaces`);
+}
+
+export async function listProjectsInWorkspace(
+  accountId: string,
+  workspaceId: string,
+): Promise<FrameioProject[]> {
+  return listAll<FrameioProject>(`/accounts/${accountId}/workspaces/${workspaceId}/projects`);
+}
+
+export async function listFolderChildren(
+  accountId: string,
+  folderId: string,
+): Promise<FrameioFolderChild[]> {
+  return listAll<FrameioFolderChild>(`/accounts/${accountId}/folders/${folderId}/children`);
+}

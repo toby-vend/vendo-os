@@ -32,6 +32,8 @@
       ·
       token expires <%= fmtDate(it.connection.tokenExpiresAt) %>
       ·
+      <a href="/dashboards/frame-io/library" style="color: #94A3B8;">video library</a>
+      ·
       <a href="/admin/frameio-mapping" style="color: #94A3B8;">manage mappings</a>
     <% } else { %>
       <span style="color: #EF4444;">●</span> Not connected — <a href="/api/frameio/oauth/start">connect Frame.io</a>

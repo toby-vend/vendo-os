@@ -13,6 +13,7 @@ import { syncMetaAds } from '../../lib/jobs/sync-meta-ads.js';
 import { syncGhl } from '../../lib/jobs/sync-ghl.js';
 import { purgeSuggestionDrafts } from '../../lib/jobs/purge-suggestion-drafts.js';
 import { processFrameioEvents } from '../../lib/frameio/processor.js';
+import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -239,6 +240,23 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/frameio-process] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Frame.io processing failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /sync-frameio — Nightly Frame.io library backfill (Phase 6).
+   * Walks every workspace → project → folder → video, mirrors into
+   * frameio_assets, soft-deletes anything missing.
+   * Schedule: 03:30 UTC daily (vercel.json).
+   */
+  app.get('/sync-frameio', async (_request, reply) => {
+    try {
+      const result = await syncFrameioLibrary({ logger: (m) => console.log('[cron/sync-frameio]', m) });
+      return reply.send({ ok: true, message: 'Frame.io library synced', ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/sync-frameio] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Frame.io library sync failed', error: msg });
     }
   });
 };

@@ -88,6 +88,10 @@
     {
       "path": "/api/cron/frameio-process",
       "schedule": "*/2 * * * *"
+    },
+    {
+      "path": "/api/cron/sync-frameio",
+      "schedule": "30 3 * * *"
     }
   ],
   "routes": [

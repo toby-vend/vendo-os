@@ -21,6 +21,7 @@
     "sync:meta:adlib": "tsx scripts/sync/sync-meta-ad-library.ts",
     "sync:asana": "tsx scripts/sync/sync-asana.ts",
     "sync:asana:discover": "tsx scripts/sync/sync-asana.ts --discover",
+    "sync:frameio": "tsx scripts/sync/sync-frameio.ts",
     "sync:portal": "tsx scripts/sync/push-clients-to-portal.ts",
     "dev": "tsx watch web/start.ts",
     "start": "tsx web/start.ts",

@@ -57,6 +57,7 @@ import { pipelineTrackerRoutes } from './routes/dashboards/pipeline.js';
 import { reviewsRoutes } from './routes/dashboards/reviews.js';
 import { healthRoutes } from './routes/dashboards/health.js';
 import { frameIoDashboardRoutes } from './routes/dashboards/frame-io.js';
+import { frameIoLibraryRoutes } from './routes/dashboards/frame-io-library.js';
 // client-database merged into /clients — see routes/clients.ts
 import { operationsRoutes } from './routes/operations.js';
 import { skillsLibraryRoutes } from './routes/skills-library.js';
@@ -403,6 +404,7 @@ app.register(profitabilityRoutes, { prefix: '/dashboards/profitability' });
 app.register(pipelineTrackerRoutes, { prefix: '/dashboards/pipeline' });
 app.register(reviewsRoutes, { prefix: '/dashboards/reviews' });
 app.register(healthRoutes, { prefix: '/dashboards/health' });
+app.register(frameIoLibraryRoutes, { prefix: '/dashboards/frame-io/library' });
 app.register(frameIoDashboardRoutes, { prefix: '/dashboards/frame-io' });
 
 // Export for Vercel
