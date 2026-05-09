@@ -14,11 +14,11 @@
  * full one; one of the two is in scope at a time.
  */
 import { z } from 'zod';
-import { defineTool } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import { scalar } from '../../queries/base';
-import { getClientHealth as getClientHealthHelper } from '../../queries/clients';
-import type { ToolCtx } from '../types';
+import { defineTool } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import { scalar } from '../../queries/base.js';
+import { getClientHealth as getClientHealthHelper } from '../../queries/clients.js';
+import type { ToolCtx } from '../types.js';
 
 const inputSchema = z
   .object({

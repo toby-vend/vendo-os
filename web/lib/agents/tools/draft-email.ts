@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { defineTool, modeField } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import type { ToolCtx } from '../types';
+import { defineTool, modeField } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import type { ToolCtx } from '../types.js';
 
 // No execute path is possible — there is no SMTP / SES / mail provider
 // configured in this codebase yet. The tool always returns dry-run regardless

@@ -2,7 +2,7 @@
  * Agents registry — single import surface for the runtime, channel
  * adapters, and route handlers.
  *
- *   import { getAgent } from '../agents';
+ *   import { getAgent } from '../agents/index.js';
  *   const atlas = getAgent('atlas');
  *
  * Phase 2 workflow agents (Daily Brief, Monitor, Concern, etc.) and
@@ -10,10 +10,10 @@
  * as they're built. Adding an agent is two lines: import + entry in
  * AGENTS.
  */
-import type { AgentDef } from '../types';
-import type { SessionUser } from '../../auth';
-import { atlasAgent } from './atlas';
-import { atlasStaffAgent } from './atlas-staff';
+import type { AgentDef } from '../types.js';
+import type { SessionUser } from '../../auth.js';
+import { atlasAgent } from './atlas.js';
+import { atlasStaffAgent } from './atlas-staff.js';
 
 const AGENTS: Record<string, AgentDef> = {
   atlas: atlasAgent,

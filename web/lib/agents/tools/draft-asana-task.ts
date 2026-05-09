@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { defineTool, modeField } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import { scalar } from '../../queries/base';
-import { createPrivateAsanaTask } from '../../asana/tasks';
-import type { ToolCtx } from '../types';
+import { defineTool, modeField } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import { scalar } from '../../queries/base.js';
+import { createPrivateAsanaTask } from '../../asana/tasks.js';
+import type { ToolCtx } from '../types.js';
 
 const inputSchema = z.object({
   mode: modeField(),

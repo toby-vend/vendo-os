@@ -3,16 +3,16 @@
  *
  * Single import surface for the runtime + cron handlers:
  *
- *   import { getChannel, recToCard } from '../channels';
+ *   import { getChannel, recToCard } from '../channels/index.js';
  *   await getChannel('web').requestApproval(userId, recToCard(rec));
  *
  * Adding a new channel = adding to CHANNELS and to the union in
  * web/lib/agents/types#ChannelName.
  */
-import type { Channel, ChannelName } from '../types';
-import { webChannel } from './web';
-import { slackChannel } from './slack';
-import { telegramChannel } from './telegram';
+import type { Channel, ChannelName } from '../types.js';
+import { webChannel } from './web.js';
+import { slackChannel } from './slack.js';
+import { telegramChannel } from './telegram.js';
 
 const CHANNELS: Record<'web' | 'slack' | 'telegram', Channel> = {
   web: webChannel,
@@ -40,5 +40,5 @@ export function defaultDeliveryChannels(): DeliveryChannel[] {
 
 // Re-exports so consumers only need this one file.
 export { webChannel, slackChannel, telegramChannel };
-export { recToCard, logChannel } from './_channel';
-export type { Channel, ChannelName, ApprovalCard, ApprovalCardField } from './_channel';
+export { recToCard, logChannel } from './_channel.js';
+export type { Channel, ChannelName, ApprovalCard, ApprovalCardField } from './_channel.js';

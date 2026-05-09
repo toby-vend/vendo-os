@@ -1,16 +1,16 @@
 import type { Tool } from 'ai';
-import type { ToolCtx, AgentDef } from '../types';
-import { searchMeetings } from './search-meetings';
-import { searchClients } from './search-clients';
-import { getClientHealth } from './get-client-health';
-import { getClientHealthStaff } from './get-client-health-staff';
-import { getCampaignPerformance } from './get-campaign-performance';
-import { queryDecisions } from './query-decisions';
-import { searchKnowledge } from './search-knowledge';
-import { draftAsanaTask } from './draft-asana-task';
-import { draftSlackMessage } from './draft-slack-message';
-import { draftPushNotification } from './draft-push-notification';
-import { draftEmail } from './draft-email';
+import type { ToolCtx, AgentDef } from '../types.js';
+import { searchMeetings } from './search-meetings.js';
+import { searchClients } from './search-clients.js';
+import { getClientHealth } from './get-client-health.js';
+import { getClientHealthStaff } from './get-client-health-staff.js';
+import { getCampaignPerformance } from './get-campaign-performance.js';
+import { queryDecisions } from './query-decisions.js';
+import { searchKnowledge } from './search-knowledge.js';
+import { draftAsanaTask } from './draft-asana-task.js';
+import { draftSlackMessage } from './draft-slack-message.js';
+import { draftPushNotification } from './draft-push-notification.js';
+import { draftEmail } from './draft-email.js';
 
 export const TOOL_FACTORIES = {
   searchMeetings,

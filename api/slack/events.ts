@@ -19,14 +19,14 @@
  * users:read.email.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { verifySlackSignature, readRawBody } from '../../web/lib/agents/channels/slack-verify';
+import { verifySlackSignature, readRawBody } from '../../web/lib/agents/channels/slack-verify.js';
 import {
   slackUserIdToVendoUser,
   postSlackMessage,
-} from '../../web/lib/agents/channels/slack';
-import { getAgentForUser } from '../../web/lib/agents/agents';
-import { runAgentBackground } from '../../web/lib/agents/runtime';
-import type { ToolCtx, ChannelName } from '../../web/lib/agents/types';
+} from '../../web/lib/agents/channels/slack.js';
+import { getAgentForUser } from '../../web/lib/agents/agents/index.js';
+import { runAgentBackground } from '../../web/lib/agents/runtime.js';
+import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
 
 // Disable @vercel/node's body parser — we need the raw bytes Slack signed.
 // The handler reads them via readRawBody() before any other access.

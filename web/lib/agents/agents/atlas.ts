@@ -13,8 +13,8 @@
  *     been done
  *   - Cite sources by tool result IDs (meeting id, client id, etc.)
  */
-import type { AgentDef, ToolCtx } from '../types';
-import { MODELS } from '../models';
+import type { AgentDef, ToolCtx } from '../types.js';
+import { MODELS } from '../models.js';
 
 const TOOLS = [
   // Read tools — Atlas can read anything the caller has permission for.

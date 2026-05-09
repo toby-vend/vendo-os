@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { defineTool } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import { searchMeetings as searchMeetingsHelper } from '../../queries/meetings';
-import type { ToolCtx } from '../types';
+import { defineTool } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import { searchMeetings as searchMeetingsHelper } from '../../queries/meetings.js';
+import type { ToolCtx } from '../types.js';
 
 const inputSchema = z.object({
   query: z.string().min(2).describe('FTS query — wildcard expanded'),

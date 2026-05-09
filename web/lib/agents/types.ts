@@ -6,7 +6,7 @@
  * source_links, edit_diff, execute_result, metadata) are stored as TEXT and
  * parsed at the boundary; the typed shape is enforced in helper modules.
  */
-import type { SessionUser } from '../auth';
+import type { SessionUser } from '../auth.js';
 
 // ---------------------------------------------------------------------------
 // String literal unions matching the schema CHECK conventions.

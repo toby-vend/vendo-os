@@ -21,14 +21,14 @@
  *     is fast enough for ≤50k rows; we'll switch to vector_top_k(idx,...)
  *     once chunk count grows beyond that
  */
-import { db } from '../../queries/base';
-import { generateId } from '../../auth';
+import { db } from '../../queries/base.js';
+import { generateId } from '../../auth.js';
 import {
   embedTexts,
   embedOne,
   serialiseVector,
   EMBEDDING_DIM,
-} from './embed';
+} from './embed.js';
 
 export type MemoryScope =
   | 'meeting'

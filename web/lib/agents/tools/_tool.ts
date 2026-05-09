@@ -23,7 +23,7 @@
  * Write tools MUST include the `mode` field in their input schema. Use
  * `modeField()` for the canonical shape:
  *
- *   import { defineTool, modeField, z } from './_tool';
+ *   import { defineTool, modeField, z } from './_tool.js';
  *
  *   export const draftAsanaTask = (ctx: ToolCtx) => defineTool({
  *     name: 'draftAsanaTask',
@@ -40,9 +40,9 @@
  */
 import { tool, zodSchema } from 'ai';
 import { z } from 'zod';
-import { generateId } from '../../auth';
-import { recordToolCall } from '../trace';
-import type { ToolCtx, ToolMode } from '../types';
+import { generateId } from '../../auth.js';
+import { recordToolCall } from '../trace.js';
+import type { ToolCtx, ToolMode } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Mode field helper — write tools include this in their input schema.
@@ -220,5 +220,5 @@ export function defineTool<TIn, TOut>(
 }
 
 // Re-export types most consumers will need.
-export type { ToolCtx } from '../types';
+export type { ToolCtx } from '../types.js';
 export { z };

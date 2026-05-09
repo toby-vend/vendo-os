@@ -14,10 +14,10 @@
  * If SLACK_BOT_TOKEN is unset, every method logs and returns — never
  * throws. This keeps the runtime working in dev without a Slack app.
  */
-import type { Channel, ApprovalCard } from './_channel';
-import { logChannel } from './_channel';
-import { getUserById, getUserByEmail, userRowToSessionUser } from '../../queries/auth';
-import type { SessionUser } from '../../auth';
+import type { Channel, ApprovalCard } from './_channel.js';
+import { logChannel } from './_channel.js';
+import { getUserById, getUserByEmail, userRowToSessionUser } from '../../queries/auth.js';
+import type { SessionUser } from '../../auth.js';
 
 const SLACK_API = 'https://slack.com/api';
 const TOKEN = process.env.SLACK_BOT_TOKEN;

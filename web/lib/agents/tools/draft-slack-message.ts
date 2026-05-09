@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { defineTool, modeField } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import { dmTobyFailsafe } from '../../classification/slack';
-import type { ToolCtx } from '../types';
+import { defineTool, modeField } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import { dmTobyFailsafe } from '../../classification/slack.js';
+import type { ToolCtx } from '../types.js';
 
 const inputSchema = z.object({
   mode: modeField(),

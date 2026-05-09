@@ -12,15 +12,15 @@
  *
  * `recordOutcome()` is the 30-day review hook used by the Decision Engine.
  */
-import { db } from '../queries/base';
-import { generateId } from '../auth';
+import { db } from '../queries/base.js';
+import { generateId } from '../auth.js';
 import type {
   CreateRecommendationInput,
   DecideRecommendationInput,
   RecommendationRow,
   RecommendationStatus,
   RecordOutcomeInput,
-} from './types';
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Create — called from any write tool while in dry-run mode.

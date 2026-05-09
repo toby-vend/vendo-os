@@ -19,12 +19,12 @@
  *   - Honours the graduations table — write tools default to dry-run.
  */
 import type { UIMessage } from 'ai';
-import { parseCookies, verifySessionToken, generateId } from '../../web/lib/auth';
-import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth';
-import { getAgentForUser } from '../../web/lib/agents/agents';
-import { loadGraduations } from '../../web/lib/agents/permissions';
-import { streamAgent } from '../../web/lib/agents/runtime';
-import type { ChannelName } from '../../web/lib/agents/types';
+import { parseCookies, verifySessionToken, generateId } from '../../web/lib/auth.js';
+import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth.js';
+import { getAgentForUser } from '../../web/lib/agents/agents/index.js';
+import { loadGraduations } from '../../web/lib/agents/permissions.js';
+import { streamAgent } from '../../web/lib/agents/runtime.js';
+import type { ChannelName } from '../../web/lib/agents/types.js';
 
 export const config = {
   runtime: 'nodejs',

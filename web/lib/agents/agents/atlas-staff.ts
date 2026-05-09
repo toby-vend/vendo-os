@@ -17,8 +17,8 @@
  *   - queryDecisions  → REMOVED (decisions are admin territory)
  *   - searchKnowledge → REMOVED (would surface decisions)
  */
-import type { AgentDef, ToolCtx } from '../types';
-import { MODELS } from '../models';
+import type { AgentDef, ToolCtx } from '../types.js';
+import { MODELS } from '../models.js';
 
 const TOOLS = [
   'searchMeetings',

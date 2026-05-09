@@ -10,8 +10,8 @@
  * mode='execute'; when it does not, mode is structurally coerced to
  * 'dry-run' regardless of what the model requested.
  */
-import { db } from '../queries/base';
-import type { SessionUser } from '../auth';
+import { db } from '../queries/base.js';
+import type { SessionUser } from '../auth.js';
 
 // ---------------------------------------------------------------------------
 // Capability slugs registered in the agent runtime. Adding a new slug here is

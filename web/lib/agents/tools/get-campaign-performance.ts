@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { defineTool } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import { rows, scalar } from '../../queries/base';
+import { defineTool } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import { rows, scalar } from '../../queries/base.js';
 import {
   getCampaignSummary,
   getGadsCampaignSummary,
-} from '../../queries/ads';
-import type { ToolCtx } from '../types';
+} from '../../queries/ads.js';
+import type { ToolCtx } from '../types.js';
 
 const inputSchema = z.object({
   clientId: z.number().int(),

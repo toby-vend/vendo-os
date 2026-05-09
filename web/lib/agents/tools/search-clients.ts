@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { defineTool } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import { rows } from '../../queries/base';
-import type { ToolCtx } from '../types';
+import { defineTool } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import { rows } from '../../queries/base.js';
+import type { ToolCtx } from '../types.js';
 
 interface ClientSearchRow {
   id: number;

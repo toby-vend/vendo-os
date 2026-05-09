@@ -13,10 +13,10 @@ export type {
   ApprovalCard,
   ApprovalCardField,
   ChannelName,
-} from '../types';
+} from '../types.js';
 
-import type { ApprovalCard } from '../types';
-import type { RecommendationRow } from '../types';
+import type { ApprovalCard } from '../types.js';
+import type { RecommendationRow } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // recToCard — turn a recommendation row into the channel-facing ApprovalCard.

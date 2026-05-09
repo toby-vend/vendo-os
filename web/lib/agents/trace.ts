@@ -10,14 +10,14 @@
  * exceptions are recordMessage and recordToolCall, which log and continue
  * because losing one trace row should never break a live agent turn.
  */
-import { db } from '../queries/base';
-import { generateId } from '../auth';
+import { db } from '../queries/base.js';
+import { generateId } from '../auth.js';
 import type {
   EndRunInput,
   RecordMessageInput,
   RecordToolCallInput,
   StartRunInput,
-} from './types';
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Runs

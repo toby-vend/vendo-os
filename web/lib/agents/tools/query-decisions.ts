@@ -2,9 +2,9 @@ import { z } from 'zod';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineTool } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import type { ToolCtx } from '../types';
+import { defineTool } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import type { ToolCtx } from '../types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // web/lib/agents/tools → project root is four levels up.

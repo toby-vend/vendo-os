@@ -8,9 +8,9 @@
  * If TELEGRAM_BOT_TOKEN is unset, every method logs and returns — same
  * graceful degradation as the Slack adapter.
  */
-import type { Channel, ApprovalCard } from './_channel';
-import { logChannel } from './_channel';
-import { db } from '../../queries/base';
+import type { Channel, ApprovalCard } from './_channel.js';
+import { logChannel } from './_channel.js';
+import { db } from '../../queries/base.js';
 
 const TG_API_BASE = 'https://api.telegram.org/bot';
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;

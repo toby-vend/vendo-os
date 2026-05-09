@@ -41,10 +41,10 @@ import {
   type ToolSet,
   type UIMessage,
 } from 'ai';
-import { startRun, endRun, recordMessage } from './trace';
-import { buildToolset } from './tools';
-import { create as createRecommendation } from './recommendations';
-import type { AgentDef, ChannelName, RunStatus, ToolCtx } from './types';
+import { startRun, endRun, recordMessage } from './trace.js';
+import { buildToolset } from './tools/index.js';
+import { create as createRecommendation } from './recommendations.js';
+import type { AgentDef, ChannelName, RunStatus, ToolCtx } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Per-tier rough cost tariff in USD per 1M tokens. Keep these conservative;

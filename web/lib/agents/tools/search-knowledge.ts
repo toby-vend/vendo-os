@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { defineTool } from './_tool';
-import { CAPABILITIES } from '../permissions';
-import { searchSimilar } from '../memory/long-term';
-import type { ToolCtx } from '../types';
+import { defineTool } from './_tool.js';
+import { CAPABILITIES } from '../permissions.js';
+import { searchSimilar } from '../memory/long-term.js';
+import type { ToolCtx } from '../types.js';
 
 // Wired to the libSQL native vector store via web/lib/agents/memory/long-term.
 // Returns up to `limit` chunks ordered by cosine distance to the embedded

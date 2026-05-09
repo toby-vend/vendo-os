@@ -10,7 +10,7 @@
  * shouldn't abort the whole job.
  */
 import { embedMany } from 'ai';
-import { EMBEDDING_MODEL } from '../models';
+import { EMBEDDING_MODEL } from '../models.js';
 
 export const EMBEDDING_DIM = 1536;
 

@@ -16,15 +16,15 @@
  * audit case for it.)
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { parseCookies, verifySessionToken } from '../../web/lib/auth';
-import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth';
+import { parseCookies, verifySessionToken } from '../../web/lib/auth.js';
+import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth.js';
 import {
   getById,
   decide,
   markExecuted,
-} from '../../web/lib/agents/recommendations';
-import { TOOL_FACTORIES, type ToolName } from '../../web/lib/agents/tools';
-import type { ChannelName, ToolCtx } from '../../web/lib/agents/types';
+} from '../../web/lib/agents/recommendations.js';
+import { TOOL_FACTORIES, type ToolName } from '../../web/lib/agents/tools/index.js';
+import type { ChannelName, ToolCtx } from '../../web/lib/agents/types.js';
 
 interface ApproveBody {
   recId: string;

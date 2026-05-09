@@ -8,9 +8,9 @@
  * agent_recommendations (the draft tool wrote it); the /inbox page reads
  * it back when the user follows the push.
  */
-import type { Channel, ApprovalCard } from './_channel';
-import { logChannel } from './_channel';
-import { sendPushToUser } from '../../push-sender';
+import type { Channel, ApprovalCard } from './_channel.js';
+import { logChannel } from './_channel.js';
+import { sendPushToUser } from '../../push-sender.js';
 
 export const webChannel: Channel = {
   name: 'web',
