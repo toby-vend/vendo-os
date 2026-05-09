@@ -5,11 +5,12 @@
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "strict": true,
+    "jsx": "react-jsx",
     "outDir": "dist",
     "rootDir": ".",
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["scripts/**/*.ts", "web/**/*.ts"],
+  "include": ["scripts/**/*.ts", "web/**/*.ts", "web/**/*.tsx", "api/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
