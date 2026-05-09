@@ -117,6 +117,23 @@ export interface FrameioUser {
   email: string | null;
   name: string | null;
   avatar_url?: string | null;
+  /** Frame.io account role — 'member' / 'owner' / 'admin' / etc. for team
+   *  members, undefined for guest/review-link commenters who don't appear
+   *  in the account-users list. */
+  role?: string | null;
+}
+
+/** Shape returned by GET /v4/accounts/:id/users (paginated list). */
+export interface FrameioAccountUserEntry {
+  user: {
+    id: string | null;
+    name: string | null;
+    email: string | null;
+    avatar_url: string | null;
+    adobe_user_id: string | null;
+    active: boolean;
+  };
+  role: string;
 }
 
 // --- Endpoints ---
@@ -137,10 +154,36 @@ export async function getWorkspace(accountId: string, workspaceId: string): Prom
   return getJson<FrameioWorkspace>(`/accounts/${accountId}/workspaces/${workspaceId}`);
 }
 
-export async function getUser(accountId: string, userId: string): Promise<FrameioUser | null> {
-  // V4 returns user info via the account_users endpoint — exact path may vary
-  // by Adobe's roll-out. We try the most common shape first.
-  return getJson<FrameioUser>(`/accounts/${accountId}/users/${userId}`);
+/**
+ * V4 doesn't expose a get-user-by-id endpoint. We list the account's users
+ * and walk pages until we hit the one we want or run out. Pages are small
+ * (Vendo's account has ~4 users today) so this is cheap; for accounts with
+ * hundreds of members the caller should cache the full list in DB.
+ */
+export async function listAccountUsers(accountId: string): Promise<FrameioAccountUserEntry[]> {
+  const all: FrameioAccountUserEntry[] = [];
+  let path: string | null = `/accounts/${accountId}/users`;
+  // Hard cap at 50 pages to bound runtime regardless of API behaviour.
+  for (let i = 0; i < 50 && path; i += 1) {
+    // V4 list endpoints return { data: [...], links: { next?, prev? } }
+    const token = await getValidAccessToken();
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new FrameioApiError(res.status, `${BASE_URL}${path}`, body);
+    }
+    const json = (await res.json()) as { data: FrameioAccountUserEntry[]; links?: { next?: string | null } };
+    all.push(...json.data);
+    path = json.links?.next ?? null;
+    // V4 returns full URLs in links.next — strip the host so getJson-style
+    // relative paths still work. (Some hands roll absolute URLs, others
+    // relative; tolerate both.)
+    if (path && path.startsWith('http')) path = new URL(path).pathname + new URL(path).search;
+    if (path && path.startsWith('/v4')) path = path.slice(3);
+  }
+  return all;
 }
 
 export async function getMe(): Promise<{ id: string; email: string | null } | null> {
