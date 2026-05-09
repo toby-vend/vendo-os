@@ -1,11 +1,13 @@
 import { z } from 'zod';
 import { defineTool } from './_tool';
 import { CAPABILITIES } from '../permissions';
+import { searchSimilar } from '../memory/long-term';
 import type { ToolCtx } from '../types';
 
-// TODO(Block 5): wire to vector store + embedding pipeline.
-// This stub exists so agents and the registry can declare the tool now;
-// it always returns an empty hit list until the knowledge base is built.
+// Wired to the libSQL native vector store via web/lib/agents/memory/long-term.
+// Returns up to `limit` chunks ordered by cosine distance to the embedded
+// query. `similarity` is reported as `1 - distance` so callers can use the
+// natural "higher is better" convention.
 
 const inputSchema = z.object({
   query: z.string().min(2),
@@ -20,6 +22,7 @@ const outputSchema = z.object({
     z.object({
       id: z.string(),
       scope: z.string(),
+      scopeId: z.string(),
       content: z.string(),
       similarity: z.number(),
     }),
@@ -36,11 +39,17 @@ export const searchKnowledge = (ctx: ToolCtx) =>
       capability: CAPABILITIES.KNOWLEDGE_READ,
       input: inputSchema,
       output: outputSchema,
-      run: async () => {
-        // TODO(Block 5): perform an embedding lookup against the knowledge
-        // store and return ranked hits. Until then, agents that call this
-        // tool will see no results and should fall back to other tools.
-        return { hits: [] };
+      run: async ({ query, scope, limit }) => {
+        const memHits = await searchSimilar({ query, scope, limit });
+        return {
+          hits: memHits.map(h => ({
+            id: h.id,
+            scope: h.scope,
+            scopeId: h.scope_id,
+            content: h.content,
+            similarity: 1 - h.distance,
+          })),
+        };
       },
     },
     ctx,
