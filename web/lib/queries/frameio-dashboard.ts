@@ -336,3 +336,102 @@ export async function getActivityFeed(limit = 30): Promise<ActivityRow[]> {
     });
   }, []);
 }
+
+export interface AwaitingAdCopyRow {
+  reviewId: number;
+  clientName: string;
+  assetName: string;
+  assetType: string;
+  status: string;
+  feedbackPreview: string | null;
+  frameioFileId: string | null;
+  frameioViewUrl: string | null;
+  adCopyMd: string | null;
+  adCopyGeneratedAt: string | null;
+  adCopyObjective: string | null;
+  updatedAt: string;
+}
+
+/**
+ * Frame.io-sourced creative_reviews — surface them all on the dashboard so
+ * each gets a "Generate ad copy" button. The 'awaiting' name is historical;
+ * we now return both fresh ones and ones that already have copy attached
+ * so the dashboard can render either state.
+ */
+export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCopyRow[]> {
+  return safe(async () => {
+    // Try with the Phase-5 columns first; fall back if the ALTER hasn't run
+    // (e.g. on a brand-new env where ad-copy has never been requested).
+    let r;
+    try {
+      r = await db.execute({
+        sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
+                     frameio_file_id, frameio_view_url, ad_copy_md, ad_copy_generated_at,
+                     ad_copy_objective, updated_at
+                FROM creative_reviews
+               WHERE frameio_file_id IS NOT NULL
+            ORDER BY updated_at DESC
+               LIMIT ?`,
+        args: [limit],
+      });
+    } catch (err) {
+      if (!String((err as Error).message ?? '').includes('no such column')) throw err;
+      r = await db.execute({
+        sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
+                     frameio_file_id, frameio_view_url, NULL AS ad_copy_md,
+                     NULL AS ad_copy_generated_at, NULL AS ad_copy_objective, updated_at
+                FROM creative_reviews
+               WHERE frameio_file_id IS NOT NULL
+            ORDER BY updated_at DESC
+               LIMIT ?`,
+        args: [limit],
+      });
+    }
+
+    return r.rows.map((row) => {
+      const x = row as unknown as Record<string, unknown>;
+      const fb = (x.feedback as string | null) ?? null;
+      return {
+        reviewId: Number(x.id),
+        clientName: String(x.client_name),
+        assetName: String(x.asset_name),
+        assetType: String(x.asset_type),
+        status: String(x.status),
+        feedbackPreview: fb ? fb.split('\n').slice(-1)[0]?.replace(/^\[[^\]]+\]\s*/, '').slice(0, 240) ?? null : null,
+        frameioFileId: (x.frameio_file_id as string | null) ?? null,
+        frameioViewUrl: (x.frameio_view_url as string | null) ?? null,
+        adCopyMd: (x.ad_copy_md as string | null) ?? null,
+        adCopyGeneratedAt: (x.ad_copy_generated_at as string | null) ?? null,
+        adCopyObjective: (x.ad_copy_objective as string | null) ?? null,
+        updatedAt: String(x.updated_at),
+      };
+    });
+  }, []);
+}
+
+export interface ReviewByIdRow {
+  reviewId: number;
+  client_name: string;
+  asset_name: string;
+  ad_copy_md: string | null;
+  ad_copy_generated_at: string | null;
+}
+
+export async function getReviewById(reviewId: number): Promise<ReviewByIdRow | null> {
+  return safe(async () => {
+    const r = await db.execute({
+      sql: `SELECT id, client_name, asset_name, ad_copy_md, ad_copy_generated_at
+              FROM creative_reviews WHERE id = ?`,
+      args: [reviewId],
+    });
+    if (r.rows.length === 0) return null;
+    const x = r.rows[0] as unknown as Record<string, unknown>;
+    return {
+      reviewId: Number(x.id),
+      client_name: String(x.client_name),
+      asset_name: String(x.asset_name),
+      ad_copy_md: (x.ad_copy_md as string | null) ?? null,
+      ad_copy_generated_at: (x.ad_copy_generated_at as string | null) ?? null,
+    };
+  }, null);
+}

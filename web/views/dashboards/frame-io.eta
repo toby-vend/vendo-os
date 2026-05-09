@@ -148,6 +148,84 @@
   </div>
 <% } %>
 
+<!-- Frame.io reviews — ad-copy generation -->
+<h3 style="font-size: 16px; font-weight: 600; margin: 0 0 0.75rem 0;">
+  Frame.io creative reviews
+  <span style="color: #94A3B8; font-weight: 400;">(<%= it.awaitingAdCopy.length %>)</span>
+  <span style="color: #94A3B8; font-weight: 400; font-size: 12px; margin-left: 8px;">— generate Meta ad copy on demand</span>
+</h3>
+<% if (it.awaitingAdCopy.length === 0) { %>
+  <div style="padding: 1.25rem; background: #0B0B0B; border: 1px dashed rgba(255,255,255,0.10); border-radius: 8px; color: #94A3B8; font-size: 14px; text-align: center; margin-bottom: 2rem;">
+    No Frame.io-sourced creative reviews yet. Once a client comments or a file is uploaded to a mapped project, it'll appear here.
+  </div>
+<% } else { %>
+  <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem;">
+    <% for (const r of it.awaitingAdCopy) { %>
+      <div class="card" style="padding: 1rem 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: 0.75rem;">
+          <div>
+            <div style="font-size: 14px; font-weight: 600;"><%= r.assetName %></div>
+            <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">
+              <%= r.clientName %> · <%= r.assetType %> · status <strong><%= r.status %></strong>
+              <% if (r.frameioViewUrl) { %> · <a href="<%= r.frameioViewUrl %>" target="_blank" style="color: #94A3B8;">↗ open in Frame.io</a><% } %>
+            </div>
+            <% if (r.feedbackPreview) { %>
+              <div style="font-size: 12px; color: #cbd5e1; margin-top: 6px; padding-left: 0.6rem; border-left: 2px solid rgba(255,255,255,0.10);">
+                Latest feedback: "<%= r.feedbackPreview %>"
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <% if (r.adCopyMd) { %>
+          <div id="adcopy-<%= r.reviewId %>" style="background:#0B0B0B;border:1px solid rgba(34,197,94,0.30);border-radius:8px;padding:0.875rem 1rem;font-size:13px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+              <strong style="color:#22C55E;">✓ Ad copy generated</strong>
+              <span style="color:#94A3B8;font-size:11px;"><%= r.adCopyObjective || 'leads' %> · <%= fmtDate(r.adCopyGeneratedAt) %></span>
+            </div>
+            <details>
+              <summary style="cursor:pointer;color:#cbd5e1;font-size:12px;margin-bottom:6px;">Show / hide markdown</summary>
+              <pre style="white-space:pre-wrap;font-size:11px;background:#000;padding:0.75rem;border-radius:4px;color:#d1d5db;margin:6px 0;"><%= r.adCopyMd %></pre>
+            </details>
+            <a href="/dashboards/frame-io/ad-copy/<%= r.reviewId %>/download" style="font-size:11px;color:#94A3B8;text-decoration:underline;">↓ download .md</a>
+            <span style="margin: 0 6px; color:#475569;">·</span>
+            <button
+              hx-post="/dashboards/frame-io/generate-ad-copy"
+              hx-vals='{"review_id": <%= r.reviewId %>, "objective": "leads"}'
+              hx-target="#adcopy-<%= r.reviewId %>"
+              hx-swap="outerHTML"
+              hx-headers='{"X-CSRF-Token": "<%= it.csrfToken %>"}'
+              style="background: none; border: none; color: #94A3B8; font-size: 11px; text-decoration: underline; cursor: pointer; padding: 0;">
+              regenerate
+            </button>
+          </div>
+        <% } else { %>
+          <div id="adcopy-<%= r.reviewId %>" style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="obj-<%= r.reviewId %>" style="padding: 6px 10px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-size: 12px;">
+              <option value="leads" selected>Leads</option>
+              <option value="awareness">Awareness</option>
+              <option value="traffic">Traffic</option>
+              <option value="sales">Sales</option>
+            </select>
+            <button
+              hx-post="/dashboards/frame-io/generate-ad-copy"
+              hx-include="#obj-<%= r.reviewId %>"
+              hx-vals='js:{review_id: <%= r.reviewId %>, objective: document.getElementById("obj-<%= r.reviewId %>").value}'
+              hx-target="#adcopy-<%= r.reviewId %>"
+              hx-swap="outerHTML"
+              hx-headers='{"X-CSRF-Token": "<%= it.csrfToken %>"}'
+              hx-indicator="#spin-<%= r.reviewId %>"
+              style="padding: 6px 14px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+              ✨ Generate Meta ad copy
+            </button>
+            <span id="spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size: 11px; color: #94A3B8;">Generating… (~10s)</span>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+<% } %>
+
 <!-- Activity feed -->
 <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 0.75rem 0;">Activity feed</h3>
 <% if (it.activity.length === 0) { %>
