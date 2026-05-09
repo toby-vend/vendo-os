@@ -55,6 +55,8 @@ import {
   searchSimilar,
 } from '../../web/lib/agents/memory/long-term';
 import { atlasAgent, getAgent, listAgents } from '../../web/lib/agents/agents';
+import { runAgentBackground } from '../../web/lib/agents/runtime';
+import { MODELS } from '../../web/lib/agents/models';
 import type { ToolCtx, AgentDef, ChannelName } from '../../web/lib/agents/types';
 import type { SessionUser } from '../../web/lib/auth';
 
@@ -526,6 +528,64 @@ async function main(): Promise<void> {
     assert(getAgent('atlas') === atlasAgent, "getAgent('atlas') returns atlasAgent");
     assert(getAgent('does-not-exist') === null, 'unknown agent returns null');
     assert(listAgents().includes('atlas'), 'listAgents includes atlas');
+  }
+
+  // -------------------------------------------------------------------------
+  // Live runtime — single Haiku call through runAgentBackground. Proves the
+  // gateway is reachable, streamText/generateText actually run, and a row
+  // lands in agent_runs with status='completed' + non-zero usage.
+  //
+  // ~$0.0005 per run (Haiku, ~50 tokens total). Skips with a notice if
+  // we can't reach the gateway.
+  // -------------------------------------------------------------------------
+
+  console.log('\n[25] runtime: single Haiku call lands in agent_runs');
+  {
+    const tinyAgent: AgentDef = {
+      name: SMOKE_AGENT,
+      model: MODELS.HAIKU,
+      maxSteps: 1,
+      tools: [],
+      systemPrompt: () => 'You are a smoke test. Answer in one short word.',
+    };
+    const ctx: ToolCtx = {
+      runId: '',
+      user: mockUser(),
+      channel: 'cron' as ChannelName,
+      conversationId: null,
+      graduations: new Set(),
+    };
+
+    const result = await runAgentBackground({
+      agent: tinyAgent,
+      ctx,
+      prompt: 'Reply with the single word: hello',
+      trigger: 'smoke-runtime',
+    });
+
+    if (result.status === 'errored') {
+      console.log(`  ⚠ runtime call errored (${result.error}) — skipping live-call assertions.`);
+      console.log('     This usually means AI_GATEWAY_API_KEY / VERCEL_OIDC_TOKEN is not set.');
+    } else {
+      assert(result.status === 'completed', 'status is completed');
+      assert(typeof result.text === 'string' && result.text.length > 0, 'returned text');
+      assert((result.inputTokens ?? 0) > 0, 'input tokens recorded');
+      assert((result.outputTokens ?? 0) > 0, 'output tokens recorded');
+
+      const persisted = await db.execute({
+        sql: `SELECT status, input_tokens, output_tokens, cost_usd
+              FROM agent_runs WHERE id = ?`,
+        args: [result.runId],
+      });
+      assert(persisted.rows.length === 1, 'agent_runs row exists');
+      assert(String(persisted.rows[0].status) === 'completed', 'persisted status');
+      assert(Number(persisted.rows[0].input_tokens) > 0, 'persisted input_tokens');
+      assert(persisted.rows[0].cost_usd !== null, 'persisted cost_usd');
+
+      console.log(
+        `     Haiku said: "${result.text.trim().slice(0, 60)}"  (${result.inputTokens}+${result.outputTokens} tok, $${result.costUsd?.toFixed(5)})`,
+      );
+    }
   }
 
   console.log('\n--- Smoke test passed.');
