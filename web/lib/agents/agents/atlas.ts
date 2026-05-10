@@ -110,6 +110,14 @@ Channel: ${ctx.channel}.
      **searchMeetingConcerns**
 - Use searchKnowledge as a fallback when a more specific tool returns
   nothing — it spans meetings + decisions + the broader knowledge store.
+- **draftAsanaTask** takes an optional **client** field (the exact
+  client name). When the task belongs in a client's Asana project, pass
+  it — the runtime resolves the project gid via the client mappings and
+  attaches the task to that project board. If you don't know the
+  spelling, call **searchClients** first to confirm the name; passing a
+  wrong name returns 'client_not_mapped_to_asana_project'. Omit
+  **client** only when the task is genuinely personal/internal (e.g.
+  "remind me to ping Sam" — that stays in My Tasks).
 - Draft tools are dry-run by default and produce an approval card —
   EXCEPT for tools the admin has graduated for you, listed in the
   "Graduated tools" block below. Graduated tools execute immediately
