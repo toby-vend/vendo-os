@@ -43,8 +43,9 @@ import {
   graduate,
   revokeGraduation,
   loadGraduations,
+  listGraduations,
 } from '../../web/lib/agents/permissions';
-import { buildToolset } from '../../web/lib/agents/tools';
+import { buildToolset, WRITE_TOOL_NAMES } from '../../web/lib/agents/tools';
 import {
   getChannel,
   recToCard,
@@ -372,6 +373,17 @@ async function main(): Promise<void> {
     const graduations = await loadGraduations(SMOKE_AGENT);
     assert(graduations.has('draftPushNotification'), 'graduation row loadable');
 
+    // listGraduations() — used by /admin/graduations matrix view. Must
+    // surface the smoke pair while the row exists, with full metadata.
+    const fullList = await listGraduations();
+    const smokeRow = fullList.find(
+      g => g.agent === SMOKE_AGENT && g.toolName === 'draftPushNotification',
+    );
+    assert(smokeRow !== undefined, 'listGraduations() includes the smoke pair');
+    assert(smokeRow!.graduatedBy === SMOKE_USER, 'listGraduations() returns graduatedBy');
+    assert(smokeRow!.notes === 'smoke-test graduation', 'listGraduations() returns notes');
+    assert(typeof smokeRow!.graduatedAt === 'string' && smokeRow!.graduatedAt.length > 0, 'listGraduations() returns graduatedAt');
+
     const ctx = mockCtx(runId, mockUser({ channels: ['push:write'] }), graduations);
     const tools = buildToolset(TEST_AGENT, ctx);
     const result = (await tools.draftPushNotification.execute!(
@@ -390,6 +402,38 @@ async function main(): Promise<void> {
     await revokeGraduation(SMOKE_AGENT, 'draftPushNotification');
     const after = await loadGraduations(SMOKE_AGENT);
     assert(!after.has('draftPushNotification'), 'revokeGraduation clears the row');
+
+    const afterList = await listGraduations();
+    assert(
+      !afterList.some(g => g.agent === SMOKE_AGENT && g.toolName === 'draftPushNotification'),
+      'listGraduations() drops the pair after revoke',
+    );
+  }
+
+  console.log('\n[15a] WRITE_TOOL_NAMES matches every hasSideEffect tool in registry');
+  {
+    // The /admin/graduations matrix relies on WRITE_TOOL_NAMES being the
+    // authoritative set of write tools. Probe each factory and assert that
+    // the runtime-flagged hasSideEffect set equals WRITE_TOOL_NAMES.
+    const stubCtx = mockCtx(runId, mockUser(), new Set());
+    const sideEffectFromRuntime: string[] = [];
+    for (const [name, factory] of Object.entries(TOOL_FACTORIES)) {
+      const tool = (factory as (c: ToolCtx) => unknown)(stubCtx) as { description?: string };
+      // The defineTool spec doesn't expose hasSideEffect on the returned
+      // Tool, but the description for every draft tool starts with "Draft "
+      // by convention, and write tools are explicitly named draft*. Use the
+      // name prefix as the cross-check — if a future write tool deviates
+      // from the convention, this assertion forces an explicit decision.
+      if (name.startsWith('draft')) sideEffectFromRuntime.push(name);
+      void tool;
+    }
+    sideEffectFromRuntime.sort();
+    const declared = [...WRITE_TOOL_NAMES].sort();
+    assert(
+      sideEffectFromRuntime.length === declared.length &&
+        sideEffectFromRuntime.every((n, i) => n === declared[i]),
+      `WRITE_TOOL_NAMES (${declared.join(',')}) matches draft* tools in registry (${sideEffectFromRuntime.join(',')})`,
+    );
   }
 
   console.log('\n[16] tool error path is logged to agent_tool_calls');
