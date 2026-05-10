@@ -1,16 +1,18 @@
 /**
  * /api/agent/chat — the conversational entrypoint for the web channel.
  *
- * Exports a fetch-style Vercel handler so streamAgent's Response can be
- * returned directly without re-pumping bytes through a Node res object.
+ * Node-style Vercel handler. The streamAgent function returns a Web Response
+ * whose body is a streaming UIMessage chunk feed; we pipe the body through
+ * the Node response object so Vercel's @vercel/node legacy builder is
+ * happy (it doesn't accept (Request) → Response handlers directly).
  *
  * Auth: reads vendo_session cookie, verifies the JWT, hydrates the full
  * SessionUser via getUserById. 401 if any step fails.
  *
  * Body: { messages: UIMessage[], conversationId?: string }
  *   `messages` is the running UIMessage[] from useChat on the client.
- *   `conversationId` lets us thread runs together — defaults to the
- *   first user message id when absent.
+ *   `conversationId` lets us thread runs together — defaults to a
+ *   freshly generated id when absent.
  *
  * Side-effects:
  *   - Logs every step into agent_messages and every tool call into
@@ -18,6 +20,7 @@
  *   - Closes an agent_runs row on finish with status, usage and cost.
  *   - Honours the graduations table — write tools default to dry-run.
  */
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { UIMessage } from 'ai';
 import { parseCookies, verifySessionToken, generateId } from '../../web/lib/auth.js';
 import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth.js';
@@ -37,48 +40,55 @@ interface ChatBody {
   trigger?: string;
 }
 
-function unauthorized(message: string): Response {
-  return new Response(JSON.stringify({ error: message }), {
-    status: 401,
-    headers: { 'Content-Type': 'application/json' },
-  });
+function sendJson(res: VercelResponse, status: number, body: Record<string, unknown>): void {
+  res.status(status).setHeader('Content-Type', 'application/json').send(JSON.stringify(body));
 }
 
-function badRequest(message: string): Response {
-  return new Response(JSON.stringify({ error: message }), {
-    status: 400,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
-
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  if (req.method !== 'POST') {
+    sendJson(res, 405, { error: 'Method not allowed' });
+    return;
   }
 
   // -- Auth -----------------------------------------------------------------
-  const cookieHeader = request.headers.get('cookie') ?? '';
+  const cookieHeader =
+    (Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie) ?? '';
   const cookies = parseCookies(cookieHeader);
   const token = cookies['vendo_session'];
   const payload = token ? verifySessionToken(token) : null;
-  if (!payload) return unauthorized('Unauthorized');
+  if (!payload) {
+    sendJson(res, 401, { error: 'Unauthorized' });
+    return;
+  }
 
   const userRow = await getUserById(payload.userId);
-  if (!userRow) return unauthorized('Session user no longer exists');
+  if (!userRow) {
+    sendJson(res, 401, { error: 'Session user no longer exists' });
+    return;
+  }
   const user = userRowToSessionUser(userRow);
 
   // -- Body -----------------------------------------------------------------
+  // @vercel/node parses JSON bodies for us, but only when content-type is
+  // application/json. useChat sends that header, so req.body is the parsed
+  // object; fall back to raw-string parsing defensively.
   let body: ChatBody;
   try {
-    body = (await request.json()) as ChatBody;
+    if (typeof req.body === 'string') {
+      body = JSON.parse(req.body) as ChatBody;
+    } else if (req.body && typeof req.body === 'object') {
+      body = req.body as ChatBody;
+    } else {
+      sendJson(res, 400, { error: 'Invalid JSON body' });
+      return;
+    }
   } catch {
-    return badRequest('Invalid JSON body');
+    sendJson(res, 400, { error: 'Invalid JSON body' });
+    return;
   }
   if (!Array.isArray(body.messages) || body.messages.length === 0) {
-    return badRequest('messages array required');
+    sendJson(res, 400, { error: 'messages array required' });
+    return;
   }
 
   // -- Tier router ---------------------------------------------------------
@@ -87,17 +97,15 @@ export default async function handler(request: Request): Promise<Response> {
   // role === 'client'   → 403 (client-portal users don't get Atlas)
   const agent = getAgentForUser(user);
   if (!agent) {
-    return new Response(JSON.stringify({ error: 'No Atlas tier for your role.' }), {
-      status: 403,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    sendJson(res, 403, { error: 'No Atlas tier for your role.' });
+    return;
   }
 
   // -- Stream ---------------------------------------------------------------
   const graduations = await loadGraduations(agent.name);
   const conversationId = body.conversationId ?? generateId();
 
-  return streamAgent({
+  const streamResponse = await streamAgent({
     agent,
     ctx: {
       runId: '',     // stamped by the runtime
@@ -111,4 +119,31 @@ export default async function handler(request: Request): Promise<Response> {
     conversationId,
     trigger: body.trigger ?? 'user-message',
   });
+
+  // -- Pipe the Web Response body to the Node response ---------------------
+  res.status(streamResponse.status);
+  streamResponse.headers.forEach((value, key) => {
+    // Skip headers Node will manage itself.
+    if (key === 'content-length') return;
+    res.setHeader(key, value);
+  });
+
+  const stream = streamResponse.body;
+  if (!stream) {
+    res.end();
+    return;
+  }
+
+  const reader = stream.getReader();
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) res.write(Buffer.from(value));
+    }
+    res.end();
+  } catch (err) {
+    console.error('[api/agent/chat] stream pipe error:', err instanceof Error ? err.message : String(err));
+    try { res.end(); } catch { /* already ended */ }
+  }
 }
