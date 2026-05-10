@@ -1,8 +1,8 @@
 # Block 9 — Atlas Phase 2 (cron-driven flows + triage UI)
 
-**Last updated:** 2026-05-10 (evening)
+**Last updated:** 2026-05-10 (late evening — full Block 9 minus 3 capability items)
 **Branch:** `main` — everything is merged, deployed, and live at `https://vendo-os.vercel.app`.
-**Smoke:** 152 assertions, all green. `node --env-file=.env.local --import tsx/esm scripts/agents/smoke.ts`.
+**Smoke:** 155 assertions, all green. `node --env-file=.env.local --import tsx/esm scripts/agents/smoke.ts`.
 
 ---
 
@@ -17,15 +17,19 @@ Block 8 (Slack inbound, conversation memory, Block Kit approval cards) is fully 
 | **Per-user Daily Brief cron** | `/api/cron/atlas-brief` runs `0 7 * * 1-5`. Each admin gets a personalised morning DM (yesterday's meetings, open Asana, flagged concerns, campaign anomalies). Atlas reasons about what to surface; never dumps every metric. | ~$0.16 / brief × 5 admins × weekdays = ~$200/year |
 | **Concern Monitor cron** | `/api/cron/concern-monitor` runs `0 9-18 * * 1-5`. Polls new high/critical `meeting_concerns`, runs `atlas-monitor` agent, drafts a follow-up Asana task or Slack DM, posts a Block Kit approval card to the recipient. Dedup tracked in `monitor_alerts(monitor='atlas-concern-monitor')`. | ~$0.05 / concern × ~14/month = ~$0.70/month |
 | **Web /inbox page** | Server-rendered Fastify route at `/inbox`. Lists every agent recommendation with Approve / Edit / Reject buttons. Filters by status and owner. Surfaces tool-internal errors (e.g. failed-but-marked-executed). Same execute-mode re-run path as the Slack Block Kit Approve. | Admin-only at v1 |
-| **Approval graduation UI** | `/admin/graduations` matrix view — every (agent × write tool) cell, grant / revoke per pair. Inline "Graduate & approve" affordance on `/inbox` for admins lets the trust decision happen at the moment they're seeing concrete tool output. Once graduated, future calls of that pair skip the inbox entirely. Plan: `plans/2026-05-10-block9-graduation-ui.md`. | The autonomy-loop unlocker |
+| **Approval graduation UI** | `/admin/graduations` matrix view — every (agent × write tool) cell, grant / revoke per pair. Inline "Graduate & approve" affordance on `/inbox` for admins lets the trust decision happen at the moment they're seeing concrete tool output. Once graduated, future calls of that pair skip the inbox entirely. **Plus** graduation now auto-upgrades requested `dry-run` to `execute` — granting a pair really does mean "auto-execute every call." Plan: `plans/2026-05-10-block9-graduation-ui.md`. | The autonomy-loop unlocker |
+| **Web /chat fully wired** | Three latent bugs fixed: (a) `api/agent/chat.ts` and `api/agent/approve.ts` were never registered in `vercel.json` → 404; (b) `chat.ts` used a fetch-style `(Request) → Promise<Response>` signature which the legacy `@vercel/node` builder doesn't dispatch → FUNCTION_INVOCATION_FAILED; (c) the manual getReader→res.write pipe dropped final chunks. Now uses `Readable.fromWeb` with `await new Promise` so Vercel doesn't tear down mid-stream. CSRF tokens added to all admin/inbox forms. | Web /chat finally works (was broken since shipped) |
+| **draftAsanaTask client resolution** | Added optional `client` field. Resolves via `getAsanaProjectForClient()` → `client_source_mappings` → Asana project gid → task attached to project board. Refuses to execute if `client` provided but unmapped. Atlas's prompt updated to call `searchClients` first when unsure of spelling. | Tasks now land in the right project, not private My Tasks |
+| **Outcome-aware tool cards in chat** | Tool card collapsed view now distinguishes drafted (amber) vs executed (green) vs errored (red). Inline "Open →" CTA above the card links to created Asana URL or `/inbox` for review. Markdown rendering via marked + sanitize-html (bold, lists, links). | UAT surfaced that "DONE" was misleading — fixed |
 
 ### Block 9 — remaining
 
 | Feature | Estimate | Why it matters |
 |---|---|---|
-| Specialist agent dispatch (AM / Creative / Finance) | ~4 hours per specialist | Atlas hands off; narrower toolsets, sharper prompts, scales over months |
-| Xero / Calendar / GHL read tools | ~30 min each, ~2 hours total | Fills the obvious gaps in the toolbox |
+| Xero / Calendar / GHL read tools | ~30 min each, ~2 hours total | Fills obvious gaps; all read-only so no graduation overhead |
+| Specialist agent dispatch (AM / Creative / Finance) | ~4 hours per specialist | Atlas hands off; narrower toolsets, sharper prompts, compounds over months |
 | Telegram inbound | ~2 hours | Mirror of Slack inbound; off-laptop access |
+| Polish — unmapped client fallback | ~30 min | 125/167 clients have no Asana mapping. Atlas currently errors out instead of falling back to a private task. Surfaced during 2026-05-10 UAT. |
 
 ---
 
@@ -65,6 +69,18 @@ Agent system prompts now hard-code "@vendodigital.co.uk — NEVER @vendodigital.
 ### 5. Admin bypasses both gates
 
 `hasCapability` short-circuits true for `user.role === 'admin'`. The graduation gate still applies — admins still need explicit approval for each write.
+
+### 7. Vercel functions need explicit registration
+
+`vercel.json` uses legacy v2 schema with explicit `builds`. New files under `api/` are NOT auto-detected — they must be added to both `builds` (so bundled) and `routes` (inserted before the `/(.*)` catch-all). Use `(VercelRequest, VercelResponse)` signatures, not fetch-style — the legacy builder doesn't dispatch `(Request) → Promise<Response>` handlers. If the underlying code returns a Web `Response`, pipe its body to `res` via `Readable.fromWeb()` inside an `await new Promise` so Vercel doesn't tear down mid-stream. Memory note: `feedback_vercel_explicit_builds.md`.
+
+### 8. CSRF tokens required in every Eta form
+
+Every authenticated POST that isn't `/api/*`, `/login`, or `/auth/google/*` is checked by the CSRF preHandler at `web/server.ts:295`. Forms without `<input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />` will 403. The render decorator at `web/server.ts:106` injects `csrfToken` into every template — just reference it. Memory note: `feedback_csrf_in_eta_forms.md`.
+
+### 9. Graduation = auto-execute, not "allow execute"
+
+The graduation gate now auto-upgrades requested `dry-run` to `execute` when a pair is graduated (not just "stops execute being coerced to dry-run"). This is the actual semantics — granting a pair means the agent's calls run for real. Atlas's system prompt is also updated to list graduated tools and tell the model the action is real (so the reply says "I've created" not "Drafted"). See `_tool.ts:148-170`.
 
 ### 6. Smoke cleanup
 
