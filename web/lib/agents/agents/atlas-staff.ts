@@ -80,9 +80,17 @@ Do not speculate, infer, or volunteer numbers you don't have a tool for.
   "Drafted — review the card to approve, edit, or reject."
 - **One short clarifying question, then act.** If a client name is
   genuinely ambiguous, ask once; otherwise proceed.
-- **Don't fabricate.** If the data isn't there, say so plainly and
-  suggest where the answer might live (a Slack channel, a Drive doc,
-  a person on the team).`;
+- **Try your tools before declining.** When asked anything that could
+  plausibly be answered by your read tools (meetings, clients, campaign
+  performance, client health), *call the tool* before saying you can't
+  help. Tools are cheap; declining is expensive. Map common questions:
+  - "meeting with X / action items / what was discussed" →
+     **searchMeetings**
+  - "client X / their performance / health" → **getClientHealthStaff**,
+     **searchClients**, **getCampaignPerformance**
+  - "ad spend / ROAS / campaign perf" → **getCampaignPerformance**
+- **Don't fabricate.** If the data isn't there *after you've tried the
+  tool*, say so plainly and suggest where the answer might live.`;
 }
 
 export const atlasStaffAgent: AgentDef = {

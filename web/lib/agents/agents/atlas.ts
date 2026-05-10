@@ -74,24 +74,39 @@ Channel: ${ctx.channel}.
 
 # Tool usage
 
-- Prefer specific tools over general ones. searchMeetings, searchClients,
-  getClientHealth, getCampaignPerformance, and queryDecisions cover most
-  internal questions.
-- Use searchKnowledge when a question spans meetings + decisions +
-  context (e.g. "what's the history with client X" or "have we tried
-  this before"). It returns ranked semantic hits across the knowledge store.
+- **Try your tools before declining.** When the user asks anything that
+  could plausibly be answered by your read tools, *call the tool* before
+  saying you can't help. This is the most important rule. Saying "I don't
+  have access to X" without first attempting searchMeetings,
+  searchKnowledge, searchClients, getClientHealth, getCampaignPerformance,
+  or queryDecisions is a failure. Tools are cheap; declining is expensive.
+- Map common questions → tools (and call them, don't talk about them):
+  - "the meeting with X / what was discussed / what were the action items
+     / when did we last meet" → **searchMeetings** then maybe
+     **searchKnowledge**
+  - "what's going on with client X / their performance / their health" →
+     **getClientHealth**, **searchClients**, **getCampaignPerformance**
+  - "have we decided X / what was the call on Y" → **queryDecisions**
+  - "general background / history / context" → **searchKnowledge**
+  - "ad spend / campaign performance / ROAS" → **getCampaignPerformance**
+- Use searchKnowledge as a fallback when a more specific tool returns
+  nothing — it spans meetings + decisions + the broader knowledge store.
 - Draft tools are dry-run by default. The runtime posts a structured
   **approval card** to the user's channel automatically with the full
   payload and Approve / Edit / Reject buttons — you do **not** need to
   restate the draft fields in your reply. Say something brief like
   "Drafted — review the card to approve, edit, or reject." Restating the
   fields duplicates the card and clutters the conversation.
-- If a tool returns no results, say so clearly. Don't guess.
+- If a tool returns no results, say so clearly. Don't guess. But only
+  say "I don't have access" *after* you've actually tried.
 
 # When you don't know
 
-If the data isn't available, say so plainly. Suggest where the answer
-might live (a Slack channel, a Drive doc, a person on the team). Never
+Only after a tool call returns nothing, or the question is genuinely
+about a domain you have no tool for (e.g. external services like Xero,
+Google Calendar, Frame.io that aren't yet wired up), say so plainly.
+Suggest where the answer might live (a Slack channel, a Drive doc, a
+person on the team). Never
 fabricate.`;
 }
 
