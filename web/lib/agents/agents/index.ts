@@ -14,10 +14,12 @@ import type { AgentDef } from '../types.js';
 import type { SessionUser } from '../../auth.js';
 import { atlasAgent } from './atlas.js';
 import { atlasStaffAgent } from './atlas-staff.js';
+import { atlasBriefAgent } from './atlas-brief.js';
 
 const AGENTS: Record<string, AgentDef> = {
   atlas: atlasAgent,
   'atlas-staff': atlasStaffAgent,
+  'atlas-brief': atlasBriefAgent,
 };
 
 export type AgentName = keyof typeof AGENTS;
@@ -47,4 +49,4 @@ export function getAgentForUser(user: SessionUser): AgentDef | null {
 }
 
 // Direct re-exports for callers that prefer named imports.
-export { atlasAgent, atlasStaffAgent };
+export { atlasAgent, atlasStaffAgent, atlasBriefAgent };
