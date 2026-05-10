@@ -39,6 +39,26 @@ export const TOOL_FACTORIES = {
 export type ToolName = keyof typeof TOOL_FACTORIES;
 
 /**
+ * Tool names whose factories declare `hasSideEffect: true` in their
+ * defineTool spec. The runtime keeps these in dry-run by default and only
+ * lifts that gate when an `agent_graduations` row exists for the (agent,
+ * tool) pair.
+ *
+ * This list is the authoritative input for the /admin/graduations matrix —
+ * keep it in sync when adding new write tools. The smoke test asserts every
+ * write tool registered here actually returns hasSideEffect=true at runtime,
+ * so a forgotten entry will fail CI.
+ */
+export const WRITE_TOOL_NAMES = [
+  'draftAsanaTask',
+  'draftSlackMessage',
+  'draftPushNotification',
+  'draftEmail',
+] as const satisfies readonly ToolName[];
+
+export type WriteToolName = (typeof WRITE_TOOL_NAMES)[number];
+
+/**
  * The toolset shape the runtime hands to ai SDK's `streamText({ tools })`.
  *
  * We deliberately widen each entry to `Tool<unknown, unknown>` rather than

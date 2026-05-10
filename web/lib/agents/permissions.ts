@@ -71,6 +71,36 @@ export async function loadGraduations(agent: string): Promise<Set<string>> {
 }
 
 // ---------------------------------------------------------------------------
+// Full graduation list — every (agent, tool) pair currently graduated, with
+// audit metadata. Used by the /admin/graduations matrix view and any audit
+// surface that needs the full picture (rather than a per-agent slice).
+// ---------------------------------------------------------------------------
+
+export interface GraduationView {
+  agent: string;
+  toolName: string;
+  graduatedAt: string;
+  graduatedBy: string;
+  notes: string | null;
+}
+
+export async function listGraduations(): Promise<GraduationView[]> {
+  const result = await db.execute({
+    sql: `SELECT agent, tool_name, graduated_at, graduated_by, notes
+            FROM agent_graduations
+           ORDER BY agent, tool_name`,
+    args: [],
+  });
+  return result.rows.map(r => ({
+    agent: String(r.agent),
+    toolName: String(r.tool_name),
+    graduatedAt: String(r.graduated_at),
+    graduatedBy: String(r.graduated_by),
+    notes: r.notes == null ? null : String(r.notes),
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Admin grant / revoke — used by the graduation flow on /decisions/dashboard.
 // Each grant is recorded with the operator email + optional notes for audit.
 // ---------------------------------------------------------------------------
