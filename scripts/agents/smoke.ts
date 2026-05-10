@@ -99,6 +99,7 @@ function mockUser(opts: { channels?: string[]; allowedRoutes?: string[]; role?: 
 function mockCtx(runId: string, user: SessionUser, graduations: Set<string>): ToolCtx {
   return {
     runId,
+    agent: SMOKE_AGENT,
     user,
     channel: 'cron' as ChannelName,
     conversationId: null,
@@ -625,6 +626,7 @@ async function main(): Promise<void> {
     };
     const ctx: ToolCtx = {
       runId: '',
+      agent: SMOKE_AGENT,
       user: mockUser(),
       channel: 'cron' as ChannelName,
       conversationId: null,

@@ -117,6 +117,7 @@ async function runAgentAndDeliver(opts: {
 
     const ctx: ToolCtx = {
       runId: '',
+      agent: agent.name,
       user,
       channel: 'slack' as ChannelName,
       conversationId: null,

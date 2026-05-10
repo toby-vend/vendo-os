@@ -43,6 +43,8 @@ import { z } from 'zod';
 import { generateId } from '../../auth.js';
 import { recordToolCall } from '../trace.js';
 import { hasCapability } from '../permissions.js';
+import { create as createRecommendation, getById as getRecById } from '../recommendations.js';
+import { getChannel, recToCard, isDeliveryChannel } from '../channels/index.js';
 import type { ToolCtx, ToolMode } from '../types.js';
 
 // ---------------------------------------------------------------------------
@@ -183,6 +185,22 @@ export function defineTool<TIn, TOut>(
           durationMs: Date.now() - startedAt,
         });
 
+        // -- 5a. Persist recommendation + post approval card -------------
+        // Write tools running in dry-run mode produce a draft for human
+        // review. Persist a recommendation row, then if the run is from a
+        // delivery channel (slack / web / telegram) push the approval card
+        // so the user sees Approve / Edit / Reject buttons. Best-effort —
+        // if either step fails we log and continue rather than fail the
+        // tool itself, since the model's reply still describes the draft.
+        if (spec.hasSideEffect && effectiveMode === 'dry-run') {
+          await persistAndDeliverDraft({ ctx, spec, parsed }).catch((err) =>
+            console.error(
+              '[defineTool] persistAndDeliverDraft failed:',
+              err instanceof Error ? err.message : String(err),
+            ),
+          );
+        }
+
         return output;
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
@@ -206,6 +224,60 @@ export function defineTool<TIn, TOut>(
       }
     },
   });
+}
+
+// ---------------------------------------------------------------------------
+// Persist recommendation + push Block Kit / push / web card.
+// Called from defineTool's wrapper after a successful dry-run of any write
+// tool. Title and reasoning fall back to common input fields so all four
+// existing draft tools (slack, asana, push, email) get reasonable cards
+// without needing per-tool customisation.
+// ---------------------------------------------------------------------------
+
+async function persistAndDeliverDraft<TIn>(opts: {
+  ctx: ToolCtx;
+  spec: { name: string };
+  parsed: TIn;
+}): Promise<void> {
+  const { ctx, spec, parsed } = opts;
+  const args = parsed as Record<string, unknown>;
+  const title =
+    pickString(args, 'title') ||
+    pickString(args, 'subject') ||
+    `${spec.name}`;
+  const reasoning =
+    pickString(args, 'body') ||
+    pickString(args, 'notes') ||
+    `${spec.name} draft from ${ctx.agent}`;
+
+  const recId = await createRecommendation({
+    runId: ctx.runId,
+    agent: ctx.agent,
+    userId: ctx.user.id,
+    title,
+    reasoning,
+    toolName: spec.name,
+    payload: args,
+  });
+
+  if (!isDeliveryChannel(ctx.channel)) return;
+
+  const rec = await getRecById(recId);
+  if (!rec) return;
+
+  try {
+    await getChannel(ctx.channel).requestApproval(ctx.user.id, recToCard(rec));
+  } catch (err: unknown) {
+    console.error(
+      `[defineTool] ${ctx.channel}.requestApproval failed:`,
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+}
+
+function pickString(o: Record<string, unknown>, key: string): string | null {
+  const v = o[key];
+  return typeof v === 'string' && v.trim().length > 0 ? v : null;
 }
 
 // Re-export types most consumers will need.

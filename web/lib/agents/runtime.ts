@@ -73,8 +73,8 @@ function estimateCostUsd(model: string, usage: LanguageModelUsage): number | nul
 // pristine. The runtime is the only place the runId is known authoritatively.
 // ---------------------------------------------------------------------------
 
-function withRunId(base: ToolCtx, runId: string): ToolCtx {
-  return { ...base, runId };
+function withRunId(base: ToolCtx, runId: string, agent: string): ToolCtx {
+  return { ...base, runId, agent };
 }
 
 // ---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ export async function streamAgent(input: StreamAgentInput): Promise<Response> {
     model: input.agent.model,
   });
 
-  const runCtx = withRunId(input.ctx, runId);
+  const runCtx = withRunId(input.ctx, runId, input.agent.name);
   const tools = buildToolset(input.agent, runCtx) as ToolSet;
   const model = input.agent.model as LanguageModel;
   const stopWhen = stepCountIs(input.agent.maxSteps ?? 8) as StopCondition<typeof tools>;
@@ -216,13 +216,13 @@ export async function runAgentBackground(
   const runId = await startRun({
     agent: input.agent.name,
     user_id: input.ctx.user.id,
-    channel: 'cron' as ChannelName,
+    channel: input.ctx.channel,
     conversation_id: input.conversationId ?? null,
     trigger: input.trigger,
     model: input.agent.model,
   });
 
-  const runCtx = withRunId(input.ctx, runId);
+  const runCtx = withRunId(input.ctx, runId, input.agent.name);
   const tools = buildToolset(input.agent, runCtx) as ToolSet;
   const model = input.agent.model as LanguageModel;
   const stopWhen = stepCountIs(input.agent.maxSteps ?? 8) as StopCondition<typeof tools>;

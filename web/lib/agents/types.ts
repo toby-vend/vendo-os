@@ -33,6 +33,11 @@ export type OutcomeRating = 'success' | 'neutral' | 'failure' | 'reversed';
 
 export interface ToolCtx {
   runId: string;
+  /**
+   * Agent name (e.g. 'atlas', 'atlas-staff'). Set by the runtime; tools
+   * use it to attribute recommendations and acceptance metrics correctly.
+   */
+  agent: string;
   user: SessionUser;
   channel: ChannelName;
   conversationId: string | null;

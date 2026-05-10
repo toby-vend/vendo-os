@@ -107,6 +107,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // DB; this is a one-off authorisation tied to the human's approval.
   const ctx: ToolCtx = {
     runId: rec.run_id,
+    agent: rec.agent,
     user,
     channel: 'web' as ChannelName,
     conversationId: null,

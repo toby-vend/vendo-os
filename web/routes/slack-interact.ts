@@ -107,6 +107,7 @@ async function handleAgentAction(opts: {
   }
   const ctx: ToolCtx = {
     runId: rec.run_id,
+    agent: rec.agent,
     user,
     channel: 'slack' as ChannelName,
     conversationId: null,

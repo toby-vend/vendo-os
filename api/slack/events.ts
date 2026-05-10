@@ -212,7 +212,8 @@ async function runAgentAndDeliver(opts: {
     }
 
     const ctx: ToolCtx = {
-      runId: '', // runtime stamps the real id on a fresh copy
+      runId: '', // runtime stamps the real id + agent name on a fresh copy
+      agent: agent.name,
       user,
       channel: 'slack' as ChannelName,
       conversationId,

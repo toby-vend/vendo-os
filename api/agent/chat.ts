@@ -100,7 +100,8 @@ export default async function handler(request: Request): Promise<Response> {
   return streamAgent({
     agent,
     ctx: {
-      runId: '', // stamped by the runtime
+      runId: '',     // stamped by the runtime
+      agent: agent.name,
       user,
       channel: 'web' as ChannelName,
       conversationId,
