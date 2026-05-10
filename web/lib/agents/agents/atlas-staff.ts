@@ -29,8 +29,10 @@ const TOOLS = [
   'getTimeSpent',           // their own hours / capacity context
   'getTrafficStats',        // analytics — staff-safe, no financials
   'getFrameioStatus',       // video team
+  'getCalendarEvents',      // their own Google Calendar — no financial risk
   // Excluded for staff: queryDecisions, searchKnowledge (admin-only),
-  // searchMeetingConcerns (flags risks — admin-only)
+  // searchMeetingConcerns (flags risks — admin-only), getXeroFinancials
+  // and getGhlPipeline (financial / CRM — admin-only)
   'draftAsanaTask',
   'draftSlackMessage',
   'draftPushNotification',
@@ -114,6 +116,8 @@ ${ctx.graduations.size > 0
   - "what's on my plate / overdue tasks / open tasks for X" →
      **searchAsanaTasks**
   - "hours on client X / time spent / capacity" → **getTimeSpent**
+  - "what's on my calendar today / this week / next meeting with X" →
+     **getCalendarEvents**
   - "client X website traffic / GA4 / GSC / top queries" →
      **getTrafficStats**
   - "Frame.io review status / outstanding revisions / video for X" →

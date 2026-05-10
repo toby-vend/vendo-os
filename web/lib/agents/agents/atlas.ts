@@ -29,6 +29,9 @@ const TOOLS = [
   'getTrafficStats',
   'getFrameioStatus',
   'searchMeetingConcerns',
+  'getXeroFinancials',
+  'getGhlPipeline',
+  'getCalendarEvents',
   // Draft tools — every write goes through dry-run + approval until
   // graduated.
   'draftAsanaTask',
@@ -108,6 +111,13 @@ Channel: ${ctx.channel}.
      **getFrameioStatus**
   - "what concerns flagged for X / risks / things needing attention" →
      **searchMeetingConcerns**
+  - "what's outstanding in Xero / overdue invoices / what's owed by X /
+     P&L for last month / how much do clients owe us" →
+     **getXeroFinancials**
+  - "what's in the pipeline / open opportunities / deals at stage X /
+     top deals by value / recent leads from GHL" → **getGhlPipeline**
+  - "what's on my calendar today / this week / next meeting with X /
+     who's on the call" → **getCalendarEvents**
 - Use searchKnowledge as a fallback when a more specific tool returns
   nothing — it spans meetings + decisions + the broader knowledge store.
 - **draftAsanaTask** takes an optional **client** field (the exact

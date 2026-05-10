@@ -12,6 +12,9 @@ import { getTimeSpent } from './get-time-spent.js';
 import { getTrafficStats } from './get-traffic-stats.js';
 import { getFrameioStatus } from './get-frameio-status.js';
 import { searchMeetingConcerns } from './search-meeting-concerns.js';
+import { getXeroFinancials } from './get-xero-financials.js';
+import { getGhlPipeline } from './get-ghl-pipeline.js';
+import { getCalendarEvents } from './get-calendar-events.js';
 import { draftAsanaTask } from './draft-asana-task.js';
 import { draftSlackMessage } from './draft-slack-message.js';
 import { draftPushNotification } from './draft-push-notification.js';
@@ -30,6 +33,9 @@ export const TOOL_FACTORIES = {
   getTrafficStats,
   getFrameioStatus,
   searchMeetingConcerns,
+  getXeroFinancials,
+  getGhlPipeline,
+  getCalendarEvents,
   draftAsanaTask,
   draftSlackMessage,
   draftPushNotification,

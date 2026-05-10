@@ -32,6 +32,9 @@ export const CAPABILITIES = {
   TRAFFIC_READ: 'traffic:read',
   FRAMEIO_READ: 'frameio:read',
   CONCERNS_READ: 'concerns:read',
+  XERO_READ: 'xero:read',
+  GHL_READ: 'ghl:read',
+  CALENDAR_READ: 'calendar:read',
   // writes (always start dry-run-only — graduation is the only path to execute)
   ASANA_WRITE: 'asana:write',
   SLACK_WRITE: 'slack:write',
