@@ -70,19 +70,29 @@
     max-width: 50ch;
     width: 100%;
   }
-  .atlas-suggestions li {
+  .atlas-suggestions li { display: contents; }
+  .atlas-suggestion-btn {
+    width: 100%;
+    text-align: left;
     color: rgba(255,255,255,0.55);
     font-size: 0.86rem;
+    font-family: inherit;
     padding: 0.6rem 0.9rem;
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 10px;
     background: rgba(255,255,255,0.02);
+    cursor: pointer;
     transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
   }
-  .atlas-suggestions li:hover {
-    color: rgba(255,255,255,0.85);
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(34,197,94,0.25);
+  .atlas-suggestion-btn:hover {
+    color: rgba(255,255,255,0.95);
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(34,197,94,0.35);
+  }
+  .atlas-suggestion-btn:focus-visible {
+    outline: none;
+    border-color: rgba(34,197,94,0.6);
+    background: rgba(34,197,94,0.06);
   }
 
   /* ── Messages list ──────────────────────────────────────────────────── */

@@ -89,7 +89,16 @@ export function App({ userName, userTier }: AppProps): React.JSX.Element {
 
   return (
     <div className="atlas-chat">
-      {!hasMessages && <Welcome userName={userName} userTier={userTier} />}
+      {!hasMessages && (
+        <Welcome
+          userName={userName}
+          userTier={userTier}
+          onSuggestion={(text) => {
+            sendMessage({ text });
+            inputRef.current?.focus();
+          }}
+        />
+      )}
 
       {hasMessages && (
         <div className="atlas-messages">
@@ -148,7 +157,17 @@ export function App({ userName, userTier }: AppProps): React.JSX.Element {
 
 // ---------------------------------------------------------------------------
 
-function Welcome({ userName, userTier }: AppProps): React.JSX.Element {
+interface WelcomeProps extends AppProps {
+  onSuggestion: (text: string) => void;
+}
+
+const SUGGESTIONS = [
+  'Which meetings did we have with Smile Dental last week?',
+  "What's the latest CTR for Veltuff's Meta campaigns?",
+  'Draft an Asana task for tomorrow’s follow-up call.',
+];
+
+function Welcome({ userName, userTier, onSuggestion }: WelcomeProps): React.JSX.Element {
   const helper =
     userTier === 'admin'
       ? 'Full agency access — clients, campaigns, meetings, decisions, financials.'
@@ -159,9 +178,17 @@ function Welcome({ userName, userTier }: AppProps): React.JSX.Element {
       <h2>Hello {userName}.</h2>
       <p>{helper}</p>
       <ul className="atlas-suggestions">
-        <li>"Which meetings did we have with Smile Dental last week?"</li>
-        <li>"What's the latest CTR for Veltuff's Meta campaigns?"</li>
-        <li>"Draft an Asana task for tomorrow's follow-up call."</li>
+        {SUGGESTIONS.map((q) => (
+          <li key={q}>
+            <button
+              type="button"
+              className="atlas-suggestion-btn"
+              onClick={() => onSuggestion(q)}
+            >
+              &ldquo;{q}&rdquo;
+            </button>
+          </li>
+        ))}
       </ul>
     </div>
   );
