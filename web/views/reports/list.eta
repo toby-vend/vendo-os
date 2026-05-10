@@ -39,7 +39,7 @@
       No reports yet. <a href="/reports/new" style="color:#5EEAD4;">Start one</a>.
     </div>
   <% } else { %>
-    <div class="card" style="padding:0; overflow:hidden;">
+    <div class="card r-table-wrap">
       <table class="r-table">
         <thead>
           <tr>
@@ -56,7 +56,7 @@
         <tbody>
           <% it.items.forEach(function(r){ %>
             <tr>
-              <td><strong><%= r.client_display_name || r.client_name %></strong></td>
+              <td><a class="r-client-link" href="/reports/<%= r.id %>"><strong><%= r.client_display_name || r.client_name %></strong></a></td>
               <td><%= r.period_label %></td>
               <td><span class="r-status r-status-<%= r.status %>"><%= r.status %></span></td>
               <td style="text-align:center;"><%= r.screenshot_count %></td>
