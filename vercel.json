@@ -53,6 +53,13 @@
       }
     },
     {
+      "src": "api/cron/concern-monitor.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 300
+      }
+    },
+    {
       "src": "public/**",
       "use": "@vercel/static"
     }
@@ -73,6 +80,10 @@
     {
       "path": "/api/cron/atlas-brief",
       "schedule": "0 7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/concern-monitor",
+      "schedule": "0 9-18 * * 1-5"
     },
     {
       "path": "/api/cron/sync-actions-to-asana",
@@ -130,6 +141,7 @@
     { "src": "/api/slack/events", "dest": "/api/slack/events.ts", "methods": ["POST"] },
     { "src": "/api/slack/commands", "dest": "/api/slack/commands.ts", "methods": ["POST"] },
     { "src": "/api/cron/atlas-brief", "dest": "/api/cron/atlas-brief.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/concern-monitor", "dest": "/api/cron/concern-monitor.ts", "methods": ["GET", "POST"] },
     { "src": "/(.*)", "dest": "/api/index.ts" }
   ]
 }
