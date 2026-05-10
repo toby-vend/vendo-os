@@ -1,13 +1,35 @@
 <% layout('/layouts/base') %>
 
-<h1>Inbox <small>(<%= it.total %> shown)</small></h1>
+<div class="inbox-header">
+  <h1>Inbox <small>(<%= it.total %> shown)</small></h1>
+  <% if (it.user?.role === 'admin') { %>
+    <a href="/admin/graduations" class="inbox-header-link">Manage graduations →</a>
+  <% } %>
+</div>
 
 <p style="color:var(--text-muted)">
 Pending agent drafts awaiting your decision. Approve to execute, reject to dismiss, edit to mark for follow-up on the source channel.
 </p>
 
 <% if (it.query?.notice) { %>
-  <% const map = { approved: '✓ Approved and executed.', rejected: 'Rejected.', edited: 'Marked as edited.', 'tool-error': '⚠ Approved but execution failed: ' + (it.query.detail || ''), error: '⚠ Execute errored: ' + (it.query.detail || ''), 'already-approved': 'Already approved.', 'already-rejected': 'Already rejected.', 'already-edited': 'Already edited.', 'no-execute': 'Tool has no execute().', 'unknown-tool': 'Unknown tool.' } %>
+  <% const map = {
+    approved: '✓ Approved and executed.',
+    rejected: 'Rejected.',
+    edited: 'Marked as edited.',
+    'tool-error': '⚠ Approved but execution failed: ' + (it.query.detail || ''),
+    error: '⚠ Execute errored: ' + (it.query.detail || ''),
+    'already-approved': 'Already approved.',
+    'already-rejected': 'Already rejected.',
+    'already-edited': 'Already edited.',
+    'no-execute': 'Tool has no execute().',
+    'unknown-tool': 'Unknown tool.',
+    'graduated-and-approved': '✓ Graduated and executed. Future calls of this (agent, tool) pair will run without approval.',
+    'graduated-tool-error': '⚠ Graduated and approved, but execution failed: ' + (it.query.detail || ''),
+    'graduated-error': '⚠ Graduated, but execute errored: ' + (it.query.detail || ''),
+    'graduated-unknown-tool': '⚠ Graduated, but tool is no longer registered.',
+    'graduated-no-execute': '⚠ Graduated, but tool has no execute().',
+    'not-write-tool': '⚠ That tool is not graduatable.',
+  } %>
   <div class="notice"><%= map[it.query.notice] || it.query.notice %></div>
 <% } %>
 
@@ -81,6 +103,21 @@ Pending agent drafts awaiting your decision. Approve to execute, reject to dismi
         <button type="submit" name="decision" value="edited">Edit on source</button>
         <button type="submit" name="decision" value="rejected" class="btn-danger">Reject</button>
       </form>
+      <% if (it.user?.role === 'admin' && rec.canGraduate) { %>
+        <details class="rec-graduate">
+          <summary>Auto-execute future <code><%= rec.toolName %></code> drafts from <code><%= rec.agent %></code></summary>
+          <form method="POST" action="/inbox/<%= rec.id %>/graduate">
+            <p>
+              Graduating this pair means future calls of this exact tool by
+              this exact agent will execute without showing up here. The
+              capability check on the calling user still applies. Make sure
+              you've seen a few good drafts before doing this.
+            </p>
+            <input type="text" name="notes" placeholder="Why now? (optional)" />
+            <button type="submit" class="btn-graduate">Graduate &amp; approve</button>
+          </form>
+        </details>
+      <% } %>
     <% } else { %>
       <p class="rec-decided">
         <small>
@@ -120,4 +157,15 @@ Pending agent drafts awaiting your decision. Approve to execute, reject to dismi
   .badge-approved { background: #b6e4b9; color: #1d5524; }
   .badge-rejected { background: #f5c4c4; color: #7a1d1d; }
   .badge-edited   { background: #c9d8f5; color: #1f3d80; }
+  .inbox-header { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; }
+  .inbox-header-link { font-size: 0.85em; color: var(--text-muted, #666); text-decoration: none; }
+  .inbox-header-link:hover { color: var(--accent, #2a8); }
+  .rec-graduate { margin-top: 0.6em; padding: 0.6em 0.8em; background: var(--bg, #fff); border: 1px dashed var(--border, #ccc); border-radius: 4px; font-size: 0.9em; }
+  .rec-graduate summary { cursor: pointer; color: var(--text-muted, #555); }
+  .rec-graduate p { color: var(--text-muted, #555); margin: 0.6em 0; font-size: 0.9em; }
+  .rec-graduate form { display: flex; flex-direction: column; gap: 0.5em; }
+  .rec-graduate input[type=text] { font: inherit; padding: 0.4em 0.6em; border: 1px solid var(--border, #ccc); border-radius: 3px; }
+  .rec-graduate code { font-size: 0.9em; padding: 1px 4px; background: var(--bg-elevated, #f4f4f4); border-radius: 3px; }
+  .btn-graduate { align-self: flex-start; padding: 0.5em 1em; border: 1px solid var(--accent, #2a8); background: var(--bg, #fff); color: var(--accent, #2a8); border-radius: 4px; cursor: pointer; font-weight: 600; }
+  .btn-graduate:hover { background: var(--accent, #2a8); color: white; }
 </style>

@@ -13,7 +13,8 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { db } from '../lib/queries/base.js';
 import { getById, decide, markExecuted } from '../lib/agents/recommendations.js';
-import { TOOL_FACTORIES, type ToolName } from '../lib/agents/tools/index.js';
+import { TOOL_FACTORIES, WRITE_TOOL_NAMES, type ToolName } from '../lib/agents/tools/index.js';
+import { graduate } from '../lib/agents/permissions.js';
 import type { ToolCtx, ChannelName, RecommendationRow } from '../lib/agents/types.js';
 import type { SessionUser } from '../lib/auth.js';
 
@@ -71,9 +72,22 @@ export const inboxRoutes: FastifyPluginAsync = async (app) => {
       byStatus[String(row.status)] = Number(row.n);
     }
 
+    // Pre-load every (agent, tool) pair currently graduated. The inline
+    // graduate-and-approve affordance only renders when the pair isn't
+    // already graduated — once it is, future calls auto-execute and the
+    // recommendation never lands in the inbox in the first place.
+    const gradResult = await db.execute({
+      sql: `SELECT agent, tool_name FROM agent_graduations`,
+      args: [],
+    });
+    const graduated = new Set<string>(
+      gradResult.rows.map(r => `${String(r.agent)}:${String(r.tool_name)}`),
+    );
+    const writeTools = new Set<string>(WRITE_TOOL_NAMES);
+
     // The Eta layout already gets `user` injected via server.ts decorator.
     reply.render('inbox', {
-      recs: recs.map(rowToView),
+      recs: recs.map(r => rowToView(r, graduated, writeTools)),
       total: recs.length,
       byStatus,
       query: q,
@@ -161,15 +175,102 @@ export const inboxRoutes: FastifyPluginAsync = async (app) => {
       ? '/inbox?notice=tool-error&detail=' + encodeURIComponent(toolError)
       : '/inbox?notice=approved');
   });
+
+  // POST /:recId/graduate — admin-only. Graduate the (agent, tool) pair AND
+  // approve+execute this recommendation in one round-trip. The trust
+  // decision happens at the moment the admin is looking at concrete output;
+  // future calls of the same (agent, tool) skip the inbox entirely.
+  app.post('/:recId/graduate', async (request, reply) => {
+    const user = (request as unknown as { user: SessionUser }).user;
+    const { recId } = request.params as { recId: string };
+    const body = (request.body ?? {}) as { notes?: string };
+
+    if (user.role !== 'admin') {
+      reply.code(403).send({ ok: false, error: 'admin only' });
+      return;
+    }
+
+    const rec = await getById(recId);
+    if (!rec) {
+      reply.code(404).send({ ok: false, error: 'recommendation not found' });
+      return;
+    }
+    if (rec.status !== 'pending') {
+      reply.redirect('/inbox?notice=already-' + rec.status);
+      return;
+    }
+
+    // Defensive: only graduate registered write tools.
+    const writeTools = new Set<string>(WRITE_TOOL_NAMES);
+    if (!writeTools.has(rec.tool_name)) {
+      reply.redirect('/inbox?notice=not-write-tool');
+      return;
+    }
+
+    await graduate({
+      agent: rec.agent,
+      toolName: rec.tool_name,
+      graduatedBy: user.email,
+      notes: body.notes && body.notes.trim().length > 0 ? body.notes.trim() : undefined,
+    });
+
+    // Now run the same approve-and-execute path as /decide.
+    const updated = await decide({ id: recId, decidedBy: user.id, decision: 'approved' });
+    if (!updated) {
+      reply.code(500).send({ ok: false, error: 'decide() returned no row' });
+      return;
+    }
+
+    const factory = TOOL_FACTORIES[rec.tool_name as ToolName];
+    if (!factory) {
+      reply.redirect('/inbox?notice=graduated-unknown-tool');
+      return;
+    }
+    const ctx: ToolCtx = {
+      runId: rec.run_id,
+      agent: rec.agent,
+      user,
+      channel: 'web' as ChannelName,
+      conversationId: null,
+      graduations: new Set([rec.tool_name]),
+    };
+    const tool = factory(ctx);
+    if (!tool.execute) {
+      reply.redirect('/inbox?notice=graduated-no-execute');
+      return;
+    }
+    const originalPayload = JSON.parse(rec.payload) as Record<string, unknown>;
+    const finalInput = { ...originalPayload, mode: 'execute' };
+
+    let result: unknown;
+    try {
+      result = await tool.execute(finalInput as never, { toolCallId: `inbox-graduate-${rec.id}`, messages: [] });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      reply.redirect('/inbox?notice=graduated-error&detail=' + encodeURIComponent(message));
+      return;
+    }
+
+    await markExecuted(rec.id, result);
+
+    const toolError = (result && typeof result === 'object' && (result as Record<string, unknown>).error)
+      ? String((result as Record<string, unknown>).error)
+      : null;
+    reply.redirect(toolError
+      ? '/inbox?notice=graduated-tool-error&detail=' + encodeURIComponent(toolError)
+      : '/inbox?notice=graduated-and-approved');
+  });
 };
 
-function rowToView(rec: PendingRow) {
+function rowToView(rec: PendingRow, graduated: Set<string>, writeTools: Set<string>) {
   let payload: Record<string, unknown> = {};
   try { payload = JSON.parse(rec.payload) as Record<string, unknown>; } catch { /* */ }
   let executeResult: Record<string, unknown> | null = null;
   if (rec.execute_result) {
     try { executeResult = JSON.parse(rec.execute_result) as Record<string, unknown>; } catch { /* */ }
   }
+  const isWriteTool = writeTools.has(rec.tool_name);
+  const isGraduated = graduated.has(`${rec.agent}:${rec.tool_name}`);
   return {
     id: rec.id,
     agent: rec.agent,
@@ -186,5 +287,9 @@ function rowToView(rec: PendingRow) {
     payload,
     executeResult,
     toolError: executeResult && typeof executeResult.error === 'string' ? executeResult.error : null,
+    // True iff (a) this is a write tool we know how to graduate, and
+    // (b) the (agent, tool) pair isn't already graduated. The view shows
+    // the inline graduate button to admins only when this is true.
+    canGraduate: isWriteTool && !isGraduated,
   };
 }
