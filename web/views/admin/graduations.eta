@@ -1,0 +1,92 @@
+<% layout('/layouts/base') %>
+
+<h1>Agent graduations</h1>
+
+<p style="color:var(--text-muted)">
+A graduation lifts the dry-run gate for one <code>(agent, tool)</code> pair
+— the agent can call that tool with <code>mode: 'execute'</code> directly,
+no inbox approval. The capability check (does the calling user hold
+<code>asana:write</code>, <code>slack:write</code>, etc.) still applies.
+Approve a few examples in the <a href="/inbox">inbox</a> before graduating.
+</p>
+
+<% if (it.query?.notice) { %>
+  <% const map = { granted: '✓ Graduated ' + (it.query.pair || ''), revoked: 'Revoked ' + (it.query.pair || '') } %>
+  <div class="notice"><%= map[it.query.notice] || it.query.notice %></div>
+<% } %>
+
+<table class="grad-matrix">
+  <thead>
+    <tr>
+      <th>Agent</th>
+      <% it.writeTools.forEach(function(tool) { %>
+        <th><code><%= tool %></code></th>
+      <% }) %>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.matrix.forEach(function(row) { %>
+      <tr>
+        <th class="agent-name"><code><%= row.agent %></code></th>
+        <% row.cells.forEach(function(entry) { %>
+          <td class="cell cell-<%= entry.cell.state %>">
+            <% if (entry.cell.state === 'n/a') { %>
+              <span class="muted">—</span>
+            <% } else if (entry.cell.state === 'graduated') { %>
+              <div class="grad-meta">
+                <span class="tick">✓ graduated</span>
+                <small>by <%= entry.cell.graduatedBy %><br/>on <%= entry.cell.graduatedAt %></small>
+                <% if (entry.cell.notes) { %>
+                  <small class="notes">"<%= entry.cell.notes %>"</small>
+                <% } %>
+              </div>
+              <form method="POST" action="/admin/graduations/revoke">
+                <input type="hidden" name="agent" value="<%= row.agent %>" />
+                <input type="hidden" name="toolName" value="<%= entry.tool %>" />
+                <button type="submit" class="btn-danger">Revoke</button>
+              </form>
+            <% } else { %>
+              <details>
+                <summary><span class="grant-cta">Grant</span></summary>
+                <form method="POST" action="/admin/graduations/grant" class="grant-form">
+                  <input type="hidden" name="agent" value="<%= row.agent %>" />
+                  <input type="hidden" name="toolName" value="<%= entry.tool %>" />
+                  <textarea name="notes" placeholder="Why now? Approval rate, sample size, who signed off… (optional)" rows="2"></textarea>
+                  <button type="submit" class="btn-primary">Grant</button>
+                </form>
+              </details>
+            <% } %>
+          </td>
+        <% }) %>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<p style="margin-top:1.5em">
+<small><strong>Reminder:</strong> graduations are global — they apply to
+every user calling that agent. User trust is enforced separately via the
+capability check on each tool's <code>capability</code> slug.</small>
+</p>
+
+<style>
+  .notice { padding: 0.6em 1em; background: var(--bg-elevated, #f4f4f4); border-left: 3px solid var(--accent, #5a9); margin-bottom: 1em; border-radius: 4px; }
+  .grad-matrix { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 0.9em; }
+  .grad-matrix th, .grad-matrix td { border: 1px solid var(--border, #ddd); padding: 0.6em 0.7em; vertical-align: top; }
+  .grad-matrix thead th { background: var(--bg-elevated, #fafafa); text-align: left; }
+  .grad-matrix .agent-name { white-space: nowrap; }
+  .cell-n\/a { background: var(--bg, #fff); }
+  .cell-n\/a .muted { color: var(--text-muted, #aaa); }
+  .cell-ungraduated { background: var(--bg, #fff); }
+  .cell-graduated { background: rgba(160, 224, 160, 0.12); }
+  .grad-meta .tick { color: #1d5524; font-weight: 600; }
+  .grad-meta small { display: block; color: var(--text-muted, #555); font-size: 0.8em; margin-top: 0.2em; }
+  .grad-meta .notes { font-style: italic; margin-top: 0.4em; }
+  .grant-cta { color: var(--accent, #2a8); cursor: pointer; font-weight: 600; }
+  .grant-form { margin-top: 0.6em; display: flex; flex-direction: column; gap: 0.4em; }
+  .grant-form textarea { font: inherit; padding: 0.4em; border: 1px solid var(--border, #ccc); border-radius: 3px; resize: vertical; }
+  .grad-matrix button { padding: 0.4em 0.8em; border: 1px solid var(--border, #ccc); background: var(--bg, #fff); border-radius: 4px; cursor: pointer; }
+  .grad-matrix .btn-primary { background: var(--accent, #2a8); color: white; border-color: transparent; }
+  .grad-matrix .btn-danger { color: #b33; margin-top: 0.6em; }
+  .grad-matrix button:hover { filter: brightness(0.95); }
+</style>
