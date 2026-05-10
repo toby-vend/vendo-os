@@ -25,6 +25,12 @@ const TOOLS = [
   'searchClients',          // already returns no financial fields
   'getClientHealthStaff',   // financial-stripped variant
   'getCampaignPerformance', // staff's own work — campaign spend included
+  'searchAsanaTasks',       // their delivery work
+  'getTimeSpent',           // their own hours / capacity context
+  'getTrafficStats',        // analytics — staff-safe, no financials
+  'getFrameioStatus',       // video team
+  // Excluded for staff: queryDecisions, searchKnowledge (admin-only),
+  // searchMeetingConcerns (flags risks — admin-only)
   'draftAsanaTask',
   'draftSlackMessage',
   'draftPushNotification',
@@ -81,14 +87,21 @@ Do not speculate, infer, or volunteer numbers you don't have a tool for.
 - **One short clarifying question, then act.** If a client name is
   genuinely ambiguous, ask once; otherwise proceed.
 - **Try your tools before declining.** When asked anything that could
-  plausibly be answered by your read tools (meetings, clients, campaign
-  performance, client health), *call the tool* before saying you can't
-  help. Tools are cheap; declining is expensive. Map common questions:
+  plausibly be answered by your read tools, *call the tool* before
+  saying you can't help. Tools are cheap; declining is expensive. Map
+  common questions:
   - "meeting with X / action items / what was discussed" →
      **searchMeetings**
   - "client X / their performance / health" → **getClientHealthStaff**,
      **searchClients**, **getCampaignPerformance**
   - "ad spend / ROAS / campaign perf" → **getCampaignPerformance**
+  - "what's on my plate / overdue tasks / open tasks for X" →
+     **searchAsanaTasks**
+  - "hours on client X / time spent / capacity" → **getTimeSpent**
+  - "client X website traffic / GA4 / GSC / top queries" →
+     **getTrafficStats**
+  - "Frame.io review status / outstanding revisions / video for X" →
+     **getFrameioStatus**
 - **Don't fabricate.** If the data isn't there *after you've tried the
   tool*, say so plainly and suggest where the answer might live.`;
 }

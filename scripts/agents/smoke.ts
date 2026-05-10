@@ -518,10 +518,12 @@ async function main(): Promise<void> {
     assert(a.name === 'atlas', "name === 'atlas'");
     assert(a.model === 'anthropic/claude-sonnet-4.6', 'model is Sonnet 4.6');
     assert(a.maxSteps === 8, 'maxSteps === 8');
-    assert(Array.isArray(a.tools) && a.tools.length === 10, 'declares 10 tools');
+    assert(Array.isArray(a.tools) && a.tools.length === 15, 'declares 15 tools');
     const expectedTools = [
       'searchMeetings', 'searchClients', 'getClientHealth',
       'getCampaignPerformance', 'queryDecisions', 'searchKnowledge',
+      'searchAsanaTasks', 'getTimeSpent', 'getTrafficStats',
+      'getFrameioStatus', 'searchMeetingConcerns',
       'draftAsanaTask', 'draftSlackMessage', 'draftPushNotification', 'draftEmail',
     ];
     for (const t of expectedTools) {
@@ -577,12 +579,18 @@ async function main(): Promise<void> {
     assert(!staffTools.has('queryDecisions'), 'staff has no queryDecisions');
     assert(!staffTools.has('searchKnowledge'), 'staff has no searchKnowledge');
     assert(!staffTools.has('getClientHealth'), 'staff has no full getClientHealth');
+    assert(!staffTools.has('searchMeetingConcerns'), 'staff has no concerns search');
     assert(staffTools.has('getClientHealthStaff'), 'staff has getClientHealthStaff');
     assert(staffTools.has('searchMeetings'), 'staff still has searchMeetings');
     assert(staffTools.has('getCampaignPerformance'), 'staff still has campaign perf');
+    assert(staffTools.has('searchAsanaTasks'), 'staff has searchAsanaTasks');
+    assert(staffTools.has('getTimeSpent'), 'staff has getTimeSpent');
+    assert(staffTools.has('getTrafficStats'), 'staff has getTrafficStats');
+    assert(staffTools.has('getFrameioStatus'), 'staff has getFrameioStatus');
     assert(adminTools.has('queryDecisions'), 'admin retains queryDecisions');
     assert(adminTools.has('searchKnowledge'), 'admin retains searchKnowledge');
     assert(adminTools.has('getClientHealth'), 'admin retains full getClientHealth');
+    assert(adminTools.has('searchMeetingConcerns'), 'admin has searchMeetingConcerns');
   }
 
   console.log('\n[24c] staff getClientHealthStaff strips financial fields');

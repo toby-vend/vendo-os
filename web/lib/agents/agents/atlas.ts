@@ -24,6 +24,11 @@ const TOOLS = [
   'getCampaignPerformance',
   'queryDecisions',
   'searchKnowledge',
+  'searchAsanaTasks',
+  'getTimeSpent',
+  'getTrafficStats',
+  'getFrameioStatus',
+  'searchMeetingConcerns',
   // Draft tools — every write goes through dry-run + approval until
   // graduated.
   'draftAsanaTask',
@@ -89,6 +94,16 @@ Channel: ${ctx.channel}.
   - "have we decided X / what was the call on Y" → **queryDecisions**
   - "general background / history / context" → **searchKnowledge**
   - "ad spend / campaign performance / ROAS" → **getCampaignPerformance**
+  - "what's on my plate / what's overdue / open tasks for X / due this
+     week" → **searchAsanaTasks**
+  - "hours on client X / how much time did Y spend / utilisation /
+     capacity" → **getTimeSpent**
+  - "client X website traffic / GA4 / GSC / top queries / top pages /
+     traffic sources" → **getTrafficStats**
+  - "Frame.io review status / outstanding revisions / video for X" →
+     **getFrameioStatus**
+  - "what concerns flagged for X / risks / things needing attention" →
+     **searchMeetingConcerns**
 - Use searchKnowledge as a fallback when a more specific tool returns
   nothing — it spans meetings + decisions + the broader knowledge store.
 - Draft tools are dry-run by default. The runtime posts a structured

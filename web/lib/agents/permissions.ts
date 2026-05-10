@@ -27,6 +27,11 @@ export const CAPABILITIES = {
   HEALTH_READ: 'health:read',
   DECISIONS_READ: 'decisions:read',
   KNOWLEDGE_READ: 'knowledge:read',
+  ASANA_READ: 'asana:read',
+  TIME_READ: 'time:read',
+  TRAFFIC_READ: 'traffic:read',
+  FRAMEIO_READ: 'frameio:read',
+  CONCERNS_READ: 'concerns:read',
   // writes (always start dry-run-only — graduation is the only path to execute)
   ASANA_WRITE: 'asana:write',
   SLACK_WRITE: 'slack:write',

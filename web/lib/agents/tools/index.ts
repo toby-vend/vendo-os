@@ -7,6 +7,11 @@ import { getClientHealthStaff } from './get-client-health-staff.js';
 import { getCampaignPerformance } from './get-campaign-performance.js';
 import { queryDecisions } from './query-decisions.js';
 import { searchKnowledge } from './search-knowledge.js';
+import { searchAsanaTasks } from './search-asana-tasks.js';
+import { getTimeSpent } from './get-time-spent.js';
+import { getTrafficStats } from './get-traffic-stats.js';
+import { getFrameioStatus } from './get-frameio-status.js';
+import { searchMeetingConcerns } from './search-meeting-concerns.js';
 import { draftAsanaTask } from './draft-asana-task.js';
 import { draftSlackMessage } from './draft-slack-message.js';
 import { draftPushNotification } from './draft-push-notification.js';
@@ -20,6 +25,11 @@ export const TOOL_FACTORIES = {
   getCampaignPerformance,
   queryDecisions,
   searchKnowledge,
+  searchAsanaTasks,
+  getTimeSpent,
+  getTrafficStats,
+  getFrameioStatus,
+  searchMeetingConcerns,
   draftAsanaTask,
   draftSlackMessage,
   draftPushNotification,
