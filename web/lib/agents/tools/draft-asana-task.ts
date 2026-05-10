@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { defineTool, modeField } from './_tool.js';
 import { CAPABILITIES } from '../permissions.js';
-import { scalar } from '../../queries/base.js';
+import { resolveAssignee } from '../../asana/assignee.js';
 import { createPrivateAsanaTask } from '../../asana/tasks.js';
 import type { ToolCtx } from '../types.js';
 
@@ -50,20 +50,10 @@ export const draftAsanaTask = (ctx: ToolCtx) =>
           return { mode: 'dry-run' as const, payload, asanaUrl: null, error: null };
         }
 
-        // Execute path. Look up the assignee's Asana gid by email.
-        // TODO: there is no asana_user_gid column on `users` yet — when the
-        // user→asana mapping table lands, swap this lookup. For now we surface
-        // a clean error so the model can fall back to dry-run.
-        let asanaGid: string | null = null;
-        try {
-          asanaGid = await scalar<string>(
-            'SELECT asana_user_gid FROM users WHERE email = ?',
-            [args.assigneeEmail],
-          );
-        } catch {
-          asanaGid = null;
-        }
-
+        // Execute path. Resolve the assignee's Asana gid via the live
+        // /users endpoint (cached) — same helper used by the Slack
+        // director-action 'add_to_asana' button. Vendo-domain emails only.
+        const asanaGid = await resolveAssignee(undefined, args.assigneeEmail);
         if (!asanaGid) {
           return {
             mode: 'execute' as const,

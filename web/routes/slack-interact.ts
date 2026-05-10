@@ -45,6 +45,34 @@ function ephemeral(reply: FastifyReply, text: string) {
 }
 
 /**
+ * Replace the original approval card with a status line. This is what the
+ * user actually sees after clicking — Slack's `response_type: ephemeral`
+ * follow-ups are unreliable in DMs, but `replace_original: true` always
+ * lands.
+ */
+function replaceCard(reply: FastifyReply, text: string) {
+  reply.send({
+    replace_original: true,
+    text,
+    blocks: [{ type: 'section', text: { type: 'mrkdwn', text } }],
+  });
+}
+
+/**
+ * Read a structured error string out of a tool's result, if the tool
+ * reports one. Tools that finish without throwing but couldn't actually
+ * execute (e.g. the Asana resolver fails to find the assignee) surface
+ * their reason in `result.error`. We hoist that into the user-visible
+ * message.
+ */
+function extractToolError(result: unknown): string | null {
+  if (!result || typeof result !== 'object') return null;
+  const r = result as Record<string, unknown>;
+  if (typeof r.error === 'string' && r.error.length > 0) return r.error;
+  return null;
+}
+
+/**
  * Approve/edit/reject handler — mirrors api/agent/approve.ts but
  * authenticates via Slack id (not session JWT) and replies ephemerally.
  */
@@ -59,42 +87,42 @@ async function handleAgentAction(opts: {
 
   const user = await slackUserIdToVendoUser(slackUserId);
   if (!user) {
-    ephemeral(
+    replaceCard(
       reply,
-      ':x: We could not match your Slack account to a Vendo user. Ask an admin to check that your Slack email matches your Vendo email and that the Slack app has `users:read.email`.',
+      ':x: Could not match your Slack account to a Vendo user. Ask an admin to check that your Slack email matches your Vendo email and that the Slack app has `users:read.email`.',
     );
     return;
   }
 
   const rec = await getById(recId);
   if (!rec) {
-    ephemeral(reply, ':x: That recommendation no longer exists.');
+    replaceCard(reply, ':x: That recommendation no longer exists.');
     return;
   }
   if (rec.status !== 'pending') {
-    ephemeral(reply, `:information_source: Already ${rec.status}.`);
+    replaceCard(reply, `:information_source: Already ${rec.status}.`);
     return;
   }
   if (rec.user_id !== user.id && user.role !== 'admin') {
-    ephemeral(reply, ':no_entry: That recommendation belongs to someone else.');
+    replaceCard(reply, ':no_entry: That recommendation belongs to someone else.');
     return;
   }
 
   const updated = await decide({ id: recId, decidedBy: user.id, decision });
   if (!updated) {
-    ephemeral(reply, ':warning: Could not record your decision. Ask an admin to check the logs.');
+    replaceCard(reply, ':warning: Could not record your decision. Ask an admin to check the logs.');
     return;
   }
 
   if (decision === 'rejected') {
-    ephemeral(reply, ':white_check_mark: Rejected.');
+    replaceCard(reply, `:no_entry_sign: *Rejected* — _${rec.title}_`);
     return;
   }
 
   if (decision === 'edited') {
     // The full edit flow lives on the web /inbox page; the Slack button
     // just records intent. The user follows up there with their tweaks.
-    ephemeral(reply, ':pencil2: Marked as edited — open Atlas on the web to make your changes.');
+    replaceCard(reply, `:pencil2: *Marked as edited* — _${rec.title}_\nOpen Atlas on the web to make your changes.`);
     return;
   }
 
@@ -102,7 +130,7 @@ async function handleAgentAction(opts: {
   // this single call; the human click is the gate).
   const factory = TOOL_FACTORIES[rec.tool_name as ToolName];
   if (!factory) {
-    ephemeral(reply, `:warning: Unknown tool ${rec.tool_name}; cannot execute.`);
+    replaceCard(reply, `:warning: Unknown tool ${rec.tool_name}; cannot execute.`);
     return;
   }
   const ctx: ToolCtx = {
@@ -115,7 +143,7 @@ async function handleAgentAction(opts: {
   };
   const tool = factory(ctx);
   if (!tool.execute) {
-    ephemeral(reply, ':warning: This tool has no execute() — cannot run from approval.');
+    replaceCard(reply, ':warning: This tool has no execute() — cannot run from approval.');
     return;
   }
 
@@ -128,12 +156,24 @@ async function handleAgentAction(opts: {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     log('agent action execute failed', msg);
-    ephemeral(reply, `:warning: Execute failed: ${msg}`);
+    replaceCard(reply, `:warning: *Execute failed* — _${rec.title}_\n\`${msg}\``);
     return;
   }
 
   await markExecuted(rec.id, result);
-  ephemeral(reply, ':white_check_mark: Approved and executed.');
+
+  // Tool may have completed without throwing but reported an internal
+  // error in its result body (e.g. asana_no_gid_for_email). Surface that
+  // distinction so the user can act.
+  const toolError = extractToolError(result);
+  if (toolError) {
+    replaceCard(
+      reply,
+      `:warning: *Approved but execution failed* — _${rec.title}_\nReason: \`${toolError}\``,
+    );
+  } else {
+    replaceCard(reply, `:white_check_mark: *Approved and executed* — _${rec.title}_`);
+  }
 }
 
 export const slackInteractRoutes: FastifyPluginAsync = async (app) => {
