@@ -60,6 +60,20 @@
       }
     },
     {
+      "src": "api/agent/chat.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 60
+      }
+    },
+    {
+      "src": "api/agent/approve.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 60
+      }
+    },
+    {
       "src": "public/**",
       "use": "@vercel/static"
     }
@@ -146,6 +160,8 @@
     { "src": "/api/slack/commands", "dest": "/api/slack/commands.ts", "methods": ["POST"] },
     { "src": "/api/cron/atlas-brief", "dest": "/api/cron/atlas-brief.ts", "methods": ["GET", "POST"] },
     { "src": "/api/cron/concern-monitor", "dest": "/api/cron/concern-monitor.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/agent/chat", "dest": "/api/agent/chat.ts", "methods": ["POST"] },
+    { "src": "/api/agent/approve", "dest": "/api/agent/approve.ts", "methods": ["POST"] },
     { "src": "/(.*)", "dest": "/api/index.ts" }
   ]
 }
