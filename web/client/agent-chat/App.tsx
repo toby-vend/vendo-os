@@ -21,6 +21,26 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
+import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
+
+// Inline Markdown → safe HTML. Atlas emits **bold**, *italic*, bullet
+// lists, and [text](url) links — we render those properly instead of
+// leaking the raw syntax. `marked.parseInline` keeps the result inline
+// (no <p> wrapper), then `sanitize-html` strips anything dangerous.
+function renderMarkdown(text: string): string {
+  const html = marked.parse(text, { async: false, breaks: true, gfm: true });
+  return sanitizeHtml(html as string, {
+    allowedTags: ['a', 'b', 'i', 'em', 'strong', 'code', 'pre', 'ul', 'ol', 'li', 'p', 'br', 'span'],
+    allowedAttributes: { a: ['href', 'target', 'rel'] },
+    transformTags: {
+      a: (tagName, attribs) => ({
+        tagName: 'a',
+        attribs: { ...attribs, target: '_blank', rel: 'noopener noreferrer' },
+      }),
+    },
+  });
+}
 
 interface AppProps {
   userName: string;
@@ -161,9 +181,17 @@ function MessageRow({ message }: { message: UIMessage }): React.JSX.Element {
 }
 
 function PartView({ part }: { part: { type: string; [k: string]: unknown } }): React.JSX.Element | null {
-  // Text part
+  // Text part — render Markdown so **bold**, lists, and [links] don't
+  // leak their raw syntax. Streaming text is still safe: each token
+  // appended just reparses inline, which marked handles cleanly.
   if (part.type === 'text') {
-    return <div className="atlas-text">{(part as { type: 'text'; text: string }).text}</div>;
+    const text = (part as { type: 'text'; text: string }).text;
+    return (
+      <div
+        className="atlas-text atlas-text-md"
+        dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }}
+      />
+    );
   }
 
   // Reasoning part — collapsed by default
@@ -232,14 +260,9 @@ function ToolCallView({ part }: { part: ToolPart }): React.JSX.Element {
   const resourceUrl = wroteForReal && output && typeof output.asanaUrl === 'string' ? output.asanaUrl : null;
 
   return (
-    <details className={`atlas-tool atlas-tool-${state} ${cardClass}`} open={state === 'output-error'}>
-      <summary>
-        <span className="atlas-tool-dot" />
-        <span className="atlas-tool-name">{toolName}</span>
-        <span className="atlas-tool-state">{stateLabel[state] ?? state}</span>
-      </summary>
-
-      {/* Outcome-aware affordance for write tools */}
+    <div className={`atlas-tool-wrap atlas-tool-${state} ${cardClass}`}>
+      {/* Outcome-aware affordance for write tools — rendered outside
+          the collapsed details so the action link is always visible. */}
       {state === 'output-available' && wroteForReal && (
         <div className="atlas-tool-cta">
           <span className="atlas-tool-cta-icon">✓</span>
@@ -259,24 +282,32 @@ function ToolCallView({ part }: { part: ToolPart }): React.JSX.Element {
         </div>
       )}
 
-      {part.input !== undefined && (
-        <div className="atlas-tool-section">
-          <div className="atlas-tool-label">input</div>
-          <pre>{JSON.stringify(part.input, null, 2)}</pre>
-        </div>
-      )}
-      {part.output !== undefined && (
-        <div className="atlas-tool-section">
-          <div className="atlas-tool-label">output</div>
-          <pre>{JSON.stringify(part.output, null, 2)}</pre>
-        </div>
-      )}
-      {part.errorText && (
-        <div className="atlas-tool-section atlas-tool-error">
-          {part.errorText}
-        </div>
-      )}
-    </details>
+      <details className="atlas-tool" open={state === 'output-error'}>
+        <summary>
+          <span className="atlas-tool-dot" />
+          <span className="atlas-tool-name">{toolName}</span>
+          <span className="atlas-tool-state">{stateLabel[state] ?? state}</span>
+        </summary>
+
+        {part.input !== undefined && (
+          <div className="atlas-tool-section">
+            <div className="atlas-tool-label">input</div>
+            <pre>{JSON.stringify(part.input, null, 2)}</pre>
+          </div>
+        )}
+        {part.output !== undefined && (
+          <div className="atlas-tool-section">
+            <div className="atlas-tool-label">output</div>
+            <pre>{JSON.stringify(part.output, null, 2)}</pre>
+          </div>
+        )}
+        {part.errorText && (
+          <div className="atlas-tool-section atlas-tool-error">
+            {part.errorText}
+          </div>
+        )}
+      </details>
+    </div>
   );
 }
 

@@ -228,54 +228,98 @@
     color: #f87171;
   }
 
-  /* Outcome-aware variants for write tools */
-  .atlas-tool-drafted {
-    border-color: rgba(245, 214, 116, 0.35);
-    background: rgba(245, 214, 116, 0.04);
+  /* Tool wrap — groups the always-visible CTA with the collapsed details */
+  .atlas-tool-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
   }
+
+  /* Outcome-aware variants for write tools — applied to the wrap so
+     the CTA + summary both adopt the colour scheme. */
   .atlas-tool-drafted .atlas-tool-dot { background: #f5d674; }
-  .atlas-tool-executed {
-    border-color: rgba(34, 197, 94, 0.35);
-    background: rgba(34, 197, 94, 0.04);
-  }
   .atlas-tool-executed .atlas-tool-dot { background: #22C55E; animation: none; }
 
   .atlas-tool-cta {
-    margin-top: 0.7rem;
-    padding: 0.55rem 0.7rem;
-    border-radius: 8px;
-    background: rgba(34, 197, 94, 0.08);
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
     display: flex;
     align-items: center;
-    gap: 0.55rem;
-    font-size: 0.82rem;
+    gap: 0.6rem;
+    font-size: 0.88rem;
     color: #d6f5dd;
   }
   .atlas-tool-cta-draft {
     background: rgba(245, 214, 116, 0.08);
+    border-color: rgba(245, 214, 116, 0.3);
     color: #f5d674;
   }
   .atlas-tool-cta-icon {
     display: inline-flex;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     align-items: center;
     justify-content: center;
     font-weight: 700;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    font-size: 0.78rem;
+    flex-shrink: 0;
   }
   .atlas-tool-cta-link {
     margin-left: auto;
     color: inherit;
     text-decoration: none;
     font-weight: 600;
-    padding: 0.2rem 0.55rem;
-    border-radius: 4px;
+    padding: 0.3rem 0.7rem;
+    border-radius: 5px;
     background: rgba(255, 255, 255, 0.08);
     transition: background 0.15s;
+    white-space: nowrap;
   }
   .atlas-tool-cta-link:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.18);
   }
+
+  /* Markdown render inside text parts */
+  .atlas-text-md {
+    white-space: normal;
+  }
+  .atlas-text-md p { margin: 0 0 0.55rem; }
+  .atlas-text-md p:last-child { margin-bottom: 0; }
+  .atlas-text-md strong { color: #fff; font-weight: 600; }
+  .atlas-text-md em { font-style: italic; color: rgba(255,255,255,0.85); }
+  .atlas-text-md a {
+    color: #86efac;
+    text-decoration: underline;
+    text-decoration-color: rgba(134, 239, 172, 0.4);
+    text-underline-offset: 2px;
+  }
+  .atlas-text-md a:hover { text-decoration-color: #86efac; }
+  .atlas-text-md ul, .atlas-text-md ol {
+    margin: 0.3rem 0 0.55rem;
+    padding-left: 1.4rem;
+  }
+  .atlas-text-md li { margin: 0.1rem 0; }
+  .atlas-text-md code {
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    padding: 0.1em 0.35em;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.86em;
+  }
+  .atlas-text-md pre {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.84rem;
+  }
+  .atlas-text-md pre code { background: transparent; padding: 0; }
 
   @keyframes atlas-pulse {
     0%, 100% { opacity: 1; }
