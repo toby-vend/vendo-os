@@ -200,19 +200,65 @@ interface ToolPart {
 function ToolCallView({ part }: { part: ToolPart }): React.JSX.Element {
   const toolName = part.type.replace(/^tool-/, '');
   const state = part.state ?? 'input-streaming';
+
+  // Write tools surface a richer status: drafted vs executed, with an
+  // outcome-aware label and inline action link. Read tools fall back to
+  // the original neutral 'done' label.
+  const isWriteTool = toolName.startsWith('draft');
+  const output = (part.output ?? null) as null | {
+    mode?: 'dry-run' | 'execute';
+    asanaUrl?: string | null;
+    posted?: boolean;
+    sent?: boolean;
+    error?: string | null;
+  };
+  const wroteForReal = isWriteTool && output?.mode === 'execute';
+  const wroteAsDraft = isWriteTool && output?.mode === 'dry-run';
+
   const stateLabel: Record<string, string> = {
     'input-streaming': 'preparing',
     'input-available': 'running',
-    'output-available': 'done',
+    'output-available': wroteForReal ? 'created' : wroteAsDraft ? 'drafted' : 'done',
     'output-error': 'errored',
   };
+  const cardClass =
+    state === 'output-available' && wroteAsDraft
+      ? 'atlas-tool-drafted'
+      : state === 'output-available' && wroteForReal
+        ? 'atlas-tool-executed'
+        : '';
+
+  // Resource link — if the executed tool returned a URL, surface it.
+  const resourceUrl = wroteForReal && output && typeof output.asanaUrl === 'string' ? output.asanaUrl : null;
+
   return (
-    <details className={`atlas-tool atlas-tool-${state}`}>
+    <details className={`atlas-tool atlas-tool-${state} ${cardClass}`} open={state === 'output-error'}>
       <summary>
         <span className="atlas-tool-dot" />
         <span className="atlas-tool-name">{toolName}</span>
         <span className="atlas-tool-state">{stateLabel[state] ?? state}</span>
       </summary>
+
+      {/* Outcome-aware affordance for write tools */}
+      {state === 'output-available' && wroteForReal && (
+        <div className="atlas-tool-cta">
+          <span className="atlas-tool-cta-icon">✓</span>
+          <span>Action completed.</span>
+          {resourceUrl && (
+            <a href={resourceUrl} target="_blank" rel="noopener noreferrer" className="atlas-tool-cta-link">
+              Open →
+            </a>
+          )}
+        </div>
+      )}
+      {state === 'output-available' && wroteAsDraft && (
+        <div className="atlas-tool-cta atlas-tool-cta-draft">
+          <span className="atlas-tool-cta-icon">✏︎</span>
+          <span>Drafted — awaiting approval.</span>
+          <a href="/inbox" className="atlas-tool-cta-link">Review in inbox →</a>
+        </div>
+      )}
+
       {part.input !== undefined && (
         <div className="atlas-tool-section">
           <div className="atlas-tool-label">input</div>
