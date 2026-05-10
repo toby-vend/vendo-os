@@ -148,12 +148,22 @@ export function defineTool<TIn, TOut>(
       // -- 3. Mode coercion (graduation gate) -----------------------------
       // Only meaningful for write tools, which include `mode` in their schema.
       // Read tools have no `mode` field, so this branch is a no-op.
+      //
+      // Semantics:
+      //   - ungraduated pair: always dry-run (regardless of what model asked)
+      //   - graduated pair:   always execute (this is the *point* of grad —
+      //                       the admin has explicitly said this combo is
+      //                       trusted; we don't second-guess via the model's
+      //                       default)
+      //
+      // The /inbox approval flow re-runs the tool with a synthetic single-
+      // entry graduations set, which lands here as "graduated" and
+      // executes — that's how human approval triggers the real call.
       let effectiveMode: ToolMode = 'execute';
       if (spec.hasSideEffect) {
         const argsRecord = parsed as Record<string, unknown>;
-        const requested = (argsRecord.mode as ToolMode) ?? 'dry-run';
         const graduated = ctx.graduations.has(spec.name);
-        effectiveMode = requested === 'execute' && graduated ? 'execute' : 'dry-run';
+        effectiveMode = graduated ? 'execute' : 'dry-run';
         // Reflect the coerced value back so run() sees the truth.
         argsRecord.mode = effectiveMode;
       }

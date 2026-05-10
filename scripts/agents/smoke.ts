@@ -410,6 +410,35 @@ async function main(): Promise<void> {
     );
   }
 
+  console.log('\n[15b] graduation auto-upgrade — dry-run request executes when graduated');
+  {
+    // Models default to mode='dry-run' because the schema defaults to it.
+    // Graduation must auto-upgrade dry-run → execute, otherwise granting a
+    // pair has no observable behaviour change (the model still drafts).
+    // This is the assertion that locks the autonomy-loop semantics in.
+    await graduate({
+      agent: SMOKE_AGENT,
+      toolName: 'draftPushNotification',
+      graduatedBy: SMOKE_USER,
+      notes: 'smoke-test auto-upgrade',
+    });
+    const graduations = await loadGraduations(SMOKE_AGENT);
+    const ctx = mockCtx(runId, mockUser({ channels: ['push:write'] }), graduations);
+    const tools = buildToolset(TEST_AGENT, ctx);
+    const result = (await tools.draftPushNotification.execute!(
+      {
+        mode: 'dry-run',                            // model defaults to this
+        userId: 'never-existed',
+        title: 'smoke auto-upgrade',
+        body: 'smoke body',
+        url: 'https://vendodigital.co.uk/',
+      },
+      TOOL_CALL_OPTS,
+    )) as { mode?: string; sent?: boolean };
+    assert(result.mode === 'execute', 'graduation upgrades requested dry-run to execute');
+    await revokeGraduation(SMOKE_AGENT, 'draftPushNotification');
+  }
+
   console.log('\n[15a] WRITE_TOOL_NAMES matches every hasSideEffect tool in registry');
   {
     // The /admin/graduations matrix relies on WRITE_TOOL_NAMES being the

@@ -110,12 +110,22 @@ Channel: ${ctx.channel}.
      **searchMeetingConcerns**
 - Use searchKnowledge as a fallback when a more specific tool returns
   nothing — it spans meetings + decisions + the broader knowledge store.
-- Draft tools are dry-run by default. The runtime posts a structured
-  **approval card** to the user's channel automatically with the full
-  payload and Approve / Edit / Reject buttons — you do **not** need to
-  restate the draft fields in your reply. Say something brief like
-  "Drafted — review the card to approve, edit, or reject." Restating the
-  fields duplicates the card and clutters the conversation.
+- Draft tools are dry-run by default and produce an approval card —
+  EXCEPT for tools the admin has graduated for you, listed in the
+  "Graduated tools" block below. Graduated tools execute immediately
+  (the action really happens). When you call a graduated tool, your
+  reply should say "I've created/sent/posted X" — *not* "drafted X" —
+  because the action is real. For ungraduated draft tools, the runtime
+  posts a structured approval card to the user's channel automatically
+  with the full payload and Approve / Edit / Reject buttons — you do
+  **not** need to restate the draft fields in your reply. Say something
+  brief like "Drafted — review the card to approve, edit, or reject."
+  Restating the fields duplicates the card and clutters the
+  conversation.
+
+${ctx.graduations.size > 0
+  ? `\n# Graduated tools (these run for real, no approval step)\n${[...ctx.graduations].map(t => `- ${t}`).join('\n')}\n`
+  : ''}
 - If a tool returns no results, say so clearly. Don't guess. But only
   say "I don't have access" *after* you've actually tried.
 
