@@ -1,0 +1,123 @@
+<% layout('/layouts/base') %>
+
+<h1>Inbox <small>(<%= it.total %> shown)</small></h1>
+
+<p style="color:var(--text-muted)">
+Pending agent drafts awaiting your decision. Approve to execute, reject to dismiss, edit to mark for follow-up on the source channel.
+</p>
+
+<% if (it.query?.notice) { %>
+  <% const map = { approved: '✓ Approved and executed.', rejected: 'Rejected.', edited: 'Marked as edited.', 'tool-error': '⚠ Approved but execution failed: ' + (it.query.detail || ''), error: '⚠ Execute errored: ' + (it.query.detail || ''), 'already-approved': 'Already approved.', 'already-rejected': 'Already rejected.', 'already-edited': 'Already edited.', 'no-execute': 'Tool has no execute().', 'unknown-tool': 'Unknown tool.' } %>
+  <div class="notice"><%= map[it.query.notice] || it.query.notice %></div>
+<% } %>
+
+<form class="filter-bar" method="GET" action="/inbox">
+  <div>
+    <label for="status">Status</label>
+    <select id="status" name="status" onchange="this.form.submit()">
+      <option value="pending"  <%= it.currentStatus === 'pending'  ? 'selected' : '' %>>Pending (<%= it.byStatus.pending  || 0 %>)</option>
+      <option value="approved" <%= it.currentStatus === 'approved' ? 'selected' : '' %>>Approved (<%= it.byStatus.approved || 0 %>)</option>
+      <option value="rejected" <%= it.currentStatus === 'rejected' ? 'selected' : '' %>>Rejected (<%= it.byStatus.rejected || 0 %>)</option>
+      <option value="edited"   <%= it.currentStatus === 'edited'   ? 'selected' : '' %>>Edited (<%= it.byStatus.edited   || 0 %>)</option>
+      <option value="all"      <%= it.currentStatus === 'all'      ? 'selected' : '' %>>All</option>
+    </select>
+  </div>
+  <div>
+    <label for="filter">Owner</label>
+    <select id="filter" name="filter" onchange="this.form.submit()">
+      <option value=""     <%= it.currentFilter === ''     ? 'selected' : '' %>>Everyone's</option>
+      <option value="mine" <%= it.currentFilter === 'mine' ? 'selected' : '' %>>Mine</option>
+    </select>
+  </div>
+</form>
+
+<% if (!it.recs.length) { %>
+  <p><em>Nothing here. The inbox is the triage surface for agent recommendations — drafts will appear after Atlas (or a cron-driven agent) suggests an action.</em></p>
+<% } %>
+
+<div class="inbox-list">
+<% it.recs.forEach(rec => { %>
+  <article class="rec-card">
+    <header class="rec-card-head">
+      <div>
+        <span class="badge badge-<%= rec.status %>"><%= rec.status %></span>
+        <span class="rec-tool"><%= rec.toolName %></span>
+        <span class="rec-agent">via <%= rec.agent %></span>
+      </div>
+      <time><%= rec.createdAt %></time>
+    </header>
+
+    <h3><%= rec.title %></h3>
+    <p class="rec-reasoning"><%= rec.reasoning %></p>
+
+    <% if (rec.userName) { %>
+      <p class="rec-owner"><small>For: <%= rec.userName %> &lt;<%= rec.userEmail %>&gt;</small></p>
+    <% } %>
+
+    <% if (Object.keys(rec.payload).length) { %>
+      <details class="rec-payload">
+        <summary>Draft payload</summary>
+        <table class="compact">
+          <% Object.entries(rec.payload).forEach(([k, v]) => { if (k === 'mode') return; %>
+            <tr>
+              <th><%= k %></th>
+              <td><%= typeof v === 'string' ? v : JSON.stringify(v) %></td>
+            </tr>
+          <% }) %>
+        </table>
+      </details>
+    <% } %>
+
+    <% if (rec.executeResult) { %>
+      <details class="rec-result <%= rec.toolError ? 'rec-result-error' : 'rec-result-ok' %>">
+        <summary><%= rec.toolError ? '⚠ Execute error: ' + rec.toolError : '✓ Executed' %></summary>
+        <pre><%= JSON.stringify(rec.executeResult, null, 2) %></pre>
+      </details>
+    <% } %>
+
+    <% if (rec.status === 'pending') { %>
+      <form class="rec-actions" method="POST" action="/inbox/<%= rec.id %>/decide">
+        <button type="submit" name="decision" value="approved" class="btn-primary">Approve</button>
+        <button type="submit" name="decision" value="edited">Edit on source</button>
+        <button type="submit" name="decision" value="rejected" class="btn-danger">Reject</button>
+      </form>
+    <% } else { %>
+      <p class="rec-decided">
+        <small>
+          <strong><%= rec.status %></strong>
+          <% if (rec.decidedAt) { %> on <%= rec.decidedAt %><% } %>
+        </small>
+      </p>
+    <% } %>
+  </article>
+<% }) %>
+</div>
+
+<style>
+  .notice { padding: 0.6em 1em; background: var(--bg-elevated, #f4f4f4); border-left: 3px solid var(--accent, #5a9); margin-bottom: 1em; border-radius: 4px; }
+  .inbox-list { display: flex; flex-direction: column; gap: 1em; margin-top: 1em; }
+  .rec-card { padding: 1em 1.2em; border: 1px solid var(--border, #ddd); border-radius: 6px; background: var(--bg-elevated, #fafafa); }
+  .rec-card h3 { margin: 0.3em 0 0.4em; font-size: 1.05em; }
+  .rec-card-head { display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; color: var(--text-muted, #666); }
+  .rec-card-head time { font-variant-numeric: tabular-nums; }
+  .rec-tool { font-family: ui-monospace, monospace; font-size: 0.85em; padding: 1px 6px; background: var(--bg, #fff); border-radius: 3px; margin: 0 0.4em; }
+  .rec-agent { font-size: 0.85em; color: var(--text-muted, #888); }
+  .rec-reasoning { color: var(--text, #222); margin: 0.4em 0 0.6em; white-space: pre-wrap; }
+  .rec-owner { margin: 0.3em 0; color: var(--text-muted, #666); }
+  .rec-payload, .rec-result { margin: 0.6em 0; }
+  .rec-payload summary, .rec-result summary { cursor: pointer; color: var(--text-muted, #555); font-size: 0.9em; }
+  .rec-payload table { font-size: 0.9em; margin-top: 0.4em; }
+  .rec-payload th { width: 12em; vertical-align: top; text-align: left; padding-right: 0.8em; color: var(--text-muted, #666); font-weight: normal; }
+  .rec-result pre { background: var(--bg, #fff); padding: 0.6em; border-radius: 4px; overflow-x: auto; font-size: 0.85em; max-height: 300px; }
+  .rec-result-error pre { background: rgba(220, 80, 80, 0.06); }
+  .rec-actions { display: flex; gap: 0.5em; margin-top: 0.8em; }
+  .rec-actions button { padding: 0.5em 1em; border: 1px solid var(--border, #ccc); background: var(--bg, #fff); border-radius: 4px; cursor: pointer; }
+  .rec-actions .btn-primary { background: var(--accent, #2a8); color: white; border-color: transparent; }
+  .rec-actions .btn-danger { color: #b33; }
+  .rec-actions button:hover { filter: brightness(0.95); }
+  .rec-decided { color: var(--text-muted, #888); margin: 0.6em 0 0; }
+  .badge-pending  { background: #f5d674; color: #6b4d00; }
+  .badge-approved { background: #b6e4b9; color: #1d5524; }
+  .badge-rejected { background: #f5c4c4; color: #7a1d1d; }
+  .badge-edited   { background: #c9d8f5; color: #1f3d80; }
+</style>

@@ -90,6 +90,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
     items: [
       { id: 'skills', label: 'Skills', href: '/skills', permission: 'skills' },
       { id: 'chat', label: 'Chat', href: '/chat', permission: 'chat' },
+      { id: 'inbox', label: 'Inbox', href: '/inbox', permission: 'inbox' },
       { id: 'briefs', label: 'Briefs', href: '/briefs', permission: 'briefs' },
       { id: 'growth', label: 'Growth', href: '/growth', permission: 'growth' },
       { id: 'drive', label: 'Drive', href: '/drive', permission: 'drive' },
