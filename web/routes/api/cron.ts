@@ -14,6 +14,7 @@ import { syncGhl } from '../../lib/jobs/sync-ghl.js';
 import { purgeSuggestionDrafts } from '../../lib/jobs/purge-suggestion-drafts.js';
 import { processFrameioEvents } from '../../lib/frameio/processor.js';
 import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
+import { pushClientsToPortal } from '../../lib/jobs/push-clients-to-portal.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -196,6 +197,30 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/sync-meta-ads] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Meta Ads sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /push-clients-to-portal — Sync VendoOS clients into the
+   * ClientDashboard portal's `organisations` table (Vercel Cron, every 6h).
+   * One-way bridge keyed on organisations.external_vendo_id. Idempotent.
+   */
+  app.get('/push-clients-to-portal', async (_request, reply) => {
+    try {
+      const result = await pushClientsToPortal();
+      return reply.send({
+        ok: true,
+        message: 'Portal client sync completed',
+        loaded: result.loaded,
+        prepared: result.prepared,
+        written: result.written,
+        collisions: result.collisions,
+        warnings: result.warnings.length,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/push-clients-to-portal] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Portal client sync failed', error: msg });
     }
   });
 
