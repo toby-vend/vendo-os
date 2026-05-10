@@ -41,6 +41,7 @@ Approve a few examples in the <a href="/inbox">inbox</a> before graduating.
                 <% } %>
               </div>
               <form method="POST" action="/admin/graduations/revoke">
+                <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
                 <input type="hidden" name="agent" value="<%= row.agent %>" />
                 <input type="hidden" name="toolName" value="<%= entry.tool %>" />
                 <button type="submit" class="btn-danger">Revoke</button>
@@ -49,6 +50,7 @@ Approve a few examples in the <a href="/inbox">inbox</a> before graduating.
               <details>
                 <summary><span class="grant-cta">Grant</span></summary>
                 <form method="POST" action="/admin/graduations/grant" class="grant-form">
+                  <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
                   <input type="hidden" name="agent" value="<%= row.agent %>" />
                   <input type="hidden" name="toolName" value="<%= entry.tool %>" />
                   <textarea name="notes" placeholder="Why now? Approval rate, sample size, who signed off… (optional)" rows="2"></textarea>

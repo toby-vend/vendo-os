@@ -99,6 +99,7 @@ Pending agent drafts awaiting your decision. Approve to execute, reject to dismi
 
     <% if (rec.status === 'pending') { %>
       <form class="rec-actions" method="POST" action="/inbox/<%= rec.id %>/decide">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
         <button type="submit" name="decision" value="approved" class="btn-primary">Approve</button>
         <button type="submit" name="decision" value="edited">Edit on source</button>
         <button type="submit" name="decision" value="rejected" class="btn-danger">Reject</button>
@@ -107,6 +108,7 @@ Pending agent drafts awaiting your decision. Approve to execute, reject to dismi
         <details class="rec-graduate">
           <summary>Auto-execute future <code><%= rec.toolName %></code> drafts from <code><%= rec.agent %></code></summary>
           <form method="POST" action="/inbox/<%= rec.id %>/graduate">
+            <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
             <p>
               Graduating this pair means future calls of this exact tool by
               this exact agent will execute without showing up here. The
