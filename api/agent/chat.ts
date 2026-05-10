@@ -22,6 +22,7 @@
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { UIMessage } from 'ai';
+import { Readable } from 'node:stream';
 import { parseCookies, verifySessionToken, generateId } from '../../web/lib/auth.js';
 import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth.js';
 import { getAgentForUser } from '../../web/lib/agents/agents/index.js';
@@ -121,29 +122,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   });
 
   // -- Pipe the Web Response body to the Node response ---------------------
+  // Use Readable.fromWeb so back-pressure, error propagation, and the
+  // final end() signal are all handled by Node's stream plumbing rather
+  // than our own getReader loop. The previous manual reader loop dropped
+  // the connection mid-stream on Vercel — the server-side run completed
+  // cleanly, but the client saw 'network error' because the final chunk
+  // never arrived.
   res.status(streamResponse.status);
   streamResponse.headers.forEach((value, key) => {
-    // Skip headers Node will manage itself.
-    if (key === 'content-length') return;
+    const lower = key.toLowerCase();
+    // Skip headers Node manages itself (and that conflict with chunked
+    // streaming when set explicitly).
+    if (lower === 'content-length' || lower === 'transfer-encoding' || lower === 'connection') return;
     res.setHeader(key, value);
   });
 
-  const stream = streamResponse.body;
-  if (!stream) {
+  if (!streamResponse.body) {
     res.end();
     return;
   }
 
-  const reader = stream.getReader();
-  try {
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      if (value) res.write(Buffer.from(value));
-    }
-    res.end();
-  } catch (err) {
-    console.error('[api/agent/chat] stream pipe error:', err instanceof Error ? err.message : String(err));
-    try { res.end(); } catch { /* already ended */ }
-  }
+  // Promise-wrap so the function doesn't return before the pipe finishes
+  // — otherwise Vercel may tear the function down with the stream open.
+  await new Promise<void>((resolve) => {
+    const nodeStream = Readable.fromWeb(streamResponse.body as unknown as Parameters<typeof Readable.fromWeb>[0]);
+    nodeStream.on('error', (err) => {
+      console.error('[api/agent/chat] stream pipe error:', err instanceof Error ? err.message : String(err));
+      try { res.end(); } catch { /* already ended */ }
+      resolve();
+    });
+    res.on('close', () => resolve());
+    res.on('finish', () => resolve());
+    nodeStream.pipe(res);
+  });
 }
