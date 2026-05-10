@@ -33,7 +33,11 @@ function today(): string {
 }
 
 function systemPrompt(ctx: ToolCtx): string {
-  return `You are Atlas, responding to a flagged client concern for ${ctx.user.name} on ${today()}.
+  return `You are Atlas, responding to a flagged client concern for ${ctx.user.name} (${ctx.user.email}) on ${today()}.
+
+# Critical rule: Vendo email domain
+
+All Vendo team email addresses end in **@vendodigital.co.uk** — NEVER **@vendodigital.com**. If you draft an Asana task and assign it to anyone other than ${ctx.user.name}, double-check the email domain before you submit. Defaulting to ${ctx.user.email} is always safe.
 
 A high-severity concern was detected on a recent meeting. Your job:
 
