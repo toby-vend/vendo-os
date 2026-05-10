@@ -1,8 +1,8 @@
 # Block 9 — Atlas Phase 2 (cron-driven flows + triage UI)
 
-**Last updated:** 2026-05-10 (afternoon)
+**Last updated:** 2026-05-10 (evening)
 **Branch:** `main` — everything is merged, deployed, and live at `https://vendo-os.vercel.app`.
-**Smoke:** 107+ assertions, all green. `node --env-file=.env.local --import tsx/esm scripts/agents/smoke.ts`.
+**Smoke:** 152 assertions, all green. `node --env-file=.env.local --import tsx/esm scripts/agents/smoke.ts`.
 
 ---
 
@@ -17,6 +17,7 @@ Block 8 (Slack inbound, conversation memory, Block Kit approval cards) is fully 
 | **Per-user Daily Brief cron** | `/api/cron/atlas-brief` runs `0 7 * * 1-5`. Each admin gets a personalised morning DM (yesterday's meetings, open Asana, flagged concerns, campaign anomalies). Atlas reasons about what to surface; never dumps every metric. | ~$0.16 / brief × 5 admins × weekdays = ~$200/year |
 | **Concern Monitor cron** | `/api/cron/concern-monitor` runs `0 9-18 * * 1-5`. Polls new high/critical `meeting_concerns`, runs `atlas-monitor` agent, drafts a follow-up Asana task or Slack DM, posts a Block Kit approval card to the recipient. Dedup tracked in `monitor_alerts(monitor='atlas-concern-monitor')`. | ~$0.05 / concern × ~14/month = ~$0.70/month |
 | **Web /inbox page** | Server-rendered Fastify route at `/inbox`. Lists every agent recommendation with Approve / Edit / Reject buttons. Filters by status and owner. Surfaces tool-internal errors (e.g. failed-but-marked-executed). Same execute-mode re-run path as the Slack Block Kit Approve. | Admin-only at v1 |
+| **Approval graduation UI** | `/admin/graduations` matrix view — every (agent × write tool) cell, grant / revoke per pair. Inline "Graduate & approve" affordance on `/inbox` for admins lets the trust decision happen at the moment they're seeing concrete tool output. Once graduated, future calls of that pair skip the inbox entirely. Plan: `plans/2026-05-10-block9-graduation-ui.md`. | The autonomy-loop unlocker |
 
 ### Block 9 — remaining
 
@@ -25,7 +26,6 @@ Block 8 (Slack inbound, conversation memory, Block Kit approval cards) is fully 
 | Specialist agent dispatch (AM / Creative / Finance) | ~4 hours per specialist | Atlas hands off; narrower toolsets, sharper prompts, scales over months |
 | Xero / Calendar / GHL read tools | ~30 min each, ~2 hours total | Fills the obvious gaps in the toolbox |
 | Telegram inbound | ~2 hours | Mirror of Slack inbound; off-laptop access |
-| Approval graduation UI | ~2 hours | Admins graduate (agent, tool) pairs so Atlas can execute writes without per-call approval |
 
 ---
 
@@ -162,12 +162,14 @@ web/lib/agents/
   models.ts, types.ts
 
 web/routes/
-  inbox.ts               # NEW — /inbox page (admin-only)
+  inbox.ts               # /inbox page — pending recs + inline graduate flow
   slack-interact.ts      # Block Kit click dispatcher
                          # (extended for agent:approve|edit|reject:<recId>)
+  admin/graduations.ts   # NEW — /admin/graduations matrix routes
 
 web/views/
-  inbox.eta              # NEW — inbox UI
+  inbox.eta              # inbox UI + admin "Graduate & approve" affordance
+  admin/graduations.eta  # NEW — graduation matrix view
 
 scripts/agents/
   smoke.ts               # 107+ assertions
@@ -196,8 +198,10 @@ scripts/migrations/
 
 ## Recommended next pick
 
-**Approval graduation UI** is probably the highest-leverage remaining piece if you want to move Atlas up the autonomy ladder. Once you can graduate (atlas, draftAsanaTask) for a known-good user pattern, those flows execute without per-call approval — much faster autonomous loops. ~2 hours.
+Graduation UI now shipped — admins can grant `(agent, tool)` pairs at `/admin/graduations` or graduate-and-approve inline from a pending rec on `/inbox`. The autonomy bottleneck is open.
 
-Failing that, **Specialist agent dispatch** (AM / Creative / Finance) is the architectural play; it pays off over months.
+Next-most-valuable, in order:
 
-Easy fillers (Xero / Calendar / GHL read tools) are also valuable but lower leverage than the autonomy moves.
+1. **Xero / Calendar / GHL read tools** (~2h total) — fills the most obvious capability gaps. All read-only, so no graduation overhead. Mostly mechanical.
+2. **Specialist agent dispatch** (AM / Creative / Finance, ~4h each) — architectural play; Atlas hands off to a narrower agent with a sharper prompt. Pays off over months but compounds slowly.
+3. **Telegram inbound** (~2h) — mirror of Slack inbound. Smaller payoff than the above; do when off-laptop access becomes a real friction point.
