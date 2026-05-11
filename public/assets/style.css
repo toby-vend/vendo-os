@@ -5210,3 +5210,358 @@ button.growth-sort-btn:hover {
   .sg-panel { left: 12px; right: 12px; bottom: 12px; width: auto; height: 80vh; }
   .sg-detail-grid { grid-template-columns: 1fr !important; }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   APPLE TAHOE LIQUID GLASS SYSTEM
+   ────────────────────────────────────────────────────────────────────
+   Upgrades buttons, inputs, sidebar, main wrapper, cards, and tables
+   from flat frosted glass to true refractive liquid glass.
+
+   Technique:
+   • SVG <feDisplacementMap id="liquid-glass"> in base.eta refracts the
+     backdrop via a 1×1 normal map (scales to any size automatically).
+   • backdrop-filter chains blur + url(#liquid-glass) + saturate.
+   • A 9-layer inset/outset box-shadow stack simulates light reflecting
+     off glass — top highlight, bottom rim shadow, ambient drop.
+   • Per-element ::before pseudo carries the lens; text/content sits
+     above via isolation:isolate so backdrop-filter samples cleanly
+     with zero text ghosting.
+
+   Brand rule: .btn-primary keeps Vendo green; glass shimmer overlays.
+   ════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Reflex intensity — bump these per-context to dial the glass louder/quieter */
+  --lg-reflex-light: 1;
+  --lg-reflex-dark: 1;
+
+  /* Default lens tint — subtle neutral; surfaces override with their own */
+  --lg-tint: rgba(255, 255, 255, 0.05);
+  --lg-tint-strong: rgba(255, 255, 255, 0.08);
+  --lg-tint-surface: rgba(20, 20, 20, 0.42);
+
+  /* The refraction filter chain. Safari falls back via @supports below. */
+  --lg-backdrop: blur(8px) url(#liquid-glass) saturate(150%);
+  --lg-backdrop-strong: blur(14px) url(#liquid-glass) saturate(160%);
+
+  /* Tahoe 9-layer shadow stack (white = reflex highlights, black = rim/ambient) */
+  --lg-shadow:
+    inset 0 0 0 1px color-mix(in srgb, white calc(var(--lg-reflex-light) * 10%), transparent),
+    inset 1.8px 3px 0px -2px color-mix(in srgb, white calc(var(--lg-reflex-light) * 90%), transparent),
+    inset -2px -2px 0px -2px color-mix(in srgb, white calc(var(--lg-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, white calc(var(--lg-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 12%), transparent),
+    inset -1.5px 2.5px 0px -2px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 20%), transparent),
+    inset 0px 3px 4px -2px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 20%), transparent),
+    inset 2px -6.5px 1px -4px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 10%), transparent),
+    0px 1px 5px 0px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 10%), transparent),
+    0px 6px 16px 0px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 8%), transparent);
+
+  /* Softer variant for large surfaces — full stack would be visually noisy */
+  --lg-shadow-soft:
+    inset 0 0 0 1px color-mix(in srgb, white calc(var(--lg-reflex-light) * 8%), transparent),
+    inset 1px 2px 0px -1.5px color-mix(in srgb, white calc(var(--lg-reflex-light) * 50%), transparent),
+    inset -1px -1.5px 0px -1.5px color-mix(in srgb, white calc(var(--lg-reflex-light) * 40%), transparent),
+    inset -2px -5px 1px -4px color-mix(in srgb, white calc(var(--lg-reflex-light) * 30%), transparent),
+    inset 0px 2px 3px -2px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 16%), transparent),
+    0px 1px 4px 0px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 10%), transparent),
+    0px 8px 24px 0px color-mix(in srgb, black calc(var(--lg-reflex-dark) * 12%), transparent);
+
+  --lg-ease: cubic-bezier(1, 0, 0.4, 1);
+}
+
+/* Safari/iOS can't chain url() into backdrop-filter — flatten to blur+saturate */
+@supports not (backdrop-filter: url(#liquid-glass)) {
+  :root {
+    --lg-backdrop: blur(12px) saturate(150%);
+    --lg-backdrop-strong: blur(18px) saturate(160%);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   BUTTONS — every variant gets the lens; .btn-primary keeps green fill
+   ────────────────────────────────────────────────────────────────────── */
+
+.btn,
+.btn-outline,
+.btn-secondary,
+.btn-danger,
+.btn-sm {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  border: none !important;
+  color: var(--vendo-text);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  transition: transform 300ms var(--lg-ease), color 250ms var(--lg-ease);
+  /* Override the generic .btn:hover { opacity: 0.85 } from line ~3711 */
+  opacity: 1 !important;
+}
+
+.btn::before,
+.btn-outline::before,
+.btn-secondary::before,
+.btn-danger::before,
+.btn-sm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-color: var(--lg-tint);
+  backdrop-filter: var(--lg-backdrop);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: var(--lg-shadow);
+  transition: background-color 400ms var(--lg-ease), box-shadow 400ms var(--lg-ease);
+}
+
+.btn-danger { color: #FCA5A5; }
+.btn-danger::before { background-color: rgba(239, 68, 68, 0.12); }
+
+@media (hover: hover) {
+  .btn:not(:disabled):hover,
+  .btn-outline:not(:disabled):hover,
+  .btn-secondary:not(:disabled):hover,
+  .btn-danger:not(:disabled):hover,
+  .btn-sm:not(:disabled):hover {
+    transform: scale(1.03);
+  }
+  .btn:not(:disabled):hover::before,
+  .btn-outline:not(:disabled):hover::before,
+  .btn-secondary:not(:disabled):hover::before,
+  .btn-sm:not(:disabled):hover::before {
+    background-color: var(--lg-tint-strong);
+  }
+}
+
+.btn:not(:disabled):active,
+.btn-outline:not(:disabled):active,
+.btn-secondary:not(:disabled):active,
+.btn-danger:not(:disabled):active,
+.btn-sm:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.btn:disabled, .btn[disabled],
+.btn-outline:disabled, .btn-secondary:disabled,
+.btn-danger:disabled, .btn-sm:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Primary — keep brand green, glass shimmer layered via inset shadow stack only.
+   Skipping ::before lens here preserves text contrast against the solid fill. */
+.btn-primary {
+  position: relative;
+  background: var(--vendo-green) !important;
+  color: #0B0B0B !important;
+  border: none !important;
+  border-radius: 8px;
+  box-shadow: var(--lg-shadow);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.18);
+  transition: transform 300ms var(--lg-ease), background 250ms var(--lg-ease), box-shadow 400ms var(--lg-ease);
+  opacity: 1 !important;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1EB34E !important;
+  transform: scale(1.03);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Icon buttons stay minimal — no full lens, just a subtle hover state */
+.btn-icon {
+  position: relative;
+  isolation: isolate;
+  transition: transform 250ms var(--lg-ease), color 200ms var(--lg-ease);
+}
+.btn-icon:hover { transform: scale(1.08); }
+
+/* ──────────────────────────────────────────────────────────────────────
+   FORM INPUTS — refractive glass; no text-shadow (preserves type clarity)
+   ────────────────────────────────────────────────────────────────────── */
+
+select,
+textarea,
+input[type="text"],
+input[type="search"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="month"],
+input[type="week"] {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--vendo-text);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--vendo-font);
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+  transition: transform 250ms var(--lg-ease), border-color 200ms var(--lg-ease);
+}
+
+/* Apply the lens via background-image trick — pseudo-elements don't work on
+   replaced/native form controls, so we paint directly with backdrop-filter
+   on the input itself. Box-shadow stack gives the glass edge. */
+select,
+textarea,
+input[type="text"],
+input[type="search"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="month"],
+input[type="week"] {
+  background-color: var(--lg-tint-surface) !important;
+  backdrop-filter: var(--lg-backdrop);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: var(--lg-shadow-soft);
+}
+
+select:focus,
+textarea:focus,
+input:focus {
+  border-color: var(--vendo-green) !important;
+  box-shadow: var(--lg-shadow-soft), 0 0 0 3px var(--vendo-green-glow);
+}
+
+select option { background: var(--vendo-surface); color: var(--vendo-text); }
+
+textarea { min-height: 80px; resize: vertical; }
+
+/* ──────────────────────────────────────────────────────────────────────
+   SIDEBAR — replace the flat rgba background with the refractive lens
+   ────────────────────────────────────────────────────────────────────── */
+
+.sidebar {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-color: rgba(20, 20, 20, 0.55);
+  backdrop-filter: var(--lg-backdrop-strong);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: var(--lg-shadow-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   MAIN WRAPPER (the "window") — same treatment, lighter tint
+   ────────────────────────────────────────────────────────────────────── */
+
+.main-wrapper {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.main-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-color: var(--lg-tint-surface);
+  backdrop-filter: var(--lg-backdrop-strong);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: var(--lg-shadow-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   CARDS — articles, stat cards, filter bars, tables
+   ────────────────────────────────────────────────────────────────────── */
+
+article,
+.stat-card,
+.filter-bar {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+article::before,
+.stat-card::before,
+.filter-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-color: var(--lg-tint-surface);
+  backdrop-filter: var(--lg-backdrop);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: var(--lg-shadow-soft);
+  transition: box-shadow 400ms var(--lg-ease);
+}
+
+.stat-card:hover::before {
+  box-shadow: var(--lg-shadow);
+}
+
+/* Tables: overflow:hidden clips ::before, so paint the lens via background+filter
+   on the table itself. Box-shadow gives the edge highlights. */
+table {
+  background: var(--lg-tint-surface) !important;
+  backdrop-filter: var(--lg-backdrop);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: none !important;
+  box-shadow: var(--lg-shadow-soft) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   REDUCED MOTION — strip transforms, keep the static glass look
+   ────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .btn-outline, .btn-secondary, .btn-danger, .btn-sm,
+  .btn-primary, .btn-icon,
+  select, textarea, input,
+  .stat-card::before, article::before, .filter-bar::before {
+    transition: none !important;
+  }
+  .btn:hover, .btn-primary:hover, .btn-outline:hover,
+  .btn-secondary:hover, .btn-danger:hover, .btn-sm:hover,
+  .btn-icon:hover {
+    transform: none !important;
+  }
+}

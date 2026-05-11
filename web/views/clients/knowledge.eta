@@ -230,22 +230,42 @@
   </div>
 
   <div>
-    <!-- Notes (Phase B placeholder) -->
-    <div class="ck-section">
-      <h2>Notes & tribal knowledge</h2>
+    <!-- Notes & tribal knowledge -->
+    <div class="ck-section" id="notes">
+      <h2>Notes & tribal knowledge <span class="ck-count"><%= b.notes.length %></span></h2>
+
+      <!-- New note form -->
+      <form method="post" action="/clients/<%= encodeURIComponent(b.meta.name) %>/notes" style="margin-bottom: 0.75rem;">
+        <textarea name="body" placeholder="Add a note — gotcha, preference, history, todo…" rows="2"
+                  required maxlength="4000"
+                  style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--vendo-border); border-radius: 8px; padding: 8px 10px; color: var(--vendo-text); font: inherit; font-size: 13px; resize: vertical;"></textarea>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; gap: 6px;">
+          <select name="category" style="background: rgba(255,255,255,0.04); border: 1px solid var(--vendo-border); color: var(--vendo-text); border-radius: 6px; padding: 4px 6px; font: inherit; font-size: 12px;">
+            <option value="context">context</option>
+            <option value="gotcha">gotcha</option>
+            <option value="preference">preference</option>
+            <option value="history">history</option>
+            <option value="todo">todo</option>
+          </select>
+          <button type="submit" style="background: var(--vendo-green); color: #000; border: 0; border-radius: 6px; padding: 5px 12px; font-weight: 600; font-size: 12px; cursor: pointer;">Save note</button>
+        </div>
+      </form>
+
       <% if (b.notes.length === 0) { %>
-      <div class="ck-notes-coming">
-        Inline notes coming in Phase B. <code>client_notes</code> table not yet seeded.
-      </div>
+      <div class="ck-notes-coming">No notes yet. The first staff note will land here.</div>
       <% } else { %>
       <ul class="ck-list">
         <% b.notes.forEach(n => { %>
         <li>
-          <div class="ck-row-title"><%= n.body %></div>
-          <div class="ck-row-meta">
+          <div class="ck-row-title" style="white-space: pre-wrap;"><%= n.body %></div>
+          <div class="ck-row-meta" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
             <span class="ck-tag ck-tag-muted" style="font-size: 10px;"><%= n.category %></span>
-            <% if (n.authorName) { %> · <%= n.authorName %><% } %>
-            · <%= fmtDate(n.updatedAt) %>
+            <% if (n.authorName) { %><span>· <%= n.authorName %></span><% } %>
+            <span>· <%= fmtDate(n.updatedAt) %></span>
+            <form method="post" action="/clients/<%= encodeURIComponent(b.meta.name) %>/notes/<%= n.id %>/archive" style="display: inline; margin-left: auto;"
+                  onsubmit="return confirm('Archive this note?');">
+              <button type="submit" style="background: none; border: 0; color: var(--vendo-text-muted); font-size: 11px; cursor: pointer; padding: 0;">archive</button>
+            </form>
           </div>
         </li>
         <% }) %>
