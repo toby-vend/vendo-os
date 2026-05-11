@@ -54,11 +54,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // -- Pull admin users ----------------------------------------------------
+  // Restrict to real @vendodigital.co.uk admins. Test accounts on
+  // @vendo.com are also flagged role='admin' but should never receive
+  // the brief — Slack lookup would fail anyway and pollute the run log.
   const r = await db.execute({
     sql: `SELECT id, email, name, password_hash, role, must_change_password,
                  created_at, updated_at
             FROM users
            WHERE role = 'admin'
+             AND email LIKE '%@vendodigital.co.uk'
            ORDER BY name`,
     args: [],
   });
