@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { db } from '../queries/base.js';
+import { recordRejection } from '../queries/ad-copy-rejections.js';
 import {
   buildAdCopyContext,
   renderBrandNotesBlock,
@@ -31,9 +32,36 @@ const MAX_TOKENS = 2400;
 
 let schemaEnsured = false;
 
+/**
+ * Idempotent migrations for the ad-copy columns on creative_reviews.
+ *
+ * Each ALTER is wrapped individually — one column's failure must not abort
+ * the rest. Matches the convention in processor.ts:55-66.
+ *
+ * Columns added across iterations:
+ *   Phase 5: ad_copy_md, ad_copy_generated_at, ad_copy_objective
+ *   Phase 6: ad_copy_status, ad_copy_approved_*, ad_copy_rejected_*,
+ *            ad_copy_rejection_reason, ad_copy_asana_task_gid
+ */
 async function ensureSchema(): Promise<void> {
   if (schemaEnsured) return;
-  for (const col of ['ad_copy_md TEXT', 'ad_copy_generated_at TEXT', 'ad_copy_objective TEXT']) {
+  const cols: string[] = [
+    // Phase 5
+    'ad_copy_md TEXT',
+    'ad_copy_generated_at TEXT',
+    'ad_copy_objective TEXT',
+    // Phase 6 — approval gate
+    "ad_copy_status TEXT DEFAULT 'draft'",
+    'ad_copy_approved_at TEXT',
+    'ad_copy_approved_by TEXT',
+    'ad_copy_rejected_at TEXT',
+    'ad_copy_rejected_by TEXT',
+    'ad_copy_rejection_reason TEXT',
+    // Phase 6 — Asana hand-off (distinct from the existing asana_task_gid
+    // column on creative_reviews, which is reserved for review-task tracking)
+    'ad_copy_asana_task_gid TEXT',
+  ];
+  for (const col of cols) {
     try { await db.execute(`ALTER TABLE creative_reviews ADD COLUMN ${col}`); } catch { /* exists */ }
   }
   schemaEnsured = true;
@@ -201,12 +229,21 @@ export async function generateAdCopyForReview(input: AdCopyInput): Promise<AdCop
     return { ok: false, reason: `anthropic_error: ${msg}` };
   }
 
+  // Regenerating resets the approval state — any prior approval / rejection
+  // referred to the old copy, not this one. Asana task gid is intentionally
+  // NOT cleared; commit 5 uses its presence to skip duplicate task creation.
   const now = new Date().toISOString();
   await db.execute({
     sql: `UPDATE creative_reviews
             SET ad_copy_md = ?,
                 ad_copy_generated_at = ?,
                 ad_copy_objective = ?,
+                ad_copy_status = 'draft',
+                ad_copy_approved_at = NULL,
+                ad_copy_approved_by = NULL,
+                ad_copy_rejected_at = NULL,
+                ad_copy_rejected_by = NULL,
+                ad_copy_rejection_reason = NULL,
                 updated_at = ?
           WHERE id = ?`,
     args: [markdown, now, objective, now, input.reviewId],
@@ -221,6 +258,136 @@ export async function generateAdCopyForReview(input: AdCopyInput): Promise<AdCop
     markdown,
     generatedAt: now,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Approval gate
+// ---------------------------------------------------------------------------
+
+const REASON_MIN_LEN = 5;
+const REASON_MAX_LEN = 1000;
+
+export interface ApproveResult {
+  ok: true;
+  reviewId: number;
+  status: 'approved';
+  approvedAt: string;
+}
+export interface RejectResult {
+  ok: true;
+  reviewId: number;
+  status: 'rejected';
+  rejectedAt: string;
+  rejectionId: number;
+}
+export type GateError =
+  | { ok: false; reason: 'review_not_found' }
+  | { ok: false; reason: 'no_copy_to_approve' }
+  | { ok: false; reason: 'no_copy_to_reject' }
+  | { ok: false; reason: 'reason_too_short'; min: number }
+  | { ok: false; reason: 'reason_too_long'; max: number };
+
+interface GateRow {
+  id: number;
+  client_name: string;
+  ad_copy_md: string | null;
+  ad_copy_objective: string | null;
+  ad_copy_asana_task_gid: string | null;
+}
+
+async function loadGateRow(reviewId: number): Promise<(GateRow & { clientId: number | null }) | null> {
+  await ensureSchema();
+  let r;
+  try {
+    r = await db.execute({
+      sql: `SELECT id, client_name, ad_copy_md, ad_copy_objective, ad_copy_asana_task_gid
+              FROM creative_reviews WHERE id = ?`,
+      args: [reviewId],
+    });
+  } catch {
+    return null;
+  }
+  const row = r.rows[0] as unknown as GateRow | undefined;
+  if (!row) return null;
+  // Look up clientId for the rejection log (so future generations can join on it).
+  let clientId: number | null = null;
+  try {
+    const c = await db.execute({
+      sql: 'SELECT id FROM clients WHERE name = ? LIMIT 1',
+      args: [row.client_name],
+    });
+    clientId = (c.rows[0] as unknown as { id: number } | undefined)?.id ?? null;
+  } catch { /* swallow */ }
+  return { ...row, clientId };
+}
+
+/**
+ * Mark a generated ad copy as approved. Idempotent — a second approve on
+ * an already-approved row simply refreshes the timestamp. Asana task
+ * creation fires from here in commit 5.
+ */
+export async function approveAdCopy(reviewId: number, userEmail: string | null): Promise<ApproveResult | GateError> {
+  const row = await loadGateRow(reviewId);
+  if (!row) return { ok: false, reason: 'review_not_found' };
+  if (!row.ad_copy_md) return { ok: false, reason: 'no_copy_to_approve' };
+
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `UPDATE creative_reviews
+            SET ad_copy_status = 'approved',
+                ad_copy_approved_at = ?,
+                ad_copy_approved_by = ?,
+                ad_copy_rejected_at = NULL,
+                ad_copy_rejected_by = NULL,
+                ad_copy_rejection_reason = NULL,
+                updated_at = ?
+          WHERE id = ?`,
+    args: [now, userEmail, now, reviewId],
+  });
+
+  return { ok: true, reviewId, status: 'approved', approvedAt: now };
+}
+
+/**
+ * Mark a generated ad copy as rejected with a mandatory reason. The reason
+ * is persisted to ad_copy_rejections (per-client learning log) and also
+ * mirrored onto creative_reviews.ad_copy_rejection_reason for cheap UI
+ * display without an extra join.
+ */
+export async function rejectAdCopy(reviewId: number, userEmail: string | null, rawReason: string): Promise<RejectResult | GateError> {
+  const reason = rawReason.trim();
+  if (reason.length < REASON_MIN_LEN) return { ok: false, reason: 'reason_too_short', min: REASON_MIN_LEN };
+  if (reason.length > REASON_MAX_LEN) return { ok: false, reason: 'reason_too_long', max: REASON_MAX_LEN };
+
+  const row = await loadGateRow(reviewId);
+  if (!row) return { ok: false, reason: 'review_not_found' };
+  if (!row.ad_copy_md) return { ok: false, reason: 'no_copy_to_reject' };
+
+  const rejectionId = await recordRejection({
+    reviewId,
+    clientId: row.clientId,
+    clientName: row.client_name,
+    adCopyMd: row.ad_copy_md,
+    objective: row.ad_copy_objective,
+    reason,
+    rejectedBy: userEmail,
+  });
+
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `UPDATE creative_reviews
+            SET ad_copy_status = 'rejected',
+                ad_copy_rejected_at = ?,
+                ad_copy_rejected_by = ?,
+                ad_copy_rejection_reason = ?,
+                ad_copy_approved_at = NULL,
+                ad_copy_approved_by = NULL,
+                updated_at = ?
+          WHERE id = ?`,
+    args: [now, userEmail, reason, now, reviewId],
+  });
+
+  return { ok: true, reviewId, status: 'rejected', rejectedAt: now, rejectionId };
 }
 
 /** Compose a download filename matching the existing skill convention. */

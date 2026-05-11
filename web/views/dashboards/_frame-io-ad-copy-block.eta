@@ -1,0 +1,109 @@
+<%
+/*
+  Frame.io ad-copy block — shared between the dashboard's review loop
+  and the HTMX response fragments returned by generate / approve / reject.
+
+  Inputs (passed via include() or reply.render()):
+    it.row       — one AwaitingAdCopyRow
+    it.csrfToken — auto-injected by reply.render; passed explicitly when included
+*/
+const r = it.row;
+const csrf = it.csrfToken || '';
+const status = r.adCopyStatus || (r.adCopyMd ? 'draft' : null);
+const borderColour = status === 'approved' ? 'rgba(34,197,94,0.30)'
+  : status === 'rejected' ? 'rgba(239,68,68,0.30)'
+  : 'rgba(148,163,184,0.30)';
+%>
+<% if (r.adCopyMd) { %>
+  <div id="adcopy-<%= r.reviewId %>" style="background:#0B0B0B;border:1px solid <%= borderColour %>;border-radius:8px;padding:0.875rem 1rem;font-size:13px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <strong style="color:#22C55E;">✓ Ad copy generated</strong>
+        <% if (status === 'approved') { %>
+          <span style="background:rgba(34,197,94,0.16);color:#22C55E;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;text-transform:uppercase;">Approved</span>
+        <% } else if (status === 'rejected') { %>
+          <span style="background:rgba(239,68,68,0.16);color:#EF4444;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;text-transform:uppercase;">Rejected</span>
+        <% } else { %>
+          <span style="background:rgba(148,163,184,0.16);color:#94A3B8;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;text-transform:uppercase;">Draft</span>
+        <% } %>
+      </div>
+      <span style="color:#94A3B8;font-size:11px;"><%= r.adCopyObjective || 'leads' %> · <%= fmtDate(r.adCopyGeneratedAt) %></span>
+    </div>
+
+    <details>
+      <summary style="cursor:pointer;color:#cbd5e1;font-size:12px;margin-bottom:6px;">Show / hide markdown</summary>
+      <pre style="white-space:pre-wrap;font-size:11px;background:#000;padding:0.75rem;border-radius:4px;color:#d1d5db;margin:6px 0;"><%= r.adCopyMd %></pre>
+    </details>
+
+    <% if (status === 'rejected' && r.adCopyRejectionReason) { %>
+      <div style="background:rgba(239,68,68,0.08);border-left:2px solid rgba(239,68,68,0.50);padding:0.5rem 0.75rem;margin:8px 0;font-size:12px;color:#fecaca;">
+        <strong style="color:#EF4444;">Rejection reason:</strong> <%= r.adCopyRejectionReason %>
+      </div>
+    <% } %>
+    <% if (status === 'approved' && r.adCopyApprovedBy) { %>
+      <div style="font-size:11px;color:#94A3B8;margin:8px 0 4px;">
+        Approved by <strong><%= r.adCopyApprovedBy %></strong> · <%= fmtDate(r.adCopyApprovedAt) %>
+        <% if (r.adCopyAsanaTaskGid) { %>
+          · <a href="https://app.asana.com/0/0/<%= r.adCopyAsanaTaskGid %>" target="_blank" rel="noopener" style="color:#94A3B8;">↗ Asana task</a>
+        <% } %>
+      </div>
+    <% } %>
+
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;">
+      <% if (status !== 'approved') { %>
+        <button
+          hx-post="/dashboards/frame-io/ad-copy/<%= r.reviewId %>/approve"
+          hx-target="#adcopy-<%= r.reviewId %>"
+          hx-swap="outerHTML"
+          hx-headers='{"X-CSRF-Token": "<%= csrf %>"}'
+          style="padding:4px 12px;background:#22C55E;color:#0B0B0B;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;">
+          ✓ Approve
+        </button>
+        <button
+          hx-get="/dashboards/frame-io/ad-copy/<%= r.reviewId %>/reject-form"
+          hx-target="#reject-form-<%= r.reviewId %>"
+          hx-swap="innerHTML"
+          style="padding:4px 12px;background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.30);border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;">
+          ✗ Reject
+        </button>
+      <% } %>
+
+      <a href="/dashboards/frame-io/ad-copy/<%= r.reviewId %>/download" style="font-size:11px;color:#94A3B8;text-decoration:underline;">↓ download .md</a>
+      <span style="color:#475569;">·</span>
+      <button
+        hx-post="/dashboards/frame-io/generate-ad-copy"
+        hx-vals='{"review_id": <%= r.reviewId %>, "objective": "<%= r.adCopyObjective || 'leads' %>"}'
+        hx-target="#adcopy-<%= r.reviewId %>"
+        hx-swap="outerHTML"
+        hx-headers='{"X-CSRF-Token": "<%= csrf %>"}'
+        hx-indicator="#regen-spin-<%= r.reviewId %>"
+        style="background:none;border:none;color:#94A3B8;font-size:11px;text-decoration:underline;cursor:pointer;padding:0;">
+        regenerate
+      </button>
+      <span id="regen-spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">↻ regenerating…</span>
+    </div>
+
+    <div id="reject-form-<%= r.reviewId %>"></div>
+  </div>
+<% } else { %>
+  <div id="adcopy-<%= r.reviewId %>" style="display:flex;gap:0.5rem;align-items:center;">
+    <select id="obj-<%= r.reviewId %>" style="padding:6px 10px;background:#0B0B0B;border:1px solid rgba(255,255,255,0.10);border-radius:6px;color:#E2E8F0;font-size:12px;">
+      <option value="leads" selected>Leads</option>
+      <option value="awareness">Awareness</option>
+      <option value="traffic">Traffic</option>
+      <option value="sales">Sales</option>
+    </select>
+    <button
+      hx-post="/dashboards/frame-io/generate-ad-copy"
+      hx-include="#obj-<%= r.reviewId %>"
+      hx-vals='js:{review_id: <%= r.reviewId %>, objective: document.getElementById("obj-<%= r.reviewId %>").value}'
+      hx-target="#adcopy-<%= r.reviewId %>"
+      hx-swap="outerHTML"
+      hx-headers='{"X-CSRF-Token": "<%= csrf %>"}'
+      hx-indicator="#spin-<%= r.reviewId %>"
+      style="padding:6px 14px;background:#22C55E;color:#0B0B0B;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
+      ✨ Generate Meta ad copy
+    </button>
+    <span id="spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">Generating… (~10s)</span>
+  </div>
+<% } %>

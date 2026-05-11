@@ -6,9 +6,16 @@ import {
   getActivityFeed,
   getReviewsAwaitingAdCopy,
   getReviewById,
+  getAdCopyRowById,
 } from '../../lib/queries/frameio-dashboard.js';
 import { getConnectionStatus } from '../../lib/frameio/auth.js';
-import { generateAdCopyForReview, adCopyFilename } from '../../lib/frameio/ad-copy.js';
+import {
+  generateAdCopyForReview,
+  approveAdCopy,
+  rejectAdCopy,
+  adCopyFilename,
+} from '../../lib/frameio/ad-copy.js';
+import type { SessionUser } from '../../lib/auth.js';
 
 /**
  * /dashboards/frame-io — Frame.io control room.
@@ -80,24 +87,84 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
       );
     }
 
-    // Render the result as an HTMX-swappable fragment. The full page just
-    // gets re-rendered on next refresh with the new copy attached.
-    const downloadUrl = `/dashboards/frame-io/ad-copy/${result.reviewId}/download`;
-    const generatedAt = new Date(result.generatedAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-    const escaped = result.markdown.replace(/[<>]/g, (ch) => (ch === '<' ? '&lt;' : '&gt;'));
-    return reply.type('text/html').send(`
-      <div style="background:#0B0B0B;border:1px solid rgba(34,197,94,0.30);border-radius:8px;padding:0.875rem 1rem;font-size:13px;">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-          <strong style="color:#22C55E;">✓ Ad copy generated</strong>
-          <span style="color:#94A3B8;font-size:11px;">${result.objective} · ${generatedAt}</span>
-        </div>
-        <details>
-          <summary style="cursor:pointer;color:#cbd5e1;font-size:12px;margin-bottom:6px;">Show / hide markdown</summary>
-          <pre style="white-space:pre-wrap;font-size:11px;background:#000;padding:0.75rem;border-radius:4px;color:#d1d5db;margin:6px 0;">${escaped}</pre>
-        </details>
-        <a href="${downloadUrl}" style="font-size:11px;color:#94A3B8;text-decoration:underline;">↓ download .md</a>
-      </div>
-    `);
+    // Re-query the row so the shared partial renders with full state
+    // (status pill, approve/reject buttons, latest ad_copy_md, etc.).
+    const row = await getAdCopyRowById(result.reviewId);
+    if (!row) {
+      return reply.code(500).type('text/html').send('<p>Ad copy generated but row vanished.</p>');
+    }
+    return reply.render('dashboards/_frame-io-ad-copy-block', { row });
+  });
+
+  // ---------------------------------------------------------------------
+  // Approval gate
+  // ---------------------------------------------------------------------
+
+  // POST /dashboards/frame-io/ad-copy/:reviewId/approve
+  // Marks the row as approved. Returns the re-rendered ad-copy block fragment.
+  app.post('/ad-copy/:reviewId/approve', async (request, reply) => {
+    const params = request.params as { reviewId: string };
+    const reviewId = Number(params.reviewId);
+    if (!Number.isFinite(reviewId) || reviewId <= 0) {
+      return reply.code(400).type('text/html').send('<p>Invalid review id</p>');
+    }
+    const user = (request as unknown as { user: SessionUser | null }).user;
+    const result = await approveAdCopy(reviewId, user?.email ?? null);
+    if (!result.ok) {
+      const safe = String(result.reason).replace(/[<>]/g, '');
+      return reply.code(400).type('text/html').send(
+        `<div style="color:#EF4444;padding:0.5rem 0.75rem;background:rgba(239,68,68,0.08);border-radius:4px;font-size:12px;">Could not approve: <code>${safe}</code></div>`,
+      );
+    }
+    const row = await getAdCopyRowById(reviewId);
+    if (!row) return reply.code(404).type('text/html').send('<p>Review not found</p>');
+    return reply.render('dashboards/_frame-io-ad-copy-block', { row });
+  });
+
+  // GET /dashboards/frame-io/ad-copy/:reviewId/reject-form
+  // Returns the inline textarea + Confirm/Cancel buttons.
+  app.get('/ad-copy/:reviewId/reject-form', async (request, reply) => {
+    const params = request.params as { reviewId: string };
+    const reviewId = Number(params.reviewId);
+    if (!Number.isFinite(reviewId) || reviewId <= 0) {
+      return reply.code(400).type('text/html').send('<p>Invalid review id</p>');
+    }
+    return reply.render('dashboards/_frame-io-reject-form', { reviewId });
+  });
+
+  // GET /dashboards/frame-io/ad-copy/:reviewId/cancel-reject
+  // Empty-body endpoint used by the form's Cancel button to clear the slot.
+  app.get('/ad-copy/:reviewId/cancel-reject', async (_request, reply) => {
+    return reply.type('text/html').send('');
+  });
+
+  // POST /dashboards/frame-io/ad-copy/:reviewId/reject
+  // Body: { reason }. Mandatory; min 5 chars, max 1000.
+  app.post('/ad-copy/:reviewId/reject', async (request, reply) => {
+    const params = request.params as { reviewId: string };
+    const reviewId = Number(params.reviewId);
+    if (!Number.isFinite(reviewId) || reviewId <= 0) {
+      return reply.code(400).type('text/html').send('<p>Invalid review id</p>');
+    }
+    const body = request.body as { reason?: string };
+    const reason = (body.reason ?? '').toString();
+    const user = (request as unknown as { user: SessionUser | null }).user;
+    const result = await rejectAdCopy(reviewId, user?.email ?? null, reason);
+    if (!result.ok) {
+      // Surface validation errors inline on the form so the reviewer can fix
+      // and resubmit without losing context.
+      let msg = `Could not reject: ${result.reason}`;
+      if (result.reason === 'reason_too_short') msg = `Please give at least ${result.min} characters explaining the rejection.`;
+      if (result.reason === 'reason_too_long') msg = `Reason is too long — keep it under ${result.max} characters.`;
+      if (result.reason === 'no_copy_to_reject') msg = 'There is no generated copy on this review to reject.';
+      if (result.reason === 'review_not_found') msg = 'Review not found.';
+      return reply.code(400).type('text/html').send(
+        `<div style="color:#EF4444;padding:0.5rem 0.75rem;background:rgba(239,68,68,0.08);border-radius:4px;font-size:12px;margin-top:6px;">${msg.replace(/[<>]/g, '')}</div>`,
+      );
+    }
+    const row = await getAdCopyRowById(reviewId);
+    if (!row) return reply.code(404).type('text/html').send('<p>Review not found</p>');
+    return reply.render('dashboards/_frame-io-ad-copy-block', { row });
   });
 
   // Browse the markdown for a single review (handy for direct linking).

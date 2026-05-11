@@ -349,6 +349,12 @@ export interface AwaitingAdCopyRow {
   adCopyMd: string | null;
   adCopyGeneratedAt: string | null;
   adCopyObjective: string | null;
+  /** Approval state for the ad copy: 'draft' | 'approved' | 'rejected'. NULL until first generation. */
+  adCopyStatus: string | null;
+  adCopyApprovedAt: string | null;
+  adCopyApprovedBy: string | null;
+  adCopyRejectionReason: string | null;
+  adCopyAsanaTaskGid: string | null;
   updatedAt: string;
 }
 
@@ -360,14 +366,18 @@ export interface AwaitingAdCopyRow {
  */
 export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCopyRow[]> {
   return safe(async () => {
-    // Try with the Phase-5 columns first; fall back if the ALTER hasn't run
-    // (e.g. on a brand-new env where ad-copy has never been requested).
+    // Try with the latest columns first; fall back twice as we go further
+    // back in schema history. Idempotent ALTERs in ad-copy.ts add the Phase 6
+    // columns on first use of the generate endpoint.
     let r;
     try {
       r = await db.execute({
         sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
-                     frameio_file_id, frameio_view_url, ad_copy_md, ad_copy_generated_at,
-                     ad_copy_objective, updated_at
+                     frameio_file_id, frameio_view_url,
+                     ad_copy_md, ad_copy_generated_at, ad_copy_objective,
+                     ad_copy_status, ad_copy_approved_at, ad_copy_approved_by,
+                     ad_copy_rejection_reason, ad_copy_asana_task_gid,
+                     updated_at
                 FROM creative_reviews
                WHERE frameio_file_id IS NOT NULL
             ORDER BY updated_at DESC
@@ -376,16 +386,40 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
       });
     } catch (err) {
       if (!String((err as Error).message ?? '').includes('no such column')) throw err;
-      r = await db.execute({
-        sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
-                     frameio_file_id, frameio_view_url, NULL AS ad_copy_md,
-                     NULL AS ad_copy_generated_at, NULL AS ad_copy_objective, updated_at
-                FROM creative_reviews
-               WHERE frameio_file_id IS NOT NULL
-            ORDER BY updated_at DESC
-               LIMIT ?`,
-        args: [limit],
-      });
+      // Try Phase-5-only columns next.
+      try {
+        r = await db.execute({
+          sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
+                       frameio_file_id, frameio_view_url,
+                       ad_copy_md, ad_copy_generated_at, ad_copy_objective,
+                       NULL AS ad_copy_status, NULL AS ad_copy_approved_at,
+                       NULL AS ad_copy_approved_by, NULL AS ad_copy_rejection_reason,
+                       NULL AS ad_copy_asana_task_gid,
+                       updated_at
+                  FROM creative_reviews
+                 WHERE frameio_file_id IS NOT NULL
+              ORDER BY updated_at DESC
+                 LIMIT ?`,
+          args: [limit],
+        });
+      } catch (err2) {
+        if (!String((err2 as Error).message ?? '').includes('no such column')) throw err2;
+        // Brand-new env — no ad-copy columns at all.
+        r = await db.execute({
+          sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
+                       frameio_file_id, frameio_view_url,
+                       NULL AS ad_copy_md, NULL AS ad_copy_generated_at, NULL AS ad_copy_objective,
+                       NULL AS ad_copy_status, NULL AS ad_copy_approved_at,
+                       NULL AS ad_copy_approved_by, NULL AS ad_copy_rejection_reason,
+                       NULL AS ad_copy_asana_task_gid,
+                       updated_at
+                  FROM creative_reviews
+                 WHERE frameio_file_id IS NOT NULL
+              ORDER BY updated_at DESC
+                 LIMIT ?`,
+          args: [limit],
+        });
+      }
     }
 
     return r.rows.map((row) => {
@@ -403,10 +437,25 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
         adCopyMd: (x.ad_copy_md as string | null) ?? null,
         adCopyGeneratedAt: (x.ad_copy_generated_at as string | null) ?? null,
         adCopyObjective: (x.ad_copy_objective as string | null) ?? null,
+        adCopyStatus: (x.ad_copy_status as string | null) ?? null,
+        adCopyApprovedAt: (x.ad_copy_approved_at as string | null) ?? null,
+        adCopyApprovedBy: (x.ad_copy_approved_by as string | null) ?? null,
+        adCopyRejectionReason: (x.ad_copy_rejection_reason as string | null) ?? null,
+        adCopyAsanaTaskGid: (x.ad_copy_asana_task_gid as string | null) ?? null,
         updatedAt: String(x.updated_at),
       };
     });
   }, []);
+}
+
+/**
+ * Single-row variant of getReviewsAwaitingAdCopy() — used by route
+ * handlers (generate / approve / reject) so they can re-render the
+ * shared dashboard partial after mutating state.
+ */
+export async function getAdCopyRowById(reviewId: number): Promise<AwaitingAdCopyRow | null> {
+  const rows = await getReviewsAwaitingAdCopy(500);
+  return rows.find((r) => r.reviewId === reviewId) ?? null;
 }
 
 export interface ReviewByIdRow {

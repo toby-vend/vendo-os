@@ -1,0 +1,39 @@
+<%
+/*
+  Reject form fragment — shown when reviewer clicks Reject. Captures the
+  reason that will be persisted to ad_copy_rejections and fed back into
+  future prompts for this client (commit 4).
+
+  Inputs:
+    it.reviewId
+    it.csrfToken
+*/
+%>
+<form
+  hx-post="/dashboards/frame-io/ad-copy/<%= it.reviewId %>/reject"
+  hx-target="#adcopy-<%= it.reviewId %>"
+  hx-swap="outerHTML"
+  hx-headers='{"X-CSRF-Token": "<%= it.csrfToken || '' %>"}'
+  style="margin-top:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.20);border-radius:6px;padding:0.6rem 0.75rem;">
+  <label style="display:block;font-size:11px;color:#fecaca;margin-bottom:4px;">
+    Why is this rejected? The model will use this to do better next time.
+  </label>
+  <textarea
+    name="reason"
+    required
+    minlength="5"
+    maxlength="1000"
+    rows="3"
+    placeholder="e.g. Variant 2 used the word 'affordable' — client has explicitly banned that word."
+    style="width:100%;padding:6px 8px;background:#0B0B0B;border:1px solid rgba(239,68,68,0.30);border-radius:4px;color:#E2E8F0;font-size:12px;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea>
+  <div style="display:flex;gap:6px;margin-top:6px;">
+    <button type="submit" style="padding:4px 10px;background:#EF4444;color:#0B0B0B;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;">Confirm rejection</button>
+    <button type="button"
+      hx-get="/dashboards/frame-io/ad-copy/<%= it.reviewId %>/cancel-reject"
+      hx-target="#reject-form-<%= it.reviewId %>"
+      hx-swap="innerHTML"
+      style="padding:4px 10px;background:none;border:1px solid rgba(255,255,255,0.15);border-radius:4px;color:#94A3B8;font-size:11px;cursor:pointer;">
+      Cancel
+    </button>
+  </div>
+</form>
