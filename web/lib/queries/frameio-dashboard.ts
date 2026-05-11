@@ -1,4 +1,5 @@
 import { db } from './base.js';
+import { getRejectionCountsByClientName } from './ad-copy-rejections.js';
 
 /**
  * Read-only queries powering the /dashboards/frame-io view.
@@ -355,6 +356,8 @@ export interface AwaitingAdCopyRow {
   adCopyApprovedBy: string | null;
   adCopyRejectionReason: string | null;
   adCopyAsanaTaskGid: string | null;
+  /** Count of past rejections for this client — feeds the dashboard hint. */
+  lessonsAvailable: number;
   updatedAt: string;
 }
 
@@ -422,12 +425,16 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
       }
     }
 
+    const clientNames = r.rows.map((row) => String((row as unknown as Record<string, unknown>).client_name));
+    const lessonCounts = await getRejectionCountsByClientName(clientNames);
+
     return r.rows.map((row) => {
       const x = row as unknown as Record<string, unknown>;
       const fb = (x.feedback as string | null) ?? null;
+      const clientName = String(x.client_name);
       return {
         reviewId: Number(x.id),
-        clientName: String(x.client_name),
+        clientName,
         assetName: String(x.asset_name),
         assetType: String(x.asset_type),
         status: String(x.status),
@@ -442,6 +449,7 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
         adCopyApprovedBy: (x.ad_copy_approved_by as string | null) ?? null,
         adCopyRejectionReason: (x.ad_copy_rejection_reason as string | null) ?? null,
         adCopyAsanaTaskGid: (x.ad_copy_asana_task_gid as string | null) ?? null,
+        lessonsAvailable: lessonCounts.get(clientName) ?? 0,
         updatedAt: String(x.updated_at),
       };
     });

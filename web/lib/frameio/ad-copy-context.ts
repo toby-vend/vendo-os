@@ -15,6 +15,7 @@
 import { db, rows, scalar } from '../queries/base.js';
 import { listNotes, type ClientNoteRow } from '../queries/client-notes.js';
 import { getTopMetaAdsForClient, type MetaWinnerRow } from '../queries/meta-ads-history.js';
+import { getRecentRejectionLessons } from '../queries/ad-copy-rejections.js';
 
 export interface ReviewRow {
   id: number;
@@ -58,6 +59,9 @@ const BRAND_NOTES_MAX_ROWS = 12;
 /** How many days back to look for past Meta winners. */
 const META_WINDOW_DAYS = 60;
 const META_WINNERS_LIMIT = 3;
+
+/** How many recent rejection reasons to feed back into the next prompt. */
+const REJECTION_LESSONS_LIMIT = 5;
 
 /**
  * Heuristic clean of the feedback trail into a list of bullet points.
@@ -123,12 +127,15 @@ export async function buildAdCopyContext(reviewId: number): Promise<AdCopyContex
   const client = await loadClientByName(review.client_name);
 
   // Everything client-scoped can run in parallel.
-  const [brandNotes, brandHubHasGuidelines, topMetaWinners] = await Promise.all([
+  const [brandNotes, brandHubHasGuidelines, topMetaWinners, rejectionLessons] = await Promise.all([
     client ? loadBrandNotes(client.id) : Promise.resolve([] as ClientNoteRow[]),
     client ? loadBrandHubPresence(client.id) : Promise.resolve(false),
     client
       ? getTopMetaAdsForClient(client.id, META_WINDOW_DAYS, META_WINNERS_LIMIT)
       : Promise.resolve([] as MetaWinnerRow[]),
+    client
+      ? getRecentRejectionLessons(client.id, REJECTION_LESSONS_LIMIT)
+      : Promise.resolve([] as string[]),
   ]);
 
   return {
@@ -139,7 +146,7 @@ export async function buildAdCopyContext(reviewId: number): Promise<AdCopyContex
     brandHubHasGuidelines,
     topMetaWinners,
     transcript: null,
-    rejectionLessons: [],
+    rejectionLessons,
   };
 }
 

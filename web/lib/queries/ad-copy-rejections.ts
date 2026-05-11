@@ -91,3 +91,30 @@ export async function getRecentRejectionLessons(clientId: number | null, limit =
     return [];
   }
 }
+
+interface CountRow { client_name: string; n: number }
+
+/**
+ * Batched count of rejections per client name — used by the dashboard to
+ * show "N lessons fed in" hints next to each Generate button without
+ * issuing one query per row.
+ */
+export async function getRejectionCountsByClientName(names: string[]): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  if (names.length === 0) return out;
+  const unique = Array.from(new Set(names));
+  const placeholders = unique.map(() => '?').join(',');
+  try {
+    const r = await rows<CountRow>(
+      `SELECT client_name, COUNT(*) AS n
+         FROM ad_copy_rejections
+        WHERE client_name IN (${placeholders})
+        GROUP BY client_name`,
+      unique,
+    );
+    for (const row of r) out.set(row.client_name, row.n);
+  } catch {
+    /* table missing — empty map */
+  }
+  return out;
+}
