@@ -1,0 +1,316 @@
+<% layout('/layouts/base') %>
+
+<style>
+  .ck-wrap { max-width: 1100px; margin: 0 auto; }
+  .ck-back { color: var(--vendo-text-muted); text-decoration: none; font-size: 13px; }
+  .ck-back:hover { color: var(--vendo-green); }
+
+  .ck-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin: 0.75rem 0 1.25rem; }
+  .ck-title { font-size: 24px; font-weight: 700; color: var(--vendo-text-heading); margin: 0; }
+  .ck-subtitle { color: var(--vendo-text-muted); font-size: 13px; margin: 4px 0 0; }
+  .ck-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .ck-tag { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .ck-tag-status { background: var(--vendo-green-subtle); color: var(--vendo-green); }
+  .ck-tag-vertical { background: rgba(99,102,241,0.12); color: #818CF8; }
+  .ck-tag-muted { background: rgba(255,255,255,0.04); color: var(--vendo-text-muted); }
+
+  .ck-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+  .ck-stat { background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-radius: 10px; padding: 1rem; }
+  .ck-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vendo-text-muted); margin-bottom: 4px; }
+  .ck-stat-value { font-size: 22px; font-weight: 700; color: var(--vendo-text-heading); }
+  .ck-stat-sub { font-size: 11px; color: var(--vendo-text-muted); margin-top: 4px; }
+
+  .ck-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 900px) { .ck-grid { grid-template-columns: 1fr; } }
+
+  .ck-section { background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-radius: 10px; padding: 1.1rem; margin-bottom: 1rem; }
+  .ck-section h2 { font-size: 14px; font-weight: 700; color: var(--vendo-text-heading); margin: 0 0 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ck-section h2 .ck-count { font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.06); color: var(--vendo-text-muted); padding: 2px 8px; border-radius: 10px; }
+  .ck-empty { color: var(--vendo-text-muted); font-size: 13px; text-align: center; padding: 1rem 0; }
+
+  .ck-list { list-style: none; margin: 0; padding: 0; }
+  .ck-list li { padding: 0.55rem 0; border-bottom: 1px solid var(--vendo-border); font-size: 13px; }
+  .ck-list li:last-child { border-bottom: none; }
+  .ck-list .ck-row-title { color: var(--vendo-text); font-weight: 500; }
+  .ck-list .ck-row-meta { color: var(--vendo-text-muted); font-size: 12px; margin-top: 2px; }
+  .ck-list .ck-row-overdue { color: #F87171; font-weight: 600; }
+
+  .ck-summary { font-size: 13px; line-height: 1.55; color: var(--vendo-text); white-space: pre-wrap; }
+  .ck-summary-meta { color: var(--vendo-text-muted); font-size: 12px; margin-bottom: 0.5rem; }
+
+  .ck-footer { text-align: right; color: var(--vendo-text-muted); font-size: 11px; margin-top: 2rem; }
+  .ck-notes-coming { color: var(--vendo-text-muted); font-size: 13px; padding: 0.5rem 0; }
+  .ck-notes-coming code { background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+</style>
+
+<%
+  const b = it.briefing;
+  const displayName = b.meta.displayName || b.meta.name;
+  const fmtGBP = (n) => '£' + (Math.round(n || 0)).toLocaleString('en-GB');
+  const fmtNum = (n) => (n || 0).toLocaleString('en-GB');
+  const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  const truncate = (s, n) => !s ? '' : (s.length > n ? s.slice(0, n - 1) + '…' : s);
+
+  let healthColour = '#6B7280';
+  let healthLabel = 'No data';
+  if (b.health) {
+    healthColour = b.health.score >= 70 ? '#22C55E' : b.health.score >= 40 ? '#F59E0B' : '#EF4444';
+    healthLabel = b.health.score >= 70 ? 'Healthy' : b.health.score >= 40 ? 'At-risk' : 'Critical';
+  }
+
+  const totalAdSpend = b.performance.metaSpend + b.performance.gadsSpend;
+%>
+
+<div class="ck-wrap">
+
+<a href="/clients/<%= encodeURIComponent(b.meta.name) %>" class="ck-back">&larr; Client overview</a>
+
+<div class="ck-header" >
+  <div>
+    <h1 class="ck-title"><%= displayName %> — Knowledge</h1>
+    <% if (b.meta.displayName && b.meta.displayName !== b.meta.name) { %>
+    <p class="ck-subtitle">Xero: <%= b.meta.name %></p>
+    <% } %>
+    <div class="ck-tags">
+      <% if (b.meta.status) { %><span class="ck-tag ck-tag-status"><%= b.meta.status %></span><% } %>
+      <% if (b.meta.vertical) { %><span class="ck-tag ck-tag-vertical"><%= b.meta.vertical %></span><% } %>
+      <% if (b.health) { %>
+      <span class="ck-tag" style="background: <%= healthColour %>15; color: <%= healthColour %>;">
+        <%= healthLabel %> · <%= b.health.score %>/100
+      </span>
+      <% } %>
+      <% if (b.meta.email) { %><span class="ck-tag ck-tag-muted"><%= b.meta.email %></span><% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Top stat strip -->
+<div class="ck-stats">
+  <% if (b.health) { %>
+  <div class="ck-stat">
+    <div class="ck-stat-label">Health</div>
+    <div class="ck-stat-value" style="color: <%= healthColour %>;"><%= b.health.score %><span style="font-size: 13px; color: var(--vendo-text-muted);">/100</span></div>
+    <div class="ck-stat-sub">
+      <% if (b.health.trend === 'up') { %>↑ improving<% } else if (b.health.trend === 'down') { %>↓ declining<% } else if (b.health.trend === 'flat') { %>Stable<% } else { %><%= b.health.period %><% } %>
+    </div>
+  </div>
+  <% } %>
+
+  <div class="ck-stat">
+    <div class="ck-stat-label">Meetings</div>
+    <div class="ck-stat-value"><%= b.meta.meetingCount %></div>
+    <div class="ck-stat-sub"><% if (b.meta.lastMeetingDate) { %>Last: <%= fmtDate(b.meta.lastMeetingDate) %><% } else { %>—<% } %></div>
+  </div>
+
+  <% if (totalAdSpend > 0) { %>
+  <div class="ck-stat">
+    <div class="ck-stat-label">30-day ad spend</div>
+    <div class="ck-stat-value"><%= fmtGBP(totalAdSpend) %></div>
+    <div class="ck-stat-sub"><%= fmtGBP(b.performance.metaSpend) %> Meta · <%= fmtGBP(b.performance.gadsSpend) %> Google</div>
+  </div>
+  <% } %>
+
+  <% if (b.activity.openActionItems.length > 0 || b.activity.openTasks.length > 0) { %>
+  <div class="ck-stat">
+    <div class="ck-stat-label">Open work</div>
+    <div class="ck-stat-value"><%= b.activity.openActionItems.length + b.activity.openTasks.length %></div>
+    <div class="ck-stat-sub">
+      <%= b.activity.openActionItems.length %> actions · <%= b.activity.openTasks.length %> tasks
+      <% if (b.activity.overdueTasks.length > 0) { %>· <span style="color: #F87171; font-weight: 600;"><%= b.activity.overdueTasks.length %> overdue</span><% } %>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (b.pipeline.openOpps.length > 0) { %>
+  <div class="ck-stat">
+    <div class="ck-stat-label">Open pipeline</div>
+    <div class="ck-stat-value"><%= b.pipeline.openOpps.length %></div>
+    <div class="ck-stat-sub"><%= fmtGBP(b.pipeline.totalValueOpen) %> total</div>
+  </div>
+  <% } %>
+
+  <% if (b.meta.outstanding > 0) { %>
+  <div class="ck-stat">
+    <div class="ck-stat-label">Outstanding</div>
+    <div class="ck-stat-value"><%= fmtGBP(b.meta.outstanding) %></div>
+    <div class="ck-stat-sub">of <%= fmtGBP(b.meta.totalInvoiced) %> invoiced</div>
+  </div>
+  <% } %>
+</div>
+
+<!-- Two-column main content -->
+<div class="ck-grid">
+
+  <div>
+    <!-- Last meeting -->
+    <% if (b.activity.lastMeeting) { %>
+    <div class="ck-section">
+      <h2>Last meeting <span class="ck-count"><%= fmtDate(b.activity.lastMeeting.date) %></span></h2>
+      <div class="ck-summary-meta">
+        <strong><%= b.activity.lastMeeting.title %></strong>
+        <% if (b.activity.lastMeeting.category) { %> · <%= b.activity.lastMeeting.category %><% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Open action items -->
+    <% if (b.activity.openActionItems.length > 0) { %>
+    <div class="ck-section">
+      <h2>Open action items <span class="ck-count"><%= b.activity.openActionItems.length %></span></h2>
+      <ul class="ck-list">
+        <% b.activity.openActionItems.forEach(a => { %>
+        <li>
+          <div class="ck-row-title"><%= a.description %></div>
+          <div class="ck-row-meta">
+            <% if (a.assignee) { %><%= a.assignee %> · <% } %>
+            <% if (a.meetingDate) { %>from <%= fmtDate(a.meetingDate) %> meeting<% } %>
+            <% if (a.meetingTitle) { %> · <%= a.meetingTitle %><% } %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <!-- Overdue tasks (highlighted) -->
+    <% if (b.activity.overdueTasks.length > 0) { %>
+    <div class="ck-section">
+      <h2 style="color: #F87171;">Overdue Asana tasks <span class="ck-count"><%= b.activity.overdueTasks.length %></span></h2>
+      <ul class="ck-list">
+        <% b.activity.overdueTasks.slice(0, 10).forEach(t => { %>
+        <li>
+          <div class="ck-row-title"><%= t.name %></div>
+          <div class="ck-row-meta">
+            <span class="ck-row-overdue">Due <%= fmtDate(t.dueOn) %></span>
+            <% if (t.assignee) { %> · <%= t.assignee %><% } %>
+            <% if (t.project) { %> · <%= t.project %><% } %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <!-- Active Asana tasks -->
+    <% if (b.activity.openTasks.length > 0) { %>
+    <div class="ck-section">
+      <h2>Active Asana tasks <span class="ck-count"><%= b.activity.openTasks.length %></span></h2>
+      <ul class="ck-list">
+        <% b.activity.openTasks.forEach(t => { %>
+        <li>
+          <div class="ck-row-title"><%= t.name %></div>
+          <div class="ck-row-meta">
+            <% if (t.dueOn) { %>Due <%= fmtDate(t.dueOn) %><% } else { %>No due date<% } %>
+            <% if (t.assignee) { %> · <%= t.assignee %><% } %>
+            <% if (t.section) { %> · <%= t.section %><% } %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <!-- Recent meetings -->
+    <% if (b.activity.recentMeetings.length > 0) { %>
+    <div class="ck-section">
+      <h2>Recent meetings</h2>
+      <ul class="ck-list">
+        <% b.activity.recentMeetings.forEach(m => { %>
+        <li>
+          <div class="ck-row-title"><%= m.title %></div>
+          <div class="ck-row-meta">
+            <%= fmtDate(m.date) %>
+            <% if (m.category) { %> · <%= m.category %><% } %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+  </div>
+
+  <div>
+    <!-- Notes (Phase B placeholder) -->
+    <div class="ck-section">
+      <h2>Notes & tribal knowledge</h2>
+      <% if (b.notes.length === 0) { %>
+      <div class="ck-notes-coming">
+        Inline notes coming in Phase B. <code>client_notes</code> table not yet seeded.
+      </div>
+      <% } else { %>
+      <ul class="ck-list">
+        <% b.notes.forEach(n => { %>
+        <li>
+          <div class="ck-row-title"><%= n.body %></div>
+          <div class="ck-row-meta">
+            <span class="ck-tag ck-tag-muted" style="font-size: 10px;"><%= n.category %></span>
+            <% if (n.authorName) { %> · <%= n.authorName %><% } %>
+            · <%= fmtDate(n.updatedAt) %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </div>
+
+    <!-- Pipeline -->
+    <% if (b.pipeline.openOpps.length > 0) { %>
+    <div class="ck-section">
+      <h2>Open pipeline <span class="ck-count"><%= fmtGBP(b.pipeline.totalValueOpen) %></span></h2>
+      <ul class="ck-list">
+        <% b.pipeline.openOpps.slice(0, 5).forEach(o => { %>
+        <li>
+          <div class="ck-row-title"><%= o.name || '(unnamed)' %></div>
+          <div class="ck-row-meta">
+            <%= fmtGBP(o.monetaryValue) %>
+            <% if (o.stage) { %> · <%= o.stage %><% } %>
+            <% if (o.contact) { %> · <%= o.contact %><% } %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <!-- Ad performance -->
+    <% if (totalAdSpend > 0) { %>
+    <div class="ck-section">
+      <h2>30-day ad performance</h2>
+      <ul class="ck-list">
+        <% if (b.performance.metaSpend > 0) { %>
+        <li>
+          <div class="ck-row-title">Meta</div>
+          <div class="ck-row-meta">
+            <%= fmtGBP(b.performance.metaSpend) %> · <%= fmtNum(b.performance.metaImpressions) %> impr · <%= fmtNum(b.performance.metaClicks) %> clicks
+          </div>
+        </li>
+        <% } %>
+        <% if (b.performance.gadsSpend > 0) { %>
+        <li>
+          <div class="ck-row-title">Google Ads</div>
+          <div class="ck-row-meta">
+            <%= fmtGBP(b.performance.gadsSpend) %> · <%= fmtNum(b.performance.gadsImpressions) %> impr · <%= fmtNum(b.performance.gadsClicks) %> clicks
+          </div>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+    <% } %>
+
+    <!-- Brand -->
+    <div class="ck-section">
+      <h2>Brand & guidelines</h2>
+      <% if (b.brand.hasGuidelines) { %>
+      <div class="ck-summary"><%= b.brand.fileCount %> indexed brand doc<%= b.brand.fileCount === 1 ? '' : 's' %> in Drive.</div>
+      <% } else { %>
+      <div class="ck-empty">No brand docs indexed yet.</div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<div class="ck-footer">
+  Generated <%= new Date(b.generatedAt).toLocaleString('en-GB') %> · cached 60s
+</div>
+
+</div>

@@ -2,6 +2,7 @@ import type { Tool } from 'ai';
 import type { ToolCtx, AgentDef } from '../types.js';
 import { searchMeetings } from './search-meetings.js';
 import { searchClients } from './search-clients.js';
+import { getClientBriefing } from './get-client-briefing.js';
 import { getClientHealth } from './get-client-health.js';
 import { getClientHealthStaff } from './get-client-health-staff.js';
 import { getCampaignPerformance } from './get-campaign-performance.js';
@@ -23,6 +24,7 @@ import { draftEmail } from './draft-email.js';
 export const TOOL_FACTORIES = {
   searchMeetings,
   searchClients,
+  getClientBriefing,
   getClientHealth,
   getClientHealthStaff,
   getCampaignPerformance,
