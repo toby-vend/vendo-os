@@ -16,6 +16,7 @@ import { processFrameioEvents } from '../../lib/frameio/processor.js';
 import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
 import { pushClientsToPortal } from '../../lib/jobs/push-clients-to-portal.js';
 import { pullOnboardingFromPortal } from '../../lib/jobs/pull-onboarding-from-portal.js';
+import { pushFinalReportsToPortal } from '../../lib/jobs/push-reports-to-portal.js';
 import { syncAsana } from '../../lib/jobs/sync-asana.js';
 import { recomputeClientProfitability } from '../../lib/jobs/client-profitability.js';
 import { recordHeartbeat } from '../../lib/jobs/heartbeat.js';
@@ -709,6 +710,33 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/sync-frameio] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Frame.io library sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /push-reports-to-portal — Push finalised client_reports to the
+   * ClientDashboard portal's `client_reports` table (Vercel Cron, every
+   * 15 minutes). Idempotent — only reports with status='final' and no
+   * successful delivery row are pushed. Per-row delivery audit lands in
+   * client_report_deliveries. Part of the Google Ads autonomous
+   * reporting build (plans/2026-05-11-google-ads-autonomous-reporting.md).
+   */
+  app.get('/push-reports-to-portal', async (_request, reply) => {
+    try {
+      const result = await pushFinalReportsToPortal();
+      return reply.send({
+        ok: true,
+        message: 'Portal report push completed',
+        attempted: result.attempted,
+        pushed: result.pushed,
+        failed: result.failed,
+        durationMs: result.durationMs,
+        errorCount: result.errors.length,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/push-reports-to-portal] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Portal report push failed', error: msg });
     }
   });
 };
