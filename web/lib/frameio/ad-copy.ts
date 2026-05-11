@@ -152,6 +152,8 @@ Constraints:
   const vertical = ctx.client?.vertical ?? '';
 
   const sections: string[] = [];
+  const today = new Date().toISOString().slice(0, 10);
+  sections.push(`Today: ${today}`);
   sections.push(`Generate Meta ad copy for the following Frame.io creative asset.`);
   sections.push(
     [
@@ -165,6 +167,15 @@ Constraints:
     ].filter(Boolean).join('\n'),
   );
 
+  // CLIENT SNAPSHOT is the authoritative source on who this client is.
+  // The copywriter must defer to it over its own inferences from the
+  // asset filename or comment trail.
+  if (ctx.snapshot) {
+    sections.push(
+      `CLIENT SNAPSHOT (authoritative — defer to this over inferences from the asset name; confidence: ${ctx.snapshot.confidence}):\n${ctx.snapshot.snapshotMd}`,
+    );
+  }
+
   const commentBlock = ctx.comments.length
     ? ctx.comments.map((c) => `- "${c}"`).join('\n')
     : '(no client comments yet)';
@@ -172,7 +183,7 @@ Constraints:
 
   const brandBlock = renderBrandNotesBlock(ctx.brandNotes, ctx.brandHubHasGuidelines);
   if (brandBlock) {
-    sections.push(`BRAND CONTEXT (tribal knowledge — respect gotchas and preferences):\n${brandBlock}`);
+    sections.push(`BRAND CONTEXT (raw tribal-knowledge notes — the snapshot above synthesises these; quote specifics here when useful):\n${brandBlock}`);
   }
 
   const winnersBlock = renderMetaWinnersBlock(ctx.topMetaWinners);

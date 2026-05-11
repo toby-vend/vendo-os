@@ -17,6 +17,8 @@ import { listNotes, type ClientNoteRow } from '../queries/client-notes.js';
 import { getTopMetaAdsForClient, type MetaWinnerRow } from '../queries/meta-ads-history.js';
 import { getRecentRejectionLessons } from '../queries/ad-copy-rejections.js';
 import { getOrCreateTranscript } from './transcribe.js';
+import { getOrBuildClientSnapshot } from './client-snapshot.js';
+import type { BrandSnapshot } from '../queries/client-snapshots.js';
 
 export interface ReviewRow {
   id: number;
@@ -39,6 +41,12 @@ export interface ClientRow {
 export interface AdCopyContext {
   review: ReviewRow;
   client: ClientRow | null;
+  /**
+   * Step 1 output — synthesised brand profile. Authoritative source on
+   * "who is this client" for the copywriter agent. Built fresh once per
+   * 7 days per scope, then cached. Null only on build failure.
+   */
+  snapshot: BrandSnapshot | null;
   /** Bullet-ready client comments parsed from the newline audit trail. */
   comments: string[];
   /** Most recent client_notes for this client, capped, grouped client-side. */
@@ -124,6 +132,23 @@ async function loadBrandNotes(clientId: number): Promise<ClientNoteRow[]> {
 }
 
 /**
+ * Look up the Frame.io project's display name from the library mirror —
+ * used as an orienting signal for the snapshot agent on unmapped projects
+ * (where the project name often hints at the client identity).
+ */
+async function loadProjectName(projectId: string | null): Promise<string | null> {
+  if (!projectId) return null;
+  try {
+    return await scalar<string>(
+      `SELECT name FROM frameio_assets WHERE id = ? AND type = 'project' LIMIT 1`,
+      [projectId],
+    );
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Resolve the Frame.io account_id for a given project, since transcribe.ts
  * needs both. The mapping is cached in frameio_projects (populated when
  * the cron processor encounters a project for the first time).
@@ -167,11 +192,28 @@ export async function buildAdCopyContext(reviewId: number): Promise<AdCopyContex
   if (!review) return null;
 
   const client = await loadClientByName(review.client_name);
+  const projectName = await loadProjectName(review.frameio_project_id);
 
-  // Everything client-scoped can run in parallel. Transcript can take
-  // ~10-60s the first time (downloads + Whisper); kicked off in parallel
-  // so the total wall-clock is dominated by the slowest of the four.
-  const [brandNotes, brandHubHasGuidelines, topMetaWinners, rejectionLessons, transcript] = await Promise.all([
+  // STEP 1: Client Brand Snapshot — synthesised once per scope per 7 days.
+  // The snapshot agent is also responsible for unmapped-project best-guess
+  // identification. Runs in parallel with the per-asset queries below —
+  // for cache hits this is effectively free; for cache misses it adds
+  // ~5-8s of Sonnet latency that overlaps with the transcript fetch.
+  //
+  // STEP 2: Per-asset/per-client raw inputs (brand notes, past winners,
+  // rejection lessons, transcript). Still passed to the copywriter so it
+  // can quote specifics — the snapshot orients, these ground.
+  const [snapshotResult, brandNotes, brandHubHasGuidelines, topMetaWinners, rejectionLessons, transcript] = await Promise.all([
+    getOrBuildClientSnapshot({
+      clientId: client?.id ?? null,
+      clientName: review.client_name,
+      projectId: review.frameio_project_id,
+      assetName: review.asset_name,
+      projectName,
+      transcript: null,
+      reviewId: review.id,
+      refreshedBy: null,
+    }),
     client ? loadBrandNotes(client.id) : Promise.resolve([] as ClientNoteRow[]),
     client ? loadBrandHubPresence(client.id) : Promise.resolve(false),
     client
@@ -186,6 +228,7 @@ export async function buildAdCopyContext(reviewId: number): Promise<AdCopyContex
   return {
     review,
     client,
+    snapshot: snapshotResult.ok ? snapshotResult.snapshot : null,
     comments: parseComments(review.feedback),
     brandNotes,
     brandHubHasGuidelines,
