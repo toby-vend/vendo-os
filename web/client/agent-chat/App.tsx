@@ -24,6 +24,27 @@ import { DefaultChatTransport, type UIMessage } from 'ai';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { ConversationDrawer } from './ConversationDrawer';
+import { FileChip } from './FileChip';
+import { PastedSnippetChip } from './PastedSnippetChip';
+import {
+  type AttachedFile,
+  type PastedSnippet,
+  MAX_TOTAL_BYTES,
+  PASTE_AS_SNIPPET_THRESHOLD,
+  formatFileSize,
+  newId,
+  prepareAttachment,
+  readAsDataUri,
+  totalAttachedBytes,
+} from './attachments';
+import {
+  ArrowUp,
+  ChevronDown,
+  Menu,
+  Paperclip,
+  Sparkles,
+  Stop,
+} from './Icons';
 
 // Inline Markdown → safe HTML. Atlas emits **bold**, *italic*, bullet
 // lists, and [text](url) links — we render those properly instead of
@@ -89,6 +110,10 @@ export function App({
   const [input, setInput] = useState('');
   const [selectedAgent, setSelectedAgent] = useState<string>(initialAgent);
   const [conversationId, setConversationId] = useState<string | null>(initialConversationId);
+  const [files, setFiles] = useState<AttachedFile[]>([]);
+  const [snippets, setSnippets] = useState<PastedSnippet[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [modelMenuOpen, setModelMenuOpen] = useState(false);
   // Hydration state — while we're loading prior messages from the server
   // we want to suppress the welcome screen and avoid sending a turn.
   const [hydrationStatus, setHydrationStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>(
@@ -102,21 +127,36 @@ export function App({
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Read selectedAgent + conversationId through refs so the transport's
-  // body callback always sees the latest value without re-creating the
-  // transport on every state change (which would break useChat's stream).
+  // Read selectedAgent + conversationId + attachments through refs so the
+  // transport's body callback always sees the latest value without
+  // re-creating the transport on every state change (which would break
+  // useChat's stream).
   const selectedAgentRef = useRef(selectedAgent);
   selectedAgentRef.current = selectedAgent;
   const conversationIdRef = useRef(conversationId);
   conversationIdRef.current = conversationId;
+  // Pending attachments + snippets for the next outgoing turn. Cleared
+  // synchronously after the body callback has consumed them.
+  const pendingAttachmentsRef = useRef<{
+    attachments: { id: string; name: string; type: string; dataUri: string }[];
+    pastedSnippets: { id: string; content: string }[];
+  }>({ attachments: [], pastedSnippets: [] });
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/agent/chat',
-      body: () => ({
-        agentName: selectedAgentRef.current,
-        conversationId: conversationIdRef.current ?? undefined,
-      }),
+      body: () => {
+        const { attachments, pastedSnippets } = pendingAttachmentsRef.current;
+        // Consume — the next turn starts with an empty pending bag.
+        pendingAttachmentsRef.current = { attachments: [], pastedSnippets: [] };
+        return {
+          agentName: selectedAgentRef.current,
+          conversationId: conversationIdRef.current ?? undefined,
+          attachments,
+          pastedSnippets,
+        };
+      },
     }),
     messages: initialMessages,
   });
@@ -180,12 +220,143 @@ export function App({
   const isStreaming = status === 'streaming' || status === 'submitted';
   const hasMessages = messages.length > 0;
 
+  // -------------------------------------------------------------------
+  // File + paste handlers
+  // -------------------------------------------------------------------
+
+  function addFiles(list: FileList | File[]): void {
+    const incoming = Array.from(list);
+    const next = incoming.map(prepareAttachment);
+    const merged = [...files, ...next];
+    // Flag too-large items so the chip can show a warning, but keep them
+    // on screen — the user removes them explicitly.
+    const flagged = merged.map((f) =>
+      f.file.size > MAX_TOTAL_BYTES ? { ...f, status: 'too-large' as const } : f,
+    );
+    setFiles(flagged);
+
+    // Read data-URIs lazily for previewable items so send() can package
+    // them without blocking.
+    next.forEach((att) => {
+      readAsDataUri(att.file).then(
+        (dataUri) => {
+          setFiles((prev) =>
+            prev.map((f) => (f.id === att.id ? { ...f, dataUri, status: f.status === 'too-large' ? 'too-large' : 'ready' } : f)),
+          );
+        },
+        () => {
+          setFiles((prev) => prev.filter((f) => f.id !== att.id));
+        },
+      );
+    });
+  }
+
+  function removeFile(id: string): void {
+    setFiles((prev) => {
+      const target = prev.find((f) => f.id === id);
+      if (target?.preview) URL.revokeObjectURL(target.preview);
+      return prev.filter((f) => f.id !== id);
+    });
+  }
+
+  function removeSnippet(id: string): void {
+    setSnippets((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  function onAttachClick(): void {
+    fileInputRef.current?.click();
+  }
+
+  function onFileInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
+    if (e.target.files && e.target.files.length > 0) addFiles(e.target.files);
+    e.target.value = ''; // allow re-selecting the same file
+  }
+
+  function onDragOver(e: React.DragEvent): void {
+    e.preventDefault();
+    if (!isDragging) setIsDragging(true);
+  }
+
+  function onDragLeave(e: React.DragEvent): void {
+    // Only clear when leaving the outer card — internal moves fire enter/leave
+    if (e.currentTarget === e.target) setIsDragging(false);
+  }
+
+  function onDrop(e: React.DragEvent): void {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addFiles(e.dataTransfer.files);
+    }
+  }
+
+  function onPaste(e: React.ClipboardEvent<HTMLTextAreaElement>): void {
+    // 1. Pasted files (e.g. screenshot from clipboard) → addFiles
+    const filesInClipboard: File[] = [];
+    for (let i = 0; i < e.clipboardData.items.length; i++) {
+      const item = e.clipboardData.items[i];
+      if (item.kind === 'file') {
+        const f = item.getAsFile();
+        if (f) filesInClipboard.push(f);
+      }
+    }
+    if (filesInClipboard.length > 0) {
+      e.preventDefault();
+      addFiles(filesInClipboard);
+      return;
+    }
+    // 2. Large pasted text → snippet card; small paste falls through.
+    const text = e.clipboardData.getData('text');
+    if (text.length > PASTE_AS_SNIPPET_THRESHOLD) {
+      e.preventDefault();
+      setSnippets((prev) => [
+        ...prev,
+        { id: newId(), content: text, createdAt: new Date().toISOString() },
+      ]);
+    }
+  }
+
   function handleSubmit(): void {
     const text = input.trim();
-    if (!text || isStreaming) return;
+    const readyFiles = files.filter((f) => f.status === 'ready' && f.dataUri);
+    const hasAttachments = readyFiles.length > 0 || snippets.length > 0;
+    if (!text && !hasAttachments) return;
+    if (isStreaming) return;
+
+    // Final size check across the wire payload.
+    if (totalAttachedBytes(readyFiles) > MAX_TOTAL_BYTES) {
+      // Surface via the UI — chip shows is-too-large; user must remove.
+      setFiles((prev) =>
+        prev.map((f) => (f.file.size > MAX_TOTAL_BYTES ? { ...f, status: 'too-large' } : f)),
+      );
+      return;
+    }
+
     ensureConversationId();
-    sendMessage({ text });
+
+    // Stash attachments + snippets for the body callback to pick up.
+    pendingAttachmentsRef.current = {
+      attachments: readyFiles.map((f) => ({
+        id: f.id,
+        name: f.file.name,
+        type: f.file.type || (f.kind === 'image' ? 'image/png' : 'application/octet-stream'),
+        dataUri: f.dataUri ?? '',
+      })),
+      pastedSnippets: snippets.map((s) => ({ id: s.id, content: s.content })),
+    };
+
+    // Build the user message text — empty text is fine when only attachments.
+    const messageText = text.length > 0 ? text : '(attachment)';
+    sendMessage({ text: messageText });
+
+    // Clear local UI state
     setInput('');
+    setFiles((prev) => {
+      // Revoke preview URLs to avoid leaks
+      for (const f of prev) if (f.preview) URL.revokeObjectURL(f.preview);
+      return [];
+    });
+    setSnippets([]);
     inputRef.current?.focus();
   }
 
@@ -239,14 +410,16 @@ export function App({
           onClick={() => setDrawerOpen(true)}
           title="Recent conversations"
         >
-          ☰ Recent
+          <Menu size={16} />
+          <span>Recent</span>
         </button>
         <a
           className="atlas-toolbar-btn"
           href={AGENT_TO_URL_BASE[selectedAgent] ?? '/chat'}
           title="Start a new conversation"
         >
-          + New chat
+          <span aria-hidden="true">+</span>
+          <span>New chat</span>
         </a>
       </div>
 
@@ -302,40 +475,124 @@ export function App({
       )}
 
       <form
-        className="atlas-input-bar"
-        onSubmit={e => {
+        className={`atlas-input-card${isDragging ? ' is-dragging' : ''}`}
+        onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();
         }}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
       >
+        {/* File / snippet chip row — only renders when something is attached */}
+        {(files.length > 0 || snippets.length > 0) && (
+          <div className="atlas-chip-row">
+            {snippets.map((s) => (
+              <PastedSnippetChip key={s.id} snippet={s} onRemove={removeSnippet} />
+            ))}
+            {files.map((f) => (
+              <FileChip key={f.id} file={f} onRemove={removeFile} />
+            ))}
+          </div>
+        )}
+
         <textarea
           ref={inputRef}
+          className="atlas-input-textarea"
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={
-            isStreaming
-              ? 'Atlas is replying...'
-              : 'Ask Atlas anything about clients, meetings, or campaigns'
-          }
+          onPaste={onPaste}
+          placeholder={isStreaming ? 'Atlas is replying…' : 'How can I help you today?'}
           disabled={isStreaming}
           rows={1}
         />
-        {isStreaming ? (
-          <button type="button" className="atlas-stop" onClick={() => stop()}>
-            Stop
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="atlas-send"
-            disabled={!input.trim()}
-            aria-label="Send"
-          >
-            <SendIcon />
-          </button>
+
+        <div className="atlas-input-actions">
+          <div className="atlas-input-actions-left">
+            <button
+              type="button"
+              className="atlas-icon-btn"
+              onClick={onAttachClick}
+              aria-label="Attach files"
+              title="Attach files"
+              disabled={isStreaming}
+            >
+              <Paperclip size={18} />
+            </button>
+          </div>
+
+          <div className="atlas-input-actions-right">
+            {!isLocked && (
+              <div className="atlas-model-chip-wrap">
+                <button
+                  type="button"
+                  className={`atlas-model-chip${modelMenuOpen ? ' is-open' : ''}`}
+                  onClick={() => setModelMenuOpen((v) => !v)}
+                  aria-haspopup="listbox"
+                  aria-expanded={modelMenuOpen}
+                >
+                  <span>{activeLabel}</span>
+                  <ChevronDown size={14} />
+                </button>
+                {modelMenuOpen && (
+                  <ModelMenu
+                    selected={selectedAgent}
+                    onSelect={(value) => {
+                      setSelectedAgent(value);
+                      setModelMenuOpen(false);
+                    }}
+                    onClose={() => setModelMenuOpen(false)}
+                    userTier={userTier}
+                  />
+                )}
+              </div>
+            )}
+
+            {isStreaming ? (
+              <button
+                type="button"
+                className="atlas-send-btn is-stop"
+                onClick={() => stop()}
+                aria-label="Stop generation"
+                title="Stop"
+              >
+                <Stop size={16} />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="atlas-send-btn"
+                disabled={!input.trim() && files.length === 0 && snippets.length === 0}
+                aria-label="Send message"
+                title="Send"
+              >
+                <ArrowUp size={18} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {isDragging && (
+          <div className="atlas-drop-overlay" aria-hidden="true">
+            <Paperclip size={28} />
+            <span>Drop files to attach</span>
+          </div>
         )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          onChange={onFileInputChange}
+          style={{ display: 'none' }}
+          accept="image/*,application/pdf,text/*,.csv,.json,.md,.docx,.xlsx"
+        />
       </form>
+
+      {!isLocked && (
+        <p className="atlas-disclaimer">Atlas can make mistakes — check important results.</p>
+      )}
     </div>
   );
 }
@@ -357,20 +614,40 @@ const SUGGESTIONS = [
   'Draft an Asana task for tomorrow’s follow-up call.',
 ];
 
+function greetingForHour(h: number): string {
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
 function Welcome({ userName, userTier, onSuggestion, selectedAgent, onSelectAgent, showPicker }: WelcomeProps): React.JSX.Element {
+  const greeting = greetingForHour(new Date().getHours());
   const helper =
     userTier === 'admin'
       ? 'Full agency access — clients, campaigns, meetings, decisions, financials.'
       : 'Client work and campaign performance. Ask me anything in scope.';
   return (
     <div className="atlas-welcome">
-      <div className="atlas-welcome-mark">A</div>
-      <h2>Hello {userName}.</h2>
-      <p>{helper}</p>
+      <div className="atlas-welcome-mark"><Sparkles size={36} /></div>
+      <h2 className="atlas-welcome-title">
+        {greeting},{' '}
+        <span className="atlas-welcome-name">
+          {userName}
+          <svg
+            className="atlas-welcome-underline"
+            viewBox="0 0 140 24"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path d="M6 16 Q 70 24, 134 14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
+          </svg>
+        </span>
+      </h2>
+      <p className="atlas-welcome-helper">{helper}</p>
 
       {showPicker && userTier === 'admin' && (
         <div className="atlas-specialist-picker">
-          <div className="atlas-specialist-picker-label">Talk to:</div>
+          <div className="atlas-specialist-picker-label">Talk to</div>
           <div className="atlas-specialist-chips">
             {SPECIALISTS.map((s) => (
               <button
@@ -395,7 +672,7 @@ function Welcome({ userName, userTier, onSuggestion, selectedAgent, onSelectAgen
               className="atlas-suggestion-btn"
               onClick={() => onSuggestion(q)}
             >
-              &ldquo;{q}&rdquo;
+              {q}
             </button>
           </li>
         ))}
@@ -560,21 +837,59 @@ function TypingIndicator(): React.JSX.Element {
   );
 }
 
-function SendIcon(): React.JSX.Element {
+// ---------------------------------------------------------------------------
+// ModelMenu — the popover triggered by the in-input agent chip. Mirrors
+// the welcome-screen specialist chip row but as a dropdown so users can
+// switch agents mid-conversation. Selecting a specialist takes effect on
+// the next turn (the system prompt is re-evaluated per request).
+// ---------------------------------------------------------------------------
+
+interface ModelMenuProps {
+  selected: string;
+  onSelect: (value: string) => void;
+  onClose: () => void;
+  userTier: 'admin' | 'staff';
+}
+
+function ModelMenu({ selected, onSelect, onClose, userTier }: ModelMenuProps): React.JSX.Element {
+  const ref = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+
+  // Non-admin users only see Atlas. Specialists are gated server-side via
+  // resolveAgentByName, but hiding them in the picker keeps the UX clean.
+  const visible = userTier === 'admin' ? SPECIALISTS : SPECIALISTS.filter((s) => s.value === 'atlas');
+
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M22 2L11 13" />
-      <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-    </svg>
+    <div ref={ref} className="atlas-model-menu" role="listbox">
+      {visible.map((s) => (
+        <button
+          key={s.value}
+          type="button"
+          role="option"
+          aria-selected={selected === s.value}
+          className={`atlas-model-menu-item${selected === s.value ? ' is-selected' : ''}`}
+          onClick={() => onSelect(s.value)}
+        >
+          <div className="atlas-model-menu-item-main">
+            <span className="atlas-model-menu-label">{s.label}</span>
+            <span className="atlas-model-menu-hint">{s.hint}</span>
+          </div>
+          {selected === s.value && <span className="atlas-model-menu-tick">✓</span>}
+        </button>
+      ))}
+    </div>
   );
 }
