@@ -7,7 +7,7 @@
   <% } %>
 </div>
 
-<p style="color:var(--text-muted)">
+<p style="color:var(--vendo-text-muted)">
 Pending agent drafts awaiting your decision. Approve to execute, reject to dismiss, edit to mark for follow-up on the source channel.
 </p>
 
@@ -133,41 +133,141 @@ Pending agent drafts awaiting your decision. Approve to execute, reject to dismi
 </div>
 
 <style>
-  .notice { padding: 0.6em 1em; background: var(--bg-elevated, #f4f4f4); border-left: 3px solid var(--accent, #5a9); margin-bottom: 1em; border-radius: 4px; }
+  .notice {
+    padding: 0.7em 1em;
+    background: var(--vendo-green-subtle);
+    border: 1px solid var(--vendo-green);
+    color: var(--vendo-text);
+    margin-bottom: 1em;
+    border-radius: 6px;
+  }
   .inbox-list { display: flex; flex-direction: column; gap: 1em; margin-top: 1em; }
-  .rec-card { padding: 1em 1.2em; border: 1px solid var(--border, #ddd); border-radius: 6px; background: var(--bg-elevated, #fafafa); }
-  .rec-card h3 { margin: 0.3em 0 0.4em; font-size: 1.05em; }
-  .rec-card-head { display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; color: var(--text-muted, #666); }
+  .rec-card {
+    padding: 1em 1.2em;
+    border: 1px solid var(--vendo-border);
+    border-radius: 8px;
+    background: var(--vendo-surface);
+    color: var(--vendo-text);
+  }
+  .rec-card h3 { margin: 0.3em 0 0.4em; font-size: 1.05em; color: var(--vendo-text-heading); }
+  .rec-card-head { display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; color: var(--vendo-text-muted); }
   .rec-card-head time { font-variant-numeric: tabular-nums; }
-  .rec-tool { font-family: ui-monospace, monospace; font-size: 0.85em; padding: 1px 6px; background: var(--bg, #fff); border-radius: 3px; margin: 0 0.4em; }
-  .rec-agent { font-size: 0.85em; color: var(--text-muted, #888); }
-  .rec-reasoning { color: var(--text, #222); margin: 0.4em 0 0.6em; white-space: pre-wrap; }
-  .rec-owner { margin: 0.3em 0; color: var(--text-muted, #666); }
+  .rec-tool {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.85em;
+    padding: 1px 6px;
+    background: var(--vendo-bg);
+    border: 1px solid var(--vendo-border);
+    color: var(--vendo-text);
+    border-radius: 3px;
+    margin: 0 0.4em;
+  }
+  .rec-agent { font-size: 0.85em; color: var(--vendo-text-muted); }
+  .rec-reasoning { color: var(--vendo-text); margin: 0.4em 0 0.6em; white-space: pre-wrap; }
+  .rec-owner { margin: 0.3em 0; color: var(--vendo-text-muted); }
   .rec-payload, .rec-result { margin: 0.6em 0; }
-  .rec-payload summary, .rec-result summary { cursor: pointer; color: var(--text-muted, #555); font-size: 0.9em; }
+  .rec-payload summary, .rec-result summary { cursor: pointer; color: var(--vendo-text-muted); font-size: 0.9em; }
   .rec-payload table { font-size: 0.9em; margin-top: 0.4em; }
-  .rec-payload th { width: 12em; vertical-align: top; text-align: left; padding-right: 0.8em; color: var(--text-muted, #666); font-weight: normal; }
-  .rec-result pre { background: var(--bg, #fff); padding: 0.6em; border-radius: 4px; overflow-x: auto; font-size: 0.85em; max-height: 300px; }
-  .rec-result-error pre { background: rgba(220, 80, 80, 0.06); }
+  .rec-payload th {
+    width: 12em;
+    vertical-align: top;
+    text-align: left;
+    padding-right: 0.8em;
+    color: var(--vendo-text-muted);
+    font-weight: normal;
+  }
+  .rec-payload td { color: var(--vendo-text); padding-bottom: 0.25em; }
+  .rec-result pre {
+    background: var(--vendo-bg);
+    border: 1px solid var(--vendo-border);
+    color: var(--vendo-text);
+    padding: 0.6em 0.7em;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.85em;
+    max-height: 300px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .rec-result-error pre { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3); }
   .rec-actions { display: flex; gap: 0.5em; margin-top: 0.8em; }
-  .rec-actions button { padding: 0.5em 1em; border: 1px solid var(--border, #ccc); background: var(--bg, #fff); border-radius: 4px; cursor: pointer; }
-  .rec-actions .btn-primary { background: var(--accent, #2a8); color: white; border-color: transparent; }
-  .rec-actions .btn-danger { color: #b33; }
-  .rec-actions button:hover { filter: brightness(0.95); }
-  .rec-decided { color: var(--text-muted, #888); margin: 0.6em 0 0; }
-  .badge-pending  { background: #f5d674; color: #6b4d00; }
-  .badge-approved { background: #b6e4b9; color: #1d5524; }
-  .badge-rejected { background: #f5c4c4; color: #7a1d1d; }
-  .badge-edited   { background: #c9d8f5; color: #1f3d80; }
+  .rec-actions button {
+    padding: 0.5em 1em;
+    border: 1px solid var(--vendo-border-strong);
+    background: var(--vendo-surface-hover);
+    color: var(--vendo-text);
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.88em;
+  }
+  .rec-actions button:hover { border-color: var(--vendo-green); color: var(--vendo-green); }
+  .rec-actions .btn-primary {
+    background: var(--vendo-green);
+    color: #0B0B0B;
+    border-color: var(--vendo-green);
+    font-weight: 600;
+  }
+  .rec-actions .btn-primary:hover {
+    background: var(--vendo-green-hover);
+    color: #0B0B0B;
+    border-color: var(--vendo-green-hover);
+  }
+  .rec-actions .btn-danger { color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+  .rec-actions .btn-danger:hover {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.6);
+  }
+  .rec-decided { color: var(--vendo-text-muted); margin: 0.6em 0 0; }
+
+  /* Status pills — readable on dark */
+  .badge-pending  { background: rgba(245, 214, 116, 0.18); color: #f5d674; border: 1px solid rgba(245, 214, 116, 0.4); padding: 1px 8px; border-radius: 999px; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-approved { background: rgba(34, 197, 94, 0.15);   color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4);   padding: 1px 8px; border-radius: 999px; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-rejected { background: rgba(239, 68, 68, 0.15);   color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4);   padding: 1px 8px; border-radius: 999px; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-edited   { background: rgba(96, 165, 250, 0.15);  color: #93c5fd; border: 1px solid rgba(96, 165, 250, 0.4);  padding: 1px 8px; border-radius: 999px; font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.05em; }
+
   .inbox-header { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; }
-  .inbox-header-link { font-size: 0.85em; color: var(--text-muted, #666); text-decoration: none; }
-  .inbox-header-link:hover { color: var(--accent, #2a8); }
-  .rec-graduate { margin-top: 0.6em; padding: 0.6em 0.8em; background: var(--bg, #fff); border: 1px dashed var(--border, #ccc); border-radius: 4px; font-size: 0.9em; }
-  .rec-graduate summary { cursor: pointer; color: var(--text-muted, #555); }
-  .rec-graduate p { color: var(--text-muted, #555); margin: 0.6em 0; font-size: 0.9em; }
+  .inbox-header-link { font-size: 0.85em; color: var(--vendo-text-muted); text-decoration: none; }
+  .inbox-header-link:hover { color: var(--vendo-green); }
+
+  /* Inline graduate affordance — admin only, sits under pending recs */
+  .rec-graduate {
+    margin-top: 0.6em;
+    padding: 0.7em 0.9em;
+    background: var(--vendo-bg);
+    border: 1px dashed var(--vendo-border-strong);
+    border-radius: 6px;
+    font-size: 0.9em;
+  }
+  .rec-graduate summary { cursor: pointer; color: var(--vendo-text-muted); }
+  .rec-graduate p { color: var(--vendo-text-muted); margin: 0.6em 0; font-size: 0.9em; }
   .rec-graduate form { display: flex; flex-direction: column; gap: 0.5em; }
-  .rec-graduate input[type=text] { font: inherit; padding: 0.4em 0.6em; border: 1px solid var(--border, #ccc); border-radius: 3px; }
-  .rec-graduate code { font-size: 0.9em; padding: 1px 4px; background: var(--bg-elevated, #f4f4f4); border-radius: 3px; }
-  .btn-graduate { align-self: flex-start; padding: 0.5em 1em; border: 1px solid var(--accent, #2a8); background: var(--bg, #fff); color: var(--accent, #2a8); border-radius: 4px; cursor: pointer; font-weight: 600; }
-  .btn-graduate:hover { background: var(--accent, #2a8); color: white; }
+  .rec-graduate input[type=text] {
+    font: inherit;
+    padding: 0.45em 0.65em;
+    background: var(--vendo-surface);
+    color: var(--vendo-text);
+    border: 1px solid var(--vendo-border-strong);
+    border-radius: 5px;
+  }
+  .rec-graduate input[type=text]:focus { outline: none; border-color: var(--vendo-green); }
+  .rec-graduate code {
+    font-size: 0.9em;
+    padding: 1px 5px;
+    background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border);
+    color: var(--vendo-text);
+    border-radius: 3px;
+  }
+  .btn-graduate {
+    align-self: flex-start;
+    padding: 0.55em 1.1em;
+    border: 1px solid var(--vendo-green);
+    background: transparent;
+    color: var(--vendo-green);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-graduate:hover { background: var(--vendo-green); color: #0B0B0B; }
 </style>

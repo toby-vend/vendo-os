@@ -2,7 +2,7 @@
 
 <h1>Agent graduations</h1>
 
-<p style="color:var(--text-muted)">
+<p style="color:var(--vendo-text-muted)">
 A graduation lifts the dry-run gate for one <code>(agent, tool)</code> pair
 — the agent can call that tool with <code>mode: 'execute'</code> directly,
 no inbox approval. The capability check (does the calling user hold
