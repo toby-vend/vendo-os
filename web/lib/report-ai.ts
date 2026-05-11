@@ -64,6 +64,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { ImageBlockParam, TextBlockParam, Tool } from '@anthropic-ai/sdk/resources/messages.js';
 import { trackUsage } from './usage-tracker.js';
 import { PLATFORM_OPTIONS, type ScreenshotPlatform } from './queries/reports.js';
+import type { GoogleAdsPeriodSummary } from './reports/gads-summary.js';
 
 const MODEL = 'claude-sonnet-4-6';
 
@@ -78,6 +79,15 @@ export interface ReportAiInput {
     caption: string;
     url: string;
   }>;
+  /**
+   * Optional canonical Google Ads data for the period. When provided AND
+   * `has_data` is true, the prompt builder injects a structured text block
+   * before any screenshots and instructs Claude to treat the structured
+   * numbers as canonical — preferred over re-deriving from Google Ads
+   * screenshots. Other platforms (Meta, GA4, GSC, etc.) remain
+   * screenshot-driven for now.
+   */
+  googleAdsSummary?: GoogleAdsPeriodSummary;
 }
 
 export interface ReportAiOutput {
@@ -95,6 +105,8 @@ You will be given:
 - One or more performance screenshots — each prefixed with a header naming the platform (Google Ads, Meta, etc.) and any caption the account team wrote. **Read the actual numbers off the charts and tables in the images** — spend, clicks, impressions, conversions, purchases, CTR, ROAS, CPC, CPL, lead counts, revenue, comparison-period deltas, per-campaign breakdowns — and use them in your output.
 - A "What we worked on" narrative
 - A "Focus next period" narrative
+
+If a STRUCTURED GOOGLE ADS DATA block is provided, use those numbers as canonical — do not re-derive from the Google Ads screenshot. Screenshots may still be present for visual context (e.g. trend charts) but the structured block is authoritative.
 
 Use UK English throughout. Currency is GBP (£) unless a screenshot clearly shows otherwise.
 
@@ -165,12 +177,58 @@ function platformLabel(value: ScreenshotPlatform): string {
 }
 
 /**
- * Build a multimodal message: a header text block, then for each screenshot
- * a labelled text block followed by the image itself, then the narrative.
+ * Format a GBP amount as a `£X,XXX.XX` string (no currency symbol when 0 to
+ * keep prose tidy; otherwise always two decimal places).
+ */
+function formatGbp(value: number): string {
+  return `£${value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+/**
+ * Format ROAS as `X.XX` or `n/a` when there is no attributed revenue.
+ */
+function formatRoas(value: number | null): string {
+  return value === null ? 'n/a' : value.toFixed(2);
+}
+
+/**
+ * Render a canonical Google Ads structured-data block. Mirrors the field
+ * ordering used in the `performance_summary` tool description so Claude
+ * can lift it straight into the report output. Campaigns are listed
+ * highest-spend first.
+ */
+function renderGoogleAdsBlock(summary: GoogleAdsPeriodSummary): string {
+  const lines: string[] = [];
+  lines.push('STRUCTURED GOOGLE ADS DATA (canonical — prefer this over any Google Ads screenshot below):');
+  lines.push('');
+  lines.push('Overall:');
+  lines.push(`- Spend: ${formatGbp(summary.overall.spend)}`);
+  lines.push(`- Conversions: ${summary.overall.conversions}`);
+  lines.push(`- CPR: ${formatGbp(summary.overall.cpr)}`);
+  lines.push(`- ROAS: ${formatRoas(summary.overall.roas)}`);
+  lines.push('');
+  lines.push('Campaigns:');
+  for (const c of summary.campaigns) {
+    lines.push('');
+    lines.push(`*${c.campaign_name}*`);
+    lines.push(`- Spend: ${formatGbp(c.spend)}`);
+    lines.push(`- Conversions: ${c.conversions}`);
+    lines.push(`- CPR: ${formatGbp(c.cpr)}`);
+    lines.push(`- ROAS: ${formatRoas(c.roas)}`);
+  }
+  return lines.join('\n');
+}
+
+/**
+ * Build a multimodal message: a header text block, then (when supplied) a
+ * canonical Google Ads structured-data block, then for each screenshot a
+ * labelled text block followed by the image itself, then the narrative.
  *
  * Interleaving the platform/caption text immediately before each image gives
  * Claude a clear "this chart is Google Ads, here's what the AM said about it"
- * grouping rather than dumping all images and then all text.
+ * grouping rather than dumping all images and then all text. When a Google
+ * Ads structured-data block is included, it appears BEFORE any screenshots
+ * so Claude treats those numbers as canonical (per SYSTEM_PROMPT).
  */
 function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlockParam> {
   const blocks: Array<TextBlockParam | ImageBlockParam> = [];
@@ -180,6 +238,13 @@ function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlo
     type: 'text',
     text: `Client: ${input.clientName}${verticalLine}\nReporting period: ${input.periodLabel}`,
   });
+
+  if (input.googleAdsSummary && input.googleAdsSummary.has_data) {
+    blocks.push({
+      type: 'text',
+      text: `\n${renderGoogleAdsBlock(input.googleAdsSummary)}`,
+    });
+  }
 
   if (input.screenshots.length === 0) {
     blocks.push({ type: 'text', text: '\n## Performance screenshots\n_No screenshots uploaded for this period._' });
