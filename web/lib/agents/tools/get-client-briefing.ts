@@ -24,7 +24,7 @@ const outputSchema = z.object({
   briefing: z.string().nullable(),
 });
 
-export const getClientBriefing = (_ctx: ToolCtx) =>
+export const getClientBriefing = (ctx: ToolCtx) =>
   defineTool(
     {
       name: 'getClientBriefing',
@@ -46,4 +46,5 @@ export const getClientBriefing = (_ctx: ToolCtx) =>
         };
       },
     },
+    ctx,
   );
