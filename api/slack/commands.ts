@@ -23,9 +23,22 @@ import {
   parseSlackForm,
 } from '../../web/lib/agents/channels/slack-verify.js';
 import { slackUserIdToVendoUser } from '../../web/lib/agents/channels/slack.js';
-import { getAgentForUser } from '../../web/lib/agents/agents/index.js';
+import { getAgentForUser, resolveAgentByName } from '../../web/lib/agents/agents/index.js';
 import { runAgentBackground } from '../../web/lib/agents/runtime.js';
 import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
+
+// Slack slash command → specialist agent name. Anything not in this map
+// falls back to the tier router (so /vendo and /atlas still work as before).
+const SLASH_COMMAND_TO_AGENT: Record<string, string> = {
+  '/atlas': 'atlas',
+  '/am': 'atlas-am',
+  '/paid-social': 'atlas-paid-social',
+  '/paidsocial': 'atlas-paid-social',
+  '/paid-search': 'atlas-paid-search',
+  '/paidsearch': 'atlas-paid-search',
+  '/creative': 'atlas-creative',
+  '/seo': 'atlas-seo',
+};
 
 export const config = {
   runtime: 'nodejs',
@@ -67,16 +80,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const slackUserId = form['user_id'] || '';
   const text = (form['text'] || '').trim();
   const responseUrl = form['response_url'] || '';
+  const command = (form['command'] || '').toLowerCase();
 
   if (!slackUserId || !responseUrl) {
     res.status(400).end('missing fields');
     return;
   }
 
+  // Pick the specialist this slash command routes to. Unknown commands
+  // (e.g. /vendo) fall through to the tier router inside runAgentAndDeliver.
+  const requestedAgent = SLASH_COMMAND_TO_AGENT[command] ?? null;
+
   if (!text) {
     res.status(200).json({
       response_type: 'ephemeral',
-      text: 'Usage: `/vendo <ask Atlas anything>`',
+      text: `Usage: \`${command || '/vendo'} <your question>\``,
     });
     return;
   }
@@ -86,7 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // so anything we do before waitUntil() must be the response itself —
   // and anything after must be inside waitUntil() for the platform to
   // keep the instance alive.
-  waitUntil(runAgentAndDeliver({ slackUserId, text, responseUrl }));
+  waitUntil(runAgentAndDeliver({ slackUserId, text, responseUrl, requestedAgent, command }));
 
   // ACK ephemerally so the user sees something within 3 s. The final
   // answer comes via response_url once the agent finishes.
@@ -100,8 +118,10 @@ async function runAgentAndDeliver(opts: {
   slackUserId: string;
   text: string;
   responseUrl: string;
+  requestedAgent: string | null;
+  command: string;
 }): Promise<void> {
-  const { slackUserId, text, responseUrl } = opts;
+  const { slackUserId, text, responseUrl, requestedAgent, command } = opts;
   try {
     const user = await slackUserIdToVendoUser(slackUserId);
     if (!user) {
@@ -109,7 +129,12 @@ async function runAgentAndDeliver(opts: {
       return;
     }
 
-    const agent = getAgentForUser(user);
+    // requestedAgent is set when the slash command name maps to a specialist.
+    // resolveAgentByName enforces admin-only access (non-admins fall back to
+    // atlas-staff). When no specific agent was requested, use the tier router.
+    const agent = requestedAgent
+      ? resolveAgentByName(requestedAgent, user)
+      : getAgentForUser(user);
     if (!agent) {
       await postFollowup(responseUrl, ':no_entry: Atlas is for Vendo team accounts only.');
       return;
@@ -128,7 +153,7 @@ async function runAgentAndDeliver(opts: {
       agent,
       ctx,
       prompt: text,
-      trigger: 'slack:command:/atlas',
+      trigger: `slack:command:${command || '/vendo'}`,
       conversationId: null,
     });
 

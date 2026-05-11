@@ -25,7 +25,8 @@ import {
   slackUserIdToVendoUser,
   postSlackMessage,
 } from '../../web/lib/agents/channels/slack.js';
-import { getAgentForUser } from '../../web/lib/agents/agents/index.js';
+import { getAgentForUser, resolveAgentByName } from '../../web/lib/agents/agents/index.js';
+import { parseSpecialistPrefix } from '../../web/lib/agents/channels/slack.js';
 import { runAgentBackground } from '../../web/lib/agents/runtime.js';
 import { loadConversation } from '../../web/lib/agents/trace.js';
 import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
@@ -158,7 +159,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const channel = event.channel;
   const threadTs = event.thread_ts || (isMention ? event.ts : undefined);
   const slackUserId = event.user;
-  const inboundText = stripBotMention(event.text);
+  const rawText = stripBotMention(event.text);
+
+  // Specialist prefix parsing — DM only. App-mentions in channels keep the
+  // tier-router default so we don't surprise members with a routing
+  // convention they may not know about.
+  const { agent: requestedAgent, text: inboundText } = isDM
+    ? parseSpecialistPrefix(rawText)
+    : { agent: null, text: rawText };
 
   // Conversation key for history reconstruction.
   //  - DMs: the channel id itself (whole DM is one rolling conversation).
@@ -175,6 +183,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       inboundText,
       isMention,
       conversationId,
+      requestedAgent,
     }),
   );
 
@@ -188,8 +197,9 @@ async function runAgentAndDeliver(opts: {
   inboundText: string;
   isMention: boolean;
   conversationId: string;
+  requestedAgent: string | null;
 }): Promise<void> {
-  const { slackUserId, channel, threadTs, inboundText, isMention, conversationId } = opts;
+  const { slackUserId, channel, threadTs, inboundText, isMention, conversationId, requestedAgent } = opts;
   try {
     const user = await slackUserIdToVendoUser(slackUserId);
     if (!user) {
@@ -201,7 +211,12 @@ async function runAgentAndDeliver(opts: {
       return;
     }
 
-    const agent = getAgentForUser(user);
+    // requestedAgent is set when the DM body started with a specialist
+    // prefix like '@am '. resolveAgentByName enforces admin-only access
+    // (non-admins fall back to atlas-staff). Otherwise the tier router runs.
+    const agent = requestedAgent
+      ? resolveAgentByName(requestedAgent, user)
+      : getAgentForUser(user);
     if (!agent) {
       await postSlackMessage({
         channel,

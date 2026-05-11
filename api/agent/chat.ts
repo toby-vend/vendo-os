@@ -25,7 +25,7 @@ import type { UIMessage } from 'ai';
 import { Readable } from 'node:stream';
 import { parseCookies, verifySessionToken, generateId } from '../../web/lib/auth.js';
 import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth.js';
-import { getAgentForUser } from '../../web/lib/agents/agents/index.js';
+import { getAgentForUser, resolveAgentByName } from '../../web/lib/agents/agents/index.js';
 import { loadGraduations } from '../../web/lib/agents/permissions.js';
 import { streamAgent } from '../../web/lib/agents/runtime.js';
 import type { ChannelName } from '../../web/lib/agents/types.js';
@@ -39,6 +39,10 @@ interface ChatBody {
   messages: UIMessage[];
   conversationId?: string;
   trigger?: string;
+  // When set, dispatch to that specific agent via resolveAgentByName
+  // (admin-gated for specialists). When absent, the tier router picks
+  // atlas or atlas-staff based on user role — the existing behaviour.
+  agentName?: string;
 }
 
 function sendJson(res: VercelResponse, status: number, body: Record<string, unknown>): void {
@@ -92,11 +96,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  // -- Tier router ---------------------------------------------------------
-  // role === 'admin'    → atlasAgent (full toolset)
-  // role === 'standard' → atlasStaffAgent (no finance, no decisions)
-  // role === 'client'   → 403 (client-portal users don't get Atlas)
-  const agent = getAgentForUser(user);
+  // -- Agent selection ----------------------------------------------------
+  // If the client requested a specific agent (specialist picker in /chat),
+  // resolve through resolveAgentByName which enforces admin-only access
+  // to specialists. Otherwise the tier router runs:
+  //   admin    → atlasAgent (full toolset)
+  //   standard → atlasStaffAgent (no finance, no decisions)
+  //   client   → 403 (client-portal users don't get Atlas)
+  const agent = body.agentName
+    ? resolveAgentByName(body.agentName, user)
+    : getAgentForUser(user);
   if (!agent) {
     sendJson(res, 403, { error: 'No Atlas tier for your role.' });
     return;

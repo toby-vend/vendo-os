@@ -58,10 +58,17 @@ import {
 import {
   atlasAgent,
   atlasStaffAgent,
+  atlasAmAgent,
+  atlasPaidSocialAgent,
+  atlasPaidSearchAgent,
+  atlasCreativeAgent,
+  atlasSeoAgent,
   getAgent,
   getAgentForUser,
+  resolveAgentByName,
   listAgents,
 } from '../../web/lib/agents/agents';
+import { parseSpecialistPrefix } from '../../web/lib/agents/channels/slack';
 import { runAgentBackground } from '../../web/lib/agents/runtime';
 import { MODELS } from '../../web/lib/agents/models';
 import { TOOL_FACTORIES } from '../../web/lib/agents/tools';
@@ -644,6 +651,91 @@ async function main(): Promise<void> {
     assert(getAgentForUser(adminUser) === atlasAgent, "admin → atlasAgent");
     assert(getAgentForUser(standardUser) === atlasStaffAgent, "standard → atlasStaffAgent");
     assert(getAgentForUser(clientUser) === null, "client → null (no Atlas)");
+  }
+
+  console.log('\n[24d] specialist registry: 5 specialists registered');
+  {
+    assert(getAgent('atlas-am') === atlasAmAgent, "getAgent('atlas-am') resolves");
+    assert(getAgent('atlas-paid-social') === atlasPaidSocialAgent, "getAgent('atlas-paid-social') resolves");
+    assert(getAgent('atlas-paid-search') === atlasPaidSearchAgent, "getAgent('atlas-paid-search') resolves");
+    assert(getAgent('atlas-creative') === atlasCreativeAgent, "getAgent('atlas-creative') resolves");
+    assert(getAgent('atlas-seo') === atlasSeoAgent, "getAgent('atlas-seo') resolves");
+    assert(listAgents().includes('atlas-am'), 'listAgents includes atlas-am');
+    assert(listAgents().includes('atlas-paid-social'), 'listAgents includes atlas-paid-social');
+    assert(listAgents().includes('atlas-paid-search'), 'listAgents includes atlas-paid-search');
+    assert(listAgents().includes('atlas-creative'), 'listAgents includes atlas-creative');
+    assert(listAgents().includes('atlas-seo'), 'listAgents includes atlas-seo');
+  }
+
+  console.log('\n[24e] resolveAgentByName — admin-only access to specialists');
+  {
+    const adminUser: SessionUser = { ...mockUser(), role: 'admin' };
+    const standardUser: SessionUser = { ...mockUser(), role: 'standard' };
+    const clientUser: SessionUser = { ...mockUser(), role: 'client' };
+
+    // admin can reach every specialist
+    assert(resolveAgentByName('atlas-am', adminUser) === atlasAmAgent, 'admin → atlas-am');
+    assert(resolveAgentByName('atlas-paid-social', adminUser) === atlasPaidSocialAgent, 'admin → atlas-paid-social');
+    assert(resolveAgentByName('atlas-seo', adminUser) === atlasSeoAgent, 'admin → atlas-seo');
+
+    // standard user falls back to atlas-staff for any specialist
+    assert(resolveAgentByName('atlas-am', standardUser) === atlasStaffAgent, 'standard → atlas-staff fallback for am');
+    assert(resolveAgentByName('atlas-paid-social', standardUser) === atlasStaffAgent, 'standard → atlas-staff fallback for paid-social');
+
+    // client user always null
+    assert(resolveAgentByName('atlas-am', clientUser) === null, 'client → null');
+    assert(resolveAgentByName('atlas', clientUser) === null, 'client → null even for atlas');
+
+    // 'atlas' name → tier router behaviour
+    assert(resolveAgentByName('atlas', adminUser) === atlasAgent, "resolveAgentByName('atlas') runs tier router for admin");
+    assert(resolveAgentByName('atlas', standardUser) === atlasStaffAgent, "resolveAgentByName('atlas') runs tier router for standard");
+
+    // unknown name → null
+    assert(resolveAgentByName('does-not-exist', adminUser) === null, 'unknown name → null');
+  }
+
+  console.log('\n[24f] specialist agents have sharper system prompts');
+  {
+    const ctx = mockCtx(runId, mockUser({ channels: ['meetings:read'] }), new Set());
+    const amPrompt = atlasAmAgent.systemPrompt(ctx);
+    assert(amPrompt.includes('Account Management'), 'AM prompt names the role');
+    assert(amPrompt.includes('/paid-social') || amPrompt.includes('paid-social'), 'AM prompt defers to paid-social');
+
+    const psPrompt = atlasPaidSocialAgent.systemPrompt(ctx);
+    assert(psPrompt.includes('Meta Ads') || psPrompt.includes('Paid Social'), 'paid-social prompt names Meta Ads');
+    assert(psPrompt.includes('/paid-search') || psPrompt.includes('paid-search'), 'paid-social defers Google to paid-search');
+
+    const psearchPrompt = atlasPaidSearchAgent.systemPrompt(ctx);
+    assert(psearchPrompt.includes('Google Ads') || psearchPrompt.includes('Paid Search'), 'paid-search prompt names Google Ads');
+
+    const creativePrompt = atlasCreativeAgent.systemPrompt(ctx);
+    assert(creativePrompt.includes('Frame.io') || creativePrompt.includes('Creative'), 'creative prompt names Frame.io');
+
+    const seoPrompt = atlasSeoAgent.systemPrompt(ctx);
+    assert(seoPrompt.includes('GSC') || seoPrompt.includes('SEO') || seoPrompt.includes('organic'), 'seo prompt names organic / GSC');
+  }
+
+  console.log('\n[24g] parseSpecialistPrefix — DM body routing');
+  {
+    const a = parseSpecialistPrefix('@am how is Smile Dental doing?');
+    assert(a.agent === 'atlas-am', "'@am ' → atlas-am");
+    assert(a.text === 'how is Smile Dental doing?', 'prefix stripped from text');
+
+    const b = parseSpecialistPrefix('@paid-social show me CTR for Veltuff');
+    assert(b.agent === 'atlas-paid-social', "'@paid-social ' → atlas-paid-social");
+
+    const c = parseSpecialistPrefix('@paidsearch what is the CPA on X?');
+    assert(c.agent === 'atlas-paid-search', "'@paidsearch ' (no dash) still routes");
+
+    const d = parseSpecialistPrefix('@SEO any organic dips this week');
+    assert(d.agent === 'atlas-seo', "case-insensitive '@SEO'");
+
+    const e = parseSpecialistPrefix('how is Smile Dental doing?');
+    assert(e.agent === null, 'no prefix → null agent');
+    assert(e.text === 'how is Smile Dental doing?', 'no prefix → text unchanged');
+
+    const f = parseSpecialistPrefix('@unknown thing here');
+    assert(f.agent === null, 'unknown prefix → null agent');
   }
 
   console.log('\n[24b] staff agent has reduced toolset');

@@ -264,6 +264,52 @@ export function parseAgentActionId(actionId: string): ParsedAgentAction | null {
 }
 
 // ---------------------------------------------------------------------------
+// Specialist prefix routing for Slack DMs
+//
+// Slack's real @-mentions are bot-user-scoped, so addressing a specialist
+// as @atlas-am would need a separate Slack app per specialist. Instead we
+// parse the first whitespace-delimited token of the DM body: if it
+// matches one of the prefixes below, the rest of the body is the actual
+// question and the chosen agent name is returned.
+//
+// Recognised prefixes (case-insensitive, leading @ optional):
+//   @am, @paid-social, @paid-search, @creative, @seo
+//   am:, paid-social:, etc. also accepted
+//
+// If no prefix matches, returns { agent: null, text: <original> } so the
+// caller can fall back to its default agent.
+// ---------------------------------------------------------------------------
+
+const PREFIX_TO_AGENT: Record<string, string> = {
+  '@am': 'atlas-am',
+  '@paid-social': 'atlas-paid-social',
+  '@paidsocial': 'atlas-paid-social',
+  '@paid-search': 'atlas-paid-search',
+  '@paidsearch': 'atlas-paid-search',
+  '@creative': 'atlas-creative',
+  '@seo': 'atlas-seo',
+};
+
+export interface ParsedSpecialistPrefix {
+  agent: string | null;
+  text: string;
+}
+
+export function parseSpecialistPrefix(text: string): ParsedSpecialistPrefix {
+  if (!text) return { agent: null, text: '' };
+  const trimmed = text.trimStart();
+  const firstSpace = trimmed.search(/\s/);
+  const token = firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace);
+  const rest = firstSpace === -1 ? '' : trimmed.slice(firstSpace + 1);
+  // Normalise: ensure leading '@' and lowercase; strip trailing ':' / ','
+  let key = token.toLowerCase().replace(/[:,]$/, '');
+  if (!key.startsWith('@')) key = '@' + key;
+  const agent = PREFIX_TO_AGENT[key] ?? null;
+  if (!agent) return { agent: null, text };
+  return { agent, text: rest.trimStart() };
+}
+
+// ---------------------------------------------------------------------------
 // Channel implementation
 // ---------------------------------------------------------------------------
 

@@ -47,13 +47,36 @@ interface AppProps {
   userTier: 'admin' | 'staff';
 }
 
+// Specialist picker — admin only. The 'atlas' option falls through to the
+// tier router server-side (admin → atlas, staff → atlas-staff). Each
+// specialist label is the user-facing name; the value is the agent name
+// the server resolves via resolveAgentByName.
+const SPECIALISTS: { value: string; label: string; hint: string }[] = [
+  { value: 'atlas', label: 'Atlas', hint: 'Generalist' },
+  { value: 'atlas-am', label: 'AM', hint: 'Client relationships' },
+  { value: 'atlas-paid-social', label: 'Paid Social', hint: 'Meta Ads' },
+  { value: 'atlas-paid-search', label: 'Paid Search', hint: 'Google Ads' },
+  { value: 'atlas-creative', label: 'Creative', hint: 'Video & Frame.io' },
+  { value: 'atlas-seo', label: 'SEO', hint: 'Organic & GSC' },
+];
+
 export function App({ userName, userTier }: AppProps): React.JSX.Element {
   const [input, setInput] = useState('');
+  const [selectedAgent, setSelectedAgent] = useState<string>('atlas');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // Read selectedAgent through a ref so the transport's body callback
+  // always sees the latest value without re-creating the transport on
+  // every state change (which would break useChat's streaming).
+  const selectedAgentRef = useRef(selectedAgent);
+  selectedAgentRef.current = selectedAgent;
+
   const { messages, sendMessage, status, error, stop } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/agent/chat' }),
+    transport: new DefaultChatTransport({
+      api: '/api/agent/chat',
+      body: () => ({ agentName: selectedAgentRef.current }),
+    }),
   });
 
   // Auto-scroll on new content
@@ -87,17 +110,27 @@ export function App({ userName, userTier }: AppProps): React.JSX.Element {
     }
   }
 
+  const activeLabel = SPECIALISTS.find((s) => s.value === selectedAgent)?.label ?? 'Atlas';
+
   return (
     <div className="atlas-chat">
       {!hasMessages && (
         <Welcome
           userName={userName}
           userTier={userTier}
+          selectedAgent={selectedAgent}
+          onSelectAgent={setSelectedAgent}
           onSuggestion={(text) => {
             sendMessage({ text });
             inputRef.current?.focus();
           }}
         />
+      )}
+
+      {hasMessages && userTier === 'admin' && selectedAgent !== 'atlas' && (
+        <div className="atlas-active-agent" title="Specialist is locked for this conversation. Start a new conversation to switch.">
+          Talking to <strong>{activeLabel}</strong>
+        </div>
       )}
 
       {hasMessages && (
@@ -159,6 +192,8 @@ export function App({ userName, userTier }: AppProps): React.JSX.Element {
 
 interface WelcomeProps extends AppProps {
   onSuggestion: (text: string) => void;
+  selectedAgent: string;
+  onSelectAgent: (value: string) => void;
 }
 
 const SUGGESTIONS = [
@@ -167,7 +202,7 @@ const SUGGESTIONS = [
   'Draft an Asana task for tomorrow’s follow-up call.',
 ];
 
-function Welcome({ userName, userTier, onSuggestion }: WelcomeProps): React.JSX.Element {
+function Welcome({ userName, userTier, onSuggestion, selectedAgent, onSelectAgent }: WelcomeProps): React.JSX.Element {
   const helper =
     userTier === 'admin'
       ? 'Full agency access — clients, campaigns, meetings, decisions, financials.'
@@ -177,6 +212,26 @@ function Welcome({ userName, userTier, onSuggestion }: WelcomeProps): React.JSX.
       <div className="atlas-welcome-mark">A</div>
       <h2>Hello {userName}.</h2>
       <p>{helper}</p>
+
+      {userTier === 'admin' && (
+        <div className="atlas-specialist-picker">
+          <div className="atlas-specialist-picker-label">Talk to:</div>
+          <div className="atlas-specialist-chips">
+            {SPECIALISTS.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                className={`atlas-specialist-chip${selectedAgent === s.value ? ' is-selected' : ''}`}
+                onClick={() => onSelectAgent(s.value)}
+                title={s.hint}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <ul className="atlas-suggestions">
         {SUGGESTIONS.map((q) => (
           <li key={q}>
