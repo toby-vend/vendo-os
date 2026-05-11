@@ -39,6 +39,7 @@ import {
   atlasCreativeAgent,
   atlasAmAgent,
 } from '../../lib/agents/agents/index.js';
+import { runMonthlyClientReports } from '../../lib/jobs/monthly-client-reports.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -542,6 +543,31 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/specialist-am] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Specialist AM failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /monthly-client-reports — Runs on the 1st of every month at 06:00.
+   * Creates a draft client_reports row per active client for the previous
+   * month. AMs review + fill the narrative in CD. Wave C / C2. Idempotent.
+   */
+  app.get('/monthly-client-reports', async (_request, reply) => {
+    try {
+      const result = await runMonthlyClientReports();
+      return reply.send({
+        ok: true,
+        message: 'Monthly client reports completed',
+        period: result.periodLabel,
+        totalClients: result.totalClients,
+        created: result.created,
+        alreadyExisted: result.alreadyExisted,
+        failed: result.failed,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/monthly-client-reports] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Monthly client reports failed', error: msg });
     }
   });
 

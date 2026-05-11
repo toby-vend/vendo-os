@@ -175,6 +175,10 @@
       "schedule": "0 11 * * 1-5"
     },
     {
+      "path": "/api/cron/monthly-client-reports",
+      "schedule": "0 6 1 * *"
+    },
+    {
       "path": "/api/cron/sync-asana",
       "schedule": "0 * * * *"
     },
