@@ -17,6 +17,7 @@ import {
 } from '../../lib/frameio/ad-copy.js';
 import { getOrCreateTranscript } from '../../lib/frameio/transcribe.js';
 import { getProjectsOverview, getLibraryStats } from '../../lib/queries/frameio-library.js';
+import { getOrBuildClientSnapshot } from '../../lib/frameio/client-snapshot.js';
 import { db } from '../../lib/queries/base.js';
 import type { SessionUser } from '../../lib/auth.js';
 
@@ -179,6 +180,87 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
     const row = await getAdCopyRowById(reviewId);
     if (!row) return reply.code(404).type('text/html').send('<p>Review not found</p>');
     return reply.render('dashboards/_frame-io-ad-copy-block', { row });
+  });
+
+  // POST /dashboards/frame-io/snapshot/refresh
+  // Body: { review_id }. Rebuilds the client brand snapshot bound to the
+  // scope of this review (mapped → client:<id>, unmapped → project:<id>).
+  // Returns the snapshot partial fragment.
+  app.post('/snapshot/refresh', async (request, reply) => {
+    const user = (request as unknown as { user: SessionUser | null }).user;
+    const body = request.body as { review_id?: string | number };
+    const reviewId = Number(body.review_id);
+    if (!Number.isFinite(reviewId) || reviewId <= 0) {
+      return reply.code(400).type('text/html').send(
+        '<div style="color:#EF4444;padding:0.5rem 0.75rem;background:rgba(239,68,68,0.08);border-radius:4px;font-size:12px;">Missing review_id</div>',
+      );
+    }
+
+    // Reverse-engineer the snapshot inputs from the review row.
+    let row;
+    try {
+      row = await db.execute({
+        sql: `SELECT id, client_name, asset_name, frameio_project_id
+                FROM creative_reviews WHERE id = ? LIMIT 1`,
+        args: [reviewId],
+      });
+    } catch (err) {
+      return reply.code(500).type('text/html').send(
+        `<div style="color:#EF4444;padding:0.5rem 0.75rem;background:rgba(239,68,68,0.08);border-radius:4px;font-size:12px;">DB error: ${(err as Error).message?.replace(/[<>]/g, '') ?? 'unknown'}</div>`,
+      );
+    }
+    const reviewRow = row.rows[0] as unknown as { id: number; client_name: string; asset_name: string; frameio_project_id: string | null } | undefined;
+    if (!reviewRow) return reply.code(404).type('text/html').send('Review not found');
+
+    // Resolve client_id (if mapped) and project name for snapshot inputs.
+    let clientId: number | null = null;
+    if (reviewRow.client_name && reviewRow.client_name !== '(unmapped)') {
+      try {
+        const c = await db.execute({
+          sql: 'SELECT id FROM clients WHERE name = ? LIMIT 1',
+          args: [reviewRow.client_name],
+        });
+        clientId = (c.rows[0] as unknown as { id: number } | undefined)?.id ?? null;
+      } catch { /* swallow */ }
+    }
+
+    let projectName: string | null = null;
+    if (reviewRow.frameio_project_id) {
+      try {
+        const p = await db.execute({
+          sql: `SELECT name FROM frameio_assets WHERE id = ? AND type = 'project' LIMIT 1`,
+          args: [reviewRow.frameio_project_id],
+        });
+        projectName = (p.rows[0] as unknown as { name: string } | undefined)?.name ?? null;
+      } catch { /* swallow */ }
+    }
+
+    const result = await getOrBuildClientSnapshot({
+      clientId,
+      clientName: reviewRow.client_name,
+      projectId: reviewRow.frameio_project_id,
+      assetName: reviewRow.asset_name,
+      projectName,
+      transcript: null,
+      reviewId: reviewRow.id,
+      refreshedBy: user?.email ?? 'auto',
+    });
+
+    if (!result.ok) {
+      return reply.code(500).type('text/html').send(
+        `<div style="color:#EF4444;padding:0.5rem 0.75rem;background:rgba(239,68,68,0.08);border-radius:4px;font-size:12px;">Snapshot rebuild failed: <code>${String(result.reason).replace(/[<>]/g, '')}</code></div>`,
+      );
+    }
+
+    return reply.render('dashboards/_frame-io-client-snapshot', {
+      snapshot: result.snapshot,
+      scopeKey: result.snapshot.scopeKey,
+      context: {
+        reviewId: reviewRow.id,
+        clientName: reviewRow.client_name,
+        projectId: reviewRow.frameio_project_id,
+      },
+    });
   });
 
   // POST /dashboards/frame-io/transcript/:fileId/refresh

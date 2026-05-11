@@ -218,6 +218,10 @@ async function fetchMeetingActions(
   // Over-fetch — gate filters aggressively.
   const fetchLimit = MAX_MEETING_ACTIONS * 4;
 
+  // Dedupe on (description, assignee, meeting_id): the upstream
+  // process-meetings extraction has been observed to insert the same action
+  // multiple times for the same meeting (3× in some cases). MIN(ai.id) keeps
+  // the earliest row so we have a stable, repeatable choice.
   const raw = await rows<MeetingActionRow>(
     `
     SELECT ai.description, ai.assignee, m.id AS meeting_id, m.date AS meeting_date,
@@ -227,6 +231,13 @@ async function fetchMeetingActions(
     WHERE m.client_name = ?
       AND m.date >= ?
       AND m.date < ?
+      AND ai.id = (
+        SELECT MIN(ai2.id)
+          FROM action_items ai2
+         WHERE ai2.meeting_id = ai.meeting_id
+           AND ai2.description = ai.description
+           AND COALESCE(ai2.assignee, '') = COALESCE(ai.assignee, '')
+      )
     ORDER BY m.date DESC, ai.id DESC
     LIMIT ?
     `,

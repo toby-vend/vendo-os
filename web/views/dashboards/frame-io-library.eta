@@ -218,6 +218,14 @@
         </div>
       </div>
 
+      <%~ include('/dashboards/_frame-io-client-snapshot', {
+        snapshot: it.snapshot,
+        scopeKey: null,
+        context: it.snapshotContext,
+        csrfToken: it.csrfToken,
+        user: it.user,
+      }) %>
+
       <h4 style="font-size: 13px; font-weight: 600; margin: 1rem 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em; color: #94A3B8;">Meta ad copy</h4>
       <% if (it.reviewRow) { %>
         <%~ include('/dashboards/_frame-io-ad-copy-block', { row: it.reviewRow, csrfToken: it.csrfToken, user: it.user }) %>

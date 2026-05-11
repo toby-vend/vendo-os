@@ -9,6 +9,7 @@ import {
 import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
 import { getOrCreateReviewForLibraryFile, getLibraryAsset } from '../../lib/frameio/library-bridge.js';
 import { getAdCopyRowById } from '../../lib/queries/frameio-dashboard.js';
+import { getSnapshot, scopeKeyFor } from '../../lib/queries/client-snapshots.js';
 import { db } from '../../lib/queries/base.js';
 
 /**
@@ -104,7 +105,20 @@ export const frameIoLibraryRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(404).type('text/html').send(`Cannot bridge file to review: ${bridge.reason}`);
     }
 
-    const [stats, projectRow, parentRow, breadcrumb, adCopyRow] = await Promise.all([
+    // Resolve client_id (if mapped) so we can compute the snapshot scope_key
+    let clientId: number | null = null;
+    if (bridge.clientName && bridge.clientName !== '(unmapped)') {
+      try {
+        const c = await db.execute({
+          sql: 'SELECT id FROM clients WHERE name = ? LIMIT 1',
+          args: [bridge.clientName],
+        });
+        clientId = (c.rows[0] as unknown as { id: number } | undefined)?.id ?? null;
+      } catch { /* swallow */ }
+    }
+    const scopeKey = scopeKeyFor(clientId, asset.project_id);
+
+    const [stats, projectRow, parentRow, breadcrumb, adCopyRow, snapshot] = await Promise.all([
       getLibraryStats(),
       db.execute({
         sql: 'SELECT name FROM frameio_assets WHERE id = ? LIMIT 1',
@@ -118,6 +132,9 @@ export const frameIoLibraryRoutes: FastifyPluginAsync = async (app) => {
         : Promise.resolve({ rows: [] as unknown[] }),
       asset.parent_id ? getBreadcrumb(asset.parent_id) : Promise.resolve([]),
       getAdCopyRowById(bridge.reviewId),
+      // Read-only — snapshot is built when the user clicks Generate.
+      // Eager-building here would cost a Sonnet call on every file page view.
+      scopeKey ? getSnapshot(scopeKey) : Promise.resolve(null),
     ]);
 
     const projectName = (projectRow.rows[0] as unknown as { name: string } | undefined)?.name ?? null;
@@ -133,6 +150,12 @@ export const frameIoLibraryRoutes: FastifyPluginAsync = async (app) => {
       breadcrumb,
       clientName: bridge.clientName,
       reviewRow: adCopyRow,
+      snapshot,
+      snapshotContext: {
+        reviewId: bridge.reviewId,
+        clientName: bridge.clientName,
+        projectId: asset.project_id,
+      },
     });
   });
 

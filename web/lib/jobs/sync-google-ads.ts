@@ -22,7 +22,12 @@ import { consoleLog } from '../monitors/base.js';
 const LOG = 'sync-google-ads';
 const API_VERSION = 'v23';
 const BASE_URL = `https://googleads.googleapis.com/${API_VERSION}`;
-const DEFAULT_DAYS = 7;
+// Rolling window for campaign/keyword stats. Wider than 7 days so that
+// late-attributed conversions (common in Google Ads — clicks attribute back
+// to their original date as conversions roll in over the following weeks)
+// are picked up on subsequent daily runs. Trade-off: each cron run upserts
+// 60× more rows, but the GAQL queries are cheap (campaign-level, not keyword).
+const DEFAULT_DAYS = 60;
 
 export interface GoogleAdsSyncResult {
   accounts: number;
@@ -57,9 +62,12 @@ interface GadsRow {
 // --- Auth ---
 
 async function mintAccessToken(): Promise<string> {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN;
+  // .trim() defends against trailing whitespace/newlines in env values
+  // (Vercel + .env files both occasionally preserve a stray "\n" which
+  // Google's OAuth endpoint rejects as "invalid_client").
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const refreshToken = process.env.GOOGLE_ADS_REFRESH_TOKEN?.trim();
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error('GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_ADS_REFRESH_TOKEN must be set');
   }

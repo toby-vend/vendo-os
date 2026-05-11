@@ -1,0 +1,74 @@
+<%
+/*
+  Client Brand Snapshot panel — shown above the ad-copy block on the
+  file detail page. The snapshot agent runs as Step 1 of the ad-copy
+  pipeline and stores its synthesised profile here.
+
+  Inputs:
+    it.snapshot    — BrandSnapshot from web/lib/queries/client-snapshots.ts
+                     OR null if not yet built (will be built on first Generate)
+    it.scopeKey    — string used for the Refresh route
+    it.csrfToken
+    it.user        — for admin gating of Refresh
+    it.context     — { reviewId, clientName, projectId } — used by refresh route
+
+  Self-contained helpers — must render standalone via reply.render.
+*/
+const _fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const s = it.snapshot;
+const confidenceColour = s
+  ? (s.confidence === 'mapped' ? '#22C55E' : s.confidence === 'best_guess' ? '#F59E0B' : '#94A3B8')
+  : '#94A3B8';
+const confidenceLabel = s
+  ? (s.confidence === 'mapped' ? 'mapped' : s.confidence === 'best_guess' ? 'best guess' : 'unmapped — low confidence')
+  : null;
+const ctx = it.context || {};
+const canRefresh = !!(it.user && (it.user.role === 'admin' || it.user.role === 'standard'));
+%>
+
+<div id="snapshot-panel" style="background:#0B0B0B;border:1px solid rgba(148,163,184,0.20);border-radius:8px;padding:0.875rem 1.125rem;margin-bottom:1rem;">
+  <details<% if (!s) { %> open<% } %>>
+    <summary style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;list-style:none;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <strong style="font-size:13px;color:#E2E8F0;">📋 Client snapshot</strong>
+        <% if (confidenceLabel) { %>
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;background:rgba(148,163,184,0.10);color:<%= confidenceColour %>;padding:2px 8px;border-radius:99px;">
+            <%= confidenceLabel %>
+          </span>
+        <% } %>
+        <% if (s) { %>
+          <span style="font-size:11px;color:#94A3B8;">synthesised <%= _fmtDate(s.generatedAt) %></span>
+        <% } %>
+      </div>
+      <span style="font-size:11px;color:#94A3B8;">▼</span>
+    </summary>
+
+    <% if (s) { %>
+      <div style="margin-top:8px;font-size:13px;line-height:1.55;color:#cbd5e1;">
+        <pre style="white-space:pre-wrap;font-family:inherit;margin:0;background:transparent;padding:0;border:none;color:#cbd5e1;font-size:12.5px;"><%= s.snapshotMd %></pre>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px;font-size:11px;color:#94A3B8;flex-wrap:wrap;">
+        <span>Auto-refreshes every 7 days · expires <%= _fmtDate(s.expiresAt) %></span>
+        <% if (canRefresh && ctx.reviewId) { %>
+          <span style="color:#475569;">·</span>
+          <button
+            hx-post="/dashboards/frame-io/snapshot/refresh"
+            hx-vals='{"review_id": <%= ctx.reviewId %>}'
+            hx-target="#snapshot-panel"
+            hx-swap="outerHTML"
+            hx-headers='{"X-CSRF-Token": "<%= it.csrfToken || '' %>"}'
+            hx-indicator="#snapshot-refresh-spin"
+            hx-confirm="Rebuild the brand snapshot? This fires a fresh Sonnet call (~$0.01)."
+            style="background:none;border:none;color:#94A3B8;font-size:11px;text-decoration:underline;cursor:pointer;padding:0;">
+            ↻ refresh now
+          </button>
+          <span id="snapshot-refresh-spin" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">↻ rebuilding…</span>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div style="margin-top:8px;padding:0.75rem 0.875rem;background:rgba(148,163,184,0.06);border:1px dashed rgba(148,163,184,0.20);border-radius:6px;font-size:12px;color:#94A3B8;">
+        No snapshot yet — one will be built automatically when you click <strong style="color:#cbd5e1;">Generate Meta ad copy</strong> below.
+      </div>
+    <% } %>
+  </details>
+</div>
