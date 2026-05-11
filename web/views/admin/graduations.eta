@@ -126,91 +126,175 @@ capability check on each tool's <code>capability</code> slug.</small>
 </script>
 
 <style>
-  .notice { padding: 0.6em 1em; background: var(--bg-elevated, #f4f4f4); border-left: 3px solid var(--accent, #5a9); margin-bottom: 1em; border-radius: 4px; }
+  .notice {
+    padding: 0.7em 1em;
+    background: var(--vendo-green-subtle);
+    border: 1px solid var(--vendo-green);
+    color: var(--vendo-text);
+    margin-bottom: 1em;
+    border-radius: 6px;
+  }
   .bulk-grant-bar {
     margin: 1em 0 1.2em;
-    padding: 0.8em 1em;
-    background: var(--bg-elevated, #fafafa);
-    border: 1px solid var(--border, #ddd);
-    border-radius: 6px;
+    padding: 0.9em 1.1em;
+    background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border);
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 0.6em;
   }
   .bulk-grant-row {
     display: flex;
     align-items: center;
-    gap: 0.8em;
+    gap: 0.9em;
     flex-wrap: wrap;
   }
   .bulk-grant-bar textarea {
     font: inherit;
-    padding: 0.45em 0.6em;
-    border: 1px solid var(--border, #ccc);
-    border-radius: 4px;
+    padding: 0.55em 0.75em;
+    background: var(--vendo-bg);
+    border: 1px solid var(--vendo-border-strong);
+    border-radius: 6px;
+    color: var(--vendo-text);
     resize: vertical;
     width: 100%;
   }
+  .bulk-grant-bar textarea:focus {
+    outline: none;
+    border-color: var(--vendo-green);
+  }
+  .bulk-grant-bar textarea::placeholder { color: var(--vendo-text-muted); }
   .bulk-grant-bar .btn-primary {
     align-self: flex-start;
-    padding: 0.5em 1em;
-    background: var(--accent, #2a8);
-    color: white;
-    border: none;
-    border-radius: 4px;
+    padding: 0.55em 1.1em;
+    background: var(--vendo-green);
+    color: #0B0B0B;
+    border: 1px solid var(--vendo-green);
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
   }
+  .bulk-grant-bar .btn-primary:hover { background: var(--vendo-green-hover); border-color: var(--vendo-green-hover); }
   .bulk-grant-bar .btn-primary:disabled {
-    background: var(--text-muted, #aaa);
+    background: var(--vendo-surface-hover);
+    color: var(--vendo-text-muted);
+    border-color: var(--vendo-border-strong);
     cursor: not-allowed;
   }
   .bulk-grant-count {
     margin-left: auto;
-    color: var(--text-muted, #666);
-    font-size: 0.9em;
+    color: var(--vendo-text-muted);
+    font-size: 0.85em;
     font-variant-numeric: tabular-nums;
   }
   .link-btn {
     background: none;
     border: none;
-    color: var(--accent, #2a8);
+    color: var(--vendo-green);
     cursor: pointer;
     font: inherit;
     padding: 0;
     text-decoration: underline;
   }
-  .link-btn:hover { filter: brightness(0.9); }
-  .grad-matrix { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 0.9em; }
-  .grad-matrix th, .grad-matrix td { border: 1px solid var(--border, #ddd); padding: 0.6em 0.7em; vertical-align: top; }
-  .grad-matrix thead th { background: var(--bg-elevated, #fafafa); text-align: left; }
-  .grad-matrix .agent-name { white-space: nowrap; }
-  .cell-n\/a { background: var(--bg, #fff); }
-  .cell-n\/a .muted { color: var(--text-muted, #aaa); }
-  .cell-ungraduated { background: var(--bg, #fff); }
-  .cell-graduated { background: rgba(160, 224, 160, 0.12); }
-  .grad-meta .tick { color: #1d5524; font-weight: 600; }
-  .grad-meta small { display: block; color: var(--text-muted, #555); font-size: 0.8em; margin-top: 0.2em; }
-  .grad-meta .notes { font-style: italic; margin-top: 0.4em; }
+  .link-btn:hover { color: var(--vendo-green-hover); }
+
+  .grad-matrix {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1em;
+    font-size: 0.88em;
+    background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .grad-matrix th, .grad-matrix td {
+    border-bottom: 1px solid var(--vendo-border);
+    border-right: 1px solid var(--vendo-border);
+    padding: 0.7em 0.85em;
+    vertical-align: top;
+    color: var(--vendo-text);
+  }
+  .grad-matrix th:last-child, .grad-matrix td:last-child { border-right: none; }
+  .grad-matrix tbody tr:last-child th,
+  .grad-matrix tbody tr:last-child td { border-bottom: none; }
+  .grad-matrix thead th {
+    background: var(--vendo-nav);
+    color: var(--vendo-text-muted);
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.78em;
+  }
+  .grad-matrix .agent-name { white-space: nowrap; color: var(--vendo-text-heading); font-weight: 600; }
+  .grad-matrix code {
+    background: var(--vendo-bg);
+    border: 1px solid var(--vendo-border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--vendo-text);
+    font-size: 0.92em;
+  }
+
+  .cell-n\/a .muted { color: var(--vendo-text-muted); opacity: 0.4; }
+  .cell-graduated { background: var(--vendo-green-subtle); }
+  .grad-meta .tick { color: var(--vendo-green); font-weight: 600; }
+  .grad-meta small {
+    display: block;
+    color: var(--vendo-text-muted);
+    font-size: 0.78em;
+    margin-top: 0.25em;
+  }
+  .grad-meta .notes {
+    font-style: italic;
+    margin-top: 0.45em;
+    color: var(--vendo-text);
+  }
+
   .grant-check {
     display: inline-flex;
     align-items: center;
-    gap: 0.45em;
+    gap: 0.5em;
     cursor: pointer;
-    color: var(--text-muted, #555);
+    color: var(--vendo-text-muted);
     user-select: none;
   }
   .grant-check input[type="checkbox"] {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: var(--accent, #2a8);
+    accent-color: var(--vendo-green);
   }
   .grant-check:has(input:checked) {
-    color: var(--accent, #2a8);
+    color: var(--vendo-green);
     font-weight: 600;
   }
-  .grad-matrix button { padding: 0.4em 0.8em; border: 1px solid var(--border, #ccc); background: var(--bg, #fff); border-radius: 4px; cursor: pointer; }
-  .grad-matrix .btn-danger { color: #b33; margin-top: 0.6em; }
-  .grad-matrix button:hover { filter: brightness(0.95); }
+
+  .grad-matrix button {
+    padding: 0.4em 0.85em;
+    border: 1px solid var(--vendo-border-strong);
+    background: var(--vendo-surface-hover);
+    color: var(--vendo-text);
+    border-radius: 5px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.85em;
+  }
+  .grad-matrix button:hover {
+    border-color: var(--vendo-green);
+    color: var(--vendo-green);
+  }
+  .grad-matrix .btn-danger {
+    color: #fca5a5;
+    margin-top: 0.7em;
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+  .grad-matrix .btn-danger:hover {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.6);
+  }
 </style>
