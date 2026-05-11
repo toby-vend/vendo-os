@@ -23,6 +23,7 @@ import { atlasBriefAgent } from '../../web/lib/agents/agents/index.js';
 import { runAgentBackground } from '../../web/lib/agents/runtime.js';
 import { postSlackMessage, slackChannel } from '../../web/lib/agents/channels/slack.js';
 import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
+import { recordHeartbeat } from '../../web/lib/jobs/heartbeat.js';
 
 export const config = {
   runtime: 'nodejs',
@@ -40,6 +41,7 @@ interface BriefResult {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const t0 = Date.now();
   // -- Auth: Vercel cron Bearer token --------------------------------------
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
@@ -85,6 +87,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   );
 
   const ok = results.every((r) => r.ok);
+  await recordHeartbeat(
+    'atlas-brief',
+    ok,
+    Date.now() - t0,
+    ok ? undefined : results.find((r) => !r.ok)?.error,
+  );
   res.status(ok ? 200 : 207).json({
     ok,
     delivered: results.filter((r) => r.ok && r.posted).length,

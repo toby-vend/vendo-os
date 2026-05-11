@@ -2,6 +2,53 @@
 
 <h2>Operations Hub</h2>
 
+<% if (it.heartbeats && it.heartbeats.length > 0) {
+  const now = Date.now();
+  const formatAgo = (iso) => {
+    if (!iso) return '—';
+    const ms = now - new Date(iso).getTime();
+    if (ms < 0 || isNaN(ms)) return '—';
+    const m = Math.floor(ms / 60000);
+    if (m < 1) return 'just now';
+    if (m < 60) return m + 'm ago';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + 'h ago';
+    return Math.floor(h / 24) + 'd ago';
+  };
+  const stale = (iso, maxMin) => {
+    if (!iso) return true;
+    return (now - new Date(iso).getTime()) > maxMin * 60000;
+  };
+%>
+<section style="margin-bottom: 2rem;">
+  <h3 style="margin-bottom: 0.75rem;">Cron heartbeats</h3>
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.5rem;">
+    <% it.heartbeats.forEach(h => {
+      const lastOk = h.last_success_at;
+      const lastErr = h.last_error_at;
+      const hasError = lastErr && (!lastOk || lastErr > lastOk);
+      const isStale = !hasError && stale(lastOk, 240); // > 4h since last success
+      const colour = hasError ? '#EF4444' : isStale ? '#F59E0B' : '#22C55E';
+      const status = hasError ? 'error' : isStale ? 'stale' : 'ok';
+    %>
+    <div style="background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-left: 3px solid <%= colour %>; border-radius: 8px; padding: 0.6rem 0.75rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+        <strong style="font-size: 12px; color: var(--vendo-text-heading); font-family: monospace;"><%= h.job %></strong>
+        <span style="font-size: 10px; font-weight: 700; color: <%= colour %>; text-transform: uppercase;"><%= status %></span>
+      </div>
+      <div style="font-size: 11px; color: var(--vendo-text-muted); margin-top: 4px;">
+        <% if (hasError) { %>
+          err <%= formatAgo(lastErr) %> · <%= (h.last_error || '').slice(0, 60) %>
+        <% } else { %>
+          ok <%= formatAgo(lastOk) %><% if (h.last_duration_ms) { %> · <%= h.last_duration_ms %>ms<% } %>
+        <% } %>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
 <div class="stat-grid ops-stat-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
   <article class="stat-card">
     <p class="stat-value"><%= it.stats.total %></p>

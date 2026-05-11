@@ -26,6 +26,7 @@ import {
 import { atlasMonitorAgent } from '../../web/lib/agents/agents/index.js';
 import { runAgentBackground } from '../../web/lib/agents/runtime.js';
 import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
+import { recordHeartbeat } from '../../web/lib/jobs/heartbeat.js';
 
 export const config = {
   runtime: 'nodejs',
@@ -159,6 +160,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const ok = results.every((r) => r.ok);
+  await recordHeartbeat(
+    'concern-monitor',
+    ok,
+    0, // unknown duration; this handler doesn't track t0. Heartbeat still useful.
+    ok ? undefined : results.find((r) => !r.ok)?.error,
+  );
   res.status(ok ? 200 : 207).json({ ok, processed: results.length, results });
 }
 

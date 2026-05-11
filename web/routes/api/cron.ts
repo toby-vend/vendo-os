@@ -18,6 +18,7 @@ import { pushClientsToPortal } from '../../lib/jobs/push-clients-to-portal.js';
 import { pullOnboardingFromPortal } from '../../lib/jobs/pull-onboarding-from-portal.js';
 import { syncAsana } from '../../lib/jobs/sync-asana.js';
 import { recomputeClientProfitability } from '../../lib/jobs/client-profitability.js';
+import { recordHeartbeat } from '../../lib/jobs/heartbeat.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -47,6 +48,22 @@ function runScript(scriptPath: string): Promise<{ stdout: string; stderr: string
 }
 
 export const cronRoutes: FastifyPluginAsync = async (app) => {
+  // -- Cron heartbeats (Wave R / R4) ------------------------------------------
+  // Every handler in this plugin auto-records to cron_heartbeats on the way
+  // out. Status < 400 → success; >= 400 → error. Job name is the route path
+  // (e.g. '/sync-asana' → 'sync-asana'). New handlers added below are
+  // instrumented for free. Failures here are swallowed by recordHeartbeat
+  // itself so we never break a cron response with observability writes.
+  app.addHook('onResponse', async (request, reply) => {
+    const routeUrl = (request as { routeOptions?: { url?: string } }).routeOptions?.url
+      ?? request.url.split('?')[0];
+    const jobName = routeUrl.replace(/^\//, '') || 'unknown';
+    const durationMs = Math.round(reply.elapsedTime ?? 0);
+    const ok = reply.statusCode < 400;
+    const errorMsg = ok ? undefined : `HTTP ${reply.statusCode}`;
+    await recordHeartbeat(jobName, ok, durationMs, errorMsg);
+  });
+
   /**
    * GET /monitors — Run all monitors (Vercel Cron)
    * Auth handled by the server.ts onRequest hook for /api/cron/* paths.

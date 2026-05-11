@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getMonitorAlerts, getMonitorAlertStats, logOperationRun } from '../lib/queries/operations.js';
+import { listHeartbeats } from '../lib/jobs/heartbeat.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../..');
@@ -33,9 +34,10 @@ const SCRIPT_MAP = new Map(SCRIPTS.map(s => [s.name, s]));
 export const operationsRoutes: FastifyPluginAsync = async (app) => {
   // GET / — Main operations hub page
   app.get('/', async (_request, reply) => {
-    const [alerts, stats] = await Promise.all([
+    const [alerts, stats, heartbeats] = await Promise.all([
       getMonitorAlerts(50),
       getMonitorAlertStats(),
+      listHeartbeats().catch(() => []),
     ]);
 
     const monitors = SCRIPTS.filter(s => s.type === 'monitor');
@@ -46,6 +48,7 @@ export const operationsRoutes: FastifyPluginAsync = async (app) => {
       stats,
       monitors,
       automations,
+      heartbeats,
     });
   });
 
