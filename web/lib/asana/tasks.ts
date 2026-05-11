@@ -64,7 +64,8 @@ export async function removeAsanaTaskFromProject(taskGid: string, projectGid: st
  */
 export async function createPrivateAsanaTask(input: {
   name: string;
-  assigneeGid: string;
+  /** Omit to create an unassigned task (e.g. when no AM is mapped). */
+  assigneeGid?: string;
   dueOn: string;
   notes?: string;
   projects?: string[];
@@ -79,7 +80,9 @@ export async function createPrivateAsanaTask(input: {
         name: input.name.slice(0, 200),
         notes: input.notes || '',
         due_on: input.dueOn,
-        assignee: input.assigneeGid,
+        // Asana drops undefined fields on JSON.stringify — leaving the task
+        // unassigned when no gid is supplied.
+        ...(input.assigneeGid ? { assignee: input.assigneeGid } : {}),
         workspace: workspaceGid,
         ...(projects.length > 0 ? { projects } : {}),
       },

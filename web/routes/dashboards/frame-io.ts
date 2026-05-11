@@ -101,7 +101,9 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
   // ---------------------------------------------------------------------
 
   // POST /dashboards/frame-io/ad-copy/:reviewId/approve
-  // Marks the row as approved. Returns the re-rendered ad-copy block fragment.
+  // Marks the row as approved. Fires the Asana hand-off (best-effort) and
+  // returns the re-rendered ad-copy block fragment with a transient banner
+  // when the hand-off succeeded or failed for THIS click.
   app.post('/ad-copy/:reviewId/approve', async (request, reply) => {
     const params = request.params as { reviewId: string };
     const reviewId = Number(params.reviewId);
@@ -118,7 +120,12 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
     }
     const row = await getAdCopyRowById(reviewId);
     if (!row) return reply.code(404).type('text/html').send('<p>Review not found</p>');
-    return reply.render('dashboards/_frame-io-ad-copy-block', { row });
+    const rowWithFlash = {
+      ...row,
+      transientAsanaSuccess: result.asanaTaskGid ? `task ${result.asanaTaskGid}` : null,
+      transientAsanaWarning: result.asanaWarning ?? null,
+    };
+    return reply.render('dashboards/_frame-io-ad-copy-block', { row: rowWithFlash });
   });
 
   // GET /dashboards/frame-io/ad-copy/:reviewId/reject-form

@@ -7,6 +7,7 @@ import {
   renderMetaWinnersBlock,
   type AdCopyContext,
 } from './ad-copy-context.js';
+import { createAdCopyAsanaTask } from './asana-handoff.js';
 
 /**
  * Phase 5 — generate Meta ad copy from a Frame.io creative-review row.
@@ -272,6 +273,10 @@ export interface ApproveResult {
   reviewId: number;
   status: 'approved';
   approvedAt: string;
+  /** Set when a new Asana task was created; null on re-approve or Asana failure. */
+  asanaTaskGid: string | null;
+  /** Non-fatal Asana failure surfaced for UI banners. */
+  asanaWarning: string | null;
 }
 export interface RejectResult {
   ok: true;
@@ -290,6 +295,8 @@ export type GateError =
 interface GateRow {
   id: number;
   client_name: string;
+  asset_name: string;
+  frameio_view_url: string | null;
   ad_copy_md: string | null;
   ad_copy_objective: string | null;
   ad_copy_asana_task_gid: string | null;
@@ -300,7 +307,8 @@ async function loadGateRow(reviewId: number): Promise<(GateRow & { clientId: num
   let r;
   try {
     r = await db.execute({
-      sql: `SELECT id, client_name, ad_copy_md, ad_copy_objective, ad_copy_asana_task_gid
+      sql: `SELECT id, client_name, asset_name, frameio_view_url,
+                   ad_copy_md, ad_copy_objective, ad_copy_asana_task_gid
               FROM creative_reviews WHERE id = ?`,
       args: [reviewId],
     });
@@ -322,9 +330,12 @@ async function loadGateRow(reviewId: number): Promise<(GateRow & { clientId: num
 }
 
 /**
- * Mark a generated ad copy as approved. Idempotent — a second approve on
- * an already-approved row simply refreshes the timestamp. Asana task
- * creation fires from here in commit 5.
+ * Mark a generated ad copy as approved.
+ *
+ * Idempotent — a second approve on an already-approved row refreshes the
+ * timestamp but skips Asana task creation if ad_copy_asana_task_gid is
+ * already populated. Asana failure is non-fatal: the approval still
+ * succeeds and the caller gets `asanaWarning` so the UI can surface it.
  */
 export async function approveAdCopy(reviewId: number, userEmail: string | null): Promise<ApproveResult | GateError> {
   const row = await loadGateRow(reviewId);
@@ -345,7 +356,38 @@ export async function approveAdCopy(reviewId: number, userEmail: string | null):
     args: [now, userEmail, now, reviewId],
   });
 
-  return { ok: true, reviewId, status: 'approved', approvedAt: now };
+  // Asana hand-off — skipped on re-approve (gid already set).
+  let asanaTaskGid: string | null = null;
+  let asanaWarning: string | null = null;
+  if (!row.ad_copy_asana_task_gid) {
+    const result = await createAdCopyAsanaTask({
+      reviewId,
+      clientName: row.client_name,
+      assetName: row.asset_name,
+      markdown: row.ad_copy_md,
+      frameioViewUrl: row.frameio_view_url,
+      approverEmail: userEmail,
+    });
+    if (result.ok) {
+      asanaTaskGid = result.taskGid;
+      try {
+        await db.execute({
+          sql: `UPDATE creative_reviews SET ad_copy_asana_task_gid = ? WHERE id = ?`,
+          args: [result.taskGid, reviewId],
+        });
+      } catch (err) {
+        // Persisting failed but the task exists — surface it so the user
+        // doesn't think the hand-off didn't happen.
+        asanaWarning = `task_persist_failed: ${(err as Error).message ?? String(err)}`;
+      }
+    } else {
+      asanaWarning = result.reason;
+      // Best-effort console log so the function logs show the failure.
+      console.warn(`[frameio.approve] Asana task creation failed for review ${reviewId}: ${result.reason}`);
+    }
+  }
+
+  return { ok: true, reviewId, status: 'approved', approvedAt: now, asanaTaskGid, asanaWarning };
 }
 
 /**

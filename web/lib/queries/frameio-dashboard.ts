@@ -359,6 +359,14 @@ export interface AwaitingAdCopyRow {
   /** Count of past rejections for this client — feeds the dashboard hint. */
   lessonsAvailable: number;
   updatedAt: string;
+  /**
+   * Transient flash for the immediate response after an Approve click —
+   * never persisted, only present on the one fragment that comes back
+   * from POST /ad-copy/:id/approve.
+   */
+  transientAsanaWarning?: string | null;
+  /** Same shape, set when the Asana hand-off succeeded for this approval. */
+  transientAsanaSuccess?: string | null;
 }
 
 /**

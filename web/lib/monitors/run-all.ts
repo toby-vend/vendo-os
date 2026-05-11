@@ -6,6 +6,7 @@ import { run as runMetaRoas } from './meta-roas.js';
 import { run as runGadsCpa } from './gads-cpa.js';
 import { run as runAdSpendPacing } from './ad-spend-pacing.js';
 import { run as runContractRenewal } from './contract-renewal.js';
+import { run as runFathomFailsafe } from './fathom-failsafe.js';
 import { run as runCronHeartbeat } from './cron-heartbeat.js';
 
 /**
@@ -14,8 +15,11 @@ import { run as runCronHeartbeat } from './cron-heartbeat.js';
  * Vercel serverless because tsx and the local sql.js DB weren't available.
  *
  * Monitors retired (now handled in real-time by the Fathom webhook):
- *   - fathom-failsafe   → superseded by AI concern detection on ingestion
  *   - concern-detection → runs inline in web/lib/concern-detection.ts
+ *
+ * fathom-failsafe was previously retired but reinstated as part of Wave R / R2:
+ * inline concern-detection only fires if a meeting arrives; the failsafe
+ * catches the absence (working day, no meetings in 36h).
  */
 
 interface MonitorResult {
@@ -79,6 +83,7 @@ export async function runAllMonitors(): Promise<RunAllResult> {
     { name: 'gads-cpa', fn: runGadsCpa },
     { name: 'ad-spend-pacing', fn: runAdSpendPacing },
     { name: 'contract-renewal', fn: runContractRenewal },
+    { name: 'fathom-failsafe', fn: runFathomFailsafe },
     // Meta-monitor runs LAST so it can check the heartbeats the others just wrote.
     { name: 'cron-heartbeat', fn: runCronHeartbeat },
   ];
