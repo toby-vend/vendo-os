@@ -1,0 +1,105 @@
+<% layout('/layouts/base') %>
+
+<%
+  const fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const fmtAcctId = (id) => {
+    const s = String(id);
+    // Standard Google Ads display: 123-456-7890
+    if (/^\d{10}$/.test(s)) return `${s.slice(0,3)}-${s.slice(3,6)}-${s.slice(6)}`;
+    return s;
+  };
+%>
+
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+  <div>
+    <h2 style="font-family: var(--vendo-font); font-size: 24px; font-weight: 600; margin: 0;">Google Ads → Client Mapping</h2>
+    <p style="color: var(--vendo-text-muted); font-size: 13px; margin: 0.25rem 0 0 0;">
+      Map each Google Ads account synced from the MCC to a Vendo client. Required for autonomous monthly reports.
+    </p>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem; background: var(--vendo-surface); border: 1px solid var(--vendo-border);">
+  <div style="display: flex; gap: 2rem; align-items: center;">
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; color: var(--vendo-text-muted); letter-spacing: 0.05em;">Accounts</div>
+      <div style="font-size: 18px; font-weight: 600; color: var(--vendo-text);"><%= it.totals.accounts %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; color: var(--vendo-text-muted); letter-spacing: 0.05em;">Mapped</div>
+      <div style="font-size: 18px; font-weight: 600; color: var(--vendo-green);"><%= it.totals.mapped %></div>
+    </div>
+    <div>
+      <div style="font-size: 11px; text-transform: uppercase; color: var(--vendo-text-muted); letter-spacing: 0.05em;">Unmapped</div>
+      <div style="font-size: 18px; font-weight: 600; color: <%= it.totals.unmapped > 0 ? '#F59E0B' : 'var(--vendo-text-muted)' %>;"><%= it.totals.unmapped %></div>
+    </div>
+  </div>
+</div>
+
+<% if (it.accounts.length === 0) { %>
+  <div style="padding: 1.5rem; background: var(--vendo-bg); border: 1px dashed var(--vendo-border-strong); border-radius: 8px; color: var(--vendo-text-muted); font-size: 14px; text-align: center;">
+    No Google Ads accounts have synced yet. Run the daily sync first (or check the MCC connection).
+  </div>
+<% } else { %>
+  <div class="card" style="padding: 0; background: var(--vendo-surface); border: 1px solid var(--vendo-border); overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: var(--vendo-text);">
+      <thead>
+        <tr style="text-align: left; border-bottom: 1px solid var(--vendo-border-strong); background: var(--vendo-nav);">
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Account</th>
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Currency</th>
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Status</th>
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Mapped client</th>
+          <th style="padding: 0.75rem 1rem; font-weight: 600; color: var(--vendo-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; text-align: right;">Save</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (const a of it.accounts) { %>
+          <tr style="border-bottom: 1px solid var(--vendo-border);">
+            <td style="padding: 0.75rem 1rem; vertical-align: middle;">
+              <div style="font-weight: 500; color: var(--vendo-text);"><%= a.descriptive_name || '(no name)' %></div>
+              <div style="font-size: 11px; color: var(--vendo-text-muted); font-family: ui-monospace, monospace; margin-top: 2px;">
+                <%= fmtAcctId(a.id) %>
+              </div>
+            </td>
+            <td style="padding: 0.75rem 1rem; vertical-align: middle; color: var(--vendo-text-muted);">
+              <%= a.currency_code || '—' %>
+            </td>
+            <td style="padding: 0.75rem 1rem; vertical-align: middle;">
+              <% if (a.status === 'ENABLED') { %>
+                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--vendo-green);">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--vendo-green);"></span>
+                  Enabled
+                </span>
+              <% } else { %>
+                <span style="font-size: 12px; color: var(--vendo-text-muted);"><%= a.status || '—' %></span>
+              <% } %>
+            </td>
+            <td style="padding: 0.75rem 1rem; vertical-align: middle;" colspan="2">
+              <form method="POST" action="/admin/gads-account-map/upsert" style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end;">
+                <input type="hidden" name="_csrf" value="<%= it.csrfToken %>">
+                <input type="hidden" name="gads_customer_id" value="<%= a.id %>">
+                <select name="client_id"
+                        style="flex: 1; max-width: 320px; padding: 6px 10px; background: var(--vendo-bg); border: 1px solid var(--vendo-border-strong); border-radius: 6px; color: var(--vendo-text); font-size: 13px; font-family: var(--vendo-font);">
+                  <option value="">— Unmapped —</option>
+                  <% for (const c of it.clients) { %>
+                    <option value="<%= c.id %>" <%= a.client_id === c.id ? 'selected' : '' %>><%= c.label %></option>
+                  <% } %>
+                </select>
+                <button type="submit"
+                        style="padding: 6px 14px; background: var(--vendo-green); color: var(--vendo-bg); border: none; border-radius: 6px; font-family: var(--vendo-font); font-weight: 600; font-size: 12px; cursor: pointer;">
+                  Save
+                </button>
+              </form>
+              <% if (a.mapping_updated_at) { %>
+                <div style="font-size: 11px; color: var(--vendo-text-muted); text-align: right; margin-top: 4px;">
+                  updated <%= fmtDate(a.mapping_updated_at) %>
+                </div>
+              <% } %>
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
