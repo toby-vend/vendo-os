@@ -83,6 +83,12 @@ interface CdReportUpsert {
 async function loadPendingReports(reportIds: number[]): Promise<PendingReportRow[]> {
   if (!reportIds.length) return [];
   const placeholders = reportIds.map(() => '?').join(', ');
+  // AGENT-COORD: depends on A1's foundation migration adding
+  //   approved_at, approved_by, contact_email, gads_summary_json,
+  //   narrative_draft_md, submitted_for_review_at, submitted_for_review_by
+  //   to client_reports (see plan §client_reports additions). Only the
+  //   approved_* pair is read here; the rest are written by A4. This
+  //   job will throw at SQL-prepare time on a pre-migration DB.
   return rows<PendingReportRow>(
     `SELECT r.id, r.client_id,
             r.period_label, r.period_start, r.period_end,
