@@ -12,6 +12,7 @@ config({ path: '.env.local' });
 const {
   listActiveClientsForReports,
   listReports,
+  listReviewQueue,
   createReport,
   findReport,
   getReport,
@@ -19,7 +20,10 @@ const {
   listScreenshots,
   updateNarrative,
   updateAiBlocks,
-  setStatus,
+  submitForReview,
+  approveReport,
+  reopenReport,
+  setGadsSummary,
   deleteReport,
   PLATFORM_OPTIONS,
 } = await import('../web/lib/queries/reports.js');
@@ -64,6 +68,7 @@ await updateNarrative(id, {
 
 await updateAiBlocks(id, {
   execSummaryMd: 'Test summary',
+  performanceSummaryMd: 'Performance test',
   winsMd: '- win',
   risksMd: '- risk',
   recommendationsMd: '- rec',
@@ -85,9 +90,31 @@ console.log(`Added screenshot id ${screenshot.id} platform=${screenshot.platform
 const shots = await listScreenshots(id);
 console.log(`Screenshots on report: ${shots.length}`);
 
-await setStatus(id, 'final');
-const finalised = await getReport(id);
-console.log(`Status after finalise: ${finalised?.status}`);
+// --- Three-state workflow round-trip ---
+await setGadsSummary(id, JSON.stringify({ smoke: true, has_data: false }));
+const withSummary = await getReport(id);
+console.log(`Gads summary attached: ${withSummary?.gads_summary_json ? '✓' : '✗'}`);
+
+await submitForReview(id, 'smoke-test@vendodigital.co.uk');
+const inReview = await getReport(id);
+console.log(`After submitForReview: status=${inReview?.status} by=${inReview?.submitted_for_review_by ?? 'null'}`);
+if (inReview?.status !== 'review') throw new Error('submitForReview did not set status=review');
+
+await approveReport(id, 'am-smoke@vendodigital.co.uk');
+const approved = await getReport(id);
+console.log(`After approveReport: status=${approved?.status} by=${approved?.approved_by ?? 'null'}`);
+if (approved?.status !== 'final') throw new Error('approveReport did not set status=final');
+
+await reopenReport(id);
+const reopened = await getReport(id);
+console.log(`After reopenReport: status=${reopened?.status} approved_at=${reopened?.approved_at ?? 'null'} submitted_at=${reopened?.submitted_for_review_at ?? 'null'}`);
+if (reopened?.status !== 'draft' || reopened.approved_at !== null || reopened.submitted_for_review_at !== null) {
+  throw new Error('reopenReport did not fully reset state');
+}
+
+// Listing helpers
+const queue = await listReviewQueue();
+console.log(`Review queue size: ${queue.length} (this draft excluded — already reopened)`);
 
 await deleteReport(id);
 const gone = await getReport(id);
