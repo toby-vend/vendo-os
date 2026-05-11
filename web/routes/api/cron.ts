@@ -225,6 +225,50 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
   });
 
   /**
+   * GET /sync-asana — Pull Asana tasks (hourly Vercel Cron).
+   * Asana had no scheduled sync before Phase F of client-knowledge;
+   * tasks could go weeks stale. Shells out to the existing CLI
+   * script — that's fine for hourly cadence.
+   */
+  app.get('/sync-asana', async (_request, reply) => {
+    const scriptPath = resolve(PROJECT_ROOT, 'scripts/sync/sync-asana.ts');
+    try {
+      const { stdout } = await runScript(scriptPath);
+      return reply.send({
+        ok: true,
+        message: 'Asana sync completed',
+        output: stdout.slice(-2000),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/sync-asana] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Asana sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /client-profitability — Recompute client_profitability table
+   *   (daily Vercel Cron, after health-score at 03:00 UTC).
+   *   Joins harvest_time_entries + xero_invoices + ad spend into per-
+   *   client margin rows. No-op for clients with no data.
+   */
+  app.get('/client-profitability', async (_request, reply) => {
+    const scriptPath = resolve(PROJECT_ROOT, 'scripts/functions/client-profitability.ts');
+    try {
+      const { stdout } = await runScript(scriptPath);
+      return reply.send({
+        ok: true,
+        message: 'Profitability recompute completed',
+        output: stdout.slice(-2000),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/client-profitability] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Profitability recompute failed', error: msg });
+    }
+  });
+
+  /**
    * GET /sync-ghl — Pull GHL pipelines + opportunities per location (Vercel Cron)
    */
   app.get('/sync-ghl', async (_request, reply) => {

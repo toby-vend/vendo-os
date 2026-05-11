@@ -128,6 +128,56 @@ export function renderBriefingMarkdown(b: ClientBriefing): string {
     out.push('');
   }
 
+  // Recent concerns (AI-flagged from meetings)
+  if (b.concerns.length > 0) {
+    out.push(`## Recent concerns (${b.concerns.length})`);
+    for (const c of b.concerns) {
+      const sev = c.severity ? `[${c.severity.toUpperCase()}]` : '';
+      out.push(`- ${sev} ${truncate(c.summary, 200)}${c.meetingDate ? `  *(${fmtDate(c.meetingDate)})*` : ''}`);
+    }
+    out.push('');
+  }
+
+  // Harvest hours
+  if (b.harvest) {
+    out.push('## Time tracking (Harvest)');
+    out.push(`- Last 7 days: ${b.harvest.hoursLast7}h`);
+    out.push(`- Last 30 days: ${b.harvest.hoursLast30}h (${b.harvest.billableLast30}h billable)`);
+    if (b.harvest.byUserLast30.length > 0) {
+      const top = b.harvest.byUserLast30.slice(0, 4);
+      out.push(`- By user (30d): ${top.map((u) => `${u.userName ?? 'unknown'} ${u.hours}h`).join(', ')}`);
+    }
+    out.push('');
+  }
+
+  // Organic / GA4 + GSC
+  if (b.ga4 || b.gsc) {
+    out.push('## Organic search (30d)');
+    if (b.ga4) {
+      const trend = b.ga4.trendPct != null
+        ? ` (${b.ga4.trendPct >= 0 ? '+' : ''}${Math.round(b.ga4.trendPct * 100)}% vs prev 30d)`
+        : '';
+      out.push(`- GA4: ${fmtNumber(b.ga4.sessions30d)} sessions${trend}, ${fmtNumber(b.ga4.users30d)} users, ${fmtNumber(b.ga4.conversions30d)} conversions`);
+    }
+    if (b.gsc) {
+      const ctr = b.gsc.ctr30d != null ? `${(b.gsc.ctr30d * 100).toFixed(1)}% CTR` : '';
+      const pos = b.gsc.avgPosition30d != null ? `pos ${b.gsc.avgPosition30d.toFixed(1)}` : '';
+      out.push(`- GSC: ${fmtNumber(b.gsc.impressions30d)} impressions, ${fmtNumber(b.gsc.clicks30d)} clicks${ctr ? `, ${ctr}` : ''}${pos ? `, ${pos}` : ''}`);
+    }
+    out.push('');
+  }
+
+  // Profitability (latest month)
+  if (b.profitability) {
+    out.push(`## Profitability — ${b.profitability.period}`);
+    out.push(`- Revenue: ${fmtCurrency(b.profitability.revenue)}, costs: ${fmtCurrency(b.profitability.costTotal)}`);
+    out.push(`- Margin: ${fmtCurrency(b.profitability.grossMargin)} (${b.profitability.marginPct.toFixed(1)}%) — ${b.profitability.classification}`);
+    if (b.profitability.rootCause) {
+      out.push(`- Root cause: ${b.profitability.rootCause}`);
+    }
+    out.push('');
+  }
+
   // Pipeline
   if (b.pipeline.openOpps.length > 0) {
     out.push(`## Open pipeline (${b.pipeline.openOpps.length} opps, ${fmtCurrency(b.pipeline.totalValueOpen)})`);

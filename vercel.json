@@ -139,6 +139,14 @@
       "schedule": "45 */4 * * *"
     },
     {
+      "path": "/api/cron/sync-asana",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/client-profitability",
+      "schedule": "0 4 * * *"
+    },
+    {
       "path": "/api/cron/push-clients-to-portal",
       "schedule": "0 */6 * * *"
     },

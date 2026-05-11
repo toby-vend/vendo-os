@@ -317,6 +317,108 @@
     </div>
     <% } %>
 
+    <!-- Recent concerns (AI-flagged) -->
+    <% if (b.concerns && b.concerns.length > 0) { %>
+    <div class="ck-section">
+      <h2 style="color: #F87171;">Recent concerns <span class="ck-count"><%= b.concerns.length %></span></h2>
+      <ul class="ck-list">
+        <% b.concerns.forEach(c => { %>
+        <li>
+          <div class="ck-row-title">
+            <% if (c.severity) { %><span class="ck-tag ck-tag-muted" style="font-size: 10px; color: #F87171; background: rgba(239,68,68,0.1);"><%= c.severity %></span> <% } %>
+            <%= truncate(c.summary || '(no summary)', 200) %>
+          </div>
+          <div class="ck-row-meta">
+            <% if (c.meetingDate) { %><%= fmtDate(c.meetingDate) %><% } %>
+            <% if (c.category) { %> · <%= c.category %><% } %>
+            <% if (c.meetingTitle) { %> · <%= c.meetingTitle %><% } %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <!-- Harvest time tracking -->
+    <% if (b.harvest) { %>
+    <div class="ck-section">
+      <h2>Time tracking <span class="ck-count"><%= b.harvest.hoursLast30 %>h (30d)</span></h2>
+      <ul class="ck-list">
+        <li>
+          <div class="ck-row-title">Last 7 days</div>
+          <div class="ck-row-meta"><%= b.harvest.hoursLast7 %>h logged</div>
+        </li>
+        <li>
+          <div class="ck-row-title">Last 30 days</div>
+          <div class="ck-row-meta"><%= b.harvest.hoursLast30 %>h logged · <%= b.harvest.billableLast30 %>h billable</div>
+        </li>
+        <% if (b.harvest.byUserLast30 && b.harvest.byUserLast30.length > 0) { %>
+        <% b.harvest.byUserLast30.slice(0, 4).forEach(u => { %>
+        <li>
+          <div class="ck-row-title"><%= u.userName || 'Unknown' %></div>
+          <div class="ck-row-meta"><%= u.hours %>h in last 30d</div>
+        </li>
+        <% }) %>
+        <% } %>
+      </ul>
+    </div>
+    <% } %>
+
+    <!-- Organic search (GA4 + GSC) -->
+    <% if (b.ga4 || b.gsc) { %>
+    <div class="ck-section">
+      <h2>Organic search (30d)</h2>
+      <ul class="ck-list">
+        <% if (b.ga4) { %>
+        <li>
+          <div class="ck-row-title">GA4 traffic</div>
+          <div class="ck-row-meta">
+            <%= fmtNum(b.ga4.sessions30d) %> sessions
+            <% if (b.ga4.trendPct != null) { %>
+              · <span style="color: <%= b.ga4.trendPct >= 0 ? '#22C55E' : '#EF4444' %>;"><%= b.ga4.trendPct >= 0 ? '+' : '' %><%= Math.round(b.ga4.trendPct * 100) %>% vs prev 30d</span>
+            <% } %>
+            · <%= fmtNum(b.ga4.users30d) %> users · <%= fmtNum(b.ga4.conversions30d) %> conversions
+          </div>
+        </li>
+        <% } %>
+        <% if (b.gsc) { %>
+        <li>
+          <div class="ck-row-title">Search Console</div>
+          <div class="ck-row-meta">
+            <%= fmtNum(b.gsc.impressions30d) %> impressions · <%= fmtNum(b.gsc.clicks30d) %> clicks
+            <% if (b.gsc.ctr30d != null) { %> · <%= (b.gsc.ctr30d * 100).toFixed(1) %>% CTR<% } %>
+            <% if (b.gsc.avgPosition30d != null) { %> · pos <%= b.gsc.avgPosition30d.toFixed(1) %><% } %>
+          </div>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+    <% } %>
+
+    <!-- Profitability -->
+    <% if (b.profitability) { %>
+    <div class="ck-section">
+      <h2>Profitability <span class="ck-count"><%= b.profitability.period %></span></h2>
+      <ul class="ck-list">
+        <li>
+          <div class="ck-row-title"><%= fmtGBP(b.profitability.grossMargin) %> margin
+            <span style="font-weight: 600; color: <%= b.profitability.marginPct >= 30 ? '#22C55E' : b.profitability.marginPct >= 10 ? '#F59E0B' : '#EF4444' %>;">(<%= b.profitability.marginPct.toFixed(1) %>%)</span>
+          </div>
+          <div class="ck-row-meta">
+            <%= fmtGBP(b.profitability.revenue) %> revenue · <%= fmtGBP(b.profitability.costTotal) %> costs
+            <% if (b.profitability.classification) { %> · <%= b.profitability.classification %><% } %>
+          </div>
+        </li>
+        <% if (b.profitability.rootCause) { %>
+        <li>
+          <div class="ck-row-title">Root cause</div>
+          <div class="ck-row-meta"><%= b.profitability.rootCause %></div>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+    <% } %>
+
     <!-- Brand -->
     <div class="ck-section">
       <h2>Brand & guidelines</h2>

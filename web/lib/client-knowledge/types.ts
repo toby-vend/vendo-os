@@ -99,6 +99,54 @@ export interface BriefingBrand {
   fileCount: number;
 }
 
+export interface BriefingHarvest {
+  hoursLast7: number;
+  hoursLast30: number;
+  billableLast30: number;
+  byUserLast30: Array<{ userName: string | null; hours: number }>;
+  lastEntryDate: string | null;
+  lastSyncedAt: string | null;
+}
+
+export interface BriefingGa4 {
+  sessions30d: number;
+  users30d: number;
+  newUsers30d: number;
+  conversions30d: number;
+  prev30dSessions: number;
+  trendPct: number | null;          // (sessions30d - prev) / prev
+  lastSyncedAt: string | null;
+}
+
+export interface BriefingGsc {
+  impressions30d: number;
+  clicks30d: number;
+  ctr30d: number | null;
+  avgPosition30d: number | null;
+  lastSyncedAt: string | null;
+}
+
+export interface BriefingConcern {
+  meetingId: string;
+  meetingTitle: string | null;
+  meetingDate: string | null;
+  severity: string | null;
+  category: string | null;
+  summary: string | null;
+  createdAt: string | null;
+}
+
+export interface BriefingProfitability {
+  period: string;
+  revenue: number;
+  costTotal: number;
+  grossMargin: number;
+  marginPct: number;
+  classification: string;
+  rootCause: string | null;
+  createdAt: string;
+}
+
 export interface ClientNote {
   id: number;
   body: string;
@@ -118,5 +166,10 @@ export interface ClientBriefing {
   performance: BriefingPerformance;
   pipeline: BriefingPipeline;
   brand: BriefingBrand;
-  notes: ClientNote[];                             // empty until Phase B
+  harvest: BriefingHarvest | null;                 // Phase F
+  ga4: BriefingGa4 | null;                         // Phase F
+  gsc: BriefingGsc | null;                         // Phase F
+  concerns: BriefingConcern[];                     // Phase F — top 5 high/critical
+  profitability: BriefingProfitability | null;     // Phase F
+  notes: ClientNote[];
 }

@@ -7,6 +7,13 @@
  */
 import { rows } from '../queries/base.js';
 import { getClientHealth } from '../queries/clients.js';
+import {
+  getHarvestHours,
+  getGa4Stats,
+  getGscStats,
+  getRecentConcerns,
+  getLatestProfitability,
+} from '../queries/client-knowledge-sources.js';
 import type {
   ClientBriefing,
   BriefingMeta,
@@ -18,6 +25,11 @@ import type {
   BriefingPerformance,
   BriefingPipeline,
   BriefingBrand,
+  BriefingHarvest,
+  BriefingGa4,
+  BriefingGsc,
+  BriefingConcern,
+  BriefingProfitability,
   ClientNote,
 } from './types.js';
 
@@ -224,8 +236,15 @@ export async function generateBriefing(clientId: number): Promise<ClientBriefing
   const client = clientResult[0];
   if (!client) return null;
 
-  // 2. Health (uses client_name)
-  const health = await getClientHealth(client.name);
+  // 2. Health + Phase F sources (in parallel; tolerate individual failures)
+  const [health, harvest, ga4, gsc, concerns, profitability] = await Promise.all([
+    getClientHealth(client.name),
+    getHarvestHours(clientId).catch(() => null),
+    getGa4Stats(clientId).catch(() => null),
+    getGscStats(clientId).catch(() => null),
+    getRecentConcerns(clientId, 5).catch(() => []),
+    getLatestProfitability(client.name).catch(() => null),
+  ]);
 
   // 3. Shape into briefing
   const meetings: BriefingMeetingSummary[] = meetingsResult.map((m) => ({
@@ -338,6 +357,33 @@ export async function generateBriefing(clientId: number): Promise<ClientBriefing
       }
     : null;
 
+  const harvestShape: BriefingHarvest | null = harvest;
+  const ga4Shape: BriefingGa4 | null = ga4
+    ? {
+        sessions30d: ga4.sessions30d,
+        users30d: ga4.users30d,
+        newUsers30d: ga4.newUsers30d,
+        conversions30d: ga4.conversions30d,
+        prev30dSessions: ga4.prev30dSessions,
+        trendPct:
+          ga4.prev30dSessions > 0
+            ? (ga4.sessions30d - ga4.prev30dSessions) / ga4.prev30dSessions
+            : null,
+        lastSyncedAt: ga4.lastSyncedAt,
+      }
+    : null;
+  const gscShape: BriefingGsc | null = gsc;
+  const concernsShape: BriefingConcern[] = concerns.map((c) => ({
+    meetingId: c.meetingId,
+    meetingTitle: c.meetingTitle,
+    meetingDate: c.meetingDate,
+    severity: c.severity,
+    category: c.category,
+    summary: c.aiSummary,
+    createdAt: c.createdAt,
+  }));
+  const profitabilityShape: BriefingProfitability | null = profitability;
+
   const briefing: ClientBriefing = {
     generatedAt: new Date().toISOString(),
     meta: metaShape,
@@ -346,6 +392,11 @@ export async function generateBriefing(clientId: number): Promise<ClientBriefing
     performance,
     pipeline: { openOpps, totalValueOpen },
     brand,
+    harvest: harvestShape,
+    ga4: ga4Shape,
+    gsc: gscShape,
+    concerns: concernsShape,
+    profitability: profitabilityShape,
     notes,
   };
 
