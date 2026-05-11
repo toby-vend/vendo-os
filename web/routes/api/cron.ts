@@ -42,6 +42,7 @@ import {
 import { runMonthlyClientReports } from '../../lib/jobs/monthly-client-reports.js';
 import { runCapacityDigest } from '../../lib/jobs/capacity-digest.js';
 import { runSalesPipelineDigest } from '../../lib/jobs/sales-pipeline-digest.js';
+import { runCaseStudyDetection } from '../../lib/jobs/case-study-detection.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -618,6 +619,31 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/sales-pipeline-digest] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Sales pipeline digest failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /case-study-detection — Weekly Wed 07:00 UTC. Detects clients
+   * hitting milestone wins (tenure 12+ months, no recent critical
+   * concerns, ad-performance signal) and inserts into case_studies
+   * with status='identified' for AM review. Wave C / C4.
+   */
+  app.get('/case-study-detection', async (_request, reply) => {
+    try {
+      const result = await runCaseStudyDetection();
+      return reply.send({
+        ok: true,
+        message: 'Case study detection completed',
+        scanned: result.scanned,
+        inserted: result.inserted,
+        skippedTenure: result.skippedTenure,
+        skippedHealth: result.skippedHealth,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/case-study-detection] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Case study detection failed', error: msg });
     }
   });
 

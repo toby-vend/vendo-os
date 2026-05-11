@@ -187,6 +187,10 @@
       "schedule": "0 17 * * 5"
     },
     {
+      "path": "/api/cron/case-study-detection",
+      "schedule": "0 7 * * 3"
+    },
+    {
       "path": "/api/cron/sync-asana",
       "schedule": "0 * * * *"
     },
