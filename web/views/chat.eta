@@ -664,19 +664,24 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 8px;
     background: transparent;
-    border: 1px solid var(--vendo-border-strong);
-    color: var(--vendo-text);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #E2E8F0;
     cursor: pointer;
     transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
   }
+  .atlas-icon-btn svg {
+    display: block;
+    stroke: currentColor;
+    fill: none;
+  }
   .atlas-icon-btn:hover {
-    background: var(--vendo-surface-hover);
-    color: var(--vendo-green);
-    border-color: var(--vendo-green);
+    background: rgba(255, 255, 255, 0.06);
+    color: #22C55E;
+    border-color: #22C55E;
   }
   .atlas-icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .atlas-icon-btn.is-listening {
@@ -696,11 +701,16 @@
     width: 34px;
     height: 34px;
     border-radius: 999px;
-    background: var(--vendo-green);
+    background: #22C55E;
     color: #0B0B0B;
     border: 0;
     cursor: pointer;
     transition: background 120ms ease;
+  }
+  .atlas-send-btn svg {
+    display: block;
+    stroke: currentColor;
+    fill: none;
   }
   .atlas-send-btn:hover:not(:disabled) { background: var(--vendo-green-hover); }
   .atlas-send-btn:disabled {

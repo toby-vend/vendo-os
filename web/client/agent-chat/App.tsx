@@ -557,7 +557,7 @@ export function App({
               title="Attach files"
               disabled={isStreaming}
             >
-              <Paperclip size={18} />
+              <Paperclip size={20} />
             </button>
             <VoiceInput
               disabled={isStreaming}

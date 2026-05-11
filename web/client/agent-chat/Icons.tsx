@@ -9,7 +9,7 @@ import * as React from 'react';
 
 type IconProps = React.SVGProps<SVGSVGElement> & { size?: number };
 
-function Svg({ size = 18, children, ...rest }: IconProps & { children: React.ReactNode }) {
+function Svg({ size = 18, children, style, ...rest }: IconProps & { children: React.ReactNode }) {
   return (
     <svg
       width={size}
@@ -17,10 +17,11 @@ function Svg({ size = 18, children, ...rest }: IconProps & { children: React.Rea
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
+      style={{ display: 'block', flexShrink: 0, ...style }}
       {...rest}
     >
       {children}
