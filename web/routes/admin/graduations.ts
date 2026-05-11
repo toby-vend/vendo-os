@@ -121,4 +121,63 @@ export const adminGraduationsRoutes: FastifyPluginAsync = async (app) => {
 
     reply.redirect(`/admin/graduations?notice=revoked&pair=${encodeURIComponent(`${agent}:${toolName}`)}`);
   });
+
+  /**
+   * Bulk grant — accepts an array of "agent:tool" pairs from the matrix
+   * checkbox column. Optional shared notes apply to every grant in the
+   * batch. Skips pairs that are already graduated, unknown agents,
+   * unknown write tools, or agents that don't declare the tool — those
+   * are reported back in the redirect notice for transparency.
+   */
+  app.post('/bulk-grant', async (request, reply) => {
+    const user = (request as unknown as { user: SessionUser }).user;
+    const body = (request.body ?? {}) as { pairs?: string | string[]; notes?: string };
+    const rawPairs = body.pairs;
+    const pairs: string[] = Array.isArray(rawPairs)
+      ? rawPairs
+      : rawPairs
+        ? [rawPairs]
+        : [];
+
+    if (pairs.length === 0) {
+      reply.redirect('/admin/graduations?notice=bulk-none');
+      return;
+    }
+
+    const writeTools = new Set<string>(WRITE_TOOL_NAMES);
+    const sharedNotes = body.notes && body.notes.trim().length > 0 ? body.notes.trim() : undefined;
+
+    // Pre-load current graduations so we skip already-granted pairs
+    // (idempotent, but avoids touching graduated_at / graduated_by on
+    // rows the admin didn't actively re-grant).
+    const existing = await listGraduations();
+    const existingKeys = new Set(existing.map((g) => `${g.agent}:${g.toolName}`));
+
+    let granted = 0;
+    let skipped = 0;
+    for (const raw of pairs) {
+      const [agent, toolName] = String(raw).split(':');
+      if (!agent || !toolName) { skipped++; continue; }
+      if (existingKeys.has(`${agent}:${toolName}`)) { skipped++; continue; }
+      if (!writeTools.has(toolName)) { skipped++; continue; }
+      const def = getAgent(agent);
+      if (!def) { skipped++; continue; }
+      if (!def.tools.includes(toolName)) { skipped++; continue; }
+
+      await graduate({
+        agent,
+        toolName,
+        graduatedBy: user.email,
+        notes: sharedNotes,
+      });
+      granted++;
+    }
+
+    const params = new URLSearchParams({
+      notice: 'bulk-granted',
+      granted: String(granted),
+      skipped: String(skipped),
+    });
+    reply.redirect(`/admin/graduations?${params.toString()}`);
+  });
 };
