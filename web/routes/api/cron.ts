@@ -16,6 +16,7 @@ import { processFrameioEvents } from '../../lib/frameio/processor.js';
 import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
 import { pushClientsToPortal } from '../../lib/jobs/push-clients-to-portal.js';
 import { pullOnboardingFromPortal } from '../../lib/jobs/pull-onboarding-from-portal.js';
+import { syncAsana } from '../../lib/jobs/sync-asana.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -204,18 +205,20 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
 
   /**
    * GET /sync-asana — Pull Asana tasks (hourly Vercel Cron).
-   * Asana had no scheduled sync before Phase F of client-knowledge;
-   * tasks could go weeks stale. Shells out to the existing CLI
-   * script — that's fine for hourly cadence.
+   * Turso-native in-process job (Wave R / R1). Replaces the
+   * fragile exec('npx tsx ...') shim that silently failed on Vercel.
    */
   app.get('/sync-asana', async (_request, reply) => {
-    const scriptPath = resolve(PROJECT_ROOT, 'scripts/sync/sync-asana.ts');
     try {
-      const { stdout } = await runScript(scriptPath);
+      const result = await syncAsana();
       return reply.send({
         ok: true,
         message: 'Asana sync completed',
-        output: stdout.slice(-2000),
+        projectsScanned: result.projectsScanned,
+        tasksFetched: result.tasksFetched,
+        tasksUpserted: result.tasksUpserted,
+        resolvedClients: result.resolvedClients,
+        durationMs: result.durationMs,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
