@@ -126,6 +126,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
       { id: 'admin-users', label: 'Users', href: '/admin/users' },
       { id: 'admin-permissions', label: 'Permissions', href: '/admin/permissions' },
       { id: 'admin-client-mapping', label: 'Client Mapping', href: '/admin/client-mapping' },
+      { id: 'admin-gads-account-map', label: 'Google Ads Mapping', href: '/admin/gads-account-map' },
       { id: 'admin-portal-users', label: 'Portal Users', href: '/admin/portal-users' },
       { id: 'admin-onboarding', label: 'Account Setup', href: '/admin/onboarding' },
       { id: 'admin-usage', label: 'Usage', href: '/admin/usage' },
