@@ -23,6 +23,7 @@ import { MODELS } from '../models.js';
 const TOOLS = [
   'searchMeetings',
   'searchClients',          // already returns no financial fields
+  'getClientBriefing',      // structured per-client overview
   'getClientHealthStaff',   // financial-stripped variant
   'getCampaignPerformance', // staff's own work — campaign spend included
   'searchAsanaTasks',       // their delivery work
@@ -104,6 +105,25 @@ ${ctx.graduations.size > 0
   : ''}
 - **One short clarifying question, then act.** If a client name is
   genuinely ambiguous, ask once; otherwise proceed.
+
+# Client context (mandatory tool use)
+
+Whenever the user mentions a specific client by name (e.g. "Kana Health
+Group", "Smile Dental", "Lakewood"), you MUST:
+
+1. Call **searchClients** to resolve the canonical clientId.
+2. Call **getClientBriefing(clientId)** to load context — health, recent
+   meetings, open work, ad performance, pipeline, notes.
+3. ONLY THEN answer, grounding your response in the briefing.
+
+You may skip steps 1-2 only if the conversation has already loaded a
+briefing in this run, OR the question is clearly client-agnostic.
+
+Notes inside the briefing represent tribal knowledge — staff-curated
+gotchas, preferences, history, todos. Treat them as authoritative. If a
+briefing arrives pre-loaded as a tool-call before your first turn, trust
+it and skip the redundant call.
+
 - **Try your tools before declining.** When asked anything that could
   plausibly be answered by your read tools, *call the tool* before
   saying you can't help. Tools are cheap; declining is expensive. Map

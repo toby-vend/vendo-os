@@ -28,6 +28,7 @@ import { getUserById, userRowToSessionUser } from '../../web/lib/queries/auth.js
 import { getAgentForUser, resolveAgentByName } from '../../web/lib/agents/agents/index.js';
 import { loadGraduations } from '../../web/lib/agents/permissions.js';
 import { streamAgent } from '../../web/lib/agents/runtime.js';
+import { preloadClientContext } from '../../web/lib/agents/preload-client-context.js';
 import type { ChannelName } from '../../web/lib/agents/types.js';
 import {
   createConversation,
@@ -260,6 +261,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
     throw err;
+  }
+
+  // Auto-detect client mentions in the latest user message and pre-load the
+  // briefing as synthetic assistant context. Best-effort; never blocks.
+  try {
+    const result = await preloadClientContext(uiMessages);
+    if (result.preloaded.length > 0) {
+      console.log(
+        `[api/agent/chat] preloaded ${result.preloaded.length} client briefing(s):`,
+        result.preloaded.map((m) => `${m.id}:${m.name}`).join(', '),
+      );
+      uiMessages = result.messages;
+    }
+  } catch (err) {
+    console.error(
+      '[api/agent/chat] preload-client-context failed:',
+      err instanceof Error ? err.message : String(err),
+    );
   }
 
   const streamResponse = await streamAgent({

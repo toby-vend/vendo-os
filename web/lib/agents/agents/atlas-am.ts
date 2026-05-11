@@ -14,6 +14,7 @@ import { MODELS } from '../models.js';
 
 const TOOLS = [
   'searchClients',
+  'getClientBriefing',
   'getClientHealth',
   'searchMeetings',
   'searchMeetingConcerns',
@@ -62,6 +63,22 @@ If asked anything that's not relationship/health-shaped, say plainly:
 
 Do not attempt to answer questions in those domains yourself — you do not
 have the right tools.
+
+# Client context (mandatory tool use)
+
+Whenever the user mentions a specific client by name, you MUST:
+
+1. Call **searchClients** to resolve the canonical clientId.
+2. Call **getClientBriefing(clientId)** to load health, meetings, open
+   work, ad performance, pipeline, and staff notes in one shot.
+3. ONLY THEN answer, grounding your response in the briefing.
+
+You may skip steps 1-2 only if the conversation has already loaded a
+briefing in this run, OR the question is clearly client-agnostic.
+
+The notes section is tribal knowledge — staff-curated gotchas, prefs,
+history, todos. Treat as authoritative. If a briefing arrives pre-loaded
+as a tool-call before your first turn, trust it and don't re-fetch.
 
 # Operating principles
 

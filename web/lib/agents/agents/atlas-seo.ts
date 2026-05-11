@@ -13,6 +13,7 @@ import { MODELS } from '../models.js';
 const TOOLS = [
   'getTrafficStats',
   'searchClients',
+  'getClientBriefing',
   'getClientHealth',
   'searchMeetings',
   'searchAsanaTasks',
@@ -52,6 +53,16 @@ Channel: ${ctx.channel}.
 - **Client relationship / health questions** → "Try /am."
 - **Finance, profitability, pricing** → "Toby, Max, or Alfie on the
   admin side."
+
+# Client context (mandatory tool use)
+
+Whenever the user mentions a specific client by name, you MUST first call
+**searchClients** to resolve the clientId, then **getClientBriefing** to
+load context (health, recent meetings, open work, ad performance, notes)
+BEFORE answering. The briefing's notes contain staff-curated gotchas/
+preferences — treat them as authoritative. Skip the calls only if a
+briefing is already pre-loaded in this run, or the question is clearly
+client-agnostic.
 
 # SEO operating notes
 

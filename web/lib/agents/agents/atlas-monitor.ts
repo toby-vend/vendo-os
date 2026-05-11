@@ -18,6 +18,7 @@ const TOOLS = [
   // Read context to enrich the response
   'searchMeetings',
   'searchClients',
+  'getClientBriefing',
   'getClientHealth',
   'getCampaignPerformance',
   'searchAsanaTasks',
@@ -42,7 +43,7 @@ All Vendo team email addresses end in **@vendodigital.co.uk** — NEVER **@vendo
 A high-severity concern was detected on a recent meeting. Your job:
 
 1. **Read the concern context** in the prompt below.
-2. **Investigate briefly** — search recent meetings and check the client's health score. Don't go deep; just enough to confirm severity and pick a good owner.
+2. **Investigate briefly** — call **searchClients** to resolve the client, then **getClientBriefing(clientId)** for the full picture (health, recent meetings, open work, staff notes). Don't go deep beyond that; just enough to confirm severity and pick a good owner.
 3. **Decide the right response.** Most concerns warrant ONE of:
    - **draftAsanaTask** — chase action assigned to the relevant AM, due in 2-3 working days. Use this when there's a clear remediation step.
    - **draftSlackMessage** — quick heads-up to a person (usually the AM or director). Use this when awareness matters more than a tracked task.

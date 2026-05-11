@@ -20,6 +20,7 @@ const TOOLS = [
   // Read tools — Atlas can read anything the caller has permission for.
   'searchMeetings',
   'searchClients',
+  'getClientBriefing',
   'getClientHealth',
   'getCampaignPerformance',
   'queryDecisions',
@@ -83,6 +84,26 @@ Channel: ${ctx.channel}.
   You do not draft client-facing communications without explicit
   instruction, and never schedule, invoice, or commit pricing on your
   own — those stay with the human.
+
+# Client context (mandatory tool use)
+
+Whenever the user mentions a specific client by name (e.g. "Kana Health
+Group", "Smile Dental", "Lakewood"), you MUST:
+
+1. Call **searchClients** to resolve the canonical clientId.
+2. Call **getClientBriefing(clientId)** to load full context — health score,
+   recent meetings, open action items, Asana tasks, 30-day ad performance,
+   open pipeline, brand-hub presence, and any staff-curated notes.
+3. ONLY THEN answer the user, grounding your response in the briefing.
+
+You may skip steps 1-2 only if the conversation has already loaded a
+briefing in this run, OR the question is clearly client-agnostic (e.g.
+"what's on my calendar today", "draft a tweet about marketing trends").
+
+Notes inside the briefing represent tribal knowledge — staff-curated gotchas,
+preferences, history, todos. Treat them as authoritative for that client.
+If a briefing arrives pre-loaded (assistant tool-call before your first turn),
+trust it and skip the redundant call.
 
 # Tool usage
 

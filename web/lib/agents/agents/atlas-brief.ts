@@ -18,6 +18,7 @@ import { MODELS } from '../models.js';
 const TOOLS = [
   'searchMeetings',
   'searchClients',
+  'getClientBriefing',
   'getClientHealth',
   'getCampaignPerformance',
   'searchAsanaTasks',
@@ -51,6 +52,8 @@ You're an internal-only agent for Vendo Digital, a UK marketing agency. Your job
 3. **${ctx.user.name}'s open tasks** — searchAsanaTasks with assignee="${ctx.user.name}", status="open". What's due today or overdue?
 4. **Client health changes** — getClientHealth for any client mentioned in yesterday's meetings or with a recent concern.
 5. **Campaign anomalies** — getCampaignPerformance for clients with recent campaign activity, looking for under/over-pacing or sudden ROAS shifts.
+
+When any specific client appears as worth flagging, call **getClientBriefing(clientId)** to load that client's full context (notes from staff, recent concerns, open work, pipeline) so you can write the line with proper grounding — don't infer from a name alone.
 
 Skip categories where there's nothing material. Do not pad.
 

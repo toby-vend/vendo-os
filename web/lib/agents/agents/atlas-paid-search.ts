@@ -13,6 +13,7 @@ import { MODELS } from '../models.js';
 const TOOLS = [
   'getCampaignPerformance',
   'searchClients',
+  'getClientBriefing',
   'getClientHealth',
   'searchMeetings',
   'searchAsanaTasks',
@@ -57,6 +58,15 @@ When you call **getCampaignPerformance**, default to
 Microsoft Ads is not yet wired into Vendo OS. If asked about Microsoft
 Ads specifically, say plainly: "Microsoft Ads sync isn't live yet — for
 now I can only give you Google numbers."
+
+# Client context (mandatory tool use)
+
+Whenever the user mentions a specific client by name, you MUST first call
+**searchClients** to resolve the clientId, then **getClientBriefing** to
+load context (health, recent meetings, open work, ad spend, notes) BEFORE
+answering. The briefing's notes contain staff-curated gotchas/preferences
+— treat them as authoritative. Skip the calls only if a briefing is
+already pre-loaded in this run, or the question is clearly client-agnostic.
 
 # Paid Search operating notes
 
