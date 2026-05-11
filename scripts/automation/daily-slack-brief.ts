@@ -1,13 +1,19 @@
 /**
- * Daily Slack Morning Brief — Day-Aware
+ * Daily Slack Morning Brief — Day-Aware (MANUAL ONLY)
  *
- * Posts a formatted morning brief to Slack with Block Kit.
- * Content varies by day of week:
+ * Posts a formatted morning brief to Slack with Block Kit via a single
+ * webhook (SLACK_BRIEF_WEBHOOK_URL). Same content for every recipient of
+ * that channel — this is intentional for a channel-wide leadership snapshot.
+ *
+ * NOTE (2026-05-11): No longer wired to a cron. Per-user personalised briefs
+ * are handled by `api/cron/atlas-brief.ts` (DM per admin). This script is
+ * kept for on-demand use only — run it manually if you ever want the
+ * channel-wide snapshot.
+ *
+ * Content by day:
  *   - Monday:   Week ahead — tasks, priorities, pipeline focus
  *   - Friday:   Week recap — wins, carry-forward, utilisation
  *   - Tue–Thu:  Full business intelligence — financials, pipeline, team, clients
- *
- * Cron: 30 7 * * 1-5 (7:30 UTC = 8:30 BST in summer; 7:30 GMT in winter)
  *
  * Usage:
  *   npx tsx scripts/automation/daily-slack-brief.ts
