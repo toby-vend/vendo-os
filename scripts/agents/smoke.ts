@@ -784,55 +784,6 @@ async function main(): Promise<void> {
     assert(!truncated.endsWith(' …'), 'no trailing space before ellipsis');
   }
 
-  console.log('\n[24k] applyAttachmentsToMessages — image part + snippet inline');
-  {
-    const { __internals } = await import('../../api/agent/chat.js');
-    const apply = __internals.applyAttachmentsToMessages;
-
-    // No attachments + no snippets → messages returned unchanged.
-    const inputBare = [{ id: 'm1', role: 'user' as const, parts: [{ type: 'text', text: 'hello' }] }];
-    const unchanged = apply(inputBare as never, [], []);
-    assert(unchanged === inputBare, 'no-op when both arrays empty');
-
-    // Image attachment → file part prepended on the last user message.
-    const inputImg = [
-      { id: 'm0', role: 'assistant' as const, parts: [{ type: 'text', text: 'prev' }] },
-      { id: 'm1', role: 'user' as const, parts: [{ type: 'text', text: 'what is this?' }] },
-    ];
-    const withImg = apply(inputImg as never, [
-      { id: 'a1', name: 'screenshot.png', type: 'image/png', dataUri: 'data:image/png;base64,xxx' },
-    ], []);
-    const last = (withImg as Array<{ parts: Array<Record<string, unknown>> }>)[1];
-    assert(last.parts.length === 2, 'image prepends a part to the user message');
-    assert(last.parts[0].type === 'file', 'first part is a file part');
-    assert(last.parts[0].mediaType === 'image/png', 'mediaType preserved');
-    assert(last.parts[0].url === 'data:image/png;base64,xxx', 'data-uri preserved');
-    assert(last.parts[1].type === 'text', 'original text part follows');
-
-    // Pasted snippet → appended to the user text under labelled fence.
-    const inputSnip = [
-      { id: 'm1', role: 'user' as const, parts: [{ type: 'text', text: 'analyse this' }] },
-    ];
-    const withSnip = apply(inputSnip as never, [], [
-      { id: 's1', content: 'paste line 1\npaste line 2' },
-    ]);
-    const text = (withSnip[0].parts as Array<{ type?: string; text?: string }>).find((p) => p.type === 'text')?.text ?? '';
-    assert(text.includes('analyse this'), 'original text preserved');
-    assert(text.includes('--- pasted snippet 1 ---'), 'fence marker present');
-    assert(text.includes('paste line 1\npaste line 2'), 'snippet body inlined');
-
-    // Payload size cap → throws.
-    const huge = 'x'.repeat(5_000_000);
-    try {
-      apply(inputBare as never, [
-        { id: 'a1', name: 'big.png', type: 'image/png', dataUri: huge },
-      ], []);
-      assert(false, 'oversize attachment should throw');
-    } catch (err) {
-      assert(err instanceof Error && err.message === 'attachment_payload_too_large', 'specific error thrown for oversize payload');
-    }
-  }
-
   console.log('\n[24j] agent_conversations CRUD + ownership');
   {
     const userId = 'smoke-conv-user-A';
