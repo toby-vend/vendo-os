@@ -19,6 +19,7 @@ import { pullOnboardingFromPortal } from '../../lib/jobs/pull-onboarding-from-po
 import { syncAsana } from '../../lib/jobs/sync-asana.js';
 import { recomputeClientProfitability } from '../../lib/jobs/client-profitability.js';
 import { recordHeartbeat } from '../../lib/jobs/heartbeat.js';
+import { runLeadScoring } from '../../lib/jobs/lead-scoring.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -292,6 +293,29 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/client-profitability] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Profitability recompute failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /lead-scoring — Re-score all open GHL opportunities (weekly Fri 09:00).
+   * Wave V / V1. Writes lead_score, score_breakdown, scored_at on
+   * ghl_opportunities. Idempotent. ~3-5s for ~100 open opps.
+   */
+  app.get('/lead-scoring', async (_request, reply) => {
+    try {
+      const result = await runLeadScoring();
+      return reply.send({
+        ok: true,
+        message: 'Lead scoring completed',
+        scored: result.scored,
+        topCount: result.top.length,
+        topScore: result.top[0]?.score ?? null,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/lead-scoring] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Lead scoring failed', error: msg });
     }
   });
 

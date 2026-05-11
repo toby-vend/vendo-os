@@ -135,6 +135,10 @@
       "schedule": "45 */4 * * *"
     },
     {
+      "path": "/api/cron/lead-scoring",
+      "schedule": "0 9 * * 5"
+    },
+    {
       "path": "/api/cron/sync-asana",
       "schedule": "0 * * * *"
     },
