@@ -24,6 +24,35 @@ import { DefaultChatTransport, type UIMessage } from 'ai';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { ConversationDrawer } from './ConversationDrawer';
+import { CodeBlock } from './CodeBlock';
+import { MessageActions } from './MessageActions';
+import { VoiceInput } from './VoiceInput';
+import { ArrowUp, Menu, Paperclip, Stop, X } from './Icons';
+import {
+  type AttachedFile,
+  type PastedSnippet,
+  MAX_TOTAL_BYTES,
+  PASTE_AS_SNIPPET_THRESHOLD,
+  formatFileSize,
+  newId,
+  prepareAttachment,
+  readAsDataUri,
+  totalAttachedBytes,
+} from './attachments';
+
+/**
+ * Extract the concatenated text content from a UIMessage. Used by
+ * MessageActions (Copy) and regenerate (re-send last user message).
+ */
+function extractTextFromMessage(message: UIMessage): string {
+  const parts = (message as { parts?: Array<{ type?: string; text?: string }> }).parts;
+  if (!Array.isArray(parts)) return '';
+  return parts
+    .filter((p) => p && p.type === 'text' && typeof p.text === 'string')
+    .map((p) => p.text as string)
+    .join('\n')
+    .trim();
+}
 
 // Inline Markdown → safe HTML. Atlas emits **bold**, *italic*, bullet
 // lists, and [text](url) links — we render those properly instead of
@@ -96,27 +125,42 @@ export function App({
   );
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [files, setFiles] = useState<AttachedFile[]>([]);
+  const [snippets, setSnippets] = useState<PastedSnippet[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   // When the user landed on /chat/<slug>, the agent is fixed for this
   // session — the picker disappears and we surface a small badge instead.
   const isLocked = initialAgent !== 'atlas';
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Read selectedAgent + conversationId through refs so the transport's
-  // body callback always sees the latest value without re-creating the
-  // transport on every state change (which would break useChat's stream).
+  // Read selectedAgent + conversationId + attachments via refs so the
+  // transport's body callback always sees the latest value without
+  // re-creating the transport on every state change (which would break
+  // useChat's stream).
   const selectedAgentRef = useRef(selectedAgent);
   selectedAgentRef.current = selectedAgent;
   const conversationIdRef = useRef(conversationId);
   conversationIdRef.current = conversationId;
+  const pendingAttachmentsRef = useRef<{
+    attachments: { id: string; name: string; type: string; dataUri: string }[];
+    pastedSnippets: { id: string; content: string }[];
+  }>({ attachments: [], pastedSnippets: [] });
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { messages, sendMessage, status, error, stop } = useChat({
+  const { messages, sendMessage, status, error, stop, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/agent/chat',
-      body: () => ({
-        agentName: selectedAgentRef.current,
-        conversationId: conversationIdRef.current ?? undefined,
-      }),
+      body: () => {
+        const { attachments, pastedSnippets } = pendingAttachmentsRef.current;
+        pendingAttachmentsRef.current = { attachments: [], pastedSnippets: [] };
+        return {
+          agentName: selectedAgentRef.current,
+          conversationId: conversationIdRef.current ?? undefined,
+          attachments,
+          pastedSnippets,
+        };
+      },
     }),
     messages: initialMessages,
   });
@@ -180,13 +224,149 @@ export function App({
   const isStreaming = status === 'streaming' || status === 'submitted';
   const hasMessages = messages.length > 0;
 
+  // -------------------------------------------------------------------
+  // File + paste handlers
+  // -------------------------------------------------------------------
+
+  function addFiles(list: FileList | File[]): void {
+    const incoming = Array.from(list);
+    const next = incoming.map(prepareAttachment);
+    const flagged = next.map((f) =>
+      f.file.size > MAX_TOTAL_BYTES ? { ...f, status: 'too-large' as const } : f,
+    );
+    setFiles((prev) => [...prev, ...flagged]);
+
+    flagged.forEach((att) => {
+      if (att.status === 'too-large') return;
+      readAsDataUri(att.file).then(
+        (dataUri) => {
+          setFiles((prev) =>
+            prev.map((f) => (f.id === att.id ? { ...f, dataUri, status: 'ready' } : f)),
+          );
+        },
+        () => {
+          setFiles((prev) => prev.filter((f) => f.id !== att.id));
+        },
+      );
+    });
+  }
+
+  function removeFile(id: string): void {
+    setFiles((prev) => {
+      const target = prev.find((f) => f.id === id);
+      if (target?.preview) URL.revokeObjectURL(target.preview);
+      return prev.filter((f) => f.id !== id);
+    });
+  }
+
+  function removeSnippet(id: string): void {
+    setSnippets((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  function onAttachClick(): void {
+    fileInputRef.current?.click();
+  }
+
+  function onFileInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
+    if (e.target.files && e.target.files.length > 0) addFiles(e.target.files);
+    e.target.value = '';
+  }
+
+  function onDragOver(e: React.DragEvent): void {
+    e.preventDefault();
+    if (!isDragging) setIsDragging(true);
+  }
+  function onDragLeave(e: React.DragEvent): void {
+    if (e.currentTarget === e.target) setIsDragging(false);
+  }
+  function onDrop(e: React.DragEvent): void {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) addFiles(e.dataTransfer.files);
+  }
+
+  function onPaste(e: React.ClipboardEvent<HTMLTextAreaElement>): void {
+    const filesInClipboard: File[] = [];
+    for (let i = 0; i < e.clipboardData.items.length; i++) {
+      const item = e.clipboardData.items[i];
+      if (item.kind === 'file') {
+        const f = item.getAsFile();
+        if (f) filesInClipboard.push(f);
+      }
+    }
+    if (filesInClipboard.length > 0) {
+      e.preventDefault();
+      addFiles(filesInClipboard);
+      return;
+    }
+    const text = e.clipboardData.getData('text');
+    if (text.length > PASTE_AS_SNIPPET_THRESHOLD) {
+      e.preventDefault();
+      setSnippets((prev) => [
+        ...prev,
+        { id: newId(), content: text, createdAt: new Date().toISOString() },
+      ]);
+    }
+  }
+
   function handleSubmit(): void {
     const text = input.trim();
-    if (!text || isStreaming) return;
+    const readyFiles = files.filter((f) => f.status === 'ready' && f.dataUri);
+    const hasAttachments = readyFiles.length > 0 || snippets.length > 0;
+    if (!text && !hasAttachments) return;
+    if (isStreaming) return;
+
+    if (totalAttachedBytes(readyFiles) > MAX_TOTAL_BYTES) {
+      setFiles((prev) =>
+        prev.map((f) => (f.file.size > MAX_TOTAL_BYTES ? { ...f, status: 'too-large' } : f)),
+      );
+      return;
+    }
+
     ensureConversationId();
-    sendMessage({ text });
+
+    pendingAttachmentsRef.current = {
+      attachments: readyFiles.map((f) => ({
+        id: f.id,
+        name: f.file.name,
+        type: f.file.type || (f.kind === 'image' ? 'image/png' : 'application/octet-stream'),
+        dataUri: f.dataUri ?? '',
+      })),
+      pastedSnippets: snippets.map((s) => ({ id: s.id, content: s.content })),
+    };
+
+    const messageText = text.length > 0 ? text : '(attachment)';
+    sendMessage({ text: messageText });
+
     setInput('');
+    setFiles((prev) => {
+      for (const f of prev) if (f.preview) URL.revokeObjectURL(f.preview);
+      return [];
+    });
+    setSnippets([]);
     inputRef.current?.focus();
+  }
+
+  // Regenerate the last assistant reply for the active conversation.
+  // Splices the assistant message out of useChat's state, then re-sends
+  // the most recent user message — the server treats it as a normal turn
+  // (an extra assistant reply lands in the DB but that's acceptable for
+  // v1; the run row makes the lineage easy to follow).
+  async function regenerateLastResponse(): Promise<void> {
+    if (isStreaming) return;
+    const lastUserIdx = (() => {
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].role === 'user') return i;
+      }
+      return -1;
+    })();
+    if (lastUserIdx === -1) return;
+    const lastUser = messages[lastUserIdx];
+    const lastUserText = extractTextFromMessage(lastUser);
+    if (!lastUserText) return;
+
+    setMessages(messages.slice(0, lastUserIdx + 1));
+    sendMessage({ text: lastUserText });
   }
 
   // Lazily create a stable conversation id on the FIRST send in a fresh
@@ -287,8 +467,13 @@ export function App({
 
       {hasMessages && (
         <div className="atlas-messages">
-          {messages.map(m => (
-            <MessageRow key={m.id} message={m} />
+          {messages.map((m, i) => (
+            <MessageRow
+              key={m.id}
+              message={m}
+              isLast={i === messages.length - 1 && !isStreaming}
+              onRegenerate={regenerateLastResponse}
+            />
           ))}
           {status === 'submitted' && <TypingIndicator />}
           <div ref={messagesEndRef} />
@@ -302,39 +487,118 @@ export function App({
       )}
 
       <form
-        className="atlas-input-bar"
-        onSubmit={e => {
+        className={`atlas-input${isDragging ? ' is-dragging' : ''}`}
+        onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();
         }}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
       >
+        {(files.length > 0 || snippets.length > 0) && (
+          <div className="atlas-input-attachments">
+            {snippets.map((s) => (
+              <span key={s.id} className="atlas-attach-pill atlas-attach-snippet">
+                <span className="atlas-attach-pill-label">Pasted snippet</span>
+                <span className="atlas-attach-pill-meta">{s.content.length} chars</span>
+                <button
+                  type="button"
+                  className="atlas-attach-pill-remove"
+                  onClick={() => removeSnippet(s.id)}
+                  aria-label="Remove snippet"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+            {files.map((f) => (
+              <span
+                key={f.id}
+                className={`atlas-attach-pill${f.status === 'too-large' ? ' is-too-large' : ''}${f.status === 'pending' ? ' is-pending' : ''}`}
+                title={f.file.name}
+              >
+                <span className="atlas-attach-pill-label">{f.file.name}</span>
+                <span className="atlas-attach-pill-meta">
+                  {f.status === 'too-large' ? 'too large' : formatFileSize(f.file.size)}
+                </span>
+                <button
+                  type="button"
+                  className="atlas-attach-pill-remove"
+                  onClick={() => removeFile(f.id)}
+                  aria-label={`Remove ${f.file.name}`}
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
         <textarea
           ref={inputRef}
+          className="atlas-input-textarea"
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={
-            isStreaming
-              ? 'Atlas is replying...'
-              : 'Ask Atlas anything about clients, meetings, or campaigns'
-          }
+          onPaste={onPaste}
+          placeholder={isStreaming ? 'Atlas is replying…' : 'Reply to Atlas…'}
           disabled={isStreaming}
           rows={1}
         />
-        {isStreaming ? (
-          <button type="button" className="atlas-stop" onClick={() => stop()}>
-            Stop
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="atlas-send"
-            disabled={!input.trim()}
-            aria-label="Send"
-          >
-            <SendIcon />
-          </button>
-        )}
+
+        <div className="atlas-input-actions">
+          <div className="atlas-input-actions-left">
+            <button
+              type="button"
+              className="atlas-icon-btn"
+              onClick={onAttachClick}
+              aria-label="Attach files"
+              title="Attach files"
+              disabled={isStreaming}
+            >
+              <Paperclip size={18} />
+            </button>
+            <VoiceInput
+              disabled={isStreaming}
+              onTranscript={(t) =>
+                setInput((prev) => (prev.length === 0 ? t : prev + (prev.endsWith(' ') ? '' : ' ') + t))
+              }
+            />
+          </div>
+          <div className="atlas-input-actions-right">
+            {isStreaming ? (
+              <button
+                type="button"
+                className="atlas-send-btn is-stop"
+                onClick={() => stop()}
+                aria-label="Stop generation"
+                title="Stop"
+              >
+                <Stop size={14} />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="atlas-send-btn"
+                disabled={!input.trim() && files.length === 0 && snippets.length === 0}
+                aria-label="Send message"
+                title="Send"
+              >
+                <ArrowUp size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          onChange={onFileInputChange}
+          style={{ display: 'none' }}
+          accept="image/*,application/pdf,text/*,.csv,.json,.md,.docx,.xlsx"
+        />
       </form>
     </div>
   );
@@ -406,28 +670,79 @@ function Welcome({ userName, userTier, onSuggestion, selectedAgent, onSelectAgen
 
 // ---------------------------------------------------------------------------
 
-function MessageRow({ message }: { message: UIMessage }): React.JSX.Element {
+interface MessageRowProps {
+  message: UIMessage;
+  isLast: boolean;
+  onRegenerate?: () => void;
+}
+
+function MessageRow({ message, isLast, onRegenerate }: MessageRowProps): React.JSX.Element {
   const role = message.role;
+  const text = extractTextFromMessage(message);
+  // Show actions for completed messages — never on the just-emitted streaming
+  // tail of an assistant message (caller passes isLast=false for the in-flight
+  // one indirectly via streaming state).
   return (
     <div className={`atlas-msg atlas-msg-${role}`}>
       {message.parts.map((p, i) => (
         <PartView key={i} part={p} />
       ))}
+      {text.length > 0 && (
+        <MessageActions
+          text={text}
+          isAssistant={role === 'assistant'}
+          onRegenerate={role === 'assistant' && isLast && onRegenerate ? onRegenerate : undefined}
+        />
+      )}
     </div>
   );
 }
 
+/**
+ * Split a markdown text into segments — either a fenced code block (with
+ * optional language) or plain prose. Used by PartView to render code with
+ * CodeBlock + leave the rest to the markdown renderer.
+ */
+function splitCodeBlocks(text: string): Array<{ kind: 'code'; lang: string | null; code: string } | { kind: 'prose'; text: string }> {
+  const segments: Array<{ kind: 'code'; lang: string | null; code: string } | { kind: 'prose'; text: string }> = [];
+  const fence = /```([a-zA-Z0-9_+-]*)\n([\s\S]*?)```/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = fence.exec(text)) !== null) {
+    if (m.index > last) segments.push({ kind: 'prose', text: text.slice(last, m.index) });
+    segments.push({ kind: 'code', lang: m[1] || null, code: m[2].replace(/\n$/, '') });
+    last = fence.lastIndex;
+  }
+  if (last < text.length) segments.push({ kind: 'prose', text: text.slice(last) });
+  return segments;
+}
+
 function PartView({ part }: { part: { type: string; [k: string]: unknown } }): React.JSX.Element | null {
-  // Text part — render Markdown so **bold**, lists, and [links] don't
-  // leak their raw syntax. Streaming text is still safe: each token
-  // appended just reparses inline, which marked handles cleanly.
   if (part.type === 'text') {
     const text = (part as { type: 'text'; text: string }).text;
+    const segments = splitCodeBlocks(text);
+    if (segments.length === 1 && segments[0].kind === 'prose') {
+      return (
+        <div
+          className="atlas-text atlas-text-md"
+          dangerouslySetInnerHTML={{ __html: renderMarkdown(segments[0].text) }}
+        />
+      );
+    }
     return (
-      <div
-        className="atlas-text atlas-text-md"
-        dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }}
-      />
+      <div className="atlas-text-md">
+        {segments.map((seg, i) =>
+          seg.kind === 'code' ? (
+            <CodeBlock key={i} code={seg.code} language={seg.lang} />
+          ) : (
+            <div
+              key={i}
+              className="atlas-text-md-segment"
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(seg.text) }}
+            />
+          ),
+        )}
+      </div>
     );
   }
 
@@ -560,21 +875,3 @@ function TypingIndicator(): React.JSX.Element {
   );
 }
 
-function SendIcon(): React.JSX.Element {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M22 2L11 13" />
-      <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-    </svg>
-  );
-}

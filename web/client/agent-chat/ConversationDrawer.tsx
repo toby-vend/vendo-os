@@ -152,36 +152,48 @@ export function ConversationDrawer({ open, onClose, agent, currentId }: Props): 
         )}
 
         <ul className="atlas-drawer-list">
-          {items.map((item) => {
-            const href = (AGENT_TO_URL_BASE[item.agent] ?? '/chat') + '/c/' + item.id;
-            const isCurrent = item.id === currentId;
-            return (
-              <li key={item.id} className={`atlas-drawer-item${isCurrent ? ' is-current' : ''}`}>
-                <a href={href} className="atlas-drawer-item-main">
-                  <div className="atlas-drawer-item-title">
-                    {item.title ?? 'Untitled conversation'}
+          {(() => {
+            // Search results stay flat; the matched ranking matters more
+            // than chronology for those.
+            const isSearching = query.trim().length > 0;
+            const renderItem = (item: ConversationItem) => {
+              const href = (AGENT_TO_URL_BASE[item.agent] ?? '/chat') + '/c/' + item.id;
+              const isCurrent = item.id === currentId;
+              return (
+                <li key={item.id} className={`atlas-drawer-item${isCurrent ? ' is-current' : ''}`}>
+                  <a href={href} className="atlas-drawer-item-main">
+                    <div className="atlas-drawer-item-title">{item.title ?? 'Untitled conversation'}</div>
+                    <div className="atlas-drawer-item-meta">
+                      <span className="atlas-drawer-item-agent">{shortAgent(item.agent)}</span>
+                      <span>·</span>
+                      <span>{relativeTime(item.lastMessageAt)}</span>
+                      <span>·</span>
+                      <span>{item.messageCount} msg</span>
+                    </div>
+                  </a>
+                  <div className="atlas-drawer-item-actions">
+                    {item.archivedAt ? (
+                      <>
+                        <button type="button" onClick={() => handleArchive(item.id, false)} title="Restore">↺</button>
+                        <button type="button" onClick={() => handleDelete(item.id)} title="Delete permanently" className="is-danger">×</button>
+                      </>
+                    ) : (
+                      <button type="button" onClick={() => handleArchive(item.id, true)} title="Archive">⊠</button>
+                    )}
                   </div>
-                  <div className="atlas-drawer-item-meta">
-                    <span className="atlas-drawer-item-agent">{shortAgent(item.agent)}</span>
-                    <span>·</span>
-                    <span>{relativeTime(item.lastMessageAt)}</span>
-                    <span>·</span>
-                    <span>{item.messageCount} msg</span>
-                  </div>
-                </a>
-                <div className="atlas-drawer-item-actions">
-                  {item.archivedAt ? (
-                    <>
-                      <button type="button" onClick={() => handleArchive(item.id, false)} title="Restore">↺</button>
-                      <button type="button" onClick={() => handleDelete(item.id)} title="Delete permanently" className="is-danger">×</button>
-                    </>
-                  ) : (
-                    <button type="button" onClick={() => handleArchive(item.id, true)} title="Archive">⊠</button>
-                  )}
-                </div>
-              </li>
-            );
-          })}
+                </li>
+              );
+            };
+
+            if (isSearching) {
+              return items.map(renderItem);
+            }
+            const groups = groupByDate(items);
+            return groups.flatMap((g) => [
+              <li key={'h:' + g.label} className="atlas-drawer-group-head" role="presentation">{g.label}</li>,
+              ...g.items.map(renderItem),
+            ]);
+          })()}
         </ul>
       </aside>
     </div>
@@ -191,6 +203,50 @@ export function ConversationDrawer({ open, onClose, agent, currentId }: Props): 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Bucket conversations into Today / Yesterday / Previous 7 days / Previous
+ * 30 days / Older. Items inside each bucket stay ordered by lastMessageAt
+ * DESC (the server already returns them this way).
+ *
+ * Exported for unit tests; pure function over the conversation list.
+ */
+export function groupByDate(
+  items: ConversationItem[],
+  now: Date = new Date(),
+): Array<{ label: string; items: ConversationItem[] }> {
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+  const sevenDaysAgo = new Date(startOfToday);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const thirtyDaysAgo = new Date(startOfToday);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const today: ConversationItem[] = [];
+  const yesterday: ConversationItem[] = [];
+  const week: ConversationItem[] = [];
+  const month: ConversationItem[] = [];
+  const older: ConversationItem[] = [];
+
+  for (const item of items) {
+    const d = new Date(item.lastMessageAt.replace(' ', 'T') + 'Z');
+    if (d >= startOfToday) today.push(item);
+    else if (d >= startOfYesterday) yesterday.push(item);
+    else if (d >= sevenDaysAgo) week.push(item);
+    else if (d >= thirtyDaysAgo) month.push(item);
+    else older.push(item);
+  }
+
+  const out: Array<{ label: string; items: ConversationItem[] }> = [];
+  if (today.length) out.push({ label: 'Today', items: today });
+  if (yesterday.length) out.push({ label: 'Yesterday', items: yesterday });
+  if (week.length) out.push({ label: 'Previous 7 days', items: week });
+  if (month.length) out.push({ label: 'Previous 30 days', items: month });
+  if (older.length) out.push({ label: 'Older', items: older });
+  return out;
+}
 
 function relativeTime(ts: string): string {
   // ts is 'YYYY-MM-DD HH:MM:SS' from libSQL datetime('now'); parse as UTC.

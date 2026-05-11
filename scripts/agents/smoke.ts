@@ -857,6 +857,74 @@ async function main(): Promise<void> {
     assert(gone === null, 'row truly gone after delete');
   }
 
+  console.log('\n[24k] applyAttachmentsToMessages — image part + snippet inline');
+  {
+    const { __internals } = await import('../../api/agent/chat.js');
+    const apply = __internals.applyAttachmentsToMessages;
+
+    const inputBare = [{ id: 'm1', role: 'user' as const, parts: [{ type: 'text', text: 'hello' }] }];
+    const unchanged = apply(inputBare as never, [], []);
+    assert(unchanged === inputBare, 'no-op when both arrays empty');
+
+    const inputImg = [
+      { id: 'm0', role: 'assistant' as const, parts: [{ type: 'text', text: 'prev' }] },
+      { id: 'm1', role: 'user' as const, parts: [{ type: 'text', text: 'what is this?' }] },
+    ];
+    const withImg = apply(inputImg as never, [
+      { id: 'a1', name: 'screenshot.png', type: 'image/png', dataUri: 'data:image/png;base64,xxx' },
+    ], []);
+    const last = (withImg as Array<{ parts: Array<Record<string, unknown>> }>)[1];
+    assert(last.parts.length === 2, 'image prepends a part');
+    assert(last.parts[0].type === 'file', 'first part is file');
+    assert(last.parts[0].mediaType === 'image/png', 'mediaType preserved');
+
+    const inputSnip = [
+      { id: 'm1', role: 'user' as const, parts: [{ type: 'text', text: 'analyse this' }] },
+    ];
+    const withSnip = apply(inputSnip as never, [], [
+      { id: 's1', content: 'paste line 1\npaste line 2' },
+    ]);
+    const text = (withSnip[0].parts as Array<{ type?: string; text?: string }>).find((p) => p.type === 'text')?.text ?? '';
+    assert(text.includes('analyse this'), 'original text preserved');
+    assert(text.includes('--- pasted snippet 1 ---'), 'fence marker present');
+    assert(text.includes('paste line 1\npaste line 2'), 'snippet body inlined');
+
+    const huge = 'x'.repeat(5_000_000);
+    let threw = false;
+    try {
+      apply(inputBare as never, [
+        { id: 'a1', name: 'big.png', type: 'image/png', dataUri: huge },
+      ], []);
+    } catch (err) {
+      threw = err instanceof Error && err.message === 'attachment_payload_too_large';
+    }
+    assert(threw, 'oversize attachment throws attachment_payload_too_large');
+  }
+
+  console.log('\n[24l] groupByDate — drawer buckets');
+  {
+    const { groupByDate } = await import('../../web/client/agent-chat/ConversationDrawer');
+    const fixedNow = new Date('2026-05-11T12:00:00Z');
+    const fmt = (d: Date) => d.toISOString().slice(0, 19).replace('T', ' ');
+    const mkItem = (id: string, lastMessageAt: string) => ({
+      id, agent: 'atlas', title: 't', messageCount: 1, lastMessageAt, archivedAt: null,
+    });
+    const items = [
+      mkItem('today', fmt(new Date('2026-05-11T08:00:00Z'))),
+      mkItem('yesterday', fmt(new Date('2026-05-10T08:00:00Z'))),
+      mkItem('week', fmt(new Date('2026-05-08T08:00:00Z'))),
+      mkItem('month', fmt(new Date('2026-04-25T08:00:00Z'))),
+      mkItem('older', fmt(new Date('2026-01-01T08:00:00Z'))),
+    ];
+    const groups = groupByDate(items, fixedNow);
+    assert(groups.length === 5, 'all five buckets present');
+    assert(groups[0].label === 'Today' && groups[0].items[0].id === 'today', 'today bucket');
+    assert(groups[1].label === 'Yesterday' && groups[1].items[0].id === 'yesterday', 'yesterday bucket');
+    assert(groups[2].label === 'Previous 7 days' && groups[2].items[0].id === 'week', 'week bucket');
+    assert(groups[3].label === 'Previous 30 days' && groups[3].items[0].id === 'month', 'month bucket');
+    assert(groups[4].label === 'Older' && groups[4].items[0].id === 'older', 'older bucket');
+  }
+
   console.log('\n[24b] staff agent has reduced toolset');
   {
     const adminTools = new Set(atlasAgent.tools);

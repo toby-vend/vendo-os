@@ -47,11 +47,67 @@ interface ChatBody {
   messages: UIMessage[];
   conversationId?: string;
   trigger?: string;
-  // When set, dispatch to that specific agent via resolveAgentByName
-  // (admin-gated for specialists). When absent, the tier router picks
-  // atlas or atlas-staff based on user role — the existing behaviour.
   agentName?: string;
+  attachments?: { id: string; name: string; type: string; dataUri: string }[];
+  pastedSnippets?: { id: string; content: string }[];
 }
+
+const MAX_ATTACHMENT_PAYLOAD = 4_000_000;
+
+function applyAttachmentsToMessages(
+  messages: UIMessage[],
+  attachments: ChatBody['attachments'] = [],
+  pastedSnippets: ChatBody['pastedSnippets'] = [],
+): UIMessage[] {
+  const safeAttachments = Array.isArray(attachments) ? attachments : [];
+  const safeSnippets = Array.isArray(pastedSnippets) ? pastedSnippets : [];
+  if (safeAttachments.length === 0 && safeSnippets.length === 0) return messages;
+
+  let total = 0;
+  for (const a of safeAttachments) total += a.dataUri ? a.dataUri.length : 0;
+  if (total > MAX_ATTACHMENT_PAYLOAD) throw new Error('attachment_payload_too_large');
+
+  const idx = [...messages].reverse().findIndex((m) => m.role === 'user');
+  if (idx === -1) return messages;
+  const targetIndex = messages.length - 1 - idx;
+  const target = messages[targetIndex] as UIMessage & {
+    parts?: Array<Record<string, unknown>>;
+  };
+  const originalParts = Array.isArray(target.parts) ? [...target.parts] : [];
+
+  const filePartsToPrepend: Array<Record<string, unknown>> = [];
+  for (const a of safeAttachments) {
+    if (a.type && a.type.startsWith('image/') && typeof a.dataUri === 'string') {
+      filePartsToPrepend.push({ type: 'file', mediaType: a.type, url: a.dataUri });
+    }
+  }
+
+  let touchedText = false;
+  const nextParts = originalParts.map((p) => {
+    if (!touchedText && p.type === 'text') {
+      touchedText = true;
+      const original = typeof p.text === 'string' ? p.text : '';
+      const fences = safeSnippets
+        .map((s, i) => `\n\n--- pasted snippet ${i + 1} ---\n${s.content}\n--- end snippet ${i + 1} ---`)
+        .join('');
+      return { ...p, text: original + fences };
+    }
+    return p;
+  });
+  if (!touchedText && safeSnippets.length > 0) {
+    const fences = safeSnippets
+      .map((s, i) => `--- pasted snippet ${i + 1} ---\n${s.content}\n--- end snippet ${i + 1} ---`)
+      .join('\n\n');
+    nextParts.unshift({ type: 'text', text: fences });
+  }
+
+  const merged = { ...target, parts: [...filePartsToPrepend, ...nextParts] } as UIMessage;
+  const out = [...messages];
+  out[targetIndex] = merged;
+  return out;
+}
+
+export const __internals = { applyAttachmentsToMessages };
 
 function sendJson(res: VercelResponse, status: number, body: Record<string, unknown>): void {
   res.status(status).setHeader('Content-Type', 'application/json').send(JSON.stringify(body));
@@ -190,6 +246,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     console.error('[api/agent/chat] conversation metadata upsert failed:', err instanceof Error ? err.message : String(err));
   }
 
+  // -- Apply attachments + pasted snippets to the last user message -----
+  let uiMessages: UIMessage[];
+  try {
+    uiMessages = applyAttachmentsToMessages(
+      body.messages,
+      body.attachments,
+      body.pastedSnippets,
+    );
+  } catch (err) {
+    if (err instanceof Error && err.message === 'attachment_payload_too_large') {
+      sendJson(res, 413, { error: 'Attachment payload too large (4MB cap).' });
+      return;
+    }
+    throw err;
+  }
+
   const streamResponse = await streamAgent({
     agent,
     ctx: {
@@ -200,7 +272,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       conversationId,
       graduations,
     },
-    uiMessages: body.messages,
+    uiMessages,
     conversationId,
     trigger: body.trigger ?? 'user-message',
   });

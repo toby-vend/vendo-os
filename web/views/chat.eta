@@ -621,76 +621,264 @@
     font-size: 0.86rem;
   }
 
-  /* ── Input bar ─────────────────────────────────────────────────────── */
-  .atlas-input-bar {
+  /* ── Input — flat surface, simple border. NO shadow / glow / blur. ─── */
+  .atlas-input {
     margin-top: auto;
-    padding: 0.75rem;
+    padding: 0.7rem 0.8rem 0.6rem;
     display: flex;
-    gap: 0.6rem;
-    align-items: flex-end;
-    background: rgba(20, 20, 20, 0.7);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    flex-direction: column;
+    gap: 0.4rem;
+    background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border-strong);
+    border-radius: 12px;
+    transition: border-color 120ms ease;
   }
-  .atlas-input-bar textarea {
-    flex: 1;
+  .atlas-input:focus-within { border-color: var(--vendo-green); }
+  .atlas-input.is-dragging { border-style: dashed; border-color: var(--vendo-green); }
+  .atlas-input-textarea {
     background: transparent;
     border: 0;
     outline: 0;
     resize: none;
-    color: #fff;
+    color: var(--vendo-text);
     font-family: var(--vendo-font, 'Manrope', system-ui);
-    font-size: 0.92rem;
-    line-height: 1.45;
-    padding: 0.45rem 0.5rem;
-    min-height: 22px;
-    max-height: 200px;
+    font-size: 0.94rem;
+    line-height: 1.5;
+    padding: 0.4rem 0.3rem;
+    min-height: 1.5em;
+    max-height: 280px;
+    overflow-y: auto;
   }
-  .atlas-input-bar textarea::placeholder {
-    color: rgba(255,255,255,0.35);
+  .atlas-input-textarea::placeholder { color: var(--vendo-text-muted); }
+  .atlas-input-textarea:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .atlas-input-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
   }
-  .atlas-input-bar textarea:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  .atlas-send,
-  .atlas-stop {
-    flex-shrink: 0;
-    height: 36px;
-    padding: 0 0.75rem;
-    border: 0;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: var(--vendo-font, 'Manrope', system-ui);
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: background 120ms ease, transform 80ms ease, opacity 120ms ease;
+  .atlas-input-actions-left { display: flex; align-items: center; gap: 0.1rem; flex: 1; }
+  .atlas-input-actions-right { display: flex; align-items: center; gap: 0.45rem; }
+
+  .atlas-icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    background: transparent;
+    border: 0;
+    color: var(--vendo-text-muted);
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
   }
-  .atlas-send {
-    background: #22C55E;
-    color: #051911;
-    width: 36px;
+  .atlas-icon-btn:hover {
+    background: var(--vendo-surface-hover);
+    color: var(--vendo-text);
   }
-  .atlas-send:hover:not(:disabled) { background: #16A34A; }
-  .atlas-send:active:not(:disabled) { transform: scale(0.97); }
-  .atlas-send:disabled {
-    opacity: 0.35;
+  .atlas-icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .atlas-icon-btn.is-listening {
+    background: rgba(239, 68, 68, 0.16);
+    color: #fca5a5;
+    animation: atlas-mic-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes atlas-mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    50%      { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.18); }
+  }
+
+  .atlas-send-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: var(--vendo-green);
+    color: #0B0B0B;
+    border: 0;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .atlas-send-btn:hover:not(:disabled) { background: var(--vendo-green-hover); }
+  .atlas-send-btn:disabled {
+    background: var(--vendo-surface-hover);
+    color: var(--vendo-text-muted);
     cursor: not-allowed;
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.4);
   }
-  .atlas-stop {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.85);
-    border: 1px solid rgba(255,255,255,0.1);
+  .atlas-send-btn.is-stop {
+    background: var(--vendo-surface-hover);
+    color: var(--vendo-text);
   }
-  .atlas-stop:hover { background: rgba(255,255,255,0.1); }
+  .atlas-send-btn.is-stop:hover { background: var(--vendo-nav); }
+
+  /* ── Attachment pills (above textarea) ──────────────────────────────── */
+  .atlas-input-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.1rem 0.1rem 0.3rem;
+  }
+  .atlas-attach-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.35rem 0.25rem 0.6rem;
+    background: var(--vendo-bg);
+    border: 1px solid var(--vendo-border-strong);
+    border-radius: 999px;
+    color: var(--vendo-text);
+    font-size: 0.78rem;
+    max-width: 280px;
+    transition: border-color 120ms ease;
+  }
+  .atlas-attach-pill:hover { border-color: var(--vendo-green); }
+  .atlas-attach-pill.is-too-large { border-color: rgba(239, 68, 68, 0.6); color: #fca5a5; }
+  .atlas-attach-pill.is-pending { opacity: 0.6; }
+  .atlas-attach-pill-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+  }
+  .atlas-attach-pill-meta {
+    color: var(--vendo-text-muted);
+    font-size: 0.7rem;
+  }
+  .atlas-attach-pill-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: transparent;
+    border: 0;
+    color: var(--vendo-text-muted);
+    cursor: pointer;
+  }
+  .atlas-attach-pill-remove:hover { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+  /* ── Hover-actions on messages ─────────────────────────────────────── */
+  .atlas-msg-actions {
+    display: flex;
+    gap: 0.2rem;
+    margin-top: 0.4rem;
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .atlas-msg:hover .atlas-msg-actions { opacity: 1; }
+  .atlas-msg-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: transparent;
+    border: 0;
+    color: var(--vendo-text-muted);
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .atlas-msg-action-btn:hover {
+    background: var(--vendo-surface-hover);
+    color: var(--vendo-text);
+  }
+
+  /* ── Code blocks (CodeBlock.tsx) ───────────────────────────────────── */
+  .atlas-code {
+    margin: 0.6rem 0;
+    border: 1px solid var(--vendo-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--vendo-bg);
+  }
+  .atlas-code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.7rem;
+    background: var(--vendo-nav);
+    border-bottom: 1px solid var(--vendo-border);
+    font-size: 0.74rem;
+  }
+  .atlas-code-lang {
+    color: var(--vendo-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.7rem;
+  }
+  .atlas-code-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.55rem;
+    background: transparent;
+    border: 1px solid var(--vendo-border);
+    border-radius: 5px;
+    color: var(--vendo-text-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+  .atlas-code-copy:hover {
+    color: var(--vendo-green);
+    border-color: var(--vendo-green);
+  }
+  .atlas-code-body {
+    margin: 0;
+    padding: 0.7rem 0.85rem;
+    overflow-x: auto;
+    color: var(--vendo-text);
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    background: var(--vendo-bg);
+  }
+  .atlas-code-body code { background: transparent; padding: 0; border: 0; }
+  /* Minimal Prism token colours that fit the Vendo dark theme */
+  .atlas-code .token.comment,
+  .atlas-code .token.prolog,
+  .atlas-code .token.doctype,
+  .atlas-code .token.cdata { color: #6b7280; font-style: italic; }
+  .atlas-code .token.punctuation { color: #cbd5e1; }
+  .atlas-code .token.property,
+  .atlas-code .token.tag,
+  .atlas-code .token.boolean,
+  .atlas-code .token.number,
+  .atlas-code .token.constant,
+  .atlas-code .token.symbol,
+  .atlas-code .token.deleted { color: #f5d674; }
+  .atlas-code .token.selector,
+  .atlas-code .token.attr-name,
+  .atlas-code .token.string,
+  .atlas-code .token.char,
+  .atlas-code .token.builtin,
+  .atlas-code .token.inserted { color: #86efac; }
+  .atlas-code .token.operator,
+  .atlas-code .token.entity,
+  .atlas-code .token.url,
+  .atlas-code .token.variable { color: #93c5fd; }
+  .atlas-code .token.atrule,
+  .atlas-code .token.attr-value,
+  .atlas-code .token.function,
+  .atlas-code .token.class-name { color: #c4b5fd; }
+  .atlas-code .token.keyword { color: #f9a8d4; }
+  .atlas-code .token.regex,
+  .atlas-code .token.important { color: #fca5a5; }
+
+  /* ── Drawer date-group headings ────────────────────────────────────── */
+  .atlas-drawer-group-head {
+    padding: 0.7rem 1.2rem 0.3rem;
+    color: var(--vendo-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
 </style>
 
 <div class="atlas-page">
