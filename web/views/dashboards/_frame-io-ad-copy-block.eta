@@ -119,7 +119,9 @@ const _fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 
   </div>
 <% } else { %>
   <div id="adcopy-<%= r.reviewId %>" style="display:flex;gap:0.5rem;align-items:center;">
-    <select id="obj-<%= r.reviewId %>" style="padding:6px 10px;background:#0B0B0B;border:1px solid rgba(255,255,255,0.10);border-radius:6px;color:#E2E8F0;font-size:12px;">
+    <!-- name="objective" is what makes hx-include send this value without needing js:
+         (the CSP doesn't allow unsafe-eval, so HTMX's `js:` hx-vals silently failed) -->
+    <select id="obj-<%= r.reviewId %>" name="objective" style="padding:6px 10px;background:#0B0B0B;border:1px solid rgba(255,255,255,0.10);border-radius:6px;color:#E2E8F0;font-size:12px;">
       <option value="leads" selected>Leads</option>
       <option value="awareness">Awareness</option>
       <option value="traffic">Traffic</option>
@@ -128,7 +130,7 @@ const _fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 
     <button
       hx-post="/dashboards/frame-io/generate-ad-copy"
       hx-include="#obj-<%= r.reviewId %>"
-      hx-vals='js:{review_id: <%= r.reviewId %>, objective: document.getElementById("obj-<%= r.reviewId %>").value}'
+      hx-vals='{"review_id": <%= r.reviewId %>}'
       hx-target="#adcopy-<%= r.reviewId %>"
       hx-swap="outerHTML"
       hx-headers='{"X-CSRF-Token": "<%= csrf %>"}'
