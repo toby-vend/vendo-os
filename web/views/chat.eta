@@ -549,8 +549,9 @@
   /* Markdown render inside text parts */
   .atlas-text-md {
     white-space: normal;
+    line-height: 1.6;
   }
-  .atlas-text-md p { margin: 0 0 0.55rem; }
+  .atlas-text-md p { margin: 0 0 0.9rem; }
   .atlas-text-md p:last-child { margin-bottom: 0; }
   .atlas-text-md strong { color: #fff; font-weight: 600; }
   .atlas-text-md em { font-style: italic; color: rgba(255,255,255,0.85); }
@@ -561,11 +562,56 @@
     text-underline-offset: 2px;
   }
   .atlas-text-md a:hover { text-decoration-color: #86efac; }
-  .atlas-text-md ul, .atlas-text-md ol {
-    margin: 0.3rem 0 0.55rem;
-    padding-left: 1.4rem;
+
+  /* Headings — Atlas sometimes emits ## or ### section titles. Give
+     them clear separation from the surrounding prose so the eye can
+     scan to the next block. */
+  .atlas-text-md h1,
+  .atlas-text-md h2,
+  .atlas-text-md h3,
+  .atlas-text-md h4 {
+    color: #fff;
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 1.25rem 0 0.55rem;
   }
-  .atlas-text-md li { margin: 0.1rem 0; }
+  .atlas-text-md h1 { font-size: 1.15rem; }
+  .atlas-text-md h2 { font-size: 1.05rem; }
+  .atlas-text-md h3 { font-size: 0.98rem; }
+  .atlas-text-md h4 {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.78);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .atlas-text-md > :first-child,
+  .atlas-text-md-segment > :first-child { margin-top: 0; }
+  .atlas-text-md > :last-child,
+  .atlas-text-md-segment > :last-child { margin-bottom: 0; }
+
+  .atlas-text-md ul, .atlas-text-md ol {
+    margin: 0.5rem 0 0.95rem;
+    padding-left: 1.5rem;
+  }
+  .atlas-text-md li { margin: 0.35rem 0; padding-left: 0.15rem; }
+  .atlas-text-md li > p { margin: 0 0 0.4rem; }
+  .atlas-text-md li > ul,
+  .atlas-text-md li > ol { margin: 0.35rem 0 0.4rem; }
+
+  .atlas-text-md hr {
+    border: 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin: 1.1rem 0;
+  }
+  .atlas-text-md blockquote {
+    margin: 0.6rem 0 0.95rem;
+    padding: 0.15rem 0 0.15rem 0.85rem;
+    border-left: 2px solid rgba(34,197,94,0.4);
+    color: rgba(255,255,255,0.78);
+  }
+  .atlas-text-md blockquote p:last-child { margin-bottom: 0; }
+
   .atlas-text-md code {
     background: rgba(255,255,255,0.06);
     border-radius: 3px;
@@ -578,6 +624,7 @@
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 6px;
     padding: 0.6rem 0.8rem;
+    margin: 0.6rem 0 0.95rem;
     overflow-x: auto;
     font-family: 'JetBrains Mono', Menlo, monospace;
     font-size: 0.84rem;
