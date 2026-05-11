@@ -294,3 +294,171 @@ export async function upsertTranscript(input: {
     ],
   });
 }
+
+// ---------------------------------------------------------------------------
+// Whisper
+// ---------------------------------------------------------------------------
+
+const WHISPER_URL = 'https://api.openai.com/v1/audio/transcriptions';
+const WHISPER_MODEL = 'whisper-1';
+
+interface WhisperVerboseJson {
+  text: string;
+  language?: string;
+  duration?: number;
+}
+
+export async function whisperTranscribe(
+  buffer: Buffer,
+  filename: string,
+): Promise<{ ok: true; text: string; language: string | null; durationSeconds: number | null }
+  | { ok: false; reason: string }> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return { ok: false, reason: 'openai_key_missing' };
+
+  const form = new FormData();
+  // Use a Blob so the multipart payload carries the filename + content type.
+  // Node 20 has global FormData / Blob.
+  form.append(
+    'file',
+    new Blob([new Uint8Array(buffer)], { type: 'application/octet-stream' }),
+    filename || 'audio',
+  );
+  form.append('model', WHISPER_MODEL);
+  form.append('response_format', 'verbose_json');
+  // Hard-coded English for now — every Vendo client speaks English in their
+  // ads. Revisit if/when we onboard a non-English market.
+  form.append('language', 'en');
+
+  let res: Response;
+  try {
+    res = await fetch(WHISPER_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: form,
+    });
+  } catch (err) {
+    return { ok: false, reason: `network: ${(err as Error).message ?? String(err)}` };
+  }
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    return { ok: false, reason: `whisper_http_${res.status}: ${body.slice(0, 240)}` };
+  }
+
+  let json: WhisperVerboseJson;
+  try {
+    json = (await res.json()) as WhisperVerboseJson;
+  } catch (err) {
+    return { ok: false, reason: `whisper_parse: ${(err as Error).message ?? String(err)}` };
+  }
+
+  return {
+    ok: true,
+    text: (json.text ?? '').trim(),
+    language: json.language ?? null,
+    durationSeconds: typeof json.duration === 'number' ? Math.round(json.duration) : null,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Orchestrator
+// ---------------------------------------------------------------------------
+
+export interface GetTranscriptOptions {
+  /** Skip the cache check and re-transcribe even if a row exists. */
+  regenerate?: boolean;
+}
+
+export type TranscriptResult =
+  | { ok: true; transcript: string; language: string | null; durationSeconds: number | null; source: string; cached: boolean }
+  | { ok: false; reason: string; cached: boolean };
+
+/**
+ * Cache-first transcript retrieval.
+ *
+ * Returns the existing row when present (whether success or error — we
+ * persist errors to prevent retry storms on a permanently-broken asset).
+ * On cache miss: fetch media_links → pick rendition → download to buffer →
+ * call Whisper → upsert.
+ *
+ * Pass { regenerate: true } from an admin "refresh transcript" link.
+ */
+export async function getOrCreateTranscript(
+  accountId: string,
+  fileId: string,
+  options: GetTranscriptOptions = {},
+): Promise<TranscriptResult> {
+  if (!options.regenerate) {
+    const cached = await getCachedTranscript(fileId);
+    if (cached) {
+      if (cached.transcript) {
+        return {
+          ok: true,
+          transcript: cached.transcript,
+          language: cached.language,
+          durationSeconds: cached.durationSeconds,
+          source: cached.source,
+          cached: true,
+        };
+      }
+      if (cached.error) {
+        return { ok: false, reason: cached.error, cached: true };
+      }
+    }
+  }
+
+  let file: FileWithMediaLinks | null;
+  try {
+    file = await fetchFileWithMediaLinks(accountId, fileId);
+  } catch (err) {
+    const reason = (err as Error).message ?? String(err);
+    await upsertTranscript({ fileId, transcript: null, language: null, durationSeconds: null, source: 'whisper-1', error: reason, bytesProcessed: null });
+    return { ok: false, reason, cached: false };
+  }
+  if (!file) {
+    const reason = 'file_not_found_or_no_access';
+    await upsertTranscript({ fileId, transcript: null, language: null, durationSeconds: null, source: 'whisper-1', error: reason, bytesProcessed: null });
+    return { ok: false, reason, cached: false };
+  }
+
+  const rendition = pickSmallestRendition(file);
+  if (!rendition) {
+    // Log full shape so we can adapt if V4 changes media_links structure.
+    console.warn('[frameio.transcribe] no rendition picked', JSON.stringify({ fileId, name: file.name, media_links: file.media_links }).slice(0, 600));
+    const reason = 'no_rendition_available';
+    await upsertTranscript({ fileId, transcript: null, language: null, durationSeconds: null, source: 'whisper-1', error: reason, bytesProcessed: null });
+    return { ok: false, reason, cached: false };
+  }
+
+  const downloaded = await downloadToBuffer(rendition.url);
+  if (!downloaded.ok) {
+    const reason = `${downloaded.reason}: ${downloaded.detail}`;
+    await upsertTranscript({ fileId, transcript: null, language: null, durationSeconds: null, source: 'whisper-1', error: reason, bytesProcessed: null });
+    return { ok: false, reason, cached: false };
+  }
+
+  const whisper = await whisperTranscribe(downloaded.buffer, `${file.name || fileId}.${rendition.format || 'bin'}`);
+  if (!whisper.ok) {
+    await upsertTranscript({ fileId, transcript: null, language: null, durationSeconds: null, source: 'whisper-1', error: whisper.reason, bytesProcessed: downloaded.bytes });
+    return { ok: false, reason: whisper.reason, cached: false };
+  }
+
+  await upsertTranscript({
+    fileId,
+    transcript: whisper.text,
+    language: whisper.language,
+    durationSeconds: whisper.durationSeconds,
+    source: 'whisper-1',
+    error: null,
+    bytesProcessed: downloaded.bytes,
+  });
+  return {
+    ok: true,
+    transcript: whisper.text,
+    language: whisper.language,
+    durationSeconds: whisper.durationSeconds,
+    source: 'whisper-1',
+    cached: false,
+  };
+}
