@@ -29,6 +29,14 @@ import { getAgentForUser, resolveAgentByName } from '../../web/lib/agents/agents
 import { loadGraduations } from '../../web/lib/agents/permissions.js';
 import { streamAgent } from '../../web/lib/agents/runtime.js';
 import type { ChannelName } from '../../web/lib/agents/types.js';
+import {
+  createConversation,
+  touchConversation,
+  setConversationTitle,
+  refreshConversationSearchBody,
+  getConversation,
+  truncateAtWordBoundary,
+} from '../../web/lib/queries/conversations.js';
 
 export const config = {
   runtime: 'nodejs',
@@ -47,6 +55,23 @@ interface ChatBody {
 
 function sendJson(res: VercelResponse, status: number, body: Record<string, unknown>): void {
   res.status(status).setHeader('Content-Type', 'application/json').send(JSON.stringify(body));
+}
+
+/**
+ * Pull the plain text out of a UIMessage. AI SDK 6 UIMessages have a
+ * `parts: [{ type: 'text', text: string } | { type: 'tool-...' } | ...]`
+ * shape; we concatenate every text part. Returns null if the message
+ * has no text content at all.
+ */
+function extractText(message: UIMessage): string | null {
+  const parts = (message as { parts?: Array<{ type?: string; text?: string }> }).parts;
+  if (!Array.isArray(parts)) return null;
+  const text = parts
+    .filter((p) => p && p.type === 'text' && typeof p.text === 'string')
+    .map((p) => p.text as string)
+    .join(' ')
+    .trim();
+  return text.length > 0 ? text : null;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
@@ -114,6 +139,56 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   // -- Stream ---------------------------------------------------------------
   const graduations = await loadGraduations(agent.name);
   const conversationId = body.conversationId ?? generateId();
+
+  // -- Conversation metadata (chat memory) --------------------------------
+  // Upsert the agent_conversations row before the run starts so the
+  // drawer can list it the moment the user sends a message. Then derive
+  // a title from the first user message (truncated; LLM-summary later).
+  // Best-effort — failures here are logged but never block the stream.
+  try {
+    const existing = await getConversation(conversationId, user.id);
+    if (!existing) {
+      await createConversation({
+        id: conversationId,
+        userId: user.id,
+        agent: agent.name,
+        channel: 'web',
+      });
+    }
+    await touchConversation(conversationId, 1);
+
+    // Title + FTS body — only set on the first turn (title IS NULL clause
+    // inside setConversationTitle). Search body is refreshed on every turn
+    // so search picks up new content.
+    const userTexts = body.messages
+      .filter((m) => m.role === 'user')
+      .map((m) => extractText(m))
+      .filter((t): t is string => typeof t === 'string' && t.length > 0);
+    if (userTexts.length > 0) {
+      const firstUser = userTexts[0];
+      const title = truncateAtWordBoundary(firstUser, 60);
+      const ftsBody = userTexts.join('\n\n');
+      if (!existing?.title) {
+        await setConversationTitle({
+          id: conversationId,
+          userId: user.id,
+          agent: agent.name,
+          title,
+          body: ftsBody,
+        });
+      } else {
+        await refreshConversationSearchBody({
+          id: conversationId,
+          userId: user.id,
+          agent: agent.name,
+          title: existing.title,
+          body: ftsBody,
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[api/agent/chat] conversation metadata upsert failed:', err instanceof Error ? err.message : String(err));
+  }
 
   const streamResponse = await streamAgent({
     agent,

@@ -109,6 +109,8 @@ const ROUTE_MAP: [string, string][] = [
   ['/settings', 'settings'],
   // Specialist chat slugs must come BEFORE the generic '/chat' entry so the
   // more-specific prefix match wins. Each maps to its own slug for permission.
+  // The `/chat/<specialist>/c/<id>` resume URLs match these prefixes too via
+  // path.startsWith(prefix + '/'), so resume views inherit the same gate.
   ['/chat/am', 'chat-am'],
   ['/chat/paid-social', 'chat-paid-social'],
   ['/chat/paid-search', 'chat-paid-search'],

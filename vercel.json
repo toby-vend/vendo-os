@@ -74,6 +74,13 @@
       }
     },
     {
+      "src": "api/agent/conversations.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 30
+      }
+    },
+    {
       "src": "public/**",
       "use": "@vercel/static"
     }
@@ -162,6 +169,7 @@
     { "src": "/api/cron/concern-monitor", "dest": "/api/cron/concern-monitor.ts", "methods": ["GET", "POST"] },
     { "src": "/api/agent/chat", "dest": "/api/agent/chat.ts", "methods": ["POST"] },
     { "src": "/api/agent/approve", "dest": "/api/agent/approve.ts", "methods": ["POST"] },
+    { "src": "/api/agent/conversations(/.*)?", "dest": "/api/agent/conversations.ts" },
     { "src": "/(.*)", "dest": "/api/index.ts" }
   ]
 }

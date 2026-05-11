@@ -23,6 +23,7 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
+import { ConversationDrawer } from './ConversationDrawer';
 
 // Inline Markdown → safe HTML. Atlas emits **bold**, *italic*, bullet
 // lists, and [text](url) links — we render those properly instead of
@@ -48,7 +49,23 @@ interface AppProps {
   // Deep-linked specialist (set when the user landed on /chat/<slug>).
   // Defaults to 'atlas' for the generic /chat entry point.
   initialAgent?: string;
+  // When set, the page is resuming an existing conversation: the client
+  // fetches messages from /api/agent/conversations/<id> on mount and
+  // hydrates useChat. When null, a fresh conversation starts on the first
+  // send and the URL is rewritten via history.replaceState.
+  initialConversationId?: string | null;
 }
+
+// Map agent name → URL base so we can rewrite the URL after the first
+// user message lands in a fresh conversation.
+const AGENT_TO_URL_BASE: Record<string, string> = {
+  'atlas': '/chat',
+  'atlas-am': '/chat/am',
+  'atlas-paid-social': '/chat/paid-social',
+  'atlas-paid-search': '/chat/paid-search',
+  'atlas-creative': '/chat/creative',
+  'atlas-seo': '/chat/seo',
+};
 
 // Specialist picker — admin only. The 'atlas' option falls through to the
 // tier router server-side (admin → atlas, staff → atlas-staff). Each
@@ -63,27 +80,89 @@ const SPECIALISTS: { value: string; label: string; hint: string }[] = [
   { value: 'atlas-seo', label: 'SEO', hint: 'Organic & GSC' },
 ];
 
-export function App({ userName, userTier, initialAgent = 'atlas' }: AppProps): React.JSX.Element {
+export function App({
+  userName,
+  userTier,
+  initialAgent = 'atlas',
+  initialConversationId = null,
+}: AppProps): React.JSX.Element {
   const [input, setInput] = useState('');
   const [selectedAgent, setSelectedAgent] = useState<string>(initialAgent);
+  const [conversationId, setConversationId] = useState<string | null>(initialConversationId);
+  // Hydration state — while we're loading prior messages from the server
+  // we want to suppress the welcome screen and avoid sending a turn.
+  const [hydrationStatus, setHydrationStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>(
+    initialConversationId ? 'loading' : 'ready',
+  );
+  const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   // When the user landed on /chat/<slug>, the agent is fixed for this
   // session — the picker disappears and we surface a small badge instead.
   const isLocked = initialAgent !== 'atlas';
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Read selectedAgent through a ref so the transport's body callback
-  // always sees the latest value without re-creating the transport on
-  // every state change (which would break useChat's streaming).
+  // Read selectedAgent + conversationId through refs so the transport's
+  // body callback always sees the latest value without re-creating the
+  // transport on every state change (which would break useChat's stream).
   const selectedAgentRef = useRef(selectedAgent);
   selectedAgentRef.current = selectedAgent;
+  const conversationIdRef = useRef(conversationId);
+  conversationIdRef.current = conversationId;
 
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/agent/chat',
-      body: () => ({ agentName: selectedAgentRef.current }),
+      body: () => ({
+        agentName: selectedAgentRef.current,
+        conversationId: conversationIdRef.current ?? undefined,
+      }),
     }),
+    messages: initialMessages,
   });
+
+  // Hydrate from server on mount when resuming a conversation.
+  useEffect(() => {
+    if (!initialConversationId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/agent/conversations/' + encodeURIComponent(initialConversationId));
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const body = (await res.json()) as {
+          messages: { role: 'user' | 'assistant' | 'system' | 'tool'; text: string }[];
+        };
+        if (cancelled) return;
+        // Convert flat {role, text} into UIMessage shape useChat expects.
+        // We only round-trip text parts for visible content; tool calls and
+        // reasoning that lived in the original stream are not re-rendered.
+        const restored: UIMessage[] = body.messages
+          .filter((m) => m.role === 'user' || m.role === 'assistant')
+          .map((m, i) => ({
+            id: 'restored-' + i,
+            role: m.role as 'user' | 'assistant',
+            parts: [{ type: 'text', text: m.text }],
+          })) as UIMessage[];
+        setInitialMessages(restored);
+        setHydrationStatus('ready');
+      } catch (err) {
+        console.error('[atlas-chat] hydration failed:', err);
+        if (!cancelled) setHydrationStatus('error');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [initialConversationId]);
+
+  // Rewrite the URL the first time a fresh conversation gets its id.
+  // Once present, the URL is bookmarkable / shareable.
+  useEffect(() => {
+    if (!conversationId) return;
+    const base = AGENT_TO_URL_BASE[selectedAgent] ?? '/chat';
+    const target = base + '/c/' + conversationId;
+    if (window.location.pathname !== target) {
+      window.history.replaceState(null, '', target);
+    }
+  }, [conversationId, selectedAgent]);
 
   // Auto-scroll on new content
   useEffect(() => {
@@ -104,9 +183,23 @@ export function App({ userName, userTier, initialAgent = 'atlas' }: AppProps): R
   function handleSubmit(): void {
     const text = input.trim();
     if (!text || isStreaming) return;
+    ensureConversationId();
     sendMessage({ text });
     setInput('');
     inputRef.current?.focus();
+  }
+
+  // Lazily create a stable conversation id on the FIRST send in a fresh
+  // chat. After this, the transport body callback picks it up via the ref
+  // and the useEffect above rewrites the URL.
+  function ensureConversationId(): void {
+    if (conversationIdRef.current) return;
+    const id =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : 'conv-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    conversationIdRef.current = id;
+    setConversationId(id);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>): void {
@@ -118,8 +211,52 @@ export function App({ userName, userTier, initialAgent = 'atlas' }: AppProps): R
 
   const activeLabel = SPECIALISTS.find((s) => s.value === selectedAgent)?.label ?? 'Atlas';
 
+  // Hydration loading state — show a small placeholder while we fetch
+  // the prior message history. Avoids flashing the welcome screen.
+  if (hydrationStatus === 'loading') {
+    return (
+      <div className="atlas-chat">
+        <div className="atlas-hydration"><TypingIndicator /> <span>Loading conversation…</span></div>
+      </div>
+    );
+  }
+  if (hydrationStatus === 'error') {
+    return (
+      <div className="atlas-chat">
+        <div className="atlas-error">
+          Conversation not found or you don't have access. <a href={AGENT_TO_URL_BASE[selectedAgent] ?? '/chat'}>Start a new chat</a>.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="atlas-chat">
+      <div className="atlas-toolbar">
+        <button
+          type="button"
+          className="atlas-toolbar-btn"
+          onClick={() => setDrawerOpen(true)}
+          title="Recent conversations"
+        >
+          ☰ Recent
+        </button>
+        <a
+          className="atlas-toolbar-btn"
+          href={AGENT_TO_URL_BASE[selectedAgent] ?? '/chat'}
+          title="Start a new conversation"
+        >
+          + New chat
+        </a>
+      </div>
+
+      <ConversationDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        agent={selectedAgent}
+        currentId={conversationId}
+      />
+
       {!hasMessages && (
         <Welcome
           userName={userName}
@@ -128,6 +265,7 @@ export function App({ userName, userTier, initialAgent = 'atlas' }: AppProps): R
           onSelectAgent={setSelectedAgent}
           showPicker={!isLocked}
           onSuggestion={(text) => {
+            ensureConversationId();
             sendMessage({ text });
             inputRef.current?.focus();
           }}

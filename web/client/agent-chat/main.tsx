@@ -19,8 +19,14 @@ function boot(): void {
   const userName = root.dataset.userName ?? 'there';
   const userTier = (root.dataset.userTier as 'admin' | 'staff') ?? 'staff';
   const initialAgent = root.dataset.initialAgent ?? 'atlas';
+  const initialConversationId = root.dataset.initialConversationId || null;
   createRoot(root).render(
-    <App userName={userName} userTier={userTier} initialAgent={initialAgent} />,
+    <App
+      userName={userName}
+      userTier={userTier}
+      initialAgent={initialAgent}
+      initialConversationId={initialConversationId}
+    />,
   );
 }
 

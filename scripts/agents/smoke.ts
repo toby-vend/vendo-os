@@ -69,6 +69,18 @@ import {
   listAgents,
 } from '../../web/lib/agents/agents';
 import { parseSpecialistPrefix } from '../../web/lib/agents/channels/slack';
+import {
+  createConversation,
+  touchConversation,
+  setConversationTitle,
+  listConversations,
+  getConversation,
+  searchConversations,
+  archiveConversation,
+  restoreConversation,
+  deleteConversation,
+  truncateAtWordBoundary,
+} from '../../web/lib/queries/conversations';
 import { runAgentBackground } from '../../web/lib/agents/runtime';
 import { MODELS } from '../../web/lib/agents/models';
 import { TOOL_FACTORIES } from '../../web/lib/agents/tools';
@@ -760,6 +772,89 @@ async function main(): Promise<void> {
 
     const f = parseSpecialistPrefix('@unknown thing here');
     assert(f.agent === null, 'unknown prefix → null agent');
+  }
+
+  console.log('\n[24i] truncateAtWordBoundary');
+  {
+    assert(truncateAtWordBoundary('short') === 'short', 'short text untouched');
+    const long = 'this is a relatively long question about Veltuff that has more than sixty characters in it';
+    const truncated = truncateAtWordBoundary(long, 60);
+    assert(truncated.length <= 61, 'truncated to budget');
+    assert(truncated.endsWith('…'), 'ellipsis appended');
+    assert(!truncated.endsWith(' …'), 'no trailing space before ellipsis');
+  }
+
+  console.log('\n[24j] agent_conversations CRUD + ownership');
+  {
+    const userId = 'smoke-conv-user-A';
+    const otherUserId = 'smoke-conv-user-B';
+    const convId = 'smoke-conv-' + Date.now().toString(36);
+
+    // Clean up any prior smoke rows
+    await db.execute({
+      sql: `DELETE FROM agent_conversations WHERE user_id IN (?, ?)`,
+      args: [userId, otherUserId],
+    });
+    await db.execute({
+      sql: `DELETE FROM agent_conversation_search WHERE user_id IN (?, ?)`,
+      args: [userId, otherUserId],
+    });
+
+    // Create + touch
+    await createConversation({ id: convId, userId, agent: 'atlas-am', channel: 'web' });
+    await touchConversation(convId, 1);
+    const fetched = await getConversation(convId, userId);
+    assert(fetched !== null, 'getConversation returns the row');
+    assert(fetched!.message_count === 1, 'message_count = 1 after first touch');
+    assert(fetched!.agent === 'atlas-am', 'agent recorded');
+
+    // Ownership: another user cannot read
+    const otherView = await getConversation(convId, otherUserId);
+    assert(otherView === null, 'getConversation refuses cross-user read');
+
+    // Title + FTS body
+    await setConversationTitle({
+      id: convId,
+      userId,
+      agent: 'atlas-am',
+      title: 'how is Smile Dental doing',
+      body: 'how is Smile Dental doing this week',
+    });
+    const titled = await getConversation(convId, userId);
+    assert(titled!.title === 'how is Smile Dental doing', 'title set');
+
+    // List
+    const list = await listConversations({ userId });
+    assert(list.length >= 1 && list.some((c) => c.id === convId), 'listConversations includes the row');
+    const filtered = await listConversations({ userId, agent: 'atlas-am' });
+    assert(filtered.some((c) => c.id === convId), 'listConversations filters by agent');
+    const wrongAgent = await listConversations({ userId, agent: 'atlas-seo' });
+    assert(!wrongAgent.some((c) => c.id === convId), 'listConversations excludes other agents');
+
+    // Search (FTS5)
+    const hits = await searchConversations({ userId, query: 'Smile' });
+    assert(hits.some((c) => c.id === convId), 'searchConversations finds the row by FTS prefix');
+    const noHits = await searchConversations({ userId, query: 'Mouldings' });
+    assert(!noHits.some((c) => c.id === convId), 'searchConversations excludes non-matches');
+
+    // Archive / restore
+    const archived = await archiveConversation(convId, userId);
+    assert(archived, 'archiveConversation returns true');
+    const afterArchive = await listConversations({ userId });
+    assert(!afterArchive.some((c) => c.id === convId), 'archived row hidden from default list');
+    const archivedList = await listConversations({ userId, archivedOnly: true });
+    assert(archivedList.some((c) => c.id === convId), 'archivedOnly surfaces it');
+
+    // Hard-delete refused on un-archived; allowed on archived
+    const restored = await restoreConversation(convId, userId);
+    assert(restored, 'restoreConversation returns true');
+    const deleteUnarchived = await deleteConversation(convId, userId);
+    assert(!deleteUnarchived, 'deleteConversation refuses un-archived rows');
+    await archiveConversation(convId, userId);
+    const deleted = await deleteConversation(convId, userId);
+    assert(deleted, 'deleteConversation succeeds on archived row');
+    const gone = await getConversation(convId, userId);
+    assert(gone === null, 'row truly gone after delete');
   }
 
   console.log('\n[24b] staff agent has reduced toolset');
