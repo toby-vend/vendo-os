@@ -1,5 +1,6 @@
 import { db } from './base.js';
 import { getRejectionCountsByClientName } from './ad-copy-rejections.js';
+import { getCachedTranscriptFileIds } from '../frameio/transcribe.js';
 
 /**
  * Read-only queries powering the /dashboards/frame-io view.
@@ -358,6 +359,8 @@ export interface AwaitingAdCopyRow {
   adCopyAsanaTaskGid: string | null;
   /** Count of past rejections for this client — feeds the dashboard hint. */
   lessonsAvailable: number;
+  /** True when a Whisper transcript is already cached for this asset. */
+  hasCachedTranscript: boolean;
   updatedAt: string;
   /**
    * Transient flash for the immediate response after an Approve click —
@@ -434,12 +437,23 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
     }
 
     const clientNames = r.rows.map((row) => String((row as unknown as Record<string, unknown>).client_name));
-    const lessonCounts = await getRejectionCountsByClientName(clientNames);
+    const videoFileIds = r.rows
+      .filter((row) => {
+        const x = row as unknown as Record<string, unknown>;
+        return x.asset_type === 'video' && typeof x.frameio_file_id === 'string';
+      })
+      .map((row) => String((row as unknown as Record<string, unknown>).frameio_file_id));
+
+    const [lessonCounts, cachedTranscriptIds] = await Promise.all([
+      getRejectionCountsByClientName(clientNames),
+      getCachedTranscriptFileIds(videoFileIds),
+    ]);
 
     return r.rows.map((row) => {
       const x = row as unknown as Record<string, unknown>;
       const fb = (x.feedback as string | null) ?? null;
       const clientName = String(x.client_name);
+      const frameioFileId = (x.frameio_file_id as string | null) ?? null;
       return {
         reviewId: Number(x.id),
         clientName,
@@ -447,7 +461,7 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
         assetType: String(x.asset_type),
         status: String(x.status),
         feedbackPreview: fb ? fb.split('\n').slice(-1)[0]?.replace(/^\[[^\]]+\]\s*/, '').slice(0, 240) ?? null : null,
-        frameioFileId: (x.frameio_file_id as string | null) ?? null,
+        frameioFileId,
         frameioViewUrl: (x.frameio_view_url as string | null) ?? null,
         adCopyMd: (x.ad_copy_md as string | null) ?? null,
         adCopyGeneratedAt: (x.ad_copy_generated_at as string | null) ?? null,
@@ -458,6 +472,7 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
         adCopyRejectionReason: (x.ad_copy_rejection_reason as string | null) ?? null,
         adCopyAsanaTaskGid: (x.ad_copy_asana_task_gid as string | null) ?? null,
         lessonsAvailable: lessonCounts.get(clientName) ?? 0,
+        hasCachedTranscript: frameioFileId ? cachedTranscriptIds.has(frameioFileId) : false,
         updatedAt: String(x.updated_at),
       };
     });

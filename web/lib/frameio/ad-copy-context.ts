@@ -16,6 +16,7 @@ import { db, rows, scalar } from '../queries/base.js';
 import { listNotes, type ClientNoteRow } from '../queries/client-notes.js';
 import { getTopMetaAdsForClient, type MetaWinnerRow } from '../queries/meta-ads-history.js';
 import { getRecentRejectionLessons } from '../queries/ad-copy-rejections.js';
+import { getOrCreateTranscript } from './transcribe.js';
 
 export interface ReviewRow {
   id: number;
@@ -62,6 +63,13 @@ const META_WINNERS_LIMIT = 3;
 
 /** How many recent rejection reasons to feed back into the next prompt. */
 const REJECTION_LESSONS_LIMIT = 5;
+
+/**
+ * Hard cap on transcript text inside the user prompt. ~6000 chars ≈
+ * 1500 tokens — generous enough for a 60-90s ad, short enough to leave
+ * room for the rest of the context.
+ */
+const TRANSCRIPT_CHAR_CAP = 6000;
 
 /**
  * Heuristic clean of the feedback trail into a list of bullet points.
@@ -116,6 +124,40 @@ async function loadBrandNotes(clientId: number): Promise<ClientNoteRow[]> {
 }
 
 /**
+ * Resolve the Frame.io account_id for a given project, since transcribe.ts
+ * needs both. The mapping is cached in frameio_projects (populated when
+ * the cron processor encounters a project for the first time).
+ */
+async function resolveAccountIdForProject(projectId: string | null): Promise<string | null> {
+  if (!projectId) return null;
+  try {
+    return await scalar<string>(
+      `SELECT account_id FROM frameio_projects WHERE project_id = ? LIMIT 1`,
+      [projectId],
+    );
+  } catch {
+    return null;
+  }
+}
+
+/** Fetch + truncate transcript for a video asset. Null on any failure. */
+async function loadTranscript(
+  reviewAssetType: string,
+  fileId: string | null,
+  projectId: string | null,
+): Promise<AdCopyContext['transcript']> {
+  if (reviewAssetType !== 'video' || !fileId) return null;
+  const accountId = await resolveAccountIdForProject(projectId);
+  if (!accountId) return null;
+  const result = await getOrCreateTranscript(accountId, fileId);
+  if (!result.ok || !result.transcript) return null;
+  const text = result.transcript.length > TRANSCRIPT_CHAR_CAP
+    ? `${result.transcript.slice(0, TRANSCRIPT_CHAR_CAP)}\n[truncated — ${result.transcript.length - TRANSCRIPT_CHAR_CAP} chars omitted]`
+    : result.transcript;
+  return { text, language: result.language, durationSeconds: result.durationSeconds };
+}
+
+/**
  * Assemble everything the ad-copy generator needs in one structured shape.
  * Returns null if the review row itself is missing — the generator should
  * surface this as `review_not_found`.
@@ -126,8 +168,10 @@ export async function buildAdCopyContext(reviewId: number): Promise<AdCopyContex
 
   const client = await loadClientByName(review.client_name);
 
-  // Everything client-scoped can run in parallel.
-  const [brandNotes, brandHubHasGuidelines, topMetaWinners, rejectionLessons] = await Promise.all([
+  // Everything client-scoped can run in parallel. Transcript can take
+  // ~10-60s the first time (downloads + Whisper); kicked off in parallel
+  // so the total wall-clock is dominated by the slowest of the four.
+  const [brandNotes, brandHubHasGuidelines, topMetaWinners, rejectionLessons, transcript] = await Promise.all([
     client ? loadBrandNotes(client.id) : Promise.resolve([] as ClientNoteRow[]),
     client ? loadBrandHubPresence(client.id) : Promise.resolve(false),
     client
@@ -136,6 +180,7 @@ export async function buildAdCopyContext(reviewId: number): Promise<AdCopyContex
     client
       ? getRecentRejectionLessons(client.id, REJECTION_LESSONS_LIMIT)
       : Promise.resolve([] as string[]),
+    loadTranscript(review.asset_type, review.frameio_file_id, review.frameio_project_id),
   ]);
 
   return {
@@ -145,7 +190,7 @@ export async function buildAdCopyContext(reviewId: number): Promise<AdCopyContex
     brandNotes,
     brandHubHasGuidelines,
     topMetaWinners,
-    transcript: null,
+    transcript,
     rejectionLessons,
   };
 }

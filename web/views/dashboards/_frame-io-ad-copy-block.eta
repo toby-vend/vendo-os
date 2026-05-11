@@ -90,7 +90,9 @@ const borderColour = status === 'approved' ? 'rgba(34,197,94,0.30)'
         style="background:none;border:none;color:#94A3B8;font-size:11px;text-decoration:underline;cursor:pointer;padding:0;">
         regenerate
       </button>
-      <span id="regen-spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">↻ regenerating…</span>
+      <span id="regen-spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">
+        <% if (r.assetType === 'video' && !r.hasCachedTranscript) { %>↻ regenerating… (transcribing video, up to 60s)<% } else { %>↻ regenerating…<% } %>
+      </span>
       <% if ((r.lessonsAvailable || 0) > 0) { %>
         <span title="Past rejection reasons for <%= r.clientName %> are fed into every regeneration." style="font-size:10px;color:#94A3B8;background:rgba(148,163,184,0.10);padding:2px 6px;border-radius:99px;">📚 <%= r.lessonsAvailable %> lesson<%= r.lessonsAvailable === 1 ? '' : 's' %> in the prompt</span>
       <% } %>
@@ -117,7 +119,14 @@ const borderColour = status === 'approved' ? 'rgba(34,197,94,0.30)'
       style="padding:6px 14px;background:#22C55E;color:#0B0B0B;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
       ✨ Generate Meta ad copy
     </button>
-    <span id="spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">Generating… (~10s)</span>
+    <%
+      // Video assets without a cached transcript will trigger Whisper on
+      // first generation — warn the user that this can take up to a minute.
+      const needsTranscription = r.assetType === 'video' && !r.hasCachedTranscript;
+    %>
+    <span id="spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">
+      <% if (needsTranscription) { %>Generating… (transcribing video, up to 60s)<% } else { %>Generating… (~10s)<% } %>
+    </span>
     <% if ((r.lessonsAvailable || 0) > 0) { %>
       <span title="Past rejection reasons for <%= r.clientName %> are fed into every generation." style="font-size:10px;color:#94A3B8;background:rgba(148,163,184,0.10);padding:2px 6px;border-radius:99px;">📚 <%= r.lessonsAvailable %> lesson<%= r.lessonsAvailable === 1 ? '' : 's' %> will be applied</span>
     <% } %>

@@ -233,6 +233,33 @@ interface CachedRow {
   generated_at: string;
 }
 
+/**
+ * Batched membership check: returns the set of file_ids that already have
+ * a non-null cached transcript. Used by the dashboard to swap the
+ * Generate button's spinner copy for video assets.
+ */
+export async function getCachedTranscriptFileIds(fileIds: string[]): Promise<Set<string>> {
+  const out = new Set<string>();
+  if (fileIds.length === 0) return out;
+  await ensureSchema();
+  const unique = Array.from(new Set(fileIds));
+  const placeholders = unique.map(() => '?').join(',');
+  try {
+    const r = await db.execute({
+      sql: `SELECT frameio_file_id FROM frameio_transcripts
+             WHERE frameio_file_id IN (${placeholders})
+               AND transcript IS NOT NULL`,
+      args: unique,
+    });
+    for (const row of r.rows) {
+      out.add(String((row as unknown as { frameio_file_id: string }).frameio_file_id));
+    }
+  } catch {
+    /* table missing — empty set */
+  }
+  return out;
+}
+
 export async function getCachedTranscript(fileId: string): Promise<CachedTranscript | null> {
   await ensureSchema();
   try {
