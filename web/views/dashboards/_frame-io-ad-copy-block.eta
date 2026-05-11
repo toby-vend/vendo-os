@@ -96,6 +96,18 @@ const borderColour = status === 'approved' ? 'rgba(34,197,94,0.30)'
       <% if ((r.lessonsAvailable || 0) > 0) { %>
         <span title="Past rejection reasons for <%= r.clientName %> are fed into every regeneration." style="font-size:10px;color:#94A3B8;background:rgba(148,163,184,0.10);padding:2px 6px;border-radius:99px;">📚 <%= r.lessonsAvailable %> lesson<%= r.lessonsAvailable === 1 ? '' : 's' %> in the prompt</span>
       <% } %>
+      <% if (it.user && it.user.role === 'admin' && r.hasCachedTranscript && r.frameioFileId) { %>
+        <button
+          hx-post="/dashboards/frame-io/transcript/<%= r.frameioFileId %>/refresh"
+          hx-confirm="Re-transcribe this video? This will cost a fresh Whisper API call."
+          hx-target="this"
+          hx-swap="outerHTML"
+          hx-headers='{"X-CSRF-Token": "<%= csrf %>"}'
+          title="Force re-transcription via Whisper (admin only)"
+          style="background:none;border:none;color:#94A3B8;font-size:10px;text-decoration:underline;cursor:pointer;padding:0;">
+          ↻ refresh transcript
+        </button>
+      <% } %>
     </div>
 
     <div id="reject-form-<%= r.reviewId %>"></div>

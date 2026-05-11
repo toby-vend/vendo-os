@@ -179,7 +179,7 @@
           </div>
         </div>
 
-        <%~ include('/dashboards/_frame-io-ad-copy-block', { row: r, csrfToken: it.csrfToken }) %>
+        <%~ include('/dashboards/_frame-io-ad-copy-block', { row: r, csrfToken: it.csrfToken, user: it.user }) %>
       </div>
     <% } %>
   </div>

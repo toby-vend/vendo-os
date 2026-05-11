@@ -15,6 +15,8 @@ import {
   rejectAdCopy,
   adCopyFilename,
 } from '../../lib/frameio/ad-copy.js';
+import { getOrCreateTranscript } from '../../lib/frameio/transcribe.js';
+import { db } from '../../lib/queries/base.js';
 import type { SessionUser } from '../../lib/auth.js';
 
 /**
@@ -172,6 +174,55 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
     const row = await getAdCopyRowById(reviewId);
     if (!row) return reply.code(404).type('text/html').send('<p>Review not found</p>');
     return reply.render('dashboards/_frame-io-ad-copy-block', { row });
+  });
+
+  // POST /dashboards/frame-io/transcript/:fileId/refresh
+  // Admin-only. Forces a re-transcription via Whisper. Returns a small
+  // inline status fragment that replaces the trigger button.
+  app.post('/transcript/:fileId/refresh', async (request, reply) => {
+    const user = (request as unknown as { user: SessionUser | null }).user;
+    if (!user || user.role !== 'admin') {
+      return reply.code(403).type('text/html').send(
+        '<span style="font-size:10px;color:#EF4444;">admin only</span>',
+      );
+    }
+    const params = request.params as { fileId: string };
+    const fileId = String(params.fileId);
+    if (!fileId) {
+      return reply.code(400).type('text/html').send(
+        '<span style="font-size:10px;color:#EF4444;">missing file id</span>',
+      );
+    }
+
+    // Resolve account_id via the originating creative_review → frameio_project.
+    let accountId: string | null = null;
+    try {
+      const r = await db.execute({
+        sql: `SELECT fp.account_id FROM creative_reviews cr
+                JOIN frameio_projects fp ON fp.project_id = cr.frameio_project_id
+               WHERE cr.frameio_file_id = ?
+               LIMIT 1`,
+        args: [fileId],
+      });
+      accountId = (r.rows[0] as unknown as { account_id: string } | undefined)?.account_id ?? null;
+    } catch { /* swallow */ }
+
+    if (!accountId) {
+      return reply.code(404).type('text/html').send(
+        '<span style="font-size:10px;color:#EF4444;">no account mapping</span>',
+      );
+    }
+
+    const result = await getOrCreateTranscript(accountId, fileId, { regenerate: true });
+    if (!result.ok) {
+      const safe = result.reason.replace(/[<>]/g, '');
+      return reply.code(500).type('text/html').send(
+        `<span style="font-size:10px;color:#EF4444;">refresh failed: <code>${safe}</code></span>`,
+      );
+    }
+    return reply.type('text/html').send(
+      `<span style="font-size:10px;color:#22C55E;">✓ transcript refreshed (${result.durationSeconds ?? '?'}s audio)</span>`,
+    );
   });
 
   // Browse the markdown for a single review (handy for direct linking).
