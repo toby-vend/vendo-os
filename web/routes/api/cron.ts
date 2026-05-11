@@ -23,6 +23,7 @@ import { runLeadScoring } from '../../lib/jobs/lead-scoring.js';
 import { runUpsellDetection } from '../../lib/jobs/upsell-detection.js';
 import { runNpsTrigger } from '../../lib/jobs/nps-trigger.js';
 import { runOnboardingStallDetection } from '../../lib/jobs/onboarding-stall.js';
+import { runPerformanceReviewGaps } from '../../lib/jobs/performance-review-gaps.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -389,6 +390,29 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/onboarding-stall] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Onboarding stall failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /performance-review-gaps — Weekly Mon 09:00 UTC. Slack digest of
+   * everyone whose last review is >90 days old (or never reviewed). Wave V / V5.
+   * Suppressed for 6 days after each post so re-runs don't double-prompt.
+   */
+  app.get('/performance-review-gaps', async (_request, reply) => {
+    try {
+      const result = await runPerformanceReviewGaps();
+      return reply.send({
+        ok: true,
+        message: 'Performance review gaps scan completed',
+        totalActive: result.totalActive,
+        gaps: result.gaps,
+        posted: result.posted,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/performance-review-gaps] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Performance review gaps failed', error: msg });
     }
   });
 
