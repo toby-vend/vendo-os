@@ -1,0 +1,25 @@
+<%
+/* AGENT-COORD: STUB — Owned by Agent A3 (Narrative).
+ *
+ * Real implementation will render the suggested "What we worked on" draft
+ * (Asana completions + meeting actions + last month's focus) with a
+ * "Use suggestion" button that POSTs to
+ *   /api/reports/:id/use-suggested-narrative
+ * Editor includes this partial only when:
+ *   - report.narrative_draft_md is non-null
+ *   - report.status === 'draft'
+ * This stub renders a minimal placeholder so the editor never crashes if
+ * A4 lands before A3. The coordinator overwrites this file at merge time.
+ */
+%>
+<div class="r-suggested-narrative card" style="border-left: 3px solid var(--vendo-green, #5EEAD4); padding: 0.75rem 1rem; margin-bottom: 0.75rem;">
+  <p class="r-muted" style="margin: 0 0 0.5rem; font-size: 13px;">
+    <strong>Suggested draft</strong> — auto-pulled from Asana completions and meeting actions for this period.
+  </p>
+  <pre style="white-space: pre-wrap; font-family: inherit; font-size: 13px; margin: 0 0 0.5rem; max-height: 240px; overflow: auto;"><%= it.report.narrative_draft_md %></pre>
+  <button class="r-btn r-btn-ghost"
+          hx-post="/api/reports/<%= it.report.id %>/use-suggested-narrative"
+          hx-swap="none">
+    Use suggestion
+  </button>
+</div>

@@ -82,8 +82,32 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.r-status-draft { background: rgba(250,204,21,0.12); color: #FACC15; }
-.r-status-final { background: rgba(94,234,212,0.12); color: #5EEAD4; }
+/* Three-state workflow: draft = neutral grey, review = amber (waiting on AM),
+ * final = green (approved + queued for portal push). Tokens match the Vendo
+ * theme — fallbacks keep the report list readable if loaded before tokens. */
+.r-status-draft  { background: rgba(148,163,184,0.14); color: var(--vendo-muted, #94A3B8); }
+.r-status-review { background: rgba(250,204,21,0.14);  color: var(--vendo-amber, #FACC15); }
+.r-status-final  { background: rgba(94,234,212,0.14);  color: var(--vendo-green, #5EEAD4); }
+
+/* "Needs review" inbox badge — counts the review queue. */
+.r-needs-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--vendo-amber, #FACC15);
+  color: var(--vendo-amber, #FACC15);
+}
+.r-needs-review .r-badge {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 0.4em;
+  border-radius: 999px;
+  background: var(--vendo-amber, #FACC15);
+  color: var(--vendo-bg, #0F172A);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
 
 /* Editor */
 .r-editor-header {
