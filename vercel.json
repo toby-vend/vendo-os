@@ -143,6 +143,10 @@
       "schedule": "0 10 * * 3"
     },
     {
+      "path": "/api/cron/nps-trigger",
+      "schedule": "0 9 * * *"
+    },
+    {
       "path": "/api/cron/sync-asana",
       "schedule": "0 * * * *"
     },
