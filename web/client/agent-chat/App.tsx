@@ -45,6 +45,9 @@ function renderMarkdown(text: string): string {
 interface AppProps {
   userName: string;
   userTier: 'admin' | 'staff';
+  // Deep-linked specialist (set when the user landed on /chat/<slug>).
+  // Defaults to 'atlas' for the generic /chat entry point.
+  initialAgent?: string;
 }
 
 // Specialist picker — admin only. The 'atlas' option falls through to the
@@ -60,9 +63,12 @@ const SPECIALISTS: { value: string; label: string; hint: string }[] = [
   { value: 'atlas-seo', label: 'SEO', hint: 'Organic & GSC' },
 ];
 
-export function App({ userName, userTier }: AppProps): React.JSX.Element {
+export function App({ userName, userTier, initialAgent = 'atlas' }: AppProps): React.JSX.Element {
   const [input, setInput] = useState('');
-  const [selectedAgent, setSelectedAgent] = useState<string>('atlas');
+  const [selectedAgent, setSelectedAgent] = useState<string>(initialAgent);
+  // When the user landed on /chat/<slug>, the agent is fixed for this
+  // session — the picker disappears and we surface a small badge instead.
+  const isLocked = initialAgent !== 'atlas';
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -120,6 +126,7 @@ export function App({ userName, userTier }: AppProps): React.JSX.Element {
           userTier={userTier}
           selectedAgent={selectedAgent}
           onSelectAgent={setSelectedAgent}
+          showPicker={!isLocked}
           onSuggestion={(text) => {
             sendMessage({ text });
             inputRef.current?.focus();
@@ -127,8 +134,15 @@ export function App({ userName, userTier }: AppProps): React.JSX.Element {
         />
       )}
 
-      {hasMessages && userTier === 'admin' && selectedAgent !== 'atlas' && (
-        <div className="atlas-active-agent" title="Specialist is locked for this conversation. Start a new conversation to switch.">
+      {selectedAgent !== 'atlas' && (hasMessages || isLocked) && (
+        <div
+          className={`atlas-active-agent${isLocked ? ' is-locked' : ''}`}
+          title={
+            isLocked
+              ? 'This specialist is pinned by URL. Visit /chat to use the picker.'
+              : 'Specialist is locked for this conversation. Start a new conversation to switch.'
+          }
+        >
           Talking to <strong>{activeLabel}</strong>
         </div>
       )}
@@ -194,6 +208,9 @@ interface WelcomeProps extends AppProps {
   onSuggestion: (text: string) => void;
   selectedAgent: string;
   onSelectAgent: (value: string) => void;
+  // Hide the specialist picker when the URL deep-linked to a specialist;
+  // the agent is fixed for the session in that case.
+  showPicker: boolean;
 }
 
 const SUGGESTIONS = [
@@ -202,7 +219,7 @@ const SUGGESTIONS = [
   'Draft an Asana task for tomorrow’s follow-up call.',
 ];
 
-function Welcome({ userName, userTier, onSuggestion, selectedAgent, onSelectAgent }: WelcomeProps): React.JSX.Element {
+function Welcome({ userName, userTier, onSuggestion, selectedAgent, onSelectAgent, showPicker }: WelcomeProps): React.JSX.Element {
   const helper =
     userTier === 'admin'
       ? 'Full agency access — clients, campaigns, meetings, decisions, financials.'
@@ -213,7 +230,7 @@ function Welcome({ userName, userTier, onSuggestion, selectedAgent, onSelectAgen
       <h2>Hello {userName}.</h2>
       <p>{helper}</p>
 
-      {userTier === 'admin' && (
+      {showPicker && userTier === 'admin' && (
         <div className="atlas-specialist-picker">
           <div className="atlas-specialist-picker-label">Talk to:</div>
           <div className="atlas-specialist-chips">

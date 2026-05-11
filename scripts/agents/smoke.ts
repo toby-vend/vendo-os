@@ -667,20 +667,28 @@ async function main(): Promise<void> {
     assert(listAgents().includes('atlas-seo'), 'listAgents includes atlas-seo');
   }
 
-  console.log('\n[24e] resolveAgentByName — admin-only access to specialists');
+  console.log('\n[24e] resolveAgentByName — admin or route-grant access');
   {
     const adminUser: SessionUser = { ...mockUser(), role: 'admin' };
-    const standardUser: SessionUser = { ...mockUser(), role: 'standard' };
+    const standardUser: SessionUser = { ...mockUser(), role: 'standard', allowedRoutes: [] };
+    const standardWithAmAccess: SessionUser = { ...mockUser(), role: 'standard', allowedRoutes: ['chat-am'] };
+    const standardWithPaidSocialAccess: SessionUser = { ...mockUser(), role: 'standard', allowedRoutes: ['chat-paid-social'] };
     const clientUser: SessionUser = { ...mockUser(), role: 'client' };
 
-    // admin can reach every specialist
+    // admin reaches every specialist
     assert(resolveAgentByName('atlas-am', adminUser) === atlasAmAgent, 'admin → atlas-am');
     assert(resolveAgentByName('atlas-paid-social', adminUser) === atlasPaidSocialAgent, 'admin → atlas-paid-social');
     assert(resolveAgentByName('atlas-seo', adminUser) === atlasSeoAgent, 'admin → atlas-seo');
 
-    // standard user falls back to atlas-staff for any specialist
-    assert(resolveAgentByName('atlas-am', standardUser) === atlasStaffAgent, 'standard → atlas-staff fallback for am');
-    assert(resolveAgentByName('atlas-paid-social', standardUser) === atlasStaffAgent, 'standard → atlas-staff fallback for paid-social');
+    // Standard user without route grant: falls back to atlas-staff
+    assert(resolveAgentByName('atlas-am', standardUser) === atlasStaffAgent, 'standard (no grant) → atlas-staff fallback');
+    assert(resolveAgentByName('atlas-paid-social', standardUser) === atlasStaffAgent, 'standard (no grant, paid-social) → atlas-staff');
+
+    // Standard user WITH the route grant: gets the specialist
+    assert(resolveAgentByName('atlas-am', standardWithAmAccess) === atlasAmAgent, 'standard + chat-am grant → atlas-am');
+    assert(resolveAgentByName('atlas-paid-social', standardWithPaidSocialAccess) === atlasPaidSocialAgent, 'standard + chat-paid-social grant → atlas-paid-social');
+    // Grant for one specialist does not unlock another
+    assert(resolveAgentByName('atlas-seo', standardWithAmAccess) === atlasStaffAgent, 'chat-am grant does not unlock atlas-seo');
 
     // client user always null
     assert(resolveAgentByName('atlas-am', clientUser) === null, 'client → null');
@@ -692,6 +700,22 @@ async function main(): Promise<void> {
 
     // unknown name → null
     assert(resolveAgentByName('does-not-exist', adminUser) === null, 'unknown name → null');
+  }
+
+  console.log('\n[24h] getRouteSlug — specialist URLs map to their own slugs');
+  {
+    // Import here to avoid top-of-file shuffling; tested locally.
+    const { getRouteSlug } = await import('../../web/lib/auth.js');
+    assert(getRouteSlug('/chat') === 'chat', '/chat → chat');
+    assert(getRouteSlug('/chat/am') === 'chat-am', '/chat/am → chat-am (NOT chat)');
+    assert(getRouteSlug('/chat/paid-social') === 'chat-paid-social', '/chat/paid-social → chat-paid-social');
+    assert(getRouteSlug('/chat/paid-search') === 'chat-paid-search', '/chat/paid-search → chat-paid-search');
+    assert(getRouteSlug('/chat/creative') === 'chat-creative', '/chat/creative → chat-creative');
+    assert(getRouteSlug('/chat/seo') === 'chat-seo', '/chat/seo → chat-seo');
+    // An unknown specialist URL still falls back to the 'chat' slug because
+    // the /chat prefix matches; that's fine — the route handler 404s on
+    // unknown specialists before this slug check matters.
+    assert(getRouteSlug('/chat/not-a-real-specialist') === 'chat', 'unknown specialist still under /chat slug');
   }
 
   console.log('\n[24f] specialist agents have sharper system prompts');

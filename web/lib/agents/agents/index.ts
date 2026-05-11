@@ -74,20 +74,36 @@ export function getAgentForUser(user: SessionUser): AgentDef | null {
 
 /**
  * Resolve a named specialist agent (e.g. 'atlas-am', 'atlas-paid-social')
- * for the requesting user. Returns the specialist when:
- *   - The user is admin (specialists are admin-only at v1)
- *   - The name is a registered specialist
+ * for the requesting user.
  *
- * For 'atlas' (the default) this delegates to getAgentForUser so the
- * tier router still applies.
+ * Access rules:
+ *   - 'atlas'   → delegates to getAgentForUser (tier router)
+ *   - specialist → returned if user is admin OR has the matching
+ *     '/chat/<slug>' route permission (e.g. 'chat-am' for atlas-am).
+ *     Falls back to atlas-staff otherwise so the caller still gets *some*
+ *     reply rather than a dead-end 403.
+ *   - other registered name (atlas-staff, atlas-brief, atlas-monitor) →
+ *     returned verbatim for cron / system callers.
+ *   - unknown → null.
+ *   - client-role users → always null (client portal is a different
+ *     surface entirely).
  *
- * For unknown names, returns null. For non-admin users requesting a
- * specialist, falls back to atlas-staff (so they get *something*
- * rather than a dead-end 403).
- *
- * Client-role users always get null regardless of name (client portal
- * uses a different surface entirely).
+ * Tool-level capability gates still apply, so a non-admin user routed to
+ * a specialist will only get the tool answers their channels grant them
+ * — e.g. they'll see meeting data but get permission_denied on
+ * getXeroFinancials. That's the intended graceful degradation.
  */
+
+// Mirror routes/admin/permissions.ts ROUTE_SLUGS — each specialist's
+// route slug, used to check user.allowedRoutes for non-admins.
+const SPECIALIST_ROUTE_SLUGS: Record<string, string> = {
+  'atlas-am': 'chat-am',
+  'atlas-paid-social': 'chat-paid-social',
+  'atlas-paid-search': 'chat-paid-search',
+  'atlas-creative': 'chat-creative',
+  'atlas-seo': 'chat-seo',
+};
+
 export function resolveAgentByName(
   name: string,
   user: SessionUser,
@@ -97,10 +113,12 @@ export function resolveAgentByName(
   // Default → tier router
   if (name === 'atlas') return getAgentForUser(user);
 
-  // Specialist → admin-only; non-admins fall back to atlas-staff
+  // Specialist → admin OR explicit route grant; otherwise atlas-staff fallback
   if (SPECIALIST_AGENTS.has(name)) {
-    if (user.role !== 'admin') return atlasStaffAgent;
-    return AGENTS[name] ?? null;
+    if (user.role === 'admin') return AGENTS[name] ?? null;
+    const slug = SPECIALIST_ROUTE_SLUGS[name];
+    if (slug && user.allowedRoutes.includes(slug)) return AGENTS[name] ?? null;
+    return atlasStaffAgent;
   }
 
   // Any other registered name (atlas-staff, atlas-brief, atlas-monitor)

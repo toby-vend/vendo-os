@@ -1,19 +1,50 @@
-import type { FastifyPluginAsync } from 'fastify';
+import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
+
+// Sub-path → agent name. Each specialist URL is its own sidebar entry +
+// route slug (chat-am, chat-paid-social, etc.) so admins can grant
+// access per-specialist via /admin/permissions.
+const SPECIALIST_URL_TO_AGENT: Record<string, string> = {
+  'am': 'atlas-am',
+  'paid-social': 'atlas-paid-social',
+  'paid-search': 'atlas-paid-search',
+  'creative': 'atlas-creative',
+  'seo': 'atlas-seo',
+};
+
+async function renderChat(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  specialist?: string,
+): Promise<void> {
+  const user = request.user;
+  const tier =
+    !user || user.role === 'client'
+      ? 'staff'
+      : user.role === 'admin'
+        ? 'admin'
+        : 'staff';
+  const initialAgent = specialist ? (SPECIALIST_URL_TO_AGENT[specialist] ?? 'atlas') : 'atlas';
+  reply.render('chat', {
+    userName: user?.name?.split(' ')[0] ?? 'there',
+    userTier: tier,
+    initialAgent,
+  });
+}
 
 export const chatRoutes: FastifyPluginAsync = async (app) => {
   app.get('/', async (request, reply) => {
-    const user = request.user;
-    // Atlas isn't available to client-portal users — keep the legacy chat
-    // for them until the portal gets its own scoped agent.
-    const tier =
-      !user || user.role === 'client'
-        ? 'staff'
-        : user.role === 'admin'
-          ? 'admin'
-          : 'staff';
-    reply.render('chat', {
-      userName: user?.name?.split(' ')[0] ?? 'there',
-      userTier: tier,
-    });
+    await renderChat(request, reply);
+  });
+
+  // /chat/am, /chat/paid-social, etc. Each is a distinct route slug
+  // (the auth hook checks user.allowedRoutes against chat-am etc.
+  // before this handler runs), so URL-level access is already enforced.
+  app.get('/:specialist', async (request, reply) => {
+    const { specialist } = request.params as { specialist: string };
+    if (!SPECIALIST_URL_TO_AGENT[specialist]) {
+      reply.code(404).send('not found');
+      return;
+    }
+    await renderChat(request, reply, specialist);
   });
 };

@@ -107,6 +107,13 @@ const ROUTE_MAP: [string, string][] = [
   ['/sync-status', 'sync-status'],
   ['/drive', 'drive'],
   ['/settings', 'settings'],
+  // Specialist chat slugs must come BEFORE the generic '/chat' entry so the
+  // more-specific prefix match wins. Each maps to its own slug for permission.
+  ['/chat/am', 'chat-am'],
+  ['/chat/paid-social', 'chat-paid-social'],
+  ['/chat/paid-search', 'chat-paid-search'],
+  ['/chat/creative', 'chat-creative'],
+  ['/chat/seo', 'chat-seo'],
   ['/chat', 'chat'],
   ['/tasks', 'tasks'],
   ['/growth', 'growth'],

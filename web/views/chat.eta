@@ -124,6 +124,10 @@
     color: #d6f5dd;
     font-weight: 600;
   }
+  .atlas-active-agent.is-locked {
+    align-self: center;
+    margin: 0.8rem auto;
+  }
 
   .atlas-suggestions li { display: contents; }
   .atlas-suggestion-btn {
@@ -501,6 +505,7 @@
     class="atlas-chat"
     data-user-name="<%= it.userName %>"
     data-user-tier="<%= it.userTier %>"
+    data-initial-agent="<%= it.initialAgent || 'atlas' %>"
   ></div>
 </div>
 

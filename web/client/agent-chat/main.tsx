@@ -18,7 +18,10 @@ function boot(): void {
   }
   const userName = root.dataset.userName ?? 'there';
   const userTier = (root.dataset.userTier as 'admin' | 'staff') ?? 'staff';
-  createRoot(root).render(<App userName={userName} userTier={userTier} />);
+  const initialAgent = root.dataset.initialAgent ?? 'atlas';
+  createRoot(root).render(
+    <App userName={userName} userTier={userTier} initialAgent={initialAgent} />,
+  );
 }
 
 if (document.readyState === 'loading') {
