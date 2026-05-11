@@ -16,23 +16,11 @@
  *     the £0-spend filter).
  *   - ROAS = conversion_value / spend; null when conversion_value == 0.
  *
- * Cross-agent coordination:
- *   - `getClientGadsCustomerIds` is owned by A1 (foundation slice). Until
- *     that lands, a local stub matching the agreed signature is exported
- *     here. The coordinator swaps the stub for the real import during merge
- *     — see the AGENT-COORD marker below.
+ * The client → gads_customer_id mapping is owned by A1 and lives in
+ * `web/lib/queries/reports.ts` (`getClientGadsCustomerIds`).
  */
 import { rows, scalar } from '../queries/base.js';
-
-// AGENT-COORD: stub for A1 getClientGadsCustomerIds — coordinator replaces
-// with `import { getClientGadsCustomerIds } from '../queries/reports.js';`
-// once A1's foundation slice (gads_account_client_map + helper) is merged.
-async function getClientGadsCustomerIds(clientId: number): Promise<string[]> {
-  return rows<{ gads_customer_id: string }>(
-    `SELECT gads_customer_id FROM gads_account_client_map WHERE client_id = ?`,
-    [clientId],
-  ).then(rs => rs.map(r => r.gads_customer_id)).catch(() => []);
-}
+import { getClientGadsCustomerIds } from '../queries/reports.js';
 
 export interface GoogleAdsCampaignRow {
   campaign_id: string;

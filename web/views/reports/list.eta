@@ -8,7 +8,17 @@
       <h2 style="font-size: 24px; font-weight: 600; margin: 0;">Client Reports</h2>
       <p class="r-muted" style="margin: 0.25rem 0 0;">Monthly performance reports — manual screenshots + AI-assisted insights.</p>
     </div>
-    <a class="r-btn r-btn-primary" href="/reports/new">+ New report</a>
+    <div style="display:flex; align-items:center; gap: 0.75rem;">
+      <% if (it.reviewCount > 0 && it.filterStatus !== 'review') { %>
+        <a class="r-btn r-btn-ghost r-needs-review"
+           href="/reports?status=review"
+           title="Reports awaiting Account Manager approval">
+          Needs review
+          <span class="r-badge"><%= it.reviewCount %></span>
+        </a>
+      <% } %>
+      <a class="r-btn r-btn-primary" href="/reports/new">+ New report</a>
+    </div>
   </div>
 
   <form method="get" action="/reports" class="card r-filter-bar">
@@ -25,8 +35,9 @@
       <span>Status</span>
       <select name="status" onchange="this.form.submit()">
         <option value="">Any</option>
-        <option value="draft" <%= it.filterStatus === 'draft' ? 'selected' : '' %>>Draft</option>
-        <option value="final" <%= it.filterStatus === 'final' ? 'selected' : '' %>>Final</option>
+        <option value="draft"  <%= it.filterStatus === 'draft'  ? 'selected' : '' %>>Draft</option>
+        <option value="review" <%= it.filterStatus === 'review' ? 'selected' : '' %>>Review queue</option>
+        <option value="final"  <%= it.filterStatus === 'final'  ? 'selected' : '' %>>Final</option>
       </select>
     </label>
     <% if (it.filterClientId || it.filterStatus) { %>

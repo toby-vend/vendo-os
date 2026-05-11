@@ -565,6 +565,10 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
         created: result.created,
         alreadyExisted: result.alreadyExisted,
         failed: result.failed,
+        gadsSummaryAttached: result.gadsSummaryAttached,
+        narrativeAttached: result.narrativeAttached,
+        aiGenerated: result.aiGenerated,
+        aiFailed: result.aiFailed,
         durationMs: result.durationMs,
       });
     } catch (err) {

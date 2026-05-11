@@ -6,7 +6,7 @@
  */
 import { db, rows, scalar } from './base.js';
 
-export type ReportStatus = 'draft' | 'final';
+export type ReportStatus = 'draft' | 'review' | 'final';
 
 export type ScreenshotPlatform =
   | 'google_ads'
@@ -46,6 +46,7 @@ export interface ClientReportRow {
   period_end: string;
   status: ReportStatus;
   contact_name: string;
+  contact_email: string | null;
   worked_on_md: string;
   focus_next_md: string;
   exec_summary_md: string;
@@ -54,6 +55,12 @@ export interface ClientReportRow {
   risks_md: string;
   recommendations_md: string;
   ai_generated_at: string | null;
+  gads_summary_json: string | null;
+  narrative_draft_md: string | null;
+  submitted_for_review_at: string | null;
+  submitted_for_review_by: string | null;
+  approved_at: string | null;
+  approved_by: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -69,6 +76,10 @@ export interface ReportListRow {
   period_end: string;
   status: ReportStatus;
   ai_generated_at: string | null;
+  submitted_for_review_at: string | null;
+  submitted_for_review_by: string | null;
+  approved_at: string | null;
+  approved_by: string | null;
   screenshot_count: number;
   created_by: string;
   updated_at: string;
@@ -93,11 +104,15 @@ const REPORT_SELECT = `
          c.name AS client_name, c.display_name AS client_display_name,
          c.vertical AS client_vertical,
          r.period_label, r.period_start, r.period_end, r.status,
-         r.contact_name,
+         r.contact_name, r.contact_email,
          r.worked_on_md, r.focus_next_md,
          r.exec_summary_md, r.performance_summary_md,
          r.wins_md, r.risks_md, r.recommendations_md,
-         r.ai_generated_at, r.created_by, r.created_at, r.updated_at
+         r.ai_generated_at,
+         r.gads_summary_json, r.narrative_draft_md,
+         r.submitted_for_review_at, r.submitted_for_review_by,
+         r.approved_at, r.approved_by,
+         r.created_by, r.created_at, r.updated_at
   FROM client_reports r
   JOIN clients c ON c.id = r.client_id
 `;
@@ -122,6 +137,8 @@ export async function listReports(opts: {
            c.name AS client_name, c.display_name AS client_display_name,
            r.period_label, r.period_start, r.period_end, r.status,
            r.ai_generated_at,
+           r.submitted_for_review_at, r.submitted_for_review_by,
+           r.approved_at, r.approved_by,
            (SELECT COUNT(*) FROM client_report_screenshots s WHERE s.report_id = r.id) AS screenshot_count,
            r.created_by, r.updated_at
     FROM client_reports r
@@ -130,6 +147,14 @@ export async function listReports(opts: {
     ORDER BY r.period_start DESC, r.updated_at DESC
     LIMIT ?
   `, [...args, limit]);
+}
+
+/**
+ * Reports currently awaiting AM approval (status='review'). Used by the
+ * review-queue filter in the list view and the "needs review" badge.
+ */
+export async function listReviewQueue(): Promise<ReportListRow[]> {
+  return listReports({ status: 'review' });
 }
 
 export async function getReport(id: number): Promise<ClientReportRow | null> {
@@ -237,6 +262,100 @@ export async function setStatus(id: number, status: ReportStatus): Promise<void>
   await db.execute({
     sql: `UPDATE client_reports SET status = ?, updated_at = datetime('now') WHERE id = ?`,
     args: [status, id],
+  });
+}
+
+class ReportStatusError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ReportStatusError';
+  }
+}
+
+async function getStatusOrThrow(id: number): Promise<ReportStatus> {
+  const current = await scalar<string>(
+    'SELECT status FROM client_reports WHERE id = ?',
+    [id],
+  );
+  if (!current) throw new ReportStatusError(`Report ${id} not found`);
+  return current as ReportStatus;
+}
+
+/**
+ * Move a draft into the review queue. Records who submitted and when so the
+ * AM inbox shows accountability.
+ */
+export async function submitForReview(reportId: number, submittedBy: string): Promise<void> {
+  const current = await getStatusOrThrow(reportId);
+  if (current !== 'draft') {
+    throw new ReportStatusError(
+      `Report ${reportId} is ${current}, expected 'draft' to submit for review`,
+    );
+  }
+  await db.execute({
+    sql: `UPDATE client_reports
+            SET status = 'review',
+                submitted_for_review_at = datetime('now'),
+                submitted_for_review_by = ?,
+                updated_at = datetime('now')
+          WHERE id = ?`,
+    args: [submittedBy, reportId],
+  });
+}
+
+/**
+ * AM approval — moves a report from review to final. Records who approved
+ * and when. The portal-push cron (A5) picks it up from there.
+ */
+export async function approveReport(reportId: number, approvedBy: string): Promise<void> {
+  const current = await getStatusOrThrow(reportId);
+  if (current !== 'review') {
+    throw new ReportStatusError(
+      `Report ${reportId} is ${current}, expected 'review' to approve`,
+    );
+  }
+  await db.execute({
+    sql: `UPDATE client_reports
+            SET status = 'final',
+                approved_at = datetime('now'),
+                approved_by = ?,
+                updated_at = datetime('now')
+          WHERE id = ?`,
+    args: [approvedBy, reportId],
+  });
+}
+
+/**
+ * Reset a report back to draft. Clears the submission and approval
+ * timestamps so the audit trail reflects that the previous review/approval
+ * has been discarded. Used for "edit after submission" / "edit after send".
+ */
+export async function reopenReport(reportId: number): Promise<void> {
+  await db.execute({
+    sql: `UPDATE client_reports
+            SET status = 'draft',
+                submitted_for_review_at = NULL,
+                submitted_for_review_by = NULL,
+                approved_at = NULL,
+                approved_by = NULL,
+                updated_at = datetime('now')
+          WHERE id = ?`,
+    args: [reportId],
+  });
+}
+
+/**
+ * Persist the structured Google Ads period summary on the report. Called
+ * during the monthly draft job once A2's `buildGoogleAdsPeriodSummary`
+ * returns a payload with data.
+ */
+export async function setGadsSummary(reportId: number, summaryJson: string): Promise<void> {
+  await db.execute({
+    sql: `UPDATE client_reports
+            SET gads_summary_json = ?,
+                updated_at = datetime('now')
+          WHERE id = ?`,
+    args: [summaryJson, reportId],
   });
 }
 

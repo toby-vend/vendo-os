@@ -20,19 +20,34 @@
       <span id="r-save-flash" class="r-saved" style="opacity: 0;">Saved</span>
       <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/text" target="_blank">Copy text</a>
       <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/preview" target="_blank">Preview / PDF</a>
+
       <% if (it.report.status === 'draft') { %>
         <button class="r-btn r-btn-primary"
-                hx-post="/api/reports/<%= it.report.id %>/status"
-                hx-vals='{"status":"final"}'>
-          Mark final
+                hx-post="/api/reports/<%= it.report.id %>/submit-review"
+                hx-confirm="Submit this report for AM review?">
+          Submit for review
         </button>
-      <% } else { %>
+      <% } else if (it.report.status === 'review') { %>
+        <% if (it.isAm) { %>
+          <button class="r-btn r-btn-primary"
+                  hx-post="/api/reports/<%= it.report.id %>/approve"
+                  hx-confirm="Approve and send to the client portal?">
+            Approve and send
+          </button>
+        <% } %>
         <button class="r-btn r-btn-ghost"
-                hx-post="/api/reports/<%= it.report.id %>/status"
-                hx-vals='{"status":"draft"}'>
-          Reopen as draft
+                hx-post="/api/reports/<%= it.report.id %>/reopen"
+                hx-confirm="Send this back to draft? The submission will be cleared.">
+          Reopen
+        </button>
+      <% } else if (it.report.status === 'final') { %>
+        <button class="r-btn r-btn-ghost"
+                hx-post="/api/reports/<%= it.report.id %>/reopen"
+                hx-confirm="Reopen this report? It will return to draft and the approval will be cleared.">
+          Reopen
         </button>
       <% } %>
+
       <button class="r-btn r-btn-danger"
               hx-post="/api/reports/<%= it.report.id %>/delete"
               hx-confirm="Delete this report and all screenshots? This can't be undone.">
@@ -40,6 +55,27 @@
       </button>
     </div>
   </div>
+
+  <!-- Status audit strip — surfaces who submitted / approved + when. -->
+  <% if (it.report.status === 'review' && it.report.submitted_for_review_at) { %>
+    <div class="card r-section" style="border-left: 3px solid var(--vendo-amber, #FACC15); padding: 0.75rem 1rem;">
+      <p class="r-muted" style="margin: 0; font-size: 13px;">
+        Submitted for review by <strong><%= it.report.submitted_for_review_by %></strong>
+        on <%= it.report.submitted_for_review_at.slice(0, 16).replace('T', ' ') %>.
+        <% if (!it.isAm) { %>
+          Waiting on an Account Manager to approve.
+        <% } %>
+      </p>
+    </div>
+  <% } else if (it.report.status === 'final' && it.report.approved_at) { %>
+    <div class="card r-section" style="border-left: 3px solid var(--vendo-green, #5EEAD4); padding: 0.75rem 1rem;">
+      <p class="r-muted" style="margin: 0; font-size: 13px;">
+        Approved by <strong><%= it.report.approved_by %></strong>
+        on <%= it.report.approved_at.slice(0, 16).replace('T', ' ') %>.
+        Portal delivery runs every 15 minutes.
+      </p>
+    </div>
+  <% } %>
 
   <!-- Recipient -->
   <section class="card r-section">
@@ -108,6 +144,11 @@
       <h3>3. What we worked on</h3>
       <p class="r-muted">Plain language. Bullets. Markdown supported.</p>
     </header>
+
+    <% if (it.report.narrative_draft_md && it.report.status === 'draft') { %>
+      <%~ include('/reports/_suggested-narrative', { report: it.report }) %>
+    <% } %>
+
     <textarea class="r-textarea"
               name="worked_on_md"
               rows="8"
