@@ -332,3 +332,31 @@ export async function listActiveClientsForReports(): Promise<ClientOption[]> {
     ORDER BY label COLLATE NOCASE
   `);
 }
+
+// === A1 additions ===
+// (Owned by Agent A1 — Foundation. Do not modify above this block.)
+
+/**
+ * Return every Google Ads customer ID mapped to a client.
+ *
+ * Reads from `gads_account_client_map` (created by
+ * scripts/migrations/2026-05-11-gads-autonomous-reports.ts). Used by A2's
+ * `buildGoogleAdsPeriodSummary` to know which `gads_accounts` rows to roll up
+ * for a given client's monthly report. Returns the IDs as strings — Google
+ * Ads customer IDs exceed JavaScript's safe integer range when formatted
+ * without dashes, and downstream SQL joins compare to TEXT columns
+ * (`gads_campaign_spend.account_id` etc.).
+ *
+ * Empty list = no mapping yet (the admin needs to set one via
+ * /admin/gads-account-map).
+ */
+export async function getClientGadsCustomerIds(clientId: number): Promise<string[]> {
+  const result = await rows<{ gads_customer_id: string }>(
+    `SELECT gads_customer_id
+       FROM gads_account_client_map
+      WHERE client_id = ?
+      ORDER BY gads_customer_id`,
+    [clientId],
+  );
+  return result.map(r => r.gads_customer_id);
+}
