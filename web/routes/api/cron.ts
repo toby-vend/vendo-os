@@ -22,6 +22,7 @@ import { recordHeartbeat } from '../../lib/jobs/heartbeat.js';
 import { runLeadScoring } from '../../lib/jobs/lead-scoring.js';
 import { runUpsellDetection } from '../../lib/jobs/upsell-detection.js';
 import { runNpsTrigger } from '../../lib/jobs/nps-trigger.js';
+import { runOnboardingStallDetection } from '../../lib/jobs/onboarding-stall.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -365,6 +366,29 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/nps-trigger] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'NPS trigger failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /onboarding-stall — Weekly Tue 09:00 UTC. Flag onboardings stalled
+   * >5 days with completion <100%. Creates an Asana task for each, assigned
+   * to the client's AM. Wave V / V4. Idempotent within a 7-day window.
+   */
+  app.get('/onboarding-stall', async (_request, reply) => {
+    try {
+      const result = await runOnboardingStallDetection();
+      return reply.send({
+        ok: true,
+        message: 'Onboarding stall detection completed',
+        candidates: result.candidates,
+        tasksCreated: result.tasksCreated,
+        skipped: result.skipped,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/onboarding-stall] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Onboarding stall failed', error: msg });
     }
   });
 

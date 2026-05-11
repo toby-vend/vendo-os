@@ -147,6 +147,10 @@
       "schedule": "0 9 * * *"
     },
     {
+      "path": "/api/cron/onboarding-stall",
+      "schedule": "0 9 * * 2"
+    },
+    {
       "path": "/api/cron/sync-asana",
       "schedule": "0 * * * *"
     },
