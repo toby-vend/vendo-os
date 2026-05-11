@@ -15,6 +15,7 @@ import { purgeSuggestionDrafts } from '../../lib/jobs/purge-suggestion-drafts.js
 import { processFrameioEvents } from '../../lib/frameio/processor.js';
 import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
 import { pushClientsToPortal } from '../../lib/jobs/push-clients-to-portal.js';
+import { pullOnboardingFromPortal } from '../../lib/jobs/pull-onboarding-from-portal.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -243,6 +244,30 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/sync-asana] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Asana sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /pull-onboarding-from-portal — Mirror CD's questionnaire_submissions
+   * into Turso cd_onboarding_snapshots (Vercel Cron, every 6h).
+   * Lets the client-knowledge briefing surface CD onboarding state without
+   * cross-cloud reads on every page load.
+   */
+  app.get('/pull-onboarding-from-portal', async (_request, reply) => {
+    try {
+      const result = await pullOnboardingFromPortal();
+      return reply.send({
+        ok: true,
+        message: 'CD onboarding mirror updated',
+        loaded: result.loaded,
+        upserted: result.upserted,
+        skipped: result.skipped,
+        warnings: result.warnings.length,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/pull-onboarding-from-portal] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'CD onboarding sync failed', error: msg });
     }
   });
 

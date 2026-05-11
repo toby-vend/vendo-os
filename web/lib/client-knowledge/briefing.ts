@@ -30,6 +30,7 @@ import type {
   BriefingGsc,
   BriefingConcern,
   BriefingProfitability,
+  BriefingOnboarding,
   ClientNote,
 } from './types.js';
 
@@ -236,15 +237,44 @@ export async function generateBriefing(clientId: number): Promise<ClientBriefing
   const client = clientResult[0];
   if (!client) return null;
 
-  // 2. Health + Phase F sources (in parallel; tolerate individual failures)
-  const [health, harvest, ga4, gsc, concerns, profitability] = await Promise.all([
+  // 2. Health + Phase F sources + Phase G onboarding (parallel)
+  interface OnboardingRow {
+    template_name: string | null;
+    status: string | null;
+    completion_percent: number | null;
+    submitted_at: string | null;
+    cd_updated_at: string;
+    synced_at: string;
+  }
+
+  const [health, harvest, ga4, gsc, concerns, profitability, onboardingRows] = await Promise.all([
     getClientHealth(client.name),
     getHarvestHours(clientId).catch(() => null),
     getGa4Stats(clientId).catch(() => null),
     getGscStats(clientId).catch(() => null),
     getRecentConcerns(clientId, 5).catch(() => []),
     getLatestProfitability(client.name).catch(() => null),
+    rows<OnboardingRow>(
+      `SELECT template_name, status, completion_percent, submitted_at,
+              cd_updated_at, synced_at
+       FROM cd_onboarding_snapshots
+       WHERE client_id = ?
+       ORDER BY synced_at DESC LIMIT 1`,
+      [clientId],
+    ).catch(() => [] as OnboardingRow[]),
   ]);
+
+  const onboardingRow = onboardingRows[0] ?? null;
+  const onboardingShape: BriefingOnboarding | null = onboardingRow
+    ? {
+        templateName: onboardingRow.template_name,
+        status: (onboardingRow.status as BriefingOnboarding['status']) ?? 'not_started',
+        completionPercent: onboardingRow.completion_percent ?? 0,
+        submittedAt: onboardingRow.submitted_at,
+        cdUpdatedAt: onboardingRow.cd_updated_at,
+        syncedAt: onboardingRow.synced_at,
+      }
+    : null;
 
   // 3. Shape into briefing
   const meetings: BriefingMeetingSummary[] = meetingsResult.map((m) => ({
@@ -397,6 +427,7 @@ export async function generateBriefing(clientId: number): Promise<ClientBriefing
     gsc: gscShape,
     concerns: concernsShape,
     profitability: profitabilityShape,
+    onboarding: onboardingShape,
     notes,
   };
 

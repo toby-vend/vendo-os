@@ -419,6 +419,24 @@
     </div>
     <% } %>
 
+    <!-- Portal onboarding (CD mirror) -->
+    <% if (b.onboarding) { %>
+    <% const onbColour = b.onboarding.status === 'submitted' ? '#22C55E' : b.onboarding.status === 'in_progress' ? '#F59E0B' : '#6B7280'; %>
+    <div class="ck-section">
+      <h2>Portal onboarding <span class="ck-count" style="background: <%= onbColour %>15; color: <%= onbColour %>;"><%= b.onboarding.completionPercent %>%</span></h2>
+      <ul class="ck-list">
+        <li>
+          <div class="ck-row-title"><%= b.onboarding.templateName || 'Questionnaire' %></div>
+          <div class="ck-row-meta">
+            Status: <%= b.onboarding.status.replace('_', ' ') %>
+            <% if (b.onboarding.submittedAt) { %> · submitted <%= fmtDate(b.onboarding.submittedAt) %><% } %>
+            · last activity <%= fmtDate(b.onboarding.cdUpdatedAt) %>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <% } %>
+
     <!-- Brand -->
     <div class="ck-section">
       <h2>Brand & guidelines</h2>

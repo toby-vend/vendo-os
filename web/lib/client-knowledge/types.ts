@@ -147,6 +147,15 @@ export interface BriefingProfitability {
   createdAt: string;
 }
 
+export interface BriefingOnboarding {
+  templateName: string | null;
+  status: 'not_started' | 'in_progress' | 'submitted' | string;
+  completionPercent: number;
+  submittedAt: string | null;
+  cdUpdatedAt: string;
+  syncedAt: string;
+}
+
 export interface ClientNote {
   id: number;
   body: string;
@@ -171,5 +180,6 @@ export interface ClientBriefing {
   gsc: BriefingGsc | null;                         // Phase F
   concerns: BriefingConcern[];                     // Phase F — top 5 high/critical
   profitability: BriefingProfitability | null;     // Phase F
+  onboarding: BriefingOnboarding | null;           // Phase G — CD portal mirror
   notes: ClientNote[];
 }

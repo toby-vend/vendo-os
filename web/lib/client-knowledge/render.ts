@@ -187,6 +187,17 @@ export function renderBriefingMarkdown(b: ClientBriefing): string {
     out.push('');
   }
 
+  // Onboarding (CD portal mirror)
+  if (b.onboarding) {
+    out.push('## Portal onboarding');
+    out.push(`- Template: ${b.onboarding.templateName ?? '(unnamed)'}`);
+    out.push(`- Status: ${b.onboarding.status}  (${b.onboarding.completionPercent}% complete)`);
+    if (b.onboarding.submittedAt) {
+      out.push(`- Submitted: ${fmtDate(b.onboarding.submittedAt)}`);
+    }
+    out.push('');
+  }
+
   // Brand
   if (b.brand.hasGuidelines) {
     out.push(`## Brand guidelines`);
