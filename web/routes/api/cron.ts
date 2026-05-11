@@ -24,6 +24,21 @@ import { runUpsellDetection } from '../../lib/jobs/upsell-detection.js';
 import { runNpsTrigger } from '../../lib/jobs/nps-trigger.js';
 import { runOnboardingStallDetection } from '../../lib/jobs/onboarding-stall.js';
 import { runPerformanceReviewGaps } from '../../lib/jobs/performance-review-gaps.js';
+import {
+  runSpecialistDigest,
+  selectClientsWithRecentGoogleAdsSpend,
+  selectClientsWithRecentMetaSpend,
+  selectClientsWithRecentOrganic,
+  selectClientsWithRecentCreative,
+  selectAllActiveClients,
+} from '../../lib/jobs/specialist-digest.js';
+import {
+  atlasPaidSocialAgent,
+  atlasPaidSearchAgent,
+  atlasSeoAgent,
+  atlasCreativeAgent,
+  atlasAmAgent,
+} from '../../lib/agents/agents/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -413,6 +428,120 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/performance-review-gaps] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Performance review gaps failed', error: msg });
+    }
+  });
+
+  // -- Wave C / C1 — Specialist digests ---------------------------------------
+  // Five specialists auto-fire daily (Mon-Fri) on their natural triggers.
+  // Pilot routes everything to one Slack channel
+  // (SLACK_CHANNEL_SPECIALIST_DIGESTS) so Toby can validate the format
+  // before broadening to per-AM DMs. Each handler caps at 8 clients/run
+  // to keep daily token cost predictable.
+
+  app.get('/specialist-paid-social', async (_request, reply) => {
+    try {
+      const result = await runSpecialistDigest({
+        agent: atlasPaidSocialAgent,
+        digestKey: 'paid-social',
+        slackHeader: 'Paid Social — daily snapshot',
+        selectClients: () => selectClientsWithRecentMetaSpend(30),
+        buildPrompt: (clientName) =>
+          `You are running the morning Meta Ads check for **${clientName}**. ` +
+          `Using the pre-loaded briefing below, write 4-7 lines: top-line spend & ` +
+          `performance vs last 7 days, anything unusual (CPL/CTR/CPA drift, paused ad ` +
+          `sets, pacing concerns), and one concrete action the AM should take today. ` +
+          `Be specific. If nothing material has changed, say "no notable change" in one line.`,
+      });
+      return reply.send({ ok: true, ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/specialist-paid-social] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Specialist paid-social failed', error: msg });
+    }
+  });
+
+  app.get('/specialist-paid-search', async (_request, reply) => {
+    try {
+      const result = await runSpecialistDigest({
+        agent: atlasPaidSearchAgent,
+        digestKey: 'paid-search',
+        slackHeader: 'Paid Search — daily snapshot',
+        selectClients: () => selectClientsWithRecentGoogleAdsSpend(30),
+        buildPrompt: (clientName) =>
+          `Morning Google Ads check for **${clientName}**. Using the pre-loaded briefing, ` +
+          `produce 4-7 lines: spend & conversions vs last 7 days, any campaigns drifting ` +
+          `(CPA, conversion rate, impression share), and one specific action. If everything ` +
+          `is stable, say "no notable change" in one line.`,
+      });
+      return reply.send({ ok: true, ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/specialist-paid-search] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Specialist paid-search failed', error: msg });
+    }
+  });
+
+  app.get('/specialist-seo', async (_request, reply) => {
+    try {
+      const result = await runSpecialistDigest({
+        agent: atlasSeoAgent,
+        digestKey: 'seo',
+        slackHeader: 'SEO — daily snapshot',
+        selectClients: () => selectClientsWithRecentOrganic(30),
+        buildPrompt: (clientName) =>
+          `Morning organic-search check for **${clientName}**. Using the pre-loaded ` +
+          `briefing, write 4-7 lines: traffic & impressions vs last 7 days, biggest ` +
+          `query/page movers, any positions dropping, and one specific action. ` +
+          `Note that organic moves slowly — if nothing material has changed, say so.`,
+      });
+      return reply.send({ ok: true, ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/specialist-seo] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Specialist SEO failed', error: msg });
+    }
+  });
+
+  app.get('/specialist-creative', async (_request, reply) => {
+    try {
+      const result = await runSpecialistDigest({
+        agent: atlasCreativeAgent,
+        digestKey: 'creative',
+        slackHeader: 'Creative — daily snapshot',
+        selectClients: () => selectClientsWithRecentCreative(14),
+        buildPrompt: (clientName) =>
+          `Daily creative-review status for **${clientName}**. Using the pre-loaded ` +
+          `briefing, write 4-7 lines: assets awaiting client review, any stale assets ` +
+          `(no feedback >5 days), upcoming launches that need creative, and one ` +
+          `specific action. If the queue is healthy, say so.`,
+      });
+      return reply.send({ ok: true, ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/specialist-creative] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Specialist creative failed', error: msg });
+    }
+  });
+
+  app.get('/specialist-am', async (_request, reply) => {
+    try {
+      const result = await runSpecialistDigest({
+        agent: atlasAmAgent,
+        digestKey: 'am',
+        slackHeader: 'Account Management — daily focus',
+        selectClients: () => selectAllActiveClients(),
+        buildPrompt: (clientName) =>
+          `Daily AM focus for **${clientName}**. Using the pre-loaded briefing, ` +
+          `write 4-7 lines: anything on this account the AM needs to touch today ` +
+          `(open concerns, stalled deliverables, upcoming meetings without prep, ` +
+          `pending decisions), and one specific action. If nothing pressing, say so.`,
+        perRunLimit: 6,
+      });
+      return reply.send({ ok: true, ...result });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/specialist-am] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Specialist AM failed', error: msg });
     }
   });
 

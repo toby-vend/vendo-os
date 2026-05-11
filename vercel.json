@@ -155,6 +155,26 @@
       "schedule": "0 9 * * 1"
     },
     {
+      "path": "/api/cron/specialist-paid-social",
+      "schedule": "0 9 * * 1-5"
+    },
+    {
+      "path": "/api/cron/specialist-paid-search",
+      "schedule": "30 9 * * 1-5"
+    },
+    {
+      "path": "/api/cron/specialist-seo",
+      "schedule": "0 10 * * 1-5"
+    },
+    {
+      "path": "/api/cron/specialist-creative",
+      "schedule": "30 10 * * 1-5"
+    },
+    {
+      "path": "/api/cron/specialist-am",
+      "schedule": "0 11 * * 1-5"
+    },
+    {
       "path": "/api/cron/sync-asana",
       "schedule": "0 * * * *"
     },
