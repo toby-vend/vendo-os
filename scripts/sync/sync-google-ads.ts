@@ -22,10 +22,12 @@ const BASE_URL = `https://googleads.googleapis.com/${API_VERSION}`;
 
 // --- Config ---
 
-const DEVELOPER_TOKEN = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
-const LOGIN_CUSTOMER_ID = process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID?.replace(/-/g, '');
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+// .trim() defends against trailing whitespace/newlines in .env values
+// (Google OAuth rejects creds with a stray "\n" as "invalid_client").
+const DEVELOPER_TOKEN = process.env.GOOGLE_ADS_DEVELOPER_TOKEN?.trim();
+const LOGIN_CUSTOMER_ID = process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID?.trim().replace(/-/g, '');
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID?.trim();
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET?.trim();
 
 let tokens: { access_token: string; refresh_token: string };
 try {
