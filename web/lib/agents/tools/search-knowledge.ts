@@ -15,6 +15,13 @@ const inputSchema = z.object({
     .enum(['meeting', 'decision', 'recommendation', 'client-doc', 'all'])
     .default('all'),
   limit: z.number().int().min(1).max(20).default(8),
+  /**
+   * Optional. When set, restrict the search to chunks tagged with this
+   * client_id (resolve via searchClients first). Use this whenever the
+   * surrounding conversation is about a specific client to prevent
+   * cross-tenant leakage from the shared knowledge store.
+   */
+  clientId: z.number().int().positive().nullish(),
 });
 
 const outputSchema = z.object({
@@ -34,13 +41,13 @@ export const searchKnowledge = (ctx: ToolCtx) =>
     {
       name: 'searchKnowledge',
       description:
-        'Search the vector knowledge store of meeting summaries, decisions, and approved recommendations. Returns up to 8 semantically-relevant hits.',
+        'Search the vector knowledge store of meeting summaries, decisions, and approved recommendations. Returns up to 8 semantically-relevant hits. Pass `clientId` to restrict to one client.',
       hasSideEffect: false,
       capability: CAPABILITIES.KNOWLEDGE_READ,
       input: inputSchema,
       output: outputSchema,
-      run: async ({ query, scope, limit }) => {
-        const memHits = await searchSimilar({ query, scope, limit });
+      run: async ({ query, scope, limit, clientId }) => {
+        const memHits = await searchSimilar({ query, scope, limit, clientId: clientId ?? null });
         return {
           hits: memHits.map(h => ({
             id: h.id,

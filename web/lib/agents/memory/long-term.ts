@@ -1,22 +1,26 @@
 /**
  * Long-term memory — semantic search over agent_memory_chunks.
  *
- * Schema (from scripts/migrations/2026-05-22-agent-memory.ts):
+ * Schema (from scripts/migrations/2026-05-22-agent-memory.ts + 2026-05-12-agent-memory-client-id.ts):
  *   id          TEXT PRIMARY KEY
  *   scope       TEXT       'meeting' | 'decision' | 'recommendation' | 'client-doc'
  *   scope_id    TEXT       the source row's id (e.g. meeting.id, rec.id)
  *   content     TEXT       the embedded passage
  *   embedding   F32_BLOB(1536)
  *   metadata    TEXT       JSON
+ *   client_id   INTEGER    nullable; lets searchSimilar filter to one client.
+ *                          Null = cross-client visible (existing behaviour).
  *   created_at  TEXT
  *
  * Storage:
  *   - insertChunk(s) takes content + scope; embedding is computed here
  *   - id is derived deterministically from (scope, scope_id) so re-runs of
  *     the seed script don't duplicate (we use INSERT OR REPLACE)
+ *   - clientId is optional; pass it to tag chunks for per-client retrieval
  *
  * Search:
  *   - searchSimilar embeds the query and ORDERs BY vector_distance_cos
+ *   - clientId filter: `WHERE client_id = ?` if provided, else cross-client
  *   - libSQL's idx_agent_memory_vec is present but the brute-force path
  *     is fast enough for ≤50k rows; we'll switch to vector_top_k(idx,...)
  *     once chunk count grows beyond that
@@ -58,18 +62,20 @@ export async function insertChunk(input: {
   scope_id: string;
   content: string;
   metadata?: Record<string, unknown>;
+  clientId?: number | null;
 }): Promise<string | null> {
   const embedding = await embedOne(input.content);
   if (!embedding) return null;
   const id = chunkId(input.scope, input.scope_id);
   await db.execute({
     sql: `INSERT INTO agent_memory_chunks
-      (id, scope, scope_id, content, embedding, metadata)
-    VALUES (?, ?, ?, ?, vector(?), ?)
+      (id, scope, scope_id, content, embedding, metadata, client_id)
+    VALUES (?, ?, ?, ?, vector(?), ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       content = excluded.content,
       embedding = excluded.embedding,
       metadata = excluded.metadata,
+      client_id = excluded.client_id,
       created_at = datetime('now')`,
     args: [
       id,
@@ -78,6 +84,7 @@ export async function insertChunk(input: {
       input.content,
       serialiseVector(embedding),
       input.metadata ? JSON.stringify(input.metadata) : null,
+      input.clientId ?? null,
     ],
   });
   return id;
@@ -92,6 +99,7 @@ export interface InsertChunkInput {
   scope_id: string;
   content: string;
   metadata?: Record<string, unknown>;
+  clientId?: number | null;
 }
 
 export async function insertChunks(
@@ -111,12 +119,13 @@ export async function insertChunks(
     try {
       await db.execute({
         sql: `INSERT INTO agent_memory_chunks
-          (id, scope, scope_id, content, embedding, metadata)
-        VALUES (?, ?, ?, ?, vector(?), ?)
+          (id, scope, scope_id, content, embedding, metadata, client_id)
+        VALUES (?, ?, ?, ?, vector(?), ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           content = excluded.content,
           embedding = excluded.embedding,
           metadata = excluded.metadata,
+          client_id = excluded.client_id,
           created_at = datetime('now')`,
         args: [
           chunkId(c.scope, c.scope_id),
@@ -125,6 +134,7 @@ export async function insertChunks(
           c.content,
           serialiseVector(e),
           c.metadata ? JSON.stringify(c.metadata) : null,
+          c.clientId ?? null,
         ],
       });
       inserted++;
@@ -150,6 +160,12 @@ export async function searchSimilar(input: {
   query: string;
   scope?: MemoryScope | 'all';
   limit?: number;
+  /**
+   * Optional per-client filter. When provided, only chunks tagged with this
+   * client_id are returned. Use this for any tool that runs in the context
+   * of a single client conversation to prevent cross-tenant leakage.
+   */
+  clientId?: number | null;
 }): Promise<MemoryHit[]> {
   const limit = input.limit ?? 8;
   const embedding = await embedOne(input.query);
@@ -157,26 +173,28 @@ export async function searchSimilar(input: {
 
   const scope = input.scope ?? 'all';
   const queryVec = serialiseVector(embedding);
+  const clientId = input.clientId ?? null;
 
-  const sql =
-    scope === 'all'
-      ? `SELECT id, scope, scope_id, content, metadata,
-                vector_distance_cos(embedding, vector(?)) AS distance
-         FROM agent_memory_chunks
-         ORDER BY distance ASC
-         LIMIT ?`
-      : `SELECT id, scope, scope_id, content, metadata,
-                vector_distance_cos(embedding, vector(?)) AS distance
-         FROM agent_memory_chunks
-         WHERE scope = ?
-         ORDER BY distance ASC
-         LIMIT ?`;
+  const where: string[] = [];
+  const filterArgs: (string | number)[] = [];
+  if (scope !== 'all') {
+    where.push('scope = ?');
+    filterArgs.push(scope);
+  }
+  if (clientId != null) {
+    where.push('client_id = ?');
+    filterArgs.push(clientId);
+  }
+  const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-  const args =
-    scope === 'all'
-      ? [queryVec, limit]
-      : [queryVec, scope, limit];
+  const sql = `SELECT id, scope, scope_id, content, metadata,
+                      vector_distance_cos(embedding, vector(?)) AS distance
+               FROM agent_memory_chunks
+               ${whereClause}
+               ORDER BY distance ASC
+               LIMIT ?`;
 
+  const args = [queryVec, ...filterArgs, limit];
   const result = await db.execute({ sql, args });
   return result.rows.map(rowToHit);
 }

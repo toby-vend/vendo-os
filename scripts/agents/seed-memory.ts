@@ -72,7 +72,7 @@ interface MeetingRow {
 async function* meetingsToSeed(
   skipIds: Set<string>,
   limit: number | null,
-): AsyncGenerator<{ id: string; content: string; metadata: Record<string, unknown> }> {
+): AsyncGenerator<{ id: string; content: string; metadata: Record<string, unknown>; clientId: number | null }> {
   const result = await db.execute({
     sql: `SELECT id, title, date, client_name, summary
           FROM meetings
@@ -81,9 +81,24 @@ async function* meetingsToSeed(
           ${limit ? `LIMIT ${limit}` : ''}`,
     args: [],
   });
+
+  // Pre-build a normalised name → id map (single round-trip)
+  const clientMap = new Map<string, number>();
+  const clientRows = await db.execute({
+    sql: `SELECT id, name, display_name FROM clients`,
+    args: [],
+  });
+  for (const cr of clientRows.rows) {
+    if (cr.name) clientMap.set(String(cr.name).toLowerCase().trim(), Number(cr.id));
+    if (cr.display_name) clientMap.set(String(cr.display_name).toLowerCase().trim(), Number(cr.id));
+  }
+
   for (const row of result.rows as unknown as MeetingRow[]) {
     if (skipIds.has(row.id)) continue;
     const heading = `Meeting: ${row.title} (${row.date}${row.client_name ? `, ${row.client_name}` : ''})`;
+    const clientId = row.client_name
+      ? clientMap.get(row.client_name.toLowerCase().trim()) ?? null
+      : null;
     yield {
       id: row.id,
       content: `${heading}\n\n${row.summary ?? ''}`,
@@ -92,6 +107,7 @@ async function* meetingsToSeed(
         date: row.date,
         clientName: row.client_name,
       },
+      clientId,
     };
   }
 }
@@ -99,7 +115,7 @@ async function* meetingsToSeed(
 async function* decisionsToSeed(
   skipIds: Set<string>,
   limit: number | null,
-): AsyncGenerator<{ id: string; content: string; metadata: Record<string, unknown> }> {
+): AsyncGenerator<{ id: string; content: string; metadata: Record<string, unknown>; clientId: number | null }> {
   const decisionsDir = resolve(PROJECT_ROOT, 'data/decisions');
   let files: string[];
   try {
@@ -132,6 +148,7 @@ async function* decisionsToSeed(
       id: filename,
       content: `Decision: ${title}\n\n${content}`,
       metadata: { title, filename, mtime },
+      clientId: null,
     };
     count++;
   }
@@ -143,7 +160,7 @@ async function* decisionsToSeed(
 
 async function seedScope(
   scope: 'meeting' | 'decision',
-  source: AsyncGenerator<{ id: string; content: string; metadata: Record<string, unknown> }>,
+  source: AsyncGenerator<{ id: string; content: string; metadata: Record<string, unknown>; clientId: number | null }>,
 ): Promise<{ scope: string; inserted: number; failed: number; skipped: number }> {
   const skipped = ARGS.reset ? 0 : -1; // -1 means "computed below"
   const skipIds = ARGS.reset ? new Set<string>() : await existingScopeIds(scope);
@@ -155,7 +172,7 @@ async function seedScope(
 
   let inserted = 0;
   let failed = 0;
-  let batchBuffer: { scope: 'meeting' | 'decision'; scope_id: string; content: string; metadata: Record<string, unknown> }[] = [];
+  let batchBuffer: { scope: 'meeting' | 'decision'; scope_id: string; content: string; metadata: Record<string, unknown>; clientId: number | null }[] = [];
   let preSkipped = 0;
 
   for await (const item of source) {
@@ -168,6 +185,7 @@ async function seedScope(
       scope_id: item.id,
       content: item.content,
       metadata: item.metadata,
+      clientId: item.clientId,
     });
     if (batchBuffer.length >= ARGS.batch) {
       const r = await insertChunks(batchBuffer);
