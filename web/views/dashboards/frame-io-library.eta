@@ -26,22 +26,28 @@
       <a href="/dashboards/frame-io" style="color: #94A3B8;">Frame.io</a>
       <span style="color: #475569;"> / </span>
       <a href="/dashboards/frame-io/library" style="color: #94A3B8;">Library</a>
-      <% if (it.view === 'folder' && it.breadcrumb) { %>
+      <% if ((it.view === 'folder' || it.view === 'file') && it.breadcrumb) { %>
         <span style="color: #475569;"> / </span>
         <a href="/dashboards/frame-io/library/folder/<%= it.projectId %>" style="color: #94A3B8;"><%= it.projectName || '(project)' %></a>
         <% for (let i = 0; i < it.breadcrumb.length; i += 1) { %>
           <% const c = it.breadcrumb[i]; %>
-          <% if (i === it.breadcrumb.length - 1) { %>
+          <% const isLastFolder = it.view === 'folder' && i === it.breadcrumb.length - 1; %>
+          <% if (isLastFolder) { %>
             <span style="color: #475569;"> / </span><span><%= c.name %></span>
           <% } else { %>
             <span style="color: #475569;"> / </span><a href="/dashboards/frame-io/library/folder/<%= c.id %>" style="color: #94A3B8;"><%= c.name %></a>
           <% } %>
+        <% } %>
+        <% if (it.view === 'file') { %>
+          <span style="color: #475569;"> / </span><span><%= it.asset.name %></span>
         <% } %>
       <% } %>
     </div>
     <h2 style="font-family: var(--vendo-font); font-size: 22px; font-weight: 600; margin: 0;">
       <% if (it.view === 'folder') { %>
         <%= it.currentFolder.name === 'root' ? it.projectName : it.currentFolder.name %>
+      <% } else if (it.view === 'file') { %>
+        <%= it.asset.name %>
       <% } else { %>
         Video Library
       <% } %>
@@ -151,7 +157,7 @@
                     <span style="font-size: 11px; color: #475569; margin-left: 6px;">empty</span>
                   <% } %>
                 <% } else { %>
-                  <span style="color: #E2E8F0; font-weight: 500;"><%= c.name %></span>
+                  <a href="/dashboards/frame-io/library/file/<%= c.id %>" style="color: #E2E8F0; text-decoration: none; font-weight: 500;"><%= c.name %></a>
                 <% } %>
               </td>
               <td style="padding: 0.55rem 1rem; color: #94A3B8;">
@@ -176,5 +182,68 @@
       <a href="<%= it.currentFolder.view_url %>" target="_blank" style="color: #94A3B8;">↗ open this folder in Frame.io</a>
     </p>
   <% } %>
+
+<% } else if (it.view === 'file') { %>
+
+  <%
+    const a = it.asset;
+    const fmtMediaType = (mt) => (mt || '').split('/').pop() || 'file';
+  %>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1.5rem; align-items: start;">
+
+    <!-- Left: video metadata + ad-copy block -->
+    <div>
+      <div class="card" style="padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+        <% if (a.thumbnail_url) { %>
+          <img src="<%= a.thumbnail_url %>" alt="<%= a.name %>" style="max-width: 100%; border-radius: 6px; margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+        <% } %>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600;"><%= a.name %></h3>
+            <div style="font-size: 12px; color: #94A3B8;">
+              <%= fmtMediaType(a.media_type) %>
+              <% if (a.file_size) { %> · <%= fmtSize(a.file_size) %><% } %>
+              <% if (a.created_at) { %> · uploaded <%= fmtDate(a.created_at) %><% } %>
+            </div>
+            <% if (it.clientName) { %>
+              <div style="font-size: 12px; color: <%= it.clientName === '(unmapped)' ? '#F59E0B' : '#22C55E' %>; margin-top: 4px;">
+                <%= it.clientName === '(unmapped)' ? '⚠ ' : '↔ ' %><%= it.clientName %>
+              </div>
+            <% } %>
+          </div>
+          <% if (a.view_url) { %>
+            <a href="<%= a.view_url %>" target="_blank" rel="noopener" style="font-size: 12px; color: #94A3B8; text-decoration: underline;">↗ open in Frame.io</a>
+          <% } %>
+        </div>
+      </div>
+
+      <h4 style="font-size: 13px; font-weight: 600; margin: 1rem 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em; color: #94A3B8;">Meta ad copy</h4>
+      <% if (it.reviewRow) { %>
+        <%~ include('/dashboards/_frame-io-ad-copy-block', { row: it.reviewRow, csrfToken: it.csrfToken, user: it.user }) %>
+      <% } else { %>
+        <div style="padding: 0.75rem 1rem; background: #0B0B0B; border: 1px dashed rgba(255,255,255,0.10); border-radius: 8px; color: #94A3B8; font-size: 13px;">
+          Ad-copy generation isn't available for this asset yet.
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Right: context panel -->
+    <div>
+      <div class="card" style="padding: 1rem 1.25rem;">
+        <div style="font-size: 11px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Location</div>
+        <div style="font-size: 12px; color: #E2E8F0;">
+          <a href="/dashboards/frame-io/library/folder/<%= it.projectId %>" style="color: #cbd5e1;"><%= it.projectName || '(project)' %></a>
+          <% for (const c of it.breadcrumb || []) { %>
+            <span style="color: #475569;"> › </span><a href="/dashboards/frame-io/library/folder/<%= c.id %>" style="color: #cbd5e1;"><%= c.name %></a>
+          <% } %>
+        </div>
+        <% if (it.parentFolder) { %>
+          <a href="/dashboards/frame-io/library/folder/<%= it.parentFolder.id %>" style="display:inline-block;margin-top:8px;font-size:11px;color:#94A3B8;text-decoration:underline;">← back to folder</a>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
 
 <% } %>

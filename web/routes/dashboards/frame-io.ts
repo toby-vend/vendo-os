@@ -16,6 +16,7 @@ import {
   adCopyFilename,
 } from '../../lib/frameio/ad-copy.js';
 import { getOrCreateTranscript } from '../../lib/frameio/transcribe.js';
+import { getProjectsOverview, getLibraryStats } from '../../lib/queries/frameio-library.js';
 import { db } from '../../lib/queries/base.js';
 import type { SessionUser } from '../../lib/auth.js';
 
@@ -41,13 +42,15 @@ import type { SessionUser } from '../../lib/auth.js';
  */
 export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
   app.get('/', async (_request, reply) => {
-    const [connection, stats, recentComments, clientSummaries, activity, awaitingAdCopy] = await Promise.all([
+    const [connection, stats, recentComments, clientSummaries, activity, awaitingAdCopy, libraryStats, libraryProjects] = await Promise.all([
       getConnectionStatus(),
       getDashboardStats(),
       getRecentExternalComments(15),
       getClientSummaries(),
       getActivityFeed(30),
       getReviewsAwaitingAdCopy(20),
+      getLibraryStats(),
+      getProjectsOverview(),
     ]);
 
     reply.render('dashboards/frame-io', {
@@ -57,6 +60,8 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
       clientSummaries,
       activity,
       awaitingAdCopy,
+      libraryStats,
+      libraryProjects,
     });
   });
 

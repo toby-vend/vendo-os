@@ -7,6 +7,8 @@ import {
   searchLibrary,
 } from '../../lib/queries/frameio-library.js';
 import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
+import { getOrCreateReviewForLibraryFile, getLibraryAsset } from '../../lib/frameio/library-bridge.js';
+import { getAdCopyRowById } from '../../lib/queries/frameio-dashboard.js';
 import { db } from '../../lib/queries/base.js';
 
 /**
@@ -79,6 +81,58 @@ export const frameIoLibraryRoutes: FastifyPluginAsync = async (app) => {
       currentFolder: node,
       projectName,
       projectId: node.project_id,
+    });
+  });
+
+  /**
+   * GET /file/:fileId — single-video page with ad-copy generation block.
+   *
+   * Creates a creative_review row on demand if one doesn't exist yet
+   * (videos in the library mirror that have never been commented on
+   * won't have a review until the first reviewer asks for ad copy).
+   */
+  app.get<{ Params: { fileId: string } }>('/file/:fileId', async (request, reply) => {
+    const { fileId } = request.params;
+
+    const asset = await getLibraryAsset(fileId);
+    if (!asset || asset.type !== 'file') {
+      return reply.code(404).type('text/html').send('Video not found in library mirror.');
+    }
+
+    const bridge = await getOrCreateReviewForLibraryFile(fileId);
+    if (!('reviewId' in bridge)) {
+      return reply.code(404).type('text/html').send(`Cannot bridge file to review: ${bridge.reason}`);
+    }
+
+    const [stats, projectRow, parentRow, breadcrumb, adCopyRow] = await Promise.all([
+      getLibraryStats(),
+      db.execute({
+        sql: 'SELECT name FROM frameio_assets WHERE id = ? LIMIT 1',
+        args: [asset.project_id],
+      }),
+      asset.parent_id
+        ? db.execute({
+            sql: 'SELECT id, name FROM frameio_assets WHERE id = ? LIMIT 1',
+            args: [asset.parent_id],
+          })
+        : Promise.resolve({ rows: [] as unknown[] }),
+      asset.parent_id ? getBreadcrumb(asset.parent_id) : Promise.resolve([]),
+      getAdCopyRowById(bridge.reviewId),
+    ]);
+
+    const projectName = (projectRow.rows[0] as unknown as { name: string } | undefined)?.name ?? null;
+    const parentFolder = (parentRow.rows[0] as unknown as { id: string; name: string } | undefined) ?? null;
+
+    reply.render('dashboards/frame-io-library', {
+      view: 'file',
+      stats,
+      asset,
+      projectName,
+      projectId: asset.project_id,
+      parentFolder,
+      breadcrumb,
+      clientName: bridge.clientName,
+      reviewRow: adCopyRow,
     });
   });
 
