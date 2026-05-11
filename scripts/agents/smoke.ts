@@ -610,9 +610,9 @@ async function main(): Promise<void> {
     assert(a.name === 'atlas', "name === 'atlas'");
     assert(a.model === 'anthropic/claude-sonnet-4.6', 'model is Sonnet 4.6');
     assert(a.maxSteps === 8, 'maxSteps === 8');
-    assert(Array.isArray(a.tools) && a.tools.length === 18, 'declares 18 tools');
+    assert(Array.isArray(a.tools) && a.tools.length === 19, 'declares 19 tools');
     const expectedTools = [
-      'searchMeetings', 'searchClients', 'getClientHealth',
+      'searchMeetings', 'searchClients', 'getClientBriefing', 'getClientHealth',
       'getCampaignPerformance', 'queryDecisions', 'searchKnowledge',
       'searchAsanaTasks', 'getTimeSpent', 'getTrafficStats',
       'getFrameioStatus', 'searchMeetingConcerns',
