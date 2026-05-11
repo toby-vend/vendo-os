@@ -42,18 +42,6 @@
   </script>
 </head>
 <body>
-  <!-- Liquid Glass: shared SVG displacement filter for buttons, inputs, surfaces.
-       Uses a 1×1 WebP normal map + feDisplacementMap for true light refraction.
-       primitiveUnits="objectBoundingBox" lets the same filter scale to any element. -->
-  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none" focusable="false">
-    <filter id="liquid-glass" primitiveUnits="objectBoundingBox">
-      <feImage result="map" width="100%" height="100%" x="0" y="0" preserveAspectRatio="none"
-        href="data:image/webp;base64,UklGRkoCAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSF8AAAABL1AmrG3D2Ev9j4iJBJBp2zZIxhgQacv2P3aGsf3IDoARsW2bpW3btN2zZ60d20gAhUAS9TUgEdLFvIkPnAJK0lcrnXPNPyq7Hd9ddO+VbWfb7H/zb9rsf0v7P+1/AABWUDgg5AEAANALAJ0BKiAAIAA+CQKCQIFAAvgAEvIA0CWtAGePuL/IsfdYrAxk//8mfx5/CrYZUgfvBlhrxoMnsT8q8R+nyhP1XbsTAvCMcEnTbLpDsZW6L/4f8d/Mfeu/Mf3O+s/qX++/8H/wf+H/lf4l8MX0F8Df8X+5n4Z+gXxX9N/0f9z/cX5g+0V/UfMD9L/T++3+9P9V+H38lvgs8AT/J/4P/EftL+a/8X+xH/k+1n0X/x/+T/lf3v+wXuFexb6tewN+J/yz+T/uZ7E3sX/I/y39Z/eL/D///84P3I/aD2yPYI/Tz//xKnGoT0EYJojZJ7CY+oh3JeKLgwIw0nGD3LZlfKr5RmYwUE/9D6Et+Q3v8jdYpf+CwzbBmGTo5N5vCSE0F9KhuYbT6oUUTpf6IATl6XYDXIvgxR+CBJoX2u3F/yT74AAAAAAA" />
-      <feGaussianBlur in="SourceGraphic" stdDeviation="0.01" result="blur" />
-      <feDisplacementMap in="blur" in2="map" scale="0.5" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-  </svg>
-
   <div class="app-layout">
     <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
     <!-- Sidebar -->
