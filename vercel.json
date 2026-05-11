@@ -179,6 +179,14 @@
       "schedule": "0 6 1 * *"
     },
     {
+      "path": "/api/cron/capacity-digest",
+      "schedule": "30 8 * * 1"
+    },
+    {
+      "path": "/api/cron/sales-pipeline-digest",
+      "schedule": "0 17 * * 5"
+    },
+    {
       "path": "/api/cron/sync-asana",
       "schedule": "0 * * * *"
     },

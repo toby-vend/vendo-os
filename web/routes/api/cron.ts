@@ -40,6 +40,8 @@ import {
   atlasAmAgent,
 } from '../../lib/agents/agents/index.js';
 import { runMonthlyClientReports } from '../../lib/jobs/monthly-client-reports.js';
+import { runCapacityDigest } from '../../lib/jobs/capacity-digest.js';
+import { runSalesPipelineDigest } from '../../lib/jobs/sales-pipeline-digest.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -568,6 +570,54 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/monthly-client-reports] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Monthly client reports failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /capacity-digest — Weekly Mon 08:30 UTC. Team utilisation snapshot
+   * posted to SLACK_CHANNEL_OPS. Wave C / C3. Idempotent within 6 days.
+   */
+  app.get('/capacity-digest', async (_request, reply) => {
+    try {
+      const result = await runCapacityDigest();
+      return reply.send({
+        ok: true,
+        message: 'Capacity digest completed',
+        posted: result.posted,
+        total: result.total,
+        over: result.over,
+        under: result.under,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/capacity-digest] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Capacity digest failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /sales-pipeline-digest — Weekly Fri 17:00 UTC. Top 10 scored leads
+   * + pipeline value delta + wins/losses for the past 7 days. Wave C / C3.
+   * Idempotent within 5 days.
+   */
+  app.get('/sales-pipeline-digest', async (_request, reply) => {
+    try {
+      const result = await runSalesPipelineDigest();
+      return reply.send({
+        ok: true,
+        message: 'Sales pipeline digest completed',
+        posted: result.posted,
+        topCount: result.topCount,
+        openValue: result.openValue,
+        wonLast7: result.wonLast7,
+        lostLast7: result.lostLast7,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/sales-pipeline-digest] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Sales pipeline digest failed', error: msg });
     }
   });
 
