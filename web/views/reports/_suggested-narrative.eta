@@ -1,0 +1,111 @@
+<!--
+  A3 → A4 contract: this form POSTs to /api/reports/:id/use-suggested-narrative
+  which must copy client_reports.narrative_draft_md into worked_on_md and
+  redirect back (or return 200 for HTMX).
+
+  Expected locals:
+    it.report.id                 — number
+    it.report.narrative_draft_md — string | null (column added by the
+                                   2026-05-11-gads-autonomous-reports
+                                   migration, owned by A1)
+    it.csrfToken                 — string (injected globally by reply.render)
+    md                           — markdown → HTML helper (global, already sanitises)
+-->
+<% var draft = it.report.narrative_draft_md || ''; %>
+<% var hasDraft = draft.trim().length > 0; %>
+
+<details class="r-suggested-narrative" <%= hasDraft ? 'open' : '' %>>
+  <summary class="r-suggested-summary">
+    <span>Suggested narrative</span>
+    <span class="r-muted r-suggested-sub">— from Asana, meetings, last month's focus</span>
+  </summary>
+
+  <div class="r-suggested-body">
+    <% if (!hasDraft) { %>
+      <p class="r-muted" style="margin: 0;">
+        No suggested narrative yet. The system will populate this on the 1st of
+        each month, or when the report is regenerated.
+      </p>
+    <% } else { %>
+      <div class="r-suggested-preview">
+        <%~ md(draft) %>
+      </div>
+
+      <form class="r-suggested-actions"
+            method="POST"
+            action="/api/reports/<%= it.report.id %>/use-suggested-narrative">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+        <button type="submit"
+                class="r-btn r-btn-primary"
+                hx-post="/api/reports/<%= it.report.id %>/use-suggested-narrative"
+                hx-confirm="Replace 'What we worked on' with this draft? Existing content will be overwritten."
+                hx-swap="none">
+          Use this draft
+        </button>
+        <span class="r-muted r-suggested-hint">
+          Copies the draft into <em>What we worked on</em>. You can still edit it afterwards.
+        </span>
+      </form>
+    <% } %>
+  </div>
+</details>
+
+<style>
+  .r-suggested-narrative {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 1rem;
+  }
+  .r-suggested-summary {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+    font-weight: 600;
+    color: #E2E8F0;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .r-suggested-summary::-webkit-details-marker { display: none; }
+  .r-suggested-summary::before {
+    content: '▸';
+    display: inline-block;
+    transition: transform 120ms;
+    color: #94A3B8;
+    font-size: 11px;
+  }
+  .r-suggested-narrative[open] .r-suggested-summary::before { transform: rotate(90deg); }
+  .r-suggested-sub { font-weight: 400; font-size: 12px; }
+  .r-suggested-body {
+    padding: 0.25rem 1rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .r-suggested-preview {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+    color: #E2E8F0;
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 0.75rem 0;
+  }
+  .r-suggested-preview h2 { font-size: 14px; font-weight: 600; margin: 0.75rem 0 0.4rem; color: #FFFFFF; }
+  .r-suggested-preview h2:first-child { margin-top: 0; }
+  .r-suggested-preview h3 { font-size: 13px; font-weight: 600; margin: 0.6rem 0 0.3rem; color: #E2E8F0; }
+  .r-suggested-preview ul { margin: 0.2rem 0 0.4rem; padding-left: 1.2rem; }
+  .r-suggested-preview li { margin: 0.15rem 0; }
+  .r-suggested-preview em { color: #94A3B8; font-style: normal; }
+  .r-suggested-preview p { margin: 0.3rem 0; }
+  .r-suggested-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .r-suggested-hint { font-size: 12px; }
+</style>
