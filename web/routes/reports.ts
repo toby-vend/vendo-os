@@ -18,6 +18,7 @@ import {
 } from '../lib/blob-uploads.js';
 import {
   listReports,
+  listReviewQueue,
   getReport,
   createReport,
   findReport,
@@ -29,7 +30,9 @@ import {
   updateNarrative,
   updateAiBlocks,
   updateAiBlock,
-  setStatus,
+  submitForReview,
+  approveReport,
+  reopenReport,
   deleteReport,
   listActiveClientsForReports,
   PLATFORM_OPTIONS,
@@ -37,11 +40,27 @@ import {
   type ReportStatus,
 } from '../lib/queries/reports.js';
 import { generateReportInsights } from '../lib/report-ai.js';
+// AGENT-COORD: stub for A2 buildGoogleAdsPeriodSummary — extends ReportAiInput
+// with googleAdsSummary so the AI prefers structured data over OCR when present.
+import { buildGoogleAdsPeriodSummary } from '../lib/reports/gads-summary.js';
 
 // --- Helpers ---
 
 function requireTeamUser(user: SessionUser | null): user is SessionUser {
   return !!user && (user.role === 'admin' || user.role === 'standard');
+}
+
+/**
+ * AM-role check. Admins always count. Otherwise the user must hold the
+ * `chat-am` channel slug — the existing per-user Account Manager flag in
+ * SessionUser.channels (mapped via user_channels → channels.slug). No new
+ * column needed; AMs already get this slug when an admin grants them
+ * access to the /chat/am specialist.
+ */
+function isAmUser(user: SessionUser | null): user is SessionUser {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  return user.channels.includes('chat-am') || user.allowedRoutes.includes('chat-am');
 }
 
 function field(body: unknown, key: string): string {
@@ -105,13 +124,14 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
 
     const clientId = request.query.client ? Number(request.query.client) : undefined;
-    const status = (request.query.status === 'draft' || request.query.status === 'final')
+    const status = (request.query.status === 'draft' || request.query.status === 'review' || request.query.status === 'final')
       ? request.query.status as ReportStatus
       : undefined;
 
-    const [items, clients] = await Promise.all([
+    const [items, clients, reviewQueue] = await Promise.all([
       listReports({ clientId, status }),
       listActiveClientsForReports(),
+      listReviewQueue(),
     ]);
 
     return reply.render('reports/list', {
@@ -119,6 +139,8 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       clients,
       filterClientId: clientId ?? '',
       filterStatus: status ?? '',
+      reviewCount: reviewQueue.length,
+      isAm: isAmUser(user),
     });
   });
 
@@ -149,6 +171,7 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       report,
       screenshots,
       platforms: PLATFORM_OPTIONS,
+      isAm: isAmUser(user),
     });
   });
 
@@ -468,7 +491,9 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     return reply.code(204).send();
   });
 
-  // Generate AI insights (one-shot, no streaming)
+  // Generate AI insights (one-shot, no streaming). Also rebuilds the Google
+  // Ads structured summary on the fly so on-demand regeneration always uses
+  // the freshest sync data, not a stale snapshot from the monthly cron.
   app.post<{ Params: { id: string } }>('/:id/generate', async (request, reply) => {
     const user = (request as any).user as SessionUser | null;
     if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
@@ -479,18 +504,35 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     if (!report) return reply.code(404).send('Not found');
     const screenshots = await listScreenshots(id);
 
+    // Best-effort Google Ads summary — if it fails, we still fall back to
+    // screenshot-only generation. Don't block on a failed sync.
+    let googleAdsSummary: Awaited<ReturnType<typeof buildGoogleAdsPeriodSummary>> | null = null;
     try {
-      const out = await generateReportInsights(
-        {
-          clientName: report.client_display_name || report.client_name,
-          vertical: report.client_vertical,
-          periodLabel: report.period_label,
-          workedOnMd: report.worked_on_md,
-          focusNextMd: report.focus_next_md,
-          screenshots: screenshots.map(s => ({ platform: s.platform, caption: s.caption, url: s.blob_url })),
-        },
-        user.id,
+      googleAdsSummary = await buildGoogleAdsPeriodSummary(
+        report.client_id,
+        report.period_start,
+        report.period_end,
       );
+    } catch (err) {
+      request.log?.warn?.({ err }, 'Google Ads summary unavailable — generating from screenshots only');
+    }
+
+    try {
+      // AGENT-COORD: googleAdsSummary becomes a typed field on ReportAiInput
+      // once A2 lands the report-ai.ts extension. Cast keeps types clean here
+      // — value is gated by has_data so an empty stub never enters the prompt.
+      const aiInput = {
+        clientName: report.client_display_name || report.client_name,
+        vertical: report.client_vertical,
+        periodLabel: report.period_label,
+        workedOnMd: report.worked_on_md,
+        focusNextMd: report.focus_next_md,
+        screenshots: screenshots.map(s => ({ platform: s.platform, caption: s.caption, url: s.blob_url })),
+        ...(googleAdsSummary && googleAdsSummary.has_data
+          ? { googleAdsSummary }
+          : {}),
+      } as Parameters<typeof generateReportInsights>[0];
+      const out = await generateReportInsights(aiInput, user.id);
       await updateAiBlocks(id, {
         execSummaryMd: out.exec_summary,
         performanceSummaryMd: out.performance_summary,
@@ -510,16 +552,80 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     return reply.type('text/html').render('reports/_ai-blocks', { report: fresh });
   });
 
-  // Mark final / draft
-  app.post<{ Params: { id: string } }>('/:id/status', async (request, reply) => {
+  // Submit a draft for AM review. Any team member can do this.
+  app.post<{ Params: { id: string } }>('/:id/submit-review', async (request, reply) => {
     const user = (request as any).user as SessionUser | null;
     if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
 
     const id = Number(request.params.id);
     if (!Number.isFinite(id)) return reply.code(404).send('Not found');
-    const next = field(request.body, 'status');
-    if (next !== 'draft' && next !== 'final') return reply.code(400).send('Bad status');
-    await setStatus(id, next);
+
+    try {
+      await submitForReview(id, user.email);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Cannot submit for review';
+      return reply.code(409).type('text/html').send(
+        `<div class="r-error">${msg.slice(0, 200)}</div>`,
+      );
+    }
+    return reply.header('HX-Redirect', `/reports/${id}`).code(204).send();
+  });
+
+  // Approve a report and send it. AM role only.
+  app.post<{ Params: { id: string } }>('/:id/approve', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+    if (!isAmUser(user)) {
+      return reply.code(403).type('text/html').send(
+        '<div class="r-error">Only Account Managers can approve reports.</div>',
+      );
+    }
+
+    const id = Number(request.params.id);
+    if (!Number.isFinite(id)) return reply.code(404).send('Not found');
+
+    try {
+      await approveReport(id, user.email);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Cannot approve';
+      return reply.code(409).type('text/html').send(
+        `<div class="r-error">${msg.slice(0, 200)}</div>`,
+      );
+    }
+    return reply.header('HX-Redirect', `/reports/${id}`).code(204).send();
+  });
+
+  // Reopen — clears review/approval timestamps, returns to draft. Either AM
+  // (rollback an approval) or a team member (rework after submission).
+  app.post<{ Params: { id: string } }>('/:id/reopen', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+    const id = Number(request.params.id);
+    if (!Number.isFinite(id)) return reply.code(404).send('Not found');
+
+    await reopenReport(id);
+    return reply.header('HX-Redirect', `/reports/${id}`).code(204).send();
+  });
+
+  // Apply the AI-suggested "What we worked on" draft (built by A3 via
+  // buildNarrativeContext) to the editable worked_on_md textarea. Posted by
+  // the _suggested-narrative.eta partial's "Use suggestion" button.
+  app.post<{ Params: { id: string } }>('/:id/use-suggested-narrative', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+    const id = Number(request.params.id);
+    if (!Number.isFinite(id)) return reply.code(404).send('Not found');
+    const report = await getReport(id);
+    if (!report) return reply.code(404).send('Not found');
+
+    const draft = report.narrative_draft_md;
+    if (draft && draft.trim()) {
+      await updateNarrative(id, { workedOnMd: draft });
+    }
+    // HTMX-friendly: redirect back to the editor so the textarea reflects the
+    // applied draft and the partial removes itself.
     return reply.header('HX-Redirect', `/reports/${id}`).code(204).send();
   });
 
