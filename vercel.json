@@ -139,6 +139,10 @@
       "schedule": "0 9 * * 5"
     },
     {
+      "path": "/api/cron/upsell-detection",
+      "schedule": "0 10 * * 3"
+    },
+    {
       "path": "/api/cron/sync-asana",
       "schedule": "0 * * * *"
     },

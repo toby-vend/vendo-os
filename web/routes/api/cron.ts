@@ -20,6 +20,7 @@ import { syncAsana } from '../../lib/jobs/sync-asana.js';
 import { recomputeClientProfitability } from '../../lib/jobs/client-profitability.js';
 import { recordHeartbeat } from '../../lib/jobs/heartbeat.js';
 import { runLeadScoring } from '../../lib/jobs/lead-scoring.js';
+import { runUpsellDetection } from '../../lib/jobs/upsell-detection.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -316,6 +317,30 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/lead-scoring] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'Lead scoring failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /upsell-detection — Weekly Wed 10:00 UTC scan for expansion signals.
+   * Wave V / V2. Three signal paths: high_performance (Google Ads),
+   * meeting_signal (recent meeting keywords), high_margin (profitability).
+   * Idempotent within each signal's window; never duplicates an open row.
+   */
+  app.get('/upsell-detection', async (_request, reply) => {
+    try {
+      const result = await runUpsellDetection();
+      return reply.send({
+        ok: true,
+        message: 'Upsell detection completed',
+        candidates: result.candidates,
+        inserted: result.inserted,
+        skipped: result.skipped,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/upsell-detection] Failed:', msg);
+      return reply.code(500).send({ ok: false, message: 'Upsell detection failed', error: msg });
     }
   });
 
