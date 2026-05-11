@@ -17,6 +17,7 @@ import { syncFrameioLibrary } from '../../lib/frameio/sync-library.js';
 import { pushClientsToPortal } from '../../lib/jobs/push-clients-to-portal.js';
 import { pullOnboardingFromPortal } from '../../lib/jobs/pull-onboarding-from-portal.js';
 import { syncAsana } from '../../lib/jobs/sync-asana.js';
+import { recomputeClientProfitability } from '../../lib/jobs/client-profitability.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -253,18 +254,22 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
 
   /**
    * GET /client-profitability — Recompute client_profitability table
-   *   (daily Vercel Cron, after health-score at 03:00 UTC).
-   *   Joins harvest_time_entries + xero_invoices + ad spend into per-
-   *   client margin rows. No-op for clients with no data.
+   * (daily Vercel Cron, after health-score at 04:00 UTC).
+   * Turso-native in-process job (Wave R / R1).
    */
   app.get('/client-profitability', async (_request, reply) => {
-    const scriptPath = resolve(PROJECT_ROOT, 'scripts/functions/client-profitability.ts');
     try {
-      const { stdout } = await runScript(scriptPath);
+      const result = await recomputeClientProfitability();
       return reply.send({
         ok: true,
         message: 'Profitability recompute completed',
-        output: stdout.slice(-2000),
+        period: result.period,
+        clientsProcessed: result.clientsProcessed,
+        healthy: result.healthy,
+        warning: result.warning,
+        critical: result.critical,
+        upserted: result.upserted,
+        durationMs: result.durationMs,
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
