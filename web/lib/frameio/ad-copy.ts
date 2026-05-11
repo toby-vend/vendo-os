@@ -1,5 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { db } from '../queries/base.js';
+import {
+  buildAdCopyContext,
+  renderBrandNotesBlock,
+  renderMetaWinnersBlock,
+  type AdCopyContext,
+} from './ad-copy-context.js';
 
 /**
  * Phase 5 — generate Meta ad copy from a Frame.io creative-review row.
@@ -55,58 +61,21 @@ export interface AdCopyError {
   reason: string;
 }
 
-interface ReviewRow {
-  id: number;
-  client_name: string;
-  asset_name: string;
-  asset_type: string;
-  feedback: string | null;
-  frameio_view_url: string | null;
-  frameio_file_id: string | null;
-  frameio_project_id: string | null;
-}
-
-interface ClientRow {
-  id: number;
-  name: string;
-  aliases: string | null;
-  vertical: string | null;
-}
-
-/** Pull a creative_review and its client. Returns null if missing. */
-async function loadContext(reviewId: number): Promise<{ review: ReviewRow; client: ClientRow | null } | null> {
-  const r = await db.execute({
-    sql: `SELECT id, client_name, asset_name, asset_type, feedback,
-                 frameio_view_url, frameio_file_id, frameio_project_id
-            FROM creative_reviews WHERE id = ?`,
-    args: [reviewId],
-  });
-  const review = r.rows[0] as unknown as ReviewRow | undefined;
-  if (!review) return null;
-
-  const c = await db.execute({
-    sql: 'SELECT id, name, aliases, vertical FROM clients WHERE name = ? LIMIT 1',
-    args: [review.client_name],
-  });
-  const client = (c.rows[0] as unknown as ClientRow | undefined) ?? null;
-  return { review, client };
-}
-
-/** Heuristic clean of the feedback trail into a list of bullet points. */
-function parseComments(feedback: string | null): string[] {
-  if (!feedback) return [];
-  return feedback
-    .split('\n')
-    .map((line) => line.replace(/^\[[^\]]+\]\s*/, '').trim())
-    .filter(Boolean);
-}
-
+/**
+ * Build the system + user prompt from a fully-loaded AdCopyContext.
+ *
+ * The system prompt is unchanged from Phase 5 — preserves the meta-ad-copy
+ * skill's output schema. The user prompt grows four optional sections,
+ * each omitted when empty:
+ *   - BRAND CONTEXT          (client_notes + brand_hub presence)
+ *   - PAST WINNING ADS       (top performers from meta_insights, last 60d)
+ *   - TRANSCRIPT             (Whisper output; wired in commit 7)
+ *   - LESSONS FROM PRIOR REJECTIONS  (wired in commit 4)
+ */
 function buildPrompt(opts: {
-  review: ReviewRow;
-  client: ClientRow | null;
+  ctx: AdCopyContext;
   objective: string;
   audienceHint: string | null;
-  comments: string[];
 }): { system: string; user: string } {
   const system = `You are a Meta (Facebook/Instagram) ad copywriter for Vendo Digital, a UK digital marketing agency. You write punchy, on-brand ad copy that conforms to Meta's character limits and best practices.
 
@@ -149,29 +118,53 @@ Constraints:
 - Honour Meta's character guidelines — character counts in parentheses help reviewers.
 - Do not output anything other than the markdown above. No preamble, no commentary.`;
 
-  const commentBlock = opts.comments.length
-    ? opts.comments.map((c) => `- "${c}"`).join('\n')
+  const { ctx } = opts;
+  const aliases = ctx.client?.aliases ?? '';
+  const vertical = ctx.client?.vertical ?? '';
+
+  const sections: string[] = [];
+  sections.push(`Generate Meta ad copy for the following Frame.io creative asset.`);
+  sections.push(
+    [
+      `CLIENT: ${ctx.review.client_name}${vertical ? ` (vertical: ${vertical})` : ''}`,
+      aliases ? `ALSO KNOWN AS: ${aliases}` : null,
+      `ASSET: ${ctx.review.asset_name} (${ctx.review.asset_type})`,
+      ctx.review.frameio_view_url ? `FRAME.IO LINK: ${ctx.review.frameio_view_url}` : null,
+      ``,
+      `OBJECTIVE: ${opts.objective}`,
+      opts.audienceHint ? `AUDIENCE HINT: ${opts.audienceHint}` : null,
+    ].filter(Boolean).join('\n'),
+  );
+
+  const commentBlock = ctx.comments.length
+    ? ctx.comments.map((c) => `- "${c}"`).join('\n')
     : '(no client comments yet)';
+  sections.push(`CLIENT COMMENTS ON THIS ASSET (use to infer tone, hero benefit, target audience):\n${commentBlock}`);
 
-  const aliases = opts.client?.aliases ?? '';
-  const vertical = opts.client?.vertical ?? '';
+  const brandBlock = renderBrandNotesBlock(ctx.brandNotes, ctx.brandHubHasGuidelines);
+  if (brandBlock) {
+    sections.push(`BRAND CONTEXT (tribal knowledge — respect gotchas and preferences):\n${brandBlock}`);
+  }
 
-  const user = `Generate Meta ad copy for the following Frame.io creative asset.
+  const winnersBlock = renderMetaWinnersBlock(ctx.topMetaWinners);
+  if (winnersBlock) {
+    sections.push(
+      `PAST WINNING ADS FOR THIS CLIENT (last 60 days — match this client's proven tone and angles):\n${winnersBlock}`,
+    );
+  }
 
-CLIENT: ${opts.review.client_name}${vertical ? ` (vertical: ${vertical})` : ''}
-${aliases ? `ALSO KNOWN AS: ${aliases}` : ''}
-ASSET: ${opts.review.asset_name} (${opts.review.asset_type})
-${opts.review.frameio_view_url ? `FRAME.IO LINK: ${opts.review.frameio_view_url}` : ''}
+  if (ctx.transcript && ctx.transcript.text) {
+    sections.push(`TRANSCRIPT (what's actually said on screen):\n${ctx.transcript.text}`);
+  }
 
-OBJECTIVE: ${opts.objective}
-${opts.audienceHint ? `AUDIENCE HINT: ${opts.audienceHint}` : ''}
+  if (ctx.rejectionLessons.length) {
+    const lessons = ctx.rejectionLessons.map((l) => `- ${l}`).join('\n');
+    sections.push(`LESSONS FROM PRIOR REJECTIONS (do not repeat these mistakes):\n${lessons}`);
+  }
 
-CLIENT COMMENTS ON THIS ASSET (use to infer tone, hero benefit, target audience):
-${commentBlock}
+  sections.push(`Write five variants, each with a distinct angle, and the testing recommendations block. UK English. Stick to the markdown structure exactly.`);
 
-Write five variants, each with a distinct angle, and the testing recommendations block. UK English. Stick to the markdown structure exactly.`;
-
-  return { system, user };
+  return { system, user: sections.join('\n\n') };
 }
 
 let _anthropic: Anthropic | null = null;
@@ -182,17 +175,14 @@ function anthropic(): Anthropic {
 
 export async function generateAdCopyForReview(input: AdCopyInput): Promise<AdCopyResult | AdCopyError> {
   await ensureSchema();
-  const ctx = await loadContext(input.reviewId);
+  const ctx = await buildAdCopyContext(input.reviewId);
   if (!ctx) return { ok: false, reason: 'review_not_found' };
 
   const objective = input.objective ?? 'leads';
-  const comments = parseComments(ctx.review.feedback);
   const { system, user } = buildPrompt({
-    review: ctx.review,
-    client: ctx.client,
+    ctx,
     objective,
     audienceHint: input.audienceHint ?? null,
-    comments,
   });
 
   let markdown: string;
