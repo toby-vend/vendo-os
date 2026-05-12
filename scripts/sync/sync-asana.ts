@@ -50,7 +50,7 @@ async function fetchAllUsers(): Promise<{ gid: string; name: string }[]> {
 async function fetchUserTasks(userGid: string): Promise<AsanaTask[]> {
   // Get tasks from My Tasks list
   const tasks = await asanaFetch<AsanaTask[]>(`/user_task_lists/${userGid}/tasks`, {
-    completed_since: 'now', // only incomplete tasks
+    completed_since: '1970-01-01T00:00:00.000Z', // include completions; see web/lib/jobs/sync-asana.ts for rationale
     opt_fields: 'name,assignee,assignee.name,due_on,completed,completed_at,memberships.section.name,projects,projects.name,notes,permalink_url,created_at,modified_at',
   });
   return tasks;
@@ -64,7 +64,7 @@ async function fetchWorkspaceTasks(): Promise<AsanaTask[]> {
   do {
     const params: Record<string, string> = {
       workspace: WORKSPACE_GID,
-      completed_since: 'now',
+      completed_since: '1970-01-01T00:00:00.000Z',
       opt_fields: 'name,assignee,assignee.name,due_on,completed,completed_at,memberships.section.name,projects,projects.name,notes,permalink_url,created_at,modified_at',
       limit: '100',
     };
@@ -96,7 +96,7 @@ async function fetchProjectTasks(projectGid: string): Promise<AsanaTask[]> {
 
   do {
     const params: Record<string, string> = {
-      completed_since: 'now',
+      completed_since: '1970-01-01T00:00:00.000Z',
       opt_fields: 'name,assignee,assignee.name,due_on,completed,completed_at,memberships.section.name,projects,projects.name,notes,permalink_url,created_at,modified_at',
       limit: '100',
     };

@@ -71,9 +71,18 @@ async function fetchProjects(workspaceGid: string, apiKey: string): Promise<{ gi
 async function fetchProjectTasks(projectGid: string, apiKey: string): Promise<AsanaTask[]> {
   const allTasks: AsanaTask[] = [];
   let offset: string | undefined;
+  // `completed_since` toggles whether the API returns completed tasks
+  // at all. Asana's default (and `completed_since='now'`, used here for
+  // months) returns ONLY incomplete tasks — a task that transitions
+  // open → completed silently disappears from sync results, leaving
+  // the prior `completed=0` row stuck. We use a rolling 90-day window
+  // so completions land in our mirror without pulling Asana's full
+  // history every hour (which would blow past Vercel's 300s budget).
+  // The 2026-05-12 one-shot all-time resync filled in older completions.
+  const completedSince = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
   do {
     const params: Record<string, string> = {
-      completed_since: 'now',
+      completed_since: completedSince,
       opt_fields:
         'name,assignee,assignee.name,due_on,completed,completed_at,memberships.section.name,projects,projects.name,notes,permalink_url,created_at,modified_at',
       limit: '100',
