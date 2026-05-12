@@ -27,6 +27,7 @@ const inputSchema = z.object({
     'feature-priority',
     'case-study-candidate',
     'growth-prescription',
+    'qa-audit',
   ]),
   subject_type: z.enum(['client', 'lead', 'feature', 'global']).nullable(),
   subject_id: z

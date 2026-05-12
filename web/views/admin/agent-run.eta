@@ -86,6 +86,58 @@
   </table>
 <% } %>
 
+<% if (it.delegations && it.delegations.length > 0) { %>
+  <h2 style="margin-top:1.5em">Delegations <small style="color:var(--vendo-text-muted)">(<%= it.delegations.length %>)</small></h2>
+
+  <p style="color:var(--vendo-text-muted)">
+    Exact prompts this run sent to other agents via <code>invokeAgent</code>,
+    and the replies it got back. Use this to spot bad prompts or
+    hallucinated replies — and tighten the system prompt if needed.
+  </p>
+
+  <% it.delegations.forEach(function(d){ %>
+    <div class="delegation">
+      <div class="delegation-header">
+        <span class="delegation-step">step <%= d.step %></span>
+        →
+        <code class="delegation-agent"><%= d.targetAgent %></code>
+        <span class="delegation-meta">
+          <% if (d.status === 'completed') { %>
+            <span class="agents-dot agents-dot-ok" title="completed"></span>
+          <% } else if (d.status === 'errored' || d.status === 'depth_exceeded' || d.status === 'unresolved') { %>
+            <span class="agents-dot agents-dot-error" title="<%= d.status %>"></span>
+          <% } else { %>
+            <span class="agents-dot agents-dot-unknown" title="<%= d.status %>"></span>
+          <% } %>
+          <%= d.status %>
+          <% if (d.durationMs !== null) { %> · <%= (d.durationMs / 1000).toFixed(1) %>s<% } %>
+          · <%= d.costGbpDisplay %>
+          <% if (d.childRunId) { %>
+            · <a href="/admin/agents/run/<%= d.childRunId %>" class="link">open child run →</a>
+          <% } %>
+        </span>
+      </div>
+
+      <div class="delegation-body">
+        <div class="delegation-side">
+          <div class="delegation-label">Prompt sent</div>
+          <pre class="delegation-text delegation-prompt"><%= d.prompt %></pre>
+        </div>
+        <div class="delegation-side">
+          <div class="delegation-label">Reply received</div>
+          <% if (d.error) { %>
+            <pre class="delegation-text delegation-error"><%= d.error %></pre>
+          <% } else if (d.replyText) { %>
+            <pre class="delegation-text delegation-reply"><%= d.replyText %></pre>
+          <% } else { %>
+            <pre class="delegation-text delegation-empty">(empty reply)</pre>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+<% } %>
+
 <h2 style="margin-top:1.5em">Transcript</h2>
 
 <% if (it.messages.length === 0) { %>
@@ -128,6 +180,53 @@
   .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
   .link:hover { text-decoration: underline; }
   .tree-indent { display: inline-block; width: 18px; color: var(--vendo-text-muted); }
+
+  .delegation {
+    border: 1px solid var(--vendo-border);
+    border-left: 3px solid #93C5FD;
+    border-radius: 6px;
+    background: var(--vendo-surface);
+    margin: 12px 0;
+    padding: 12px 16px;
+  }
+  .delegation-header {
+    display: flex; align-items: center; gap: 0.6em;
+    margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .delegation-step {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--vendo-text-muted); padding: 1px 6px;
+    background: rgba(255,255,255,0.04); border-radius: 4px;
+  }
+  .delegation-agent { font-size: 14px; color: var(--vendo-text); font-weight: 600; }
+  .delegation-meta {
+    font-size: 12px; color: var(--vendo-text-muted);
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-left: auto;
+  }
+  .delegation-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 900px) {
+    .delegation-body { grid-template-columns: 1fr; }
+  }
+  .delegation-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--vendo-text-muted); margin-bottom: 4px;
+  }
+  .delegation-text {
+    background: var(--vendo-bg); border: 1px solid var(--vendo-border);
+    border-radius: 4px; padding: 10px 12px; margin: 0;
+    font-family: var(--vendo-font); font-size: 13px;
+    white-space: pre-wrap; max-height: 360px; overflow: auto;
+    color: var(--vendo-text);
+  }
+  .delegation-prompt { border-left: 2px solid var(--vendo-green); }
+  .delegation-reply  { border-left: 2px solid #93C5FD; }
+  .delegation-error  { border-left: 2px solid #EF4444; color: #FCA5A5; }
+  .delegation-empty  { color: var(--vendo-text-muted); font-style: italic; }
 
   .msg {
     border: 1px solid var(--vendo-border);

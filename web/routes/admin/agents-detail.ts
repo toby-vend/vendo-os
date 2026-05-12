@@ -62,13 +62,17 @@ export const adminAgentsDetailRoutes: FastifyPluginAsync = async (app) => {
       return;
     }
 
-    const tree = await loadRunTree(runId);
-    const messages = await loadMessages(runId);
+    const [tree, messages, delegations] = await Promise.all([
+      loadRunTree(runId),
+      loadMessages(runId),
+      loadDelegations(runId),
+    ]);
 
     reply.render('admin/agent-run', {
       root: viewRun(root),
       tree: tree.map(viewRun),
       messages: messages.map(viewMessage),
+      delegations,
     });
   });
 
@@ -190,6 +194,94 @@ async function loadRunTree(runId: string): Promise<AgentRunRow[]> {
       ...(root ? [root] : []),
       ...((kids.rows as unknown as AgentRunRow[]) ?? []),
     ];
+  }
+}
+
+/**
+ * Pull every invokeAgent call this run made, joining the start row
+ * (carries the prompt) with the end row (carries the reply text + child
+ * runId). Returns one entry per logical call so the view can render the
+ * delegation as parent-prompt → child-reply.
+ *
+ * Both rows share the same call_id; we group on it.
+ */
+interface DelegationRow {
+  callId: string;
+  step: number;
+  targetAgent: string;
+  prompt: string;
+  replyText: string;
+  childRunId: string | null;
+  status: string;
+  costGbpDisplay: string;
+  durationMs: number | null;
+  error: string | null;
+}
+
+async function loadDelegations(runId: string): Promise<DelegationRow[]> {
+  try {
+    const r = await db.execute({
+      sql: `SELECT call_id, step, phase, input, output, error, duration_ms, created_at
+              FROM agent_tool_calls
+             WHERE run_id = ?
+               AND tool_name = 'invokeAgent'
+          ORDER BY step ASC, created_at ASC`,
+      args: [runId],
+    });
+    type Row = {
+      call_id: string;
+      step: number;
+      phase: 'start' | 'end' | 'error';
+      input: string | null;
+      output: string | null;
+      error: string | null;
+      duration_ms: number | null;
+      created_at: string;
+    };
+    const rows = r.rows as unknown as Row[];
+
+    // Group by call_id, pick start row for input and end row for output.
+    const grouped = new Map<string, Row[]>();
+    for (const row of rows) {
+      const list = grouped.get(row.call_id);
+      if (list) list.push(row);
+      else grouped.set(row.call_id, [row]);
+    }
+
+    const out: DelegationRow[] = [];
+    for (const [callId, calls] of grouped) {
+      const start = calls.find(c => c.phase === 'start') ?? calls[0];
+      const end = calls.find(c => c.phase === 'end');
+      const err = calls.find(c => c.phase === 'error');
+
+      let input: { agentName?: string; prompt?: string } = {};
+      try { if (start?.input) input = JSON.parse(start.input); } catch { /* ignore */ }
+      let output: {
+        runId?: string;
+        text?: string;
+        status?: string;
+        costUsd?: number | null;
+      } = {};
+      try { if (end?.output) output = JSON.parse(end.output); } catch { /* ignore */ }
+
+      out.push({
+        callId,
+        step: start?.step ?? 0,
+        targetAgent: input.agentName ?? '<unknown>',
+        prompt: input.prompt ?? '',
+        replyText: output.text ?? '',
+        childRunId: output.runId ?? null,
+        status: output.status ?? (err ? 'errored' : 'unknown'),
+        costGbpDisplay: formatGbp(output.costUsd ?? null, 4),
+        durationMs: end?.duration_ms ?? err?.duration_ms ?? null,
+        error: err?.error ?? null,
+      });
+    }
+    out.sort((a, b) => a.step - b.step);
+    return out;
+  } catch (err) {
+    console.warn('[admin/agents-detail] loadDelegations failed:', err);
+    return [];
   }
 }
 

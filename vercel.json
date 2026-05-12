@@ -102,6 +102,11 @@
       "config": { "maxDuration": 300 }
     },
     {
+      "src": "api/cron/atlas-qa.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 300 }
+    },
+    {
       "src": "api/agent/chat.ts",
       "use": "@vercel/node",
       "config": {
@@ -209,6 +214,10 @@
       "schedule": "0 17 * * 5"
     },
     {
+      "path": "/api/cron/atlas-qa",
+      "schedule": "0 19 * * 0"
+    },
+    {
       "path": "/api/cron/nps-trigger",
       "schedule": "0 9 * * *"
     },
@@ -305,6 +314,7 @@
     { "src": "/api/cron/atlas-profitability", "dest": "/api/cron/atlas-profitability.ts", "methods": ["GET", "POST"] },
     { "src": "/api/cron/atlas-feature-prioritiser", "dest": "/api/cron/atlas-feature-prioritiser.ts", "methods": ["GET", "POST"] },
     { "src": "/api/cron/atlas-growth", "dest": "/api/cron/atlas-growth.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/atlas-qa", "dest": "/api/cron/atlas-qa.ts", "methods": ["GET", "POST"] },
     { "src": "/api/agent/chat", "dest": "/api/agent/chat.ts", "methods": ["POST"] },
     { "src": "/api/agent/approve", "dest": "/api/agent/approve.ts", "methods": ["POST"] },
     { "src": "/api/agent/conversations(/.*)?", "dest": "/api/agent/conversations.ts" },

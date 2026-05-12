@@ -28,6 +28,7 @@ import { atlasCaseStudyAgent } from './atlas-case-study.js';
 import { atlasProfitabilityAgent } from './atlas-profitability.js';
 import { atlasFeaturePrioritiserAgent } from './atlas-feature-prioritiser.js';
 import { atlasGrowthAgent } from './atlas-growth.js';
+import { atlasQaAgent } from './atlas-qa.js';
 
 const AGENTS: Record<string, AgentDef> = {
   atlas: atlasAgent,
@@ -49,6 +50,9 @@ const AGENTS: Record<string, AgentDef> = {
   'atlas-profitability': atlasProfitabilityAgent,
   'atlas-feature-prioritiser': atlasFeaturePrioritiserAgent,
   'atlas-growth': atlasGrowthAgent,
+  // Meta-audit: watches the stack itself once a week. Doesn't invoke
+  // other agents — it inspects what they produced.
+  'atlas-qa': atlasQaAgent,
 };
 
 // Specialist names that need admin tier to use (they touch financial /
@@ -161,4 +165,5 @@ export {
   atlasProfitabilityAgent,
   atlasFeaturePrioritiserAgent,
   atlasGrowthAgent,
+  atlasQaAgent,
 };

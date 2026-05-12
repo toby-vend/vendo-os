@@ -35,6 +35,7 @@ const FINDING_TYPES = [
   'feature-priority',
   'case-study-candidate',
   'growth-prescription',
+  'qa-audit',
 ];
 
 export const adminGrowthRoutes: FastifyPluginAsync = async (app) => {
