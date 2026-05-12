@@ -43,7 +43,8 @@ import { generateReportInsights } from '../lib/report-ai.js';
 // AGENT-COORD: stub for A2 buildGoogleAdsPeriodSummary — extends ReportAiInput
 // with googleAdsSummary so the AI prefers structured data over OCR when present.
 import { buildGoogleAdsPeriodSummary } from '../lib/reports/gads-summary.js';
-import { buildPhase0Payload, safeStringify } from '../lib/reports/dashboard-shell.js';
+import { safeStringify } from '../lib/reports/dashboard-shell.js';
+import { buildDashboardData, recomputeDashboard } from '../lib/reports/build-dashboard-data.js';
 
 // --- Helpers ---
 
@@ -177,8 +178,9 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
   });
 
   // ── v2 dashboard ─────────────────────────────────────────────────────────
-  // Phase 0: render the React shell with a stub payload. Phase 1 wires the
-  // /api/reports/:id/data.json endpoint and the data aggregators.
+  // Renders the React shell. The full DashboardPayload is assembled by
+  // buildDashboardData (cached in client_report_data_cache). Aggregators
+  // for each block live in web/lib/reports/aggregators/.
   // See plans/2026-05-12-client-report-v2-tab-dashboard.md.
   app.get<{ Params: { id: string } }>('/:id/view', async (request, reply) => {
     const user = (request as any).user as SessionUser | null;
@@ -189,7 +191,7 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     const report = await getReport(id);
     if (!report) return reply.code(404).send('Not found');
 
-    const payload = await buildPhase0Payload(report, 'internal');
+    const payload = await buildDashboardData(id, { mode: 'internal' });
     return reply.render('reports/dashboard', {
       client: payload.client,
       payloadJson: safeStringify(payload),
@@ -307,6 +309,46 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
   // Multipart only for the upload endpoint.
   await app.register(fastifyMultipart, {
     limits: { fileSize: MAX_FILE_BYTES + 1024 },
+  });
+
+  // ── v2 dashboard data ────────────────────────────────────────────────────
+  // JSON payload that backs the React dashboard. Same shape returned to
+  // both the admin shell render and the portal shell render. Admin-only
+  // for now; the portal route inlines the payload at SSR time so no
+  // separate API call is needed from the client mode.
+  app.get<{ Params: { id: string } }>('/:id/data.json', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+    const id = Number(request.params.id);
+    if (!Number.isFinite(id)) return reply.code(404).send('Not found');
+
+    try {
+      const payload = await buildDashboardData(id, { mode: 'internal' });
+      return reply
+        .header('Cache-Control', 'private, no-cache')
+        .send(payload);
+    } catch (err: any) {
+      request.log?.error({ err }, 'dashboard data build failed');
+      return reply.code(500).send({ error: err?.message || 'Build failed' });
+    }
+  });
+
+  // Force a fresh build (drops the cache row, recomputes, writes back).
+  app.post<{ Params: { id: string } }>('/:id/recompute', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+    const id = Number(request.params.id);
+    if (!Number.isFinite(id)) return reply.code(404).send('Not found');
+
+    try {
+      const payload = await recomputeDashboard(id, 'internal');
+      return reply.send({ ok: true, computedAt: payload.computedAt });
+    } catch (err: any) {
+      request.log?.error({ err }, 'dashboard recompute failed');
+      return reply.code(500).send({ error: err?.message || 'Recompute failed' });
+    }
   });
 
   // Create a new report — POST from /reports/new

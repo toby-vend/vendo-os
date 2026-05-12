@@ -11,7 +11,8 @@ import { getGSCSummary, getTopQueries, getTopPages, getGSCDailyTrend, getGSCSumm
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
 import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags, getMetaTopAds, getMetaEngagement, getGadsTopKeywords } from '../lib/queries/portal.js';
 import { getReport } from '../lib/queries/reports.js';
-import { buildPhase0Payload, safeStringify } from '../lib/reports/dashboard-shell.js';
+import { safeStringify } from '../lib/reports/dashboard-shell.js';
+import { buildDashboardData } from '../lib/reports/build-dashboard-data.js';
 
 // --- Helpers ---
 
@@ -612,7 +613,7 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(404).send('Not found');
     }
 
-    const payload = await buildPhase0Payload(report, 'client');
+    const payload = await buildDashboardData(reportId, { mode: 'client' });
     return reply.render('reports/dashboard', {
       client: payload.client,
       payloadJson: safeStringify(payload),
