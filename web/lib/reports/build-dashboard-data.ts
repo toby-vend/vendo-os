@@ -66,7 +66,7 @@ export async function buildDashboardData(
   // because they feed into multiple blocks / flags. The booking-pipeline
   // existence check runs alongside so we can flag clients whose GHL
   // workspace doesn't have a 'Booked Appointment' pipeline.
-  const [overview, meta, google, seo, aiSummary, treatments, bookingPipelineIds] = await Promise.all([
+  const [overview, meta, googleResult, seo, aiSummary, treatments, bookingPipelineIds] = await Promise.all([
     buildOverview(report.client_id, range),
     buildMeta(report.client_id, range),
     buildGoogle(report.client_id, range),
@@ -76,6 +76,8 @@ export async function buildDashboardData(
     findBookingPipelineIds(report.client_id),
   ]);
 
+  const google = googleResult.block;
+  const deviceSplitMissing = googleResult.deviceSplitMissing;
   const bookingPipelineMissing = bookingPipelineIds.length === 0;
 
   // Treatment rows live inside the overview block. Aggregators may also
@@ -102,8 +104,7 @@ export async function buildDashboardData(
       ...(treatments.averageCaseValueIsDefault ? { averageCaseValueIsDefault: true as const } : {}),
       ...(treatments.treatmentMappingMissing ? { treatmentMappingMissing: true as const } : {}),
       ...(bookingPipelineMissing ? { bookingPipelineMissing: true as const } : {}),
-      // deviceSplitMissing is emitted by the Google aggregator once A4
-      // wires segments.device into the sync.
+      ...(deviceSplitMissing ? { deviceSplitMissing: true as const } : {}),
     },
     computedAt: new Date().toISOString(),
   };
