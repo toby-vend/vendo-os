@@ -21,6 +21,7 @@ import { draftSlackMessage } from './draft-slack-message.js';
 import { draftPushNotification } from './draft-push-notification.js';
 import { draftEmail } from './draft-email.js';
 import { invokeAgent } from './invoke-agent.js';
+import { recordGrowthFinding } from './record-growth-finding.js';
 
 export const TOOL_FACTORIES = {
   searchMeetings,
@@ -44,6 +45,7 @@ export const TOOL_FACTORIES = {
   draftPushNotification,
   draftEmail,
   invokeAgent,
+  recordGrowthFinding,
 } as const;
 
 export type ToolName = keyof typeof TOOL_FACTORIES;

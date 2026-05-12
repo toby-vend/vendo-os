@@ -113,4 +113,5 @@ export const atlasSeoAgent: AgentDef = {
   maxSteps: 8,
   tools: TOOLS,
   systemPrompt,
+  canBeInvoked: true,
 };

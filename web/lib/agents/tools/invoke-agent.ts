@@ -30,25 +30,20 @@ import type { ToolCtx } from '../types.js';
 
 const MAX_AGENT_DEPTH = 3;
 
-const INVOKABLE = [
-  'atlas-am',
-  'atlas-paid-social',
-  'atlas-paid-search',
-  'atlas-creative',
-  'atlas-seo',
-] as const;
-
 const inputSchema = z.object({
-  agentName: z.enum(INVOKABLE).describe(
-    'Specialist to delegate to. Pick the one whose domain matches the question.',
+  // We accept any string and validate against the dynamic allowlist
+  // inside run() — this lets us add invokable agents (atlas-churn-risk,
+  // atlas-upsell, codebase-health, …) without bumping a hard-coded enum.
+  agentName: z.string().min(1).describe(
+    'Name of the agent to delegate to. Must have canBeInvoked=true in its AgentDef.',
   ),
   prompt: z
     .string()
     .min(10)
     .max(2000)
     .describe(
-      'What the specialist should do. Be concrete: name the client, the metric, ' +
-        'the date range. The specialist receives this verbatim with its own ' +
+      'What the target agent should do. Be concrete: name the client, the metric, ' +
+        'the date range. The target receives this verbatim with its own ' +
         'system prompt — no extra context is forwarded.',
     ),
 });
@@ -89,21 +84,52 @@ export const invokeAgent = (ctx: ToolCtx) =>
         }
 
         // Lazy imports break the agents/index.ts ↔ tools/index.ts cycle.
-        const { resolveAgentByName } = await import('../agents/index.js');
+        const { resolveAgentByName, getAgent } = await import('../agents/index.js');
         const { runAgentBackground } = await import('../runtime.js');
+
+        // Allowlist check — only agents with canBeInvoked=true are reachable.
+        const def = getAgent(args.agentName);
+        if (!def) {
+          return {
+            runId: null,
+            text: '',
+            status: 'unresolved' as const,
+            costUsd: null,
+            error: `agent '${args.agentName}' is not registered.`,
+          };
+        }
+        if (!def.canBeInvoked) {
+          return {
+            runId: null,
+            text: '',
+            status: 'unresolved' as const,
+            costUsd: null,
+            error: `agent '${args.agentName}' is not delegatable (canBeInvoked is not set).`,
+          };
+        }
+        // Optional per-target whitelist of callers.
+        if (def.allowedCallers && !def.allowedCallers.includes(ctx.agent)) {
+          return {
+            runId: null,
+            text: '',
+            status: 'unresolved' as const,
+            costUsd: null,
+            error: `agent '${args.agentName}' can only be invoked by: ${def.allowedCallers.join(', ')}.`,
+          };
+        }
 
         const target = resolveAgentByName(args.agentName, ctx.user);
         // resolveAgentByName falls back to atlas-staff for non-admins on
-        // specialist names — we'd rather surface that to the model than
-        // silently route to a different agent.
+        // specialist names — surface that to the model rather than
+        // silently routing to a different agent.
         if (!target || target.name !== args.agentName) {
           return {
             runId: null,
             text: '',
             status: 'unresolved' as const,
             costUsd: null,
-            error: `cannot resolve specialist '${args.agentName}' for ${ctx.user.email} ` +
-              `(role: ${ctx.user.role}). Specialist agents require admin role or an explicit route grant.`,
+            error: `cannot resolve '${args.agentName}' for ${ctx.user.email} ` +
+              `(role: ${ctx.user.role}). May require admin role or an explicit route grant.`,
           };
         }
 

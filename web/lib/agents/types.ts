@@ -68,6 +68,20 @@ export interface AgentDef {
   maxSteps?: number;
   tools: string[];
   systemPrompt: (ctx: ToolCtx) => string;
+  /**
+   * When true, other agents (carrying the invokeAgent tool) may delegate
+   * to this one. False/undefined keeps the agent off the invokeAgent
+   * allowlist — typical for orchestrators that should never be called
+   * from inside another run.
+   */
+  canBeInvoked?: boolean;
+  /**
+   * Restrict which agents can invoke this one. When omitted, any
+   * orchestrator carrying invokeAgent may delegate. Useful when a
+   * specialist should only be reachable from a single orchestrator
+   * (e.g. atlas-churn-risk only from atlas-growth).
+   */
+  allowedCallers?: string[];
 }
 
 // ---------------------------------------------------------------------------

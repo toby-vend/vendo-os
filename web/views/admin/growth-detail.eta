@@ -1,0 +1,92 @@
+<% layout('/layouts/base') %>
+
+<p style="margin-bottom:0.5em">
+  <a href="/admin/growth" class="link">← all growth findings</a>
+</p>
+
+<h1>
+  <span class="ch-sev sev-<%= it.finding.severity.toLowerCase() %>"><%= it.finding.severity %></span>
+  <%= it.finding.title %>
+</h1>
+
+<p style="color:var(--vendo-text-muted)">
+  <code><%= it.finding.agent %></code> · <%= it.finding.finding_type %>
+  <% if (it.finding.subject_label) { %> · <strong><%= it.finding.subject_label %></strong><% } %>
+  · first seen <%= it.finding.firstSeenShort %>
+  · last seen <%= it.finding.lastSeenShort %>
+  · seen <%= it.finding.occurrences %>×
+  · status <strong><%= it.finding.status %></strong>
+</p>
+
+<% if (it.finding.description) { %>
+  <h2>What's happening</h2>
+  <pre class="growth-block"><%= it.finding.description %></pre>
+<% } %>
+
+<% if (it.finding.reasoning) { %>
+  <h2>Reasoning</h2>
+  <pre class="growth-block"><%= it.finding.reasoning %></pre>
+<% } %>
+
+<% if (it.finding.proposed_action) { %>
+  <h2>Proposed action</h2>
+  <pre class="growth-block growth-action"><%= it.finding.proposed_action %></pre>
+<% } %>
+
+<% if (it.finding.run_id) { %>
+  <p style="margin-top:1em">
+    <small>Trace: <a href="/admin/agents/run/<%= it.finding.run_id %>" class="link">→ agent run <%= it.finding.run_id.slice(0,8) %>…</a></small>
+  </p>
+<% } %>
+
+<% if (it.finding.status === 'open') { %>
+  <div class="growth-actions">
+    <form method="POST" action="/admin/growth/<%= it.finding.id %>/acted" style="display:inline-block; margin-right:8px">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+      <input type="text" name="outcome" placeholder="What did you do? (optional)" style="width:280px" />
+      <button type="submit" class="btn-primary">Mark acted</button>
+    </form>
+    <form method="POST" action="/admin/growth/<%= it.finding.id %>/dismissed" style="display:inline-block; margin-right:8px">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+      <button type="submit">Dismiss (never re-raise)</button>
+    </form>
+    <form method="POST" action="/admin/growth/<%= it.finding.id %>/stale" style="display:inline-block">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+      <button type="submit">Mark stale</button>
+    </form>
+  </div>
+<% } else { %>
+  <p style="color:var(--vendo-text-muted)">
+    <%= it.finding.status %><% if (it.finding.acted_by) { %> by <%= it.finding.acted_by %><% } %>
+    <% if (it.finding.acted_at) { %> on <%= it.finding.acted_at.slice(0,16) %><% } %>
+    <% if (it.finding.acted_outcome) { %> — <%= it.finding.acted_outcome %><% } %>
+  </p>
+<% } %>
+
+<style>
+  .ch-sev { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; vertical-align: middle; }
+  .ch-sev.sev-p0 { background: rgba(239, 68, 68, 0.15); color: #FCA5A5; }
+  .ch-sev.sev-p1 { background: rgba(245, 158, 11, 0.15); color: #FCD34D; }
+  .ch-sev.sev-p2 { background: rgba(59, 130, 246, 0.10); color: #93C5FD; }
+  .ch-sev.sev-p3 { background: rgba(148, 163, 184, 0.10); color: var(--vendo-text-muted); }
+  .growth-block {
+    background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 8px 0;
+    white-space: pre-wrap;
+    font-family: var(--vendo-font);
+    font-size: 14px;
+    color: var(--vendo-text);
+  }
+  .growth-action { border-left: 3px solid var(--vendo-green); }
+  .growth-actions { margin-top: 1.5em; padding: 12px; background: var(--vendo-surface); border-radius: 6px; }
+  .growth-actions input[type="text"] { background: var(--vendo-bg); color: var(--vendo-text); border: 1px solid var(--vendo-border); border-radius: 4px; padding: 6px 10px; font-family: var(--vendo-font); }
+  .growth-actions button { background: var(--vendo-surface); color: var(--vendo-text); border: 1px solid var(--vendo-border); border-radius: 4px; padding: 6px 14px; cursor: pointer; }
+  .growth-actions button:hover { border-color: var(--vendo-border-strong); }
+  .growth-actions .btn-primary { background: var(--vendo-green); color: #0B0B0B; border-color: var(--vendo-green); font-weight: 600; }
+  .growth-actions .btn-primary:hover { background: var(--vendo-green-hover); }
+  .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+</style>

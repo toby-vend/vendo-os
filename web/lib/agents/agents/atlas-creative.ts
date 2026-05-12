@@ -105,4 +105,5 @@ export const atlasCreativeAgent: AgentDef = {
   maxSteps: 8,
   tools: TOOLS,
   systemPrompt,
+  canBeInvoked: true,
 };
