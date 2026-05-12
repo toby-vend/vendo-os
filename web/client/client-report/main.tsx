@@ -6,6 +6,7 @@
  */
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import type { DashboardPayload } from './types';
 
 const ROOT_ID = 'report-root';
@@ -21,7 +22,12 @@ function boot(): void {
     root.textContent = 'No report payload found on window.';
     return;
   }
-  createRoot(root).render(<App payload={payload} />);
+  const showDetails = payload.mode === 'internal';
+  createRoot(root).render(
+    <ErrorBoundary showDetails={showDetails}>
+      <App payload={payload} />
+    </ErrorBoundary>,
+  );
 }
 
 if (document.readyState === 'loading') {
