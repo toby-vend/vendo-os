@@ -12,7 +12,8 @@ export type GrowthFindingType =
   | 'profit-alert'
   | 'feature-priority'
   | 'case-study-candidate'
-  | 'growth-prescription';
+  | 'growth-prescription'
+  | 'qa-audit';
 
 export type GrowthSubjectType = 'client' | 'lead' | 'feature' | 'global';
 
