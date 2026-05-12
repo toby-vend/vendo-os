@@ -24,7 +24,7 @@
   </div>
   <div class="agents-total">
     <div class="agents-total-label">Cost · 24h</div>
-    <div class="agents-total-value">$<%= it.stats.cost.toFixed(3) %></div>
+    <div class="agents-total-value"><%= it.stats.costDisplay %></div>
   </div>
   <div class="agents-total">
     <div class="agents-total-label">Avg duration · 24h</div>

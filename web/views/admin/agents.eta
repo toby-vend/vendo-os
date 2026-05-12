@@ -15,7 +15,7 @@
   </div>
   <div class="agents-total">
     <div class="agents-total-label">LLM cost · last 24h</div>
-    <div class="agents-total-value">$<%= it.totals.costTodayUsd.toFixed(3) %></div>
+    <div class="agents-total-value"><%= it.totals.costTodayDisplay %></div>
   </div>
   <div class="agents-total">
     <div class="agents-total-label">Errors · last 24h</div>
@@ -62,7 +62,7 @@
         </td>
         <td><%= r.runsDay %></td>
         <td class="<%= r.errorsDay > 0 ? 'is-bad' : '' %>"><%= r.errorsDay %></td>
-        <td>$<%= r.costDay.toFixed(3) %></td>
+        <td><%= r.costDayDisplay %></td>
         <td><a href="/admin/agents/<%= r.name %>" class="link">→</a></td>
       </tr>
     <% }) %>
