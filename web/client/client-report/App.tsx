@@ -31,6 +31,25 @@ export function App({ payload }: { payload: DashboardPayload }) {
   const { client, report, mode } = payload;
   const isClient = mode === 'client';
 
+  // Listen for `vendo-tab` CustomEvents emitted by the Overview channel
+  // cards ("Open →") and switch tabs without prop-drilling setTab.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (
+        detail === 'overview' ||
+        detail === 'summary' ||
+        detail === 'meta' ||
+        detail === 'google' ||
+        detail === 'seo'
+      ) {
+        setTab(detail);
+      }
+    };
+    window.addEventListener('vendo-tab', handler as EventListener);
+    return () => window.removeEventListener('vendo-tab', handler as EventListener);
+  }, []);
+
   // Apply tweaks to the root element. Client mode locks to defaults.
   useEffect(() => {
     const root = document.getElementById('report-root');
