@@ -1,0 +1,124 @@
+<% layout('/layouts/base') %>
+
+<p style="margin-bottom:0.5em">
+  <a href="/admin/agents" class="link">← all agents</a>
+  &nbsp;·&nbsp;
+  <a href="/admin/agents/conversations" class="link">conversations →</a>
+</p>
+
+<h1>
+  Agent communication graph
+  <small style="color:var(--vendo-text-muted)">· last <%= it.sinceDays %> days</small>
+</h1>
+
+<p style="color:var(--vendo-text-muted)">
+  Every node is an agent that ran in the window. Every edge is a
+  <code>invokeAgent</code> delegation: thickness scales with call count,
+  arrow points from caller to callee. Hover an edge for the totals.
+</p>
+
+<% if (!it.hasData) { %>
+  <p style="color:var(--vendo-text-muted); margin-top:2em">
+    No agent‑to‑agent delegations in this window. The chart
+    will populate as the orchestrators (atlas, atlas‑brief,
+    atlas‑growth) call specialists or growth workers.
+  </p>
+<% } else { %>
+  <svg
+    viewBox="0 0 760 480"
+    xmlns="http://www.w3.org/2000/svg"
+    style="background:var(--vendo-surface);border:1px solid var(--vendo-border);border-radius:8px;width:100%;height:auto;max-height:720px;display:block"
+  >
+    <defs>
+      <% it.nodes.forEach(function(n){ %>
+        <% if (n.pos) { %>
+          <radialGradient id="grad-<%= n.agent %>" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"  stop-color="<%= n.colour %>" stop-opacity="0.30" />
+            <stop offset="100%" stop-color="<%= n.colour %>" stop-opacity="0.05" />
+          </radialGradient>
+        <% } %>
+      <% }) %>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+              markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.45)" />
+      </marker>
+    </defs>
+
+    <!-- edges first so nodes render on top -->
+    <% it.edges.forEach(function(e){ %>
+      <g class="graph-edge">
+        <line
+          x1="<%= e.fromPos.x %>" y1="<%= e.fromPos.y %>"
+          x2="<%= e.toPos.x %>"  y2="<%= e.toPos.y %>"
+          stroke="rgba(255,255,255,0.20)"
+          stroke-width="<%= e.stroke.toFixed(2) %>"
+          marker-end="url(#arrow)"
+        />
+        <title><%= e.from %> → <%= e.to %>: <%= e.callCount %> calls, <%= e.costDisplay %></title>
+      </g>
+    <% }) %>
+
+    <!-- nodes -->
+    <% it.nodes.forEach(function(n){ %>
+      <% if (n.pos) { %>
+        <g>
+          <circle
+            cx="<%= n.pos.x %>" cy="<%= n.pos.y %>" r="42"
+            fill="url(#grad-<%= n.agent %>)"
+            stroke="<%= n.colour %>"
+            stroke-width="1.5"
+          />
+          <text
+            x="<%= n.pos.x %>" y="<%= n.pos.y - 4 %>"
+            text-anchor="middle"
+            fill="<%= n.colour %>"
+            font-family="var(--vendo-font)"
+            font-size="11"
+            font-weight="600"
+          ><%= n.agent.replace(/^atlas-/, '').slice(0, 14) %></text>
+          <text
+            x="<%= n.pos.x %>" y="<%= n.pos.y + 12 %>"
+            text-anchor="middle"
+            fill="rgba(255,255,255,0.55)"
+            font-family="var(--vendo-font)"
+            font-size="10"
+          ><%= n.runs %> runs</text>
+        </g>
+      <% } %>
+    <% }) %>
+  </svg>
+
+  <h2 style="margin-top:2em">Top edges</h2>
+  <table class="conv-table">
+    <thead>
+      <tr>
+        <th>Caller</th>
+        <th>Callee</th>
+        <th>Calls</th>
+        <th>Total cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.edges.slice(0, 30).forEach(function(e){ %>
+        <tr>
+          <td><code><%= e.from %></code></td>
+          <td><code><%= e.to %></code></td>
+          <td><%= e.callCount %></td>
+          <td><%= e.costDisplay %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<style>
+  .conv-table { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 13px; }
+  .conv-table th, .conv-table td {
+    text-align: left; padding: 8px 10px; vertical-align: top;
+    border-bottom: 1px solid var(--vendo-border);
+  }
+  .conv-table th { color: var(--vendo-text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .conv-table tr:hover { background: var(--vendo-surface); }
+  .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+</style>
