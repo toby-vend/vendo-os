@@ -1,0 +1,207 @@
+<% layout('/layouts/base') %>
+
+<div class="ch-header">
+  <h1>Codebase health <small>(<%= it.counts.total %> open)</small></h1>
+  <form method="POST" action="/admin/code-health/run-now" style="display:inline">
+    <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+    <button type="submit" class="btn-primary">Run scan now</button>
+  </form>
+</div>
+
+<p style="color:var(--vendo-text-muted)">
+  Daily LLM + static analysis of the repo. Findings are fingerprinted —
+  re-scans dedup automatically. Cron runs at 06:30 UTC on weekdays.
+</p>
+
+<% if (it.lastRun) { %>
+  <div class="ch-run-summary">
+    <strong>Last scan:</strong>
+    <%= it.lastRun.ago %> ·
+    <%= it.lastRun.trigger %> ·
+    <%= it.lastRun.files_scanned %> files ·
+    <%= it.lastRun.findings_new %> new ·
+    <%= it.lastRun.findings_persisting %> persisting ·
+    <%= it.lastRun.findings_resolved %> resolved
+    <% if (it.lastRun.durationSec) { %>
+      · <%= it.lastRun.durationSec %>s
+    <% } %>
+    · cost <%= it.lastRun.costStr %>
+    <% if (it.lastRun.status === 'partial') { %>
+      · <span style="color:#F59E0B">partial (<%= it.lastRun.error || 'unknown' %>)</span>
+    <% } else if (it.lastRun.status === 'failed') { %>
+      · <span style="color:#EF4444">failed (<%= it.lastRun.error || 'unknown' %>)</span>
+    <% } %>
+  </div>
+<% } %>
+
+<% if (it.query?.notice) { %>
+  <% const map = {
+    'run-complete': '✓ Scan complete: ' + (it.query.new || 0) + ' new, ' + (it.query.persisting || 0) + ' persisting, ' + (it.query.resolved || 0) + ' resolved.',
+    'run-failed': '⚠ Scan failed: ' + (it.query.error || 'unknown'),
+  } %>
+  <div class="notice"><%= map[it.query.notice] || it.query.notice %></div>
+<% } %>
+
+<form class="filter-bar" method="GET" action="/admin/code-health">
+  <div>
+    <label for="status">Status</label>
+    <select id="status" name="status" onchange="this.form.submit()">
+      <option value="open"     <%= it.currentStatus === 'open'     ? 'selected' : '' %>>Open</option>
+      <option value="resolved" <%= it.currentStatus === 'resolved' ? 'selected' : '' %>>Resolved</option>
+      <option value="noise"    <%= it.currentStatus === 'noise'    ? 'selected' : '' %>>Noise</option>
+      <option value="wontfix"  <%= it.currentStatus === 'wontfix'  ? 'selected' : '' %>>Won't fix</option>
+    </select>
+  </div>
+  <div>
+    <label for="severity">Severity</label>
+    <select id="severity" name="severity" onchange="this.form.submit()">
+      <option value=""   <%= !it.query.severity ? 'selected' : '' %>>All</option>
+      <option value="P0" <%= it.query.severity === 'P0' ? 'selected' : '' %>>P0 (<%= it.counts.P0 %>)</option>
+      <option value="P1" <%= it.query.severity === 'P1' ? 'selected' : '' %>>P1 (<%= it.counts.P1 %>)</option>
+      <option value="P2" <%= it.query.severity === 'P2' ? 'selected' : '' %>>P2 (<%= it.counts.P2 %>)</option>
+      <option value="P3" <%= it.query.severity === 'P3' ? 'selected' : '' %>>P3 (<%= it.counts.P3 %>)</option>
+    </select>
+  </div>
+  <div>
+    <label for="type">Type</label>
+    <select id="type" name="type" onchange="this.form.submit()">
+      <option value="">All</option>
+      <% ['bug','perf','refactor','security','style','dead-code','type','dependency','cron-drift','todo'].forEach(function(t){ %>
+        <option value="<%= t %>" <%= it.query.type === t ? 'selected' : '' %>><%= t %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="source">Source</label>
+    <select id="source" name="source" onchange="this.form.submit()">
+      <option value="">All</option>
+      <% ['static:tsc','static:audit','static:knip','static:gitleaks','static:cron-drift','static:todo','llm:review'].forEach(function(s){ %>
+        <option value="<%= s %>" <%= it.query.source === s ? 'selected' : '' %>><%= s %></option>
+      <% }) %>
+    </select>
+  </div>
+</form>
+
+<% if (it.findings.length === 0) { %>
+  <p style="color:var(--vendo-text-muted); margin-top:2em">
+    No findings match the current filter.
+    <% if (it.currentStatus === 'open' && it.counts.total === 0) { %>
+      Codebase is clean.
+    <% } %>
+  </p>
+<% } else { %>
+  <table class="ch-table">
+    <thead>
+      <tr>
+        <th>Sev</th>
+        <th>Type</th>
+        <th>Location</th>
+        <th>Title</th>
+        <th>Source</th>
+        <th>Seen</th>
+        <th>×</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.findings.forEach(function(f){ %>
+        <tr class="ch-row">
+          <td><span class="ch-sev <%= f.severityClass %>"><%= f.severity %></span></td>
+          <td><code><%= f.finding_type %></code></td>
+          <td>
+            <code><%= f.location %></code>
+          </td>
+          <td>
+            <details>
+              <summary><%= f.title %></summary>
+              <% if (f.description) { %>
+                <div class="ch-desc"><%= f.description %></div>
+              <% } %>
+              <% if (f.proposed_fix) { %>
+                <div class="ch-fix"><strong>Proposed:</strong> <%= f.proposed_fix %></div>
+              <% } %>
+            </details>
+          </td>
+          <td><small><%= f.sourceLabel %></small></td>
+          <td><small><%= f.firstSeenShort %></small></td>
+          <td><%= f.occurrences %></td>
+          <td class="ch-actions">
+            <% if (f.status === 'open') { %>
+              <form method="POST" action="/admin/code-health/<%= f.id %>/resolve" style="display:inline">
+                <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+                <button type="submit" class="link-btn" title="Mark as resolved">✓</button>
+              </form>
+              <form method="POST" action="/admin/code-health/<%= f.id %>/noise" style="display:inline">
+                <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+                <button type="submit" class="link-btn" title="Mark as noise — never re-raise">∅</button>
+              </form>
+              <form method="POST" action="/admin/code-health/<%= f.id %>/wontfix" style="display:inline">
+                <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+                <button type="submit" class="link-btn" title="Won't fix">✗</button>
+              </form>
+            <% } else if (f.status === 'noise') { %>
+              <small style="color:var(--vendo-text-muted)">noise<% if (f.noise_reason) { %>: <%= f.noise_reason %><% } %></small>
+            <% } else { %>
+              <small style="color:var(--vendo-text-muted)"><%= f.status %></small>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<style>
+  .ch-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5em; }
+  .ch-run-summary {
+    background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border);
+    border-left: 3px solid var(--vendo-green);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--vendo-text-muted);
+    margin: 1em 0;
+  }
+  .ch-table { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 13px; }
+  .ch-table th, .ch-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--vendo-border);
+    vertical-align: top;
+  }
+  .ch-table th { color: var(--vendo-text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ch-row:hover { background: var(--vendo-surface); }
+  .ch-sev {
+    display: inline-block; min-width: 28px; text-align: center;
+    padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;
+  }
+  .ch-sev.sev-p0 { background: rgba(239, 68, 68, 0.15); color: #FCA5A5; }
+  .ch-sev.sev-p1 { background: rgba(245, 158, 11, 0.15); color: #FCD34D; }
+  .ch-sev.sev-p2 { background: rgba(59, 130, 246, 0.10); color: #93C5FD; }
+  .ch-sev.sev-p3 { background: rgba(148, 163, 184, 0.10); color: var(--vendo-text-muted); }
+  .ch-desc { margin-top: 6px; color: var(--vendo-text-muted); white-space: pre-wrap; }
+  .ch-fix { margin-top: 6px; color: var(--vendo-text); }
+  .ch-actions { white-space: nowrap; }
+  .ch-actions .link-btn {
+    background: transparent;
+    border: 1px solid var(--vendo-border);
+    color: var(--vendo-text);
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 2px;
+  }
+  .ch-actions .link-btn:hover { background: var(--vendo-surface-hover); border-color: var(--vendo-border-strong); }
+  .filter-bar { display: flex; gap: 1.5em; margin: 1em 0; align-items: end; flex-wrap: wrap; }
+  .filter-bar label { display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .filter-bar select {
+    background: var(--vendo-surface);
+    color: var(--vendo-text);
+    border: 1px solid var(--vendo-border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: var(--vendo-font);
+  }
+</style>

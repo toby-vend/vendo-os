@@ -113,7 +113,8 @@
     "leads:attribute:backfill": "tsx scripts/functions/lead-attribution.ts --backfill",
     "leads:attribute:force": "tsx scripts/functions/lead-attribution.ts --backfill --force",
     "auto:traffic-light": "tsx scripts/automation/traffic-light-alerts.ts",
-    "auto:daily-brief": "tsx scripts/automation/daily-slack-brief.ts"
+    "auto:daily-brief": "tsx scripts/automation/daily-slack-brief.ts",
+    "scan:codehealth": "tsx scripts/agents/codebase-health-preview.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.179",
