@@ -22,6 +22,7 @@ import { userRowToSessionUser, type UserRow } from '../../web/lib/queries/auth.j
 import { atlasBriefAgent } from '../../web/lib/agents/agents/index.js';
 import { runAgentBackground } from '../../web/lib/agents/runtime.js';
 import { postSlackMessage, slackChannel } from '../../web/lib/agents/channels/slack.js';
+import { slackifyAgentOutput } from '../../web/lib/agents/format/slackify.js';
 import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
 import { recordHeartbeat } from '../../web/lib/jobs/heartbeat.js';
 
@@ -131,12 +132,14 @@ async function runAndDeliver(row: UserRow): Promise<BriefResult> {
   }
 
   // Resolve their Slack DM channel via deliverProactive (handles the
-  // email → Slack id lookup internally).
+  // email → Slack id lookup internally). slackifyAgentOutput strips
+  // model preamble, normalises `**bold**` to `*bold*`, and linkifies
+  // Asana gids and meeting ids so the recipient can click through.
   let posted = false;
   try {
     await slackChannel.deliverProactive(user.id, {
       title: `Morning brief — ${todayWords()}`,
-      body: result.text.trim(),
+      body: slackifyAgentOutput(result.text),
     });
     posted = true;
   } catch (err) {

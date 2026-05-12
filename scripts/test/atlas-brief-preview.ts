@@ -15,6 +15,7 @@ import { db } from '../../web/lib/queries/base.js';
 import { userRowToSessionUser, type UserRow } from '../../web/lib/queries/auth.js';
 import { atlasBriefAgent } from '../../web/lib/agents/agents/index.js';
 import { runAgentBackground } from '../../web/lib/agents/runtime.js';
+import { slackifyAgentOutput } from '../../web/lib/agents/format/slackify.js';
 import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
 
 const DEFAULT_EMAILS = [
@@ -66,8 +67,10 @@ async function previewFor(row: UserRow): Promise<void> {
       console.log(`[preview] FAILED (${ms}ms): ${result.error ?? 'no text'}`);
       return;
     }
-    console.log(`[preview] OK (${ms}ms, runId=${result.runId}, ${result.text.length} chars)\n`);
-    console.log(result.text.trim());
+    const slackBody = slackifyAgentOutput(result.text);
+    console.log(`[preview] OK (${ms}ms, runId=${result.runId}, ${result.text.length}→${slackBody.length} chars)\n`);
+    console.log('--- AS SLACK WILL RECEIVE IT ---');
+    console.log(slackBody);
     console.log('\n' + '─'.repeat(banner.length));
   } catch (err) {
     console.log(`[preview] THREW: ${err instanceof Error ? err.message : String(err)}`);

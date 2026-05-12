@@ -57,20 +57,39 @@ When any specific client appears as worth flagging, call **getClientBriefing(cli
 
 Skip categories where there's nothing material. Do not pad.
 
-# Output format
+# Output format — Slack mrkdwn (NOT CommonMark)
 
-Slack-flavoured markdown. Aim for under 250 words total. Structure:
+Aim for under 250 words total. Start the message directly with the greeting line. No preamble like "Here's the briefing" or "I now have everything I need". No closing line. No \`---\` horizontal rules. No headings (\`#\`, \`##\`). Output only the briefing body itself.
 
-> *Morning, ${ctx.user.name.split(' ')[0]}* :sun_with_face:
->
-> *Yesterday* — 1-3 bullets, only if there's something worth flagging.
-> *Today* — what's on ${ctx.user.name.split(' ')[0]}'s plate (top 3 tasks, due dates if relevant).
-> *Watch* — concerns / risks / anomalies needing attention. Skip if none.
-> *Quick wins* — small things that would unblock something — only if relevant.
+Slack mrkdwn syntax — important, output must render in Slack:
+- *Bold uses single asterisks* — never \`**double**\` (renders literally).
+- _Italics_ uses single underscores.
+- Hyperlinks are \`<https://example.com|label>\` — never \`[label](url)\`.
+- Bullet lines start with a hyphen and a space: \`- item\`.
+- Do NOT wrap IDs (gid, meeting IDs, etc) in backticks — output them as plain text inline.
+
+Structure (each section starts with the bold marker, no extra heading):
+
+*Morning, ${ctx.user.name.split(' ')[0]}* :sun_with_face:
+
+*Yesterday* — 1-3 bullets, only if there's something worth flagging.
+*Today* — what's on ${ctx.user.name.split(' ')[0]}'s plate (top 3 tasks, due dates if relevant).
+*Watch* — concerns / risks / anomalies needing attention. Skip if none.
+*Quick wins* — small things that would unblock something — only if relevant.
 
 If a section is empty, omit it entirely. Do not write "nothing to report" — silence is the signal.
 
-Cite tool result IDs (meeting 144xxx, task gid, etc) when stating facts so the human can verify.
+# Linking sources (mandatory)
+
+When you name a specific Asana task, format the link inline:
+  \`<https://app.asana.com/0/0/<gid>|Task title>\`
+Example: \`<https://app.asana.com/0/0/1213538510904151|Bright Ortho Onboarding Tracker>\` — overdue since 23 Mar.
+
+When you reference a specific meeting, link it the same way:
+  \`<https://vendo-os.vercel.app/meetings/<id>|short label>\`
+Example: \`<https://vendo-os.vercel.app/meetings/145119629|Zen House mid-month review>\`.
+
+Never output a bare \`gid:NNN\` or \`meeting NNN\` — always wrap it in the link form above so the recipient can click through.
 
 UK English. No emoji except :sun_with_face: at the top.`;
 }
@@ -78,7 +97,10 @@ UK English. No emoji except :sun_with_face: at the top.`;
 export const atlasBriefAgent: AgentDef = {
   name: 'atlas-brief',
   model: MODELS.SONNET,
-  maxSteps: 12,
+  // 16 steps: tool-heavy users (those touching every client area) hit
+  // the prior 12 ceiling and produced near-empty briefs. 16 is enough
+  // headroom for a wide fan-out plus the final write step.
+  maxSteps: 16,
   tools: TOOLS,
   systemPrompt,
 };
