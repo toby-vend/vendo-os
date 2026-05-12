@@ -10,9 +10,10 @@ import { getGA4Summary, getGA4TrafficSources, getOrganicTrend, getGA4EngagementS
 import { getGSCSummary, getTopQueries, getTopPages, getGSCDailyTrend, getGSCSummaryPrior, getPositionDistribution, getCTROpportunities, getPositionMovers } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
 import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags, getMetaTopAds, getMetaEngagement, getGadsTopKeywords } from '../lib/queries/portal.js';
-import { getReport } from '../lib/queries/reports.js';
+import { getReport, listReports } from '../lib/queries/reports.js';
 import { safeStringify } from '../lib/reports/dashboard-shell.js';
 import { buildDashboardData } from '../lib/reports/build-dashboard-data.js';
+import { markFirstClientView } from '../lib/reports/notify-first-view.js';
 
 // --- Helpers ---
 
@@ -592,11 +593,31 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     });
   });
 
+  // ── Performance Reports list ─────────────────────────────────────────────
+  // Lists finalised reports for the logged-in client. Each row links to the
+  // v2 dashboard view at /portal/reports/:id/view.
+  app.get('/reports', async (request, reply) => {
+    let clientId: number;
+    try {
+      clientId = getClientId(request);
+    } catch {
+      return reply.code(403).send('Not signed in');
+    }
+    const reports = await listReports({ clientId, status: 'final' });
+    const clientName = await getClientName(clientId);
+    return reply.render('portal/reports', {
+      reports,
+      clientName,
+      pageTitle: 'Performance Reports',
+      currentPath: '/portal/reports',
+    });
+  });
+
   // ── v2 dashboard ──────────────────────────────────────────────────────────
-  // Phase 0: render the React shell with a stub payload. Auth: the report
-  // must belong to the logged-in client (or an admin previewing via
-  // ?clientId=). Mismatch → 404, not 403, to avoid leaking existence.
-  // See plans/2026-05-12-client-report-v2-tab-dashboard.md.
+  // The report must belong to the logged-in client (or an admin previewing
+  // via ?clientId=). Mismatch → 404 (not 403) so we don't leak existence.
+  // Only finalised reports are visible in client mode — drafts/review stay
+  // hidden until the AM approves.
   app.get<{ Params: { id: string } }>('/reports/:id/view', async (request, reply) => {
     const reportId = Number(request.params.id);
     if (!Number.isFinite(reportId)) return reply.code(404).send('Not found');
@@ -612,8 +633,25 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
     if (!report || report.client_id !== clientId) {
       return reply.code(404).send('Not found');
     }
+    // Hide non-final reports from clients (admins previewing via
+    // ?clientId= can still see everything because their session user
+    // role is 'admin').
+    const isAdminPreview = (request as any).user?.role === 'admin';
+    if (report.status !== 'final' && !isAdminPreview) {
+      return reply.code(404).send('Not found');
+    }
 
     const payload = await buildDashboardData(reportId, { mode: 'client' });
+
+    // First-view Slack ping — only for real client viewers, not admin
+    // previews. Fire-and-forget; failures don't block the render.
+    if (!isAdminPreview && report.status === 'final') {
+      const viewerId = (request as any).user?.id || (request as any).user?.email || 'unknown';
+      void markFirstClientView({ reportId, viewerId }).catch((err) => {
+        request.log?.warn({ err }, 'first-view notification failed');
+      });
+    }
+
     return reply.render('reports/dashboard', {
       client: payload.client,
       payloadJson: safeStringify(payload),

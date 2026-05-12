@@ -20,6 +20,7 @@
       <span id="r-save-flash" class="r-saved" style="opacity: 0;">Saved</span>
       <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/text" target="_blank">Copy text</a>
       <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/preview" target="_blank">Preview / PDF</a>
+      <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/view" target="_blank">Open dashboard</a>
 
       <% if (it.report.status === 'draft') { %>
         <button class="r-btn r-btn-primary"

@@ -1,0 +1,130 @@
+<% layout('/portal/layout') %>
+
+<style>
+  .reports-list {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .reports-list-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .reports-list-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    color: #fff;
+  }
+  .reports-list-sub {
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+  }
+  .report-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .report-card:hover {
+    background: rgba(34,197,94,0.06);
+    border-color: rgba(34,197,94,0.4);
+  }
+  .report-card-mark {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: rgba(34,197,94,0.12);
+    color: #22C55E;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .report-card-body { flex: 1; min-width: 0; }
+  .report-card-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+  .report-card-meta {
+    margin-top: 2px;
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+  }
+  .report-card-arrow {
+    color: rgba(255,255,255,0.4);
+    flex-shrink: 0;
+  }
+  .reports-empty {
+    padding: 60px 20px;
+    text-align: center;
+    color: rgba(255,255,255,0.55);
+    border: 1px dashed rgba(255,255,255,0.12);
+    border-radius: 10px;
+  }
+  .reports-empty-mark {
+    width: 48px; height: 48px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.6);
+    display: grid; place-items: center;
+    margin: 0 auto 12px;
+  }
+</style>
+
+<div class="reports-list">
+  <div class="reports-list-head">
+    <div>
+      <h1 class="reports-list-title">Performance Reports</h1>
+      <p class="reports-list-sub" style="margin: 4px 0 0;">
+        Monthly performance reviews for <%= it.clientName %>.
+      </p>
+    </div>
+  </div>
+
+  <% if (!it.reports || it.reports.length === 0) { %>
+    <div class="reports-empty">
+      <div class="reports-empty-mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </div>
+      <div>No finalised reports yet.</div>
+      <div style="margin-top: 4px; font-size: 12px;">
+        Your first report will appear here once your account manager publishes it.
+      </div>
+    </div>
+  <% } else { %>
+    <% for (const r of it.reports) { %>
+      <a class="report-card" href="/portal/reports/<%= r.id %>/view">
+        <div class="report-card-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </div>
+        <div class="report-card-body">
+          <div class="report-card-title"><%= r.period_label %></div>
+          <div class="report-card-meta">
+            Published <%= r.approved_at ? r.approved_at.slice(0, 10) : r.updated_at.slice(0, 10) %>
+          </div>
+        </div>
+        <svg class="report-card-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 4L10 8L6 12" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    <% } %>
+  <% } %>
+</div>
