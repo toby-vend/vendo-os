@@ -684,11 +684,181 @@
   font-size: 12px; color: var(--vr-ink-2); cursor: pointer;
 }
 
+/* ── SEO topline (3 across × 2 rows) ─────────────────────────────────── */
+.vr-seo-topline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--vr-rule);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  overflow: hidden;
+}
+.vr-seo-tile {
+  background: var(--vr-surface);
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 0;
+}
+.vr-seo-tile-label {
+  font-size: 11px; color: var(--vr-ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.vr-seo-tile-value {
+  font-size: 18px; font-weight: 600; font-family: var(--vr-mono);
+  letter-spacing: -0.01em; color: var(--vr-ink);
+}
+
+/* ── Insights cards (SEO) ────────────────────────────────────────────── */
+.vr-insights-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+.vr-insight-card {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative;
+}
+.vr-insight-card.is-good { border-left: 3px solid var(--vr-good); }
+.vr-insight-card.is-watch { border-left: 3px solid oklch(0.7 0.13 70); }
+.vr-insight-tag {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--vr-ink-3); font-weight: 600;
+}
+.vr-insight-headline {
+  font-size: 14px; font-weight: 600;
+  letter-spacing: -0.01em; line-height: 1.35;
+  color: var(--vr-ink);
+}
+.vr-insight-body {
+  font-size: 12.5px; color: var(--vr-ink-2);
+  line-height: 1.5; margin: 0; text-wrap: pretty;
+}
+.vr-insight-metric {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-top: auto; padding-top: 10px;
+  border-top: 1px dashed var(--vr-rule);
+}
+.vr-insight-metric-label { font-size: 11px; color: var(--vr-ink-3); }
+.vr-insight-metric-value {
+  font-size: 16px; font-weight: 600;
+  font-family: var(--vr-mono); margin-left: auto;
+  color: var(--vr-ink);
+}
+
+/* ── Search Console chart ────────────────────────────────────────────── */
+.vr-gsc-chart {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  overflow: hidden;
+}
+.vr-gsc-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--vr-rule);
+}
+.vr-gsc-tab {
+  border: none;
+  background: var(--vr-surface);
+  border-right: 1px solid var(--vr-rule);
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px;
+  font-family: var(--vr-sans);
+  position: relative;
+  transition: background 120ms ease;
+  color: var(--vr-ink);
+}
+.vr-gsc-tab:last-child { border-right: none; }
+.vr-gsc-tab:hover { background: var(--vr-bg-2); }
+.vr-gsc-tab.is-active::after {
+  content: ""; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 2px; background: var(--vr-ink);
+}
+.vr-gsc-tab-swatch {
+  width: 10px; height: 10px;
+  border-radius: 2px; border: 1.5px solid;
+}
+.vr-gsc-tab-label {
+  font-size: 11px; color: var(--vr-ink-3);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  font-weight: 500;
+}
+.vr-gsc-tab-value {
+  font-size: 22px; font-weight: 600;
+  font-family: var(--vr-mono); letter-spacing: -0.01em;
+}
+.vr-gsc-canvas { position: relative; padding: 8px 12px 0; }
+.vr-gsc-tooltip {
+  position: absolute;
+  top: 16px;
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule-strong);
+  border-radius: var(--vr-radius-sm);
+  padding: 10px 12px;
+  box-shadow: var(--vr-shadow-md);
+  font-size: 12px;
+  pointer-events: none;
+  min-width: 180px;
+  z-index: 5;
+}
+.vr-gsc-tooltip-date {
+  font-size: 11px; color: var(--vr-ink-3); font-family: var(--vr-mono);
+  margin-bottom: 6px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--vr-rule);
+}
+.vr-gsc-tooltip-row {
+  display: flex; align-items: center; gap: 8px; padding: 3px 0;
+}
+.vr-gsc-tooltip-swatch { width: 8px; height: 8px; border-radius: 2px; }
+.vr-gsc-tooltip-label { color: var(--vr-ink-2); flex: 1; }
+.vr-gsc-tooltip-val {
+  font-family: var(--vr-mono); font-weight: 600; color: var(--vr-ink);
+}
+.vr-gsc-foot {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--vr-rule);
+  background: var(--vr-surface-2);
+  font-size: 11px; color: var(--vr-ink-3);
+}
+.vr-gsc-foot code {
+  font-family: var(--vr-mono); font-size: 11px;
+  background: var(--vr-bg-2); padding: 1px 5px; border-radius: 3px;
+  color: var(--vr-ink-2);
+}
+
+/* ── Site health tiles ───────────────────────────────────────────────── */
+.vr-health-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+}
+.vr-health-tile {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.vr-health-label { font-size: 11px; color: var(--vr-ink-3); }
+.vr-health-value {
+  font-size: 20px; font-weight: 600;
+  font-family: var(--vr-mono); letter-spacing: -0.01em;
+  color: var(--vr-ink);
+}
+.vr-health-value.is-good { color: var(--vr-good); }
+
 @media (max-width: 1100px) {
   .vr-kpi-grid, .vr-topline-grid { grid-template-columns: repeat(2, 1fr); }
   .vr-channel-grid { grid-template-columns: 1fr; }
   .vr-two-up { grid-template-columns: 1fr; }
   .vr-ai-pillars { grid-template-columns: 1fr; }
+  .vr-insights-grid { grid-template-columns: 1fr; }
+  .vr-health-grid { grid-template-columns: repeat(2, 1fr); }
+  .vr-seo-topline { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ── Creative cards (Meta tab) ───────────────────────────────────────── */
