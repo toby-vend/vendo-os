@@ -21,6 +21,13 @@ import { atlasPaidSocialAgent } from './atlas-paid-social.js';
 import { atlasPaidSearchAgent } from './atlas-paid-search.js';
 import { atlasCreativeAgent } from './atlas-creative.js';
 import { atlasSeoAgent } from './atlas-seo.js';
+import { atlasChurnRiskAgent } from './atlas-churn-risk.js';
+import { atlasUpsellAgent } from './atlas-upsell.js';
+import { atlasLeadQualityAgent } from './atlas-lead-quality.js';
+import { atlasCaseStudyAgent } from './atlas-case-study.js';
+import { atlasProfitabilityAgent } from './atlas-profitability.js';
+import { atlasFeaturePrioritiserAgent } from './atlas-feature-prioritiser.js';
+import { atlasGrowthAgent } from './atlas-growth.js';
 
 const AGENTS: Record<string, AgentDef> = {
   atlas: atlasAgent,
@@ -32,6 +39,16 @@ const AGENTS: Record<string, AgentDef> = {
   'atlas-paid-search': atlasPaidSearchAgent,
   'atlas-creative': atlasCreativeAgent,
   'atlas-seo': atlasSeoAgent,
+  // Wave 1 growth agents — each cron-driven, each able to invoke the
+  // specialists above when domain depth is needed. The orchestrator
+  // (atlas-growth) invokes the six workers.
+  'atlas-churn-risk': atlasChurnRiskAgent,
+  'atlas-upsell': atlasUpsellAgent,
+  'atlas-lead-quality': atlasLeadQualityAgent,
+  'atlas-case-study': atlasCaseStudyAgent,
+  'atlas-profitability': atlasProfitabilityAgent,
+  'atlas-feature-prioritiser': atlasFeaturePrioritiserAgent,
+  'atlas-growth': atlasGrowthAgent,
 };
 
 // Specialist names that need admin tier to use (they touch financial /
@@ -137,4 +154,11 @@ export {
   atlasPaidSearchAgent,
   atlasCreativeAgent,
   atlasSeoAgent,
+  atlasChurnRiskAgent,
+  atlasUpsellAgent,
+  atlasLeadQualityAgent,
+  atlasCaseStudyAgent,
+  atlasProfitabilityAgent,
+  atlasFeaturePrioritiserAgent,
+  atlasGrowthAgent,
 };

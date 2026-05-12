@@ -122,4 +122,5 @@ export const atlasAmAgent: AgentDef = {
   maxSteps: 8,
   tools: TOOLS,
   systemPrompt,
+  canBeInvoked: true,
 };

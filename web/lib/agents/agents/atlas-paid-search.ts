@@ -109,4 +109,5 @@ export const atlasPaidSearchAgent: AgentDef = {
   maxSteps: 8,
   tools: TOOLS,
   systemPrompt,
+  canBeInvoked: true,
 };

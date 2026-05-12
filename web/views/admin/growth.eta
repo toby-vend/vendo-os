@@ -1,0 +1,117 @@
+<% layout('/layouts/base') %>
+
+<h1>Growth <small>(<%= it.counts.P0 + it.counts.P1 + it.counts.P2 + it.counts.P3 %> open)</small></h1>
+
+<p style="color:var(--vendo-text-muted)">
+  Findings produced by the cooperating growth agents (atlas-churn-risk,
+  atlas-upsell, atlas-lead-quality, atlas-case-study, atlas-profitability,
+  atlas-feature-prioritiser, atlas-growth). Each agent runs on its own
+  cron; the weekly atlas-growth orchestrator synthesises the top moves.
+</p>
+
+<div class="ch-counts" style="margin:1em 0">
+  <span class="ch-sev sev-p0">P0 · <%= it.counts.P0 %></span>
+  <span class="ch-sev sev-p1">P1 · <%= it.counts.P1 %></span>
+  <span class="ch-sev sev-p2">P2 · <%= it.counts.P2 %></span>
+  <span class="ch-sev sev-p3">P3 · <%= it.counts.P3 %></span>
+</div>
+
+<form class="filter-bar" method="GET" action="/admin/growth">
+  <div>
+    <label for="status">Status</label>
+    <select id="status" name="status" onchange="this.form.submit()">
+      <option value="open"      <%= it.currentStatus === 'open'      ? 'selected' : '' %>>Open</option>
+      <option value="acted"     <%= it.currentStatus === 'acted'     ? 'selected' : '' %>>Acted</option>
+      <option value="dismissed" <%= it.currentStatus === 'dismissed' ? 'selected' : '' %>>Dismissed</option>
+      <option value="stale"     <%= it.currentStatus === 'stale'     ? 'selected' : '' %>>Stale</option>
+    </select>
+  </div>
+  <div>
+    <label for="severity">Severity</label>
+    <select id="severity" name="severity" onchange="this.form.submit()">
+      <option value="">All</option>
+      <% ['P0','P1','P2','P3'].forEach(function(s){ %>
+        <option value="<%= s %>" <%= it.query.severity === s ? 'selected' : '' %>><%= s %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="finding_type">Type</label>
+    <select id="finding_type" name="finding_type" onchange="this.form.submit()">
+      <option value="">All</option>
+      <% it.findingTypes.forEach(function(t){ %>
+        <option value="<%= t %>" <%= it.query.finding_type === t ? 'selected' : '' %>><%= t %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="agent">Agent</label>
+    <input type="text" id="agent" name="agent" value="<%= it.query.agent || '' %>" placeholder="atlas-churn-risk" />
+  </div>
+</form>
+
+<% if (it.findings.length === 0) { %>
+  <p style="color:var(--vendo-text-muted); margin-top:2em">
+    <% if (it.currentStatus === 'open') { %>
+      No open findings yet. The growth agents will start populating this
+      as their crons fire (next run window: weekday 04:00 – 11:00 UTC).
+    <% } else { %>
+      No <%= it.currentStatus %> findings match.
+    <% } %>
+  </p>
+<% } else { %>
+  <table class="ch-table">
+    <thead>
+      <tr>
+        <th>Sev</th>
+        <th>Agent</th>
+        <th>Subject</th>
+        <th>Title</th>
+        <th>Type</th>
+        <th>Last seen</th>
+        <th>×</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.findings.forEach(function(f){ %>
+        <tr class="ch-row">
+          <td><span class="ch-sev <%= f.severityClass %>"><%= f.severity %></span></td>
+          <td><code><%= f.agent %></code></td>
+          <td>
+            <% if (f.subject_label) { %>
+              <strong><%= f.subject_label %></strong>
+            <% } %>
+            <% if (f.subject_id) { %>
+              <br/><small style="color:var(--vendo-text-muted)"><%= f.subject_type %>:<%= f.subject_id %></small>
+            <% } %>
+          </td>
+          <td>
+            <a href="/admin/growth/<%= f.id %>"><%= f.title %></a>
+          </td>
+          <td><small><%= f.finding_type %></small></td>
+          <td><small><%= f.lastSeenShort %></small></td>
+          <td><%= f.occurrences %></td>
+          <td><a href="/admin/growth/<%= f.id %>" class="link">→</a></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<style>
+  .ch-table { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 13px; }
+  .ch-table th, .ch-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--vendo-border); vertical-align: top; }
+  .ch-table th { color: var(--vendo-text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ch-row:hover { background: var(--vendo-surface); }
+  .ch-sev { display: inline-block; min-width: 28px; text-align: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-right: 4px; }
+  .ch-sev.sev-p0 { background: rgba(239, 68, 68, 0.15); color: #FCA5A5; }
+  .ch-sev.sev-p1 { background: rgba(245, 158, 11, 0.15); color: #FCD34D; }
+  .ch-sev.sev-p2 { background: rgba(59, 130, 246, 0.10); color: #93C5FD; }
+  .ch-sev.sev-p3 { background: rgba(148, 163, 184, 0.10); color: var(--vendo-text-muted); }
+  .filter-bar { display: flex; gap: 1.5em; margin: 1em 0; align-items: end; flex-wrap: wrap; }
+  .filter-bar label { display: block; font-size: 11px; color: var(--vendo-text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .filter-bar select, .filter-bar input { background: var(--vendo-surface); color: var(--vendo-text); border: 1px solid var(--vendo-border); border-radius: 4px; padding: 6px 10px; font-family: var(--vendo-font); }
+  .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+</style>

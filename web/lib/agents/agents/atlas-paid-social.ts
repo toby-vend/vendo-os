@@ -109,4 +109,5 @@ export const atlasPaidSocialAgent: AgentDef = {
   maxSteps: 8,
   tools: TOOLS,
   systemPrompt,
+  canBeInvoked: true,
 };

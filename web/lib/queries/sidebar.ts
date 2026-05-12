@@ -135,6 +135,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
       { id: 'admin-suggestions', label: 'Suggestions', href: '/admin/suggestions' },
       { id: 'admin-code-health', label: 'Code Health', href: '/admin/code-health' },
       { id: 'admin-agents', label: 'Agents', href: '/admin/agents' },
+      { id: 'admin-growth', label: 'Growth', href: '/admin/growth' },
       { id: 'sync-status', label: 'Sync Status', href: '/sync-status' },
     ],
   },
