@@ -35,6 +35,7 @@ import { adminFrameioMappingRoutes } from './routes/admin/frameio-mapping.js';
 import { adminGadsAccountMapRoutes } from './routes/admin/gads-account-map.js';
 import { adminCodeHealthRoutes } from './routes/admin/code-health.js';
 import { adminAgentsRoutes } from './routes/admin/agents.js';
+import { treatmentMappingsRoutes } from './routes/admin/treatment-mappings.js';
 import { googleOAuthRoutes } from './routes/google-oauth.js';
 import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
@@ -372,6 +373,10 @@ app.register(adminFrameioMappingRoutes, { prefix: '/admin/frameio-mapping' });
 app.register(adminGadsAccountMapRoutes, { prefix: '/admin/gads-account-map' });
 app.register(adminCodeHealthRoutes, { prefix: '/admin/code-health' });
 app.register(adminAgentsRoutes, { prefix: '/admin/agents' });
+// Treatment-mappings admin — full paths inside the plugin so a single
+// registration covers both /admin/clients/:id/treatment-mappings (UI) and
+// /api/admin/clients/:id/treatment-mappings/... (HTMX-driven mutations).
+app.register(treatmentMappingsRoutes);
 app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });

@@ -1,0 +1,214 @@
+<%
+// Partial: mappings table + add form + unmapped sidebar.
+// Rendered standalone for HTMX swaps, and embedded by treatment-mappings.eta
+// for full-page loads. Receives the same `it` shape from buildContext().
+const client = it.client;
+const mappings = it.mappings || [];
+const unmappedCampaigns = it.unmappedCampaigns || [];
+const appliesToOptions = it.appliesToOptions || ['both', 'meta', 'google'];
+
+// Pre-format helpers.
+const fmtMoney = (n) => {
+  if (n == null) return '';
+  try { return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(n); }
+  catch { return `£${n}`; }
+};
+const fmtDate = (s) => {
+  if (!s) return '—';
+  try { return new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  catch { return s; }
+};
+%>
+
+<% if (it.error) { %>
+  <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #ef4444; font-size: 14px;">
+    <%= it.error %>
+  </div>
+<% } %>
+
+<% if (typeof it.autoSuggestedCount === 'number') { %>
+  <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: #22C55E; font-size: 14px;">
+    <% if (it.autoSuggestedCount === 0) { %>
+      No new mappings to suggest — every classifiable campaign is already mapped, or the regex library returned no matches.
+    <% } else { %>
+      Added <%= it.autoSuggestedCount %> mapping<%= it.autoSuggestedCount === 1 ? '' : 's' %> from the built-in regex library.
+    <% } %>
+  </div>
+<% } %>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.5rem; align-items: flex-start;">
+
+  <!-- Main: existing mappings + add form -->
+  <div>
+
+    <div class="card" style="overflow-x: auto; padding: 0;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <th style="text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; width: 70px;">Priority</th>
+            <th style="text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Treatment</th>
+            <th style="text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">Campaign pattern (regex)</th>
+            <th style="text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; width: 110px;">Applies to</th>
+            <th style="text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; width: 150px;">Avg case (£)</th>
+            <th style="text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; width: 80px;">Active</th>
+            <th style="text-align: right; padding: 12px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; width: 110px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (mappings.length === 0) { %>
+            <tr>
+              <td colspan="7" style="padding: 2rem; text-align: center; color: #64748B; font-size: 14px;">
+                No mappings yet. Use <strong>Auto-suggest</strong> above, or add one below.
+              </td>
+            </tr>
+          <% } else { %>
+            <% mappings.forEach(function(m) { %>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); <%= m.is_active ? '' : 'opacity: 0.55;' %>">
+                <form
+                  hx-post="/api/admin/clients/<%= client.id %>/treatment-mappings/<%= m.id %>/update"
+                  hx-target="#tm-content"
+                  hx-swap="innerHTML"
+                  style="display: contents;">
+                  <input type="hidden" name="is_active_present" value="1" />
+                  <td style="padding: 8px 14px;">
+                    <input type="number" name="priority" value="<%= m.priority %>" min="0" max="9999"
+                      style="width: 56px; padding: 5px 7px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px;" />
+                  </td>
+                  <td style="padding: 8px 14px;">
+                    <input type="text" name="treatment_name" value="<%= m.treatment_name %>" required
+                      style="width: 100%; min-width: 140px; padding: 5px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px; box-sizing: border-box;" />
+                  </td>
+                  <td style="padding: 8px 14px;">
+                    <input type="text" name="campaign_pattern" value="<%= m.campaign_pattern %>" required spellcheck="false"
+                      style="width: 100%; min-width: 200px; padding: 5px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; box-sizing: border-box;" />
+                  </td>
+                  <td style="padding: 8px 14px;">
+                    <select name="applies_to"
+                      style="width: 100%; padding: 5px 6px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px;">
+                      <% appliesToOptions.forEach(function(opt) { %>
+                        <option value="<%= opt %>"<%= m.applies_to === opt ? ' selected' : '' %>><%= opt %></option>
+                      <% }) %>
+                    </select>
+                  </td>
+                  <td style="padding: 8px 14px;">
+                    <input type="number" name="avg_case_value_gbp" value="<%= m.avg_case_value_gbp == null ? '' : m.avg_case_value_gbp %>" min="0" step="1" placeholder="default"
+                      style="width: 100%; padding: 5px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px; box-sizing: border-box;" />
+                  </td>
+                  <td style="padding: 8px 14px; text-align: center;">
+                    <label style="display: inline-flex; align-items: center; cursor: pointer;">
+                      <input type="checkbox" name="is_active" value="on"<%= m.is_active ? ' checked' : '' %>
+                        style="accent-color: #22C55E; width: 16px; height: 16px;" />
+                    </label>
+                  </td>
+                  <td style="padding: 8px 14px; text-align: right; white-space: nowrap;">
+                    <button type="submit" style="font-size: 12px; color: #22C55E; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 4px 10px; cursor: pointer;">Save</button>
+                    <button type="button"
+                      hx-post="/api/admin/clients/<%= client.id %>/treatment-mappings/<%= m.id %>/delete"
+                      hx-target="#tm-content"
+                      hx-swap="innerHTML"
+                      hx-confirm="Delete this mapping? <%= (m.treatment_name || '').replace(/[^a-zA-Z0-9 &-]/g, '') %>"
+                      style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer; margin-left: 4px;">Delete</button>
+                  </td>
+                </form>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Add mapping -->
+    <div class="card" style="padding: 1rem 1.25rem; margin-top: 1rem;">
+      <h3 style="margin: 0 0 0.75rem; font-size: 14px; font-weight: 600; color: #E2E8F0;">Add mapping</h3>
+      <form
+        hx-post="/api/admin/clients/<%= client.id %>/treatment-mappings"
+        hx-target="#tm-content"
+        hx-swap="innerHTML"
+        hx-on:htmx:after-request="if (event.detail.successful) this.reset();">
+        <div style="display: grid; grid-template-columns: 70px minmax(140px, 1fr) minmax(180px, 2fr) 110px 130px auto; gap: 0.5rem; align-items: end;">
+          <div>
+            <label style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748B; margin-bottom: 3px;">Priority</label>
+            <input type="number" name="priority" value="100" min="0" max="9999"
+              style="width: 100%; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px; box-sizing: border-box;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748B; margin-bottom: 3px;">Treatment *</label>
+            <input type="text" name="treatment_name" required placeholder="e.g. Invisalign & Ortho"
+              style="width: 100%; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px; box-sizing: border-box;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748B; margin-bottom: 3px;">Pattern (regex) *</label>
+            <input type="text" name="campaign_pattern" required spellcheck="false" placeholder="invis|aligner"
+              style="width: 100%; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; box-sizing: border-box;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748B; margin-bottom: 3px;">Applies to</label>
+            <select name="applies_to"
+              style="width: 100%; padding: 6px 6px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px;">
+              <% appliesToOptions.forEach(function(opt) { %>
+                <option value="<%= opt %>"<%= opt === 'both' ? ' selected' : '' %>><%= opt %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748B; margin-bottom: 3px;">Avg case (£)</label>
+            <input type="number" name="avg_case_value_gbp" min="0" step="1" placeholder="default"
+              style="width: 100%; padding: 6px 8px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px; box-sizing: border-box;" />
+          </div>
+          <div>
+            <button type="submit" style="padding: 7px 16px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">Add</button>
+          </div>
+        </div>
+        <p style="margin: 0.5rem 0 0; font-size: 11px; color: #64748B;">
+          Lower priority wins. Leave avg case blank to fall back to the vertical default.
+        </p>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Sidebar: unmapped campaigns -->
+  <aside class="card" style="padding: 1rem 1.25rem; align-self: flex-start; position: sticky; top: 1rem;">
+    <h3 style="margin: 0 0 0.5rem; font-size: 14px; font-weight: 600; color: #E2E8F0;">
+      Unmapped campaigns
+      <span style="display: inline-block; margin-left: 4px; padding: 1px 8px; background: rgba(255,255,255,0.06); border-radius: 999px; font-size: 11px; color: #94A3B8; vertical-align: middle;">
+        <%= unmappedCampaigns.length %>
+      </span>
+    </h3>
+    <p style="margin: 0 0 0.75rem; font-size: 11px; color: #64748B; line-height: 1.5;">
+      Last 90 days of Meta + Google campaign names with spend that don't match any active mapping.
+    </p>
+    <% if (unmappedCampaigns.length === 0) { %>
+      <div style="font-size: 13px; color: #64748B; padding: 0.5rem 0;">
+        Nothing unmapped — every recent campaign already matches a mapping.
+      </div>
+    <% } else { %>
+      <ul style="list-style: none; padding: 0; margin: 0; max-height: 520px; overflow-y: auto;">
+        <% unmappedCampaigns.forEach(function(c) { %>
+          <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+              <span style="font-size: 13px; color: #E2E8F0; word-break: break-word; flex: 1;"><%= c.name %></span>
+              <span style="font-size: 11px; color: #64748B; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0;"><%= c.source %></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; color: #64748B;">
+                <%= fmtMoney(c.spend) || '£0' %> last 90 days
+                <% if (c.suggested) { %>
+                  &nbsp;·&nbsp;suggested: <strong style="color: #22C55E;"><%= c.suggested %></strong>
+                <% } %>
+              </span>
+              <button type="button"
+                onclick="vendoTmPrefill(this)"
+                data-treatment="<%= c.suggested || c.name %>"
+                data-pattern="<%= c.suggestedPattern %>"
+                style="font-size: 11px; color: #22C55E; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.3); border-radius: 6px; padding: 3px 8px; cursor: pointer; white-space: nowrap;">
+                Add as mapping
+              </button>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </aside>
+
+</div>
