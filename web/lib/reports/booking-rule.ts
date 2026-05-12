@@ -34,24 +34,58 @@ export function isBookedAppointmentPipeline(name: string | null | undefined): bo
 }
 
 /**
- * Return the IDs of every "Booked Appointment" pipeline owned by this
- * client. Empty array means the client has no matching pipeline — the
- * caller should set `missingPipeline: true` and report bookings as 0.
+ * Resolve the regex that decides which pipelines count as bookings for
+ * this client. Per-client override (`clients.booking_pipeline_pattern`)
+ * wins; falls back to the universal default.
+ *
+ * The override is stored as a raw regex source (without slashes). If it
+ * fails to compile, we log and fall back to the default rather than
+ * crashing the dashboard build.
+ */
+export async function getBookingPipelinePattern(clientId: number): Promise<RegExp> {
+  const found = await rows<{ booking_pipeline_pattern: string | null }>(
+    `SELECT booking_pipeline_pattern
+       FROM clients
+      WHERE id = ?
+      LIMIT 1`,
+    [clientId],
+  );
+  const override = found[0]?.booking_pipeline_pattern?.trim();
+  if (!override) return BOOKING_PIPELINE_PATTERN;
+  try {
+    return new RegExp(override, 'i');
+  } catch (err) {
+    console.warn(
+      `[booking-rule] client ${clientId} has invalid booking_pipeline_pattern ` +
+      `${JSON.stringify(override)} — using default. ${(err as Error).message}`,
+    );
+    return BOOKING_PIPELINE_PATTERN;
+  }
+}
+
+/**
+ * Return the IDs of every booking pipeline owned by this client, using
+ * the per-client override pattern if set (default `/booked appointment/i`).
+ * Empty array means the client has no matching pipeline — the caller
+ * should set `missingPipeline: true` and report bookings as 0.
+ *
+ * We can't run a JS RegExp inside SQL directly. Instead we pull the
+ * client's pipelines (typically a handful) and filter in-memory.
  */
 export async function findBookingPipelineIds(clientId: number): Promise<string[]> {
-  const found = await rows<{ id: string }>(
-    `SELECT p.id
+  const pattern = await getBookingPipelinePattern(clientId);
+  const found = await rows<{ id: string; name: string }>(
+    `SELECT p.id, p.name
        FROM ghl_pipelines p
       WHERE p.location_id IN (
               SELECT external_id
                 FROM client_source_mappings
                WHERE client_id = ?
                  AND source = 'ghl'
-            )
-        AND LOWER(p.name) LIKE '%booked appointment%'`,
+            )`,
     [clientId],
   );
-  return found.map(r => r.id);
+  return found.filter(r => pattern.test(r.name)).map(r => r.id);
 }
 
 export interface BookingOpportunity {
