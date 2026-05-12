@@ -27,6 +27,7 @@ import { buildGoogle } from './aggregators/google.js';
 import { buildSeo } from './aggregators/seo.js';
 import { buildAiSummary } from './aggregators/ai-summary.js';
 import { buildTreatments } from './aggregators/treatment.js';
+import { findBookingPipelineIds } from './booking-rule.js';
 import type {
   DashboardMode,
   DashboardPayload,
@@ -62,15 +63,20 @@ export async function buildDashboardData(
 
   // Aggregators run in parallel — they're independent reads against
   // different source tables. Treatment + aiSummary are wired separately
-  // because they feed into multiple blocks / flags.
-  const [overview, meta, google, seo, aiSummary, treatments] = await Promise.all([
+  // because they feed into multiple blocks / flags. The booking-pipeline
+  // existence check runs alongside so we can flag clients whose GHL
+  // workspace doesn't have a 'Booked Appointment' pipeline.
+  const [overview, meta, google, seo, aiSummary, treatments, bookingPipelineIds] = await Promise.all([
     buildOverview(report.client_id, range),
     buildMeta(report.client_id, range),
     buildGoogle(report.client_id, range),
     buildSeo(report.client_id, range),
     buildAiSummary(reportId),
     buildTreatments(report.client_id, range),
+    findBookingPipelineIds(report.client_id),
   ]);
+
+  const bookingPipelineMissing = bookingPipelineIds.length === 0;
 
   // Treatment rows live inside the overview block. Aggregators may also
   // surface flags (default avg value, missing mapping, missing booking
@@ -95,9 +101,9 @@ export async function buildDashboardData(
       geoGridComingSoon: true,
       ...(treatments.averageCaseValueIsDefault ? { averageCaseValueIsDefault: true as const } : {}),
       ...(treatments.treatmentMappingMissing ? { treatmentMappingMissing: true as const } : {}),
-      // bookingPipelineMissing + deviceSplitMissing are emitted by the
-      // GHL booking-rule helper and the Google aggregator respectively
-      // — they'll wire through here once A2/A4 lands their pieces.
+      ...(bookingPipelineMissing ? { bookingPipelineMissing: true as const } : {}),
+      // deviceSplitMissing is emitted by the Google aggregator once A4
+      // wires segments.device into the sync.
     },
     computedAt: new Date().toISOString(),
   };
