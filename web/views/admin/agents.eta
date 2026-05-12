@@ -1,0 +1,203 @@
+<% layout('/layouts/base') %>
+
+<h1>Agents <small>(<%= it.cards.length %> scheduled)</small></h1>
+
+<p style="color:var(--vendo-text-muted)">
+  Every cron-triggered job and scheduled agent on Vendo OS. Heartbeats
+  are written on each run by <code>recordHeartbeat()</code>; LLM activity
+  is captured in <code>agent_runs</code> with usage + cost.
+</p>
+
+<div class="agents-totals">
+  <div class="agents-total">
+    <div class="agents-total-label">Runs · last 24h</div>
+    <div class="agents-total-value"><%= it.totals.runsToday %></div>
+  </div>
+  <div class="agents-total">
+    <div class="agents-total-label">LLM cost · last 24h</div>
+    <div class="agents-total-value">$<%= it.totals.costTodayUsd.toFixed(3) %></div>
+  </div>
+  <div class="agents-total">
+    <div class="agents-total-label">Errors · last 24h</div>
+    <div class="agents-total-value <%= it.totals.errorsToday > 0 ? 'is-bad' : '' %>"><%= it.totals.errorsToday %></div>
+  </div>
+</div>
+
+<h2 style="margin-top:1.5em">Scheduled jobs</h2>
+
+<table class="agents-table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Job</th>
+      <th>Schedule</th>
+      <th>Last success</th>
+      <th>Last error</th>
+      <th>Duration</th>
+      <th>Detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.cards.forEach(function(c){ %>
+      <tr class="agents-row agents-row-<%= c.status %>">
+        <td>
+          <span class="agents-dot agents-dot-<%= c.status %>" title="<%= c.status %>"></span>
+        </td>
+        <td>
+          <code><%= c.job %></code>
+          <% if (c.path) { %>
+            <br/><small style="color:var(--vendo-text-muted)"><%= c.path %></small>
+          <% } %>
+        </td>
+        <td>
+          <%= c.scheduleHuman %>
+          <% if (c.scheduleHuman !== c.schedule) { %>
+            <br/><small style="color:var(--vendo-text-muted)"><code><%= c.schedule %></code></small>
+          <% } %>
+        </td>
+        <td>
+          <% if (c.lastSuccessAgo) { %>
+            <%= c.lastSuccessAgo %>
+            <br/><small style="color:var(--vendo-text-muted)"><%= c.lastSuccessAt %></small>
+          <% } else { %>
+            <small style="color:var(--vendo-text-muted)">never</small>
+          <% } %>
+        </td>
+        <td>
+          <% if (c.lastErrorAgo) { %>
+            <%= c.lastErrorAgo %>
+            <% if (c.lastError) { %>
+              <details>
+                <summary><small>show</small></summary>
+                <pre class="agents-error"><%= c.lastError %></pre>
+              </details>
+            <% } %>
+          <% } else { %>
+            <small style="color:var(--vendo-text-muted)">—</small>
+          <% } %>
+        </td>
+        <td>
+          <% if (c.lastDurationMs !== null) { %>
+            <%= (c.lastDurationMs / 1000).toFixed(1) %>s
+          <% } else { %>
+            <small style="color:var(--vendo-text-muted)">—</small>
+          <% } %>
+        </td>
+        <td>
+          <% if (c.dashboardUrl) { %>
+            <a href="<%= c.dashboardUrl %>" class="link">→</a>
+          <% } else { %>
+            <small style="color:var(--vendo-text-muted)">—</small>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h2 style="margin-top:2em">Recent LLM runs <small style="color:var(--vendo-text-muted)">(last 20)</small></h2>
+
+<% if (it.recentRuns.length === 0) { %>
+  <p style="color:var(--vendo-text-muted)">No agent runs recorded yet.</p>
+<% } else { %>
+  <table class="agents-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Agent</th>
+        <th>Trigger</th>
+        <th>Channel</th>
+        <th>Started</th>
+        <th>Duration</th>
+        <th>Tokens</th>
+        <th>Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.recentRuns.forEach(function(r){ %>
+        <tr class="<%= r.statusClass %>">
+          <td>
+            <span class="agents-dot agents-dot-<%= r.status === 'errored' ? 'error' : r.status === 'running' ? 'unknown' : 'ok' %>" title="<%= r.status %>"></span>
+          </td>
+          <td><code><%= r.agent %></code></td>
+          <td><small><%= r.trigger %></small></td>
+          <td><small><%= r.channel %></small></td>
+          <td><%= r.startedAgo %><br/><small style="color:var(--vendo-text-muted)"><%= r.startedShort %></small></td>
+          <td>
+            <% if (r.durationSec) { %>
+              <%= r.durationSec %>s
+            <% } else if (r.status === 'running') { %>
+              <small style="color:var(--vendo-text-muted)">running…</small>
+            <% } else { %>
+              <small style="color:var(--vendo-text-muted)">—</small>
+            <% } %>
+          </td>
+          <td>
+            <% if (r.input_tokens || r.output_tokens) { %>
+              <small><%= r.input_tokens || 0 %> + <%= r.output_tokens || 0 %></small>
+            <% } else { %>
+              <small style="color:var(--vendo-text-muted)">—</small>
+            <% } %>
+          </td>
+          <td><%= r.cost %></td>
+        </tr>
+        <% if (r.error) { %>
+          <tr><td></td><td colspan="7"><pre class="agents-error"><%= r.error %></pre></td></tr>
+        <% } %>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<style>
+  .agents-totals { display: flex; gap: 1em; margin: 1em 0; flex-wrap: wrap; }
+  .agents-total {
+    background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    min-width: 160px;
+  }
+  .agents-total-label { font-size: 11px; color: var(--vendo-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .agents-total-value { font-size: 22px; font-weight: 600; margin-top: 2px; }
+  .agents-total-value.is-bad { color: #FCA5A5; }
+
+  .agents-table { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 13px; }
+  .agents-table th, .agents-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--vendo-border);
+    vertical-align: top;
+  }
+  .agents-table th { color: var(--vendo-text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .agents-row:hover { background: var(--vendo-surface); }
+  .agents-row-error { background: rgba(239, 68, 68, 0.05); }
+  .agents-row-stale { background: rgba(245, 158, 11, 0.04); }
+
+  .agents-dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    vertical-align: middle;
+  }
+  .agents-dot-ok      { background: var(--vendo-green); }
+  .agents-dot-error   { background: #EF4444; }
+  .agents-dot-stale   { background: #F59E0B; }
+  .agents-dot-unknown { background: #64748B; }
+
+  .agents-error {
+    background: var(--vendo-bg);
+    border: 1px solid var(--vendo-border);
+    border-radius: 4px;
+    padding: 8px;
+    margin-top: 6px;
+    color: #FCA5A5;
+    font-size: 11px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+
+  .run-error { background: rgba(239, 68, 68, 0.05); }
+  .run-running { background: rgba(59, 130, 246, 0.05); }
+
+  .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+</style>
