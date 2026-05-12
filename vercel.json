@@ -67,6 +67,41 @@
       }
     },
     {
+      "src": "api/cron/atlas-churn-risk.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 300 }
+    },
+    {
+      "src": "api/cron/atlas-upsell.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 300 }
+    },
+    {
+      "src": "api/cron/atlas-lead-quality.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 300 }
+    },
+    {
+      "src": "api/cron/atlas-case-study.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 300 }
+    },
+    {
+      "src": "api/cron/atlas-profitability.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 300 }
+    },
+    {
+      "src": "api/cron/atlas-feature-prioritiser.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 300 }
+    },
+    {
+      "src": "api/cron/atlas-growth.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 300 }
+    },
+    {
       "src": "api/agent/chat.ts",
       "use": "@vercel/node",
       "config": {
@@ -146,12 +181,32 @@
       "schedule": "45 */4 * * *"
     },
     {
-      "path": "/api/cron/lead-scoring",
-      "schedule": "0 9 * * 5"
+      "path": "/api/cron/atlas-churn-risk",
+      "schedule": "0 9 * * 1-5"
     },
     {
-      "path": "/api/cron/upsell-detection",
-      "schedule": "0 10 * * 3"
+      "path": "/api/cron/atlas-upsell",
+      "schedule": "30 9 * * 3"
+    },
+    {
+      "path": "/api/cron/atlas-lead-quality",
+      "schedule": "0 8 * * 1-5"
+    },
+    {
+      "path": "/api/cron/atlas-case-study",
+      "schedule": "0 7 * * 3"
+    },
+    {
+      "path": "/api/cron/atlas-profitability",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/atlas-feature-prioritiser",
+      "schedule": "0 11 * * 1"
+    },
+    {
+      "path": "/api/cron/atlas-growth",
+      "schedule": "0 17 * * 5"
     },
     {
       "path": "/api/cron/nps-trigger",
@@ -196,10 +251,6 @@
     {
       "path": "/api/cron/sales-pipeline-digest",
       "schedule": "0 17 * * 5"
-    },
-    {
-      "path": "/api/cron/case-study-detection",
-      "schedule": "0 7 * * 3"
     },
     {
       "path": "/api/cron/sync-asana",
@@ -247,6 +298,13 @@
     { "src": "/api/cron/atlas-brief", "dest": "/api/cron/atlas-brief.ts", "methods": ["GET", "POST"] },
     { "src": "/api/cron/concern-monitor", "dest": "/api/cron/concern-monitor.ts", "methods": ["GET", "POST"] },
     { "src": "/api/cron/codebase-health", "dest": "/api/cron/codebase-health.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/atlas-churn-risk", "dest": "/api/cron/atlas-churn-risk.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/atlas-upsell", "dest": "/api/cron/atlas-upsell.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/atlas-lead-quality", "dest": "/api/cron/atlas-lead-quality.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/atlas-case-study", "dest": "/api/cron/atlas-case-study.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/atlas-profitability", "dest": "/api/cron/atlas-profitability.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/atlas-feature-prioritiser", "dest": "/api/cron/atlas-feature-prioritiser.ts", "methods": ["GET", "POST"] },
+    { "src": "/api/cron/atlas-growth", "dest": "/api/cron/atlas-growth.ts", "methods": ["GET", "POST"] },
     { "src": "/api/agent/chat", "dest": "/api/agent/chat.ts", "methods": ["POST"] },
     { "src": "/api/agent/approve", "dest": "/api/agent/approve.ts", "methods": ["POST"] },
     { "src": "/api/agent/conversations(/.*)?", "dest": "/api/agent/conversations.ts" },
