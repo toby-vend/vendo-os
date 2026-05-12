@@ -23,7 +23,53 @@
   </div>
 </div>
 
-<h2 style="margin-top:1.5em">Scheduled jobs</h2>
+<h2 style="margin-top:1.5em">Agent registry</h2>
+
+<p style="color:var(--vendo-text-muted)">
+  Every defined LLM agent. <strong>Can invoke</strong> means the agent
+  is an orchestrator — it can delegate to specialists via the
+  <code>invokeAgent</code> tool. Click into any agent for its system
+  prompt, tool surface, and recent runs.
+</p>
+
+<table class="agents-table">
+  <thead>
+    <tr>
+      <th>Agent</th>
+      <th>Model</th>
+      <th>Tier</th>
+      <th>Tools</th>
+      <th>Delegates</th>
+      <th>Runs 24h</th>
+      <th>Errors 24h</th>
+      <th>Cost 24h</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.registry.forEach(function(r){ %>
+      <tr class="agents-row">
+        <td><code><%= r.name %></code></td>
+        <td><span class="model-pill model-<%= r.modelTier %>"><%= r.modelTier %></span></td>
+        <td><small><%= r.tier %></small></td>
+        <td><%= r.toolCount %></td>
+        <td>
+          <% if (r.canInvoke) { %>
+            <span class="invoke-yes">✓ yes</span>
+          <% } else { %>
+            <small style="color:var(--vendo-text-muted)">—</small>
+          <% } %>
+        </td>
+        <td><%= r.runsDay %></td>
+        <td class="<%= r.errorsDay > 0 ? 'is-bad' : '' %>"><%= r.errorsDay %></td>
+        <td>$<%= r.costDay.toFixed(3) %></td>
+        <td><a href="/admin/agents/<%= r.name %>" class="link">→</a></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h2 style="margin-top:2em">Scheduled jobs</h2>
 
 <table class="agents-table">
   <thead>
@@ -200,4 +246,20 @@
 
   .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
   .link:hover { text-decoration: underline; }
+
+  .model-pill {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .model-pill.model-haiku { background: rgba(148, 163, 184, 0.12); color: #94A3B8; }
+  .model-pill.model-sonnet { background: rgba(59, 130, 246, 0.15); color: #93C5FD; }
+  .model-pill.model-opus { background: rgba(168, 85, 247, 0.15); color: #C4B5FD; }
+  .model-pill.model-other { background: rgba(255,255,255,0.06); color: var(--vendo-text-muted); }
+  .invoke-yes { color: var(--vendo-green); font-weight: 600; font-size: 12px; }
+  .is-bad { color: #FCA5A5; }
 </style>

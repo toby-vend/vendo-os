@@ -21,6 +21,8 @@ import { readFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { db } from '../../lib/queries/base.js';
+import { listAgents, getAgent, SPECIALIST_AGENTS } from '../../lib/agents/agents/index.js';
+import { MODELS } from '../../lib/agents/models.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../../');
@@ -69,11 +71,12 @@ interface AgentCard {
 
 export const adminAgentsRoutes: FastifyPluginAsync = async (app) => {
   app.get('/', async (_request, reply) => {
-    const [heartbeats, crons, recentRuns, totals] = await Promise.all([
+    const [heartbeats, crons, recentRuns, totals, registry] = await Promise.all([
       loadHeartbeats(),
       loadCrons(),
       loadRecentAgentRuns(20),
       loadTotals(),
+      loadAgentRegistry(),
     ]);
 
     const cards = buildCards(heartbeats, crons);
@@ -82,9 +85,87 @@ export const adminAgentsRoutes: FastifyPluginAsync = async (app) => {
       cards,
       recentRuns: recentRuns.map(viewRun),
       totals,
+      registry,
     });
   });
 };
+
+// ---------------------------------------------------------------------------
+// Agent registry — one row per AgentDef defined in agents/index.ts, joined
+// with 24h activity from agent_runs. Drives the "Agent registry" section on
+// /admin/agents (separate from the cron heartbeats below it).
+// ---------------------------------------------------------------------------
+
+interface RegistryRow {
+  name: string;
+  model: string;
+  modelTier: 'haiku' | 'sonnet' | 'opus' | 'other';
+  tier: 'admin' | 'standard' | 'specialist' | 'cron';
+  toolCount: number;
+  canInvoke: boolean;
+  runsDay: number;
+  errorsDay: number;
+  costDay: number;
+}
+
+async function loadAgentRegistry(): Promise<RegistryRow[]> {
+  const stats = await load24hAgentStats();
+  const rows: RegistryRow[] = [];
+  for (const name of listAgents()) {
+    const def = getAgent(name);
+    if (!def) continue;
+    rows.push({
+      name,
+      model: def.model,
+      modelTier: tierOf(def.model),
+      tier: classifyTier(name),
+      toolCount: def.tools.length,
+      canInvoke: def.tools.includes('invokeAgent'),
+      runsDay: stats.get(name)?.runs ?? 0,
+      errorsDay: stats.get(name)?.errors ?? 0,
+      costDay: stats.get(name)?.cost ?? 0,
+    });
+  }
+  // Sort: orchestrators first, specialists second, alphabetical within each.
+  const tierRank = { admin: 0, standard: 1, specialist: 2, cron: 3 } as const;
+  rows.sort((a, b) => tierRank[a.tier] - tierRank[b.tier] || a.name.localeCompare(b.name));
+  return rows;
+}
+
+function tierOf(modelSlug: string): RegistryRow['modelTier'] {
+  if (modelSlug === MODELS.HAIKU) return 'haiku';
+  if (modelSlug === MODELS.SONNET) return 'sonnet';
+  if (modelSlug === MODELS.OPUS) return 'opus';
+  return 'other';
+}
+
+function classifyTier(name: string): RegistryRow['tier'] {
+  if (SPECIALIST_AGENTS.has(name)) return 'specialist';
+  if (name === 'atlas-brief' || name === 'atlas-monitor') return 'cron';
+  if (name === 'atlas-staff') return 'standard';
+  return 'admin';
+}
+
+async function load24hAgentStats(): Promise<Map<string, { runs: number; errors: number; cost: number }>> {
+  const map = new Map<string, { runs: number; errors: number; cost: number }>();
+  try {
+    const r = await db.execute(`
+      SELECT agent,
+             COUNT(*) AS runs,
+             COALESCE(SUM(CASE WHEN status = 'errored' THEN 1 ELSE 0 END), 0) AS errors,
+             COALESCE(SUM(cost_usd), 0) AS cost
+        FROM agent_runs
+       WHERE started_at >= datetime('now', '-1 day')
+    GROUP BY agent
+    `);
+    for (const row of r.rows as unknown as { agent: string; runs: number; errors: number; cost: number }[]) {
+      map.set(row.agent, { runs: Number(row.runs), errors: Number(row.errors), cost: Number(row.cost) });
+    }
+  } catch {
+    // agent_runs may not exist yet on a fresh dev DB.
+  }
+  return map;
+}
 
 // ---------------------------------------------------------------------------
 // Data loaders

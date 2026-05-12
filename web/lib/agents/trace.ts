@@ -27,8 +27,9 @@ export async function startRun(input: StartRunInput): Promise<string> {
   const id = generateId();
   await db.execute({
     sql: `INSERT INTO agent_runs
-      (id, agent, user_id, channel, conversation_id, trigger, model, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 'running')`,
+      (id, agent, user_id, channel, conversation_id, trigger, model, status,
+       parent_run_id, depth)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'running', ?, ?)`,
     args: [
       id,
       input.agent,
@@ -37,6 +38,8 @@ export async function startRun(input: StartRunInput): Promise<string> {
       input.conversation_id,
       input.trigger,
       input.model,
+      input.parent_run_id ?? null,
+      input.depth ?? 0,
     ],
   });
   return id;

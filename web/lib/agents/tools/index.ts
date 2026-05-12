@@ -20,6 +20,7 @@ import { draftAsanaTask } from './draft-asana-task.js';
 import { draftSlackMessage } from './draft-slack-message.js';
 import { draftPushNotification } from './draft-push-notification.js';
 import { draftEmail } from './draft-email.js';
+import { invokeAgent } from './invoke-agent.js';
 
 export const TOOL_FACTORIES = {
   searchMeetings,
@@ -42,6 +43,7 @@ export const TOOL_FACTORIES = {
   draftSlackMessage,
   draftPushNotification,
   draftEmail,
+  invokeAgent,
 } as const;
 
 export type ToolName = keyof typeof TOOL_FACTORIES;

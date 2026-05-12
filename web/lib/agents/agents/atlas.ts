@@ -39,6 +39,10 @@ const TOOLS = [
   'draftSlackMessage',
   'draftPushNotification',
   'draftEmail',
+  // Delegation — ask a specialist (atlas-am, atlas-paid-social,
+  // atlas-paid-search, atlas-creative, atlas-seo) for a domain-specific
+  // read instead of trying to answer in-line. Capped at depth 3.
+  'invokeAgent',
 ];
 
 function today(): string {

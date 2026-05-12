@@ -25,6 +25,9 @@ const TOOLS = [
   'getTimeSpent',
   'searchMeetingConcerns',
   'searchKnowledge',
+  // Delegate to a specialist when you spot a domain anomaly worth their
+  // read — e.g. invokeAgent('atlas-paid-social', '...') for a ROAS shift.
+  'invokeAgent',
 ];
 
 function today(): string {
