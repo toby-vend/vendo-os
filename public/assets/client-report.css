@@ -1,0 +1,353 @@
+/* Vendo Reporting v2 — dashboard styles.
+ *
+ * All tokens prefixed --vr-* and scoped to #report-root so they do not
+ * leak into the surrounding Vendo OS theme (which uses --vendo-*).
+ *
+ * Phase 0 covers: shell, sidebar, topbar, tab placeholder. Phase 2 adds
+ * KPI cards, channel grid, tables, charts, AI summary, etc.
+ */
+
+#report-root {
+  --vr-sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --vr-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+
+  --vr-bg: oklch(0.985 0.005 80);
+  --vr-bg-2: oklch(0.97 0.006 80);
+  --vr-surface: #ffffff;
+  --vr-surface-2: oklch(0.985 0.005 80);
+  --vr-rule: oklch(0.92 0.006 80);
+  --vr-rule-strong: oklch(0.86 0.008 80);
+
+  --vr-ink: oklch(0.22 0.012 250);
+  --vr-ink-2: oklch(0.45 0.012 250);
+  --vr-ink-3: oklch(0.62 0.01 250);
+
+  --vr-accent: oklch(0.55 0.12 195);
+  --vr-accent-soft: oklch(0.55 0.12 195 / 0.1);
+
+  --vr-good: oklch(0.55 0.12 155);
+  --vr-good-bg: oklch(0.55 0.12 155 / 0.1);
+  --vr-bad: oklch(0.58 0.16 25);
+  --vr-bad-bg: oklch(0.58 0.16 25 / 0.1);
+
+  --vr-shadow-sm: 0 1px 2px oklch(0.2 0.012 250 / 0.04);
+  --vr-shadow-md: 0 4px 12px oklch(0.2 0.012 250 / 0.06);
+
+  --vr-radius: 10px;
+  --vr-radius-sm: 6px;
+  --vr-radius-lg: 14px;
+
+  --vr-pad: 24px;
+
+  font-family: var(--vr-sans);
+  background: var(--vr-bg);
+  color: var(--vr-ink);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#report-root[data-vr-theme="dark"] {
+  --vr-bg: oklch(0.18 0.01 250);
+  --vr-bg-2: oklch(0.22 0.01 250);
+  --vr-surface: oklch(0.24 0.012 250);
+  --vr-surface-2: oklch(0.21 0.012 250);
+  --vr-rule: oklch(0.32 0.012 250);
+  --vr-rule-strong: oklch(0.4 0.012 250);
+
+  --vr-ink: oklch(0.96 0.005 80);
+  --vr-ink-2: oklch(0.78 0.008 80);
+  --vr-ink-3: oklch(0.6 0.008 80);
+}
+
+#report-root[data-vr-density="compact"] { --vr-pad: 16px; }
+#report-root[data-vr-density="comfy"]   { --vr-pad: 28px; }
+
+#report-root *,
+#report-root *::before,
+#report-root *::after { box-sizing: border-box; }
+
+/* ── App shell ─────────────────────────────────────────────────────────── */
+.vr-app {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────────── */
+.vr-sidebar {
+  background: var(--vr-bg);
+  border-right: 1px solid var(--vr-rule);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.vr-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 18px;
+  border-bottom: 1px solid var(--vr-rule);
+  margin-bottom: 14px;
+}
+.vr-brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--vr-ink);
+  color: var(--vr-bg);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.02em;
+}
+.vr-brand-name {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+.vr-brand-sub {
+  font-size: 11px;
+  color: var(--vr-ink-3);
+  margin-top: 1px;
+}
+
+.vr-client-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm);
+  margin-bottom: 14px;
+}
+.vr-app[data-vr-mode="internal"] .vr-client-switch {
+  cursor: pointer;
+}
+.vr-app[data-vr-mode="internal"] .vr-client-switch:hover {
+  border-color: var(--vr-rule-strong);
+}
+.vr-client-mono {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--vr-accent-soft);
+  color: var(--vr-accent);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 11px;
+}
+.vr-client-body { min-width: 0; flex: 1; }
+.vr-client-name {
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vr-client-meta {
+  font-size: 11px;
+  color: var(--vr-ink-3);
+}
+.vr-client-chev {
+  color: var(--vr-ink-3);
+  flex-shrink: 0;
+}
+
+.vr-nav-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--vr-ink-3);
+  padding: 14px 10px 6px;
+}
+.vr-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--vr-radius-sm);
+  color: var(--vr-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.vr-nav-item:hover {
+  background: var(--vr-bg-2);
+  color: var(--vr-ink);
+}
+.vr-nav-item.is-active {
+  background: var(--vr-surface);
+  color: var(--vr-ink);
+  border: 1px solid var(--vr-rule);
+  box-shadow: var(--vr-shadow-sm);
+}
+.vr-nav-icon {
+  width: 16px;
+  display: grid;
+  place-items: center;
+  opacity: 0.8;
+}
+.vr-nav-pill {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--vr-ink-3);
+  font-family: var(--vr-mono);
+}
+
+.vr-sidebar-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--vr-rule);
+  font-size: 11px;
+  color: var(--vr-ink-3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.vr-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--vr-good);
+  box-shadow: 0 0 0 3px var(--vr-good-bg);
+}
+
+/* ── Main area ─────────────────────────────────────────────────────────── */
+.vr-main { min-width: 0; }
+
+.vr-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px var(--vr-pad);
+  border-bottom: 1px solid var(--vr-rule);
+  background: var(--vr-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.vr-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--vr-ink-2);
+}
+.vr-crumb-sep { color: var(--vr-ink-3); }
+.vr-crumb-current { color: var(--vr-ink); font-weight: 600; }
+
+.vr-topbar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.vr-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm);
+  background: var(--vr-surface);
+  font-size: 13px;
+  color: var(--vr-ink);
+}
+
+.vr-btn {
+  padding: 7px 12px;
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm);
+  background: var(--vr-surface);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--vr-sans);
+  color: var(--vr-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.vr-btn:hover:not(:disabled) { border-color: var(--vr-rule-strong); }
+.vr-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.vr-btn-primary {
+  background: var(--vr-ink);
+  color: var(--vr-bg);
+  border-color: var(--vr-ink);
+}
+.vr-btn-primary:hover:not(:disabled) {
+  background: var(--vr-ink-2);
+  border-color: var(--vr-ink-2);
+}
+
+/* ── Tab content ──────────────────────────────────────────────────────── */
+.vr-tab-content {
+  padding: 28px var(--vr-pad) 80px;
+  max-width: 1480px;
+}
+
+.vr-tab-placeholder {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vr-tab-placeholder-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--vr-ink);
+}
+.vr-tab-placeholder-body {
+  margin: 0;
+  font-size: 14px;
+  color: var(--vr-ink-2);
+  line-height: 1.55;
+}
+.vr-tab-placeholder-meta {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--vr-rule);
+  font-size: 12px;
+  color: var(--vr-ink-3);
+  font-family: var(--vr-mono);
+}
+.vr-tab-placeholder-meta code {
+  background: var(--vr-bg-2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11.5px;
+}
+
+/* ── Print ─────────────────────────────────────────────────────────────── */
+@media print {
+  #report-root { background: #fff; }
+  .vr-sidebar,
+  .vr-topbar-actions { display: none; }
+  .vr-app { grid-template-columns: 1fr; }
+  .vr-topbar { position: static; border-bottom: 1px solid #e5e5e5; }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .vr-app { grid-template-columns: 1fr; }
+  .vr-sidebar { position: static; height: auto; }
+}

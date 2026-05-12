@@ -32,6 +32,8 @@
     "sync:meetings:backfill-invitees": "tsx scripts/sync/sync-meetings.ts --backfill-invitees",
     "build:chat": "tsx scripts/build-agent-chat.ts",
     "build:chat:watch": "tsx scripts/build-agent-chat.ts --watch",
+    "build:report": "tsx scripts/build-client-report.ts",
+    "build:report:watch": "tsx scripts/build-client-report.ts --watch",
     "drive:reindex": "tsx scripts/sync/sync-drive.ts",
     "drive:reindex:watch": "tsx scripts/sync/sync-drive.ts --watch",
     "drive:process": "tsx scripts/sync/process-drive-queue.ts",
