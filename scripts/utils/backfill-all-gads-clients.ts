@@ -94,31 +94,70 @@ console.log(`Period: ${dateFrom} → ${dateTo} (${BACKFILL_DAYS} days)`);
 
 const token = await mintAccessToken();
 const syncedAt = new Date().toISOString();
+// Skip threshold: an account whose latest row was synced within the last
+// 6 hours is treated as already-backfilled. Lets the script resume cleanly
+// after a crash without redoing finished accounts.
+const SKIP_IF_SYNCED_WITHIN_MS = 6 * 60 * 60 * 1000;
+const todayStartIso = new Date(Date.now() - SKIP_IF_SYNCED_WITHIN_MS).toISOString();
+
+/** Retry a fn on transient network errors (ECONNRESET, EAI_AGAIN, timeouts). */
+async function withRetry<T>(label: string, fn: () => Promise<T>, attempts = 4): Promise<T> {
+  let lastErr: unknown;
+  for (let n = 1; n <= attempts; n++) {
+    try { return await fn(); }
+    catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      const transient = /ECONNRESET|EAI_AGAIN|ETIMEDOUT|fetch failed|socket hang up|503|502|504/i.test(msg);
+      if (!transient || n === attempts) throw err;
+      const backoff = 500 * Math.pow(2, n - 1);  // 0.5s, 1s, 2s
+      console.log(`  ${label}: transient error (attempt ${n}/${attempts}), retrying in ${backoff}ms — ${msg.slice(0, 80)}`);
+      await new Promise(r => setTimeout(r, backoff));
+    }
+  }
+  throw lastErr;
+}
 
 let totalRowsBefore = 0;
 let totalConvsBefore = 0;
 let totalRowsAfter = 0;
 let totalConvsAfter = 0;
+let skipped = 0;
 const errors: string[] = [];
 
 for (let i = 0; i < accounts.length; i++) {
   const acc = accounts[i];
   const tag = `[${(i + 1).toString().padStart(2)}/${accounts.length}] ${acc.gads_customer_id}`;
 
+  // Skip-if-already-synced-today: if ANY row for this account was synced
+  // today, the previous run got here. Makes the script crash-resumable.
+  const syncCheck = await withRetry(`${tag} check`, () => db.execute({
+    sql: `SELECT MAX(synced_at) as last_sync
+            FROM gads_campaign_spend
+           WHERE account_id = ? AND date BETWEEN ? AND ?`,
+    args: [acc.gads_customer_id, dateFrom, dateTo],
+  }));
+  const lastSync = (syncCheck.rows[0] as { last_sync: string | null }).last_sync;
+  if (lastSync && lastSync >= todayStartIso) {
+    console.log(`${tag}  skipped (already synced today)  ${acc.notes ?? ''}`);
+    skipped++;
+    continue;
+  }
+
   // Before
-  const before = await db.execute({
+  const before = await withRetry(`${tag} before`, () => db.execute({
     sql: `SELECT COUNT(*) as rows_, COALESCE(SUM(conversions),0) as conv
             FROM gads_campaign_spend
            WHERE account_id = ? AND date BETWEEN ? AND ?`,
     args: [acc.gads_customer_id, dateFrom, dateTo],
-  });
+  }));
   const b = before.rows[0] as { rows_: number; conv: number };
   totalRowsBefore += Number(b.rows_);
   totalConvsBefore += Number(b.conv);
 
   let rowsApi: GadsRow[];
   try {
-    rowsApi = await fetchCampaignSpend(token, acc.gads_customer_id);
+    rowsApi = await withRetry(`${tag} api`, () => fetchCampaignSpend(token, acc.gads_customer_id));
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`${acc.gads_customer_id} (${acc.notes ?? '?'}): ${msg}`);
@@ -126,6 +165,10 @@ for (let i = 0; i < accounts.length; i++) {
     continue;
   }
 
+  // Batch all upserts for this account into a single libsql transaction —
+  // one round-trip instead of N. Both faster and far less exposure to
+  // transient connection drops mid-account.
+  const batch: Array<{ sql: string; args: (string | number | null)[] }> = [];
   for (const r of rowsApi) {
     const date = r.segments?.date;
     const campaignId = r.campaign?.id;
@@ -134,7 +177,7 @@ for (let i = 0; i < accounts.length; i++) {
     const conv = Number(r.metrics?.conversions ?? 0);
     const convVal = Number(r.metrics?.conversionsValue ?? 0);
     const cpc = conv > 0 ? spend / conv : 0;
-    await db.execute({
+    batch.push({
       sql: `INSERT INTO gads_campaign_spend (date, account_id, account_name, campaign_id, campaign_name, campaign_status, spend_micros, spend, impressions, clicks, conversions, conversion_value, cost_per_conversion, synced_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(date, account_id, campaign_id) DO UPDATE SET
@@ -155,13 +198,21 @@ for (let i = 0; i < accounts.length; i++) {
       ],
     });
   }
+  if (batch.length) {
+    // db.batch chunks in groups of 200 statements to stay under libsql's
+    // payload limit while still cutting round-trips dramatically.
+    for (let s = 0; s < batch.length; s += 200) {
+      const chunk = batch.slice(s, s + 200);
+      await withRetry(`${tag} upsert[${s}-${s + chunk.length}]`, () => db.batch(chunk, 'write'));
+    }
+  }
 
-  const after = await db.execute({
+  const after = await withRetry(`${tag} after`, () => db.execute({
     sql: `SELECT COUNT(*) as rows_, COALESCE(SUM(conversions),0) as conv
             FROM gads_campaign_spend
            WHERE account_id = ? AND date BETWEEN ? AND ?`,
     args: [acc.gads_customer_id, dateFrom, dateTo],
-  });
+  }));
   const a = after.rows[0] as { rows_: number; conv: number };
   totalRowsAfter += Number(a.rows_);
   totalConvsAfter += Number(a.conv);
@@ -172,7 +223,8 @@ for (let i = 0; i < accounts.length; i++) {
 
 console.log('');
 console.log('=== Backfill summary ===');
-console.log(`Accounts processed:    ${accounts.length}`);
+console.log(`Accounts processed:    ${accounts.length - skipped}`);
+console.log(`Accounts skipped:      ${skipped} (already synced within 6h)`);
 console.log(`Rows before:           ${totalRowsBefore}`);
 console.log(`Rows after:            ${totalRowsAfter}`);
 console.log(`Conversions before:    ${totalConvsBefore.toFixed(1)}`);
