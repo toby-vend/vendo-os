@@ -1,0 +1,161 @@
+<% layout('/layouts/base') %>
+
+<p style="margin-bottom:0.5em">
+  <a href="/admin/agents/<%= it.root.agent %>" class="link">← <%= it.root.agent %></a>
+</p>
+
+<h1>
+  Run <code><%= it.root.id.slice(0,8) %>…</code>
+  <small style="color:var(--vendo-text-muted)">
+    <%= it.root.agent %> · <%= it.root.trigger %> · <%= it.root.startedAgo %>
+  </small>
+</h1>
+
+<div class="agents-totals">
+  <div class="agents-total">
+    <div class="agents-total-label">Status</div>
+    <div class="agents-total-value">
+      <span class="agents-dot agents-dot-<%= it.root.status === 'errored' ? 'error' : it.root.status === 'running' ? 'unknown' : 'ok' %>"></span>
+      <%= it.root.status %>
+    </div>
+  </div>
+  <div class="agents-total">
+    <div class="agents-total-label">Duration</div>
+    <div class="agents-total-value">
+      <% if (it.root.durationSec) { %><%= it.root.durationSec %>s<% } else { %>—<% } %>
+    </div>
+  </div>
+  <div class="agents-total">
+    <div class="agents-total-label">Tokens</div>
+    <div class="agents-total-value" style="font-size:16px"><%= it.root.input_tokens || 0 %> in / <%= it.root.output_tokens || 0 %> out</div>
+  </div>
+  <div class="agents-total">
+    <div class="agents-total-label">Cost</div>
+    <div class="agents-total-value"><%= it.root.cost %></div>
+  </div>
+</div>
+
+<% if (it.root.error) { %>
+  <pre class="agents-error" style="margin:1em 0"><%= it.root.error %></pre>
+<% } %>
+
+<% if (it.tree.length > 1) { %>
+  <h2 style="margin-top:1.5em">Call tree <small style="color:var(--vendo-text-muted)">(<%= it.tree.length %> runs)</small></h2>
+
+  <p style="color:var(--vendo-text-muted)">
+    This run delegated to other agents via <code>invokeAgent</code>. Each
+    child is its own agent_run with its own trace — click through to
+    inspect.
+  </p>
+
+  <table class="agents-table">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Agent</th>
+        <th>Trigger</th>
+        <th>Depth</th>
+        <th>Duration</th>
+        <th>Cost</th>
+        <th>Trace</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.tree.forEach(function(r){ %>
+        <tr class="<%= r.statusClass %>">
+          <td><span class="agents-dot agents-dot-<%= r.status === 'errored' ? 'error' : r.status === 'running' ? 'unknown' : 'ok' %>"></span></td>
+          <td>
+            <% for (let i=0; i<r.depth; i++) { %><span class="tree-indent">↳</span><% } %>
+            <code><%= r.agent %></code>
+            <% if (r.id === it.root.id) { %><small style="color:var(--vendo-text-muted)">(this run)</small><% } %>
+          </td>
+          <td><small><%= r.trigger %></small></td>
+          <td><%= r.depth %></td>
+          <td>
+            <% if (r.durationSec) { %><%= r.durationSec %>s<% } else { %>—<% } %>
+          </td>
+          <td><%= r.cost %></td>
+          <td>
+            <% if (r.id !== it.root.id) { %>
+              <a href="/admin/agents/run/<%= r.id %>" class="link">→</a>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<h2 style="margin-top:1.5em">Transcript</h2>
+
+<% if (it.messages.length === 0) { %>
+  <p style="color:var(--vendo-text-muted)">No messages recorded for this run.</p>
+<% } else { %>
+  <% it.messages.forEach(function(m){ %>
+    <div class="msg msg-<%= m.role %>">
+      <div class="msg-header">
+        <span class="msg-role"><%= m.role %></span>
+        <small style="color:var(--vendo-text-muted)">step <%= m.step %> · <%= m.created_at?.slice(11,19) %></small>
+        <% if (m.finishReason) { %><small style="color:var(--vendo-text-muted)">· <%= m.finishReason %></small><% } %>
+      </div>
+      <% if (m.text) { %>
+        <pre class="msg-text"><%= m.text %></pre>
+      <% } %>
+      <% if (m.toolCalls.length > 0) { %>
+        <details>
+          <summary><small>tool calls (<%= m.toolCalls.length %>)</small></summary>
+          <pre class="msg-tool-calls"><%= JSON.stringify(m.toolCalls, null, 2) %></pre>
+        </details>
+      <% } %>
+    </div>
+  <% }) %>
+<% } %>
+
+<style>
+  .agents-totals { display: flex; gap: 1em; margin: 1em 0; flex-wrap: wrap; }
+  .agents-total { background: var(--vendo-surface); border: 1px solid var(--vendo-border); border-radius: 6px; padding: 12px 16px; min-width: 160px; }
+  .agents-total-label { font-size: 11px; color: var(--vendo-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .agents-total-value { font-size: 22px; font-weight: 600; margin-top: 2px; }
+  .agents-total-value.is-bad { color: #FCA5A5; }
+  .agents-table { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 13px; }
+  .agents-table th, .agents-table td { text-align: left; padding: 8px 10px; vertical-align: top; border-bottom: 1px solid var(--vendo-border); }
+  .agents-table th { color: var(--vendo-text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .agents-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; }
+  .agents-dot-ok { background: var(--vendo-green); }
+  .agents-dot-error { background: #EF4444; }
+  .agents-dot-unknown { background: #64748B; }
+  .agents-error { background: var(--vendo-bg); border: 1px solid var(--vendo-border); border-radius: 4px; padding: 8px; color: #FCA5A5; font-size: 11px; white-space: pre-wrap; overflow-x: auto; }
+  .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+  .tree-indent { display: inline-block; width: 18px; color: var(--vendo-text-muted); }
+
+  .msg {
+    border: 1px solid var(--vendo-border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    background: var(--vendo-surface);
+  }
+  .msg-system { border-left: 3px solid #64748B; }
+  .msg-user { border-left: 3px solid var(--vendo-green); }
+  .msg-assistant { border-left: 3px solid #93C5FD; }
+  .msg-tool { border-left: 3px solid #FCD34D; }
+  .msg-header { display: flex; align-items: baseline; gap: 0.8em; margin-bottom: 6px; }
+  .msg-role { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: var(--vendo-text-muted); }
+  .msg-text {
+    white-space: pre-wrap;
+    margin: 0;
+    font-family: var(--vendo-font);
+    font-size: 13px;
+    color: var(--vendo-text);
+  }
+  .msg-tool-calls {
+    background: var(--vendo-bg);
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 11px;
+    overflow-x: auto;
+    margin-top: 8px;
+    color: var(--vendo-text-muted);
+  }
+</style>

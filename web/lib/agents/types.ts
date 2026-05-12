@@ -42,6 +42,19 @@ export interface ToolCtx {
   channel: ChannelName;
   conversationId: string | null;
   graduations: Set<string>;
+  /**
+   * Distance from the root invocation (0 for a user-initiated or cron-
+   * initiated run, 1 for a child invoked via invokeAgent, etc.). Capped
+   * by the invokeAgent tool to MAX_AGENT_DEPTH to prevent runaway chains.
+   * Optional at the construction site — the runtime defaults to 0.
+   */
+  depth?: number;
+  /**
+   * agent_runs.id of the parent run that invoked this one, or null for
+   * a root run. Persisted on the child's agent_runs row so the
+   * /admin/agents/run/:id tree view can reconstruct the call hierarchy.
+   */
+  parentRunId?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -76,6 +89,8 @@ export interface AgentRunRow {
   output_tokens: number | null;
   cost_usd: number | null;
   error: string | null;
+  parent_run_id: string | null;
+  depth: number;
 }
 
 export interface AgentMessageRow {
@@ -176,7 +191,12 @@ export interface Channel {
 export type StartRunInput = Pick<
   AgentRunRow,
   'agent' | 'user_id' | 'channel' | 'conversation_id' | 'trigger' | 'model'
->;
+> & {
+  /** Parent agent_runs.id when this run was spawned via invokeAgent. */
+  parent_run_id?: string | null;
+  /** Recursion distance from root. Defaults to 0 in startRun. */
+  depth?: number;
+};
 
 export type EndRunInput = {
   runId: string;

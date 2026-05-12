@@ -1,0 +1,180 @@
+<% layout('/layouts/base') %>
+
+<p style="margin-bottom:0.5em">
+  <a href="/admin/agents" class="link">← all agents</a>
+</p>
+
+<h1>
+  <code><%= it.def.name %></code>
+  <small style="color:var(--vendo-text-muted)">
+    · <span class="model-pill model-<%= ['haiku','sonnet','opus'].includes(it.def.model.split('/').pop().split('-')[1]) ? it.def.model.split('/').pop().split('-')[1] : 'other' %>"><%= it.def.model %></span>
+    · <%= it.def.tier %>
+    · maxSteps <%= it.def.maxSteps %>
+  </small>
+</h1>
+
+<div class="agents-totals">
+  <div class="agents-total">
+    <div class="agents-total-label">Runs · 24h</div>
+    <div class="agents-total-value"><%= it.stats.runs %></div>
+  </div>
+  <div class="agents-total">
+    <div class="agents-total-label">Errors · 24h</div>
+    <div class="agents-total-value <%= it.stats.errors > 0 ? 'is-bad' : '' %>"><%= it.stats.errors %></div>
+  </div>
+  <div class="agents-total">
+    <div class="agents-total-label">Cost · 24h</div>
+    <div class="agents-total-value">$<%= it.stats.cost.toFixed(3) %></div>
+  </div>
+  <div class="agents-total">
+    <div class="agents-total-label">Avg duration · 24h</div>
+    <div class="agents-total-value">
+      <% if (it.stats.avgDurationSec !== null) { %>
+        <%= it.stats.avgDurationSec.toFixed(1) %>s
+      <% } else { %>—<% } %>
+    </div>
+  </div>
+</div>
+
+<h2 style="margin-top:1.5em">Tools <small>(<%= it.tools.length %>)</small></h2>
+
+<table class="agents-table">
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Type</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% it.tools.forEach(function(t){ %>
+      <tr class="agents-row">
+        <td><code><%= t.name %></code></td>
+        <td>
+          <% if (t.isWrite) { %>
+            <span style="color:#FCD34D">write</span>
+          <% } else { %>
+            <small>read</small>
+          <% } %>
+        </td>
+        <td>
+          <% if (!t.registered) { %>
+            <span class="is-bad">⚠ unregistered</span>
+          <% } else if (t.isWrite && t.graduated) { %>
+            <span class="invoke-yes">✓ graduated — auto-executes</span>
+          <% } else if (t.isWrite) { %>
+            <small>dry-run (drafts only)</small>
+          <% } else { %>
+            <small style="color:var(--vendo-text-muted)">—</small>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<h2 style="margin-top:1.5em">System prompt</h2>
+
+<details>
+  <summary><small>show full prompt (rendered with current user, today's date)</small></summary>
+  <pre class="agents-prompt"><%= it.systemPrompt %></pre>
+</details>
+
+<h2 style="margin-top:1.5em">Recent runs <small>(last <%= it.recentRuns.length %>)</small></h2>
+
+<% if (it.recentRuns.length === 0) { %>
+  <p style="color:var(--vendo-text-muted)">No runs recorded for this agent yet.</p>
+<% } else { %>
+  <table class="agents-table">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Started</th>
+        <th>Trigger</th>
+        <th>Channel</th>
+        <th>Depth</th>
+        <th>Duration</th>
+        <th>Tokens</th>
+        <th>Cost</th>
+        <th>Trace</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.recentRuns.forEach(function(r){ %>
+        <tr class="<%= r.statusClass %>">
+          <td><span class="agents-dot agents-dot-<%= r.status === 'errored' ? 'error' : r.status === 'running' ? 'unknown' : 'ok' %>"></span></td>
+          <td><%= r.startedAgo %><br/><small style="color:var(--vendo-text-muted)"><%= r.startedShort %></small></td>
+          <td><small><%= r.trigger %></small></td>
+          <td><small><%= r.channel %></small></td>
+          <td><%= r.depth %></td>
+          <td>
+            <% if (r.durationSec) { %><%= r.durationSec %>s<% } else { %>—<% } %>
+          </td>
+          <td><small><%= r.input_tokens || 0 %> + <%= r.output_tokens || 0 %></small></td>
+          <td><%= r.cost %></td>
+          <td><a href="/admin/agents/run/<%= r.id %>" class="link">→</a></td>
+        </tr>
+        <% if (r.error) { %>
+          <tr><td></td><td colspan="8"><pre class="agents-error"><%= r.error %></pre></td></tr>
+        <% } %>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<style>
+  /* Inherit base table + pill styles from agents.eta. Repeat here so the
+     detail page is self-contained even if rendered in isolation. */
+  .agents-totals { display: flex; gap: 1em; margin: 1em 0; flex-wrap: wrap; }
+  .agents-total {
+    background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    min-width: 160px;
+  }
+  .agents-total-label { font-size: 11px; color: var(--vendo-text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .agents-total-value { font-size: 22px; font-weight: 600; margin-top: 2px; }
+  .agents-total-value.is-bad { color: #FCA5A5; }
+
+  .agents-table { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 13px; }
+  .agents-table th, .agents-table td {
+    text-align: left; padding: 8px 10px; vertical-align: top;
+    border-bottom: 1px solid var(--vendo-border);
+  }
+  .agents-table th { color: var(--vendo-text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .agents-row:hover { background: var(--vendo-surface); }
+
+  .agents-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; }
+  .agents-dot-ok { background: var(--vendo-green); }
+  .agents-dot-error { background: #EF4444; }
+  .agents-dot-unknown { background: #64748B; }
+
+  .agents-error { background: var(--vendo-bg); border: 1px solid var(--vendo-border); border-radius: 4px; padding: 8px; color: #FCA5A5; font-size: 11px; white-space: pre-wrap; overflow-x: auto; }
+  .agents-prompt {
+    background: var(--vendo-bg);
+    border: 1px solid var(--vendo-border);
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 8px;
+    max-height: 600px;
+    overflow: auto;
+    font-size: 12px;
+    white-space: pre-wrap;
+    color: var(--vendo-text);
+  }
+
+  .run-error { background: rgba(239, 68, 68, 0.05); }
+  .run-running { background: rgba(59, 130, 246, 0.05); }
+
+  .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+
+  .model-pill { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .model-pill.model-haiku { background: rgba(148, 163, 184, 0.12); color: #94A3B8; }
+  .model-pill.model-sonnet { background: rgba(59, 130, 246, 0.15); color: #93C5FD; }
+  .model-pill.model-opus { background: rgba(168, 85, 247, 0.15); color: #C4B5FD; }
+  .model-pill.model-other { background: rgba(255,255,255,0.06); color: var(--vendo-text-muted); }
+  .invoke-yes { color: var(--vendo-green); font-weight: 600; font-size: 12px; }
+  .is-bad { color: #FCA5A5; }
+</style>

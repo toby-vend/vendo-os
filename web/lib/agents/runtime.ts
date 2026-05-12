@@ -102,6 +102,8 @@ export async function streamAgent(input: StreamAgentInput): Promise<Response> {
     conversation_id: conversationId,
     trigger,
     model: input.agent.model,
+    parent_run_id: input.ctx.parentRunId ?? null,
+    depth: input.ctx.depth ?? 0,
   });
 
   const runCtx = withRunId(input.ctx, runId, input.agent.name);
@@ -220,6 +222,8 @@ export async function runAgentBackground(
     conversation_id: input.conversationId ?? null,
     trigger: input.trigger,
     model: input.agent.model,
+    parent_run_id: input.ctx.parentRunId ?? null,
+    depth: input.ctx.depth ?? 0,
   });
 
   const runCtx = withRunId(input.ctx, runId, input.agent.name);

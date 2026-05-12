@@ -27,6 +27,9 @@ const TOOLS = [
   // Draft tools — every output goes through dry-run + approval
   'draftAsanaTask',
   'draftSlackMessage',
+  // Delegate to a specialist when the concern needs domain depth before
+  // drafting a response (e.g. invokeAgent('atlas-paid-social', ...)).
+  'invokeAgent',
 ];
 
 function today(): string {
