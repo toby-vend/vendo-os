@@ -43,6 +43,7 @@ import { generateReportInsights } from '../lib/report-ai.js';
 // AGENT-COORD: stub for A2 buildGoogleAdsPeriodSummary — extends ReportAiInput
 // with googleAdsSummary so the AI prefers structured data over OCR when present.
 import { buildGoogleAdsPeriodSummary } from '../lib/reports/gads-summary.js';
+import { buildPhase0Payload, safeStringify } from '../lib/reports/dashboard-shell.js';
 
 // --- Helpers ---
 
@@ -172,6 +173,26 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       screenshots,
       platforms: PLATFORM_OPTIONS,
       isAm: isAmUser(user),
+    });
+  });
+
+  // ── v2 dashboard ─────────────────────────────────────────────────────────
+  // Phase 0: render the React shell with a stub payload. Phase 1 wires the
+  // /api/reports/:id/data.json endpoint and the data aggregators.
+  // See plans/2026-05-12-client-report-v2-tab-dashboard.md.
+  app.get<{ Params: { id: string } }>('/:id/view', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+    const id = Number(request.params.id);
+    if (!Number.isFinite(id)) return reply.code(404).send('Not found');
+    const report = await getReport(id);
+    if (!report) return reply.code(404).send('Not found');
+
+    const payload = await buildPhase0Payload(report, 'internal');
+    return reply.render('reports/dashboard', {
+      client: payload.client,
+      payloadJson: safeStringify(payload),
     });
   });
 

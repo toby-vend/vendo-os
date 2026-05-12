@@ -10,6 +10,8 @@ import { getGA4Summary, getGA4TrafficSources, getOrganicTrend, getGA4EngagementS
 import { getGSCSummary, getTopQueries, getTopPages, getGSCDailyTrend, getGSCSummaryPrior, getPositionDistribution, getCTROpportunities, getPositionMovers } from '../lib/queries/gsc.js';
 import { getAttributedLeads, getLeadsBySource, getLeadsByTreatment } from '../lib/queries/attribution.js';
 import { getMetaCampaignsForClient, getGadsCampaignsForClient, getClientName, getGhlPipelineSummary, getGhlRecentOpportunities, getGhlLeads, getGhlLeadTags, getMetaTopAds, getMetaEngagement, getGadsTopKeywords } from '../lib/queries/portal.js';
+import { getReport } from '../lib/queries/reports.js';
+import { buildPhase0Payload, safeStringify } from '../lib/reports/dashboard-shell.js';
 
 // --- Helpers ---
 
@@ -586,6 +588,34 @@ export const portalRoutes: FastifyPluginAsync = async (app) => {
       days,
       pageTitle: 'ROI Breakdown',
       isHtmx: true,
+    });
+  });
+
+  // ── v2 dashboard ──────────────────────────────────────────────────────────
+  // Phase 0: render the React shell with a stub payload. Auth: the report
+  // must belong to the logged-in client (or an admin previewing via
+  // ?clientId=). Mismatch → 404, not 403, to avoid leaking existence.
+  // See plans/2026-05-12-client-report-v2-tab-dashboard.md.
+  app.get<{ Params: { id: string } }>('/reports/:id/view', async (request, reply) => {
+    const reportId = Number(request.params.id);
+    if (!Number.isFinite(reportId)) return reply.code(404).send('Not found');
+
+    let clientId: number;
+    try {
+      clientId = getClientId(request);
+    } catch {
+      return reply.code(404).send('Not found');
+    }
+
+    const report = await getReport(reportId);
+    if (!report || report.client_id !== clientId) {
+      return reply.code(404).send('Not found');
+    }
+
+    const payload = await buildPhase0Payload(report, 'client');
+    return reply.render('reports/dashboard', {
+      client: payload.client,
+      payloadJson: safeStringify(payload),
     });
   });
 };
