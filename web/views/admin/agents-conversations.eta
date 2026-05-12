@@ -1,0 +1,102 @@
+<% layout('/layouts/base') %>
+
+<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.3em">
+  <h1>Conversations <small>(<%= it.rows.length %>)</small></h1>
+  <div>
+    <a href="/admin/agents" class="link">← all agents</a>
+    &nbsp;·&nbsp;
+    <a href="/admin/agents/graph" class="link">communication graph →</a>
+  </div>
+</div>
+
+<p style="color:var(--vendo-text-muted)">
+  Multi-agent runs that delegated via <code>invokeAgent</code>. Each row
+  is one conversation tree — click in for the chatroom view of who said
+  what to whom.
+</p>
+
+<form class="filter-bar" method="GET" action="/admin/agents/conversations">
+  <div>
+    <label>Root agent</label>
+    <input type="text" name="agent" value="<%= it.filter.agent %>" placeholder="atlas-growth" />
+  </div>
+  <div>
+    <label>Window</label>
+    <select name="since_days" onchange="this.form.submit()">
+      <option value="1"  <%= it.filter.sinceDays ===  1 ? 'selected' : '' %>>24h</option>
+      <option value="3"  <%= it.filter.sinceDays ===  3 ? 'selected' : '' %>>3 days</option>
+      <option value="7"  <%= it.filter.sinceDays ===  7 ? 'selected' : '' %>>7 days</option>
+      <option value="14" <%= it.filter.sinceDays === 14 ? 'selected' : '' %>>14 days</option>
+      <option value="30" <%= it.filter.sinceDays === 30 ? 'selected' : '' %>>30 days</option>
+    </select>
+  </div>
+  <button type="submit">Filter</button>
+</form>
+
+<% if (it.rows.length === 0) { %>
+  <p style="color:var(--vendo-text-muted); margin-top:2em">
+    No multi-agent conversations in this window. Single-agent runs are
+    visible from each agent's detail page.
+  </p>
+<% } else { %>
+  <table class="conv-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>When</th>
+        <th>Root agent</th>
+        <th>Participants</th>
+        <th>Runs</th>
+        <th>Msgs</th>
+        <th>Cost</th>
+        <th>Trigger</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% it.rows.forEach(function(r){ %>
+        <tr class="<%= r.statusClass %>">
+          <td><span class="dot dot-<%= r.status === 'errored' ? 'error' : r.status === 'running' ? 'unk' : 'ok' %>"></span></td>
+          <td><%= r.ago %><br/><small style="color:var(--vendo-text-muted)"><%= r.startedShort %></small></td>
+          <td><code><%= r.rootAgent %></code></td>
+          <td><%= r.participants %> agents</td>
+          <td><%= r.runCount %></td>
+          <td><%= r.totalMessages %></td>
+          <td><%= r.costDisplay %></td>
+          <td><small><%= r.trigger %></small></td>
+          <td><a href="/admin/agents/conversations/<%= r.rootRunId %>" class="link">→ open</a></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<style>
+  .filter-bar { display: flex; gap: 1.5em; align-items: end; margin: 1em 0; flex-wrap: wrap; }
+  .filter-bar label { display: block; font-size: 11px; color: var(--vendo-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .filter-bar input, .filter-bar select {
+    background: var(--vendo-surface); color: var(--vendo-text);
+    border: 1px solid var(--vendo-border); border-radius: 4px;
+    padding: 6px 10px; font-family: var(--vendo-font);
+  }
+  .filter-bar button {
+    background: var(--vendo-green); color: #0B0B0B; font-weight: 600;
+    border: 1px solid var(--vendo-green); border-radius: 4px;
+    padding: 6px 14px; cursor: pointer;
+  }
+  .conv-table { width: 100%; border-collapse: collapse; margin-top: 1em; font-size: 13px; }
+  .conv-table th, .conv-table td {
+    text-align: left; padding: 8px 10px; vertical-align: top;
+    border-bottom: 1px solid var(--vendo-border);
+  }
+  .conv-table th { color: var(--vendo-text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .conv-table tr:hover { background: var(--vendo-surface); }
+  .sev-error { background: rgba(239,68,68,0.05); }
+  .sev-running { background: rgba(59,130,246,0.05); }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+  .dot-ok { background: var(--vendo-green); }
+  .dot-error { background: #EF4444; }
+  .dot-unk { background: #64748B; }
+  .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+</style>

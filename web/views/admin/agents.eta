@@ -1,6 +1,12 @@
 <% layout('/layouts/base') %>
 
-<h1>Agents <small>(<%= it.cards.length %> scheduled)</small></h1>
+<div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:1em">
+  <h1>Agents <small>(<%= it.cards.length %> scheduled)</small></h1>
+  <div style="display:flex; gap:1em; font-size:13px">
+    <a href="/admin/agents/conversations" style="color:var(--vendo-green); text-decoration:none; font-weight:600">Conversations →</a>
+    <a href="/admin/agents/graph" style="color:var(--vendo-green); text-decoration:none; font-weight:600">Graph →</a>
+  </div>
+</div>
 
 <p style="color:var(--vendo-text-muted)">
   Every cron-triggered job and scheduled agent on Vendo OS. Heartbeats

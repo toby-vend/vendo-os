@@ -1,0 +1,168 @@
+<% layout('/layouts/base') %>
+
+<p style="margin-bottom:0.5em">
+  <a href="/admin/agents/conversations" class="link">← conversations</a>
+  &nbsp;·&nbsp;
+  <a href="/admin/agents/run/<%= it.root.id %>" class="link">technical run view →</a>
+</p>
+
+<div class="conv-page-header">
+  <h1>
+    Conversation
+    <small style="color:var(--vendo-text-muted)">
+      · <code><%= it.root.agent %></code>
+      · <%= it.legend.length %> agents
+      · <%= it.root.trigger %>
+      · status <%= it.root.status %>
+    </small>
+  </h1>
+  <div class="conv-controls">
+    <label><input type="checkbox" id="conv-toggle-tools" checked /> Show tool calls (non-invoke)</label>
+    <label><input type="checkbox" id="conv-toggle-thinking" checked /> Show thinking turns</label>
+  </div>
+</div>
+
+<div class="conv-legend">
+  <% it.legend.forEach(function(l){ %>
+    <span class="conv-agent-pill" style="background:<%= l.colour %>1F;color:<%= l.colour %>"><%= l.agent %></span>
+  <% }) %>
+</div>
+
+<div class="conv-root">
+  <%~ it.conversationHtml %>
+</div>
+
+<script>
+  // Lightweight CSS-driven filters. The chatroom HTML is server-rendered
+  // so we toggle visibility via class on .conv-root rather than rerender.
+  document.getElementById('conv-toggle-tools').addEventListener('change', function(e) {
+    document.querySelector('.conv-root').classList.toggle('hide-tools', !e.target.checked);
+  });
+  document.getElementById('conv-toggle-thinking').addEventListener('change', function(e) {
+    document.querySelector('.conv-root').classList.toggle('hide-thinking', !e.target.checked);
+  });
+</script>
+
+<style>
+  .conv-page-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
+  .conv-controls { display: flex; gap: 1em; font-size: 12px; color: var(--vendo-text-muted); }
+  .conv-controls label { cursor: pointer; user-select: none; }
+  .conv-controls input { vertical-align: middle; margin-right: 4px; }
+
+  .conv-legend {
+    display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 20px 0;
+    padding: 10px 12px; background: var(--vendo-surface);
+    border: 1px solid var(--vendo-border); border-radius: 6px;
+  }
+
+  .conv-agent-pill {
+    display: inline-block; padding: 2px 8px; border-radius: 12px;
+    font-size: 11px; font-weight: 600; font-family: var(--vendo-font);
+  }
+
+  .conv-root { display: flex; flex-direction: column; gap: 4px; }
+
+  .conv-run { display: flex; flex-direction: column; gap: 6px; }
+  .conv-depth-0 > .conv-run-header {
+    display: flex; align-items: center; gap: 0.6em;
+    padding: 8px 12px; background: var(--vendo-bg);
+    border: 1px solid var(--vendo-border); border-radius: 6px;
+    margin-bottom: 4px; font-size: 12px;
+  }
+  .conv-run-meta { color: var(--vendo-text-muted); font-size: 11px; }
+  .conv-run-error {
+    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
+    color: #FCA5A5; padding: 8px 12px; border-radius: 4px;
+    font-size: 12px; white-space: pre-wrap;
+  }
+
+  .conv-bubble {
+    background: var(--vendo-surface); border: 1px solid var(--vendo-border);
+    border-radius: 8px; padding: 10px 14px;
+  }
+  .conv-bubble-header { display: flex; align-items: center; gap: 0.8em; margin-bottom: 6px; font-size: 11px; color: var(--vendo-text-muted); }
+  .conv-bubble-time { font-variant-numeric: tabular-nums; }
+  .conv-bubble-step { color: var(--vendo-text-muted); }
+  .conv-bubble-finish { color: var(--vendo-text-muted); font-style: italic; }
+  .conv-bubble-text {
+    margin: 0; white-space: pre-wrap; font-family: var(--vendo-font);
+    font-size: 13px; color: var(--vendo-text);
+  }
+  .conv-bubble-user { border-left: 3px solid var(--vendo-green); }
+  .conv-bubble-assistant { border-left: 3px solid #93C5FD; }
+  .conv-bubble-tool { border-left: 3px solid #FCD34D; }
+
+  /* Tool calls (non-invoke) — compact, expandable */
+  .conv-tool {
+    background: var(--vendo-bg); border: 1px solid var(--vendo-border);
+    border-radius: 6px; padding: 0;
+  }
+  .conv-tool summary {
+    list-style: none; cursor: pointer; padding: 6px 12px;
+    font-size: 12px; color: var(--vendo-text-muted);
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .conv-tool summary::-webkit-details-marker { display: none; }
+  .conv-tool-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    background: rgba(252,211,77,0.12); color: #FCD34D;
+    padding: 1px 6px; border-radius: 3px;
+  }
+  .conv-tool summary code { color: var(--vendo-text); font-size: 12px; }
+  .conv-tool-meta { margin-left: auto; color: var(--vendo-text-muted); }
+  .conv-tool-error { color: #FCA5A5; }
+  .conv-tool-body {
+    padding: 8px 12px; border-top: 1px solid var(--vendo-border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  @media (max-width: 900px) { .conv-tool-body { grid-template-columns: 1fr; } }
+  .conv-tool-section-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--vendo-text-muted); margin-bottom: 4px;
+  }
+  .conv-tool-json {
+    background: var(--vendo-bg); border: 1px solid var(--vendo-border);
+    border-radius: 4px; padding: 8px 10px; margin: 0;
+    font-size: 11px; max-height: 320px; overflow: auto;
+    color: var(--vendo-text-muted);
+  }
+
+  /* invokeAgent — the headline interaction */
+  .conv-invoke {
+    background: var(--vendo-surface); border: 1px solid var(--vendo-border);
+    border-left: 3px solid #93C5FD; border-radius: 8px;
+    padding: 12px 16px; margin: 6px 0;
+  }
+  .conv-invoke-header { display: flex; align-items: center; gap: 0.6em; margin-bottom: 10px; flex-wrap: wrap; }
+  .conv-invoke-arrow { color: var(--vendo-text-muted); font-weight: 600; }
+  .conv-invoke-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--vendo-text-muted); margin-bottom: 4px;
+  }
+  .conv-invoke-prompt, .conv-invoke-reply {
+    background: var(--vendo-bg); border: 1px solid var(--vendo-border);
+    border-left: 2px solid var(--vendo-green);
+    border-radius: 4px; padding: 8px 10px; margin: 4px 0;
+  }
+  .conv-invoke-reply { border-left-color: #93C5FD; }
+  .conv-invoke-error {
+    background: rgba(239,68,68,0.08); color: #FCA5A5;
+    padding: 8px 10px; border-radius: 4px; margin-top: 6px;
+    font-size: 12px; white-space: pre-wrap;
+  }
+  .conv-child-block {
+    margin-top: 10px; padding-left: 16px;
+    border-left: 2px dashed rgba(255,255,255,0.10);
+  }
+
+  /* Toggleable filters */
+  .conv-root.hide-tools .conv-tool { display: none; }
+  .conv-root.hide-thinking .conv-bubble-assistant:not(:last-child) {
+    /* hide intermediate assistant 'thinking' turns; the final reply
+       (typically the last assistant bubble in a run) remains visible */
+    display: none;
+  }
+
+  .link { color: var(--vendo-green); text-decoration: none; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+</style>
