@@ -1,21 +1,27 @@
 /**
  * Atlas Brief Preview — run the per-user morning brief for a list of
- * users WITHOUT delivering to Slack. Prints each user's brief to stdout
- * so you can sanity-check that the personalisation is actually working.
+ * users. Prints each user's brief to stdout. Optionally also delivers
+ * via Slack DM (pass --deliver) so you can verify the live formatting
+ * end-to-end.
  *
  * Usage (must load .env.local before imports so Turso + AI Gateway init):
+ *   # Preview only — no Slack delivery (default 4 admins):
  *   node --env-file=.env.local --import tsx/esm scripts/test/atlas-brief-preview.ts
  *
- * Defaults: previews Toby, Alfie, Max, Dilith.
- * Override by passing a comma-separated email list:
+ *   # Specific email(s):
  *   node --env-file=.env.local --import tsx/esm scripts/test/atlas-brief-preview.ts \
  *     toby@vendodigital.co.uk,max@vendodigital.co.uk
+ *
+ *   # Preview AND DM via Slack:
+ *   node --env-file=.env.local --import tsx/esm scripts/test/atlas-brief-preview.ts \
+ *     toby@vendodigital.co.uk --deliver
  */
 import { db } from '../../web/lib/queries/base.js';
 import { userRowToSessionUser, type UserRow } from '../../web/lib/queries/auth.js';
 import { atlasBriefAgent } from '../../web/lib/agents/agents/index.js';
 import { runAgentBackground } from '../../web/lib/agents/runtime.js';
 import { slackifyAgentOutput } from '../../web/lib/agents/format/slackify.js';
+import { slackChannel } from '../../web/lib/agents/channels/slack.js';
 import type { ToolCtx, ChannelName } from '../../web/lib/agents/types.js';
 
 const DEFAULT_EMAILS = [
@@ -40,7 +46,7 @@ async function loadUser(email: string): Promise<UserRow | null> {
   return r.rows[0] as unknown as UserRow;
 }
 
-async function previewFor(row: UserRow): Promise<void> {
+async function previewFor(row: UserRow, deliver: boolean): Promise<void> {
   const user = userRowToSessionUser(row);
   const ctx: ToolCtx = {
     runId: '',
@@ -71,6 +77,23 @@ async function previewFor(row: UserRow): Promise<void> {
     console.log(`[preview] OK (${ms}ms, runId=${result.runId}, ${result.text.length}→${slackBody.length} chars)\n`);
     console.log('--- AS SLACK WILL RECEIVE IT ---');
     console.log(slackBody);
+
+    if (deliver) {
+      const todayWords = new Date().toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      });
+      try {
+        await slackChannel.deliverProactive(user.id, {
+          title: `Morning brief — ${todayWords} (test)`,
+          body: slackBody,
+        });
+        console.log(`\n[preview] ✅ DM delivered to ${user.email}`);
+      } catch (err) {
+        console.log(`\n[preview] ❌ Slack DM failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
     console.log('\n' + '─'.repeat(banner.length));
   } catch (err) {
     console.log(`[preview] THREW: ${err instanceof Error ? err.message : String(err)}`);
@@ -78,12 +101,14 @@ async function previewFor(row: UserRow): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const arg = process.argv[2];
-  const emails = arg
-    ? arg.split(',').map((s) => s.trim()).filter(Boolean)
+  const args = process.argv.slice(2);
+  const deliver = args.includes('--deliver');
+  const emailArg = args.find((a) => !a.startsWith('--'));
+  const emails = emailArg
+    ? emailArg.split(',').map((s) => s.trim()).filter(Boolean)
     : DEFAULT_EMAILS;
 
-  console.log(`Previewing Atlas morning brief for ${emails.length} user(s)…`);
+  console.log(`Previewing Atlas morning brief for ${emails.length} user(s)${deliver ? ' (with Slack DM delivery)' : ''}…`);
 
   for (const email of emails) {
     const row = await loadUser(email);
@@ -92,7 +117,7 @@ async function main(): Promise<void> {
       continue;
     }
     // Sequential rather than parallel so output stays readable.
-    await previewFor(row);
+    await previewFor(row, deliver);
   }
   process.exit(0);
 }
