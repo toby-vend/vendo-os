@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { db } from '../../lib/queries/base.js';
 import { listAgents, getAgent, SPECIALIST_AGENTS } from '../../lib/agents/agents/index.js';
 import { MODELS } from '../../lib/agents/models.js';
+import { formatGbp } from '../../lib/format/currency.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '../../../');
@@ -84,8 +85,8 @@ export const adminAgentsRoutes: FastifyPluginAsync = async (app) => {
     reply.render('admin/agents', {
       cards,
       recentRuns: recentRuns.map(viewRun),
-      totals,
-      registry,
+      totals: { ...totals, costTodayDisplay: formatGbp(totals.costTodayUsd, 3) },
+      registry: registry.map(r => ({ ...r, costDayDisplay: formatGbp(r.costDay, 3) })),
     });
   });
 };
@@ -399,7 +400,7 @@ function viewRun(r: AgentRunRow) {
     const b = Date.parse(r.ended_at.replace(' ', 'T') + 'Z');
     if (Number.isFinite(a) && Number.isFinite(b)) durationMs = b - a;
   }
-  const cost = r.cost_usd !== null && r.cost_usd !== undefined ? `$${Number(r.cost_usd).toFixed(4)}` : '—';
+  const cost = formatGbp(r.cost_usd, 4);
   return {
     ...r,
     startedShort,

@@ -20,6 +20,7 @@ import { TOOL_FACTORIES, WRITE_TOOL_NAMES } from '../../lib/agents/tools/index.j
 import { loadGraduations } from '../../lib/agents/permissions.js';
 import type { ToolCtx } from '../../lib/agents/types.js';
 import type { SessionUser } from '../../lib/auth.js';
+import { formatGbp } from '../../lib/format/currency.js';
 
 interface AgentRunRow {
   id: string;
@@ -124,7 +125,7 @@ export const adminAgentsDetailRoutes: FastifyPluginAsync = async (app) => {
       systemPrompt,
       tools,
       recentRuns: recentRuns.map(viewRun),
-      stats,
+      stats: { ...stats, costDisplay: formatGbp(stats.cost, 3) },
     });
   });
 };
@@ -282,7 +283,7 @@ function viewRun(r: AgentRunRow) {
     startedShort: r.started_at?.slice(0, 16) ?? '',
     startedAgo: r.started_at ? timeAgo(r.started_at) : '',
     durationSec: durationSec !== null ? durationSec.toFixed(1) : null,
-    cost: r.cost_usd !== null && r.cost_usd !== undefined ? `$${Number(r.cost_usd).toFixed(4)}` : '—',
+    cost: formatGbp(r.cost_usd, 4),
     statusClass: r.status === 'errored' ? 'run-error' : r.status === 'running' ? 'run-running' : 'run-ok',
     // Indentation cue for the tree view — depth is also a property so the
     // template can prefix the agent name with ↳ characters.
