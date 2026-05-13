@@ -7,31 +7,37 @@
  * KPI cards, channel grid, tables, charts, AI summary, etc.
  */
 
+/* Default palette is the Vendo OS dark theme — mirrors public/assets/style.css
+ * --vendo-* tokens so the report dashboard sits alongside the rest of the app.
+ * Tokens remain prefixed --vr-* and scoped to #report-root to avoid leakage. */
 #report-root {
-  --vr-sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --vr-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --vr-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
 
-  --vr-bg: oklch(0.985 0.005 80);
-  --vr-bg-2: oklch(0.97 0.006 80);
-  --vr-surface: #ffffff;
-  --vr-surface-2: oklch(0.985 0.005 80);
-  --vr-rule: oklch(0.92 0.006 80);
-  --vr-rule-strong: oklch(0.86 0.008 80);
+  --vr-bg: #0B0B0B;
+  --vr-bg-2: #111111;
+  --vr-surface: #141414;
+  --vr-surface-2: #1A1A1A;
+  --vr-rule: rgba(255, 255, 255, 0.06);
+  --vr-rule-strong: rgba(255, 255, 255, 0.10);
 
-  --vr-ink: oklch(0.22 0.012 250);
-  --vr-ink-2: oklch(0.45 0.012 250);
-  --vr-ink-3: oklch(0.62 0.01 250);
+  --vr-ink: #E2E8F0;
+  --vr-ink-2: #94A3B8;
+  --vr-ink-3: rgba(255, 255, 255, 0.45);
 
-  --vr-accent: oklch(0.55 0.12 195);
-  --vr-accent-soft: oklch(0.55 0.12 195 / 0.1);
+  --vr-accent: #22C55E;
+  --vr-accent-soft: rgba(34, 197, 94, 0.10);
 
-  --vr-good: oklch(0.55 0.12 155);
-  --vr-good-bg: oklch(0.55 0.12 155 / 0.1);
-  --vr-bad: oklch(0.58 0.16 25);
-  --vr-bad-bg: oklch(0.58 0.16 25 / 0.1);
+  --vr-good: #22C55E;
+  --vr-good-bg: rgba(34, 197, 94, 0.12);
+  --vr-bad: #EF4444;
+  --vr-bad-bg: rgba(239, 68, 68, 0.12);
 
-  --vr-shadow-sm: 0 1px 2px oklch(0.2 0.012 250 / 0.04);
-  --vr-shadow-md: 0 4px 12px oklch(0.2 0.012 250 / 0.06);
+  --vr-watch: #F5D674;
+  --vr-watch-bg: rgba(245, 214, 116, 0.10);
+
+  --vr-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --vr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
 
   --vr-radius: 10px;
   --vr-radius-sm: 6px;
@@ -47,17 +53,13 @@
   text-rendering: optimizeLegibility;
 }
 
+/* "Dark mode" toggle now switches to an OLED-black variant — visible but
+ * still on-brand. Off (default) is the standard Vendo dark above. */
 #report-root[data-vr-theme="dark"] {
-  --vr-bg: oklch(0.18 0.01 250);
-  --vr-bg-2: oklch(0.22 0.01 250);
-  --vr-surface: oklch(0.24 0.012 250);
-  --vr-surface-2: oklch(0.21 0.012 250);
-  --vr-rule: oklch(0.32 0.012 250);
-  --vr-rule-strong: oklch(0.4 0.012 250);
-
-  --vr-ink: oklch(0.96 0.005 80);
-  --vr-ink-2: oklch(0.78 0.008 80);
-  --vr-ink-3: oklch(0.6 0.008 80);
+  --vr-bg: #000000;
+  --vr-bg-2: #0A0A0A;
+  --vr-surface: #0F0F0F;
+  --vr-surface-2: #161616;
 }
 
 #report-root[data-vr-density="compact"] { --vr-pad: 16px; }
@@ -612,7 +614,7 @@
 }
 .vr-ai-summary::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--vr-accent), oklch(0.65 0.15 280), var(--vr-accent));
+  background: linear-gradient(90deg, var(--vr-accent), #16A34A, var(--vr-accent));
 }
 .vr-ai-head { display: flex; align-items: center; gap: 14px; }
 .vr-ai-mark {
@@ -639,7 +641,7 @@
   display: flex; flex-direction: column; gap: 12px;
 }
 .vr-ai-pillar.is-good { border-top: 3px solid var(--vr-good); }
-.vr-ai-pillar.is-watch { border-top: 3px solid oklch(0.7 0.13 70); }
+.vr-ai-pillar.is-watch { border-top: 3px solid var(--vr-watch); }
 .vr-ai-pillar.is-focus { border-top: 3px solid var(--vr-accent); }
 .vr-ai-pillar-head { display: flex; align-items: center; }
 .vr-ai-tag {
@@ -648,7 +650,7 @@
   color: var(--vr-ink-2);
 }
 .vr-ai-pillar.is-good .vr-ai-tag { color: var(--vr-good); }
-.vr-ai-pillar.is-watch .vr-ai-tag { color: oklch(0.6 0.15 60); }
+.vr-ai-pillar.is-watch .vr-ai-tag { color: var(--vr-watch); }
 .vr-ai-pillar.is-focus .vr-ai-tag { color: var(--vr-accent); }
 .vr-ai-list {
   margin: 0; padding: 0; list-style: none;
@@ -670,7 +672,7 @@
   font-size: 11px; color: var(--vr-ink-3); font-family: var(--vr-mono);
 }
 .vr-ai-confidence.is-high { color: var(--vr-good); }
-.vr-ai-confidence.is-medium { color: oklch(0.65 0.13 80); }
+.vr-ai-confidence.is-medium { color: var(--vr-watch); }
 .vr-ai-confidence.is-low { color: var(--vr-bad); }
 
 /* ── Tweaks panel (floating drawer) ──────────────────────────────────── */
@@ -768,7 +770,7 @@
   position: relative;
 }
 .vr-insight-card.is-good { border-left: 3px solid var(--vr-good); }
-.vr-insight-card.is-watch { border-left: 3px solid oklch(0.7 0.13 70); }
+.vr-insight-card.is-watch { border-left: 3px solid var(--vr-watch); }
 .vr-insight-tag {
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--vr-ink-3); font-weight: 600;
@@ -991,10 +993,28 @@
 }
 
 /* ── Print ─────────────────────────────────────────────────────────────── */
+/* Dashboard is dark by default; print swaps to a light palette so the
+ * physical/PDF output is legible without burning ink. */
 @media print {
-  #report-root { background: #fff; }
+  #report-root {
+    --vr-bg: #ffffff;
+    --vr-bg-2: #f7f7f7;
+    --vr-surface: #ffffff;
+    --vr-surface-2: #fafafa;
+    --vr-rule: #e5e5e5;
+    --vr-rule-strong: #cccccc;
+    --vr-ink: #111111;
+    --vr-ink-2: #444444;
+    --vr-ink-3: #777777;
+    --vr-shadow-sm: none;
+    --vr-shadow-md: none;
+    background: #fff;
+    color: #111;
+  }
   .vr-sidebar,
-  .vr-topbar-actions { display: none; }
+  .vr-topbar-actions,
+  .vr-tweaks-fab,
+  .vr-tweaks-panel { display: none; }
   .vr-app { grid-template-columns: 1fr; }
   .vr-topbar { position: static; border-bottom: 1px solid #e5e5e5; }
 }
