@@ -16,6 +16,7 @@
 import { defineTool, z } from './_tool.js';
 import { CAPABILITIES } from '../permissions.js';
 import { upsertGrowthFinding } from '../../growth/findings-store.js';
+import { mirrorFindingToLegacy } from '../../growth/legacy-mirror.js';
 import type { ToolCtx } from '../types.js';
 
 const inputSchema = z.object({
@@ -73,7 +74,7 @@ export const recordGrowthFinding = (ctx: ToolCtx) =>
       input: inputSchema,
       output: outputSchema,
       run: async (args, ctx) => {
-        const outcome = await upsertGrowthFinding({
+        const findingInput = {
           agent: ctx.agent,
           finding_type: args.finding_type,
           subject_type: args.subject_type,
@@ -85,7 +86,12 @@ export const recordGrowthFinding = (ctx: ToolCtx) =>
           reasoning: args.reasoning,
           proposed_action: args.proposed_action,
           run_id: ctx.runId,
-        });
+        };
+        const outcome = await upsertGrowthFinding(findingInput);
+        // Mirror to legacy growth tables (case_studies, upsell_opportunities)
+        // so /growth tabs surface the agent output. Best-effort — failures
+        // are logged inside mirrorFindingToLegacy and don't abort the tool.
+        await mirrorFindingToLegacy(findingInput);
         return {
           id: outcome.id,
           fingerprint: outcome.fingerprint,
