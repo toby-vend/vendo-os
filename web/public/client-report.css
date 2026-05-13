@@ -1,0 +1,1029 @@
+/* Vendo Reporting v2 — dashboard styles.
+ *
+ * All tokens prefixed --vr-* and scoped to #report-root so they do not
+ * leak into the surrounding Vendo OS theme (which uses --vendo-*).
+ *
+ * Phase 0 covers: shell, sidebar, topbar, tab placeholder. Phase 2 adds
+ * KPI cards, channel grid, tables, charts, AI summary, etc.
+ */
+
+/* Default palette is the Vendo OS dark theme — mirrors public/assets/style.css
+ * --vendo-* tokens so the report dashboard sits alongside the rest of the app.
+ * Tokens remain prefixed --vr-* and scoped to #report-root to avoid leakage. */
+#report-root {
+  --vr-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --vr-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+
+  --vr-bg: #0B0B0B;
+  --vr-bg-2: #111111;
+  --vr-surface: #141414;
+  --vr-surface-2: #1A1A1A;
+  --vr-rule: rgba(255, 255, 255, 0.06);
+  --vr-rule-strong: rgba(255, 255, 255, 0.10);
+
+  --vr-ink: #E2E8F0;
+  --vr-ink-2: #94A3B8;
+  --vr-ink-3: rgba(255, 255, 255, 0.45);
+
+  --vr-accent: #22C55E;
+  --vr-accent-soft: rgba(34, 197, 94, 0.10);
+
+  --vr-good: #22C55E;
+  --vr-good-bg: rgba(34, 197, 94, 0.12);
+  --vr-bad: #EF4444;
+  --vr-bad-bg: rgba(239, 68, 68, 0.12);
+
+  --vr-watch: #F5D674;
+  --vr-watch-bg: rgba(245, 214, 116, 0.10);
+
+  --vr-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --vr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  --vr-radius: 10px;
+  --vr-radius-sm: 6px;
+  --vr-radius-lg: 14px;
+
+  --vr-pad: 24px;
+
+  font-family: var(--vr-sans);
+  background: var(--vr-bg);
+  color: var(--vr-ink);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* "Dark mode" toggle now switches to an OLED-black variant — visible but
+ * still on-brand. Off (default) is the standard Vendo dark above. */
+#report-root[data-vr-theme="dark"] {
+  --vr-bg: #000000;
+  --vr-bg-2: #0A0A0A;
+  --vr-surface: #0F0F0F;
+  --vr-surface-2: #161616;
+}
+
+#report-root[data-vr-density="compact"] { --vr-pad: 16px; }
+#report-root[data-vr-density="comfy"]   { --vr-pad: 28px; }
+
+#report-root *,
+#report-root *::before,
+#report-root *::after { box-sizing: border-box; }
+
+/* ── App shell ─────────────────────────────────────────────────────────── */
+.vr-app {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────────── */
+.vr-sidebar {
+  background: var(--vr-bg);
+  border-right: 1px solid var(--vr-rule);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.vr-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 18px;
+  border-bottom: 1px solid var(--vr-rule);
+  margin-bottom: 14px;
+}
+.vr-brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--vr-ink);
+  color: var(--vr-bg);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.02em;
+}
+.vr-brand-name {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+.vr-brand-sub {
+  font-size: 11px;
+  color: var(--vr-ink-3);
+  margin-top: 1px;
+}
+
+.vr-client-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm);
+  margin-bottom: 14px;
+}
+.vr-app[data-vr-mode="internal"] .vr-client-switch {
+  cursor: pointer;
+}
+.vr-app[data-vr-mode="internal"] .vr-client-switch:hover {
+  border-color: var(--vr-rule-strong);
+}
+.vr-client-mono {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--vr-accent-soft);
+  color: var(--vr-accent);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 11px;
+}
+.vr-client-body { min-width: 0; flex: 1; }
+.vr-client-name {
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vr-client-meta {
+  font-size: 11px;
+  color: var(--vr-ink-3);
+}
+.vr-client-chev {
+  color: var(--vr-ink-3);
+  flex-shrink: 0;
+}
+
+.vr-nav-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--vr-ink-3);
+  padding: 14px 10px 6px;
+}
+.vr-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--vr-radius-sm);
+  color: var(--vr-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.vr-nav-item:hover {
+  background: var(--vr-bg-2);
+  color: var(--vr-ink);
+}
+.vr-nav-item.is-active {
+  background: var(--vr-surface);
+  color: var(--vr-ink);
+  border: 1px solid var(--vr-rule);
+  box-shadow: var(--vr-shadow-sm);
+}
+.vr-nav-icon {
+  width: 16px;
+  display: grid;
+  place-items: center;
+  opacity: 0.8;
+}
+.vr-nav-pill {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--vr-ink-3);
+  font-family: var(--vr-mono);
+}
+
+.vr-sidebar-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--vr-rule);
+  font-size: 11px;
+  color: var(--vr-ink-3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.vr-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--vr-good);
+  box-shadow: 0 0 0 3px var(--vr-good-bg);
+}
+
+/* ── Main area ─────────────────────────────────────────────────────────── */
+.vr-main { min-width: 0; }
+
+.vr-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px var(--vr-pad);
+  border-bottom: 1px solid var(--vr-rule);
+  background: var(--vr-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.vr-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--vr-ink-2);
+}
+.vr-crumb-sep { color: var(--vr-ink-3); }
+.vr-crumb-current { color: var(--vr-ink); font-weight: 600; }
+
+.vr-topbar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.vr-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm);
+  background: var(--vr-surface);
+  font-size: 13px;
+  color: var(--vr-ink);
+}
+
+.vr-btn {
+  padding: 7px 12px;
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm);
+  background: var(--vr-surface);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--vr-sans);
+  color: var(--vr-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.vr-btn:hover:not(:disabled) { border-color: var(--vr-rule-strong); }
+.vr-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.vr-btn-primary {
+  background: var(--vr-ink);
+  color: var(--vr-bg);
+  border-color: var(--vr-ink);
+}
+.vr-btn-primary:hover:not(:disabled) {
+  background: var(--vr-ink-2);
+  border-color: var(--vr-ink-2);
+}
+
+/* ── Tab content ──────────────────────────────────────────────────────── */
+.vr-tab-content {
+  padding: 28px var(--vr-pad) 80px;
+  max-width: 1480px;
+}
+
+.vr-tab-placeholder {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vr-tab-placeholder-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--vr-ink);
+}
+.vr-tab-placeholder-body {
+  margin: 0;
+  font-size: 14px;
+  color: var(--vr-ink-2);
+  line-height: 1.55;
+}
+.vr-tab-placeholder-meta {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--vr-rule);
+  font-size: 12px;
+  color: var(--vr-ink-3);
+  font-family: var(--vr-mono);
+}
+.vr-tab-placeholder-meta code {
+  background: var(--vr-bg-2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11.5px;
+}
+
+/* ── Error boundary card ─────────────────────────────────────────────── */
+.vr-error-card {
+  max-width: 560px; margin: 80px auto;
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 32px;
+  display: flex; flex-direction: column; gap: 14px;
+  text-align: center;
+  align-items: center;
+}
+.vr-error-mark {
+  width: 48px; height: 48px; border-radius: 999px;
+  background: var(--vr-bad-bg); color: var(--vr-bad);
+  display: grid; place-items: center;
+  font-size: 22px;
+}
+.vr-error-title {
+  margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+}
+.vr-error-body {
+  margin: 0; color: var(--vr-ink-2); font-size: 13px; line-height: 1.55;
+}
+.vr-error-details {
+  width: 100%; text-align: left;
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm);
+  background: var(--vr-bg-2);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--vr-ink-2);
+}
+.vr-error-details summary {
+  cursor: pointer; user-select: none;
+  font-family: var(--vr-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--vr-ink-3);
+}
+.vr-error-pre {
+  margin: 10px 0 0; padding: 0;
+  font-family: var(--vr-mono); font-size: 11.5px;
+  color: var(--vr-ink); white-space: pre-wrap; word-break: break-word;
+  max-height: 240px; overflow-y: auto;
+}
+.vr-error-actions { display: flex; gap: 8px; }
+
+/* ── Section header ──────────────────────────────────────────────────── */
+.vr-section-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px;
+  margin: 28px 0 14px;
+}
+.vr-section-head:first-child { margin-top: 0; }
+.vr-section-title {
+  margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em;
+}
+.vr-section-sub { margin: 4px 0 0; font-size: 13px; color: var(--vr-ink-2); }
+.vr-section-action { display: flex; gap: 8px; align-items: center; }
+
+/* ── Delta chip ───────────────────────────────────────────────────────── */
+.vr-delta {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 6px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+  font-family: var(--vr-mono);
+}
+
+/* ── KPI cards (4-wide grid) ──────────────────────────────────────────── */
+.vr-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.vr-kpi-card {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 8px;
+  min-height: 140px;
+}
+.vr-kpi-label { font-size: 12px; color: var(--vr-ink-2); font-weight: 500; }
+.vr-kpi-value {
+  font-size: 28px; font-weight: 600; letter-spacing: -0.02em;
+  font-family: var(--vr-mono); color: var(--vr-ink);
+}
+.vr-kpi-row { display: flex; align-items: center; gap: 10px; }
+.vr-kpi-compare { font-size: 11px; color: var(--vr-ink-3); font-family: var(--vr-mono); }
+.vr-kpi-spark { margin-top: auto; padding-top: 8px; }
+
+/* ── Stat tile (compact + lg variants) ────────────────────────────────── */
+.vr-stat-tile {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm);
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  position: relative;
+}
+.vr-stat-tile.is-lg { padding: 16px 18px; min-height: 130px; }
+.vr-stat-label { font-size: 11px; color: var(--vr-ink-3); }
+.vr-stat-value { font-size: 16px; font-weight: 600; font-family: var(--vr-mono); color: var(--vr-ink); }
+.vr-stat-value.is-lg { font-size: 22px; letter-spacing: -0.02em; }
+
+/* ── Topline grid (Meta / Google: 4-up) ──────────────────────────────── */
+.vr-topline-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--vr-rule);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  overflow: hidden;
+}
+.vr-topline-grid .vr-stat-tile {
+  border: none; border-radius: 0;
+  background: var(--vr-surface);
+}
+
+/* ── Channel grid (Overview) ─────────────────────────────────────────── */
+.vr-channel-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+.vr-channel-card {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.vr-channel-head { display: flex; align-items: center; gap: 12px; }
+.vr-channel-name { font-weight: 600; font-size: 14px; }
+.vr-channel-sub { font-size: 11px; color: var(--vr-ink-3); }
+.vr-channel-link {
+  margin-left: auto; font-size: 12px; color: var(--vr-ink-2);
+  text-decoration: none; padding: 4px 8px;
+  border: 1px solid var(--vr-rule); border-radius: 4px;
+  background: none; cursor: pointer; font-family: inherit;
+}
+.vr-channel-link:hover { color: var(--vr-ink); border-color: var(--vr-rule-strong); }
+.vr-channel-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--vr-rule); border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm); overflow: hidden;
+}
+.vr-channel-stats > * { background: var(--vr-surface); border: none; border-radius: 0; }
+.vr-channel-deltas {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  padding-top: 10px; border-top: 1px dashed var(--vr-rule);
+}
+.vr-delta-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.vr-delta-label {
+  text-transform: uppercase; font-size: 10px; letter-spacing: 0.06em;
+  color: var(--vr-ink-3);
+}
+
+/* ── Channel pip (monogram) ──────────────────────────────────────────── */
+.vr-pip {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: grid; place-items: center;
+  font-weight: 600; font-size: 13px;
+  border: 1px solid;
+}
+
+/* ── Data tables ─────────────────────────────────────────────────────── */
+.vr-data-table-wrap {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  overflow: hidden;
+}
+.vr-data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.vr-data-table th {
+  text-align: left; font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--vr-ink-3);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--vr-rule);
+  cursor: pointer; user-select: none;
+  background: var(--vr-surface-2);
+}
+.vr-data-table th:hover { color: var(--vr-ink); }
+.vr-data-table th:not(:first-child) { text-align: right; }
+.vr-data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--vr-rule);
+  vertical-align: middle;
+}
+.vr-data-table tr:last-child td { border-bottom: none; }
+.vr-data-table tr:hover td { background: var(--vr-bg-2); }
+.vr-data-table .vr-num { font-family: var(--vr-mono); font-size: 12.5px; text-align: right; color: var(--vr-ink); }
+.vr-data-table .vr-num.is-strong { font-weight: 600; }
+.vr-data-table.is-compact th, .vr-data-table.is-compact td { padding: 9px 14px; }
+.vr-row-name { font-weight: 600; font-size: 13px; }
+.vr-row-sub { font-size: 11px; color: var(--vr-ink-3); margin-top: 2px; }
+.vr-kw { font-family: var(--vr-mono); font-size: 12px; color: var(--vr-ink); }
+.vr-totals { display: flex; gap: 18px; font-size: 12px; color: var(--vr-ink-2); font-family: var(--vr-mono); }
+.vr-totals strong { color: var(--vr-ink); font-weight: 600; }
+.vr-totals-label { color: var(--vr-ink-3); }
+
+/* ── Status pill ─────────────────────────────────────────────────────── */
+.vr-status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 8px;
+  font-size: 11px; font-weight: 500;
+  border-radius: 999px; border: 1px solid var(--vr-rule);
+  background: var(--vr-surface);
+}
+.vr-status-pill.is-active { color: var(--vr-good); }
+.vr-status-pill.is-paused { color: var(--vr-ink-3); }
+.vr-status-dot { width: 5px; height: 5px; border-radius: 999px; background: currentColor; }
+
+/* ── Segmented control (e.g. 30d / 90d) ──────────────────────────────── */
+.vr-seg {
+  display: inline-flex; padding: 3px;
+  background: var(--vr-bg-2); border-radius: var(--vr-radius-sm);
+  border: 1px solid var(--vr-rule);
+}
+.vr-seg-btn {
+  border: none; background: none;
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  color: var(--vr-ink-2); cursor: pointer;
+  border-radius: 4px; font-family: var(--vr-sans);
+}
+.vr-seg-btn.is-active {
+  background: var(--vr-surface); color: var(--vr-ink);
+  box-shadow: var(--vr-shadow-sm);
+}
+
+/* ── Two-up layout ───────────────────────────────────────────────────── */
+.vr-two-up {
+  display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px;
+  margin-top: 14px;
+}
+
+/* ── Booking-rate sidecar (bookings topline tile) ────────────────────── */
+.vr-booking-rate {
+  position: absolute; top: 14px; right: 14px;
+  display: inline-flex; align-items: baseline; gap: 4px;
+  padding: 2px 7px;
+  background: var(--vr-good-bg);
+  border-radius: 4px;
+}
+.vr-booking-rate-label {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--vr-good); opacity: 0.85;
+}
+.vr-booking-rate-value {
+  font-size: 12px; font-weight: 700; font-family: var(--vr-mono); color: var(--vr-good);
+}
+
+/* ── Placeholder ─────────────────────────────────────────────────────── */
+.vr-placeholder {
+  border: 1px dashed var(--vr-rule-strong); border-radius: var(--vr-radius);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px;
+  background: var(--vr-bg-2);
+  color: var(--vr-ink-3);
+  gap: 6px;
+  text-align: center;
+}
+.vr-placeholder-label { font-family: var(--vr-mono); font-size: 12px; }
+.vr-placeholder-sub { font-size: 12px; color: var(--vr-ink-3); max-width: 56ch; }
+
+/* ── AI summary ──────────────────────────────────────────────────────── */
+.vr-ai-summary {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-lg);
+  padding: 28px 32px;
+  display: flex; flex-direction: column; gap: 22px;
+  position: relative; overflow: hidden;
+}
+.vr-ai-summary::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--vr-accent), #16A34A, var(--vr-accent));
+}
+.vr-ai-head { display: flex; align-items: center; gap: 14px; }
+.vr-ai-mark {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--vr-accent-soft); color: var(--vr-accent);
+  display: grid; place-items: center;
+}
+.vr-ai-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.vr-ai-sub { font-size: 12px; color: var(--vr-ink-3); }
+.vr-ai-actions { margin-left: auto; display: flex; gap: 8px; }
+.vr-ai-headline {
+  margin: 0; font-size: 17px; line-height: 1.55; color: var(--vr-ink);
+  letter-spacing: -0.005em; text-wrap: pretty;
+}
+.vr-ai-headline strong { color: var(--vr-ink); font-weight: 600; }
+.vr-ai-pillars {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+.vr-ai-pillar {
+  background: var(--vr-surface-2);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.vr-ai-pillar.is-good { border-top: 3px solid var(--vr-good); }
+.vr-ai-pillar.is-watch { border-top: 3px solid var(--vr-watch); }
+.vr-ai-pillar.is-focus { border-top: 3px solid var(--vr-accent); }
+.vr-ai-pillar-head { display: flex; align-items: center; }
+.vr-ai-tag {
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--vr-ink-2);
+}
+.vr-ai-pillar.is-good .vr-ai-tag { color: var(--vr-good); }
+.vr-ai-pillar.is-watch .vr-ai-tag { color: var(--vr-watch); }
+.vr-ai-pillar.is-focus .vr-ai-tag { color: var(--vr-accent); }
+.vr-ai-list {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.vr-ai-list li {
+  font-size: 13px; line-height: 1.5; color: var(--vr-ink-2);
+  padding-left: 14px; position: relative;
+}
+.vr-ai-list li::before {
+  content: ""; position: absolute; left: 0; top: 8px;
+  width: 4px; height: 4px; border-radius: 999px;
+  background: var(--vr-ink-3);
+}
+.vr-ai-list strong { color: var(--vr-ink); font-weight: 600; }
+.vr-ai-meta {
+  display: flex; justify-content: space-between;
+  padding-top: 14px; border-top: 1px dashed var(--vr-rule);
+  font-size: 11px; color: var(--vr-ink-3); font-family: var(--vr-mono);
+}
+.vr-ai-confidence.is-high { color: var(--vr-good); }
+.vr-ai-confidence.is-medium { color: var(--vr-watch); }
+.vr-ai-confidence.is-low { color: var(--vr-bad); }
+
+/* ── Tweaks panel (floating drawer) ──────────────────────────────────── */
+.vr-tweaks-fab {
+  position: fixed; right: 24px; bottom: 24px; z-index: 50;
+  width: 40px; height: 40px; border-radius: 999px;
+  background: var(--vr-surface); border: 1px solid var(--vr-rule-strong);
+  color: var(--vr-ink-2); cursor: pointer;
+  display: grid; place-items: center;
+  box-shadow: var(--vr-shadow-md);
+}
+.vr-tweaks-fab:hover { color: var(--vr-ink); border-color: var(--vr-ink); }
+.vr-tweaks-panel {
+  position: fixed; right: 24px; bottom: 76px; z-index: 51;
+  width: 280px;
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  box-shadow: var(--vr-shadow-md);
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.vr-tweaks-head { display: flex; align-items: center; justify-content: space-between; }
+.vr-tweaks-title { font-size: 13px; font-weight: 600; }
+.vr-tweaks-close {
+  border: none; background: none; cursor: pointer;
+  font-size: 18px; line-height: 1; color: var(--vr-ink-3);
+  padding: 0 4px;
+}
+.vr-tweaks-close:hover { color: var(--vr-ink); }
+.vr-tweaks-section {
+  display: flex; flex-direction: column; gap: 10px;
+  padding-top: 10px; border-top: 1px solid var(--vr-rule);
+}
+.vr-tweaks-section:first-of-type { border-top: 0; padding-top: 0; }
+.vr-tweaks-section-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--vr-ink-3); font-weight: 600;
+}
+.vr-tweaks-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; color: var(--vr-ink); gap: 10px;
+}
+.vr-tweaks-row-col { flex-direction: column; align-items: stretch; gap: 6px; }
+.vr-tweaks-row select,
+.vr-tweaks-row input[type="range"] {
+  font: inherit; padding: 4px 6px;
+  background: var(--vr-surface); color: var(--vr-ink);
+  border: 1px solid var(--vr-rule); border-radius: var(--vr-radius-sm);
+}
+.vr-tweaks-meta {
+  margin-left: 8px; font-family: var(--vr-mono); font-size: 11px; color: var(--vr-ink-3);
+}
+.vr-tweaks-radios { display: flex; gap: 8px; }
+.vr-tweaks-radio {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--vr-ink-2); cursor: pointer;
+}
+
+/* ── SEO topline (3 across × 2 rows) ─────────────────────────────────── */
+.vr-seo-topline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--vr-rule);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  overflow: hidden;
+}
+.vr-seo-tile {
+  background: var(--vr-surface);
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 0;
+}
+.vr-seo-tile-label {
+  font-size: 11px; color: var(--vr-ink-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.vr-seo-tile-value {
+  font-size: 18px; font-weight: 600; font-family: var(--vr-mono);
+  letter-spacing: -0.01em; color: var(--vr-ink);
+}
+
+/* ── Insights cards (SEO) ────────────────────────────────────────────── */
+.vr-insights-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+.vr-insight-card {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative;
+}
+.vr-insight-card.is-good { border-left: 3px solid var(--vr-good); }
+.vr-insight-card.is-watch { border-left: 3px solid var(--vr-watch); }
+.vr-insight-tag {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--vr-ink-3); font-weight: 600;
+}
+.vr-insight-headline {
+  font-size: 14px; font-weight: 600;
+  letter-spacing: -0.01em; line-height: 1.35;
+  color: var(--vr-ink);
+}
+.vr-insight-body {
+  font-size: 12.5px; color: var(--vr-ink-2);
+  line-height: 1.5; margin: 0; text-wrap: pretty;
+}
+.vr-insight-metric {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-top: auto; padding-top: 10px;
+  border-top: 1px dashed var(--vr-rule);
+}
+.vr-insight-metric-label { font-size: 11px; color: var(--vr-ink-3); }
+.vr-insight-metric-value {
+  font-size: 16px; font-weight: 600;
+  font-family: var(--vr-mono); margin-left: auto;
+  color: var(--vr-ink);
+}
+
+/* ── Search Console chart ────────────────────────────────────────────── */
+.vr-gsc-chart {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  overflow: hidden;
+}
+.vr-gsc-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--vr-rule);
+}
+.vr-gsc-tab {
+  border: none;
+  background: var(--vr-surface);
+  border-right: 1px solid var(--vr-rule);
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px;
+  font-family: var(--vr-sans);
+  position: relative;
+  transition: background 120ms ease;
+  color: var(--vr-ink);
+}
+.vr-gsc-tab:last-child { border-right: none; }
+.vr-gsc-tab:hover { background: var(--vr-bg-2); }
+.vr-gsc-tab.is-active::after {
+  content: ""; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 2px; background: var(--vr-ink);
+}
+.vr-gsc-tab-swatch {
+  width: 10px; height: 10px;
+  border-radius: 2px; border: 1.5px solid;
+}
+.vr-gsc-tab-label {
+  font-size: 11px; color: var(--vr-ink-3);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  font-weight: 500;
+}
+.vr-gsc-tab-value {
+  font-size: 22px; font-weight: 600;
+  font-family: var(--vr-mono); letter-spacing: -0.01em;
+}
+.vr-gsc-canvas { position: relative; padding: 8px 12px 0; }
+.vr-gsc-tooltip {
+  position: absolute;
+  top: 16px;
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule-strong);
+  border-radius: var(--vr-radius-sm);
+  padding: 10px 12px;
+  box-shadow: var(--vr-shadow-md);
+  font-size: 12px;
+  pointer-events: none;
+  min-width: 180px;
+  z-index: 5;
+}
+.vr-gsc-tooltip-date {
+  font-size: 11px; color: var(--vr-ink-3); font-family: var(--vr-mono);
+  margin-bottom: 6px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--vr-rule);
+}
+.vr-gsc-tooltip-row {
+  display: flex; align-items: center; gap: 8px; padding: 3px 0;
+}
+.vr-gsc-tooltip-swatch { width: 8px; height: 8px; border-radius: 2px; }
+.vr-gsc-tooltip-label { color: var(--vr-ink-2); flex: 1; }
+.vr-gsc-tooltip-val {
+  font-family: var(--vr-mono); font-weight: 600; color: var(--vr-ink);
+}
+.vr-gsc-foot {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--vr-rule);
+  background: var(--vr-surface-2);
+  font-size: 11px; color: var(--vr-ink-3);
+}
+.vr-gsc-foot code {
+  font-family: var(--vr-mono); font-size: 11px;
+  background: var(--vr-bg-2); padding: 1px 5px; border-radius: 3px;
+  color: var(--vr-ink-2);
+}
+
+/* ── Site health tiles ───────────────────────────────────────────────── */
+.vr-health-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+}
+.vr-health-tile {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.vr-health-label { font-size: 11px; color: var(--vr-ink-3); }
+.vr-health-value {
+  font-size: 20px; font-weight: 600;
+  font-family: var(--vr-mono); letter-spacing: -0.01em;
+  color: var(--vr-ink);
+}
+.vr-health-value.is-good { color: var(--vr-good); }
+
+@media (max-width: 1100px) {
+  .vr-kpi-grid, .vr-topline-grid { grid-template-columns: repeat(2, 1fr); }
+  .vr-channel-grid { grid-template-columns: 1fr; }
+  .vr-two-up { grid-template-columns: 1fr; }
+  .vr-ai-pillars { grid-template-columns: 1fr; }
+  .vr-insights-grid { grid-template-columns: 1fr; }
+  .vr-health-grid { grid-template-columns: repeat(2, 1fr); }
+  .vr-seo-topline { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Creative cards (Meta tab) ───────────────────────────────────────── */
+.vr-creative-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.vr-creative-card {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.vr-creative-thumb {
+  height: 120px;
+  position: relative;
+  display: grid;
+  place-items: end start;
+}
+.vr-creative-thumb-label {
+  font-family: var(--vr-mono);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 6px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.vr-creative-body { padding: 12px 14px; }
+.vr-creative-name { font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+.vr-creative-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+  font-size: 12px;
+  font-family: var(--vr-mono);
+}
+.vr-creative-stat-label { color: var(--vr-ink-3); margin-right: 6px; }
+
+/* ── Audience + device rows (Meta + Google two-up) ───────────────────── */
+.vr-audience-list,
+.vr-device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.vr-audience-row,
+.vr-device-row {
+  background: var(--vr-surface);
+  border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vr-audience-head,
+.vr-device-head { display: flex; align-items: center; gap: 8px; }
+.vr-audience-name,
+.vr-device-name { font-size: 13px; font-weight: 500; }
+.vr-audience-pct,
+.vr-device-share {
+  margin-left: auto;
+  font-family: var(--vr-mono);
+  font-size: 12px;
+  color: var(--vr-ink-2);
+}
+.vr-audience-foot,
+.vr-device-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--vr-ink-3);
+  font-family: var(--vr-mono);
+}
+.vr-device-icon {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  color: var(--vr-ink-2);
+}
+
+/* ── Print ─────────────────────────────────────────────────────────────── */
+/* Dashboard is dark by default; print swaps to a light palette so the
+ * physical/PDF output is legible without burning ink. */
+@media print {
+  #report-root {
+    --vr-bg: #ffffff;
+    --vr-bg-2: #f7f7f7;
+    --vr-surface: #ffffff;
+    --vr-surface-2: #fafafa;
+    --vr-rule: #e5e5e5;
+    --vr-rule-strong: #cccccc;
+    --vr-ink: #111111;
+    --vr-ink-2: #444444;
+    --vr-ink-3: #777777;
+    --vr-shadow-sm: none;
+    --vr-shadow-md: none;
+    background: #fff;
+    color: #111;
+  }
+  .vr-sidebar,
+  .vr-topbar-actions,
+  .vr-tweaks-fab,
+  .vr-tweaks-panel { display: none; }
+  .vr-app { grid-template-columns: 1fr; }
+  .vr-topbar { position: static; border-bottom: 1px solid #e5e5e5; }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .vr-app { grid-template-columns: 1fr; }
+  .vr-sidebar { position: static; height: auto; }
+}
+@media (max-width: 1100px) {
+  .vr-creative-grid { grid-template-columns: 1fr; }
+}

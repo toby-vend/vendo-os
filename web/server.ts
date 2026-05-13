@@ -38,6 +38,7 @@ import { adminAgentsRoutes } from './routes/admin/agents.js';
 import { adminAgentsDetailRoutes } from './routes/admin/agents-detail.js';
 import { adminGrowthRoutes } from './routes/admin/growth.js';
 import { adminAgentsConversationsRoutes, adminAgentsGraphRoutes } from './routes/admin/agents-conversations.js';
+import { treatmentMappingsRoutes } from './routes/admin/treatment-mappings.js';
 import { googleOAuthRoutes } from './routes/google-oauth.js';
 import { settingsRoutes } from './routes/settings.js';
 import { chatRoutes } from './routes/chat.js';
@@ -379,6 +380,10 @@ app.register(adminAgentsDetailRoutes, { prefix: '/admin/agents' });
 app.register(adminAgentsConversationsRoutes, { prefix: '/admin/agents/conversations' });
 app.register(adminAgentsGraphRoutes, { prefix: '/admin/agents/graph' });
 app.register(adminGrowthRoutes, { prefix: '/admin/growth' });
+// Treatment-mappings admin — full paths inside the plugin so a single
+// registration covers both /admin/clients/:id/treatment-mappings (UI) and
+// /api/admin/clients/:id/treatment-mappings/... (HTMX-driven mutations).
+app.register(treatmentMappingsRoutes);
 app.register(googleOAuthRoutes);
 app.register(settingsRoutes, { prefix: '/settings' });
 app.register(chatRoutes, { prefix: '/chat' });

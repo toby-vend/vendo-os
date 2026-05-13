@@ -165,6 +165,45 @@ async function fetchCampaignSpend(customerId: string, dateFrom: string, dateTo: 
 
 // --- Fetch keyword stats ---
 
+// --- Fetch campaign device split ---
+//
+// Queries the campaign performance with `segments.device` so we can break
+// out Mobile / Desktop / Tablet / Other. Stored separately in
+// `gads_device_split` so the daily campaign totals in `gads_campaign_spend`
+// stay one-row-per-campaign-day.
+async function fetchCampaignDeviceSplit(customerId: string, dateFrom: string, dateTo: string) {
+  const query = `
+    SELECT
+      segments.date,
+      segments.device,
+      customer.id,
+      customer.descriptive_name,
+      campaign.id,
+      campaign.name,
+      metrics.cost_micros,
+      metrics.impressions,
+      metrics.clicks,
+      metrics.conversions,
+      metrics.conversions_value
+    FROM campaign
+    WHERE segments.date BETWEEN '${dateFrom}' AND '${dateTo}'
+  `;
+
+  return gadsQuery(customerId, query);
+}
+
+// Google Ads device enum is upper-case (MOBILE / DESKTOP / TABLET / OTHER /
+// CONNECTED_TV / UNSPECIFIED / UNKNOWN). Normalise to capitalised English
+// per the v2 dashboard contract — UI only renders Mobile / Desktop / Tablet,
+// so anything else collapses to 'Other'.
+function normaliseDevice(raw: unknown): 'Mobile' | 'Desktop' | 'Tablet' | 'Other' {
+  const s = String(raw ?? '').toUpperCase();
+  if (s === 'MOBILE') return 'Mobile';
+  if (s === 'DESKTOP') return 'Desktop';
+  if (s === 'TABLET') return 'Tablet';
+  return 'Other';
+}
+
 async function fetchKeywordStats(customerId: string, dateFrom: string, dateTo: string) {
   const query = `
     SELECT
@@ -286,6 +325,80 @@ async function syncGoogleAds() {
     upsertSpend.free();
     saveDb();
     log('GADS', `Campaign sync: ${totalRows} rows across ${accounts.length} accounts`);
+
+    // 2b. Fetch per-campaign device split (Mobile/Desktop/Tablet/Other).
+    //     Lives in a separate table so the per-day campaign UNIQUE constraint
+    //     on `gads_campaign_spend` isn't broken. See
+    //     scripts/migrations/2026-05-12-gads-device-split.ts.
+    log('GADS', `Fetching campaign device split...`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS gads_device_split (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      account_id TEXT NOT NULL,
+      account_name TEXT,
+      campaign_id TEXT NOT NULL,
+      campaign_name TEXT,
+      device TEXT NOT NULL,
+      spend_micros INTEGER DEFAULT 0,
+      spend REAL DEFAULT 0,
+      impressions INTEGER DEFAULT 0,
+      clicks INTEGER DEFAULT 0,
+      conversions REAL DEFAULT 0,
+      conversion_value REAL DEFAULT 0,
+      synced_at TEXT NOT NULL,
+      UNIQUE(date, account_id, campaign_id, device)
+    )`);
+    db.run('CREATE INDEX IF NOT EXISTS idx_gads_device_split_date ON gads_device_split(date)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_gads_device_split_account ON gads_device_split(account_id)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_gads_device_split_campaign ON gads_device_split(campaign_id)');
+
+    const upsertDevice = db.prepare(
+      `INSERT INTO gads_device_split (date, account_id, account_name, campaign_id, campaign_name, device, spend_micros, spend, impressions, clicks, conversions, conversion_value, synced_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(date, account_id, campaign_id, device) DO UPDATE SET
+         account_name=excluded.account_name, campaign_name=excluded.campaign_name,
+         spend_micros=excluded.spend_micros, spend=excluded.spend,
+         impressions=excluded.impressions, clicks=excluded.clicks,
+         conversions=excluded.conversions, conversion_value=excluded.conversion_value,
+         synced_at=excluded.synced_at`
+    );
+
+    let deviceTotal = 0;
+    for (const acct of accounts) {
+      try {
+        const deviceRows = await fetchCampaignDeviceSplit(acct.id, dateFrom, dateTo);
+        if (deviceRows.length === 0) continue;
+
+        for (const row of deviceRows) {
+          const costMicros = Number(row.metrics?.costMicros || 0);
+          upsertDevice.run([
+            row.segments.date,
+            String(row.customer.id),
+            row.customer.descriptiveName || acct.descriptiveName,
+            String(row.campaign.id),
+            row.campaign.name || null,
+            normaliseDevice(row.segments.device),
+            costMicros,
+            costMicros / 1_000_000,
+            Number(row.metrics?.impressions || 0),
+            Number(row.metrics?.clicks || 0),
+            Number(row.metrics?.conversions || 0),
+            Number(row.metrics?.conversionsValue || 0),
+            now,
+          ]);
+        }
+        deviceTotal += deviceRows.length;
+        log('GADS', `  ${acct.descriptiveName}: ${deviceRows.length} device rows`);
+      } catch (err) {
+        // Device split is an enhancement — skip on failure rather than aborting sync.
+        log('GADS', `  ${acct.descriptiveName}: device fetch skipped (${(err as Error).message?.slice(0, 60)})`);
+      }
+    }
+
+    upsertDevice.free();
+    saveDb();
+    log('GADS', `Device split: ${deviceTotal} rows across ${accounts.length} accounts`);
 
     // 3. Fetch keyword stats for each account
     log('GADS', `Fetching keyword stats...`);
