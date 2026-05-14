@@ -18,6 +18,7 @@ import {
 import { getOrCreateTranscript } from '../../lib/frameio/transcribe.js';
 import { getProjectsOverview, getLibraryStats } from '../../lib/queries/frameio-library.js';
 import { getOrBuildClientSnapshot } from '../../lib/frameio/client-snapshot.js';
+import { runCritique } from '../../lib/frameio/ad-copy-critique.js';
 import { db } from '../../lib/queries/base.js';
 import type { SessionUser } from '../../lib/auth.js';
 
@@ -195,6 +196,31 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
     const row = await getAdCopyRowById(reviewId);
     if (!row) return reply.code(404).type('text/html').send('<p>Review not found</p>');
     return reply.render('dashboards/_frame-io-ad-copy-block', { row });
+  });
+
+  // POST /dashboards/frame-io/ad-copy/:reviewId/critique
+  // Runs the self-critique pass (Sonnet, ~$0.02 + 8-10s). Cached after
+  // first run; regenerate clears it. Returns the critique block fragment.
+  app.post('/ad-copy/:reviewId/critique', async (request, reply) => {
+    const params = request.params as { reviewId: string };
+    const reviewId = Number(params.reviewId);
+    if (!Number.isFinite(reviewId) || reviewId <= 0) {
+      return reply.code(400).type('text/html').send('<p>Invalid review id</p>');
+    }
+    const body = request.body as { force?: string | boolean } | undefined;
+    const force = body?.force === true || body?.force === 'true' || body?.force === '1';
+    const result = await runCritique(reviewId, { force });
+    if (!result.ok) {
+      const safe = result.reason.replace(/[<>]/g, '');
+      return reply.code(500).type('text/html').send(
+        `<div style="color:#EF4444;padding:0.5rem 0.75rem;background:rgba(239,68,68,0.08);border-radius:4px;font-size:12px;">Critique failed: <code>${safe}</code></div>`,
+      );
+    }
+    return reply.render('dashboards/_frame-io-critique-block', {
+      reviewId: result.reviewId,
+      markdown: result.markdown,
+      generatedAt: result.generatedAt,
+    });
   });
 
   // POST /dashboards/frame-io/snapshot/refresh

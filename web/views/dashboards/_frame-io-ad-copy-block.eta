@@ -143,6 +143,20 @@ const _tChip = _transcriptChip(r);
         style="background:none;border:none;color:#94A3B8;font-size:11px;text-decoration:underline;cursor:pointer;padding:0;">
         regenerate
       </button>
+      <% if (!r.adCopyCritiqueMd) { %>
+        <span style="color:#475569;">·</span>
+        <button
+          hx-post="/dashboards/frame-io/ad-copy/<%= r.reviewId %>/critique"
+          hx-target="#critique-slot-<%= r.reviewId %>"
+          hx-swap="innerHTML"
+          hx-headers='{"X-CSRF-Token": "<%= csrf %>"}'
+          hx-indicator="#critique-spin-<%= r.reviewId %>"
+          title="Score each variant on specificity, brand fit and hypothesis distinctiveness. Costs ~$0.02."
+          style="background:none;border:none;color:#c4b5fd;font-size:11px;text-decoration:underline;cursor:pointer;padding:0;">
+          🧪 run critique
+        </button>
+        <span id="critique-spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">🧪 critiquing… (~8s)</span>
+      <% } %>
       <span id="regen-spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">
         <% if (r.assetType === 'video' && !r.hasCachedTranscript) { %>↻ regenerating… (transcribing video, up to 60s)<% } else { %>↻ regenerating…<% } %>
       </span>
@@ -167,6 +181,16 @@ const _tChip = _transcriptChip(r);
     </div>
 
     <div id="reject-form-<%= r.reviewId %>"></div>
+
+    <div id="critique-slot-<%= r.reviewId %>">
+      <% if (r.adCopyCritiqueMd) { %>
+        <%~ include('/dashboards/_frame-io-critique-block', {
+          reviewId: r.reviewId,
+          markdown: r.adCopyCritiqueMd,
+          generatedAt: r.adCopyCritiqueAt,
+        }) %>
+      <% } %>
+    </div>
   </div>
 <% } else { %>
   <div id="adcopy-<%= r.reviewId %>">

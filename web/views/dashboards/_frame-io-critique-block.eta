@@ -1,0 +1,23 @@
+<%
+/*
+  Self-critique block — collapsible panel showing the second-pass review.
+  Rendered both inline on the ad-copy block (when ad_copy_critique_md is
+  set on the row) and standalone as the response fragment to
+  POST /ad-copy/:id/critique.
+
+  Inputs (route render):
+    it.reviewId, it.markdown, it.generatedAt
+  Inputs (inline include from _frame-io-ad-copy-block):
+    it.reviewId, it.markdown, it.generatedAt
+*/
+const _fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+%>
+<div id="critique-<%= it.reviewId %>" style="background:#0B0B0B;border:1px solid rgba(168,85,247,0.30);border-radius:8px;padding:0.75rem 1rem;margin-top:8px;font-size:13px;">
+  <details open>
+    <summary style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;list-style:none;">
+      <strong style="color:#c4b5fd;">🧪 Self-critique</strong>
+      <span style="font-size:11px;color:#94A3B8;"><%= _fmtDate(it.generatedAt) %></span>
+    </summary>
+    <pre style="white-space:pre-wrap;font-family:inherit;font-size:12px;color:#cbd5e1;margin:8px 0 0 0;padding:0;background:transparent;border:none;"><%= it.markdown %></pre>
+  </details>
+</div>
