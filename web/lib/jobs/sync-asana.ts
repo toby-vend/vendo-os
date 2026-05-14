@@ -36,8 +36,31 @@ export interface AsanaSyncResult {
   projectsScanned: number;
   tasksFetched: number;
   tasksUpserted: number;
+  tasksMarkedDeleted: number;
   resolvedClients: number;
   durationMs: number;
+}
+
+/**
+ * Idempotent column add. SQLite/libsql has no `ADD COLUMN IF NOT EXISTS`,
+ * so we attempt the ALTER and swallow the "duplicate column" error.
+ * Other errors propagate.
+ */
+async function ensureDeletedColumns(): Promise<void> {
+  for (const sql of [
+    'ALTER TABLE asana_tasks ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0',
+    'ALTER TABLE asana_tasks ADD COLUMN deleted_at TEXT',
+  ]) {
+    try {
+      await db.execute(sql);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!/duplicate column/i.test(msg)) throw err;
+    }
+  }
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_asana_tasks_deleted ON asana_tasks(deleted)',
+  );
 }
 
 function requireEnv(key: string): string {
@@ -114,6 +137,9 @@ export async function syncAsana(): Promise<AsanaSyncResult> {
   const workspaceGid = requireEnv('ASANA_WORKSPACE_GID');
   const now = new Date().toISOString();
 
+  // 0. Ensure deletion-tracking columns exist (no-op on subsequent runs).
+  await ensureDeletedColumns();
+
   // 1. Fetch projects
   const projects = await fetchProjects(workspaceGid, apiKey);
 
@@ -157,7 +183,9 @@ export async function syncAsana(): Promise<AsanaSyncResult> {
                 notes = excluded.notes,
                 permalink_url = excluded.permalink_url,
                 modified_at = excluded.modified_at,
-                synced_at = excluded.synced_at`,
+                synced_at = excluded.synced_at,
+                deleted = 0,
+                deleted_at = NULL`,
         args: [
           task.gid,
           task.name,
@@ -181,6 +209,26 @@ export async function syncAsana(): Promise<AsanaSyncResult> {
       upserted += stmts.length;
     }
   }
+
+  // 3b. Reconcile deletions. Any task we previously had as open but did
+  // NOT see in this run has either been deleted in Asana, moved to an
+  // archived/foreign project, or trashed. Asana's API silently drops
+  // deleted items, so the only signal is absence. We compare against
+  // `synced_at < runStart` — rows touched by the upserts above will
+  // have synced_at = `now`. Open completed-recently rows are included
+  // because the 90-day completed_since window would still surface them
+  // if alive. Resurrections recover automatically (the ON CONFLICT
+  // clause resets deleted = 0 on the next upsert).
+  const completedCutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  const deleteResult = await db.execute({
+    sql: `UPDATE asana_tasks
+            SET deleted = 1, deleted_at = ?
+          WHERE deleted = 0
+            AND synced_at < ?
+            AND (completed = 0 OR (completed_at IS NOT NULL AND completed_at >= ?))`,
+    args: [now, now, completedCutoff],
+  });
+  const tasksMarkedDeleted = Number(deleteResult.rowsAffected ?? 0);
 
   // 4. Auto-resolve project_gid → canonical client_id (Asana source).
   // The old CLI version called resolveClientBatch from scripts/utils — that
@@ -236,6 +284,7 @@ export async function syncAsana(): Promise<AsanaSyncResult> {
     projectsScanned: projects.length,
     tasksFetched: allTasks.length,
     tasksUpserted: upserted,
+    tasksMarkedDeleted,
     resolvedClients: resolved,
     durationMs: Date.now() - start,
   };

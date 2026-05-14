@@ -260,6 +260,7 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
         projectsScanned: result.projectsScanned,
         tasksFetched: result.tasksFetched,
         tasksUpserted: result.tasksUpserted,
+        tasksMarkedDeleted: result.tasksMarkedDeleted,
         resolvedClients: result.resolvedClients,
         durationMs: result.durationMs,
       });
