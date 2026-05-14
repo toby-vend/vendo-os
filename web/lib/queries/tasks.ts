@@ -33,7 +33,9 @@ export interface TaskSearchOpts {
 // --- Tasks ---
 
 export async function searchTasks(opts: TaskSearchOpts): Promise<{ tasks: AsanaTaskRow[]; total: number }> {
-  const conditions: string[] = [];
+  // Hide tasks deleted in Asana — sync sweep flags these so they stop
+  // showing in admin lists and in the morning brief.
+  const conditions: string[] = ['deleted = 0'];
   const args: (string | number)[] = [];
 
   if (opts.assignee) { conditions.push('assignee_name LIKE ?'); args.push(`%${opts.assignee}%`); }
@@ -74,7 +76,7 @@ export async function getTaskByGid(gid: string): Promise<AsanaTaskRow | null> {
 // --- Filter helpers ---
 
 export async function getTaskAssignees(): Promise<string[]> {
-  const result = await rows<{ assignee_name: string }>('SELECT DISTINCT assignee_name FROM asana_tasks WHERE assignee_name IS NOT NULL ORDER BY assignee_name');
+  const result = await rows<{ assignee_name: string }>('SELECT DISTINCT assignee_name FROM asana_tasks WHERE assignee_name IS NOT NULL AND deleted = 0 ORDER BY assignee_name');
   return result.map(r => r.assignee_name);
 }
 
@@ -82,7 +84,7 @@ export async function getTaskProjects(): Promise<{ gid: string; name: string }[]
   return rows<{ gid: string; name: string }>(`
     SELECT DISTINCT project_gid as gid, project_name as name
     FROM asana_tasks
-    WHERE project_gid IS NOT NULL AND project_name IS NOT NULL
+    WHERE project_gid IS NOT NULL AND project_name IS NOT NULL AND deleted = 0
     ORDER BY project_name
   `);
 }
@@ -96,10 +98,12 @@ export async function getTaskStats(): Promise<{
   dueToday: number;
   dueThisWeek: number;
 }> {
-  const total = await scalar('SELECT COUNT(*) FROM asana_tasks WHERE completed = 0') as number ?? 0;
-  const overdue = await scalar("SELECT COUNT(*) FROM asana_tasks WHERE completed = 0 AND due_on < date('now')") as number ?? 0;
-  const dueToday = await scalar("SELECT COUNT(*) FROM asana_tasks WHERE completed = 0 AND due_on = date('now')") as number ?? 0;
-  const dueThisWeek = await scalar("SELECT COUNT(*) FROM asana_tasks WHERE completed = 0 AND due_on >= date('now') AND due_on <= date('now', '+7 days')") as number ?? 0;
+  // `deleted = 0` excludes tasks the Asana sync's reconciliation sweep
+  // has flagged as removed from Asana.
+  const total = await scalar('SELECT COUNT(*) FROM asana_tasks WHERE completed = 0 AND deleted = 0') as number ?? 0;
+  const overdue = await scalar("SELECT COUNT(*) FROM asana_tasks WHERE completed = 0 AND deleted = 0 AND due_on < date('now')") as number ?? 0;
+  const dueToday = await scalar("SELECT COUNT(*) FROM asana_tasks WHERE completed = 0 AND deleted = 0 AND due_on = date('now')") as number ?? 0;
+  const dueThisWeek = await scalar("SELECT COUNT(*) FROM asana_tasks WHERE completed = 0 AND deleted = 0 AND due_on >= date('now') AND due_on <= date('now', '+7 days')") as number ?? 0;
 
   return { total, open: total, overdue, dueToday, dueThisWeek };
 }

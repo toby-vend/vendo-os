@@ -173,7 +173,7 @@ export async function generateBriefing(clientId: number): Promise<ClientBriefing
        FROM asana_tasks
        WHERE project_gid IN (
          SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'asana'
-       ) AND completed = 0
+       ) AND completed = 0 AND deleted = 0
        ORDER BY due_on ASC NULLS LAST LIMIT 10`,
       [clientId],
     ),
@@ -182,7 +182,7 @@ export async function generateBriefing(clientId: number): Promise<ClientBriefing
        FROM asana_tasks
        WHERE project_gid IN (
          SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'asana'
-       ) AND completed = 0 AND due_on IS NOT NULL AND due_on < ?
+       ) AND completed = 0 AND deleted = 0 AND due_on IS NOT NULL AND due_on < ?
        ORDER BY due_on ASC LIMIT 20`,
       [clientId, today],
     ),

@@ -64,7 +64,11 @@ export const searchAsanaTasks = (ctx: ToolCtx) =>
       input: inputSchema,
       output: outputSchema,
       run: async (args) => {
-        const where: string[] = [];
+        // Hide tasks deleted in Asana — the sync's reconciliation sweep
+        // sets this when a task disappears from the API. Without this
+        // filter, deleted tasks linger as completed = 0 and re-surface
+        // in the morning brief.
+        const where: string[] = ['deleted = 0'];
         const params: (string | number)[] = [];
 
         if (args.query) {

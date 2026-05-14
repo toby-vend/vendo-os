@@ -156,6 +156,7 @@ export async function getUnlinkedAsanaProjects(): Promise<UnlinkedAccount[]> {
     FROM asana_tasks
     WHERE project_gid NOT IN (SELECT external_id FROM client_source_mappings WHERE source = 'asana')
       AND project_gid IS NOT NULL
+      AND deleted = 0
     ORDER BY project_name
   `);
 }
@@ -307,6 +308,7 @@ export async function getClientEnrichedData(clientId: number): Promise<ClientDet
       SELECT gid, name, assignee_name, due_on, completed, section_name, project_name
       FROM asana_tasks
       WHERE project_gid IN (SELECT external_id FROM client_source_mappings WHERE client_id = ? AND source = 'asana')
+        AND deleted = 0
       ORDER BY completed ASC, due_on ASC
       LIMIT 50
     `, [clientId]),

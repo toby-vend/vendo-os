@@ -182,6 +182,7 @@ async function fetchAsanaTasks(
      AND csm.external_id = at.project_gid
     WHERE csm.client_id = ?
       AND at.completed = 1
+      AND at.deleted = 0
       AND at.completed_at IS NOT NULL
       AND at.completed_at >= ?
       AND at.completed_at < ?
