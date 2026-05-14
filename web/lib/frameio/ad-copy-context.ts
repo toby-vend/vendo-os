@@ -150,14 +150,27 @@ async function loadProjectName(projectId: string | null): Promise<string | null>
 
 /**
  * Resolve the Frame.io account_id for a given project, since transcribe.ts
- * needs both. The mapping is cached in frameio_projects (populated when
- * the cron processor encounters a project for the first time).
+ * needs both. Tries two sources in order:
+ *   1. frameio_projects (populated when the cron processor encounters a
+ *      project for the first time — only mapped projects with webhook
+ *      events).
+ *   2. frameio_assets (the library mirror — comprehensive, populated by
+ *      the nightly sync regardless of mapping state).
+ * Unmapped projects that have never received a webhook still resolve via
+ * the library mirror, so transcripts work for them too.
  */
 async function resolveAccountIdForProject(projectId: string | null): Promise<string | null> {
   if (!projectId) return null;
   try {
-    return await scalar<string>(
+    const a = await scalar<string>(
       `SELECT account_id FROM frameio_projects WHERE project_id = ? LIMIT 1`,
+      [projectId],
+    );
+    if (a) return a;
+  } catch { /* fall through */ }
+  try {
+    return await scalar<string>(
+      `SELECT account_id FROM frameio_assets WHERE id = ? LIMIT 1`,
       [projectId],
     );
   } catch {

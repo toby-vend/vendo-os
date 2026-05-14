@@ -1,6 +1,6 @@
 import { db } from './base.js';
 import { getRejectionCountsByClientName } from './ad-copy-rejections.js';
-import { getCachedTranscriptFileIds } from '../frameio/transcribe.js';
+import { getCachedTranscriptFileIds, getTranscriptStatesByFileIds, type TranscriptState } from '../frameio/transcribe.js';
 
 /**
  * Read-only queries powering the /dashboards/frame-io view.
@@ -372,6 +372,8 @@ export interface AwaitingAdCopyRow {
   lessonsAvailable: number;
   /** True when a Whisper transcript is already cached for this asset. */
   hasCachedTranscript: boolean;
+  /** Richer transcript state for the dashboard chip — null for non-video assets. */
+  transcriptState: TranscriptState | null;
   updatedAt: string;
   /**
    * Transient flash for the immediate response after an Approve click —
@@ -494,9 +496,10 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
       })
       .map((row) => String((row as unknown as Record<string, unknown>).frameio_file_id));
 
-    const [lessonCounts, cachedTranscriptIds] = await Promise.all([
+    const [lessonCounts, cachedTranscriptIds, transcriptStates] = await Promise.all([
       getRejectionCountsByClientName(clientNames),
       getCachedTranscriptFileIds(videoFileIds),
+      getTranscriptStatesByFileIds(videoFileIds),
     ]);
 
     return r.rows.map((row) => {
@@ -531,6 +534,7 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
         adCopyCritiqueAt: (x.ad_copy_critique_at as string | null) ?? null,
         lessonsAvailable: lessonCounts.get(clientName) ?? 0,
         hasCachedTranscript: frameioFileId ? cachedTranscriptIds.has(frameioFileId) : false,
+        transcriptState: frameioFileId && x.asset_type === 'video' ? (transcriptStates.get(frameioFileId) ?? null) : null,
         updatedAt: String(x.updated_at),
       };
     });

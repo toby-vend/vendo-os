@@ -19,6 +19,24 @@ const borderColour = status === 'approved' ? 'rgba(34,197,94,0.30)'
   : 'rgba(148,163,184,0.30)';
 const _fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 const isUnmapped = r.clientName === '(unmapped)';
+
+// Build a per-asset transcript chip — only relevant for video assets.
+function _transcriptChip(row) {
+  if (row.assetType !== 'video') return null;
+  const s = row.transcriptState;
+  if (!s || s.state === 'pending') {
+    return { colour: '#94A3B8', bg: 'rgba(148,163,184,0.10)', label: '📝 will transcribe on click (~30s)' };
+  }
+  if (s.state === 'error') {
+    const reason = (s.error || 'unknown').replace(/[<>]/g, '').slice(0, 80);
+    return { colour: '#F59E0B', bg: 'rgba(245,158,11,0.10)', label: `⚠ transcript unavailable: ${reason}` };
+  }
+  const parts = [];
+  if (s.durationSeconds) parts.push(`${s.durationSeconds}s`);
+  if (s.charCount) parts.push(`${s.charCount} chars`);
+  return { colour: '#22C55E', bg: 'rgba(34,197,94,0.10)', label: `📝 transcript ready${parts.length ? ' (' + parts.join(' / ') + ')' : ''}` };
+}
+const _tChip = _transcriptChip(r);
 %>
 <% if (isUnmapped) { %>
   <div style="background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.30);border-radius:6px;padding:0.6rem 0.875rem;margin-bottom:8px;font-size:12px;color:#fcd34d;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -111,6 +129,9 @@ const isUnmapped = r.clientName === '(unmapped)';
       <% if ((r.lessonsAvailable || 0) > 0) { %>
         <span title="Past rejection reasons for <%= r.clientName %> are fed into every regeneration." style="font-size:10px;color:#94A3B8;background:rgba(148,163,184,0.10);padding:2px 6px;border-radius:99px;">📚 <%= r.lessonsAvailable %> lesson<%= r.lessonsAvailable === 1 ? '' : 's' %> in the prompt</span>
       <% } %>
+      <% if (_tChip) { %>
+        <span style="font-size:10px;color:<%= _tChip.colour %>;background:<%= _tChip.bg %>;padding:2px 6px;border-radius:99px;"><%= _tChip.label %></span>
+      <% } %>
       <% if (it.user && it.user.role === 'admin' && r.hasCachedTranscript && r.frameioFileId) { %>
         <button
           hx-post="/dashboards/frame-io/transcript/<%= r.frameioFileId %>/refresh"
@@ -159,6 +180,9 @@ const isUnmapped = r.clientName === '(unmapped)';
       </span>
       <% if ((r.lessonsAvailable || 0) > 0) { %>
         <span title="Past rejection reasons for <%= r.clientName %> are fed into every generation." style="font-size:10px;color:#94A3B8;background:rgba(148,163,184,0.10);padding:2px 6px;border-radius:99px;">📚 <%= r.lessonsAvailable %> lesson<%= r.lessonsAvailable === 1 ? '' : 's' %> will be applied</span>
+      <% } %>
+      <% if (_tChip) { %>
+        <span style="font-size:10px;color:<%= _tChip.colour %>;background:<%= _tChip.bg %>;padding:2px 6px;border-radius:99px;"><%= _tChip.label %></span>
       <% } %>
     </div>
   </div>

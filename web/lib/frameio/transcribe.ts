@@ -260,6 +260,70 @@ export async function getCachedTranscriptFileIds(fileIds: string[]): Promise<Set
   return out;
 }
 
+export interface TranscriptState {
+  /** 'ready' = cached non-null transcript; 'pending' = no row yet; 'error' = previous attempt failed (cached). */
+  state: 'ready' | 'pending' | 'error';
+  language: string | null;
+  durationSeconds: number | null;
+  charCount: number | null;
+  error: string | null;
+}
+
+interface RawStateRow {
+  frameio_file_id: string;
+  transcript: string | null;
+  language: string | null;
+  duration_seconds: number | null;
+  error: string | null;
+}
+
+/**
+ * Richer per-file transcript state — used by the dashboard chip. Returns
+ * 'pending' for any file_id with no row at all so the UI can prompt for
+ * first-time transcription latency.
+ */
+export async function getTranscriptStatesByFileIds(fileIds: string[]): Promise<Map<string, TranscriptState>> {
+  const out = new Map<string, TranscriptState>();
+  if (fileIds.length === 0) return out;
+  await ensureSchema();
+  const unique = Array.from(new Set(fileIds));
+  for (const id of unique) {
+    out.set(id, { state: 'pending', language: null, durationSeconds: null, charCount: null, error: null });
+  }
+  const placeholders = unique.map(() => '?').join(',');
+  try {
+    const r = await db.execute({
+      sql: `SELECT frameio_file_id, transcript, language, duration_seconds, error
+              FROM frameio_transcripts
+             WHERE frameio_file_id IN (${placeholders})`,
+      args: unique,
+    });
+    for (const row of r.rows) {
+      const x = row as unknown as RawStateRow;
+      if (x.transcript) {
+        out.set(x.frameio_file_id, {
+          state: 'ready',
+          language: x.language,
+          durationSeconds: x.duration_seconds,
+          charCount: x.transcript.length,
+          error: null,
+        });
+      } else if (x.error) {
+        out.set(x.frameio_file_id, {
+          state: 'error',
+          language: null,
+          durationSeconds: null,
+          charCount: null,
+          error: x.error,
+        });
+      }
+    }
+  } catch {
+    /* table missing — all stay pending */
+  }
+  return out;
+}
+
 export async function getCachedTranscript(fileId: string): Promise<CachedTranscript | null> {
   await ensureSchema();
   try {
