@@ -82,8 +82,63 @@ export interface AdCopyInput {
   reviewId: number;
   /** Optional override; defaults to 'leads'. */
   objective?: 'awareness' | 'traffic' | 'leads' | 'sales';
-  /** Optional override for the angle, e.g. tone or audience hint. */
+  /** Legacy audience hint — superseded by `audience`. Both still accepted. */
   audienceHint?: string;
+  /** Per-asset brief — persisted to creative_reviews and pre-filled on regenerate. */
+  heroBenefit?: string;
+  audience?: string;
+  ctaTarget?: string;
+  bannedWords?: string;
+  tone?: string;
+}
+
+export interface BriefFields {
+  heroBenefit: string | null;
+  audience: string | null;
+  ctaTarget: string | null;
+  bannedWords: string | null;
+  tone: string | null;
+}
+
+const EMPTY_BRIEF: BriefFields = {
+  heroBenefit: null, audience: null, ctaTarget: null, bannedWords: null, tone: null,
+};
+
+/** Read whatever brief fields are already persisted on the review row. */
+async function loadExistingBrief(reviewId: number): Promise<BriefFields> {
+  try {
+    const r = await db.execute({
+      sql: `SELECT ad_copy_hero_benefit, ad_copy_audience, ad_copy_cta_target,
+                   ad_copy_banned_words, ad_copy_tone
+              FROM creative_reviews WHERE id = ?`,
+      args: [reviewId],
+    });
+    const row = r.rows[0] as unknown as Record<string, string | null> | undefined;
+    if (!row) return EMPTY_BRIEF;
+    return {
+      heroBenefit: row.ad_copy_hero_benefit ?? null,
+      audience: row.ad_copy_audience ?? null,
+      ctaTarget: row.ad_copy_cta_target ?? null,
+      bannedWords: row.ad_copy_banned_words ?? null,
+      tone: row.ad_copy_tone ?? null,
+    };
+  } catch {
+    return EMPTY_BRIEF;
+  }
+}
+
+/** Persist the brief fields onto the review row. Idempotent. */
+async function persistBrief(reviewId: number, brief: BriefFields): Promise<void> {
+  await db.execute({
+    sql: `UPDATE creative_reviews
+            SET ad_copy_hero_benefit = ?,
+                ad_copy_audience = ?,
+                ad_copy_cta_target = ?,
+                ad_copy_banned_words = ?,
+                ad_copy_tone = ?
+          WHERE id = ?`,
+    args: [brief.heroBenefit, brief.audience, brief.ctaTarget, brief.bannedWords, brief.tone, reviewId],
+  });
 }
 
 export interface AdCopyResult {
@@ -114,7 +169,7 @@ export interface AdCopyError {
 function buildPrompt(opts: {
   ctx: AdCopyContext;
   objective: string;
-  audienceHint: string | null;
+  brief: BriefFields;
 }): { system: string; user: string } {
   const system = `You are a Meta (Facebook/Instagram) ad copywriter for Vendo Digital, a UK digital marketing agency. You write punchy, on-brand ad copy that conforms to Meta's character limits and best practices.
 
@@ -203,6 +258,7 @@ When a CLIENT SNAPSHOT is included in the user message, treat it as the ground-t
   const aliases = ctx.client?.aliases ?? '';
   const vertical = ctx.client?.vertical ?? '';
 
+  const { brief } = opts;
   const sections: string[] = [];
   const today = new Date().toISOString().slice(0, 10);
   sections.push(`Today: ${today}`);
@@ -215,9 +271,29 @@ When a CLIENT SNAPSHOT is included in the user message, treat it as the ground-t
       ctx.review.frameio_view_url ? `FRAME.IO LINK: ${ctx.review.frameio_view_url}` : null,
       ``,
       `OBJECTIVE: ${opts.objective}`,
-      opts.audienceHint ? `AUDIENCE HINT: ${opts.audienceHint}` : null,
+      brief.audience ? `AUDIENCE: ${brief.audience}` : null,
     ].filter(Boolean).join('\n'),
   );
+
+  // -- Per-asset BRIEF (richer than the legacy audience hint) ---------------
+  if (brief.heroBenefit) {
+    sections.push(
+      `HERO BENEFIT (the single most important thing this ad is selling — at least 2 of the 5 variants must lead with this in their Primary Text):\n${brief.heroBenefit}`,
+    );
+  }
+  if (brief.ctaTarget) {
+    sections.push(
+      `CTA TARGET (the specific conversion this ad drives — every variant's CTA Button must align with this goal, and the Primary Text should make the action obvious):\n${brief.ctaTarget}`,
+    );
+  }
+  if (brief.tone) {
+    sections.push(`TONE: ${brief.tone}`);
+  }
+  if (brief.bannedWords) {
+    sections.push(
+      `BANNED WORDS (client-specific bans on top of the system's banned template phrases — never use these in any variant):\n${brief.bannedWords}`,
+    );
+  }
 
   // CLIENT SNAPSHOT is the authoritative source on who this client is.
   // The copywriter must defer to it over its own inferences from the
@@ -267,6 +343,21 @@ function anthropic(): Anthropic {
 
 export async function generateAdCopyForReview(input: AdCopyInput): Promise<AdCopyResult | AdCopyError> {
   await ensureSchema();
+
+  // Merge the incoming brief fields with whatever's already persisted on the
+  // review row, then persist the merged result so regenerate preserves any
+  // unchanged fields. Input takes precedence; falsy strings fall back to row.
+  const existingBrief = await loadExistingBrief(input.reviewId);
+  const trim = (s?: string) => (typeof s === 'string' && s.trim().length > 0 ? s.trim() : null);
+  const brief: BriefFields = {
+    heroBenefit: trim(input.heroBenefit) ?? existingBrief.heroBenefit,
+    audience: trim(input.audience) ?? trim(input.audienceHint) ?? existingBrief.audience,
+    ctaTarget: trim(input.ctaTarget) ?? existingBrief.ctaTarget,
+    bannedWords: trim(input.bannedWords) ?? existingBrief.bannedWords,
+    tone: trim(input.tone) ?? existingBrief.tone,
+  };
+  await persistBrief(input.reviewId, brief);
+
   const ctx = await buildAdCopyContext(input.reviewId);
   if (!ctx) return { ok: false, reason: 'review_not_found' };
 
@@ -274,7 +365,7 @@ export async function generateAdCopyForReview(input: AdCopyInput): Promise<AdCop
   const { system, user } = buildPrompt({
     ctx,
     objective,
-    audienceHint: input.audienceHint ?? null,
+    brief,
   });
 
   let markdown: string;

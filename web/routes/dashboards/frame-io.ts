@@ -67,12 +67,22 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
   });
 
   // POST /dashboards/frame-io/generate-ad-copy
-  // Body: { review_id, objective?, audience_hint? }
+  // Body: { review_id, objective?, audience?, hero_benefit?, cta_target?,
+  //         banned_words?, tone? }
   // Returns: HTMX-friendly HTML fragment (the new ad-copy block) on success,
   // 4xx with an error message on failure. Anyone with dashboard access can
   // trigger generation — same gate as viewing the dashboard.
   app.post('/generate-ad-copy', async (request, reply) => {
-    const body = request.body as { review_id?: string | number; objective?: string; audience_hint?: string };
+    const body = request.body as {
+      review_id?: string | number;
+      objective?: string;
+      audience_hint?: string;
+      audience?: string;
+      hero_benefit?: string;
+      cta_target?: string;
+      banned_words?: string;
+      tone?: string;
+    };
     const reviewId = Number(body.review_id);
     if (!Number.isFinite(reviewId) || reviewId <= 0) {
       return reply.code(400).type('text/html').send('<p>Missing review_id</p>');
@@ -86,6 +96,11 @@ export const frameIoDashboardRoutes: FastifyPluginAsync = async (app) => {
       reviewId,
       objective,
       audienceHint: body.audience_hint?.trim() || undefined,
+      audience: body.audience?.trim() || undefined,
+      heroBenefit: body.hero_benefit?.trim() || undefined,
+      ctaTarget: body.cta_target?.trim() || undefined,
+      bannedWords: body.banned_words?.trim() || undefined,
+      tone: body.tone?.trim() || undefined,
     });
 
     if (!result.ok) {
