@@ -195,7 +195,21 @@
     <!-- Left: video metadata + ad-copy block -->
     <div>
       <div class="card" style="padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
-        <% if (a.thumbnail_url) { %>
+        <% if (a.view_url) {
+          // Frame.io's player embedded inline. Their CSP allows app.frame.io
+          // in frame-src per our config. If the viewer isn't logged into
+          // Frame.io they'll see the login flow inside the frame — they can
+          // also fall back to the '↗ open in Frame.io' link below.
+        %>
+          <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 6px; margin-bottom: 0.75rem; background: #000; border: 1px solid rgba(255,255,255,0.08);">
+            <iframe src="<%= a.view_url %>"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                    allowfullscreen
+                    loading="lazy"
+                    title="<%= a.name %>"></iframe>
+          </div>
+        <% } else if (a.thumbnail_url) { %>
           <img src="<%= a.thumbnail_url %>" alt="<%= a.name %>" style="max-width: 100%; border-radius: 6px; margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
         <% } %>
         <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem;">
