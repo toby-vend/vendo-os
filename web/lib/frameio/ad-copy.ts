@@ -61,6 +61,16 @@ async function ensureSchema(): Promise<void> {
     // Phase 6 — Asana hand-off (distinct from the existing asana_task_gid
     // column on creative_reviews, which is reserved for review-task tracking)
     'ad_copy_asana_task_gid TEXT',
+    // Phase 7 — per-asset brief (persisted so regenerate preserves it)
+    'ad_copy_hero_benefit TEXT',
+    'ad_copy_audience TEXT',
+    'ad_copy_cta_target TEXT',
+    'ad_copy_banned_words TEXT',
+    'ad_copy_tone TEXT',
+    // Phase 7 — output quality artefacts
+    'ad_copy_lint_warnings TEXT',  // JSON array of violation summaries
+    'ad_copy_critique_md TEXT',     // self-critique markdown
+    'ad_copy_critique_at TEXT',
   ];
   for (const col of cols) {
     try { await db.execute(`ALTER TABLE creative_reviews ADD COLUMN ${col}`); } catch { /* exists */ }

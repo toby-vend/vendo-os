@@ -357,6 +357,17 @@ export interface AwaitingAdCopyRow {
   adCopyApprovedBy: string | null;
   adCopyRejectionReason: string | null;
   adCopyAsanaTaskGid: string | null;
+  /** Persisted per-asset brief — pre-fills the brief panel on regenerate. */
+  adCopyHeroBenefit: string | null;
+  adCopyAudience: string | null;
+  adCopyCtaTarget: string | null;
+  adCopyBannedWords: string | null;
+  adCopyTone: string | null;
+  /** Lint violations from the last generation, JSON-stringified. */
+  adCopyLintWarnings: string | null;
+  /** Self-critique markdown (opt-in second-pass review). */
+  adCopyCritiqueMd: string | null;
+  adCopyCritiqueAt: string | null;
   /** Count of past rejections for this client — feeds the dashboard hint. */
   lessonsAvailable: number;
   /** True when a Whisper transcript is already cached for this asset. */
@@ -380,17 +391,23 @@ export interface AwaitingAdCopyRow {
  */
 export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCopyRow[]> {
   return safe(async () => {
-    // Try with the latest columns first; fall back twice as we go further
-    // back in schema history. Idempotent ALTERs in ad-copy.ts add the Phase 6
-    // columns on first use of the generate endpoint.
+    // Schema fallback chain: try Phase-7 columns first, fall back tier-by-tier
+    // as we step further back in schema history. Each tier NULLs the columns
+    // it can't provide. Idempotent ALTERs in ad-copy.ts add the new columns
+    // on first use of the generate endpoint.
     let r;
+    const isMissingCol = (err: unknown) => String((err as Error).message ?? '').includes('no such column');
     try {
+      // Phase 7 — brief fields + lint + critique
       r = await db.execute({
         sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
                      frameio_file_id, frameio_view_url,
                      ad_copy_md, ad_copy_generated_at, ad_copy_objective,
                      ad_copy_status, ad_copy_approved_at, ad_copy_approved_by,
                      ad_copy_rejection_reason, ad_copy_asana_task_gid,
+                     ad_copy_hero_benefit, ad_copy_audience, ad_copy_cta_target,
+                     ad_copy_banned_words, ad_copy_tone,
+                     ad_copy_lint_warnings, ad_copy_critique_md, ad_copy_critique_at,
                      updated_at
                 FROM creative_reviews
                WHERE frameio_file_id IS NOT NULL
@@ -399,16 +416,20 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
         args: [limit],
       });
     } catch (err) {
-      if (!String((err as Error).message ?? '').includes('no such column')) throw err;
-      // Try Phase-5-only columns next.
+      if (!isMissingCol(err)) throw err;
       try {
+        // Phase 6 — approval gate columns present, Phase 7 columns NULL
         r = await db.execute({
           sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
                        frameio_file_id, frameio_view_url,
                        ad_copy_md, ad_copy_generated_at, ad_copy_objective,
-                       NULL AS ad_copy_status, NULL AS ad_copy_approved_at,
-                       NULL AS ad_copy_approved_by, NULL AS ad_copy_rejection_reason,
-                       NULL AS ad_copy_asana_task_gid,
+                       ad_copy_status, ad_copy_approved_at, ad_copy_approved_by,
+                       ad_copy_rejection_reason, ad_copy_asana_task_gid,
+                       NULL AS ad_copy_hero_benefit, NULL AS ad_copy_audience,
+                       NULL AS ad_copy_cta_target, NULL AS ad_copy_banned_words,
+                       NULL AS ad_copy_tone,
+                       NULL AS ad_copy_lint_warnings, NULL AS ad_copy_critique_md,
+                       NULL AS ad_copy_critique_at,
                        updated_at
                   FROM creative_reviews
                  WHERE frameio_file_id IS NOT NULL
@@ -417,22 +438,51 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
           args: [limit],
         });
       } catch (err2) {
-        if (!String((err2 as Error).message ?? '').includes('no such column')) throw err2;
-        // Brand-new env — no ad-copy columns at all.
-        r = await db.execute({
-          sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
-                       frameio_file_id, frameio_view_url,
-                       NULL AS ad_copy_md, NULL AS ad_copy_generated_at, NULL AS ad_copy_objective,
-                       NULL AS ad_copy_status, NULL AS ad_copy_approved_at,
-                       NULL AS ad_copy_approved_by, NULL AS ad_copy_rejection_reason,
-                       NULL AS ad_copy_asana_task_gid,
-                       updated_at
-                  FROM creative_reviews
-                 WHERE frameio_file_id IS NOT NULL
-              ORDER BY updated_at DESC
-                 LIMIT ?`,
-          args: [limit],
-        });
+        if (!isMissingCol(err2)) throw err2;
+        try {
+          // Phase 5 only
+          r = await db.execute({
+            sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
+                         frameio_file_id, frameio_view_url,
+                         ad_copy_md, ad_copy_generated_at, ad_copy_objective,
+                         NULL AS ad_copy_status, NULL AS ad_copy_approved_at,
+                         NULL AS ad_copy_approved_by, NULL AS ad_copy_rejection_reason,
+                         NULL AS ad_copy_asana_task_gid,
+                         NULL AS ad_copy_hero_benefit, NULL AS ad_copy_audience,
+                         NULL AS ad_copy_cta_target, NULL AS ad_copy_banned_words,
+                         NULL AS ad_copy_tone,
+                         NULL AS ad_copy_lint_warnings, NULL AS ad_copy_critique_md,
+                         NULL AS ad_copy_critique_at,
+                         updated_at
+                    FROM creative_reviews
+                   WHERE frameio_file_id IS NOT NULL
+                ORDER BY updated_at DESC
+                   LIMIT ?`,
+            args: [limit],
+          });
+        } catch (err3) {
+          if (!isMissingCol(err3)) throw err3;
+          // Brand-new env — no ad-copy columns at all
+          r = await db.execute({
+            sql: `SELECT id, client_name, asset_name, asset_type, status, feedback,
+                         frameio_file_id, frameio_view_url,
+                         NULL AS ad_copy_md, NULL AS ad_copy_generated_at, NULL AS ad_copy_objective,
+                         NULL AS ad_copy_status, NULL AS ad_copy_approved_at,
+                         NULL AS ad_copy_approved_by, NULL AS ad_copy_rejection_reason,
+                         NULL AS ad_copy_asana_task_gid,
+                         NULL AS ad_copy_hero_benefit, NULL AS ad_copy_audience,
+                         NULL AS ad_copy_cta_target, NULL AS ad_copy_banned_words,
+                         NULL AS ad_copy_tone,
+                         NULL AS ad_copy_lint_warnings, NULL AS ad_copy_critique_md,
+                         NULL AS ad_copy_critique_at,
+                         updated_at
+                    FROM creative_reviews
+                   WHERE frameio_file_id IS NOT NULL
+                ORDER BY updated_at DESC
+                   LIMIT ?`,
+            args: [limit],
+          });
+        }
       }
     }
 
@@ -471,6 +521,14 @@ export async function getReviewsAwaitingAdCopy(limit = 20): Promise<AwaitingAdCo
         adCopyApprovedBy: (x.ad_copy_approved_by as string | null) ?? null,
         adCopyRejectionReason: (x.ad_copy_rejection_reason as string | null) ?? null,
         adCopyAsanaTaskGid: (x.ad_copy_asana_task_gid as string | null) ?? null,
+        adCopyHeroBenefit: (x.ad_copy_hero_benefit as string | null) ?? null,
+        adCopyAudience: (x.ad_copy_audience as string | null) ?? null,
+        adCopyCtaTarget: (x.ad_copy_cta_target as string | null) ?? null,
+        adCopyBannedWords: (x.ad_copy_banned_words as string | null) ?? null,
+        adCopyTone: (x.ad_copy_tone as string | null) ?? null,
+        adCopyLintWarnings: (x.ad_copy_lint_warnings as string | null) ?? null,
+        adCopyCritiqueMd: (x.ad_copy_critique_md as string | null) ?? null,
+        adCopyCritiqueAt: (x.ad_copy_critique_at as string | null) ?? null,
         lessonsAvailable: lessonCounts.get(clientName) ?? 0,
         hasCachedTranscript: frameioFileId ? cachedTranscriptIds.has(frameioFileId) : false,
         updatedAt: String(x.updated_at),
