@@ -1,0 +1,70 @@
+<%
+/*
+  Brief panel — collapsible form for: hero benefit, audience, CTA target,
+  banned words, tone. Used by both 'no copy yet' and 'copy exists'
+  branches of _frame-io-ad-copy-block. Field values pre-fill from the
+  AwaitingAdCopyRow so regenerate preserves them.
+
+  Inputs:
+    it.row           — AwaitingAdCopyRow
+    it.openByDefault — boolean (open the <details> on first render)
+
+  The form lives inside #brief-form-<reviewId>. The Generate / regenerate
+  buttons reference this id via hx-include so their POST body picks up
+  every named input automatically (no js: eval needed).
+
+  Self-contained — no cross-template helpers.
+*/
+const r = it.row;
+const hasAny = !!(r.adCopyHeroBenefit || r.adCopyAudience || r.adCopyCtaTarget || r.adCopyBannedWords || r.adCopyTone);
+const TONES = ['Professional', 'Punchy', 'Warm', 'Bold', 'Conversational'];
+const _esc = (s) => (s || '').toString().replace(/[<>&"]/g, (ch) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[ch]));
+%>
+<details<% if (it.openByDefault && !hasAny) { %> open<% } %> style="margin:8px 0;">
+  <summary style="cursor:pointer;font-size:11px;color:<%= hasAny ? '#22C55E' : '#94A3B8' %>;padding:4px 0;list-style:none;user-select:none;">
+    <% if (hasAny) { %>
+      ✏️ Edit brief · filled — preserved on regenerate
+    <% } else { %>
+      ⊕ Add brief (recommended) — briefs with hero benefit + audience produce noticeably better copy
+    <% } %>
+  </summary>
+  <div id="brief-form-<%= r.reviewId %>" style="background:#0B0B0B;border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:0.75rem 0.875rem;margin-top:6px;display:grid;gap:10px;font-size:12px;">
+    <label style="display:block;">
+      <span style="display:block;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">
+        Hero benefit <span style="text-transform:none;letter-spacing:0;color:#64748b;">— the single most important thing this ad is selling</span>
+      </span>
+      <textarea name="hero_benefit" rows="2" placeholder="E.g. 0% finance available on Invisalign treatment"
+        style="width:100%;padding:6px 8px;background:#000;border:1px solid rgba(255,255,255,0.10);border-radius:4px;color:#E2E8F0;font-size:12px;font-family:inherit;box-sizing:border-box;resize:vertical;"><%= _esc(r.adCopyHeroBenefit) %></textarea>
+    </label>
+    <label style="display:block;">
+      <span style="display:block;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Audience</span>
+      <textarea name="audience" rows="2" placeholder="E.g. parents of teenagers in Surrey considering private orthodontics"
+        style="width:100%;padding:6px 8px;background:#000;border:1px solid rgba(255,255,255,0.10);border-radius:4px;color:#E2E8F0;font-size:12px;font-family:inherit;box-sizing:border-box;resize:vertical;"><%= _esc(r.adCopyAudience) %></textarea>
+    </label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <label style="display:block;">
+        <span style="display:block;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">CTA target</span>
+        <input name="cta_target" type="text" value="<%= _esc(r.adCopyCtaTarget) %>"
+          placeholder="E.g. Book a free consultation"
+          style="width:100%;padding:6px 8px;background:#000;border:1px solid rgba(255,255,255,0.10);border-radius:4px;color:#E2E8F0;font-size:12px;font-family:inherit;box-sizing:border-box;" />
+      </label>
+      <label style="display:block;">
+        <span style="display:block;color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Banned words</span>
+        <input name="banned_words" type="text" value="<%= _esc(r.adCopyBannedWords) %>"
+          placeholder="E.g. cheap, basic, affordable"
+          style="width:100%;padding:6px 8px;background:#000;border:1px solid rgba(255,255,255,0.10);border-radius:4px;color:#E2E8F0;font-size:12px;font-family:inherit;box-sizing:border-box;" />
+      </label>
+    </div>
+    <fieldset style="border:none;padding:0;margin:0;">
+      <legend style="color:#94A3B8;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;padding:0;">Tone</legend>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        <% for (const t of TONES) { %>
+          <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#cbd5e1;cursor:pointer;">
+            <input type="radio" name="tone" value="<%= t %>"<% if (r.adCopyTone === t) { %> checked<% } %> />
+            <%= t %>
+          </label>
+        <% } %>
+      </div>
+    </fieldset>
+  </div>
+</details>

@@ -64,6 +64,8 @@ const _fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 
       </div>
     <% } %>
 
+    <%~ include('/dashboards/_frame-io-brief-panel', { row: r, openByDefault: false }) %>
+
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;">
       <% if (status !== 'approved') { %>
         <button
@@ -87,6 +89,7 @@ const _fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 
       <span style="color:#475569;">·</span>
       <button
         hx-post="/dashboards/frame-io/generate-ad-copy"
+        hx-include="#brief-form-<%= r.reviewId %>"
         hx-vals='{"review_id": <%= r.reviewId %>, "objective": "<%= r.adCopyObjective || 'leads' %>"}'
         hx-target="#adcopy-<%= r.reviewId %>"
         hx-swap="outerHTML"
@@ -118,36 +121,38 @@ const _fmtDate = (d) => !d ? '—' : new Date(d).toLocaleString('en-GB', { day: 
     <div id="reject-form-<%= r.reviewId %>"></div>
   </div>
 <% } else { %>
-  <div id="adcopy-<%= r.reviewId %>" style="display:flex;gap:0.5rem;align-items:center;">
-    <!-- name="objective" is what makes hx-include send this value without needing js:
-         (the CSP doesn't allow unsafe-eval, so HTMX's `js:` hx-vals silently failed) -->
-    <select id="obj-<%= r.reviewId %>" name="objective" style="padding:6px 10px;background:#0B0B0B;border:1px solid rgba(255,255,255,0.10);border-radius:6px;color:#E2E8F0;font-size:12px;">
-      <option value="leads" selected>Leads</option>
-      <option value="awareness">Awareness</option>
-      <option value="traffic">Traffic</option>
-      <option value="sales">Sales</option>
-    </select>
-    <button
-      hx-post="/dashboards/frame-io/generate-ad-copy"
-      hx-include="#obj-<%= r.reviewId %>"
-      hx-vals='{"review_id": <%= r.reviewId %>}'
-      hx-target="#adcopy-<%= r.reviewId %>"
-      hx-swap="outerHTML"
-      hx-headers='{"X-CSRF-Token": "<%= csrf %>"}'
-      hx-indicator="#spin-<%= r.reviewId %>"
-      style="padding:6px 14px;background:#22C55E;color:#0B0B0B;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
-      ✨ Generate Meta ad copy
-    </button>
-    <%
-      // Video assets without a cached transcript will trigger Whisper on
-      // first generation — warn the user that this can take up to a minute.
-      const needsTranscription = r.assetType === 'video' && !r.hasCachedTranscript;
-    %>
-    <span id="spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">
-      <% if (needsTranscription) { %>Generating… (transcribing video, up to 60s)<% } else { %>Generating… (~10s)<% } %>
-    </span>
-    <% if ((r.lessonsAvailable || 0) > 0) { %>
-      <span title="Past rejection reasons for <%= r.clientName %> are fed into every generation." style="font-size:10px;color:#94A3B8;background:rgba(148,163,184,0.10);padding:2px 6px;border-radius:99px;">📚 <%= r.lessonsAvailable %> lesson<%= r.lessonsAvailable === 1 ? '' : 's' %> will be applied</span>
-    <% } %>
+  <div id="adcopy-<%= r.reviewId %>">
+    <%~ include('/dashboards/_frame-io-brief-panel', { row: r, openByDefault: true }) %>
+    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-top:6px;">
+      <!-- name="objective" makes hx-include send this value (CSP blocks 'js:' hx-vals) -->
+      <select id="obj-<%= r.reviewId %>" name="objective" style="padding:6px 10px;background:#0B0B0B;border:1px solid rgba(255,255,255,0.10);border-radius:6px;color:#E2E8F0;font-size:12px;">
+        <option value="leads" selected>Leads</option>
+        <option value="awareness">Awareness</option>
+        <option value="traffic">Traffic</option>
+        <option value="sales">Sales</option>
+      </select>
+      <button
+        hx-post="/dashboards/frame-io/generate-ad-copy"
+        hx-include="#obj-<%= r.reviewId %>, #brief-form-<%= r.reviewId %>"
+        hx-vals='{"review_id": <%= r.reviewId %>}'
+        hx-target="#adcopy-<%= r.reviewId %>"
+        hx-swap="outerHTML"
+        hx-headers='{"X-CSRF-Token": "<%= csrf %>"}'
+        hx-indicator="#spin-<%= r.reviewId %>"
+        style="padding:6px 14px;background:#22C55E;color:#0B0B0B;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">
+        ✨ Generate Meta ad copy
+      </button>
+      <%
+        // Video assets without a cached transcript will trigger Whisper on
+        // first generation — warn the user that this can take up to a minute.
+        const needsTranscription = r.assetType === 'video' && !r.hasCachedTranscript;
+      %>
+      <span id="spin-<%= r.reviewId %>" class="htmx-indicator" style="font-size:11px;color:#94A3B8;">
+        <% if (needsTranscription) { %>Generating… (transcribing video, up to 60s)<% } else { %>Generating… (~10s)<% } %>
+      </span>
+      <% if ((r.lessonsAvailable || 0) > 0) { %>
+        <span title="Past rejection reasons for <%= r.clientName %> are fed into every generation." style="font-size:10px;color:#94A3B8;background:rgba(148,163,184,0.10);padding:2px 6px;border-radius:99px;">📚 <%= r.lessonsAvailable %> lesson<%= r.lessonsAvailable === 1 ? '' : 's' %> will be applied</span>
+      <% } %>
+    </div>
   </div>
 <% } %>
