@@ -8,6 +8,7 @@ import {
   type AdCopyContext,
 } from './ad-copy-context.js';
 import { createAdCopyAsanaTask } from './asana-handoff.js';
+import { lintAdCopyOutput, buildRefinementPrompt, summariseViolations } from './ad-copy-lint.js';
 
 /**
  * Phase 5 — generate Meta ad copy from a Frame.io creative-review row.
@@ -368,6 +369,7 @@ export async function generateAdCopyForReview(input: AdCopyInput): Promise<AdCop
     brief,
   });
 
+  // First attempt
   let markdown: string;
   try {
     const resp = await anthropic().messages.create({
@@ -384,9 +386,41 @@ export async function generateAdCopyForReview(input: AdCopyInput): Promise<AdCop
     return { ok: false, reason: `anthropic_error: ${msg}` };
   }
 
+  // Lint. On violations, one refinement retry. After that, ship with warnings.
+  let lint = lintAdCopyOutput({ markdown, bannedWords: brief.bannedWords });
+  if (!lint.ok) {
+    try {
+      const refinementUser = buildRefinementPrompt(markdown, lint.violations);
+      const resp2 = await anthropic().messages.create({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        system,
+        messages: [
+          { role: 'user', content: user },
+          { role: 'assistant', content: markdown },
+          { role: 'user', content: refinementUser },
+        ],
+      });
+      const block2 = resp2.content.find((b) => b.type === 'text');
+      if (block2 && block2.type === 'text') {
+        const retried = block2.text.trim();
+        const lint2 = lintAdCopyOutput({ markdown: retried, bannedWords: brief.bannedWords });
+        if (lint2.violations.length < lint.violations.length) {
+          markdown = retried;
+          lint = lint2;
+        }
+      }
+    } catch (err) {
+      // Refinement failed (e.g. rate limit). Keep the first attempt + its violations.
+      console.warn(`[frameio.adcopy] refinement attempt failed for review ${input.reviewId}: ${(err as Error).message ?? String(err)}`);
+    }
+  }
+  const lintWarnings = lint.ok ? null : summariseViolations(lint.violations);
+
   // Regenerating resets the approval state — any prior approval / rejection
   // referred to the old copy, not this one. Asana task gid is intentionally
   // NOT cleared; commit 5 uses its presence to skip duplicate task creation.
+  // Also clear stale critique (it referred to the previous markdown).
   const now = new Date().toISOString();
   await db.execute({
     sql: `UPDATE creative_reviews
@@ -399,9 +433,12 @@ export async function generateAdCopyForReview(input: AdCopyInput): Promise<AdCop
                 ad_copy_rejected_at = NULL,
                 ad_copy_rejected_by = NULL,
                 ad_copy_rejection_reason = NULL,
+                ad_copy_lint_warnings = ?,
+                ad_copy_critique_md = NULL,
+                ad_copy_critique_at = NULL,
                 updated_at = ?
           WHERE id = ?`,
-    args: [markdown, now, objective, now, input.reviewId],
+    args: [markdown, now, objective, lintWarnings, now, input.reviewId],
   });
 
   return {

@@ -89,6 +89,26 @@ const _tChip = _transcriptChip(r);
       </div>
     <% } %>
 
+    <% if (r.adCopyLintWarnings) {
+      let _lintParsed = [];
+      try { _lintParsed = JSON.parse(r.adCopyLintWarnings) || []; } catch (e) { _lintParsed = []; }
+    %>
+      <% if (_lintParsed.length > 0) { %>
+        <details style="font-size:11px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.20);padding:0.4rem 0.6rem;border-radius:4px;margin:8px 0;">
+          <summary style="cursor:pointer;color:#fcd34d;font-weight:600;list-style:none;">
+            ⚠ <%= _lintParsed.length %> lint issue<%= _lintParsed.length === 1 ? '' : 's' %> the auto-retry couldn't fix — click for details
+          </summary>
+          <ul style="margin:6px 0 0 0;padding-left:1.25rem;color:#fcd34d;">
+            <% for (const v of _lintParsed) { %>
+              <li style="margin:2px 0;">
+                <% if (v.variant) { %><strong>Variant <%= v.variant %>:</strong> <% } %><%= v.detail %>
+              </li>
+            <% } %>
+          </ul>
+        </details>
+      <% } %>
+    <% } %>
+
     <%~ include('/dashboards/_frame-io-brief-panel', { row: r, openByDefault: false }) %>
 
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;">
