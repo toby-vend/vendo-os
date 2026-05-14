@@ -216,6 +216,7 @@ async function findQaCandidates(clientFilter?: string): Promise<QaCandidate[]> {
     SELECT t.gid, t.name, t.notes, t.section_name, t.project_name, t.assignee_name
     FROM asana_tasks t
     WHERE t.completed = 0
+      AND t.deleted = 0
       AND (
         t.section_name LIKE '%QA%'
         OR t.section_name LIKE '%review%'

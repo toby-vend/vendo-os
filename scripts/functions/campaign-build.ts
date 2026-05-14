@@ -97,6 +97,7 @@ async function findCampaignCandidates(clientFilter?: string): Promise<CampaignCa
       MAX(t.name) as latest_task
     FROM asana_tasks t
     WHERE t.completed = 0
+      AND t.deleted = 0
       AND t.project_gid IS NOT NULL
       AND (
         t.section_name LIKE '%campaign%'
@@ -159,7 +160,7 @@ async function updateExistingBuilds(): Promise<void> {
         COUNT(*) as total,
         SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as done
       FROM asana_tasks
-      WHERE project_gid = ?
+      WHERE project_gid = ? AND deleted = 0
     `, [projectGid]);
 
     if (!taskStats.length || !taskStats[0].values.length) continue;

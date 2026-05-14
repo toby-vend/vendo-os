@@ -71,6 +71,7 @@ async function findCreativeCandidates(clientFilter?: string): Promise<CreativeCa
     SELECT t.gid, t.name, t.project_name, t.section_name, t.assignee_name
     FROM asana_tasks t
     WHERE t.completed = 0
+      AND t.deleted = 0
       AND (
         t.section_name LIKE '%creative%'
         OR t.section_name LIKE '%design%'

@@ -131,6 +131,7 @@ async function processRevenue(
       SELECT COUNT(*) as task_count
       FROM asana_tasks
       WHERE project_name LIKE ?
+        AND deleted = 0
         AND (
           (completed = 1 AND strftime('%Y-%m', completed_at) = ?)
           OR (completed = 0 AND strftime('%Y-%m', modified_at) = ?)

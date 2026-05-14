@@ -660,14 +660,30 @@ export async function initSchema(): Promise<void> {
       permalink_url TEXT,
       created_at TEXT,
       modified_at TEXT,
-      synced_at TEXT NOT NULL
+      synced_at TEXT NOT NULL,
+      deleted INTEGER NOT NULL DEFAULT 0,
+      deleted_at TEXT
     )
   `);
+
+  // Idempotent ALTERs for DBs created before deletion-tracking landed.
+  // SQLite has no `ADD COLUMN IF NOT EXISTS`; swallow the duplicate-column
+  // error and let everything else propagate.
+  for (const sql of [
+    'ALTER TABLE asana_tasks ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0',
+    'ALTER TABLE asana_tasks ADD COLUMN deleted_at TEXT',
+  ]) {
+    try { db.run(sql); } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!/duplicate column/i.test(msg)) throw err;
+    }
+  }
 
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_assignee ON asana_tasks(assignee_name)');
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_due ON asana_tasks(due_on)');
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_completed ON asana_tasks(completed)');
   db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_project ON asana_tasks(project_gid)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_asana_tasks_deleted ON asana_tasks(deleted)');
 
   // --- LinkedIn content table ---
 

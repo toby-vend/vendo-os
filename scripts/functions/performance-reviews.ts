@@ -21,7 +21,7 @@ async function gatherMetrics(personName: string): Promise<Record<string, unknown
       COUNT(CASE WHEN completed = 0 THEN 1 END) as open,
       COUNT(CASE WHEN completed = 0 AND due_on < date('now') THEN 1 END) as overdue
     FROM asana_tasks
-    WHERE assignee_name LIKE ? AND modified_at >= date('now', '-90 days')
+    WHERE assignee_name LIKE ? AND deleted = 0 AND modified_at >= date('now', '-90 days')
   `, [`%${personName}%`]);
 
   const taskMetrics = tasks.length && tasks[0].values.length

@@ -183,7 +183,8 @@ async function syncAsana() {
 
     log('ASANA', `Total unique tasks: ${allTasks.length}`);
 
-    // Upsert tasks
+    // Upsert tasks. On conflict we also reset deleted/deleted_at so
+    // tasks resurrected in Asana (rare) recover automatically.
     const upsert = db.prepare(
       `INSERT INTO asana_tasks (gid, name, assignee_gid, assignee_name, due_on, completed, completed_at, section_name, project_gid, project_name, notes, permalink_url, created_at, modified_at, synced_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -191,7 +192,8 @@ async function syncAsana() {
          name=excluded.name, assignee_gid=excluded.assignee_gid, assignee_name=excluded.assignee_name,
          due_on=excluded.due_on, completed=excluded.completed, completed_at=excluded.completed_at,
          section_name=excluded.section_name, project_gid=excluded.project_gid, project_name=excluded.project_name,
-         notes=excluded.notes, permalink_url=excluded.permalink_url, modified_at=excluded.modified_at, synced_at=excluded.synced_at`
+         notes=excluded.notes, permalink_url=excluded.permalink_url, modified_at=excluded.modified_at, synced_at=excluded.synced_at,
+         deleted=0, deleted_at=NULL`
     );
 
     for (const task of allTasks) {
@@ -221,6 +223,19 @@ async function syncAsana() {
     }
 
     upsert.free();
+
+    // Reconcile deletions. Anything not refreshed this run has been
+    // deleted in Asana (or moved to an unsynced workspace). Local sync
+    // pulls all history (completed_since = epoch), so we sweep across
+    // both open and completed rows.
+    const sweep = db.prepare(
+      `UPDATE asana_tasks
+         SET deleted = 1, deleted_at = ?
+       WHERE deleted = 0 AND synced_at < ?`
+    );
+    sweep.run([now, now]);
+    sweep.free();
+
     saveDb();
     log('ASANA', `Synced ${allTasks.length} tasks successfully`);
 

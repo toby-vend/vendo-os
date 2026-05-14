@@ -102,6 +102,7 @@ async function getDeliveryKpis(): Promise<KpiSection> {
       COUNT(CASE WHEN completed = 0 THEN 1 END) as open_tasks,
       COUNT(CASE WHEN completed = 0 AND due_on < date('now') THEN 1 END) as overdue_tasks
     FROM asana_tasks
+    WHERE deleted = 0
   `);
   if (taskResult.length && taskResult[0].values.length) {
     const [completed, open, overdue] = taskResult[0].values[0] as [number, number, number];
@@ -225,7 +226,7 @@ async function getTeamKpis(): Promise<KpiSection> {
       COUNT(CASE WHEN completed = 1 AND strftime('%Y-%m', completed_at) = strftime('%Y-%m', 'now') THEN 1 END) as completed,
       COUNT(CASE WHEN completed = 0 THEN 1 END) as open
     FROM asana_tasks
-    WHERE assignee_name IS NOT NULL
+    WHERE assignee_name IS NOT NULL AND deleted = 0
     GROUP BY assignee_name
     ORDER BY completed DESC
   `);
