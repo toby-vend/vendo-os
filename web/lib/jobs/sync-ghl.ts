@@ -176,13 +176,29 @@ export async function syncGhl(): Promise<GhlSyncResult> {
     throw new Error('No GHL locations with API keys found in ghl_locations table');
   }
 
-  const locations = result.rows.map(row => {
+  // Decrypt per-location and skip any key that fails — a single un-decryptable
+  // key (e.g. after the encryption secret rotates) must NOT crash the whole
+  // sync. Previously decryption ran eagerly inside .map(), so one bad key threw
+  // out of here and froze EVERY location's data (this is exactly what happened
+  // when the Vendo Digital key rotated — all GHL data went stale platform-wide).
+  const locations: { id: string; name: string; apiKey: string }[] = [];
+  let skipped = 0;
+  for (const row of result.rows) {
     const rawKey = row.api_key as string;
-    const apiKey = rawKey.startsWith('v1:') ? decryptToken(rawKey) : rawKey;
-    return { id: row.id as string, name: row.name as string, apiKey };
-  });
+    try {
+      const apiKey = rawKey.startsWith('v1:') ? decryptToken(rawKey) : rawKey;
+      locations.push({ id: row.id as string, name: row.name as string, apiKey });
+    } catch (err) {
+      skipped++;
+      consoleLog(LOG, `[${row.name as string}] skipped — key failed to decrypt: ${err instanceof Error ? err.message : err}`);
+    }
+  }
 
-  consoleLog(LOG, `Syncing ${locations.length} locations`);
+  if (locations.length === 0) {
+    throw new Error('No GHL locations with a usable API key (all keys failed to decrypt)');
+  }
+
+  consoleLog(LOG, `Syncing ${locations.length} locations${skipped ? ` (${skipped} skipped — bad keys)` : ''}`);
 
   const now = new Date().toISOString();
   let grandPipelines = 0;
