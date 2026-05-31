@@ -21,6 +21,11 @@
  */
 import { rows, scalar } from '../queries/base.js';
 import { getClientGadsCustomerIds } from '../queries/reports.js';
+import {
+  campaignIdFilter,
+  fetchLatestCampaignMeta,
+  isActiveStatus,
+} from './gads-active-campaigns.js';
 
 export interface GoogleAdsCampaignRow {
   campaign_id: string;
@@ -53,7 +58,6 @@ export interface GoogleAdsPeriodSummary {
 interface SpendRow {
   account_id: string;
   campaign_id: string;
-  campaign_name: string | null;
   spend: number;
   conversions: number;
   conversion_value: number;
@@ -92,22 +96,30 @@ export async function buildGoogleAdsPeriodSummary(
     };
   }
 
-  // 4. Aggregate per-campaign across the period and across all mapped
-  //    accounts (a client may have multiple linked Google Ads customers).
+  // 4. Resolve the active campaign set (paused/removed campaigns are excluded
+  //    so the AI's canonical numbers match the dashboard and the client's
+  //    Google Ads backend after a restructure). See gads-active-campaigns.ts.
+  const latestMeta = await fetchLatestCampaignMeta(customerIds, periodStart, periodEnd);
+  const nameById = new Map(latestMeta.map(m => [m.campaign_id, m.campaign_name]));
+  const activeIds = latestMeta.filter(m => isActiveStatus(m.campaign_status)).map(m => m.campaign_id);
+  const active = campaignIdFilter(activeIds);
+
+  // Aggregate per-campaign across the period and across all mapped accounts (a
+  // client may have multiple linked Google Ads customers). GROUP BY campaign_id
+  // only — grouping by name too would split a renamed campaign into two rows.
   const placeholders = customerIds.map(() => '?').join(', ');
   const spendRows = await rows<SpendRow>(
     `SELECT account_id,
             campaign_id,
-            campaign_name,
             SUM(spend)             AS spend,
             SUM(conversions)       AS conversions,
             SUM(conversion_value)  AS conversion_value
        FROM gads_campaign_spend
       WHERE account_id IN (${placeholders})
-        AND date BETWEEN ? AND ?
-      GROUP BY account_id, campaign_id, campaign_name
+        AND date BETWEEN ? AND ?${active.clause}
+      GROUP BY account_id, campaign_id
       ORDER BY SUM(spend) DESC`,
-    [...customerIds, periodStart, periodEnd],
+    [...customerIds, periodStart, periodEnd, ...active.params],
   );
 
   // 5. Map → typed rows. Filter out £0-spend campaigns (inactive in period).
@@ -121,7 +133,7 @@ export async function buildGoogleAdsPeriodSummary(
     const roas = conversionValue > 0 ? conversionValue / spend : null;
     campaigns.push({
       campaign_id: r.campaign_id,
-      campaign_name: r.campaign_name ?? '(unnamed campaign)',
+      campaign_name: nameById.get(r.campaign_id) ?? '(unnamed campaign)',
       spend,
       conversions,
       conversion_value: conversionValue,

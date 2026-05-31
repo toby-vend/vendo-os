@@ -26,6 +26,11 @@
  */
 import { rows } from '../../queries/base.js';
 import { getClientGadsCustomerIds } from '../../queries/reports.js';
+import {
+  campaignIdFilter,
+  fetchLatestCampaignMeta,
+  isActiveStatus,
+} from '../gads-active-campaigns.js';
 import { classifyBookingSource, countBookingsForClient, listBookingOpportunities } from '../booking-rule.js';
 import type {
   DateRange,
@@ -60,6 +65,16 @@ export async function buildGoogle(clientId: number, range: DateRange): Promise<B
     };
   }
 
+  // Resolve the active campaign set for the current period FIRST. A report
+  // mirrors the live Google Ads account: paused/removed (wound-down) campaigns
+  // are excluded from every rollup, so the toplines match the client's backend
+  // rather than double-counting legacy campaigns left over from a restructure.
+  // The same active set is reused for the previous period so % deltas compare
+  // like-for-like (latest name/status also drives the campaign table display).
+  const latestMeta = await fetchLatestCampaignMeta(customerIds, range.current.start, range.current.end);
+  const metaById = new Map(latestMeta.map(m => [m.campaign_id, m]));
+  const activeIds = latestMeta.filter(m => isActiveStatus(m.campaign_status)).map(m => m.campaign_id);
+
   // Fan out reads in parallel.
   const [
     currentDaily,
@@ -72,11 +87,11 @@ export async function buildGoogle(clientId: number, range: DateRange): Promise<B
     bookingCount,
     bookingOpps,
   ] = await Promise.all([
-    fetchDailyTotals(customerIds, range.current.start, range.current.end),
-    fetchDailyTotals(customerIds, range.previous.start, range.previous.end),
-    fetchCampaignAggregate(customerIds, range.current.start, range.current.end),
-    fetchKeywordAggregate(customerIds, range.current.start, range.current.end),
-    fetchDeviceAggregate(customerIds, range.current.start, range.current.end),
+    fetchDailyTotals(customerIds, range.current.start, range.current.end, activeIds),
+    fetchDailyTotals(customerIds, range.previous.start, range.previous.end, activeIds),
+    fetchCampaignAggregate(customerIds, range.current.start, range.current.end, activeIds),
+    fetchKeywordAggregate(customerIds, range.current.start, range.current.end, activeIds),
+    fetchDeviceAggregate(customerIds, range.current.start, range.current.end, activeIds),
     fetchGoogleLeads(clientId, range.current.start, range.current.end),
     fetchGoogleLeads(clientId, range.previous.start, range.previous.end),
     countBookingsForClient(clientId, range),
@@ -190,13 +205,25 @@ export async function buildGoogle(clientId: number, range: DateRange): Promise<B
   ];
 
   // ── Campaigns table ───────────────────────────────────────────────────
-  const campaignLeadCounts = attributeLeadsToCampaigns(leadsCurrent, campaignAgg);
+  // Enrich each campaign's period sums with its latest-known name + status
+  // (correct display name after a rename, end-of-period status) from the
+  // active-set metadata, rather than a lexicographic MAX().
+  const campaignRows: CampaignAggRow[] = campaignAgg.map((c): CampaignAggRow => {
+    const meta = metaById.get(c.campaign_id);
+    return {
+      ...c,
+      campaign_name: meta?.campaign_name ?? null,
+      campaign_status: meta?.campaign_status ?? null,
+    };
+  });
+
+  const campaignLeadCounts = attributeLeadsToCampaigns(leadsCurrent, campaignRows);
   const campaignRevenueByName = attributeRevenueToCampaigns(
     bookingOpps.filter(o => classifyBookingSource(o.source) === 'google'),
-    campaignAgg,
+    campaignRows,
   );
 
-  const campaigns: GoogleCampaign[] = campaignAgg
+  const campaigns: GoogleCampaign[] = campaignRows
     .slice(0, MAX_CAMPAIGNS)
     .map((c): GoogleCampaign => {
       const leads = campaignLeadCounts.get(c.campaign_id) ?? 0;
@@ -264,8 +291,10 @@ async function fetchDailyTotals(
   customerIds: string[],
   start: string,
   end: string,
+  activeIds: string[],
 ): Promise<DailyRow[]> {
   const placeholders = customerIds.map(() => '?').join(',');
+  const active = campaignIdFilter(activeIds);
   return rows<DailyRow>(
     `SELECT date,
             SUM(spend)            AS spend,
@@ -275,10 +304,10 @@ async function fetchDailyTotals(
             SUM(conversion_value) AS conversion_value
        FROM gads_campaign_spend
       WHERE account_id IN (${placeholders})
-        AND date BETWEEN ? AND ?
+        AND date BETWEEN ? AND ?${active.clause}
       GROUP BY date
       ORDER BY date ASC`,
-    [...customerIds, start, end],
+    [...customerIds, start, end, ...active.params],
   );
 }
 
@@ -329,11 +358,9 @@ function sparklineSeries(daily: DailyRow[], start: string, end: string): {
 
 // ── Campaign rollup ───────────────────────────────────────────────────────
 
-interface CampaignAggRow {
+interface CampaignSumRow {
   account_id: string;
   campaign_id: string;
-  campaign_name: string | null;
-  campaign_status: string | null;
   spend: number;
   impressions: number;
   clicks: number;
@@ -341,21 +368,27 @@ interface CampaignAggRow {
   conversion_value: number;
 }
 
+/** Sums + the latest-known name/status (merged in `buildGoogle`). */
+interface CampaignAggRow extends CampaignSumRow {
+  campaign_name: string | null;
+  campaign_status: string | null;
+}
+
 async function fetchCampaignAggregate(
   customerIds: string[],
   start: string,
   end: string,
-): Promise<CampaignAggRow[]> {
+  activeIds: string[],
+): Promise<CampaignSumRow[]> {
   const placeholders = customerIds.map(() => '?').join(',');
-  // For status, pick the most recent value in the window (MAX by date).
-  // Single GROUP BY column for the unique campaign; status & name use MAX
-  // (statuses are short strings — MAX is safe and avoids the GROUP BY
-  // gymnastics of correlated subqueries).
-  return rows<CampaignAggRow>(
+  const active = campaignIdFilter(activeIds);
+  // Period sums per campaign. Name + status are NOT taken here (a lexicographic
+  // MAX mis-picks after a rename/re-enable); the caller merges the latest-by-
+  // date values from fetchLatestCampaignMeta. The active filter drops paused/
+  // removed campaigns so the table mirrors the live account.
+  return rows<CampaignSumRow>(
     `SELECT account_id,
             campaign_id,
-            MAX(campaign_name)    AS campaign_name,
-            MAX(campaign_status)  AS campaign_status,
             SUM(spend)            AS spend,
             SUM(impressions)      AS impressions,
             SUM(clicks)           AS clicks,
@@ -363,11 +396,11 @@ async function fetchCampaignAggregate(
             SUM(conversion_value) AS conversion_value
        FROM gads_campaign_spend
       WHERE account_id IN (${placeholders})
-        AND date BETWEEN ? AND ?
+        AND date BETWEEN ? AND ?${active.clause}
       GROUP BY account_id, campaign_id
       HAVING SUM(spend) > 0
       ORDER BY SUM(spend) DESC`,
-    [...customerIds, start, end],
+    [...customerIds, start, end, ...active.params],
   );
 }
 
@@ -386,8 +419,10 @@ async function fetchKeywordAggregate(
   customerIds: string[],
   start: string,
   end: string,
+  activeIds: string[],
 ): Promise<KeywordAggRow[]> {
   const placeholders = customerIds.map(() => '?').join(',');
+  const active = campaignIdFilter(activeIds);
   return rows<KeywordAggRow>(
     `SELECT keyword_text,
             MAX(campaign_name) AS campaign_name,
@@ -397,12 +432,12 @@ async function fetchKeywordAggregate(
             SUM(conversions)   AS conversions
        FROM gads_keyword_stats
       WHERE account_id IN (${placeholders})
-        AND date BETWEEN ? AND ?
+        AND date BETWEEN ? AND ?${active.clause}
       GROUP BY keyword_text
       HAVING SUM(clicks) > 0
       ORDER BY SUM(clicks) DESC
       LIMIT 50`,
-    [...customerIds, start, end],
+    [...customerIds, start, end, ...active.params],
   );
 }
 
@@ -419,8 +454,10 @@ async function fetchDeviceAggregate(
   customerIds: string[],
   start: string,
   end: string,
+  activeIds: string[],
 ): Promise<DeviceAggRow[]> {
   const placeholders = customerIds.map(() => '?').join(',');
+  const active = campaignIdFilter(activeIds);
   // The gads_device_split table may not exist on clients whose machine
   // hasn't run the new migration yet. Catch + return [] so the aggregator
   // degrades gracefully (the orchestrator then sets deviceSplitMissing).
@@ -432,10 +469,10 @@ async function fetchDeviceAggregate(
               SUM(impressions) AS impressions
          FROM gads_device_split
         WHERE account_id IN (${placeholders})
-          AND date BETWEEN ? AND ?
+          AND date BETWEEN ? AND ?${active.clause}
         GROUP BY device
         ORDER BY SUM(spend) DESC`,
-      [...customerIds, start, end],
+      [...customerIds, start, end, ...active.params],
     );
   } catch {
     return [];
