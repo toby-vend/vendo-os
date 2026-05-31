@@ -25,7 +25,7 @@ for (const id of ids) {
     console.log(`TOPLINE  spend=£${Number(spend ?? 0).toFixed(2)}  clicks=${clicks}  leads=${leads}  bookings=${tile('bookings')}  cpb=£${Number(tile('cpb')??0).toFixed(2)}  revenue=£${Number(tile('revenue')??0).toFixed(2)}  roas=${Number(tile('roas')??0).toFixed(2)}`);
     console.log('CAMPAIGNS:');
     for (const c of g.campaigns) {
-      console.log(`  - ${c.name} [${c.status}]  £${Number(c.spend).toFixed(2)}  ${c.clicks} clicks  ${c.leads} leads  CPL £${Number(c.cpl).toFixed(2)}`);
+      console.log(`  - ${c.name} [${c.status}]  £${Number(c.spend).toFixed(2)}  ${c.clicks} clicks  ${c.leads} leads  CPL £${Number(c.cpl).toFixed(2)}  rev £${Number(c.revenue??0).toFixed(2)}`);
     }
   } catch (err) {
     console.error(`report ${id} FAILED:`, err instanceof Error ? err.message : err);
