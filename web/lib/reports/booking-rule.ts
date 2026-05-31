@@ -88,6 +88,93 @@ export async function findBookingPipelineIds(clientId: number): Promise<string[]
   return found.filter(r => pattern.test(r.name)).map(r => r.id);
 }
 
+/**
+ * Terminal-negative stage names. In GHL these are positioned AFTER the
+ * "Booked Appointment" stage, so a naive position threshold would wrongly
+ * count them as booked. Exclude them explicitly.
+ */
+const NEGATIVE_STAGE_PATTERN =
+  /lost|no\s*response|wrong\s*number|closed|cancel|unqualified|not\s*interested|junk|spam|dnq|duplicate/i;
+
+export interface BookingScope {
+  /** Pipelines whose NAME matches the booking pattern — every opp counts. */
+  pipelineIds: string[];
+  /** "Booked-or-beyond" stage IDs within treatment pipelines (excludes the
+   *  negative terminal stages that sit after Booked in GHL). */
+  stageIds: string[];
+}
+
+/**
+ * Resolve what counts as a booking for this client. Two shapes are supported:
+ *
+ *  1. A dedicated pipeline named "Booked Appointment" (legacy) — every opp in
+ *     it is booked (via `pipelineIds`).
+ *  2. A "Booked Appointment" STAGE inside treatment pipelines (Zen House &
+ *     most dental clients) — an opp is booked once its stage is at or beyond
+ *     that stage, EXCLUDING the negative terminal stages (Lost / No Response /
+ *     Wrong Number …) which GHL positions after it (via `stageIds`).
+ *
+ * Empty pipelineIds AND empty stageIds ⇒ client has no booking signal.
+ */
+export async function resolveBookingScope(clientId: number): Promise<BookingScope> {
+  const pattern = await getBookingPipelinePattern(clientId);
+  const pipelineIds = await findBookingPipelineIds(clientId);
+  const namedSet = new Set(pipelineIds);
+
+  const stageRows = await rows<{
+    pipeline_id: string;
+    stage_id: string;
+    stage_name: string;
+    position: number;
+  }>(
+    `SELECT s.pipeline_id AS pipeline_id, s.id AS stage_id,
+            s.name AS stage_name, s.position AS position
+       FROM ghl_stages s
+       JOIN ghl_pipelines p ON p.id = s.pipeline_id
+      WHERE p.location_id IN (
+              SELECT external_id FROM client_source_mappings
+               WHERE client_id = ? AND source = 'ghl'
+            )`,
+    [clientId],
+  );
+
+  const byPipeline = new Map<string, typeof stageRows>();
+  for (const r of stageRows) {
+    const arr = byPipeline.get(r.pipeline_id) ?? [];
+    arr.push(r);
+    byPipeline.set(r.pipeline_id, arr);
+  }
+
+  const stageIds: string[] = [];
+  for (const [pid, stages] of byPipeline) {
+    if (namedSet.has(pid)) continue; // whole pipeline already counts
+    const bookingStage = stages.find(s => pattern.test(s.stage_name));
+    if (!bookingStage) continue;
+    for (const s of stages) {
+      if (s.position >= bookingStage.position && !NEGATIVE_STAGE_PATTERN.test(s.stage_name)) {
+        stageIds.push(s.stage_id);
+      }
+    }
+  }
+  return { pipelineIds, stageIds };
+}
+
+/** Build the `(pipeline_id IN (...) OR stage_id IN (...))` predicate + params. */
+export function bookingPredicate(scope: BookingScope): { clause: string; params: string[] } {
+  const parts: string[] = [];
+  const params: string[] = [];
+  if (scope.pipelineIds.length) {
+    parts.push(`pipeline_id IN (${scope.pipelineIds.map(() => '?').join(',')})`);
+    params.push(...scope.pipelineIds);
+  }
+  if (scope.stageIds.length) {
+    parts.push(`stage_id IN (${scope.stageIds.map(() => '?').join(',')})`);
+    params.push(...scope.stageIds);
+  }
+  if (parts.length === 0) return { clause: '1=0', params: [] };
+  return { clause: `(${parts.join(' OR ')})`, params };
+}
+
 export interface BookingOpportunity {
   id: string;
   contact_name: string | null;
@@ -97,6 +184,9 @@ export interface BookingOpportunity {
   updated_at: string | null;
   last_stage_change_at: string | null;
   location_id: string | null;
+  /** GHL pipeline name (= treatment) — lets aggregators attribute booking
+   *  revenue to a campaign via the pipeline→treatment join. */
+  pipeline_name: string | null;
 }
 
 /**
@@ -112,21 +202,23 @@ export async function listBookingOpportunities(
   clientId: number,
   range: DateRange,
 ): Promise<BookingOpportunity[]> {
-  const pipelineIds = await findBookingPipelineIds(clientId);
-  if (pipelineIds.length === 0) return [];
+  const scope = await resolveBookingScope(clientId);
+  const predicate = bookingPredicate(scope);
+  if (predicate.clause === '1=0') return [];
 
-  const placeholders = pipelineIds.map(() => '?').join(',');
   const startTs = range.current.start;
   const endTs = range.current.end + 'T23:59:59';
 
   return rows<BookingOpportunity>(
-    `SELECT id, contact_name, source, monetary_value,
-            created_at, updated_at, last_stage_change_at, location_id
-       FROM ghl_opportunities
-      WHERE pipeline_id IN (${placeholders})
-        AND COALESCE(last_stage_change_at, updated_at) >= ?
-        AND COALESCE(last_stage_change_at, updated_at) <= ?`,
-    [...pipelineIds, startTs, endTs],
+    `SELECT o.id, o.contact_name, o.source, o.monetary_value,
+            o.created_at, o.updated_at, o.last_stage_change_at, o.location_id,
+            p.name AS pipeline_name
+       FROM ghl_opportunities o
+       LEFT JOIN ghl_pipelines p ON p.id = o.pipeline_id
+      WHERE ${predicate.clause}
+        AND COALESCE(o.last_stage_change_at, o.updated_at) >= ?
+        AND COALESCE(o.last_stage_change_at, o.updated_at) <= ?`,
+    [...predicate.params, startTs, endTs],
   );
 }
 
@@ -147,12 +239,12 @@ export async function countBookingsForClient(
   clientId: number,
   range: DateRange,
 ): Promise<BookingCount> {
-  const pipelineIds = await findBookingPipelineIds(clientId);
-  if (pipelineIds.length === 0) {
+  const scope = await resolveBookingScope(clientId);
+  const predicate = bookingPredicate(scope);
+  if (predicate.clause === '1=0') {
     return { total: 0, totalPrev: 0, missingPipeline: true };
   }
 
-  const placeholders = pipelineIds.map(() => '?').join(',');
   const startCurrent = range.current.start;
   const endCurrent = range.current.end + 'T23:59:59';
   const startPrev = range.previous.start;
@@ -162,18 +254,18 @@ export async function countBookingsForClient(
     rows<{ n: number }>(
       `SELECT COUNT(*) AS n
          FROM ghl_opportunities
-        WHERE pipeline_id IN (${placeholders})
+        WHERE ${predicate.clause}
           AND COALESCE(last_stage_change_at, updated_at) >= ?
           AND COALESCE(last_stage_change_at, updated_at) <= ?`,
-      [...pipelineIds, startCurrent, endCurrent],
+      [...predicate.params, startCurrent, endCurrent],
     ),
     rows<{ n: number }>(
       `SELECT COUNT(*) AS n
          FROM ghl_opportunities
-        WHERE pipeline_id IN (${placeholders})
+        WHERE ${predicate.clause}
           AND COALESCE(last_stage_change_at, updated_at) >= ?
           AND COALESCE(last_stage_change_at, updated_at) <= ?`,
-      [...pipelineIds, startPrev, endPrev],
+      [...predicate.params, startPrev, endPrev],
     ),
   ]);
 

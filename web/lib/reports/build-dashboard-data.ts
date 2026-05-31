@@ -27,7 +27,7 @@ import { buildGoogle } from './aggregators/google.js';
 import { buildSeo } from './aggregators/seo.js';
 import { buildAiSummary } from './aggregators/ai-summary.js';
 import { buildTreatments } from './aggregators/treatment.js';
-import { findBookingPipelineIds } from './booking-rule.js';
+import { resolveBookingScope } from './booking-rule.js';
 import type {
   DashboardMode,
   DashboardPayload,
@@ -66,19 +66,22 @@ export async function buildDashboardData(
   // because they feed into multiple blocks / flags. The booking-pipeline
   // existence check runs alongside so we can flag clients whose GHL
   // workspace doesn't have a 'Booked Appointment' pipeline.
-  const [overview, meta, googleResult, seo, aiSummary, treatments, bookingPipelineIds] = await Promise.all([
+  const [overview, meta, googleResult, seo, aiSummary, treatments, bookingScope] = await Promise.all([
     buildOverview(report.client_id, range),
     buildMeta(report.client_id, range),
     buildGoogle(report.client_id, range),
     buildSeo(report.client_id, range),
     buildAiSummary(reportId),
     buildTreatments(report.client_id, range),
-    findBookingPipelineIds(report.client_id),
+    resolveBookingScope(report.client_id),
   ]);
 
   const google = googleResult.block;
   const deviceSplitMissing = googleResult.deviceSplitMissing;
-  const bookingPipelineMissing = bookingPipelineIds.length === 0;
+  // "Missing" only when the client has neither a booking pipeline nor a
+  // booking stage — Zen House-style stage funnels now resolve correctly.
+  const bookingPipelineMissing =
+    bookingScope.pipelineIds.length === 0 && bookingScope.stageIds.length === 0;
 
   // Treatment rows live inside the overview block. Aggregators may also
   // surface flags (default avg value, missing mapping, missing booking

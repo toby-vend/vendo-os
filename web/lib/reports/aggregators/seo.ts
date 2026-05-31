@@ -31,7 +31,8 @@
 import { rows } from '../../queries/base.js';
 import {
   classifyBookingSource,
-  findBookingPipelineIds,
+  resolveBookingScope,
+  bookingPredicate,
 } from '../booking-rule.js';
 import type {
   DateRange,
@@ -152,20 +153,20 @@ async function getOrganicLeadsAndRevenue(
   startIso: string,
   endIso: string,
 ): Promise<{ leads: number; revenue: number }> {
-  const pipelineIds = await findBookingPipelineIds(clientId);
-  if (pipelineIds.length === 0) return { leads: 0, revenue: 0 };
+  const scope = await resolveBookingScope(clientId);
+  const predicate = bookingPredicate(scope);
+  if (predicate.clause === '1=0') return { leads: 0, revenue: 0 };
 
-  const placeholders = pipelineIds.map(() => '?').join(',');
   const startTs = startIso;
   const endTs = endIso + 'T23:59:59';
 
   const opps = await rows<{ source: string | null; monetary_value: number | null }>(
     `SELECT source, monetary_value
        FROM ghl_opportunities
-      WHERE pipeline_id IN (${placeholders})
+      WHERE ${predicate.clause}
         AND COALESCE(last_stage_change_at, updated_at) >= ?
         AND COALESCE(last_stage_change_at, updated_at) <= ?`,
-    [...pipelineIds, startTs, endTs],
+    [...predicate.params, startTs, endTs],
   );
 
   let leads = 0;
