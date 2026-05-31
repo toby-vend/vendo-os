@@ -32,6 +32,7 @@ import {
   isActiveStatus,
 } from '../gads-active-campaigns.js';
 import { classifyBookingSource, countBookingsForClient, listBookingOpportunities } from '../booking-rule.js';
+import { classifyByDefaults } from '../treatment-defaults.js';
 import type {
   DateRange,
   GoogleBlock,
@@ -486,6 +487,10 @@ interface GhlOppLite {
   source: string | null;
   monetary_value: number;
   created_at: string | null;
+  /** GHL pipeline name (each pipeline is a treatment) — the real attribution
+   *  signal. Optional so booking-rule opportunities (which don't carry it)
+   *  remain assignable; those fall back to `source`. */
+  pipeline_name?: string | null;
 }
 
 /**
@@ -501,15 +506,16 @@ async function fetchGoogleLeads(
   end: string,
 ): Promise<GhlOppLite[]> {
   const all = await rows<GhlOppLite>(
-    `SELECT id, source, monetary_value, created_at
-       FROM ghl_opportunities
-      WHERE location_id IN (
+    `SELECT o.id, o.source, o.monetary_value, o.created_at, p.name AS pipeline_name
+       FROM ghl_opportunities o
+       LEFT JOIN ghl_pipelines p ON p.id = o.pipeline_id
+      WHERE o.location_id IN (
               SELECT external_id FROM client_source_mappings
                WHERE client_id = ? AND source = 'ghl'
             )
-        AND created_at IS NOT NULL
-        AND created_at >= ?
-        AND created_at <= ?`,
+        AND o.created_at IS NOT NULL
+        AND o.created_at >= ?
+        AND o.created_at <= ?`,
     [clientId, start, end + 'T23:59:59'],
   );
   return all.filter(o => classifyBookingSource(o.source) === 'google');
@@ -521,22 +527,50 @@ async function fetchGoogleLeads(
  * silently (they still count in the topline tile — they just don't show
  * up against a specific campaign).
  */
+/**
+ * Map each treatment to its highest-spend campaign for this client. GHL leads
+ * carry no campaign reference — only a pipeline, and each pipeline IS a
+ * treatment (e.g. "General Dentistry Appointments"). Campaigns classify to the
+ * same treatment labels via the built-in keyword library, so treatment is the
+ * join key. When several campaigns share a treatment the top spender wins.
+ */
+function buildTreatmentToCampaign(campaigns: CampaignAggRow[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const c of [...campaigns].sort((a, b) => b.spend - a.spend)) {
+    const treatment = classifyByDefaults(c.campaign_name ?? '');
+    if (treatment && !map.has(treatment)) map.set(treatment, c.campaign_id);
+  }
+  return map;
+}
+
+/**
+ * Treatment for a GHL opportunity: prefer its pipeline name (the real signal),
+ * fall back to the free-text `source` for opps without a classifiable pipeline.
+ */
+function oppTreatment(opp: GhlOppLite): string | null {
+  return (
+    classifyByDefaults(opp.pipeline_name ?? '') ??
+    (opp.source ? classifyByDefaults(opp.source) : null)
+  );
+}
+
+/**
+ * Attribute leads to campaigns via pipeline → treatment → campaign. Opps whose
+ * treatment maps to no active campaign (e.g. a PMax-only treatment) stay
+ * unattributed — they still count in the topline Leads tile.
+ */
 function attributeLeadsToCampaigns(
   opps: GhlOppLite[],
   campaigns: CampaignAggRow[],
 ): Map<string, number> {
+  const treatmentToCampaign = buildTreatmentToCampaign(campaigns);
   const counts = new Map<string, number>();
   for (const opp of opps) {
-    const src = (opp.source ?? '').toLowerCase();
-    if (!src) continue;
-    const match = campaigns.find(c => {
-      const id = c.campaign_id;
-      const name = (c.campaign_name ?? '').toLowerCase();
-      return (id && src.includes(id)) || (name && name.length > 3 && src.includes(name));
-    });
-    if (match) {
-      counts.set(match.campaign_id, (counts.get(match.campaign_id) ?? 0) + 1);
-    }
+    const treatment = oppTreatment(opp);
+    if (!treatment) continue;
+    const campaignId = treatmentToCampaign.get(treatment);
+    if (!campaignId) continue;
+    counts.set(campaignId, (counts.get(campaignId) ?? 0) + 1);
   }
   return counts;
 }
@@ -546,18 +580,14 @@ function attributeRevenueToCampaigns(
   opps: GhlOppLite[],
   campaigns: CampaignAggRow[],
 ): Map<string, number> {
+  const treatmentToCampaign = buildTreatmentToCampaign(campaigns);
   const revenue = new Map<string, number>();
   for (const opp of opps) {
-    const src = (opp.source ?? '').toLowerCase();
-    if (!src) continue;
-    const match = campaigns.find(c => {
-      const id = c.campaign_id;
-      const name = (c.campaign_name ?? '').toLowerCase();
-      return (id && src.includes(id)) || (name && name.length > 3 && src.includes(name));
-    });
-    if (match) {
-      revenue.set(match.campaign_id, (revenue.get(match.campaign_id) ?? 0) + Number(opp.monetary_value ?? 0));
-    }
+    const treatment = oppTreatment(opp);
+    if (!treatment) continue;
+    const campaignId = treatmentToCampaign.get(treatment);
+    if (!campaignId) continue;
+    revenue.set(campaignId, (revenue.get(campaignId) ?? 0) + Number(opp.monetary_value ?? 0));
   }
   return revenue;
 }

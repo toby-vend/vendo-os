@@ -19,11 +19,12 @@ for (const id of ids) {
     const g = p.google;
     const spend = g.topline.find(t => t.key === 'spend')?.value;
     const clicks = g.topline.find(t => t.key === 'clicks')?.value;
+    const leads = g.topline.find(t => t.key === 'leads')?.value;
     console.log(`\n=== report ${id} — ${p.client?.name ?? '?'} (${p.range?.current?.start}..${p.range?.current?.end}) ===`);
-    console.log(`TOPLINE  spend=£${Number(spend ?? 0).toFixed(2)}  clicks=${clicks}`);
+    console.log(`TOPLINE  spend=£${Number(spend ?? 0).toFixed(2)}  clicks=${clicks}  leads=${leads}`);
     console.log('CAMPAIGNS:');
     for (const c of g.campaigns) {
-      console.log(`  - ${c.name} [${c.status}]  £${Number(c.spend).toFixed(2)}  ${c.clicks} clicks`);
+      console.log(`  - ${c.name} [${c.status}]  £${Number(c.spend).toFixed(2)}  ${c.clicks} clicks  ${c.leads} leads  CPL £${Number(c.cpl).toFixed(2)}`);
     }
   } catch (err) {
     console.error(`report ${id} FAILED:`, err instanceof Error ? err.message : err);
