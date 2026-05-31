@@ -36,7 +36,7 @@ export interface GoogleAdsSyncResult {
   durationMs: number;
 }
 
-interface GadsRow {
+export interface GadsRow {
   segments?: { date: string };
   customer?: { id: string | number; descriptiveName?: string };
   campaign?: { id: string | number; name?: string; status?: string };
@@ -61,7 +61,7 @@ interface GadsRow {
 
 // --- Auth ---
 
-async function mintAccessToken(): Promise<string> {
+export async function mintAccessToken(): Promise<string> {
   // .trim() defends against trailing whitespace/newlines in env values
   // (Vercel + .env files both occasionally preserve a stray "\n" which
   // Google's OAuth endpoint rejects as "invalid_client").
@@ -89,7 +89,7 @@ async function mintAccessToken(): Promise<string> {
   return data.access_token;
 }
 
-async function gadsQuery(accessToken: string, customerId: string, query: string): Promise<GadsRow[]> {
+export async function gadsQuery(accessToken: string, customerId: string, query: string): Promise<GadsRow[]> {
   const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
   const loginCustomerId = process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID?.replace(/-/g, '');
   if (!developerToken || !loginCustomerId) {

@@ -32,6 +32,7 @@ import { consoleLog } from '../monitors/base.js';
 import { generateReportInsights } from '../report-ai.js';
 // AGENT-COORD: stubs for A2 + A3 — replaced at merge time.
 import { buildGoogleAdsPeriodSummary } from '../reports/gads-summary.js';
+import { reconcileClientGads } from '../reports/gads-reconcile.js';
 import { buildNarrativeContext, saveNarrativeDraft } from '../reports/narrative-context.js';
 
 const LOG_SOURCE = 'monthly-client-reports';
@@ -131,6 +132,22 @@ export async function runMonthlyClientReports(): Promise<MonthlyClientReportsRes
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         consoleLog(LOG_SOURCE, `Google Ads summary failed for ${clientName}: ${msg}`);
+      }
+
+      // 1b) Reconciliation guardrail — flag if the DB's active spend has drifted
+      // from the live Google Ads API for this period (non-blocking; logs only).
+      try {
+        const recon = await reconcileClientGads(clientId, period.start, period.end);
+        if (recon && !recon.withinTolerance) {
+          consoleLog(
+            LOG_SOURCE,
+            `⚠ Google Ads spend variance for ${clientName}: ${recon.variancePct.toFixed(1)}% ` +
+              `(DB £${recon.dbActiveSpend.toFixed(2)} vs API £${recon.apiActiveSpend.toFixed(2)}) — report may be stale`,
+          );
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        consoleLog(LOG_SOURCE, `Google Ads reconciliation skipped for ${clientName}: ${msg}`);
       }
 
       // 2) Suggested narrative draft — A3's stub returns empty until A3

@@ -43,6 +43,7 @@ import { generateReportInsights } from '../lib/report-ai.js';
 // AGENT-COORD: stub for A2 buildGoogleAdsPeriodSummary — extends ReportAiInput
 // with googleAdsSummary so the AI prefers structured data over OCR when present.
 import { buildGoogleAdsPeriodSummary } from '../lib/reports/gads-summary.js';
+import { reconcileClientGads } from '../lib/reports/gads-reconcile.js';
 import { safeStringify } from '../lib/reports/dashboard-shell.js';
 import { buildDashboardData, recomputeDashboard } from '../lib/reports/build-dashboard-data.js';
 
@@ -578,6 +579,21 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
       );
     } catch (err) {
       request.log?.warn?.({ err }, 'Google Ads summary unavailable — generating from screenshots only');
+    }
+
+    // Reconciliation guardrail — compare the DB's active spend against the live
+    // Google Ads API for the period. Non-blocking: a material variance is logged
+    // so a drifted report is caught at generation time. (See gads-reconcile.ts.)
+    try {
+      const recon = await reconcileClientGads(report.client_id, report.period_start, report.period_end);
+      if (recon && !recon.withinTolerance) {
+        request.log?.warn?.(
+          { clientId: report.client_id, ...recon },
+          `Google Ads spend variance ${recon.variancePct.toFixed(1)}% (DB £${recon.dbActiveSpend.toFixed(2)} vs API £${recon.apiActiveSpend.toFixed(2)}) — report may be stale`,
+        );
+      }
+    } catch (err) {
+      request.log?.warn?.({ err }, 'Google Ads reconciliation skipped');
     }
 
     try {
