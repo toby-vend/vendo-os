@@ -152,6 +152,13 @@ export const clientsRoutes: FastifyPluginAsync = async (app) => {
 
     const isAdmin = (request as any).user?.role === 'admin';
 
+    // Only canonical (active) clients expose a detail/reporting/skills page.
+    // Admins retain access to all clients for management via /admin/clients.
+    if (data.client.status !== 'active' && !isAdmin) {
+      reply.code(404).send('Client not found');
+      return;
+    }
+
     const [enriched, health] = await Promise.all([
       data.client.id
         ? getClientEnrichedData(data.client.id)
