@@ -34,6 +34,7 @@ import {
   resolveBookingScope,
   bookingPredicate,
 } from '../booking-rule.js';
+import { buildGeoGrid } from './geogrid.js';
 import type {
   DateRange,
   SeoBlock,
@@ -55,12 +56,14 @@ export async function buildSeo(clientId: number, range: DateRange): Promise<SeoB
     topPages,
     queries,
     searchConsoleSeries,
+    geoGrid,
   ] = await Promise.all([
     buildToplineSet(clientId, window30),
     buildToplineSet(clientId, window90),
     buildTopPages(clientId, window30),
     buildQueries(clientId, window30),
     buildSearchConsoleSeries(clientId, range.current.end, 104),
+    buildGeoGrid(clientId),
   ]);
 
   return {
@@ -78,6 +81,7 @@ export async function buildSeo(clientId: number, range: DateRange): Promise<SeoB
       referringDomains: 0,
     },
     searchConsoleSeries,
+    geoGrid,
   };
 }
 

@@ -34,6 +34,8 @@ export type {
   SeoQuery,
   SeoHealth,
   SeoSearchConsoleSeries,
+  GeoGridKeyword,
+  GeoGridBlock,
   SeoBlock,
   AiSummaryBlock,
   DashboardFlags,

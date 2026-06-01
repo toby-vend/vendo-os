@@ -103,7 +103,8 @@ export async function buildDashboardData(
     aiSummary,
     flags: {
       gbpComingSoon: true,
-      geoGridComingSoon: true,
+      // Only flag "coming soon" when no geo-grid scans are synced for this client.
+      ...(seo.geoGrid ? {} : { geoGridComingSoon: true as const }),
       ...(treatments.averageCaseValueIsDefault ? { averageCaseValueIsDefault: true as const } : {}),
       ...(treatments.treatmentMappingMissing ? { treatmentMappingMissing: true as const } : {}),
       ...(treatments.leadAttributionUnavailable ? { treatmentLeadAttributionUnavailable: true as const } : {}),

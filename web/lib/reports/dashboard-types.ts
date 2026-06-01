@@ -237,6 +237,46 @@ export interface SeoSearchConsoleSeries {
   position: number[];
 }
 
+/**
+ * One keyword's geo-grid result. `ranks` is an NxN matrix of Google Maps
+ * positions across a grid centred on the business; null = not found in the
+ * top 20 (Local Viking's "X"). Reading top-left → bottom-right, north → south.
+ */
+export interface GeoGridKeyword {
+  term: string;
+  /** N for an NxN grid (e.g. 9). */
+  gridSize: number;
+  ranks: (number | null)[][];
+  /** Average grid rank (lower is better). */
+  agr: number;
+  /** Average total grid rank — penalises not-found nodes. */
+  atgr: number;
+  /** Share of local voice, 0-1. */
+  solv: number;
+  /** AGR / SoLV from the previous scan of the same term, for deltas. null if none. */
+  agrPrev: number | null;
+  solvPrev: number | null;
+}
+
+/**
+ * Local geo-grid block. Present only when the client has at least one
+ * finished scan synced; otherwise null and the SEO tab shows a placeholder.
+ */
+export interface GeoGridBlock {
+  provider: string;
+  businessName: string;
+  gridCenterLat: number;
+  gridCenterLng: number;
+  /** Node spacing + unit, surfaced as a "≈X mile radius" caption. */
+  gridPointDistance: number;
+  gridDistanceMeasure: string;
+  /** ISO timestamp of the latest scan batch shown. */
+  scannedAt: string;
+  /** ISO timestamp of the previous batch the deltas compare against (or null). */
+  previousScannedAt: string | null;
+  keywords: GeoGridKeyword[];
+}
+
 export interface SeoBlock {
   topline30: SeoTopline[];
   topline90: SeoTopline[];
@@ -244,6 +284,8 @@ export interface SeoBlock {
   queries: SeoQuery[];
   health: SeoHealth;
   searchConsoleSeries: SeoSearchConsoleSeries | null;
+  /** Local geo-grid rank tracking; null when no scans are synced. */
+  geoGrid: GeoGridBlock | null;
 }
 
 // ── AI summary block ───────────────────────────────────────────────────
@@ -263,7 +305,8 @@ export interface AiSummaryBlock {
 
 export interface DashboardFlags {
   gbpComingSoon: true;
-  geoGridComingSoon: true;
+  /** Set only when no geo-grid scans are synced for the client. */
+  geoGridComingSoon?: true;
   bookingPipelineMissing?: true;
   averageCaseValueIsDefault?: true;
   treatmentMappingMissing?: true;

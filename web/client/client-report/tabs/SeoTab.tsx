@@ -21,6 +21,7 @@ import { SectionHeader } from '../components/SectionHeader';
 import { Delta } from '../components/Delta';
 import { Placeholder } from '../components/Placeholder';
 import { SearchConsoleChart } from '../components/SearchConsoleChart';
+import { GeoGrid } from '../components/GeoGrid';
 import { GeoGridPlaceholder } from '../components/GeoGridPlaceholder';
 import { GbpPlaceholder } from '../components/GbpPlaceholder';
 import { fmt } from '../lib/format';
@@ -123,9 +124,9 @@ export function SeoTab({ payload }: { payload: DashboardPayload; accent: string 
       {/* Local GeoGrid */}
       <SectionHeader
         title="Local GeoGrid"
-        sub="Rankings across a 7×7 grid centred on the practice."
+        sub="Google Maps rankings across a grid of points centred on the practice."
       />
-      <GeoGridPlaceholder />
+      {seo.geoGrid ? <GeoGrid block={seo.geoGrid} /> : <GeoGridPlaceholder />}
 
       {/* Google Business Profile */}
       <SectionHeader

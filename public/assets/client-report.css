@@ -603,6 +603,77 @@
 .vr-placeholder-label { font-family: var(--vr-mono); font-size: 12px; }
 .vr-placeholder-sub { font-size: 12px; color: var(--vr-ink-3); max-width: 56ch; }
 
+/* ── Local GeoGrid ───────────────────────────────────────────────────── */
+.vr-geogrid { margin-top: 14px; }
+.vr-geogrid-kw {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+}
+.vr-geogrid-kw-btn {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 14px; cursor: pointer; text-align: left;
+  background: var(--vr-surface); border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm); font-family: var(--vr-sans);
+  color: var(--vr-ink-2);
+  transition: border-color 0.12s, color 0.12s;
+}
+.vr-geogrid-kw-btn:hover { border-color: var(--vr-rule-strong); }
+.vr-geogrid-kw-btn.is-active {
+  border-color: var(--vr-accent); color: var(--vr-ink);
+  box-shadow: var(--vr-shadow-sm);
+}
+.vr-geogrid-kw-term { font-size: 13px; font-weight: 600; }
+.vr-geogrid-kw-solv { font-size: 11px; color: var(--vr-ink-3); font-family: var(--vr-mono); }
+
+.vr-geogrid-body {
+  display: grid; grid-template-columns: minmax(0, 1.3fr) 1fr; gap: 28px;
+  align-items: start;
+}
+.vr-geogrid-plot { display: flex; flex-direction: column; gap: 12px; }
+.vr-geogrid-grid { display: grid; gap: 3px; width: 100%; max-width: 460px; }
+.vr-geogrid-cell {
+  aspect-ratio: 1 / 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 3px; line-height: 1;
+  font-family: var(--vr-mono); font-size: 12px; font-weight: 600;
+}
+.vr-geogrid-cell.is-centre { outline: 2px solid var(--vr-ink); outline-offset: -2px; }
+.vr-geogrid-legend {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  font-size: 11px; color: var(--vr-ink-3); font-family: var(--vr-sans);
+}
+.vr-geogrid-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.vr-geogrid-legend i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+
+.vr-geogrid-side { display: flex; flex-direction: column; gap: 16px; }
+.vr-geogrid-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.vr-geogrid-metric {
+  background: var(--vr-surface); border: 1px solid var(--vr-rule);
+  border-radius: var(--vr-radius-sm); padding: 12px;
+}
+.vr-geogrid-metric-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--vr-ink-3);
+}
+.vr-geogrid-metric-value {
+  font-size: 22px; font-weight: 700; font-family: var(--vr-mono);
+  color: var(--vr-ink); margin-top: 4px;
+}
+.vr-geogrid-metric-delta { font-size: 11px; font-family: var(--vr-mono); margin-top: 2px; }
+.vr-geogrid-metric-delta.is-good { color: var(--vr-good); }
+.vr-geogrid-metric-delta.is-bad { color: var(--vr-bad); }
+.vr-geogrid-metric-delta.is-flat { color: var(--vr-ink-3); }
+
+.vr-geogrid-caption {
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: 12px; color: var(--vr-ink-2);
+}
+.vr-geogrid-caption strong { color: var(--vr-ink); font-size: 13px; }
+.vr-geogrid-caption-muted { color: var(--vr-ink-3); }
+
+@media (max-width: 720px) {
+  .vr-geogrid-body { grid-template-columns: 1fr; }
+}
+
 /* ── AI summary ──────────────────────────────────────────────────────── */
 .vr-ai-summary {
   background: var(--vr-surface);
