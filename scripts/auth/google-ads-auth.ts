@@ -26,7 +26,12 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
 }
 
 const state = randomBytes(16).toString('hex');
-const scopes = ['https://www.googleapis.com/auth/adwords'];
+// One token, multiple Google services. Keep adwords so the Google Ads sync
+// keeps working; webmasters.readonly enables Search Console (sync:gsc).
+const scopes = [
+  'https://www.googleapis.com/auth/adwords',
+  'https://www.googleapis.com/auth/webmasters.readonly',
+];
 
 // Desktop clients use the loopback redirect — bind to an available port
 const server = createServer(async (req, res) => {
@@ -101,8 +106,8 @@ const server = createServer(async (req, res) => {
     res.end(`
       <html>
         <body style="font-family: system-ui; max-width: 500px; margin: 80px auto; text-align: center;">
-          <h1>Google Ads connected</h1>
-          <p>Tokens saved. You can close this tab.</p>
+          <h1>Google account connected</h1>
+          <p>Tokens saved (Google Ads + Search Console). You can close this tab.</p>
         </body>
       </html>
     `);
