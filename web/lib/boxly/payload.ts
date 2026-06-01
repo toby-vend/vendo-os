@@ -38,13 +38,20 @@ export interface BoxlyLead {
   dedupKey: string;
 }
 
-/** Case-insensitive lookup across a list of candidate keys. Returns first non-empty string. */
+/** Canonicalise a key for matching: lowercase, strip all non-alphanumerics.
+ *  So "Entry Point URL", "entry_point_url" and "entryPointUrl" all collide —
+ *  real Boxly/Zapier field labels use spaced Title Case. */
+function canonKey(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/** Tolerant lookup across candidate keys (space/case/punctuation-insensitive).
+ *  Returns the first non-empty string value. */
 function pick(obj: BoxlyRawPayload, candidates: string[]): string | null {
-  // Build a lowercased key index once per call.
   const index = new Map<string, unknown>();
-  for (const [k, v] of Object.entries(obj)) index.set(k.toLowerCase(), v);
+  for (const [k, v] of Object.entries(obj)) index.set(canonKey(k), v);
   for (const cand of candidates) {
-    const v = index.get(cand.toLowerCase());
+    const v = index.get(canonKey(cand));
     if (v == null) continue;
     const s = typeof v === 'string' ? v : String(v);
     const trimmed = s.trim();
