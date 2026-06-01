@@ -47,6 +47,7 @@ import { driveWebhookRoutes } from './routes/drive-webhook.js';
 import { slackInteractRoutes } from './routes/slack-interact.js';
 import { fathomWebhookRoutes } from './routes/fathom-webhook.js';
 import { frameioWebhookRoutes } from './routes/frameio-webhook.js';
+import { boxlyWebhookRoutes } from './routes/boxly-webhook.js';
 import { frameioOAuthRoutes } from './routes/frameio-oauth.js';
 import { driveCronRoutes } from './routes/drive-cron.js';
 import { taskRunRoutes } from './routes/task-runs.js';
@@ -147,7 +148,7 @@ app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
   // Public routes (no session required)
-  if (path.startsWith('/assets/') || path === '/login' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook' || path === '/api/frameio/webhook' || path === '/api/slack/interact') return;
+  if (path.startsWith('/assets/') || path === '/login' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook' || path === '/api/frameio/webhook' || path === '/api/boxly/webhook' || path === '/api/slack/interact') return;
 
   // Cron routes — validate Vercel cron secret
   if (path.startsWith('/api/cron/')) {
@@ -393,6 +394,7 @@ app.register(slackInteractRoutes, { prefix: '/api/slack' });
 app.register(fathomWebhookRoutes, { prefix: '/api/fathom' });
 app.register(frameioWebhookRoutes, { prefix: '/api/frameio' });
 app.register(frameioOAuthRoutes, { prefix: '/api/frameio' });
+app.register(boxlyWebhookRoutes, { prefix: '/api/boxly' });
 app.register(driveCronRoutes, { prefix: '/api/cron' });
 app.register(taskRunRoutes, { prefix: '/api/tasks' });
 app.register(pushRoutes, { prefix: '/api/push' });
