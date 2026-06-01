@@ -54,6 +54,12 @@ export interface TreatmentAggregatorResult {
    *  no campaign matched any built-in pattern (everything fell into
    *  "Other"). UI uses this to nudge the AM to configure mappings. */
   treatmentMappingMissing: boolean;
+  /** Set when there were booking opportunities but NONE could be attributed
+   *  to a named treatment — the client's GHL `source` field carries channel
+   *  labels, not campaign names, so the substring heuristic can never match.
+   *  Treatment rows are emitted spend-only (leads/cpl/cac/revenue = null) and
+   *  the "Other" lead-dump is suppressed. */
+  leadAttributionUnavailable: boolean;
 }
 
 // ── Internal types ─────────────────────────────────────────────────────
@@ -106,6 +112,7 @@ export async function buildTreatments(
       treatments: [],
       averageCaseValueIsDefault: false,
       treatmentMappingMissing: false,
+      leadAttributionUnavailable: false,
     };
   }
 
@@ -141,13 +148,40 @@ export async function buildTreatments(
   // Step 2 — attribute leads + bookings to treatment buckets via the
   // `source` substring heuristic. Leads not attributable to any
   // treatment's campaigns roll into "Other".
-  attributeLeadsToTreatments(bookingOpps, buckets);
+  const { attributedToNamed } = attributeLeadsToTreatments(bookingOpps, buckets);
+
+  // When there ARE booking opps but not a single one matched a named
+  // treatment's campaign, the client's GHL `source` field carries channel
+  // labels rather than campaign names — treatment-level attribution is
+  // impossible. Emit spend-only rows and let the UI show an honest note,
+  // rather than dumping every lead + all fallback revenue into "Other".
+  const leadAttributionUnavailable =
+    bookingOpps.length > 0 && attributedToNamed === 0;
 
   // Step 3 — resolve avg case value + assemble OverviewTreatment rows.
   const treatments: OverviewTreatment[] = [];
   let averageCaseValueIsDefault = false;
 
   for (const [name, bucket] of buckets) {
+    if (leadAttributionUnavailable) {
+      // Drop buckets that exist ONLY because of the lead-dump (zero campaign
+      // spend) — e.g. an "Other" bucket created purely to park unattributed
+      // leads. Keep genuine campaign-spend rows, but null out the
+      // lead/booking-derived columns the UI can't honestly populate.
+      if (bucket.spend <= 0) continue;
+      treatments.push({
+        name,
+        spend: round2(bucket.spend),
+        leads: null,
+        cpl: null,
+        cac: null,
+        revenue: null,
+        avgValue: 0,
+        avgValueIsDefault: false,
+      });
+      continue;
+    }
+
     const resolved = await resolveAvgCaseValue(
       bucket.overrideAvgValue,
       vertical,
@@ -189,6 +223,7 @@ export async function buildTreatments(
     // Only true when we had NO per-client mappings AND nothing matched
     // the built-in regex library either.
     treatmentMappingMissing: mappings.length === 0 && !anyMatchedBeyondOther,
+    leadAttributionUnavailable,
   };
 }
 
@@ -276,7 +311,7 @@ function classifyCampaign(
 function attributeLeadsToTreatments(
   opps: BookingOpportunity[],
   buckets: Map<string, TreatmentAccumulator>,
-): void {
+): { attributedToNamed: number } {
   // Walk buckets in spend-descending order for tie-breaking — but we
   // need a snapshot list now, before we start mutating leads/bookings.
   const ordered = [...buckets.entries()]
@@ -284,6 +319,7 @@ function attributeLeadsToTreatments(
     .sort((a, b) => b[1].spend - a[1].spend);
 
   let other = buckets.get('Other');
+  let attributedToNamed = 0;
 
   for (const opp of opps) {
     const source = (opp.source || '').toLowerCase().trim();
@@ -295,6 +331,7 @@ function attributeLeadsToTreatments(
             bucket.leads += 1;
             bucket.bookings += 1;
             assigned = true;
+            attributedToNamed += 1;
             break;
           }
         }
@@ -318,6 +355,8 @@ function attributeLeadsToTreatments(
       other.bookings += 1;
     }
   }
+
+  return { attributedToNamed };
 }
 
 interface ResolvedAvgValue {

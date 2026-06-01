@@ -97,10 +97,13 @@ export interface OverviewChannel {
 export interface OverviewTreatment {
   name: string;
   spend: number;
-  leads: number;
-  cpl: number;
-  cac: number;
-  revenue: number;
+  /** null when lead/booking attribution to treatments is unavailable for
+   *  this client (GHL source carries channel labels, not campaign names —
+   *  see flags.treatmentLeadAttributionUnavailable). */
+  leads: number | null;
+  cpl: number | null;
+  cac: number | null;
+  revenue: number | null;
   avgValue: number;
   /** true when the avg case value falls back to the defaults table */
   avgValueIsDefault: boolean;
@@ -264,6 +267,11 @@ export interface DashboardFlags {
   bookingPipelineMissing?: true;
   averageCaseValueIsDefault?: true;
   treatmentMappingMissing?: true;
+  /** Leads/bookings could not be attributed to any named treatment because
+   *  the client's GHL `source` field carries channel labels ("Paid Social",
+   *  "Paid Search") rather than campaign names. Treatment rows show spend
+   *  only; the UI suppresses the misleading 0-lead / 0-revenue columns. */
+  treatmentLeadAttributionUnavailable?: true;
   deviceSplitMissing?: true;
 }
 

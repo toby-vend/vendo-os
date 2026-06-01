@@ -106,6 +106,7 @@ export async function buildDashboardData(
       geoGridComingSoon: true,
       ...(treatments.averageCaseValueIsDefault ? { averageCaseValueIsDefault: true as const } : {}),
       ...(treatments.treatmentMappingMissing ? { treatmentMappingMissing: true as const } : {}),
+      ...(treatments.leadAttributionUnavailable ? { treatmentLeadAttributionUnavailable: true as const } : {}),
       ...(bookingPipelineMissing ? { bookingPipelineMissing: true as const } : {}),
       ...(deviceSplitMissing ? { deviceSplitMissing: true as const } : {}),
     },

@@ -42,16 +42,20 @@ export function OverviewTab({
   const [sortKey, setSortKey] = useState<SortKey>('revenue');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
+  // When the client's GHL source data can't link leads to treatments, the
+  // lead/cpl/cac/revenue columns are null — show spend only.
+  const attribUnavailable = Boolean(flags.treatmentLeadAttributionUnavailable);
+
   const sortedTreatments = useMemo<OverviewTreatment[]>(() => {
     const arr = [...overview.treatments];
     arr.sort((a, b) => {
       const dir = sortDir === 'asc' ? 1 : -1;
-      return ((a[sortKey] as number) - (b[sortKey] as number)) * dir;
+      return ((Number(a[sortKey] ?? 0)) - (Number(b[sortKey] ?? 0))) * dir;
     });
     return arr;
   }, [overview.treatments, sortKey, sortDir]);
 
-  const totalRev = overview.treatments.reduce((s, t) => s + t.revenue, 0);
+  const totalRev = overview.treatments.reduce((s, t) => s + (t.revenue ?? 0), 0);
   const totalSpend = overview.treatments.reduce((s, t) => s + t.spend, 0);
 
   const setSort = (key: SortKey): void => {
@@ -117,10 +121,12 @@ export function OverviewTab({
               <span className="vr-totals-label">Total spend</span>{' '}
               <strong>{fmt.currency(totalSpend)}</strong>
             </span>
-            <span>
-              <span className="vr-totals-label">Total revenue</span>{' '}
-              <strong>{fmt.currency(totalRev)}</strong>
-            </span>
+            {!attribUnavailable && (
+              <span>
+                <span className="vr-totals-label">Total revenue</span>{' '}
+                <strong>{fmt.currency(totalRev)}</strong>
+              </span>
+            )}
           </div>
         }
       />
@@ -149,51 +155,74 @@ export function OverviewTab({
                 <tr key={t.name}>
                   <td>
                     <div className="vr-row-name">{t.name}</div>
-                    <div className="vr-row-sub">
-                      avg case value {fmt.currency(t.avgValue)}
-                      {t.avgValueIsDefault && (
-                        <span
-                          title="Using a default benchmark — replaced once client closed-won data lands."
-                          style={{
-                            marginLeft: 6,
-                            padding: '1px 6px',
-                            borderRadius: 4,
-                            fontSize: 10,
-                            color: 'var(--vr-ink-3)',
-                            border: '1px solid var(--vr-rule)',
-                          }}
-                        >
-                          default
-                        </span>
-                      )}
-                    </div>
+                    {!attribUnavailable && (
+                      <div className="vr-row-sub">
+                        avg case value {fmt.currency(t.avgValue)}
+                        {t.avgValueIsDefault && (
+                          <span
+                            title="Using a default benchmark — replaced once client closed-won data lands."
+                            style={{
+                              marginLeft: 6,
+                              padding: '1px 6px',
+                              borderRadius: 4,
+                              fontSize: 10,
+                              color: 'var(--vr-ink-3)',
+                              border: '1px solid var(--vr-rule)',
+                            }}
+                          >
+                            default
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td className="vr-num">{fmt.currency(t.spend)}</td>
-                  <td className="vr-num">{t.leads}</td>
-                  <td className="vr-num">{fmt.currency(t.cpl)}</td>
-                  <td className="vr-num">{fmt.currency(t.cac)}</td>
-                  <td className="vr-num is-strong">{fmt.currency(t.revenue)}</td>
+                  <td className="vr-num">{t.leads == null ? '—' : t.leads}</td>
+                  <td className="vr-num">{t.cpl == null ? '—' : fmt.currency(t.cpl)}</td>
+                  <td className="vr-num">{t.cac == null ? '—' : fmt.currency(t.cac)}</td>
+                  <td className="vr-num is-strong">
+                    {t.revenue == null ? '—' : fmt.currency(t.revenue)}
+                  </td>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <MiniBar value={t.revenue} max={totalRev} w={100} />
-                      <span
-                        style={{
-                          fontFamily: 'var(--vr-mono)',
-                          fontSize: 11,
-                          color: 'var(--vr-ink-2)',
-                        }}
-                      >
-                        {totalRev > 0
-                          ? ((t.revenue / totalRev) * 100).toFixed(1)
-                          : '0.0'}
-                        %
-                      </span>
-                    </div>
+                    {t.revenue == null ? (
+                      <span className="vr-num">—</span>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <MiniBar value={t.revenue} max={totalRev} w={100} />
+                        <span
+                          style={{
+                            fontFamily: 'var(--vr-mono)',
+                            fontSize: 11,
+                            color: 'var(--vr-ink-2)',
+                          }}
+                        >
+                          {totalRev > 0
+                            ? ((t.revenue / totalRev) * 100).toFixed(1)
+                            : '0.0'}
+                          %
+                        </span>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {attribUnavailable && (
+            <p
+              style={{
+                margin: '10px 2px 0',
+                fontSize: 12,
+                lineHeight: 1.5,
+                color: 'var(--vr-ink-3)',
+              }}
+            >
+              ⓘ Lead and revenue figures by treatment aren’t available for this
+              client yet — the CRM records leads by channel (paid search, paid
+              social) rather than by campaign, so they can’t be split across
+              service lines. Spend is shown per treatment from campaign names.
+            </p>
+          )}
         </div>
       )}
     </div>

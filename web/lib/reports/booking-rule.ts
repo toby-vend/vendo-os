@@ -289,7 +289,7 @@ export type BookingPlatform = 'meta' | 'google' | 'organic' | 'direct' | 'other'
 export function classifyBookingSource(source: string | null | undefined): BookingPlatform {
   if (!source) return 'other';
   const s = source.toLowerCase();
-  if (/(fb|facebook|instagram|ig\b|meta)/i.test(s)) return 'meta';
+  if (/(fb|facebook|instagram|ig\b|meta|paid[-_ ]?social|\bsocial\b)/i.test(s)) return 'meta';
   if (/(google[-_ ]?ads|adwords|gads|paid[-_ ]?search|gclid)/i.test(s)) return 'google';
   if (/(organic|seo|search engine)/i.test(s)) return 'organic';
   if (/(direct|website|web form|enquiry|contact form)/i.test(s)) return 'direct';
