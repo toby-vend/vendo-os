@@ -25,10 +25,13 @@
  *
  * Steps 2 and 3 flip `avgValueIsDefault` on the row AND propagate
  * `averageCaseValueIsDefault: true` to the result so the UI can show a
- * "default value — not your data" hint.
+ * "default value — not your data" hint. This fallback only kicks in when
+ * the client's GHL carries no `monetary_value` at all — otherwise revenue
+ * comes straight from GHL (see below).
  *
- * Lead attribution heuristic — see comment block above
- * `attributeLeadsToTreatments` further down.
+ * Leads / bookings / revenue — attributed from GHL via the opportunity's
+ * PIPELINE (pipelines are named per service line), not the free-text
+ * `source` field. See `attributeByPipeline` further down.
  *
  * UK English. GBP currency throughout.
  */
@@ -41,7 +44,7 @@ import {
   type TreatmentMappingRow,
 } from '../../queries/treatment-mappings.js';
 import { classifyByDefaults } from '../treatment-defaults.js';
-import { countBookingsForClient, listBookingOpportunities, type BookingOpportunity } from '../booking-rule.js';
+import { resolveBookingScope, bookingPredicate, type BookingScope } from '../booking-rule.js';
 import type { DateRange, OverviewTreatment } from '../dashboard-types.js';
 
 export interface TreatmentAggregatorResult {
@@ -79,11 +82,15 @@ interface CompiledMapping {
 
 interface TreatmentAccumulator {
   spend: number;
+  /** Leads = GHL opportunities CREATED in the period whose pipeline maps to
+   *  this treatment. */
   leads: number;
+  /** Bookings = booked-or-beyond opps whose pipeline maps to this treatment. */
   bookings: number;
-  /** Lowercased campaign name fragments owned by this treatment. Used
-   *  by the lead-attribution heuristic. */
-  campaignNames: Set<string>;
+  /** Revenue = sum of real GHL `monetary_value` across this treatment's
+   *  bookings. Zero when the client carries no monetary values (then the
+   *  row falls back to an avg-case-value estimate). */
+  revenue: number;
   /** Override value (from tier 1) if any campaign in this bucket was
    *  matched via a per-client mapping that carried an avg_case_value
    *  override. Tracks the first override we see — multiple campaigns
@@ -97,12 +104,11 @@ export async function buildTreatments(
   clientId: number,
   range: DateRange,
 ): Promise<TreatmentAggregatorResult> {
-  const [mappings, vertical, campaigns, bookingOpps, bookingCount] = await Promise.all([
+  const [mappings, vertical, campaigns, scope] = await Promise.all([
     listMappingsForClient(clientId),
     fetchClientVertical(clientId),
     fetchCampaignSpend(clientId, range),
-    listBookingOpportunities(clientId, range),
-    countBookingsForClient(clientId, range),
+    resolveBookingScope(clientId),
   ]);
 
   // Empty input → no rows. Don't surface "missing mappings" here — that
@@ -118,7 +124,15 @@ export async function buildTreatments(
 
   const compiledMappings = compileMappings(mappings);
 
-  // Step 1 — classify every campaign into a treatment bucket.
+  const makeBucket = (): TreatmentAccumulator => ({
+    spend: 0,
+    leads: 0,
+    bookings: 0,
+    revenue: 0,
+    overrideAvgValue: null,
+  });
+
+  // Step 1 — classify every campaign into a treatment bucket (spend side).
   const buckets = new Map<string, TreatmentAccumulator>();
   let anyMatchedBeyondOther = false;
 
@@ -129,45 +143,52 @@ export async function buildTreatments(
 
     let bucket = buckets.get(treatment);
     if (!bucket) {
-      bucket = {
-        spend: 0,
-        leads: 0,
-        bookings: 0,
-        campaignNames: new Set<string>(),
-        overrideAvgValue: null,
-      };
+      bucket = makeBucket();
       buckets.set(treatment, bucket);
     }
     bucket.spend += campaign.spend;
-    bucket.campaignNames.add(campaign.name.toLowerCase());
     if (result.overrideAvgValue != null && bucket.overrideAvgValue == null) {
       bucket.overrideAvgValue = result.overrideAvgValue;
     }
   }
 
-  // Step 2 — attribute leads + bookings to treatment buckets via the
-  // `source` substring heuristic. Leads not attributable to any
-  // treatment's campaigns roll into "Other".
-  const { attributedToNamed } = attributeLeadsToTreatments(bookingOpps, buckets);
+  // Step 2 — attribute leads, bookings and revenue from GHL using the
+  // opportunity's PIPELINE as the source of truth for the treatment. GHL
+  // pipelines are named per service line ("Dental Implant Appointments",
+  // "Invisalign/Orthodontic Appointments", …), so the same classifier that
+  // maps campaign names to treatments maps pipeline names too. Revenue is
+  // the real sum of `monetary_value` on booked-or-beyond opps.
+  const ghl = await attributeByPipeline(clientId, range, scope, compiledMappings);
+  for (const [treatment, agg] of ghl.byTreatment) {
+    let bucket = buckets.get(treatment);
+    if (!bucket) {
+      bucket = makeBucket();
+      buckets.set(treatment, bucket);
+    }
+    bucket.leads = agg.leads;
+    bucket.bookings = agg.bookings;
+    bucket.revenue = agg.revenue;
+  }
 
-  // When there ARE booking opps but not a single one matched a named
-  // treatment's campaign, the client's GHL `source` field carries channel
-  // labels rather than campaign names — treatment-level attribution is
-  // impossible. Emit spend-only rows and let the UI show an honest note,
-  // rather than dumping every lead + all fallback revenue into "Other".
-  const leadAttributionUnavailable =
-    bookingOpps.length > 0 && attributedToNamed === 0;
+  // Attribution is "unavailable" only when GHL gave us leads/bookings but
+  // NONE landed on a named treatment (e.g. the client routes everything
+  // through one generic pipeline). Then we fall back to spend-only rows +
+  // an honest UI note rather than dumping everything into "Other".
+  const ghlActivity = ghl.totalLeads + ghl.totalBookings;
+  const namedActivity = [...buckets.entries()]
+    .filter(([name]) => name !== 'Other')
+    .reduce((s, [, b]) => s + b.leads + b.bookings, 0);
+  const leadAttributionUnavailable = ghlActivity > 0 && namedActivity === 0;
 
-  // Step 3 — resolve avg case value + assemble OverviewTreatment rows.
+  // Step 3 — assemble OverviewTreatment rows.
   const treatments: OverviewTreatment[] = [];
   let averageCaseValueIsDefault = false;
 
   for (const [name, bucket] of buckets) {
     if (leadAttributionUnavailable) {
-      // Drop buckets that exist ONLY because of the lead-dump (zero campaign
-      // spend) — e.g. an "Other" bucket created purely to park unattributed
-      // leads. Keep genuine campaign-spend rows, but null out the
-      // lead/booking-derived columns the UI can't honestly populate.
+      // Keep genuine campaign-spend rows, but null the lead/booking-derived
+      // columns the UI can't honestly populate. Drop buckets that exist only
+      // because of GHL activity that couldn't be attributed.
       if (bucket.spend <= 0) continue;
       treatments.push({
         name,
@@ -182,16 +203,26 @@ export async function buildTreatments(
       continue;
     }
 
-    const resolved = await resolveAvgCaseValue(
-      bucket.overrideAvgValue,
-      vertical,
-      name,
-    );
-    if (resolved.isDefault) averageCaseValueIsDefault = true;
-
     const cpl = bucket.leads > 0 ? bucket.spend / bucket.leads : 0;
     const cac = bucket.bookings > 0 ? bucket.spend / bucket.bookings : 0;
-    const revenue = bucket.bookings * resolved.value;
+
+    // Revenue: prefer the real GHL monetary_value sum. Only fall back to an
+    // avg-case-value estimate when the client's GHL carries no monetary
+    // values at all (so we never silently show £0 against a real booking).
+    let revenue: number;
+    let avgValue: number;
+    let avgValueIsDefault: boolean;
+    if (ghl.monetaryPresent) {
+      revenue = bucket.revenue;
+      avgValue = bucket.bookings > 0 ? bucket.revenue / bucket.bookings : 0;
+      avgValueIsDefault = false;
+    } else {
+      const resolved = await resolveAvgCaseValue(bucket.overrideAvgValue, vertical, name);
+      if (resolved.isDefault) averageCaseValueIsDefault = true;
+      avgValue = resolved.value;
+      avgValueIsDefault = resolved.isDefault;
+      revenue = bucket.bookings * resolved.value;
+    }
 
     treatments.push({
       name,
@@ -200,22 +231,19 @@ export async function buildTreatments(
       cpl: round2(cpl),
       cac: round2(cac),
       revenue: round2(revenue),
-      avgValue: round2(resolved.value),
-      avgValueIsDefault: resolved.isDefault,
+      avgValue: round2(avgValue),
+      avgValueIsDefault,
     });
   }
 
-  // Stable order: highest spend first, but keep "Other" pinned at the
-  // bottom so it never looks like a primary treatment line.
+  // Stable order: highest revenue first (the column the table sorts by),
+  // but keep "Other" pinned at the bottom so it never looks like a primary
+  // treatment line.
   treatments.sort((a, b) => {
     if (a.name === 'Other' && b.name !== 'Other') return 1;
     if (b.name === 'Other' && a.name !== 'Other') return -1;
-    return b.spend - a.spend;
+    return (b.revenue ?? b.spend) - (a.revenue ?? a.spend);
   });
-
-  // Suppress unused-variable lint when bookings are 0 for a client w/o a
-  // booking pipeline — we still want the value tracked for future use.
-  void bookingCount;
 
   return {
     treatments,
@@ -288,75 +316,109 @@ function classifyCampaign(
   return { treatment: 'Other', overrideAvgValue: null };
 }
 
+interface PipelineAttribution {
+  byTreatment: Map<string, { leads: number; bookings: number; revenue: number }>;
+  totalLeads: number;
+  totalBookings: number;
+  /** True when at least one booked opp carries a non-zero `monetary_value`
+   *  — i.e. GHL is the revenue source of truth for this client. */
+  monetaryPresent: boolean;
+}
+
 /**
- * Lead-attribution heuristic.
+ * Attribute GHL opportunities to treatments via their PIPELINE.
  *
- * GHL's `source` field is unstructured free text — it can be a page URL
- * with utm_campaign, a campaign name copy-pasted in, "Facebook lead
- * ads", or empty. There's no foreign key from `ghl_opportunities` to a
- * campaign, so we infer.
- *
- * For each booking opportunity we lowercase the `source` field, then
- * check it against each treatment bucket's known campaign-name
- * substrings. First match wins (we walk buckets in spend-descending
- * order so high-spend treatments win when the source contains multiple
- * keywords). Unmatched opportunities go into the "Other" bucket so the
- * totals balance.
- *
- * Each matched opportunity counts as both a lead AND a booking. The
- * `listBookingOpportunities` call upstream already filters to opps
- * currently in a Booked Appointment pipeline, so every opp returned IS
- * a booking by the universal rule.
+ * GHL pipelines are named per service line, so an opportunity's pipeline IS
+ * its treatment — far more reliable than parsing the free-text `source`
+ * field (which often carries only a channel label like "Paid Social").
+ * Two reads:
+ *   - Leads: opps CREATED in the period (the true top-of-funnel count).
+ *   - Bookings + revenue: opps at the "booked-or-beyond" stage whose stage
+ *     last changed in the period (booking-rule scope), summing the real
+ *     `monetary_value`.
+ * Both are grouped by pipeline name and classified to a treatment label
+ * with the same mappings → defaults → "Other" precedence used for spend.
  */
-function attributeLeadsToTreatments(
-  opps: BookingOpportunity[],
-  buckets: Map<string, TreatmentAccumulator>,
-): { attributedToNamed: number } {
-  // Walk buckets in spend-descending order for tie-breaking — but we
-  // need a snapshot list now, before we start mutating leads/bookings.
-  const ordered = [...buckets.entries()]
-    .filter(([name]) => name !== 'Other')
-    .sort((a, b) => b[1].spend - a[1].spend);
+async function attributeByPipeline(
+  clientId: number,
+  range: DateRange,
+  scope: BookingScope,
+  mappings: CompiledMapping[],
+): Promise<PipelineAttribution> {
+  const startTs = range.current.start;
+  const endTs = range.current.end + 'T23:59:59';
 
-  let other = buckets.get('Other');
-  let attributedToNamed = 0;
+  const leadRows = await rows<{ pipeline_name: string | null; n: number }>(
+    `SELECT p.name AS pipeline_name, COUNT(*) AS n
+       FROM ghl_opportunities o
+       LEFT JOIN ghl_pipelines p ON p.id = o.pipeline_id
+      WHERE o.location_id IN (
+              SELECT external_id FROM client_source_mappings
+               WHERE client_id = ? AND source = 'ghl'
+            )
+        AND o.created_at >= ? AND o.created_at <= ?
+      GROUP BY p.name`,
+    [clientId, startTs, endTs],
+  );
 
-  for (const opp of opps) {
-    const source = (opp.source || '').toLowerCase().trim();
-    let assigned = false;
-    if (source) {
-      for (const [, bucket] of ordered) {
-        for (const cname of bucket.campaignNames) {
-          if (cname && source.includes(cname)) {
-            bucket.leads += 1;
-            bucket.bookings += 1;
-            assigned = true;
-            attributedToNamed += 1;
-            break;
-          }
-        }
-        if (assigned) break;
-      }
+  const predicate = bookingPredicate(scope);
+  const bookingRows =
+    predicate.clause === '1=0'
+      ? []
+      : await rows<{ pipeline_name: string | null; n: number; revenue: number }>(
+          `SELECT p.name AS pipeline_name, COUNT(*) AS n,
+                  COALESCE(SUM(o.monetary_value), 0) AS revenue
+             FROM ghl_opportunities o
+             LEFT JOIN ghl_pipelines p ON p.id = o.pipeline_id
+            WHERE ${predicate.clause}
+              AND COALESCE(o.last_stage_change_at, o.updated_at) >= ?
+              AND COALESCE(o.last_stage_change_at, o.updated_at) <= ?
+            GROUP BY p.name`,
+          [...predicate.params, startTs, endTs],
+        );
+
+  const byTreatment = new Map<string, { leads: number; bookings: number; revenue: number }>();
+  const bump = (t: string) => {
+    let e = byTreatment.get(t);
+    if (!e) {
+      e = { leads: 0, bookings: 0, revenue: 0 };
+      byTreatment.set(t, e);
     }
-    if (!assigned) {
-      // Park in "Other" so totals balance, even if we never had any
-      // unmatched campaign spend.
-      if (!other) {
-        other = {
-          spend: 0,
-          leads: 0,
-          bookings: 0,
-          campaignNames: new Set<string>(),
-          overrideAvgValue: null,
-        };
-        buckets.set('Other', other);
-      }
-      other.leads += 1;
-      other.bookings += 1;
-    }
+    return e;
+  };
+
+  let totalLeads = 0;
+  for (const r of leadRows) {
+    bump(classifyTreatmentName(r.pipeline_name, mappings)).leads += r.n;
+    totalLeads += r.n;
   }
 
-  return { attributedToNamed };
+  let totalBookings = 0;
+  let monetaryPresent = false;
+  for (const r of bookingRows) {
+    const e = bump(classifyTreatmentName(r.pipeline_name, mappings));
+    e.bookings += r.n;
+    e.revenue += r.revenue || 0;
+    totalBookings += r.n;
+    if ((r.revenue || 0) > 0) monetaryPresent = true;
+  }
+
+  return { byTreatment, totalLeads, totalBookings, monetaryPresent };
+}
+
+/**
+ * Classify a GHL pipeline name into a treatment label. Same precedence as
+ * the campaign classifier — per-client mappings first (ignoring the
+ * meta/google `applies_to` filter, which is about ad platforms not
+ * pipelines), then built-in defaults, then "Other".
+ */
+function classifyTreatmentName(name: string | null, mappings: CompiledMapping[]): string {
+  const n = (name || '').trim();
+  if (!n) return 'Other';
+  for (const m of mappings) {
+    if (m.regex.test(n)) return m.treatment;
+  }
+  return classifyByDefaults(n) ?? 'Other';
 }
 
 interface ResolvedAvgValue {
