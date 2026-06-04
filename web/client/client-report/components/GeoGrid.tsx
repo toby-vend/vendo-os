@@ -102,8 +102,8 @@ function NodeOverlay({ kw, proj }: { kw: GeoGridKeyword; proj: Projected }) {
       if (!p) continue;
       const right = pts[r]?.[c + 1];
       const down = pts[r + 1]?.[c];
-      if (right) lines.push(<line key={`h${r}-${c}`} x1={p.x} y1={p.y} x2={right.x} y2={right.y} stroke="rgba(255,255,255,0.06)" />);
-      if (down) lines.push(<line key={`v${r}-${c}`} x1={p.x} y1={p.y} x2={down.x} y2={down.y} stroke="rgba(255,255,255,0.06)" />);
+      if (right) lines.push(<line key={`h${r}-${c}`} x1={p.x} y1={p.y} x2={right.x} y2={right.y} stroke="rgba(255,255,255,0.28)" strokeWidth={1} />);
+      if (down) lines.push(<line key={`v${r}-${c}`} x1={p.x} y1={p.y} x2={down.x} y2={down.y} stroke="rgba(255,255,255,0.28)" strokeWidth={1} />);
     }
   }
 

@@ -636,7 +636,7 @@
 .vr-geogrid-map { position: absolute; inset: 0; background: #0a0c0b; }
 .vr-geogrid-map .leaflet-container { background: #0a0c0b; font: inherit; }
 /* Tone the CARTO tiles down so the ranking nodes pop. */
-.vr-geogrid-map .leaflet-tile-pane { filter: saturate(0.7) brightness(0.82); }
+.vr-geogrid-map .leaflet-tile-pane { filter: saturate(0.8) brightness(1.05); }
 .vr-geogrid-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 500; }
 
 .vr-geogrid-legend {
