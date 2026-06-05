@@ -14,6 +14,39 @@
 </div>
 <% } %>
 
+<!-- Pending access requests — blocked Google sign-ins awaiting provisioning -->
+<% if (it.accessRequests && it.accessRequests.length > 0) { %>
+<div class="card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.06);">
+  <h3 style="font-size: 14px; font-weight: 600; color: #FBBF24; margin-bottom: 0.25rem;">⚠ Pending access requests (<%= it.accessRequests.length %>)</h3>
+  <p style="font-size: 13px; color: #94A3B8; margin-bottom: 1rem;">These people tried to sign in with Google but have no account yet. Approve to create their account, or dismiss.</p>
+  <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+    <% it.accessRequests.forEach(r => { %>
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 0.6rem 0.85rem;">
+      <div style="flex: 1; min-width: 200px;">
+        <div style="font-size: 14px; color: #E2E8F0; font-weight: 500;"><%= r.name || r.email %></div>
+        <div style="font-size: 12px; color: #94A3B8;"><%= r.email %><% if (r.attempts > 1) { %> · <%= r.attempts %> attempts<% } %></div>
+      </div>
+      <form method="POST" action="/admin/users" style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+        <input type="hidden" name="email" value="<%= r.email %>" />
+        <input type="hidden" name="name" value="<%= r.name || r.email %>" />
+        <select name="role" style="padding: 6px 10px; background: #1E293B; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 13px;">
+          <option value="standard">Standard</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button type="submit" style="padding: 6px 14px; background: #22C55E; color: #0B0B0B; border: none; border-radius: 6px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">Approve</button>
+      </form>
+      <form method="POST" action="/admin/users/access-requests/<%= r.id %>/dismiss" style="margin: 0;">
+        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+        <button type="submit" style="padding: 6px 14px; background: none; color: #94A3B8; border: 1px solid rgba(255,255,255,0.10); border-radius: 6px; font-family: var(--vendo-font); font-size: 13px; cursor: pointer;">Dismiss</button>
+      </form>
+    </div>
+    <% }) %>
+  </div>
+  <p style="font-size: 12px; color: #64748B; margin-top: 0.85rem;">Approved standard users get no channels by default — edit them afterwards to grant access.</p>
+</div>
+<% } %>
+
 <!-- Invite Form -->
 <div id="invite-form" style="display: none; margin-bottom: 1.5rem;">
   <div class="card" style="padding: 1.5rem;">
@@ -29,11 +62,6 @@
         <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Email</label>
           <input type="email" name="email" required placeholder="user@vendo.digital"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
-        </div>
-        <div>
-          <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Temporary Password</label>
-          <input type="text" name="password" required placeholder="They will change this on first login"
                  style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
         </div>
         <div>
@@ -109,7 +137,6 @@
         <td style="padding: 12px 16px; text-align: right;">
           <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
             <a href="/admin/users/<%= u.id %>/edit" style="font-size: 12px; color: #94A3B8; text-decoration: none; padding: 4px 8px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;">Edit</a>
-            <form method="POST" action="/admin/users/<%= u.id %>/reset-password" style="display:inline;"><input type="hidden" name="_csrf" value="<%= it.csrfToken %>" /><button type="submit" style="font-size: 12px; color: #F59E0B; background: none; border: 1px solid rgba(245,158,11,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer;">Reset PW</button></form>
             <button onclick="if(confirm('Delete <%= u.name %>? This cannot be undone.')) document.getElementById('delete-<%= u.id %>').submit()" style="font-size: 12px; color: #EF4444; background: none; border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 4px 8px; cursor: pointer;">Delete</button>
           </div>
           <form id="delete-<%= u.id %>" method="POST" action="/admin/users/<%= u.id %>/delete" style="display:none;"><input type="hidden" name="_csrf" value="<%= it.csrfToken %>" /></form>
@@ -121,27 +148,3 @@
   </table>
 </div>
 
-<% if (it.resetUser) { %>
-<!-- Reset Password Confirmation Modal -->
-<div id="reset-modal" style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6);">
-  <div style="background: #1E293B; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 2rem; max-width: 440px; width: 90%;">
-    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 0.5rem; color: #E2E8F0;">Reset Password</h3>
-    <p style="font-size: 14px; color: #94A3B8; margin-bottom: 1.25rem;">New temporary password for <strong style="color: #E2E8F0;"><%= it.resetUser.name %></strong>:</p>
-
-    <div style="display: flex; align-items: center; gap: 0.5rem; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; margin-bottom: 0.5rem;">
-      <code id="reset-pw-value" style="flex: 1; font-size: 15px; color: #22C55E; letter-spacing: 0.5px; word-break: break-all;"><%= it.resetUser.password %></code>
-      <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('reset-pw-value').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)" style="padding: 4px 10px; font-size: 12px; background: rgba(255,255,255,0.06); color: #94A3B8; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; white-space: nowrap; font-family: var(--vendo-font);">Copy</button>
-    </div>
-    <p style="font-size: 12px; color: #64748B; margin-bottom: 1.5rem;">They will be asked to change this on first login.</p>
-
-    <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-      <a href="/admin/users" style="padding: 8px 16px; background: transparent; color: #94A3B8; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; text-decoration: none; cursor: pointer;">Cancel</a>
-      <form method="POST" action="/admin/users/<%= it.resetUser.id %>/reset-password/confirm" style="display:inline;">
-        <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
-        <input type="hidden" name="password" value="<%= it.resetUser.password %>" />
-        <button type="submit" style="padding: 8px 16px; background: #F59E0B; color: #0B0B0B; border: none; border-radius: 8px; font-family: var(--vendo-font); font-size: 13px; font-weight: 600; cursor: pointer;">Confirm Reset</button>
-      </form>
-    </div>
-  </div>
-</div>
-<% } %>

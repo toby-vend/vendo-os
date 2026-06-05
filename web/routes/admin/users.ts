@@ -6,24 +6,31 @@ import {
   updateUser,
   deleteUser,
   setUserChannels,
-  updateUserPassword,
   getUserById,
   getUserByEmail,
   getUserRouteOverrides,
   setUserRouteOverrides,
+  listPendingAccessRequests,
+  dismissAccessRequest,
+  resolveAccessRequestByEmail,
 } from '../../lib/queries.js';
-import { hashPassword, generateId, validatePasswordComplexity, type SessionUser } from '../../lib/auth.js';
+import { generateId, type SessionUser } from '../../lib/auth.js';
 import { sendInviteNotifications } from '../../lib/notifications.js';
 import { ROUTE_SLUGS } from './permissions.js';
 
 export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
-  // List all users
+  // List all users + any pending access requests (blocked Google sign-ins)
   app.get('/', async (request, reply) => {
-    const [users, channels] = await Promise.all([getAllUsers(), getChannels()]);
-    reply.render('admin/users', { users, channels });
+    const [users, channels, accessRequests] = await Promise.all([
+      getAllUsers(),
+      getChannels(),
+      listPendingAccessRequests(),
+    ]);
+    reply.render('admin/users', { users, channels, accessRequests });
   });
 
-  // Create new user
+  // Create new user. Login is Google-only, so no password is set — the account
+  // simply needs to exist (matched by email) for that person's Google sign-in to work.
   app.post('/', async (request, reply) => {
     const body = request.body as Record<string, string | string[]>;
     const email = (typeof body.email === 'string' ? body.email : '').trim().toLowerCase();
@@ -31,32 +38,34 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     const VALID_ROLES = ['admin', 'standard', 'client'] as const;
     const rawRole = typeof body.role === 'string' ? body.role : 'standard';
     const role = (VALID_ROLES as readonly string[]).includes(rawRole) ? rawRole as 'admin' | 'standard' | 'client' : 'standard';
-    const password = (typeof body.password === 'string' ? body.password : '').trim();
     const channelIds = Array.isArray(body.channels) ? body.channels : (body.channels ? [body.channels] : []);
 
-    if (!email || !name || !password) {
-      const [users, channels] = await Promise.all([getAllUsers(), getChannels()]);
-      reply.render('admin/users', { users, channels, error: 'Email, name, and password are required' });
+    if (!email || !name) {
+      const [users, channels, accessRequests] = await Promise.all([getAllUsers(), getChannels(), listPendingAccessRequests()]);
+      reply.render('admin/users', { users, channels, accessRequests, error: 'Email and name are required' });
       return;
     }
 
     // Check for duplicate email
     const existing = await getUserByEmail(email);
     if (existing) {
-      const [users, channels] = await Promise.all([getAllUsers(), getChannels()]);
-      reply.render('admin/users', { users, channels, error: 'A user with that email already exists' });
+      const [users, channels, accessRequests] = await Promise.all([getAllUsers(), getChannels(), listPendingAccessRequests()]);
+      reply.render('admin/users', { users, channels, accessRequests, error: 'A user with that email already exists' });
       return;
     }
 
+    const currentUser = (request as any).user as SessionUser;
     const userId = generateId();
-    await createUser({ id: userId, email, name, passwordHash: hashPassword(password), role });
+    await createUser({ id: userId, email, name, role });
 
     if (channelIds.length > 0) {
       await setUserChannels(userId, channelIds);
     }
 
+    // Clear any pending access request now this email is provisioned
+    await resolveAccessRequestByEmail(email, currentUser.id);
+
     // Send invite notifications (non-blocking — don't delay the redirect)
-    const currentUser = (request as any).user as SessionUser;
     sendInviteNotifications({
       name,
       email,
@@ -64,6 +73,17 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
       invitedBy: currentUser.name,
     }).catch(e => console.error('[notify] Invite notification error:', e));
 
+    reply.redirect('/admin/users');
+  });
+
+  // Dismiss a pending access request (someone we don't want to grant access)
+  app.post('/access-requests/:id/dismiss', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const reqId = parseInt(id, 10);
+    if (!isNaN(reqId)) {
+      const currentUser = (request as any).user as SessionUser;
+      await dismissAccessRequest(reqId, currentUser.id);
+    }
     reply.redirect('/admin/users');
   });
 
@@ -136,42 +156,6 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     }
 
     await deleteUser(id);
-    reply.redirect('/admin/users');
-  });
-
-  // Reset password — step 1: generate and preview
-  app.post('/:id/reset-password', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const user = await getUserById(id);
-    if (!user) { reply.redirect('/admin/users'); return; }
-
-    // Generate a random compliant password (12 chars, mixed case + digit + symbol)
-    const lower = 'abcdefghijkmnpqrstuvwxyz';
-    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-    const digits = '23456789';
-    const symbols = '!@#$%&*';
-    const all = lower + upper + digits;
-    let pw = '';
-    pw += upper[Math.floor(Math.random() * upper.length)];
-    pw += lower[Math.floor(Math.random() * lower.length)];
-    pw += digits[Math.floor(Math.random() * digits.length)];
-    pw += symbols[Math.floor(Math.random() * symbols.length)];
-    for (let i = 0; i < 8; i++) pw += all[Math.floor(Math.random() * all.length)];
-    pw = pw.split('').sort(() => Math.random() - 0.5).join('');
-
-    const [users, channels] = await Promise.all([getAllUsers(), getChannels()]);
-    reply.render('admin/users', { users, channels, resetUser: { id: user.id, name: user.name, password: pw } });
-  });
-
-  // Reset password — step 2: confirm
-  app.post('/:id/reset-password/confirm', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const body = request.body as Record<string, string | string[]>;
-    const password = (typeof body.password === 'string' ? body.password : '').trim();
-
-    if (!password) { reply.redirect('/admin/users'); return; }
-
-    await updateUserPassword(id, hashPassword(password), true);
     reply.redirect('/admin/users');
   });
 };

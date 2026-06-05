@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { getUserByEmail, getUserById, updateUserPassword, logAuditEvent } from '../lib/queries.js';
+import { getUserById, updateUserPassword, logAuditEvent } from '../lib/queries.js';
 import {
   verifyPassword,
   hashPassword,
@@ -12,29 +12,12 @@ import {
   type SessionUser,
 } from '../lib/auth.js';
 
-// --- Login rate limiting (IP-based, in-memory) ---
-const LOGIN_WINDOW_MS = 60_000; // 1 minute
-const LOGIN_MAX_ATTEMPTS = 5;
-const loginAttempts = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = loginAttempts.get(ip);
-  if (!entry || now > entry.resetAt) {
-    loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
-    return false;
-  }
-  entry.count++;
-  return entry.count > LOGIN_MAX_ATTEMPTS;
-}
-
-// Clean up stale entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, entry] of loginAttempts) {
-    if (now > entry.resetAt) loginAttempts.delete(ip);
-  }
-}, 5 * 60_000).unref();
+// Login is Google-only — "Sign in with Google" is the sole entry point, gated
+// on an admin-provisioned account. The OAuth flow itself lives in google-oauth.ts.
+const LOGIN_MESSAGES: Record<string, string> = {
+  google: 'Google sign-in failed. Please try again.',
+  state: 'Your sign-in session expired. Please try again.',
+};
 
 export const authRoutes: FastifyPluginAsync = async (app) => {
   app.get('/login', async (request, reply) => {
@@ -44,41 +27,11 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
       reply.redirect('/');
       return;
     }
-    reply.render('login', {});
-  });
-
-  app.post('/login', async (request, reply) => {
-    const ip = request.ip;
-    if (isRateLimited(ip)) {
-      reply.code(429).render('login', { error: 'Too many login attempts. Please try again in a minute.' });
-      return;
-    }
-
-    const body = request.body as { email?: string; password?: string } | undefined;
-    const email = (body?.email || '').trim().toLowerCase();
-    const password = body?.password || '';
-
-    if (!email || !password) {
-      reply.render('login', { error: 'Email and password are required' });
-      return;
-    }
-
-    const user = await getUserByEmail(email);
-    if (!user || !verifyPassword(password, user.password_hash)) {
-      logAuditEvent({ eventType: 'login_failed', ipAddress: ip, details: `email: ${email}` }).catch(() => {});
-      reply.render('login', { error: 'Invalid email or password' });
-      return;
-    }
-
-    logAuditEvent({ eventType: 'login_success', userId: user.id, ipAddress: ip }).catch(() => {});
-    const token = createSessionToken({ userId: user.id, role: user.role, iat: Date.now() });
-    reply.header('Set-Cookie', sessionCookie(token));
-
-    if (user.must_change_password === 1) {
-      reply.redirect('/change-password');
-    } else {
-      reply.redirect('/');
-    }
+    const query = request.query as { flagged?: string; error?: string };
+    reply.render('login', {
+      flagged: query.flagged === '1',
+      error: query.error ? (LOGIN_MESSAGES[query.error] ?? null) : null,
+    });
   });
 
   app.get('/logout', async (_request, reply) => {

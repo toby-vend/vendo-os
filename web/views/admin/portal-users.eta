@@ -32,11 +32,6 @@
                  style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
         </div>
         <div>
-          <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Temporary Password</label>
-          <input type="text" name="password" required placeholder="They will change this on first login"
-                 style="width: 100%; padding: 8px 12px; background: #0B0B0B; border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; color: #E2E8F0; font-family: var(--vendo-font); font-size: 14px;">
-        </div>
-        <div>
           <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; margin-bottom: 0.4rem;">Client</label>
           <select name="client_id" id="portal-client-select" required
                   onchange="var opt = this.options[this.selectedIndex]; document.getElementById('portal-client-name').value = opt.dataset.name || '';"

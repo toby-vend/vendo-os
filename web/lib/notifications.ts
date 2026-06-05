@@ -187,3 +187,49 @@ export async function sendInviteNotifications(details: InviteDetails): Promise<{
   console.log(`[notify] Invite sent to ${details.email} — Slack: ${slack}, Email: ${email}`);
   return { slack, email };
 }
+
+// ── Admin alert: un-provisioned Google sign-in ────────────
+
+interface AccessRequestAlert {
+  requesterEmail: string;
+  requesterName?: string | null;
+  admins: { name: string; email: string }[];
+}
+
+/**
+ * Alert every admin that someone tried to sign in with Google but has no
+ * account yet. Fired non-blocking from the login callback — failures are
+ * logged, never thrown (the in-app pending list is the source of truth).
+ */
+export async function notifyAdminsOfAccessRequest(details: AccessRequestAlert): Promise<void> {
+  const reviewUrl = `${APP_URL}/admin/users`;
+  const who = details.requesterName ? `${details.requesterName} (${details.requesterEmail})` : details.requesterEmail;
+
+  const slackMessage = [
+    `🔐 *Vendo OS access request*`,
+    `${who} tried to sign in with Google but has no account yet.`,
+    '',
+    `Review & approve: ${reviewUrl}`,
+  ].join('\n');
+
+  const emailHtml = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px;">
+      <h2 style="margin: 0 0 8px; font-size: 20px; color: #1a1a1a;">Access request — Vendo OS</h2>
+      <p style="color: #555; font-size: 15px; line-height: 1.5;"><strong>${who}</strong> tried to sign in with Google but has no account yet. They've been blocked until you provision them.</p>
+      <a href="${reviewUrl}" style="display: inline-block; padding: 12px 28px; background: #22C55E; color: #0B0B0B; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; margin: 12px 0;">Review &amp; approve</a>
+    </div>
+  `;
+
+  await Promise.all(
+    details.admins.flatMap(admin => [
+      (async () => {
+        const slackUserId = await findSlackUserByEmail(admin.email);
+        if (slackUserId) await sendSlackDM(slackUserId, slackMessage);
+      })().catch(e => console.error('[notify] Access-request Slack error:', e)),
+      sendGmail(admin.email, 'Vendo OS — new access request', emailHtml)
+        .catch(e => console.error('[notify] Access-request email error:', e)),
+    ]),
+  );
+
+  console.log(`[notify] Access request for ${details.requesterEmail} alerted to ${details.admins.length} admin(s)`);
+}

@@ -148,7 +148,7 @@ app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
   // Public routes (no session required)
-  if (path.startsWith('/assets/') || path === '/login' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook' || path === '/api/frameio/webhook' || path === '/api/boxly/webhook' || path === '/api/slack/interact') return;
+  if (path.startsWith('/assets/') || path === '/login' || path === '/auth/google/login' || path === '/auth/google/callback' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook' || path === '/api/frameio/webhook' || path === '/api/boxly/webhook' || path === '/api/slack/interact') return;
 
   // Cron routes — validate Vercel cron secret
   if (path.startsWith('/api/cron/')) {

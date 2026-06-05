@@ -41,6 +41,19 @@ export interface ClientUserMapRow {
   client_name: string;
 }
 
+export interface AccessRequestRow {
+  id: number;
+  email: string;
+  name: string | null;
+  google_sub: string | null;
+  status: 'pending' | 'dismissed' | 'resolved';
+  attempts: number;
+  first_requested_at: string;
+  last_requested_at: string;
+  resolved_at: string | null;
+  resolved_by: string | null;
+}
+
 export interface ChannelRow {
   id: string;
   slug: string;
@@ -86,11 +99,16 @@ export async function getAllUsers(): Promise<(UserRow & { channels: string; goog
   `);
 }
 
-export async function createUser(user: { id: string; email: string; name: string; passwordHash: string; role: string }): Promise<void> {
+// Login is Google-only. Accounts created without a password get an unusable
+// sentinel hash (NOT NULL constraint) and must_change_password = 0 so the user
+// is never trapped on the now-defunct change-password screen.
+const NO_PASSWORD_SENTINEL = 'GOOGLE_OAUTH_NO_PASSWORD';
+
+export async function createUser(user: { id: string; email: string; name: string; passwordHash?: string; role: string }): Promise<void> {
   const now = new Date().toISOString();
   await db.execute({
-    sql: 'INSERT INTO users (id, email, name, password_hash, role, must_change_password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 1, ?, ?)',
-    args: [user.id, user.email, user.name, user.passwordHash, user.role, now, now],
+    sql: 'INSERT INTO users (id, email, name, password_hash, role, must_change_password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
+    args: [user.id, user.email, user.name, user.passwordHash ?? NO_PASSWORD_SENTINEL, user.role, now, now],
   });
 }
 
@@ -135,14 +153,14 @@ export async function createPortalUser(user: {
   id: string;
   email: string;
   name: string;
-  passwordHash: string;
+  passwordHash?: string;
   clientId: number;
   clientName: string;
 }): Promise<void> {
   const now = new Date().toISOString();
   await db.execute({
-    sql: 'INSERT INTO users (id, email, name, password_hash, role, must_change_password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 1, ?, ?)',
-    args: [user.id, user.email, user.name, user.passwordHash, 'client', now, now],
+    sql: 'INSERT INTO users (id, email, name, password_hash, role, must_change_password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
+    args: [user.id, user.email, user.name, user.passwordHash ?? NO_PASSWORD_SENTINEL, 'client', now, now],
   });
   await db.execute({
     sql: 'INSERT INTO client_user_map (user_id, client_id, client_name) VALUES (?, ?, ?)',
@@ -738,6 +756,23 @@ export async function initSchema(): Promise<void> {
     PRIMARY KEY (user_id, route_slug)
   )`, args: [] });
 
+  // Access requests — a Google sign-in for an email with no provisioned account.
+  // Blocked at login and surfaced to admins so they can create the account.
+  await db.execute({ sql: `CREATE TABLE IF NOT EXISTS access_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    name TEXT,
+    google_sub TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 1,
+    first_requested_at TEXT NOT NULL,
+    last_requested_at TEXT NOT NULL,
+    resolved_at TEXT,
+    resolved_by TEXT
+  )`, args: [] });
+
+  await db.execute({ sql: `CREATE INDEX IF NOT EXISTS idx_access_requests_status ON access_requests(status)`, args: [] });
+
   // Sidebar config
   const { initSidebarSchema } = await import('./sidebar.js');
   await initSidebarSchema();
@@ -799,7 +834,7 @@ export async function deleteUserOAuthToken(userId: string, provider = 'google'):
 
 // --- Audit Log ---
 
-export type AuditEventType = 'login_success' | 'login_failed' | 'password_changed' | 'user_created' | 'user_deleted' | 'oauth_connected' | 'oauth_disconnected';
+export type AuditEventType = 'login_success' | 'login_failed' | 'password_changed' | 'user_created' | 'user_deleted' | 'oauth_connected' | 'oauth_disconnected' | 'login_blocked_no_account';
 
 export async function logAuditEvent(event: {
   eventType: AuditEventType;
@@ -811,4 +846,75 @@ export async function logAuditEvent(event: {
     sql: 'INSERT INTO audit_log (event_type, user_id, ip_address, details, created_at) VALUES (?, ?, ?, ?, ?)',
     args: [event.eventType, event.userId ?? null, event.ipAddress ?? null, event.details ?? null, new Date().toISOString()],
   });
+}
+
+// --- Access requests (un-provisioned Google sign-ins) ---
+
+/**
+ * Record (or bump) an access request for an email that tried to sign in via
+ * Google but has no provisioned account. Idempotent on email: repeat attempts
+ * increment the counter and refresh the timestamp rather than duplicating, and
+ * a previously-dismissed request is re-opened to pending.
+ */
+export async function recordAccessRequest(data: { email: string; name?: string | null; googleSub?: string | null }): Promise<void> {
+  const now = new Date().toISOString();
+  await db.execute({
+    sql: `INSERT INTO access_requests (email, name, google_sub, status, attempts, first_requested_at, last_requested_at)
+          VALUES (?, ?, ?, 'pending', 1, ?, ?)
+          ON CONFLICT(email) DO UPDATE SET
+            attempts = access_requests.attempts + 1,
+            last_requested_at = excluded.last_requested_at,
+            name = COALESCE(excluded.name, access_requests.name),
+            google_sub = COALESCE(excluded.google_sub, access_requests.google_sub),
+            status = CASE WHEN access_requests.status = 'resolved' THEN 'resolved' ELSE 'pending' END,
+            resolved_at = CASE WHEN access_requests.status = 'resolved' THEN access_requests.resolved_at ELSE NULL END,
+            resolved_by = CASE WHEN access_requests.status = 'resolved' THEN access_requests.resolved_by ELSE NULL END`,
+    args: [data.email, data.name ?? null, data.googleSub ?? null, now, now],
+  });
+}
+
+export async function listPendingAccessRequests(): Promise<AccessRequestRow[]> {
+  try {
+    return await rows<AccessRequestRow>(
+      "SELECT * FROM access_requests WHERE status = 'pending' ORDER BY last_requested_at DESC",
+    );
+  } catch {
+    // Table may not exist yet (migration not run) — fail soft.
+    return [];
+  }
+}
+
+export async function countPendingAccessRequests(): Promise<number> {
+  try {
+    const count = await scalar("SELECT COUNT(*) FROM access_requests WHERE status = 'pending'");
+    return (count as number) ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function getAccessRequestById(id: number): Promise<AccessRequestRow | null> {
+  const result = await rows<AccessRequestRow>('SELECT * FROM access_requests WHERE id = ?', [id]);
+  return result[0] ?? null;
+}
+
+export async function dismissAccessRequest(id: number, byUserId: string): Promise<void> {
+  await db.execute({
+    sql: "UPDATE access_requests SET status = 'dismissed', resolved_at = ?, resolved_by = ? WHERE id = ?",
+    args: [new Date().toISOString(), byUserId, id],
+  });
+}
+
+/** Mark any pending request for this email as resolved — called when an admin provisions the account. */
+export async function resolveAccessRequestByEmail(email: string, byUserId: string): Promise<void> {
+  await db.execute({
+    sql: "UPDATE access_requests SET status = 'resolved', resolved_at = ?, resolved_by = ? WHERE email = ? AND status != 'resolved'",
+    args: [new Date().toISOString(), byUserId, email],
+  });
+}
+
+export async function getAdminUsers(): Promise<{ id: string; name: string; email: string }[]> {
+  return rows<{ id: string; name: string; email: string }>(
+    "SELECT id, name, email FROM users WHERE role = 'admin' ORDER BY name",
+  );
 }

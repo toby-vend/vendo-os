@@ -6,7 +6,7 @@ import {
   getUserByEmail,
 } from '../../lib/queries.js';
 import { getAllClientsAdmin } from '../../lib/queries/clients.js';
-import { hashPassword, generateId } from '../../lib/auth.js';
+import { generateId } from '../../lib/auth.js';
 
 export const adminPortalUsersRoutes: FastifyPluginAsync = async (app) => {
   // List all client portal users
@@ -23,11 +23,10 @@ export const adminPortalUsersRoutes: FastifyPluginAsync = async (app) => {
     const body = request.body as Record<string, string | string[]>;
     const email = (typeof body.email === 'string' ? body.email : '').trim().toLowerCase();
     const name = (typeof body.name === 'string' ? body.name : '').trim();
-    const password = (typeof body.password === 'string' ? body.password : '').trim();
     const clientIdStr = typeof body.client_id === 'string' ? body.client_id : '';
     const clientName = (typeof body.client_name === 'string' ? body.client_name : '').trim();
 
-    if (!email || !name || !password || !clientIdStr) {
+    if (!email || !name || !clientIdStr) {
       const [portalUsers, clients] = await Promise.all([
         getAllPortalUsers(),
         getAllClientsAdmin(),
@@ -35,7 +34,7 @@ export const adminPortalUsersRoutes: FastifyPluginAsync = async (app) => {
       reply.render('admin/portal-users', {
         portalUsers,
         clients,
-        error: 'Email, name, password, and client are required',
+        error: 'Email, name, and client are required',
       });
       return;
     }
@@ -73,7 +72,6 @@ export const adminPortalUsersRoutes: FastifyPluginAsync = async (app) => {
       id: generateId(),
       email,
       name,
-      passwordHash: hashPassword(password),
       clientId,
       clientName,
     });
