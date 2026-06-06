@@ -26,10 +26,48 @@ export interface FewShotExample {
 }
 
 /**
- * Distilled style standard. Filled from analysis of past reports.
- * Empty string = not yet configured (no effect on the prompt).
+ * Distilled style standard.
+ *
+ * PROVISIONAL BASELINE — derived from Vendo's established client-report email
+ * format (web/views/reports/preview.eta) and house conventions, NOT yet from
+ * Toby's uploaded example reports. Once real reports land in
+ * data/report-examples/, refine/replace this and add FEW_SHOT_EXAMPLES so the
+ * output is calibrated to the genuine standard.
+ *
+ * This guide is report-LEVEL (how the finished report reads as a whole). The
+ * per-field rules in report-ai.ts cover each section's mechanics — this avoids
+ * repeating them and focuses on cohesion and house voice.
  */
-export const STYLE_GUIDE = '';
+export const STYLE_GUIDE = `The finished report is delivered as a friendly monthly email. The greeting
+and sign-off are added automatically — your sections sit inside this flow and
+must read as one coherent, confident update, not five disconnected blocks:
+
+  Hi [first name], — (templated)
+  [Period] [Platform] Performance   → performance_summary
+  Screenshots                       → (team-uploaded; you don't write these)
+  This Month                        → exec_summary, then wins, then worked_on
+  Things to keep an eye on          → risks (hidden entirely if "no material risks")
+  Next Month & Ongoing              → focus (team) + recommendations
+  Thanks, [name] — (templated)
+
+House standard:
+- One narrative thread. The exec_summary sets the headline; wins, worked_on and
+  recommendations should reinforce it, not restate it. Don't repeat the same
+  metric verbatim in three places — lead with it once, then build.
+- Numbers are exact and lifted from the canonical data: "£2,644.32", "112
+  conversions", "CPR £23.61". Never round into vagueness, never invent.
+- "CPR" (Cost per Result) is the house term for cost-per-conversion. Campaign
+  rows are bottom-funnel only (Spend / conversions / CPR / ROAS where revenue
+  exists). Campaign names verbatim, including the "VD | …" prefix.
+- Voice: a senior account director who is on top of the account — warm, plain
+  English, momentum-focused, addressed to "you". Confident without hype. No
+  agency jargon, no filler, no catastrophising.
+- worked_on and recommendations should make the client feel the account is
+  being actively driven: concrete delivery this month, concrete plans next.
+  Frame everything as forward progress.
+- Length discipline: exec_summary 2–4 sentences; wins 2–5 bullets; worked_on
+  2–4 sentences or ≤5 bullets; risks 1–4 (or hidden); recommendations 2–4.
+  Tight beats padded.`;
 
 /**
  * Verbatim worked examples. Keep to 1–2 to control prompt cost.
