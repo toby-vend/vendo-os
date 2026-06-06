@@ -25,9 +25,24 @@ import { db, rows, scalar } from '../queries/base.js';
 // Public types
 // ---------------------------------------------------------------------------
 
+export interface MeetingDiscussion {
+  title: string;
+  /** YYYY-MM-DD */
+  date: string;
+  /** Fathom's own meeting summary, trimmed. Internal context — not client-facing. */
+  summary: string;
+}
+
 export interface NarrativeContext {
   asana_tasks_completed: Array<{ name: string; completed_at: string; project: string | null }>;
   meeting_actions: Array<{ summary: string; assignee: string | null; meeting_date: string }>;
+  /**
+   * What was discussed in the client's calls this period — derived from each
+   * meeting's Fathom summary. Internal context that feeds the AI so the report
+   * reflects topics actually covered. NOT gated by assignee (it describes the
+   * call, not who owns a task) and NOT placed in the client-facing draft.
+   */
+  meeting_discussions: MeetingDiscussion[];
   last_focus_next_md: string | null;
   suggested_worked_on_md: string;
 }
@@ -40,6 +55,10 @@ const VENDO_TEAM_DOMAIN = 'vendodigital.co.uk';
 const MAX_ASANA_TASKS = 50;
 const MAX_MEETING_ACTIONS = 50;
 const VISIBLE_LIST_LIMIT = 10;
+/** How many meetings' summaries to feed the AI as discussion context. */
+const MAX_MEETING_DISCUSSIONS = 8;
+/** Cap each meeting summary so a chatty month doesn't blow the prompt budget. */
+const MAX_SUMMARY_CHARS = 2000;
 
 // ---------------------------------------------------------------------------
 // Internal row shapes
@@ -269,6 +288,56 @@ async function fetchMeetingActions(
 }
 
 /**
+ * Fetch the client's meeting summaries for the period — "what was discussed
+ * this month". Unlike meeting actions, this is NOT gated by assignee: the
+ * summary describes the call itself, which is exactly the context the report
+ * writer needs. Linked by `meetings.client_name` (canonical clients.name).
+ *
+ * Returns Fathom's own summary per meeting, capped in count and length. This
+ * is internal context only — callers must not surface it verbatim to clients.
+ */
+async function fetchMeetingDiscussions(
+  clientId: number,
+  periodStart: string,
+  periodEnd: string,
+): Promise<MeetingDiscussion[]> {
+  const periodEndExclusive = nextDay(periodEnd);
+
+  const clientName = await scalar<string>(
+    'SELECT name FROM clients WHERE id = ? LIMIT 1',
+    [clientId],
+  );
+  if (!clientName) return [];
+
+  const raw = await rows<{ title: string; date: string; summary: string }>(
+    `
+    SELECT title, date, summary
+    FROM meetings
+    WHERE client_name = ?
+      AND date >= ?
+      AND date < ?
+      AND summary IS NOT NULL
+      AND length(trim(summary)) > 0
+    ORDER BY date DESC
+    LIMIT ?
+    `,
+    [clientName, periodStart, periodEndExclusive, MAX_MEETING_DISCUSSIONS],
+  );
+
+  return raw.map(r => {
+    const summary = (r.summary || '').trim();
+    return {
+      title: (r.title || 'Untitled meeting').trim(),
+      date: shortDate(r.date),
+      summary:
+        summary.length > MAX_SUMMARY_CHARS
+          ? `${summary.slice(0, MAX_SUMMARY_CHARS)}…`
+          : summary,
+    };
+  });
+}
+
+/**
  * Fetch the previous month's `focus_next_md` for this client — the most
  * recent `client_reports` row whose period ended before this report's
  * period started.
@@ -297,7 +366,9 @@ async function fetchLastFocusNext(
 // Markdown assembly
 // ---------------------------------------------------------------------------
 
-function assembleMarkdown(ctx: Omit<NarrativeContext, 'suggested_worked_on_md'>): string {
+function assembleMarkdown(
+  ctx: Pick<NarrativeContext, 'asana_tasks_completed' | 'meeting_actions' | 'last_focus_next_md'>,
+): string {
   const sections: string[] = [];
 
   sections.push('## Last month\'s focus');
@@ -357,9 +428,10 @@ export async function buildNarrativeContext(
   periodStart: string,
   periodEnd: string,
 ): Promise<NarrativeContext> {
-  const [asanaTasks, meetingActions, lastFocus] = await Promise.all([
+  const [asanaTasks, meetingActions, meetingDiscussions, lastFocus] = await Promise.all([
     fetchAsanaTasks(clientId, periodStart, periodEnd),
     fetchMeetingActions(clientId, periodStart, periodEnd),
+    fetchMeetingDiscussions(clientId, periodStart, periodEnd),
     fetchLastFocusNext(clientId, periodStart),
   ]);
 
@@ -375,6 +447,9 @@ export async function buildNarrativeContext(
 
   return {
     ...partial,
+    meeting_discussions: meetingDiscussions,
+    // The client-facing draft stays deliberately scoped to completed work
+    // (Asana + gated meeting actions). Discussions are AI context only.
     suggested_worked_on_md: assembleMarkdown(partial),
   };
 }

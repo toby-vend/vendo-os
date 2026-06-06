@@ -28,7 +28,6 @@ import {
   deleteScreenshot,
   reorderScreenshots,
   updateNarrative,
-  updateAiBlocks,
   updateAiBlock,
   submitForReview,
   approveReport,
@@ -39,11 +38,7 @@ import {
   type ScreenshotPlatform,
   type ReportStatus,
 } from '../lib/queries/reports.js';
-import { generateReportInsights } from '../lib/report-ai.js';
-// AGENT-COORD: stub for A2 buildGoogleAdsPeriodSummary — extends ReportAiInput
-// with googleAdsSummary so the AI prefers structured data over OCR when present.
-import { buildGoogleAdsPeriodSummary } from '../lib/reports/gads-summary.js';
-import { reconcileClientGads } from '../lib/reports/gads-reconcile.js';
+import { generateReportForId } from '../lib/reports/generate.js';
 import { safeStringify } from '../lib/reports/dashboard-shell.js';
 import { buildDashboardData, recomputeDashboard } from '../lib/reports/build-dashboard-data.js';
 
@@ -566,58 +561,19 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     if (!Number.isFinite(id)) return reply.code(404).send('Not found');
     const report = await getReport(id);
     if (!report) return reply.code(404).send('Not found');
-    const screenshots = await listScreenshots(id);
 
-    // Best-effort Google Ads summary — if it fails, we still fall back to
-    // screenshot-only generation. Don't block on a failed sync.
-    let googleAdsSummary: Awaited<ReturnType<typeof buildGoogleAdsPeriodSummary>> | null = null;
-    try {
-      googleAdsSummary = await buildGoogleAdsPeriodSummary(
-        report.client_id,
-        report.period_start,
-        report.period_end,
-      );
-    } catch (err) {
-      request.log?.warn?.({ err }, 'Google Ads summary unavailable — generating from screenshots only');
-    }
-
-    // Reconciliation guardrail — compare the DB's active spend against the live
-    // Google Ads API for the period. Non-blocking: a material variance is logged
-    // so a drifted report is caught at generation time. (See gads-reconcile.ts.)
-    try {
-      const recon = await reconcileClientGads(report.client_id, report.period_start, report.period_end);
-      if (recon && !recon.withinTolerance) {
-        request.log?.warn?.(
-          { clientId: report.client_id, ...recon },
-          `Google Ads spend variance ${recon.variancePct.toFixed(1)}% (DB £${recon.dbActiveSpend.toFixed(2)} vs API £${recon.apiActiveSpend.toFixed(2)}) — report may be stale`,
-        );
-      }
-    } catch (err) {
-      request.log?.warn?.({ err }, 'Google Ads reconciliation skipped');
-    }
-
-    try {
-      const out = await generateReportInsights({
-        clientName: report.client_display_name || report.client_name,
-        vertical: report.client_vertical,
-        periodLabel: report.period_label,
-        workedOnMd: report.worked_on_md,
-        focusNextMd: report.focus_next_md,
-        screenshots: screenshots.map(s => ({ platform: s.platform, caption: s.caption, url: s.blob_url })),
-        ...(googleAdsSummary && googleAdsSummary.has_data
-          ? { googleAdsSummary }
-          : {}),
-      }, user.id);
-      await updateAiBlocks(id, {
-        execSummaryMd: out.exec_summary,
-        performanceSummaryMd: out.performance_summary,
-        winsMd: out.wins,
-        risksMd: out.risks,
-        recommendationsMd: out.recommendations,
-      });
-    } catch (err) {
-      request.log?.error?.({ err }, 'Report AI generation failed');
-      const msg = err instanceof Error ? err.message : 'Generation failed';
+    // Shared pipeline: rebuilds the Google Ads summary on the fly, runs the
+    // reconciliation guardrail, pulls narrative + meeting context, and
+    // generates the AI blocks. The manual flow keeps the team's hand-written
+    // `worked_on_md` (applyNarrativeDraft defaults off) but still benefits
+    // from the auto-pulled meeting context.
+    const gen = await generateReportForId(id, {
+      userId: user.id,
+      log: (m) => request.log?.info?.(m),
+    });
+    if (!gen.aiGenerated) {
+      request.log?.error?.({ aiError: gen.aiError }, 'Report AI generation failed');
+      const msg = gen.aiError ?? 'Generation failed';
       return reply.code(500).type('text/html').send(
         `<div class="r-error">AI generation failed: ${msg.slice(0, 200)}</div>`,
       );

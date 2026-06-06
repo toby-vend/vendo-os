@@ -22,18 +22,9 @@
  * cron stays cheap on re-runs.
  */
 import { db } from '../queries/base.js';
-import {
-  createReport,
-  findReport,
-  setGadsSummary,
-  updateAiBlocks,
-} from '../queries/reports.js';
+import { createReport, findReport } from '../queries/reports.js';
 import { consoleLog } from '../monitors/base.js';
-import { generateReportInsights } from '../report-ai.js';
-// AGENT-COORD: stubs for A2 + A3 — replaced at merge time.
-import { buildGoogleAdsPeriodSummary } from '../reports/gads-summary.js';
-import { reconcileClientGads } from '../reports/gads-reconcile.js';
-import { buildNarrativeContext, saveNarrativeDraft } from '../reports/narrative-context.js';
+import { generateReportForId } from '../reports/generate.js';
 
 const LOG_SOURCE = 'monthly-client-reports';
 
@@ -120,76 +111,19 @@ export async function runMonthlyClientReports(): Promise<MonthlyClientReportsRes
       created++;
       rows.push({ clientId, clientName, reportId, skipped: false });
 
-      // 1) Google Ads structured summary — A2's stub returns has_data=false
-      // until A2 lands the real aggregation. Either way the call is safe.
-      let gadsSummary: Awaited<ReturnType<typeof buildGoogleAdsPeriodSummary>> | null = null;
-      try {
-        gadsSummary = await buildGoogleAdsPeriodSummary(clientId, period.start, period.end);
-        if (gadsSummary.has_data) {
-          await setGadsSummary(reportId, JSON.stringify(gadsSummary));
-          gadsSummaryAttached++;
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        consoleLog(LOG_SOURCE, `Google Ads summary failed for ${clientName}: ${msg}`);
-      }
-
-      // 1b) Reconciliation guardrail — flag if the DB's active spend has drifted
-      // from the live Google Ads API for this period (non-blocking; logs only).
-      try {
-        const recon = await reconcileClientGads(clientId, period.start, period.end);
-        if (recon && !recon.withinTolerance) {
-          consoleLog(
-            LOG_SOURCE,
-            `⚠ Google Ads spend variance for ${clientName}: ${recon.variancePct.toFixed(1)}% ` +
-              `(DB £${recon.dbActiveSpend.toFixed(2)} vs API £${recon.apiActiveSpend.toFixed(2)}) — report may be stale`,
-          );
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        consoleLog(LOG_SOURCE, `Google Ads reconciliation skipped for ${clientName}: ${msg}`);
-      }
-
-      // 2) Suggested narrative draft — A3's stub returns empty until A3
-      // lands. Skip the save when there's nothing useful to draft.
-      try {
-        const ctx = await buildNarrativeContext(clientId, period.start, period.end);
-        if (ctx.suggested_worked_on_md && ctx.suggested_worked_on_md.trim()) {
-          await saveNarrativeDraft(reportId, ctx.suggested_worked_on_md);
-          narrativeAttached++;
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        consoleLog(LOG_SOURCE, `Narrative context failed for ${clientName}: ${msg}`);
-      }
-
-      // 3) AI insights — fire Sonnet with whatever structured signal we have.
-      // No screenshots at this point (the team uploads them in the editor).
-      // The prompt is happy with structured data alone when has_data is true,
-      // and gracefully degrades to placeholder copy otherwise.
-      try {
-        const out = await generateReportInsights({
-          clientName,
-          vertical: null,
-          periodLabel: period.label,
-          workedOnMd: '',
-          focusNextMd: '',
-          screenshots: [],
-          ...(gadsSummary && gadsSummary.has_data ? { googleAdsSummary: gadsSummary } : {}),
-        }, null);
-        await updateAiBlocks(reportId, {
-          execSummaryMd: out.exec_summary,
-          performanceSummaryMd: out.performance_summary,
-          winsMd: out.wins,
-          risksMd: out.risks,
-          recommendationsMd: out.recommendations,
-        });
-        aiGenerated++;
-      } catch (err) {
-        aiFailed++;
-        const msg = err instanceof Error ? err.message : String(err);
-        consoleLog(LOG_SOURCE, `AI generation failed for ${clientName} (report ${reportId}): ${msg}`);
-      }
+      // Full pipeline: Google Ads summary + reconciliation guardrail, narrative
+      // context (Asana completions + meeting actions + call discussions),
+      // auto-write the "what we worked on" draft into the report, then generate
+      // the five AI blocks. Each external step degrades gracefully on failure.
+      const gen = await generateReportForId(reportId, {
+        userId: null,
+        applyNarrativeDraft: true,
+        log: (m) => consoleLog(LOG_SOURCE, m),
+      });
+      if (gen.gadsHasData) gadsSummaryAttached++;
+      if (gen.narrativeApplied) narrativeAttached++;
+      if (gen.aiGenerated) aiGenerated++;
+      else aiFailed++;
     } catch (err) {
       failed++;
       const error = err instanceof Error ? err.message : String(err);

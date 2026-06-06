@@ -65,6 +65,7 @@ import type { ImageBlockParam, TextBlockParam, Tool } from '@anthropic-ai/sdk/re
 import { trackUsage } from './usage-tracker.js';
 import { PLATFORM_OPTIONS, type ScreenshotPlatform } from './queries/reports.js';
 import type { GoogleAdsPeriodSummary } from './reports/gads-summary.js';
+import { renderStyleAddendum } from './reports/report-style.js';
 
 const MODEL = 'claude-sonnet-4-6';
 
@@ -88,6 +89,29 @@ export interface ReportAiInput {
    * screenshot-driven for now.
    */
   googleAdsSummary?: GoogleAdsPeriodSummary;
+  /**
+   * Optional internal meeting context — what was discussed in the client's
+   * calls this period (from Fathom summaries). Used to ground the qualitative
+   * sections (exec summary, wins, "what we worked on" framing,
+   * recommendations) in what actually happened. INTERNAL only: never quoted
+   * verbatim or surfaced as client-facing copy, and never a source of metrics.
+   */
+  meetingDiscussions?: Array<{ title: string; date: string; summary: string }>;
+  /**
+   * Optional list of work completed this period — Asana tasks closed and
+   * meeting action items. INTERNAL source: task names often contain internal
+   * shorthand and personal names, so the model must synthesise client-ready
+   * prose from them, never reproduce them verbatim. Grounds the "what we
+   * worked on" narrative and wins in real delivery.
+   */
+  completedWork?: Array<{ label: string; date: string; source: 'asana' | 'meeting' }>;
+  /**
+   * When true, ask the model to also draft the client-facing "What we worked
+   * on" narrative (returned as `worked_on`). Used by the automated flow when
+   * the team hasn't written one. When false, the model uses the supplied
+   * `workedOnMd` as-is and does not return `worked_on`.
+   */
+  draftWorkedOn?: boolean;
 }
 
 export interface ReportAiOutput {
@@ -96,17 +120,34 @@ export interface ReportAiOutput {
   wins: string;
   risks: string;
   recommendations: string;
+  /** Present only when `draftWorkedOn` was requested. */
+  worked_on?: string;
 }
 
-const SYSTEM_PROMPT = `You are a senior account director at Vendo Digital, a UK digital marketing agency. You are drafting the AI-generated sections of a monthly client performance report.
+const BASE_SYSTEM_PROMPT = `You are a senior account director at Vendo Digital, a UK digital marketing agency. You are drafting the AI-generated sections of a monthly client performance report.
 
 You will be given:
 - Client name and reporting period
 - One or more performance screenshots — each prefixed with a header naming the platform (Google Ads, Meta, etc.) and any caption the account team wrote. **Read the actual numbers off the charts and tables in the images** — spend, clicks, impressions, conversions, purchases, CTR, ROAS, CPC, CPL, lead counts, revenue, comparison-period deltas, per-campaign breakdowns — and use them in your output.
 - A "What we worked on" narrative
 - A "Focus next period" narrative
+- Optionally, an "Internal meeting context" block — short summaries of the calls held with the client this period
+- Optionally, a "Work completed this period" list — Asana tasks closed and meeting actions for the account
 
 If a STRUCTURED GOOGLE ADS DATA block is provided, use those numbers as canonical — do not re-derive from the Google Ads screenshot. Screenshots may still be present for visual context (e.g. trend charts) but the structured block is authoritative.
+
+Internal meeting context — handle with care:
+- This is internal background (auto-generated call summaries) to help you understand what was worked on and discussed. It is NOT client-facing text.
+- Use it to: enrich the "what we worked on" framing, identify genuine wins and work delivered, and shape sensible recommendations and next steps that reflect what was actually discussed.
+- NEVER quote it verbatim, and NEVER surface internal/commercial details from it in the report — e.g. pricing or contract negotiations, fees, staffing or internal frustrations, churn/cancellation risk, complaints, or anything the client would not expect to read back in their own performance report. When in doubt, leave it out.
+- It is NOT a source of performance metrics. All spend/conversion/ROAS numbers must still come only from the screenshots, captions, or the structured Google Ads block. Meeting context informs qualitative narrative only.
+
+"Work completed this period" — handle with care:
+- This is an internal list (Asana task names and meeting action items). Task names use internal shorthand and frequently name individual team members or contacts — these are NOT for the client's eyes.
+- Synthesise it into client-appropriate themes of delivery (e.g. "migrated your lead capture to the new CRM", "fixed a form issue on the aligner landing page", "completed quarterly and monthly optimisations"). Never reproduce raw task names, internal contact/staff names, ticket references, or internal admin chores (e.g. "send summary email to X") verbatim.
+- Use it to ground the "what we worked on" narrative and the wins. It is not a source of metrics.
+
+When asked to draft the "What we worked on" narrative (the \`worked_on\` field): write 2–4 short, client-facing sentences or up to ~5 tight bullets describing what Vendo delivered this period, drawn from the completed-work list and meeting context, in the same confident, momentum-focused voice as the rest of the report. Lead with the client-relevant outcome, not the internal task. If there is no real delivery signal, return a brief, honest line rather than padding.
 
 Use UK English throughout. Currency is GBP (£) unless a screenshot clearly shows otherwise.
 
@@ -126,17 +167,20 @@ Tone — read carefully:
 Call the \`submit_report\` tool with all five fields filled in. Every field is required — do not return an empty string for any of them. The performance_summary field MUST contain a structured metric breakdown extracted from the screenshots; the others are short narrative blocks.`;
 
 /**
- * Tool definition for the structured report output. Using tool-use rather
- * than free-text JSON guarantees Claude returns exactly the five fields we
- * need, in the right shape, and prevents JSON-truncation issues.
+ * Final system prompt = base rules + optional style standard / few-shot
+ * examples distilled from past reports (see report-style.ts). When the style
+ * module is unconfigured this is identical to the base prompt.
  */
-const SUBMIT_REPORT_TOOL: Tool = {
-  name: 'submit_report',
-  description: 'Submit the five generated sections of a monthly client performance report. Every field is required.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      performance_summary: {
+const SYSTEM_PROMPT = `${BASE_SYSTEM_PROMPT}${renderStyleAddendum()}`;
+
+const WORKED_ON_PROPERTY = {
+  type: 'string' as const,
+  description:
+    'Client-facing "What we worked on" narrative for the period — 2–4 short sentences or up to ~5 tight bullets. Synthesise from the "Work completed this period" list and meeting context into client-appropriate themes of delivery. NEVER reproduce raw internal task names, internal staff/contact names, or admin chores verbatim. Same confident, momentum-focused voice as the rest of the report. Markdown.',
+};
+
+const REPORT_PROPERTIES = {
+  performance_summary: {
         type: 'string',
         description:
           'Markdown metric breakdown extracted from the screenshots. Section ordering matters — follow this layout exactly:\n\n**1. CRM funnel (only if visible in screenshots)** — for dental / lead-gen / B2B accounts, when a CRM screenshot is provided (Go High Level / GHL, Boxly, HubSpot, etc.) this comes FIRST under a heading like "Go High Level Leads:" or "Boxly:". List each campaign\'s funnel breakdown showing the lead lifecycle exactly as it appears (e.g. Lead → Follow Up → Scheduled / Booked → Won / Lost), with counts. Format example:\n\n**Go High Level Leads:**\n- Dental Implants: 17\n  - Lead: 2\n  - Follow Up: 9\n  - Scheduled: 4\n  - Won: 1\n  - Lost: 1\n\n**2. Overall [Platform] Performance** — for each ad platform that appears (Meta, Google Ads, etc.), give a top-line summary subsection. Format example:\n\n**Overall Meta Performance:**\n- Spend: £10,568.74\n- Purchases: 258\n- Revenue: £115,937.93\n- ROAS: 10.97\n\n**3. Individual Campaign Performance** — per-campaign rows.\n\nEXCLUDE any campaign row with £0 spend (or zero/blank impressions and clicks) — those campaigns were not active.\n\n**Per-campaign rows must be tight and bottom-funnel only.** Use these metrics:\n  - Spend\n  - Conversion volume — labelled per the account: "Purchases" (ecom), "Results (View Content)" (dental on Meta), "Results (Lead Forms)" (instant-form lead-gen), "Leads" or "Results (website leads)" (other)\n  - **CPR** (Cost per Result) — Vendo\'s preferred term for cost per conversion. Derive from Spend ÷ conversions if not shown.\n  - ROAS / Purchase ROAS (ecom) OR omit if there is no revenue tracked\n\nDo NOT include impressions, reach, frequency, CPM, CTR, CPC, or other upper-funnel vanity metrics in the per-campaign rows — those go in the narrative blocks (wins / risks / This Month) only when they tell a real story.\n\nUse the exact campaign names shown. Vendo campaigns are typically prefixed "VD |" and follow the pattern "VD | [Type] | [Audience] | [Optimisation]" (e.g. "VD | Dental Implant | Lead - View Content", "VD | Sales | All Products | Broad | CBO"). Preserve them verbatim. Format examples:\n\n*VD | Dental Implant | Lead - View Content*\n- Spend: £985.27\n- Results (View Content): 16\n- CPR: £61.58\n\n*VD | Sales | All Products | Broad | CBO*\n- Spend: £2,551.85\n- Purchases: 66\n- CPR: £38.66 (per purchase)\n- Purchase ROAS: 14.19',
@@ -161,10 +205,28 @@ const SUBMIT_REPORT_TOOL: Tool = {
         description:
           'Markdown bullet list of 2–4 specific, actionable next steps that follow from the risks, the metrics, and the focus-next narrative. Vendo "Next Month & Ongoing" sections typically cover: upcoming content shoot days and what they\'ll capture, new campaign launches that depend on incoming creative or landing pages, creative refreshes, A/B tests being introduced, and tooling additions (e.g. Motion for creative analysis). Frame as forward momentum, not as overdue work.',
       },
+} as const;
+
+/**
+ * Build the submit_report tool. Using tool-use rather than free-text JSON
+ * guarantees Claude returns exactly the fields we need, in the right shape,
+ * and prevents JSON-truncation issues. When `draftWorkedOn` is set, the tool
+ * additionally requires a client-facing `worked_on` narrative.
+ */
+function buildSubmitReportTool(draftWorkedOn: boolean): Tool {
+  const baseRequired = ['performance_summary', 'exec_summary', 'wins', 'risks', 'recommendations'];
+  return {
+    name: 'submit_report',
+    description: 'Submit the generated sections of a monthly client performance report. Every field is required.',
+    input_schema: {
+      type: 'object',
+      properties: draftWorkedOn
+        ? { ...REPORT_PROPERTIES, worked_on: WORKED_ON_PROPERTY }
+        : { ...REPORT_PROPERTIES },
+      required: draftWorkedOn ? [...baseRequired, 'worked_on'] : baseRequired,
     },
-    required: ['performance_summary', 'exec_summary', 'wins', 'risks', 'recommendations'],
-  },
-};
+  };
+}
 
 let _anthropic: Anthropic | null = null;
 function anthropic(): Anthropic {
@@ -264,15 +326,45 @@ function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlo
     }
   }
 
-  blocks.push({
-    type: 'text',
-    text: `\n## What we worked on\n${input.workedOnMd.trim() || '_(not provided)_'}`,
-  });
+  if (input.draftWorkedOn) {
+    blocks.push({
+      type: 'text',
+      text:
+        '\n## What we worked on\n_The team has not written this section — draft the client-facing `worked_on` narrative yourself from the "Work completed this period" list and meeting context below._',
+    });
+  } else {
+    blocks.push({
+      type: 'text',
+      text: `\n## What we worked on\n${input.workedOnMd.trim() || '_(not provided)_'}`,
+    });
+  }
 
   blocks.push({
     type: 'text',
     text: `\n## Focus next period\n${input.focusNextMd.trim() || '_(not provided)_'}`,
   });
+
+  if (input.completedWork && input.completedWork.length) {
+    const parts: string[] = [
+      '\n## Work completed this period (internal source — synthesise, do not reproduce verbatim)',
+      '_Asana tasks closed and meeting actions. Task names contain internal shorthand and personal names — turn these into client-appropriate themes of delivery. Not a source of metrics._',
+    ];
+    for (const w of input.completedWork) {
+      parts.push(`- [${w.source}] ${w.label} (${w.date})`);
+    }
+    blocks.push({ type: 'text', text: parts.join('\n') });
+  }
+
+  if (input.meetingDiscussions && input.meetingDiscussions.length) {
+    const parts: string[] = [
+      '\n## Internal meeting context (what was discussed this period)',
+      '_Internal background only — do not quote verbatim or surface commercially sensitive detail in the client-facing report. Not a source of metrics._',
+    ];
+    for (const m of input.meetingDiscussions) {
+      parts.push(`\n### ${m.date} — ${m.title}\n${m.summary}`);
+    }
+    blocks.push({ type: 'text', text: parts.join('\n') });
+  }
 
   return blocks;
 }
@@ -286,6 +378,7 @@ export async function generateReportInsights(
   }
 
   const content = buildUserContent(input);
+  const tool = buildSubmitReportTool(!!input.draftWorkedOn);
 
   const response = await anthropic().messages.create({
     model: MODEL,
@@ -293,7 +386,7 @@ export async function generateReportInsights(
     messages: [{ role: 'user', content }],
     max_tokens: 6000,
     temperature: 0.4,
-    tools: [SUBMIT_REPORT_TOOL],
+    tools: [tool],
     tool_choice: { type: 'tool', name: 'submit_report' },
   });
 
@@ -330,6 +423,7 @@ export async function generateReportInsights(
     wins: typeof args.wins === 'string' ? args.wins : '',
     risks: typeof args.risks === 'string' ? args.risks : '',
     recommendations: typeof args.recommendations === 'string' ? args.recommendations : '',
+    ...(input.draftWorkedOn && typeof args.worked_on === 'string' ? { worked_on: args.worked_on } : {}),
   };
 
   // If performance_summary came back empty despite required:true, surface it
