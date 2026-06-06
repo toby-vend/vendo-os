@@ -36,3 +36,6 @@ Thumbs.db
 *.log
 .secrets/
 .vercel
+
+# Client creative sheets (binary, regenerable per-client deliverables)
+outputs/creatives/

@@ -1,0 +1,779 @@
+{
+  "_meta": {
+    "source_template": "scripts/creative/master-template.xlsx",
+    "sheet": "Variables",
+    "field_count": 94,
+    "rules": "Treatment categories not offered by the practice are left entirely blank. Factual gaps left blank and listed in the QC summary. USP/CTA are AI-drafts for QC."
+  },
+  "fields": [
+    {
+      "name": "Global/Location_ie_Sutton",
+      "collection": "Global",
+      "collection_label": "Practice details",
+      "is_treatment_category": false,
+      "source_type": "factual",
+      "hint": "Pull verbatim from the practice website (about/contact/home)."
+    },
+    {
+      "name": "Global/Dentist Full Address",
+      "collection": "Global",
+      "collection_label": "Practice details",
+      "is_treatment_category": false,
+      "source_type": "factual",
+      "hint": "Pull verbatim from the practice website (about/contact/home)."
+    },
+    {
+      "name": "Global/Practice Name",
+      "collection": "Global",
+      "collection_label": "Practice details",
+      "is_treatment_category": false,
+      "source_type": "factual",
+      "hint": "Pull verbatim from the practice website (about/contact/home)."
+    },
+    {
+      "name": "General Dentistry/GD_Practice_Year Opening",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "General Dentistry/GD_Check up from Price",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "General Dentistry/GD_Practice_USP 1",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "General Dentistry/GD_Practice_USP 2",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "General Dentistry/GD_Practice_USP 3",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "General Dentistry/GD_Practice_Chosen_CTA",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Check-Up Today"
+    },
+    {
+      "name": "General Dentistry/GD_Root_Canal_From_Price",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "General Dentistry/GD_Fillings_From_Price",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "General Dentistry/GD_Extraction_From_Price",
+      "collection": "General Dentistry",
+      "collection_label": "General / check-ups",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Membership/Membership_CTA",
+      "collection": "Membership",
+      "collection_label": "Membership plan",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Join the Plan"
+    },
+    {
+      "name": "Membership/Membership_Most_Popular_Price_per_month",
+      "collection": "Membership",
+      "collection_label": "Membership plan",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Membership/Membership From Cost",
+      "collection": "Membership",
+      "collection_label": "Membership plan",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Membership/Membership_Popular_Item 1",
+      "collection": "Membership",
+      "collection_label": "Membership plan",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Membership/Membership_Popular_Item 2",
+      "collection": "Membership",
+      "collection_label": "Membership plan",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Membership/Membership_Popular_Item 3",
+      "collection": "Membership",
+      "collection_label": "Membership plan",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Membership/Membership_Popular_Item 4",
+      "collection": "Membership",
+      "collection_label": "Membership plan",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Emergency/Emergency_From Price",
+      "collection": "Emergency",
+      "collection_label": "Emergency dentistry",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Emergency/Emergency_CTA",
+      "collection": "Emergency",
+      "collection_label": "Emergency dentistry",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Get Seen Today"
+    },
+    {
+      "name": "Nervous Patients/NP_USP 1",
+      "collection": "Nervous Patients",
+      "collection_label": "Nervous patients",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Nervous Patients/NP_USP 2",
+      "collection": "Nervous Patients",
+      "collection_label": "Nervous patients",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Nervous Patients/NP_USP 3",
+      "collection": "Nervous Patients",
+      "collection_label": "Nervous patients",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Nervous Patients/NP_CTA",
+      "collection": "Nervous Patients",
+      "collection_label": "Nervous patients",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book a Gentle Consultation"
+    },
+    {
+      "name": "Smile Makeover Bonding/Smile_Makeover_From Price",
+      "collection": "Smile Makeover Bonding",
+      "collection_label": "Composite bonding / smile makeover",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Smile Makeover Bonding/Smile_Makeover_USP 1",
+      "collection": "Smile Makeover Bonding",
+      "collection_label": "Composite bonding / smile makeover",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Smile Makeover Bonding/Smile_Makeover_USP 2",
+      "collection": "Smile Makeover Bonding",
+      "collection_label": "Composite bonding / smile makeover",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Smile Makeover Bonding/Smile_Makeover_USP 3",
+      "collection": "Smile Makeover Bonding",
+      "collection_label": "Composite bonding / smile makeover",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Smile Makeover Bonding/Smile_Makeover_Price_Per_Tooth",
+      "collection": "Smile Makeover Bonding",
+      "collection_label": "Composite bonding / smile makeover",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Smile Makeover Bonding/Smile_Makeover_CTA",
+      "collection": "Smile Makeover Bonding",
+      "collection_label": "Composite bonding / smile makeover",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Smile Consultation"
+    },
+    {
+      "name": "Smile Makeover Bonding/Smile_Makeover_Price_Per_Month",
+      "collection": "Smile Makeover Bonding",
+      "collection_label": "Composite bonding / smile makeover",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Teeth_Whitening/TW_Monthly_From_Price",
+      "collection": "Teeth_Whitening",
+      "collection_label": "Teeth whitening",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Teeth_Whitening/TW_From_Price",
+      "collection": "Teeth_Whitening",
+      "collection_label": "Teeth whitening",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Teeth_Whitening/TW_One-Of_Price",
+      "collection": "Teeth_Whitening",
+      "collection_label": "Teeth whitening",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Teeth_Whitening/TW_CTA",
+      "collection": "Teeth_Whitening",
+      "collection_label": "Teeth whitening",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Brighten Your Smile"
+    },
+    {
+      "name": "Ortho/Ortho_CTA",
+      "collection": "Ortho",
+      "collection_label": "Orthodontics",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Free Consultation"
+    },
+    {
+      "name": "Ortho/Ortho_USP 1",
+      "collection": "Ortho",
+      "collection_label": "Orthodontics",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Ortho/Ortho_USP 2",
+      "collection": "Ortho",
+      "collection_label": "Orthodontics",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Ortho/Ortho_USP 3",
+      "collection": "Ortho",
+      "collection_label": "Orthodontics",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Ortho/Ortho_Monthly_from_Price",
+      "collection": "Ortho",
+      "collection_label": "Orthodontics",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Invisalign-Clear-Aligners/Invisalign-Clear_USP 1",
+      "collection": "Invisalign-Clear-Aligners",
+      "collection_label": "Invisalign / clear aligners",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Invisalign-Clear-Aligners/Invisalign-Clear_USP 2",
+      "collection": "Invisalign-Clear-Aligners",
+      "collection_label": "Invisalign / clear aligners",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Invisalign-Clear-Aligners/Invisalign-Clear_USP 3",
+      "collection": "Invisalign-Clear-Aligners",
+      "collection_label": "Invisalign / clear aligners",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Invisalign-Clear-Aligners/Invisalign-Clear_CTA",
+      "collection": "Invisalign-Clear-Aligners",
+      "collection_label": "Invisalign / clear aligners",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Free Invisalign Consultation"
+    },
+    {
+      "name": "Invisalign-Clear-Aligners/Invisalign-Clear_From_Price",
+      "collection": "Invisalign-Clear-Aligners",
+      "collection_label": "Invisalign / clear aligners",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Invisalign-Clear-Aligners/Invisalign or Clear-Aligners",
+      "collection": "Invisalign-Clear-Aligners",
+      "collection_label": "Invisalign / clear aligners",
+      "is_treatment_category": true,
+      "source_type": "factual",
+      "hint": "Pull verbatim from the practice website (about/contact/home)."
+    },
+    {
+      "name": "Invisalign-Clear-Aligners/Invisalign-From-Monthly-Price",
+      "collection": "Invisalign-Clear-Aligners",
+      "collection_label": "Invisalign / clear aligners",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Dental Implants/Impants_Dental From Price",
+      "collection": "Dental Implants",
+      "collection_label": "Dental implants",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Dental Implants/Impants_Monthly_From Price",
+      "collection": "Dental Implants",
+      "collection_label": "Dental implants",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Dental Implants/Impants_USP 1",
+      "collection": "Dental Implants",
+      "collection_label": "Dental implants",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Dental Implants/Impants_USP 2",
+      "collection": "Dental Implants",
+      "collection_label": "Dental implants",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Dental Implants/Impants_USP 3",
+      "collection": "Dental Implants",
+      "collection_label": "Dental implants",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Dental Implants/Implants_CTA",
+      "collection": "Dental Implants",
+      "collection_label": "Dental implants",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Free Implant Consultation"
+    },
+    {
+      "name": "Full_Mouth_Dental_Implants/CTA",
+      "collection": "Full_Mouth_Dental_Implants",
+      "collection_label": "Full-mouth implants",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Free Consultation"
+    },
+    {
+      "name": "Full_Mouth_Dental_Implants/Full_Mouth_USP 1",
+      "collection": "Full_Mouth_Dental_Implants",
+      "collection_label": "Full-mouth implants",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Full_Mouth_Dental_Implants/Full_Mouth_USP 2",
+      "collection": "Full_Mouth_Dental_Implants",
+      "collection_label": "Full-mouth implants",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Full_Mouth_Dental_Implants/Full_Mouth_USP 3",
+      "collection": "Full_Mouth_Dental_Implants",
+      "collection_label": "Full-mouth implants",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Full_Mouth_Dental_Implants/Full_Mouth_From_Price",
+      "collection": "Full_Mouth_Dental_Implants",
+      "collection_label": "Full-mouth implants",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Full_Mouth_Dental_Implants/Full_Mouth_Price_Per_Month",
+      "collection": "Full_Mouth_Dental_Implants",
+      "collection_label": "Full-mouth implants",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Dentures/Dentures_Price_Per_Month",
+      "collection": "Dentures",
+      "collection_label": "Dentures",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Dentures/Dentures_From_Price",
+      "collection": "Dentures",
+      "collection_label": "Dentures",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Dentures/Dentures_CTA",
+      "collection": "Dentures",
+      "collection_label": "Dentures",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Denture Consultation"
+    },
+    {
+      "name": "Dentures/Dentures_USP 1",
+      "collection": "Dentures",
+      "collection_label": "Dentures",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Dentures/Dentures_USP 2",
+      "collection": "Dentures",
+      "collection_label": "Dentures",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Dentures/Dentures_USP 3",
+      "collection": "Dentures",
+      "collection_label": "Dentures",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Dentures Repairs/Denture_Repair_From_Price",
+      "collection": "Dentures Repairs",
+      "collection_label": "Denture repairs",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Dentures Repairs/Denture_Repair_CTA",
+      "collection": "Dentures Repairs",
+      "collection_label": "Denture repairs",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Get Your Dentures Repaired"
+    },
+    {
+      "name": "Dentures Repairs/Denture_Repair_USP 1",
+      "collection": "Dentures Repairs",
+      "collection_label": "Denture repairs",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Dentures Repairs/Denture_Repair_USP 2",
+      "collection": "Dentures Repairs",
+      "collection_label": "Denture repairs",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Dentures Repairs/Denture_Repair_USP 3",
+      "collection": "Dentures Repairs",
+      "collection_label": "Denture repairs",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Paediatrics/Paediatric_CTA",
+      "collection": "Paediatrics",
+      "collection_label": "Children's dentistry",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Child's Visit"
+    },
+    {
+      "name": "Paediatrics/Paediatric_Price_per_month",
+      "collection": "Paediatrics",
+      "collection_label": "Children's dentistry",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Perio Gum Treatment/Gum-Treatment-CTA",
+      "collection": "Perio Gum Treatment",
+      "collection_label": "Gum / perio treatment",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Book Your Gum Assessment"
+    },
+    {
+      "name": "Perio Gum Treatment/Gum-Treatment_From_Price",
+      "collection": "Perio Gum Treatment",
+      "collection_label": "Gum / perio treatment",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Invisalign Open Day/Invisalign_OD_Open Date",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Invisalign Open Day/Invisalign_OD_Savings",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Invisalign Open Day/Invisalign_OD_Price",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Invisalign Open Day/Invisalign_OD_Offer Details",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Invisalign Open Day/Invisalign_OD_CTA",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Reserve Your Open Day Spot"
+    },
+    {
+      "name": "Invisalign Open Day/Impant_Open_Day_Date",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Invisalign Open Day/Impant_Open_Day_USP 1",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Invisalign Open Day/Impant_Open_Day_USP 2",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Invisalign Open Day/Impant_Open_Day_USP 3",
+      "collection": "Invisalign Open Day",
+      "collection_label": "Invisalign open day (event)",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Implant Open Day/Implant_OD_Opening_Date",
+      "collection": "Implant Open Day",
+      "collection_label": "Implant open day (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Implant Open Day/Implant_OD_Only_Price",
+      "collection": "Implant Open Day",
+      "collection_label": "Implant open day (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_price",
+      "hint": "Use the 'from' price published on the site's fees/pricing/treatment page. Keep the practice's own currency symbol and wording. Leave blank if not published."
+    },
+    {
+      "name": "Implant Open Day/Implant_OD_CTA",
+      "collection": "Implant Open Day",
+      "collection_label": "Implant open day (event)",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Reserve Your Open Day Spot"
+    },
+    {
+      "name": "Implant Open Day/Implant_OD_Spaces_left",
+      "collection": "Implant Open Day",
+      "collection_label": "Implant open day (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Squat Launch/Squat_CTA",
+      "collection": "Squat Launch",
+      "collection_label": "New practice launch (event)",
+      "is_treatment_category": true,
+      "source_type": "cta",
+      "hint": "Use the Vendo default CTA unless the site implies a better fit. QC owns final wording.",
+      "default": "Register Your Interest"
+    },
+    {
+      "name": "Squat Launch/Squat_Opening_Location",
+      "collection": "Squat Launch",
+      "collection_label": "New practice launch (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    },
+    {
+      "name": "Squat Launch/Squat_USP 1",
+      "collection": "Squat Launch",
+      "collection_label": "New practice launch (event)",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Squat Launch/Squat_USP 2",
+      "collection": "Squat Launch",
+      "collection_label": "New practice launch (event)",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Squat Launch/Squat_USP 3",
+      "collection": "Squat Launch",
+      "collection_label": "New practice launch (event)",
+      "is_treatment_category": true,
+      "source_type": "usp",
+      "hint": "Draft a short benefit-led USP from the site's copy for this treatment (e.g. finance available, free consultation, X years' experience). Mark as draft for QC."
+    },
+    {
+      "name": "Squat Launch/Squat_Opening_Season_Year",
+      "collection": "Squat Launch",
+      "collection_label": "New practice launch (event)",
+      "is_treatment_category": true,
+      "source_type": "factual_offer",
+      "hint": "Only fill if a current offer/event/open-day with this detail is found on the site. Otherwise leave blank."
+    }
+  ]
+}
