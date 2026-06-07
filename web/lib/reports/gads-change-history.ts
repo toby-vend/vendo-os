@@ -61,11 +61,26 @@ export async function fetchGadsChangeHistory(
     return { text: '', count: 0, note: 'No Google Ads account is mapped to this client.' };
   }
 
-  // 30-day window note (Google Ads only keeps ~35 days of change_event).
-  const thirtyAgo = new Date(Date.now() - 33 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  // Google Ads `change_event` ONLY accepts a date range within the last ~30
+  // days, and rejects (400 INVALID_ARGUMENT) if the start is older — so we
+  // CLAMP the query window to [today-29d, today] intersected with the period.
+  const dayMs = 24 * 60 * 60 * 1000;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const earliestStr = new Date(Date.now() - 29 * dayMs).toISOString().slice(0, 10);
+
+  const queryStart = periodStart < earliestStr ? earliestStr : periodStart;
+  const queryEnd = periodEnd > todayStr ? todayStr : periodEnd;
+
+  if (queryStart > queryEnd) {
+    return {
+      text: '',
+      count: 0,
+      note: 'This period is outside Google Ads’ ~30-day change-history window, so it can’t be auto-pulled — paste the export manually.',
+    };
+  }
   const windowNote =
-    periodStart < thirtyAgo
-      ? 'Google Ads only returns changes from the last ~30 days, so earlier days of this period may be missing — paste the export to fill any gaps.'
+    periodStart < earliestStr
+      ? `Google Ads only keeps ~30 days of change history, so only changes from ${queryStart} onward could be pulled — paste the export to fill earlier days.`
       : undefined;
 
   let accessToken: string;
@@ -75,8 +90,8 @@ export async function fetchGadsChangeHistory(
     return { text: '', count: 0, note: `Google Ads auth unavailable: ${err instanceof Error ? err.message : String(err)}` };
   }
 
-  const start = `${periodStart} 00:00:00`;
-  const end = `${periodEnd} 23:59:59`;
+  const start = `${queryStart} 00:00:00`;
+  const end = `${queryEnd} 23:59:59`;
   const gaql =
     `SELECT change_event.change_date_time, change_event.client_type, ` +
     `change_event.change_resource_type, change_event.resource_change_operation, ` +
