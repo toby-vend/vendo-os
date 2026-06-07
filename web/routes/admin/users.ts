@@ -10,6 +10,8 @@ import {
   getUserByEmail,
   getUserRouteOverrides,
   setUserRouteOverrides,
+  getUserReportChannels,
+  setUserReportChannels,
   listPendingAccessRequests,
   dismissAccessRequest,
   resolveAccessRequestByEmail,
@@ -105,7 +107,17 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
     const overrideMap: Record<string, string> = {};
     for (const o of overrides) overrideMap[o.route_slug] = o.mode;
 
-    reply.render('admin/user-edit', { editUser: user, channels, userChannelIds, routeSlugs: ROUTE_SLUGS, overrideMap });
+    const userReportChannels = await getUserReportChannels(id);
+
+    reply.render('admin/user-edit', {
+      editUser: user, channels, userChannelIds, routeSlugs: ROUTE_SLUGS, overrideMap,
+      reportChannelOptions: [
+        { value: 'google_ads', label: 'Google Ads' },
+        { value: 'meta', label: 'Meta' },
+        { value: 'seo', label: 'SEO' },
+      ],
+      userReportChannels,
+    });
   });
 
   // Update user
@@ -129,6 +141,13 @@ export const adminUsersRoutes: FastifyPluginAsync = async (app) => {
 
     await updateUser(id, { name, role, email });
     await setUserChannels(id, channelIds);
+
+    // Report-channel visibility (Google Ads / Meta / SEO). Empty = all (no
+    // restriction). Ignored for admins (they always see all).
+    const reportChannels = Array.isArray(body.reportChannels)
+      ? body.reportChannels
+      : (body.reportChannels ? [body.reportChannels] : []);
+    await setUserReportChannels(id, reportChannels as string[]);
 
     // Save per-user route overrides
     const overrideValues = Array.isArray(body.overrides) ? body.overrides : (body.overrides ? [body.overrides] : []);

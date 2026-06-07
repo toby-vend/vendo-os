@@ -11,6 +11,8 @@ export interface SessionUser {
   mustChangePassword: boolean;
   channels: string[];       // channel slugs
   allowedRoutes: string[];  // route slugs
+  /** Report channels this user may see — google_ads | meta | seo. Admins: all. */
+  reportChannels: Array<'google_ads' | 'meta' | 'seo'>;
   googleConnected: boolean;
   clientId: number | null;  // set when role === 'client'
   clientName: string | null;

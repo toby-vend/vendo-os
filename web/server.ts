@@ -92,7 +92,7 @@ import {
   type SessionUser,
 } from './lib/auth.js';
 import { initVapid } from './lib/push-sender.js';
-import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, hasUserOAuthToken, getClientForUser, migrateSidebarConfig } from './lib/queries.js';
+import { getUserById, getUserChannelSlugs, getUserAllowedRoutes, getUserReportChannels, hasUserOAuthToken, getClientForUser, migrateSidebarConfig } from './lib/queries.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -191,14 +191,26 @@ app.addHook('onRequest', async (request, reply) => {
   }
 
   const { getSidebarConfig } = await import('./lib/queries/sidebar.js');
-  const [channels, allowedRoutes, googleConnected, clientMapping, sidebarConfig] = await Promise.all([
+  const [channels, allowedRoutes, assignedReportChannels, googleConnected, clientMapping, sidebarConfig] = await Promise.all([
     getUserChannelSlugs(dbUser.id),
     dbUser.role === 'admin' ? Promise.resolve([]) : getUserAllowedRoutes(dbUser.id),
+    dbUser.role === 'standard' ? getUserReportChannels(dbUser.id) : Promise.resolve([]),
     hasUserOAuthToken(dbUser.id, 'google'),
     dbUser.role === 'client' ? getClientForUser(dbUser.id) : Promise.resolve(null),
     getSidebarConfig(),
   ]);
   (request as any)._sidebarConfig = sidebarConfig;
+
+  // Report-channel visibility: admins see all; clients see none (portal only);
+  // standard staff see their assigned channels, or all if none assigned (so
+  // nobody is locked out until an admin restricts them).
+  const ALL_REPORT_CHANNELS: SessionUser['reportChannels'] = ['google_ads', 'meta', 'seo'];
+  let reportChannels: SessionUser['reportChannels'];
+  if (dbUser.role === 'admin') reportChannels = ALL_REPORT_CHANNELS;
+  else if (dbUser.role === 'client') reportChannels = [];
+  else reportChannels = assignedReportChannels.length
+    ? (assignedReportChannels as SessionUser['reportChannels'])
+    : ALL_REPORT_CHANNELS;
 
   const user: SessionUser = {
     id: dbUser.id,
@@ -208,6 +220,7 @@ app.addHook('onRequest', async (request, reply) => {
     mustChangePassword: dbUser.must_change_password === 1,
     channels,
     allowedRoutes,
+    reportChannels,
     googleConnected,
     clientId: clientMapping?.client_id ?? null,
     clientName: clientMapping?.client_name ?? null,

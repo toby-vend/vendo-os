@@ -110,6 +110,7 @@ function mockUser(opts: { channels?: string[]; allowedRoutes?: string[]; role?: 
     mustChangePassword: false,
     channels: opts.channels ?? [],
     allowedRoutes: opts.allowedRoutes ?? [],
+    reportChannels: ['google_ads', 'meta', 'seo'],
     googleConnected: false,
     clientId: null,
     clientName: null,

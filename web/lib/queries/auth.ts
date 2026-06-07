@@ -29,6 +29,7 @@ export function userRowToSessionUser(row: UserRow): SessionUser {
     mustChangePassword: row.must_change_password === 1,
     channels: [],
     allowedRoutes: [],
+    reportChannels: row.role === 'admin' ? ['google_ads', 'meta', 'seo'] : [],
     googleConnected: false,
     clientId: null,
     clientName: null,
@@ -202,6 +203,38 @@ export async function setUserChannels(userId: string, channelIds: string[]): Pro
     await db.execute({
       sql: 'INSERT INTO user_channels (user_id, channel_id) VALUES (?, ?)',
       args: [userId, channelId],
+    });
+  }
+}
+
+// --- Report channels (Google Ads / Meta / SEO visibility) ---
+
+const VALID_REPORT_CHANNELS = new Set(['google_ads', 'meta', 'seo']);
+
+/**
+ * Report channels a user is explicitly assigned to. Empty = unrestricted
+ * (the caller decides: admins always see all; an unassigned non-admin
+ * defaults to all so nobody is locked out until configured).
+ */
+export async function getUserReportChannels(userId: string): Promise<string[]> {
+  try {
+    const result = await rows<{ report_channel: string }>(
+      'SELECT report_channel FROM user_report_channels WHERE user_id = ?',
+      [userId],
+    );
+    return result.map(r => r.report_channel).filter(c => VALID_REPORT_CHANNELS.has(c));
+  } catch {
+    return []; // table may not exist yet (pre-migration)
+  }
+}
+
+export async function setUserReportChannels(userId: string, channels: string[]): Promise<void> {
+  const clean = channels.filter(c => VALID_REPORT_CHANNELS.has(c));
+  await db.execute({ sql: 'DELETE FROM user_report_channels WHERE user_id = ?', args: [userId] });
+  for (const channel of clean) {
+    await db.execute({
+      sql: 'INSERT INTO user_report_channels (user_id, report_channel) VALUES (?, ?)',
+      args: [userId, channel],
     });
   }
 }

@@ -47,7 +47,7 @@
       <div>
         <label class="ue-label">Role</label>
         <select name="role" id="edit-role" class="ue-input" style="max-width: 200px;"
-                onchange="var s = this.value === 'standard' ? 'block' : 'none'; document.getElementById('edit-channels').style.display = s; document.getElementById('edit-overrides').style.display = s;">
+                onchange="var s = this.value === 'standard' ? 'block' : 'none'; document.getElementById('edit-channels').style.display = s; document.getElementById('edit-overrides').style.display = s; document.getElementById('edit-report-channels').style.display = s;">
           <option value="standard" <%= it.editUser.role === 'standard' ? 'selected' : '' %>>Standard</option>
           <option value="admin" <%= it.editUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
         </select>
@@ -64,6 +64,21 @@
           <input type="checkbox" name="channels" value="<%= ch.id %>"
                  <%= (it.userChannelIds || []).includes(ch.id) ? 'checked' : '' %>>
           <%= ch.name %>
+        </label>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Report channel visibility (Google Ads / Meta / SEO) -->
+    <div class="card" style="padding: 1.5rem; margin-bottom: 1rem;" id="edit-report-channels" <%= it.editUser.role === 'admin' ? 'style="display:none;padding:1.5rem;margin-bottom:1rem;"' : '' %>>
+      <h3 style="margin: 0 0 0.75rem; font-size: 14px; font-weight: 600; color: var(--vendo-text-heading);">Client report channels</h3>
+      <p style="font-size: 12px; color: #64748B; margin: 0 0 0.75rem;">Which client-report channels this person can see. Leave all unticked = no restriction (sees all). Admins always see every channel.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <% (it.reportChannelOptions || []).forEach(rc => { %>
+        <label class="ue-check">
+          <input type="checkbox" name="reportChannels" value="<%= rc.value %>"
+                 <%= (it.userReportChannels || []).includes(rc.value) ? 'checked' : '' %>>
+          <%= rc.label %>
         </label>
         <% }) %>
       </div>

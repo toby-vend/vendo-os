@@ -70,6 +70,39 @@ function isAmUser(user: SessionUser | null): user is SessionUser {
   return user.channels.includes('chat-am') || user.allowedRoutes.includes('chat-am');
 }
 
+/** Whether a user may see/act on reports for a given channel. */
+function canSeeChannel(user: SessionUser | null, channel: ReportChannel): boolean {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  return user.reportChannels.includes(channel);
+}
+
+/** The channel options a user is allowed to pick / see. */
+function visibleChannelOptions(user: SessionUser | null): typeof CHANNEL_OPTIONS {
+  if (!user || user.role === 'admin') return CHANNEL_OPTIONS;
+  return CHANNEL_OPTIONS.filter(c => user.reportChannels.includes(c.value));
+}
+
+/**
+ * Plugin preHandler: for any report route with a numeric :id, block non-admins
+ * from a report whose channel they aren't assigned to. Routes without :id
+ * (list, new, switch, create) handle channel scoping inline.
+ */
+async function enforceChannelAccess(request: any, reply: any): Promise<void> {
+  const user = request.user as SessionUser | null;
+  if (user && user.role === 'admin') return;
+  const idRaw = request.params?.id;
+  if (idRaw === undefined) return;
+  const id = Number(idRaw);
+  if (!Number.isFinite(id)) return; // let the handler 404
+  const report = await getReport(id);
+  if (report && !canSeeChannel(user, report.channel)) {
+    return reply.code(403).type('text/html').send(
+      "<div class=\"r-error\">You don't have access to this channel's reports.</div>",
+    );
+  }
+}
+
 function field(body: unknown, key: string): string {
   if (!body || typeof body !== 'object') return '';
   const v = (body as Record<string, unknown>)[key];
@@ -125,6 +158,8 @@ function defaultMonthYYYYMM(): string {
 // ============================================================================
 
 export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
+  app.addHook('preHandler', enforceChannelAccess);
+
   // List
   app.get<{ Querystring: { client?: string; status?: string } }>('/', async (request, reply) => {
     const user = (request as any).user as SessionUser | null;
@@ -135,11 +170,15 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       ? request.query.status as ReportStatus
       : undefined;
 
-    const [items, clients, reviewQueue] = await Promise.all([
+    const [allItems, clients, allReview] = await Promise.all([
       listReports({ clientId, status }),
       listActiveClientsForReports(),
       listReviewQueue(),
     ]);
+
+    // Non-admins only see reports for the channels they work in.
+    const items = user.role === 'admin' ? allItems : allItems.filter(r => canSeeChannel(user, r.channel));
+    const reviewQueue = user.role === 'admin' ? allReview : allReview.filter(r => canSeeChannel(user, r.channel));
 
     return reply.render('reports/list', {
       items,
@@ -159,7 +198,7 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     const clients = await listActiveClientsForReports();
     return reply.render('reports/new', {
       clients,
-      channelOptions: CHANNEL_OPTIONS,
+      channelOptions: visibleChannelOptions(user),
       defaultMonth: defaultMonthYYYYMM(),
     });
   });
@@ -191,7 +230,7 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       platforms: PLATFORM_OPTIONS,
       // Only allow tagging screenshots with this report's channel platforms.
       channelPlatforms: PLATFORM_OPTIONS.filter(p => CHANNEL_PLATFORMS[report.channel].includes(p.value)),
-      channelOptions: CHANNEL_OPTIONS,
+      channelOptions: visibleChannelOptions(user),
       channelLabel: channelLabel(report.channel),
       monthValue: report.period_start.slice(0, 7),
       siblingByChannel,
@@ -211,6 +250,7 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       const channel: ReportChannel = isReportChannel(request.query.channel) ? request.query.channel : 'google_ads';
       const period = monthToPeriod(request.query.month ?? '');
       if (!Number.isFinite(clientId) || !period) return reply.code(400).send('Invalid client or month');
+      if (!canSeeChannel(user, channel)) return reply.code(403).send("You don't have access to this channel.");
 
       const existing = await findReport(clientId, period.start, period.end, channel);
       if (existing) return reply.redirect(`/reports/${existing}`);
@@ -341,6 +381,8 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
 // ============================================================================
 
 export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
+  app.addHook('preHandler', enforceChannelAccess);
+
   // Multipart only for the upload endpoint.
   await app.register(fastifyMultipart, {
     limits: { fileSize: MAX_FILE_BYTES + 1024 },
@@ -399,6 +441,7 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(400).send('Missing or invalid client_id');
     }
     const channel: ReportChannel = isReportChannel(channelRaw) ? channelRaw : 'google_ads';
+    if (!canSeeChannel(user, channel)) return reply.code(403).send("You don't have access to this channel.");
     const period = monthToPeriod(monthRaw);
     if (!period) return reply.code(400).send('Invalid month — expected YYYY-MM');
 
@@ -427,6 +470,7 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     const period = monthToPeriod(field(request.body, 'month'));
     if (!Number.isFinite(clientId) || clientId <= 0) return reply.code(400).send('Invalid client_id');
     const channel: ReportChannel = isReportChannel(channelRaw) ? channelRaw : 'google_ads';
+    if (!canSeeChannel(user, channel)) return reply.code(403).send("You don't have access to this channel.");
     if (!period) return reply.code(400).send('Invalid month — expected YYYY-MM');
 
     let id = await findReport(clientId, period.start, period.end, channel);
