@@ -106,6 +106,14 @@ export interface ReportAiInput {
    */
   uploadedCsv?: Array<{ label: string; text: string }>;
   /**
+   * Google Ads change history for the period (pasted by the team or auto-pulled
+   * from the API) — the log of account changes (budgets, bids, status,
+   * keywords, negatives, etc.). Internal context: synthesise into the
+   * client-facing "what we did" themes and use to explain performance shifts;
+   * never dump raw rows verbatim.
+   */
+  changeHistory?: string;
+  /**
    * Optional internal meeting context — what was discussed in the client's
    * calls this period (from Fathom summaries). Used to ground the qualitative
    * sections (exec summary, wins, "what we worked on" framing,
@@ -315,6 +323,17 @@ function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlo
       parts.push(`\n### ${c.label}\n\`\`\`csv\n${c.text}\n\`\`\``);
     }
     blocks.push({ type: 'text', text: parts.join('\n') });
+  }
+
+  if (input.changeHistory && input.changeHistory.trim()) {
+    const ch = input.changeHistory.trim().slice(0, 12000);
+    blocks.push({
+      type: 'text',
+      text:
+        '\n## Account change history (internal — what was actually changed in the account this period)\n' +
+        '_Use this to ground the "what we did" themes and to explain performance shifts. Synthesise into client-appropriate language — do NOT paste raw log rows, user emails, or timestamps._\n\n' +
+        ch,
+    });
   }
 
   if (input.screenshots.length === 0) {

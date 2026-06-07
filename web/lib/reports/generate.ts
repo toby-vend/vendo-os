@@ -181,6 +181,7 @@ export async function generateReportForId(
         screenshots: imageShots.map(s => ({ platform: s.platform, caption: s.caption, url: s.blob_url })),
         draftWorkedOn,
         ...(channelData.trim() ? { channelData } : {}),
+        ...(channel === 'google_ads' && report.change_history?.trim() ? { changeHistory: report.change_history } : {}),
         ...(csvFiles.length ? {
           uploadedCsv: csvFiles.map(c => ({
             label: `${c.file_name || 'campaign.csv'}${c.caption ? ` — ${c.caption}` : ''}`,

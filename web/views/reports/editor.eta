@@ -166,6 +166,27 @@
     </div>
   </section>
 
+  <% /* Change history — Google Ads only. Gives the AI concrete account changes. */ %>
+  <% if (it.report.channel === 'google_ads') { %>
+  <section class="card r-section">
+    <header class="r-section-head">
+      <h3>2a. Change history</h3>
+      <p class="r-muted">Paste the Google Ads <strong>Change History</strong> for the month (Tools → Change history → export/copy). The AI uses it to explain what changed and ground "what we did" — it won't appear verbatim in the report. <span id="r-ch-autopull"></span></p>
+    </header>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <button type="button" class="r-btn r-btn-ghost r-btn-sm"
+              hx-post="/api/reports/<%= it.report.id %>/pull-change-history"
+              hx-target="#r-change-history"
+              hx-swap="outerHTML"
+              hx-indicator="#r-ch-spin">
+        Auto-pull from Google Ads
+      </button>
+      <span id="r-ch-spin" class="htmx-indicator r-muted" style="font-size:12px; align-self:center;">Pulling…</span>
+    </div>
+    <%~ include('/reports/_change-history-field', { report: it.report }) %>
+  </section>
+  <% } %>
+
   <!-- What we worked on -->
   <section class="card r-section">
     <header class="r-section-head">

@@ -47,6 +47,7 @@ import {
   type ReportChannel,
 } from '../lib/queries/reports.js';
 import { generateReportForId } from '../lib/reports/generate.js';
+import { fetchGadsChangeHistory } from '../lib/reports/gads-change-history.js';
 import { safeStringify } from '../lib/reports/dashboard-shell.js';
 import { buildDashboardData, recomputeDashboard } from '../lib/reports/build-dashboard-data.js';
 
@@ -459,11 +460,13 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     const workedOnMd = field(request.body, 'worked_on_md');
     const focusNextMd = field(request.body, 'focus_next_md');
     const contactName = field(request.body, 'contact_name');
+    const changeHistory = field(request.body, 'change_history');
 
     const params: Parameters<typeof updateNarrative>[1] = {};
     if ('worked_on_md' in (request.body as object)) params.workedOnMd = workedOnMd;
     if ('focus_next_md' in (request.body as object)) params.focusNextMd = focusNextMd;
     if ('contact_name' in (request.body as object)) params.contactName = contactName;
+    if ('change_history' in (request.body as object)) params.changeHistory = changeHistory;
 
     await updateNarrative(id, params);
 
@@ -471,6 +474,33 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     return reply.type('text/html').send(
       `<span class="r-saved" hx-swap-oob="true" id="r-save-flash">Saved</span>`,
     );
+  });
+
+  // Auto-pull the Google Ads change history from the API into the field.
+  app.post<{ Params: { id: string } }>('/:id/pull-change-history', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+    const id = Number(request.params.id);
+    if (!Number.isFinite(id)) return reply.code(404).send('Not found');
+    const report = await getReport(id);
+    if (!report) return reply.code(404).send('Not found');
+    if (report.channel !== 'google_ads') {
+      return reply.code(400).type('text/html').send('<div class="r-error">Change history is Google Ads only.</div>');
+    }
+
+    let note: string | undefined;
+    try {
+      const result = await fetchGadsChangeHistory(report.client_id, report.period_start, report.period_end);
+      note = result.note;
+      if (result.text) await updateNarrative(id, { changeHistory: result.text });
+    } catch (err) {
+      request.log?.error?.({ err }, 'change history pull failed');
+      note = `Pull failed: ${err instanceof Error ? err.message : 'unknown error'}`;
+    }
+
+    const fresh = await getReport(id);
+    return reply.type('text/html').render('reports/_change-history-field', { report: fresh, note });
   });
 
   // Save a single AI block (after the user edits it post-generation)

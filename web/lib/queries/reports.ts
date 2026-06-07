@@ -92,6 +92,8 @@ export interface ClientReportRow {
   contact_email: string | null;
   worked_on_md: string;
   focus_next_md: string;
+  /** Free-text Google Ads change history pasted/auto-pulled for the period. */
+  change_history: string;
   exec_summary_md: string;
   performance_summary_md: string;
   wins_md: string;
@@ -156,7 +158,7 @@ const REPORT_SELECT = `
          r.channel,
          r.period_label, r.period_start, r.period_end, r.status,
          r.contact_name, r.contact_email,
-         r.worked_on_md, r.focus_next_md,
+         r.worked_on_md, r.focus_next_md, r.change_history,
          r.exec_summary_md, r.performance_summary_md,
          r.wins_md, r.risks_md, r.recommendations_md,
          r.ai_generated_at,
@@ -268,12 +270,14 @@ export async function updateNarrative(id: number, params: {
   workedOnMd?: string;
   focusNextMd?: string;
   contactName?: string;
+  changeHistory?: string;
 }): Promise<void> {
   const sets: string[] = [];
   const args: (string | number)[] = [];
   if (params.workedOnMd !== undefined) { sets.push('worked_on_md = ?'); args.push(params.workedOnMd); }
   if (params.focusNextMd !== undefined) { sets.push('focus_next_md = ?'); args.push(params.focusNextMd); }
   if (params.contactName !== undefined) { sets.push('contact_name = ?'); args.push(params.contactName.slice(0, 100)); }
+  if (params.changeHistory !== undefined) { sets.push('change_history = ?'); args.push(params.changeHistory.slice(0, 20000)); }
   if (!sets.length) return;
   sets.push("updated_at = datetime('now')");
   args.push(id);
