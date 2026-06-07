@@ -162,11 +162,13 @@ export async function generateReportForId(
     (currentWorkedOnEmpty || !!opts.forceNarrative) &&
     completedWork.length > 0;
 
-  // 5) AI insights. Screenshots are filtered to this channel's platforms so a
-  // Google Ads report never sees a Meta screenshot, etc.
+  // 5) AI insights. Files are filtered to this channel's platforms so a Google
+  // Ads report never sees a Meta screenshot/CSV, etc. Images go to the model as
+  // pictures; CSVs go in as canonical campaign data text.
   const allowedPlatforms = new Set(CHANNEL_PLATFORMS[channel]);
-  const screenshots = (await listScreenshots(reportId))
-    .filter(s => allowedPlatforms.has(s.platform));
+  const files = (await listScreenshots(reportId)).filter(s => allowedPlatforms.has(s.platform));
+  const imageShots = files.filter(s => s.kind !== 'csv');
+  const csvFiles = files.filter(s => s.kind === 'csv' && s.csv_text);
   try {
     const out = await generateReportInsights(
       {
@@ -176,9 +178,15 @@ export async function generateReportForId(
         periodLabel: report.period_label,
         workedOnMd: report.worked_on_md,
         focusNextMd: report.focus_next_md,
-        screenshots: screenshots.map(s => ({ platform: s.platform, caption: s.caption, url: s.blob_url })),
+        screenshots: imageShots.map(s => ({ platform: s.platform, caption: s.caption, url: s.blob_url })),
         draftWorkedOn,
         ...(channelData.trim() ? { channelData } : {}),
+        ...(csvFiles.length ? {
+          uploadedCsv: csvFiles.map(c => ({
+            label: `${c.file_name || 'campaign.csv'}${c.caption ? ` — ${c.caption}` : ''}`,
+            text: c.csv_text as string,
+          })),
+        } : {}),
         ...(includeMeetingContext && meetingDiscussions.length ? { meetingDiscussions } : {}),
         ...(completedWork.length ? { completedWork } : {}),
       },
@@ -187,7 +195,7 @@ export async function generateReportForId(
     await updateAiBlocks(reportId, {
       execSummaryMd: out.exec_summary,
       performanceSummaryMd: out.performance_summary,
-      winsMd: out.wins,
+      winsMd: '', // 'wins' folded into the headline + table to kill repetition
       risksMd: out.risks,
       recommendationsMd: out.recommendations,
     });

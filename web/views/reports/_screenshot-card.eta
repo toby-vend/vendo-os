@@ -1,7 +1,16 @@
 <div class="r-screenshot-card" id="r-shot-<%= it.screenshot.id %>">
-  <a href="<%= it.screenshot.blob_url %>" target="_blank" class="r-shot-thumb">
-    <img src="<%= it.screenshot.blob_url %>" alt="<%= it.screenshot.caption || it.screenshot.platform %>" loading="lazy" />
-  </a>
+  <% if (it.screenshot.kind === 'csv') { %>
+    <a href="<%= it.screenshot.blob_url %>" target="_blank" class="r-shot-thumb"
+       style="display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px; background:rgba(255,255,255,.03); text-decoration:none;">
+      <span style="font-size:28px;">📄</span>
+      <span style="font-size:12px; color:#94A3B8; word-break:break-all; padding:0 8px; text-align:center;"><%= it.screenshot.file_name || 'campaign.csv' %></span>
+      <span style="font-size:11px; color:#64748B;">CSV — AI reads this</span>
+    </a>
+  <% } else { %>
+    <a href="<%= it.screenshot.blob_url %>" target="_blank" class="r-shot-thumb">
+      <img src="<%= it.screenshot.blob_url %>" alt="<%= it.screenshot.caption || it.screenshot.platform %>" loading="lazy" />
+    </a>
+  <% } %>
   <div class="r-shot-meta">
     <select name="platform"
             hx-post="/api/reports/<%= it.screenshot.report_id %>/screenshots/<%= it.screenshot.id %>"

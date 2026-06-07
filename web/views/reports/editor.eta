@@ -123,11 +123,11 @@
            hx-swap="none" />
   </section>
 
-  <!-- Performance screenshots -->
+  <!-- Performance -->
   <section class="card r-section">
     <header class="r-section-head">
-      <h3>2. Performance screenshots</h3>
-      <p class="r-muted">Upload screenshots from each platform. Tag the platform and add a short caption (e.g. "Spend up 12% MoM, conversions flat"). The AI uses captions to write insights — give it something to work with.</p>
+      <h3>2. Performance</h3>
+      <p class="r-muted">Upload a <strong>CSV export of the campaign data</strong> (best — the AI reads the figures directly) and/or performance screenshots. Tag the platform and add a short caption. The AI treats CSV figures as canonical.</p>
     </header>
 
     <form id="r-upload-form"
@@ -151,9 +151,9 @@
         <span>Caption (optional)</span>
         <input type="text" name="caption" placeholder="e.g. Spend up 12% MoM, ROAS 3.4 → 4.1" maxlength="500" />
       </label>
-      <label class="r-field" style="flex: 0 0 220px;">
-        <span>Image (PNG / JPEG / WebP, max 4MB)</span>
-        <input type="file" name="file" accept="image/png,image/jpeg,image/webp" required />
+      <label class="r-field" style="flex: 0 0 260px;">
+        <span>File (CSV, or PNG / JPEG / WebP image)</span>
+        <input type="file" name="file" accept=".csv,text/csv,image/png,image/jpeg,image/webp" required />
       </label>
       <button type="submit" class="r-btn r-btn-primary" id="r-upload-btn">Add</button>
     </form>

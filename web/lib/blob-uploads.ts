@@ -101,3 +101,67 @@ function safeFilenameBase(name: string | null): string {
   const stripped = name.replace(/\.[^.]+$/, '');
   return stripped.replace(/[^a-zA-Z0-9_-]+/g, '_').slice(0, 40);
 }
+
+// ── CSV uploads (campaign data exports) ─────────────────────────────────────
+
+// CSVs are tiny relative to images; keep a tight cap so a stray binary doesn't
+// bloat the DB / prompt. ~2MB of CSV is tens of thousands of rows.
+export const MAX_CSV_BYTES = 2 * 1024 * 1024;
+// Cap the text we persist + feed to the AI (a campaign export is well under this).
+export const MAX_CSV_TEXT_CHARS = 60_000;
+
+export interface ValidatedCsv {
+  /** UTF-8 text, trimmed to MAX_CSV_TEXT_CHARS. */
+  text: string;
+  /** Whether the text was truncated to fit the cap. */
+  truncated: boolean;
+}
+
+/** Treat an upload as a CSV when its filename ends .csv or .tsv/.txt. */
+export function looksLikeCsvFilename(name: string | null): boolean {
+  return !!name && /\.(csv|tsv|txt)$/i.test(name.trim());
+}
+
+/**
+ * Validate an uploaded CSV by confirming it is non-empty UTF-8 text (no binary
+ * NUL bytes) within the size cap. We do not enforce a strict schema — campaign
+ * exports vary — only that it's readable text the AI can parse.
+ */
+export function validateCsvBuffer(buffer: Buffer): ValidatedCsv {
+  if (buffer.length === 0) throw new UploadValidationError('CSV file is empty.');
+  if (buffer.length > MAX_CSV_BYTES) {
+    throw new UploadValidationError(`CSV exceeds ${MAX_CSV_BYTES / 1024 / 1024}MB limit.`);
+  }
+  // Reject binary content masquerading as CSV (NUL byte in the first 8KB).
+  const head = buffer.subarray(0, 8192);
+  if (head.includes(0x00)) {
+    throw new UploadValidationError('That doesn’t look like a CSV — it appears to be a binary file.');
+  }
+  const raw = buffer.toString('utf8').replace(/\r\n/g, '\n').trim();
+  if (!raw) throw new UploadValidationError('CSV file has no readable content.');
+  const truncated = raw.length > MAX_CSV_TEXT_CHARS;
+  return { text: truncated ? raw.slice(0, MAX_CSV_TEXT_CHARS) : raw, truncated };
+}
+
+/**
+ * Upload raw CSV bytes to Vercel Blob (text/csv) so the team can re-download
+ * the original export. The parsed text is stored separately in the DB for the
+ * AI; this is purely the source-of-truth file.
+ */
+export async function uploadCsv(params: {
+  pathPrefix: string;
+  filename: string | null;
+  bytes: Buffer;
+}): Promise<{ url: string; pathname: string }> {
+  const suffix = crypto.randomBytes(4).toString('hex');
+  const base = safeFilenameBase(params.filename) || 'campaign-data';
+  const cleanPrefix = params.pathPrefix.replace(/^\/+|\/+$/g, '');
+  const pathname = `${cleanPrefix}/${base}-${suffix}.csv`;
+
+  const blob = await put(pathname, params.bytes, {
+    access: 'public',
+    contentType: 'text/csv',
+    addRandomSuffix: false,
+  });
+  return { url: blob.url, pathname: blob.pathname };
+}

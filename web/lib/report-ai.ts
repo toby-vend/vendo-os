@@ -99,6 +99,13 @@ export interface ReportAiInput {
    */
   channelData?: string;
   /**
+   * CSV campaign-data exports the team uploaded for this report. Treated as
+   * canonical campaign data (same authority as channelData) — especially
+   * valuable when the API has no data for the channel/period. Channel-filtered
+   * upstream.
+   */
+  uploadedCsv?: Array<{ label: string; text: string }>;
+  /**
    * Optional internal meeting context — what was discussed in the client's
    * calls this period (from Fathom summaries). Used to ground the qualitative
    * sections (exec summary, wins, "what we worked on" framing,
@@ -126,7 +133,6 @@ export interface ReportAiInput {
 export interface ReportAiOutput {
   exec_summary: string;
   performance_summary: string;
-  wins: string;
   risks: string;
   recommendations: string;
   /** Present only when `draftWorkedOn` was requested. */
@@ -173,7 +179,15 @@ Tone — read carefully:
 - Do not catastrophise. Phrases like "cannot launch effectively without X" or "delays directly impact revenue" are out of bounds unless the team's narrative explicitly says so.
 - Address the client directly ("you", "your campaigns"). Confident, plain English, friendly but professional. No marketing fluff.
 
-Call the \`submit_report\` tool with all five fields filled in. Every field is required — do not return an empty string for any of them. The performance_summary field MUST contain a structured metric breakdown extracted from the screenshots; the others are short narrative blocks.`;
+REPORT CRAFT — the difference between a good report and a credible one:
+- **Say each number ONCE.** State the headline figures (total enquiries, blended cost per lead, total spend) in the Headline, and each campaign's figures ONLY in the performance table. Do NOT restate the same metric in multiple sections — repetition reads as padding and erodes trust. Once a number is in the table, refer to the campaign by name afterwards, not by re-quoting its numbers.
+- **No duplicate or near-duplicate lines.** Never list the same piece of work twice (e.g. once active, once passive). Each item appears exactly once. Don't split one action into two differently-worded items.
+- **Own the trade-offs; don't soften them.** If one campaign is taking a large share of budget for few results, say so plainly and show the spend split — do NOT excuse it with "naturally carries a higher cost per lead". Confront the allocation honestly and frame the planned work as the fix. A client who does the maths must feel you've addressed it, not steered around it.
+- **Earn every adjective.** Avoid empty descriptors ("strong", "excellent", "solid", "real promise") unless you can anchor them to a benchmark — a month-on-month change or a target. If there's no benchmark in the data, drop the adjective and let the number stand. "£16.34 per lead across 99 enquiries" beats "an excellent result".
+- **Anchor to revenue where you can.** If booking / lead-to-booking / revenue data is present, include it — booking is usually the real goal, so a report that only counts leads is incomplete. Never invent it if absent.
+- **Close with a decision.** End the recommendations with one explicit thing you need from the client — a yes/no on a specific next step — not a vague "let us know if you have questions".
+
+Call the \`submit_report\` tool. Fill every field. \`performance_summary\` MUST be a markdown TABLE (see its description). The narrative fields are tight and non-overlapping — together they read as ONE coherent email, not repeated takes on the same facts.`;
 
 /**
  * Channel-purity directive. This is the hard rule that keeps a report to a
@@ -202,7 +216,7 @@ function channelDirective(channel: ReportChannel): string {
 CHANNEL — THIS REPORT IS ${label.toUpperCase()} ONLY.
 ----------------------------------------------------------------------------
 ${terminology[channel]}
-Write EXCLUSIVELY about ${label}. Do NOT mention, compare to, or include any data, campaigns, wins, risks, or recommendations relating to ${others}. If the internal meeting/completed-work context references ${others}, IGNORE those parts entirely — only surface ${label} work. Every section (performance, exec summary, wins, risks, recommendations, what-we-worked-on) must be 100% ${label}.`;
+Write EXCLUSIVELY about ${label}. Do NOT mention, compare to, or include any data, campaigns, risks, or recommendations relating to ${others}. If the internal meeting/completed-work context references ${others}, IGNORE those parts entirely — only surface ${label} work. Every section (headline, performance, watch point, next month, what-we-did) must be 100% ${label}.`;
 }
 
 /**
@@ -216,34 +230,29 @@ function buildSystemPrompt(channel: ReportChannel): string {
 const WORKED_ON_PROPERTY = {
   type: 'string' as const,
   description:
-    'Client-facing "What we worked on" narrative for the period — 2–4 short sentences or up to ~5 tight bullets. Synthesise from the "Work completed this period" list and meeting context into client-appropriate themes of delivery. NEVER reproduce raw internal task names, internal staff/contact names, or admin chores verbatim. Same confident, momentum-focused voice as the rest of the report. Markdown.',
+    'The "What we did this month" section — a markdown bullet list. Synthesise the "Work completed this period" list + meeting context into client-appropriate themes of delivery. RULES: each item appears EXACTLY ONCE (never the same action in two differently-worded bullets); use active voice ("Fixed a form issue on the aligner landing page", not "A typo fix was completed"); do NOT restate any performance metrics here (they live in the table); NEVER reproduce raw internal task names or staff/contact names. 3–6 tight bullets. If two source items are the same underlying action, merge them into one.',
 };
 
 const REPORT_PROPERTIES = {
   performance_summary: {
         type: 'string',
         description:
-          'The "Paid Search Performance" breakdown.\n\n**PREFERRED for Google Ads / Paid Search reports (match the reference reports): write it as short PROSE paragraphs, one per campaign**, not a bullet table. Each runs like: "General Dentistry: This campaign delivered 99 enquiries at £16.34 per lead, with form submissions amongst the phone calls." Open with a one-line overall: "The account recorded 112 enquiries at an average cost per lead of £23.61" (add tracked revenue vs spend when available). Use clean client-facing campaign names (strip "VD |"/"Search -") and client terminology ("enquiries", "cost per lead" for lead-gen; "revenue"/"ROAS" for ecom). This prose style takes precedence over the bullet layout below for single-platform Paid Search reports.\n\nFor richer MULTI-PLATFORM reports (Meta + CRM funnel screenshots etc.), the structured layout below applies instead — section ordering matters, follow it exactly:\n\n**1. CRM funnel (only if visible in screenshots)** — for dental / lead-gen / B2B accounts, when a CRM screenshot is provided (Go High Level / GHL, Boxly, HubSpot, etc.) this comes FIRST under a heading like "Go High Level Leads:" or "Boxly:". List each campaign\'s funnel breakdown showing the lead lifecycle exactly as it appears (e.g. Lead → Follow Up → Scheduled / Booked → Won / Lost), with counts. Format example:\n\n**Go High Level Leads:**\n- Dental Implants: 17\n  - Lead: 2\n  - Follow Up: 9\n  - Scheduled: 4\n  - Won: 1\n  - Lost: 1\n\n**2. Overall [Platform] Performance** — for each ad platform that appears (Meta, Google Ads, etc.), give a top-line summary subsection. Format example:\n\n**Overall Meta Performance:**\n- Spend: £10,568.74\n- Purchases: 258\n- Revenue: £115,937.93\n- ROAS: 10.97\n\n**3. Individual Campaign Performance** — per-campaign rows.\n\nEXCLUDE any campaign row with £0 spend (or zero/blank impressions and clicks) — those campaigns were not active.\n\n**Per-campaign rows must be tight and bottom-funnel only.** Use these metrics:\n  - Spend\n  - Conversion volume — labelled per the account: "Purchases" (ecom), "Results (View Content)" (dental on Meta), "Results (Lead Forms)" (instant-form lead-gen), "Leads" or "Results (website leads)" (other)\n  - **CPR** (Cost per Result) — Vendo\'s preferred term for cost per conversion. Derive from Spend ÷ conversions if not shown.\n  - ROAS / Purchase ROAS (ecom) OR omit if there is no revenue tracked\n\nDo NOT include impressions, reach, frequency, CPM, CTR, CPC, or other upper-funnel vanity metrics in the per-campaign rows — those go in the narrative blocks (wins / risks / This Month) only when they tell a real story.\n\nUse the exact campaign names shown. Vendo campaigns are typically prefixed "VD |" and follow the pattern "VD | [Type] | [Audience] | [Optimisation]" (e.g. "VD | Dental Implant | Lead - View Content", "VD | Sales | All Products | Broad | CBO"). Preserve them verbatim. Format examples:\n\n*VD | Dental Implant | Lead - View Content*\n- Spend: £985.27\n- Results (View Content): 16\n- CPR: £61.58\n\n*VD | Sales | All Products | Broad | CBO*\n- Spend: £2,551.85\n- Purchases: 66\n- CPR: £38.66 (per purchase)\n- Purchase ROAS: 14.19',
+          'The "Performance by campaign" section — a markdown TABLE, then ONE short interpretation paragraph.\n\nTABLE columns (in this order): Campaign | Enquiries | Cost per lead | Spend | % of budget. Add a final **Total** row. Use clean client-facing campaign names (strip internal "VD |" / "Search -" prefixes). EXCLUDE £0-spend / inactive campaigns. "% of budget" = that campaign\'s spend ÷ total spend, as a whole percent. Terminology by account: "Enquiries"/"Leads" + "Cost per lead" for lead-gen; "Sales"/"Purchases" + "CPA" (+ a ROAS column) for ecommerce. If booking / lead-to-booking or revenue data is present, add a column for it (e.g. Bookings, or Revenue + ROAS) — booking is usually the real goal.\n\nExample:\n\n| Campaign | Enquiries | Cost per lead | Spend | % of budget |\n|---|---|---|---|---|\n| General Dentistry | 99 | £16.34 | £1,617.66 | 61% |\n| Clear Aligners | 6 | £155.48 | £932.88 | 35% |\n| Performance Max | 7 | £13.39 | £93.73 | 4% |\n| **Total** | **112** | **£23.61** | **£2,644.32** | **100%** |\n\nThen ONE short paragraph (2–4 sentences) reading the allocation honestly — which campaign is the efficient engine, which is over/under-funded relative to results, and the resulting priority. Confront trade-offs (e.g. "Clear Aligners is taking ~a third of budget for ~5% of enquiries, so the priority is to make that spend work harder") — do NOT soften with excuses. Do NOT re-list the per-campaign numbers in this paragraph; the table already shows them.',
       },
       exec_summary: {
         type: 'string',
         description:
-          'Two to four sentences summarising the headline story for the period. Quote the most important specific numbers visible in the screenshots. Reference platforms by name. Markdown.',
-      },
-      wins: {
-        type: 'string',
-        description:
-          'Markdown bullet list of 2–5 wins from the period. Each bullet starts with a strong verb and cites a concrete metric where possible. Where the screenshots / narrative reveal which specific creatives, ad sets, or messaging themes drove the strongest results, name them — Vendo reports often call out top performers by theme (e.g. "location-specific messaging", "denture pain-point hooks", "process-focused Smile Makeover ad", "Beginner / Intermediate / Advanced video"). Do NOT invent themes if the inputs don\'t identify which creatives won.',
+          'The "Headline" — 2–3 sentences. State the period\'s topline ONCE (total enquiries, blended cost per lead, total spend) and the real story in one breath, including the main thing to address. Example: "112 enquiries at a blended cost per lead of £23.61, from £2,644.32 spend. General Dentistry did the heavy lifting; Performance Max was the most efficient channel; Clear Aligners remains low-volume and is the main thing to address." Plain and decisive — no empty adjectives, no benchmarks-free praise. Markdown.',
       },
       risks: {
         type: 'string',
         description:
-          'Markdown bullet list of 1–4 risks or concerns spotted in the data (CPL trending up, conversion volume falling, spend rising without conversions, dropped impressions, etc.). If genuinely nothing concerning shows up, return a single bullet: "- No material risks flagged for this period." Do not invent risks.',
+          'The "Watch point" — the single most important issue to flag this period, owned honestly and framed as a fix-it item (not doom). 2–4 sentences or tight bullets: name the issue with its figure, acknowledge the context, state that it\'s being treated as an action (cross-reference the next-month fix), and give a reassess point (e.g. "we\'ll reassess at the end of June"). Do NOT repeat the full campaign metrics — reference the one figure that matters. If there is genuinely nothing to watch, return "- No material concerns this period." Never invent a concern.',
       },
       recommendations: {
         type: 'string',
         description:
-          'Markdown bullet list of 2–4 specific, actionable next steps that follow from the risks, the metrics, and the focus-next narrative. Vendo "Next Month & Ongoing" sections typically cover: upcoming content shoot days and what they\'ll capture, new campaign launches that depend on incoming creative or landing pages, creative refreshes, A/B tests being introduced, and tooling additions (e.g. Motion for creative analysis). Frame as forward momentum, not as overdue work.',
+          'The "Next month" plan — a markdown bullet list of 2–4 specific actions, each leading with the action and stating its goal (e.g. "Clear Aligners review: full search-term and keyword analysis to cut wasted spend and add tighter negatives. Goal: lift volume and bring the cost per lead down."). Then end with ONE explicit ask on its own line, prefixed "**One thing I need from you:**" — a single yes/no decision you need from the client to proceed (e.g. a go/no-go on building a new campaign). Do not pad with vague offers to "answer questions".',
       },
 } as const;
 
@@ -254,7 +263,7 @@ const REPORT_PROPERTIES = {
  * additionally requires a client-facing `worked_on` narrative.
  */
 function buildSubmitReportTool(draftWorkedOn: boolean): Tool {
-  const baseRequired = ['performance_summary', 'exec_summary', 'wins', 'risks', 'recommendations'];
+  const baseRequired = ['performance_summary', 'exec_summary', 'risks', 'recommendations'];
   return {
     name: 'submit_report',
     description: 'Submit the generated sections of a monthly client performance report. Every field is required.',
@@ -298,6 +307,14 @@ function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlo
 
   if (input.channelData && input.channelData.trim()) {
     blocks.push({ type: 'text', text: `\n${input.channelData.trim()}` });
+  }
+
+  if (input.uploadedCsv && input.uploadedCsv.length) {
+    const parts: string[] = ['\nUPLOADED CAMPAIGN DATA (CSV — canonical; prefer these figures, parse the rows):'];
+    for (const c of input.uploadedCsv) {
+      parts.push(`\n### ${c.label}\n\`\`\`csv\n${c.text}\n\`\`\``);
+    }
+    blocks.push({ type: 'text', text: parts.join('\n') });
   }
 
   if (input.screenshots.length === 0) {
@@ -412,7 +429,6 @@ export async function generateReportInsights(
   const out: ReportAiOutput = {
     exec_summary: typeof args.exec_summary === 'string' ? args.exec_summary : '',
     performance_summary: typeof args.performance_summary === 'string' ? args.performance_summary : '',
-    wins: typeof args.wins === 'string' ? args.wins : '',
     risks: typeof args.risks === 'string' ? args.risks : '',
     recommendations: typeof args.recommendations === 'string' ? args.recommendations : '',
     ...(input.draftWorkedOn && typeof args.worked_on === 'string' ? { worked_on: args.worked_on } : {}),

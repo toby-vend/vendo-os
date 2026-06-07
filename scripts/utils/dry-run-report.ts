@@ -8,6 +8,7 @@
  */
 import { rows } from '../../web/lib/queries/base.js';
 import { buildGoogleAdsPeriodSummary } from '../../web/lib/reports/gads-summary.js';
+import { buildChannelSummary } from '../../web/lib/reports/channel-summary.js';
 import { buildNarrativeContext } from '../../web/lib/reports/narrative-context.js';
 import { generateReportInsights } from '../../web/lib/report-ai.js';
 import { mkdir, writeFile } from 'fs/promises';
@@ -72,14 +73,16 @@ for (const t of TARGETS) {
   console.log('\n--- Calling Claude Sonnet 4.6 ---');
   let ai;
   try {
+    const channelSummary = await buildChannelSummary('google_ads', t.clientId, PERIOD_START, PERIOD_END);
     ai = await generateReportInsights({
       clientName,
       vertical: client?.vertical ?? null,
+      channel: 'google_ads',
       periodLabel: PERIOD_LABEL,
       workedOnMd: narrative?.suggested_worked_on_md ?? '',
       focusNextMd: narrative?.last_focus_next_md ?? '',
       screenshots: [],
-      ...(gads.has_data ? { googleAdsSummary: gads } : {}),
+      ...(channelSummary.hasData ? { channelData: channelSummary.canonicalText } : {}),
     }, null);
     console.log('  AI generation: ok');
   } catch (err) {
@@ -100,11 +103,7 @@ ${ai.exec_summary}
 
 ${ai.performance_summary}
 
-## Wins
-
-${ai.wins}
-
-## Risks
+## Watch point
 
 ${ai.risks}
 

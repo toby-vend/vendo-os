@@ -133,9 +133,15 @@ export interface ScreenshotRow {
   id: number;
   report_id: number;
   platform: ScreenshotPlatform;
+  /** 'image' (screenshot) or 'csv' (campaign data export). */
+  kind: 'image' | 'csv';
   caption: string;
   blob_url: string;
   blob_pathname: string;
+  /** Original upload filename (csv rows). */
+  file_name: string | null;
+  /** Parsed CSV text fed to the AI as canonical campaign data (csv rows). */
+  csv_text: string | null;
   position: number;
   source: 'manual' | 'api';
   width: number | null;
@@ -215,8 +221,8 @@ export async function getReport(id: number): Promise<ClientReportRow | null> {
 
 export async function listScreenshots(reportId: number): Promise<ScreenshotRow[]> {
   return rows<ScreenshotRow>(
-    `SELECT id, report_id, platform, caption, blob_url, blob_pathname,
-            position, source, width, height, created_at
+    `SELECT id, report_id, platform, kind, caption, blob_url, blob_pathname,
+            file_name, csv_text, position, source, width, height, created_at
      FROM client_report_screenshots
      WHERE report_id = ?
      ORDER BY position ASC, id ASC`,
@@ -427,6 +433,9 @@ export async function addScreenshot(params: {
   blobUrl: string;
   blobPathname: string;
   source?: 'manual' | 'api';
+  kind?: 'image' | 'csv';
+  fileName?: string | null;
+  csvText?: string | null;
 }): Promise<ScreenshotRow> {
   const nextPosition = (await scalar<number>(
     'SELECT COALESCE(MAX(position), -1) + 1 FROM client_report_screenshots WHERE report_id = ?',
@@ -435,16 +444,20 @@ export async function addScreenshot(params: {
 
   const result = await db.execute({
     sql: `INSERT INTO client_report_screenshots
-            (report_id, platform, caption, blob_url, blob_pathname, position, source)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-          RETURNING id, report_id, platform, caption, blob_url, blob_pathname,
-                    position, source, width, height, created_at`,
+            (report_id, platform, kind, caption, blob_url, blob_pathname,
+             file_name, csv_text, position, source)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          RETURNING id, report_id, platform, kind, caption, blob_url, blob_pathname,
+                    file_name, csv_text, position, source, width, height, created_at`,
     args: [
       params.reportId,
       params.platform,
+      params.kind ?? 'image',
       params.caption,
       params.blobUrl,
       params.blobPathname,
+      params.fileName ?? null,
+      params.csvText ?? null,
       nextPosition,
       params.source ?? 'manual',
     ],

@@ -13,6 +13,9 @@ import type { SessionUser } from '../lib/auth.js';
 import {
   validateImageBuffer,
   uploadImage as uploadImageToBlob,
+  validateCsvBuffer,
+  uploadCsv,
+  looksLikeCsvFilename,
   MAX_FILE_BYTES,
   UploadValidationError,
 } from '../lib/blob-uploads.js';
@@ -285,19 +288,15 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     const sections: string[] = [
       `Hi ${report.contact_name || 'there'},`,
       '',
-      `Hope you're well!`,
-      '',
-      `Please find your monthly ${channelPhrase} Report for ${report.period_label} below:`,
+      `Hope you're well. Here's your ${channelPhrase} summary for ${report.period_label}.`,
       '',
     ];
 
+    // Headline (exec summary) leads, no heading.
+    if (report.exec_summary_md.trim()) sections.push(report.exec_summary_md.trim(), '');
+
     if (report.performance_summary_md.trim()) {
-      sections.push(
-        `## ${report.period_label} ${channelPhrase} Performance`,
-        '',
-        report.performance_summary_md.trim(),
-        '',
-      );
+      sections.push('## Performance by campaign', '', report.performance_summary_md.trim(), '');
     }
 
     if (screenshots.length) {
@@ -309,20 +308,21 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       sections.push('');
     }
 
-    sections.push('## This Month', '');
-    if (report.exec_summary_md.trim()) sections.push(report.exec_summary_md.trim(), '');
-    if (report.wins_md.trim()) sections.push(report.wins_md.trim(), '');
-    if (report.worked_on_md.trim()) sections.push(report.worked_on_md.trim(), '');
-
-    if (report.risks_md.trim() && !/^\s*-?\s*no material risks/i.test(report.risks_md)) {
-      sections.push('## Things to keep an eye on', '', report.risks_md.trim(), '');
+    if (report.worked_on_md.trim()) {
+      sections.push('## What we did this month', '', report.worked_on_md.trim(), '');
     }
 
-    sections.push('## Next Month & Ongoing', '');
-    if (report.focus_next_md.trim()) sections.push(report.focus_next_md.trim(), '');
-    if (report.recommendations_md.trim()) sections.push(report.recommendations_md.trim(), '');
+    if (report.risks_md.trim() && !/^\s*-?\s*no material/i.test(report.risks_md)) {
+      sections.push('## Watch point', '', report.risks_md.trim(), '');
+    }
 
-    sections.push('', `Let us know if you have any questions at all!`, '', `Thanks,`, senderFirstName);
+    if (report.focus_next_md.trim() || report.recommendations_md.trim()) {
+      sections.push('## Next month', '');
+      if (report.focus_next_md.trim()) sections.push(report.focus_next_md.trim(), '');
+      if (report.recommendations_md.trim()) sections.push(report.recommendations_md.trim(), '');
+    }
+
+    sections.push('', `Thanks,`, senderFirstName);
 
     return reply.render('reports/text', {
       report,
@@ -530,33 +530,63 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     if (!platform) return reply.code(400).type('text/html').send('<div class="r-error">Pick a platform.</div>');
     if (!buffer) return reply.code(400).type('text/html').send('<div class="r-error">No file attached.</div>');
 
-    let validated;
-    try {
-      validated = validateImageBuffer(buffer);
-    } catch (err) {
-      const msg = err instanceof UploadValidationError ? err.message : 'Invalid file.';
-      return reply.code(400).type('text/html').send(`<div class="r-error">${msg}</div>`);
-    }
+    let screenshot;
 
-    let blob;
-    try {
-      blob = await uploadImageToBlob({
-        pathPrefix: `reports/${id}`,
-        filename: clientFilename || platform,
-        image: validated,
+    if (looksLikeCsvFilename(clientFilename)) {
+      // CSV campaign-data upload: validate as text, store the parsed text for
+      // the AI, and keep the original file in Blob for re-download.
+      let csv;
+      try {
+        csv = validateCsvBuffer(buffer);
+      } catch (err) {
+        const msg = err instanceof UploadValidationError ? err.message : 'Invalid CSV.';
+        return reply.code(400).type('text/html').send(`<div class="r-error">${msg}</div>`);
+      }
+      let blob;
+      try {
+        blob = await uploadCsv({ pathPrefix: `reports/${id}`, filename: clientFilename || platform, bytes: buffer });
+      } catch (err) {
+        request.log?.error?.(err);
+        return reply.code(500).type('text/html').send('<div class="r-error">Upload failed.</div>');
+      }
+      screenshot = await addScreenshot({
+        reportId: id,
+        platform,
+        caption,
+        kind: 'csv',
+        fileName: clientFilename,
+        csvText: csv.text,
+        blobUrl: blob.url,
+        blobPathname: blob.pathname,
       });
-    } catch (err) {
-      request.log?.error?.(err);
-      return reply.code(500).type('text/html').send('<div class="r-error">Upload failed.</div>');
+    } else {
+      // Image screenshot upload (existing path).
+      let validated;
+      try {
+        validated = validateImageBuffer(buffer);
+      } catch (err) {
+        const msg = err instanceof UploadValidationError ? err.message : 'Invalid file.';
+        return reply.code(400).type('text/html').send(`<div class="r-error">${msg}</div>`);
+      }
+      let blob;
+      try {
+        blob = await uploadImageToBlob({
+          pathPrefix: `reports/${id}`,
+          filename: clientFilename || platform,
+          image: validated,
+        });
+      } catch (err) {
+        request.log?.error?.(err);
+        return reply.code(500).type('text/html').send('<div class="r-error">Upload failed.</div>');
+      }
+      screenshot = await addScreenshot({
+        reportId: id,
+        platform,
+        caption,
+        blobUrl: blob.url,
+        blobPathname: blob.pathname,
+      });
     }
-
-    const screenshot = await addScreenshot({
-      reportId: id,
-      platform,
-      caption,
-      blobUrl: blob.url,
-      blobPathname: blob.pathname,
-    });
 
     return reply.type('text/html').render('reports/_screenshot-card', {
       screenshot,
