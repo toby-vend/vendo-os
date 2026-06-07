@@ -8,8 +8,11 @@
     it.report.narrative_draft_md — string | null (column added by the
                                    2026-05-11-gads-autonomous-reports
                                    migration, owned by A1)
-    it.csrfToken                 — string (injected globally by reply.render)
-    md                           — markdown → HTML helper (global, already sanitises)
+    it.csrfToken                 — string (MUST be passed into the include; not
+                                   auto-shared with partials)
+    it.md                        — markdown → HTML helper (MUST be passed into
+                                   the include; reply.render only injects it at
+                                   the top level, not into included partials)
 -->
 <% var draft = it.report.narrative_draft_md || ''; %>
 <% var hasDraft = draft.trim().length > 0; %>
@@ -28,7 +31,7 @@
       </p>
     <% } else { %>
       <div class="r-suggested-preview">
-        <%~ md(draft) %>
+        <%~ it.md(draft) %>
       </div>
 
       <form class="r-suggested-actions"

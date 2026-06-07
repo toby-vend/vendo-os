@@ -147,7 +147,7 @@
     </header>
 
     <% if (it.report.narrative_draft_md && it.report.status === 'draft') { %>
-      <%~ include('/reports/_suggested-narrative', { report: it.report }) %>
+      <%~ include('/reports/_suggested-narrative', { report: it.report, md: it.md, csrfToken: it.csrfToken }) %>
     <% } %>
 
     <textarea class="r-textarea"
