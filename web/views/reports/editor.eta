@@ -125,9 +125,23 @@
 
   <!-- Performance -->
   <section class="card r-section">
-    <header class="r-section-head">
-      <h3>2. Performance</h3>
-      <p class="r-muted">Upload a <strong>CSV export of the campaign data</strong> (best — the AI reads the figures directly) and/or performance screenshots. Tag the platform and add a short caption. The AI treats CSV figures as canonical.</p>
+    <header class="r-section-head" style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+      <div>
+        <h3>2. Performance</h3>
+        <p class="r-muted">Upload a <strong>CSV export of the campaign data</strong> (best — the AI reads the figures directly) and/or performance screenshots. Tag the platform and add a short caption. The AI treats CSV figures as canonical.</p>
+      </div>
+      <% if (it.report.channel === 'google_ads') { %>
+      <div style="text-align:right; flex-shrink:0;">
+        <button class="r-btn r-btn-primary" style="white-space:nowrap;"
+                hx-post="/api/reports/<%= it.report.id %>/pull-google-ads"
+                hx-swap="none"
+                hx-indicator="#r-gads-spin"
+                hx-confirm="Pull the latest Google Ads metrics + change history and (re)generate this report? This overwrites the AI sections.">
+          Pull Google Ads data
+        </button>
+        <div id="r-gads-spin" class="htmx-indicator r-muted" style="font-size:12px; margin-top:6px;">Pulling metrics + change history & generating… (~20s)</div>
+      </div>
+      <% } %>
     </header>
 
     <form id="r-upload-form"
@@ -211,8 +225,8 @@
   <!-- Focus next period -->
   <section class="card r-section">
     <header class="r-section-head">
-      <h3>4. Focus next period</h3>
-      <p class="r-muted">What's the plan for next month?</p>
+      <h3>4. Focus next period <span class="r-muted" style="font-weight:400; font-size:13px;">(optional)</span></h3>
+      <p class="r-muted">What's the plan for next month? Leave blank to let the AI write the "Next month" section itself — it isn't required.</p>
     </header>
     <textarea class="r-textarea"
               name="focus_next_md"

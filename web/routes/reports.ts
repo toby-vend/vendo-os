@@ -547,6 +547,46 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     return reply.type('text/html').render('reports/_change-history-field', { report: fresh, note });
   });
 
+  // One-click Google Ads pull: change history + performance metrics, then
+  // (re)generate the report from them. Google Ads only.
+  app.post<{ Params: { id: string } }>('/:id/pull-google-ads', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+    const id = Number(request.params.id);
+    if (!Number.isFinite(id)) return reply.code(404).send('Not found');
+    const report = await getReport(id);
+    if (!report) return reply.code(404).send('Not found');
+    if (report.channel !== 'google_ads') {
+      return reply.code(400).type('text/html').send('<div class="r-error">This is Google Ads only.</div>');
+    }
+
+    // 1) Change history → field (so it's included as context in generation).
+    try {
+      const ch = await fetchGadsChangeHistory(report.client_id, report.period_start, report.period_end);
+      if (ch.text) await updateNarrative(id, { changeHistory: ch.text });
+    } catch (err) {
+      request.log?.warn?.({ err }, 'change history pull failed during pull-google-ads');
+    }
+
+    // 2) Pull performance metrics + (re)generate the report blocks.
+    const gen = await generateReportForId(id, {
+      userId: user.id,
+      applyNarrativeDraft: true,
+      forceNarrative: true,
+      log: (m) => request.log?.info?.(m),
+    });
+    if (!gen.aiGenerated) {
+      return reply.code(500).type('text/html').send(
+        `<div class="r-error">Pull failed: ${(gen.aiError ?? 'generation error').slice(0, 200)}</div>`,
+      );
+    }
+
+    // Multiple sections changed (performance, change history, AI blocks) — do a
+    // clean reload of the editor so everything shows the fresh data.
+    return reply.header('HX-Refresh', 'true').send('');
+  });
+
   // Save a single AI block (after the user edits it post-generation)
   app.post<{ Params: { id: string; field: string } }>('/:id/ai/:field', async (request, reply) => {
     const user = (request as any).user as SessionUser | null;
