@@ -39,3 +39,7 @@ Thumbs.db
 
 # Client creative sheets (binary, regenerable per-client deliverables)
 outputs/creatives/
+
+# Raw uploaded client reports (anonymised copies live in report-style.ts)
+data/report-examples/*
+!data/report-examples/README.md

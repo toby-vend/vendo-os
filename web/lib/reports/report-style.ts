@@ -28,52 +28,110 @@ export interface FewShotExample {
 /**
  * Distilled style standard.
  *
- * PROVISIONAL BASELINE — derived from Vendo's established client-report email
- * format (web/views/reports/preview.eta) and house conventions, NOT yet from
- * Toby's uploaded example reports. Once real reports land in
- * data/report-examples/, refine/replace this and add FEW_SHOT_EXAMPLES so the
- * output is calibrated to the genuine standard.
+ * Calibrated from Toby's real monthly Google Ads reports
+ * (data/report-examples/) — the genuine house standard for client-facing
+ * Paid Search reporting. PRESENTATION here (prose, "enquiries"/"cost per lead",
+ * clean campaign names) intentionally takes precedence over the bullet/CPR/
+ * "VD |" presentation in report-ai.ts for these Google Ads client emails. The
+ * SUBSTANTIVE locked rules in report-ai.ts still hold: anti-fabrication,
+ * bottom-funnel only, skip inactive campaigns, dental View Content handling,
+ * and the positive/mirroring tone.
  *
- * This guide is report-LEVEL (how the finished report reads as a whole). The
- * per-field rules in report-ai.ts cover each section's mechanics — this avoids
- * repeating them and focuses on cohesion and house voice.
+ * The few-shot examples below carry the structure; this guide states the rules.
  */
-export const STYLE_GUIDE = `The finished report is delivered as a friendly monthly email. The greeting
-and sign-off are added automatically — your sections sit inside this flow and
-must read as one coherent, confident update, not five disconnected blocks:
+export const STYLE_GUIDE = `These reports are written as a warm, first-person monthly email from the
+account manager. The greeting and sign-off are templated — your sections sit
+inside that flow and must read like the real Vendo reports below.
 
-  Hi [first name], — (templated)
-  [Period] [Platform] Performance   → performance_summary
-  Screenshots                       → (team-uploaded; you don't write these)
-  This Month                        → exec_summary, then wins, then worked_on
-  Things to keep an eye on          → risks (hidden entirely if "no material risks")
-  Next Month & Ongoing              → focus (team) + recommendations
-  Thanks, [name] — (templated)
+STRUCTURE (map onto the report's fields):
+- exec_summary = the "Overview": one short paragraph. Lead with the headline —
+  total enquiries (or sales) and the average cost per lead — then the standing
+  goal/context, and, where revenue is tracked, "a total tracked revenue of £X
+  from an ad spend of £Y" (note ongoing/lifetime value where relevant).
+- performance_summary = "Paid Search Performance": a short PROSE paragraph PER
+  campaign — NOT a bullet table. Each runs: "[Clean Campaign Name]: [n]
+  enquiries at £X per lead." then one sentence of genuine context (form
+  submissions vs calls, quality, availability constraints, an improvement
+  month-on-month). For ecom, give an "Overall Performance" line (revenue,
+  spend, ROAS, profit if known) then each campaign's revenue contribution.
+- recommendations = "Looking Ahead" / "Proceeding Forward": specific, tactical
+  next steps in prose-y bullets — search-term reports, keyword analysis,
+  negative keywords, bid-strategy/ROAS-target tuning, ad-copy/asset refreshes,
+  new ad groups, landing-page suggestions. A light "it'd be good to catch up"
+  is on-brand when no recent call.
 
-House standard:
-- One narrative thread. The exec_summary sets the headline; wins, worked_on and
-  recommendations should reinforce it, not restate it. Don't repeat the same
-  metric verbatim in three places — lead with it once, then build.
-- Numbers are exact and lifted from the canonical data: "£2,644.32", "112
-  conversions", "CPR £23.61". Never round into vagueness, never invent.
-- "CPR" (Cost per Result) is the house term for cost-per-conversion. Campaign
-  rows are bottom-funnel only (Spend / conversions / CPR / ROAS where revenue
-  exists). Campaign names verbatim, including the "VD | …" prefix.
-- Voice: a senior account director who is on top of the account — warm, plain
-  English, momentum-focused, addressed to "you". Confident without hype. No
-  agency jargon, no filler, no catastrophising.
-- worked_on and recommendations should make the client feel the account is
-  being actively driven: concrete delivery this month, concrete plans next.
-  Frame everything as forward progress.
-- Length discipline: exec_summary 2–4 sentences; wins 2–5 bullets; worked_on
-  2–4 sentences or ≤5 bullets; risks 1–4 (or hidden); recommendations 2–4.
-  Tight beats padded.`;
+TERMINOLOGY (client-facing — this is the key calibration):
+- Lead-gen (dental, services, B2B): say "enquiries", "cost per lead", "£X per
+  lead", "form submissions", "phone calls". Do NOT say "conversions" or "CPR"
+  to these clients.
+- Ecommerce: say "revenue", "spend", "ROAS" / "return on spend", "profit".
+- Use friendly platform names: "Performance Max" or "PMax", "Google Ads",
+  "Microsoft Ads".
+- CLEAN campaign names — strip internal prefixes. "VD | Search - General
+  Dentistry" becomes "General Dentistry"; "VD | Search - Clear Aligners"
+  becomes "Invisalign®"/"Clear Aligners" as the client knows it. Never show the
+  "VD |" prefix or "Search -" plumbing to the client.
+
+VOICE:
+- First person ("I completed a quarterly audit", "we'll be…", "I paused…").
+- Warm, plain English, confident, momentum-focused. Honesty is woven naturally
+  into the prose (e.g. "a majority of these leads are turned away due to
+  limited availability") rather than flagged as a separate risk — only use the
+  risks field for something the client genuinely needs to act on.
+- Exact numbers, never rounded into vagueness, never invented.
+- Tight beats padded: exec_summary one paragraph; per-campaign one short
+  paragraph each; recommendations 2–4 points.`;
 
 /**
- * Verbatim worked examples. Keep to 1–2 to control prompt cost.
- * Empty array = not yet configured (no effect on the prompt).
+ * Worked examples — adapted from Toby's real monthly reports, anonymised
+ * (client/owner names replaced with placeholders; figures kept as realistic
+ * illustrations). They teach STRUCTURE and VOICE; the model must not copy
+ * their numbers or facts. Greeting/sign-off shown for context only — the app
+ * templates those, so the model writes the body sections.
  */
-export const FEW_SHOT_EXAMPLES: FewShotExample[] = [];
+export const FEW_SHOT_EXAMPLES: FewShotExample[] = [
+  {
+    label: 'Dental — Paid Search (lead-gen)',
+    content: `Dear [Client],
+
+Hope you and the team are well.
+Attached is your monthly report and loom video outlining the performance of your Paid Search campaigns for [Month Year].
+
+Overview
+The account recorded 68 enquiries at an average cost per lead of £43.21. The ongoing goal has been to find more booked patients for Invisalign and Smile Makeovers, whilst reducing the cost per lead and keeping a good flow of patients to fill the diaries for the weeks ahead. We removed the CPA targets on the high-value campaigns as they were choking the ability to get leads, and they are now performing far more consistently, with reduced cost per lead month on month. In [Month], there was a total tracked revenue of £4,290.50 from the Google campaigns, from an ad spend of £2,938.21, with many patients still to be seen for valuable ongoing treatments — this return will grow with lifetime value over the coming months.
+
+Paid Search Performance
+Emergency Dentistry: We had 16 enquiries at £28.50 per lead. Despite some going ahead, it looks like a majority of these leads are turned away due to limited availability.
+General Dentistry: This campaign delivered 36 enquiries at £24.08 per lead, with 9 form submissions amongst the phone calls. These convert well compared to emergencies.
+Invisalign®: We generated 6 enquiries at an average cost per lead of £124.01 — another improvement. These were mostly forms, which convert better than the phone calls.
+Smile Makeover: Delivered 6 enquiries at a cost per lead of £111.62, also an improvement.
+PMax: 3 additional enquiries at a cost per lead of £30.02.
+
+Looking Ahead
+In [Month], we'll continue working towards converting more high-quality Invisalign and Smile Makeover patients, using optimisations such as keyword analysis and search-term reports. I'll be adding more specific ad groups for general treatments such as fillings and periodontal care, as these are popular — it would be good to add some treatment pricing for these to the general landing page to complement this.
+
+As always, feel free to reach out if you need anything.
+Best wishes,`,
+  },
+  {
+    label: 'Ecommerce — Paid Search (revenue/ROAS)',
+    content: `Hi [Client],
+
+Attached is your monthly report and loom video detailing the performance of your Paid Search campaigns for [Month Year].
+
+Paid Search
+[Month] was a high-activity month focused on structural refinement and scaling high-intent traffic across both Google and Microsoft. We added new product ranges into your Catch All Shopping campaign to capture volume, and expanded our keyword lists for the core ranges. We also performed a major cleanup of search terms, blocking irrelevant traffic, and pushed return-on-spend targets higher across the major campaigns to focus spend on higher-return purchases.
+
+Overall Performance
+In [Month], your Paid Search activity generated £131,332.89 in revenue from a total spend of £25,139.15, a platform-wide return on spend (ROAS) of 5.22. Google Ads remained strong, contributing £110,354.37 at a blended ROAS of 4.84, with the PMax campaign having a particularly successful month at £24,438.58 in revenue. Microsoft Ads continues to be a profitable supplementary channel, delivering £20,978.52 at a blended ROAS of 9.0.
+
+Focus Areas for Next Month
+We'll continue managing bidding strategies and monitoring the recent ROAS-target increases so spend is directed towards the most profitable orders. We'll also split out further campaigns in Microsoft where performance has been strongest, and look at a Google remarketing campaign targeting website visitors who didn't convert to add another touchpoint.
+
+If you have any questions, feel free to reach out.
+Many thanks,`,
+  },
+];
 
 /**
  * Compose the optional style addendum for the system prompt. Returns an empty
