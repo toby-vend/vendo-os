@@ -51,6 +51,47 @@ function tidyFields(changed?: string): string {
     .join(', ');
 }
 
+/** Strip Vendo's internal campaign-name prefixes for a clean, readable name. */
+function cleanName(name: string): string {
+  return name
+    .replace(/^VD\s*\|\s*/i, '')
+    .replace(/^Search\s*-\s*/i, '')
+    .trim();
+}
+
+/**
+ * Build id -> clean-name maps for the customer's campaigns and ad groups, so
+ * change-history lines read "General Dentistry" instead of "campaign 234…".
+ */
+async function fetchNameMaps(
+  accessToken: string,
+  customerId: string,
+): Promise<{ campaigns: Map<string, string>; adGroups: Map<string, string> }> {
+  const campaigns = new Map<string, string>();
+  const adGroups = new Map<string, string>();
+  try {
+    const rows = (await gadsQuery(
+      accessToken,
+      customerId,
+      'SELECT campaign.id, campaign.name FROM campaign LIMIT 2000',
+    )) as unknown as Array<{ campaign?: { id?: string; name?: string } }>;
+    for (const r of rows) {
+      if (r.campaign?.id && r.campaign.name) campaigns.set(String(r.campaign.id), cleanName(r.campaign.name));
+    }
+  } catch { /* names are best-effort; fall back to ids */ }
+  try {
+    const rows = (await gadsQuery(
+      accessToken,
+      customerId,
+      'SELECT ad_group.id, ad_group.name FROM ad_group LIMIT 5000',
+    )) as unknown as Array<{ adGroup?: { id?: string; name?: string } }>;
+    for (const r of rows) {
+      if (r.adGroup?.id && r.adGroup.name) adGroups.set(String(r.adGroup.id), cleanName(r.adGroup.name));
+    }
+  } catch { /* best-effort */ }
+  return { campaigns, adGroups };
+}
+
 export async function fetchGadsChangeHistory(
   clientId: number,
   periodStart: string,
@@ -112,6 +153,8 @@ export async function fetchGadsChangeHistory(
       apiError = err instanceof Error ? err.message : String(err);
       continue;
     }
+    // Resolve campaign / ad-group ids to clean names for this customer.
+    const { campaigns, adGroups } = await fetchNameMaps(accessToken, cid);
     for (const r of apiRows) {
       const ce = r.changeEvent;
       if (!ce) continue;
@@ -119,7 +162,13 @@ export async function fetchGadsChangeHistory(
       const op = (ce.resourceChangeOperation ?? '').toLowerCase();
       const type = (ce.changeResourceType ?? '').toLowerCase().replace(/_/g, ' ');
       const fields = tidyFields(ce.changedFields);
-      const scope = ce.adGroup ? `ad group ${lastSeg(ce.adGroup)}` : ce.campaign ? `campaign ${lastSeg(ce.campaign)}` : '';
+      const agId = lastSeg(ce.adGroup);
+      const cId = lastSeg(ce.campaign);
+      const scope = ce.adGroup
+        ? `ad group: ${adGroups.get(agId) || agId}`
+        : ce.campaign
+          ? `campaign: ${campaigns.get(cId) || cId}`
+          : '';
       const via = ce.clientType && ce.clientType !== 'GOOGLE_ADS_WEB_CLIENT' ? ` (${ce.clientType.toLowerCase()})` : '';
       lines.push(`${when}  ${op} ${type}${fields ? ` — ${fields}` : ''}${scope ? ` [${scope}]` : ''}${via}`);
     }
