@@ -44,8 +44,15 @@
 <body>
   <div class="app-layout">
     <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <!-- Sidebar. hx-boost makes nav clicks swap only the .main-wrapper (topbar
+         + content) in place — the sidebar stays put, so there's no full-page
+         reload, flash, or scroll jump. Scoped to the aside so forms, logout and
+         page-content links are unaffected. -->
+    <aside class="sidebar" id="sidebar"
+           hx-boost="true"
+           hx-target=".main-wrapper"
+           hx-select=".main-wrapper"
+           hx-swap="outerHTML">
       <div class="sidebar-header">
         <div class="sidebar-logo">
           <div class="logo-icon">V</div>
@@ -203,6 +210,26 @@
 
   <script>
   var isMobile = window.innerWidth <= 768;
+
+  // In-place sidebar navigation (hx-boost swaps only .main-wrapper). Never
+  // animate-scroll on boost, and keep the sidebar's active highlight + open
+  // group in sync since the sidebar itself isn't re-rendered.
+  if (window.htmx) {
+    htmx.config.scrollIntoViewOnBoost = false;
+    htmx.config.scrollBehavior = 'instant';
+  }
+  function updateSidebarActive() {
+    var path = location.pathname;
+    document.querySelectorAll('.sidebar a.nav-child, .sidebar a.nav-group-link, .sidebar-footer a.nav-item').forEach(function(a) {
+      var href = a.getAttribute('href') || '';
+      var active = href === '/' ? path === '/' : (href.length > 1 && path.startsWith(href));
+      a.classList.toggle('active', active);
+      if (active) { var g = a.closest('.nav-group'); if (g) g.classList.add('open'); }
+    });
+  }
+  // Runs after every settle; cheap + idempotent (path-based), so it's safe to
+  // run on non-nav swaps too — it only changes anything when the URL changed.
+  document.body.addEventListener('htmx:afterSettle', updateSidebarActive);
 
   // Mobile More overlay
   function openMoreNav() {
