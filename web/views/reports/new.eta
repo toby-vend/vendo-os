@@ -4,7 +4,7 @@
 
 <div style="max-width: 640px; margin: 0 auto;">
   <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 0.5rem;">New report</h2>
-  <p class="r-muted" style="margin-bottom: 1.5rem;">Pick the client and the month you're reporting on.</p>
+  <p class="r-muted" style="margin-bottom: 1.5rem;">Pick the client, channel and month you're reporting on. Each channel is a separate, channel-pure report.</p>
 
   <form method="post" action="/api/reports" class="card r-form">
     <label class="r-field">
@@ -13,6 +13,15 @@
         <option value="">Choose a client…</option>
         <% it.clients.forEach(function(c){ %>
           <option value="<%= c.id %>"><%= c.label %></option>
+        <% }); %>
+      </select>
+    </label>
+
+    <label class="r-field">
+      <span>Channel</span>
+      <select name="channel" required>
+        <% it.channelOptions.forEach(function(c){ %>
+          <option value="<%= c.value %>"><%= c.label %></option>
         <% }); %>
       </select>
     </label>

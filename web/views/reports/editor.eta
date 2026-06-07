@@ -57,6 +57,33 @@
     </div>
   </div>
 
+  <!-- Month + channel selector. Channels are kept pure: switching channel
+       loads that channel's separate report (or offers to generate it). -->
+  <div class="r-channel-bar card" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px;">
+    <strong style="font-size:13px;">Channel:</strong>
+    <% it.channelOptions.forEach(function(c){ %>
+      <% var sid = it.siblingByChannel[c.value]; %>
+      <% if (c.value === it.report.channel) { %>
+        <span class="r-btn r-btn-primary" style="cursor:default;"><%= c.label %></span>
+      <% } else if (sid) { %>
+        <a class="r-btn r-btn-ghost" href="/reports/<%= sid %>"><%= c.label %></a>
+      <% } else { %>
+        <a class="r-btn r-btn-ghost" style="opacity:.55;"
+           href="/reports/switch?clientId=<%= it.report.client_id %>&month=<%= it.monthValue %>&channel=<%= c.value %>"
+           title="No <%= c.label %> report for this month yet — click to generate">+ <%= c.label %></a>
+      <% } %>
+    <% }); %>
+
+    <form method="GET" action="/reports/switch" style="display:flex; gap:8px; align-items:center; margin-left:auto;">
+      <input type="hidden" name="clientId" value="<%= it.report.client_id %>" />
+      <input type="hidden" name="channel" value="<%= it.report.channel %>" />
+      <label class="r-muted" style="font-size:13px;">Month</label>
+      <input type="month" name="month" value="<%= it.monthValue %>"
+             style="background:var(--vendo-surface); color:inherit; border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:6px 8px;" />
+      <button class="r-btn r-btn-ghost" type="submit">Go</button>
+    </form>
+  </div>
+
   <!-- Status audit strip — surfaces who submitted / approved + when. -->
   <% if (it.report.status === 'review' && it.report.submitted_for_review_at) { %>
     <div class="card r-section" style="border-left: 3px solid var(--vendo-amber, #FACC15); padding: 0.75rem 1rem;">
@@ -115,7 +142,7 @@
         <span>Platform</span>
         <select name="platform" required>
           <option value="">Pick…</option>
-          <% it.platforms.forEach(function(p){ %>
+          <% (it.channelPlatforms || it.platforms).forEach(function(p){ %>
             <option value="<%= p.value %>"><%= p.label %></option>
           <% }); %>
         </select>

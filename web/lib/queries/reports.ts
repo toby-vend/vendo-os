@@ -35,12 +35,55 @@ export const PLATFORM_OPTIONS: { value: ScreenshotPlatform; label: string }[] = 
   { value: 'other', label: 'Other' },
 ];
 
+/**
+ * Report channels. A client report is scoped to exactly one channel — no
+ * channel crosses over. Each client can have one report per channel per month.
+ */
+export type ReportChannel = 'google_ads' | 'meta' | 'seo';
+
+export const CHANNELS: ReportChannel[] = ['google_ads', 'meta', 'seo'];
+
+export const CHANNEL_OPTIONS: { value: ReportChannel; label: string }[] = [
+  { value: 'google_ads', label: 'Google Ads' },
+  { value: 'meta', label: 'Meta' },
+  { value: 'seo', label: 'SEO' },
+];
+
+export function channelLabel(channel: ReportChannel): string {
+  return CHANNEL_OPTIONS.find(c => c.value === channel)?.label ?? channel;
+}
+
+export function isReportChannel(value: unknown): value is ReportChannel {
+  return value === 'google_ads' || value === 'meta' || value === 'seo';
+}
+
+/**
+ * Which screenshot platforms belong to each channel. Used to keep a report's
+ * screenshots channel-pure (a Google Ads report shows only Google Ads / GHL
+ * screenshots, etc.). GHL (CRM funnel) is shared context allowed on any
+ * lead-gen channel report.
+ */
+export const CHANNEL_PLATFORMS: Record<ReportChannel, ScreenshotPlatform[]> = {
+  google_ads: ['google_ads', 'ghl'],
+  meta: ['meta', 'ghl'],
+  seo: ['gsc', 'ga4'],
+};
+
+/** Map a screenshot platform to its primary channel (null if none). */
+export function platformChannel(platform: ScreenshotPlatform): ReportChannel | null {
+  if (platform === 'google_ads') return 'google_ads';
+  if (platform === 'meta') return 'meta';
+  if (platform === 'gsc' || platform === 'ga4') return 'seo';
+  return null; // ghl is shared; others (tiktok/linkedin/bing/...) are out of scope
+}
+
 export interface ClientReportRow {
   id: number;
   client_id: number;
   client_name: string;
   client_display_name: string | null;
   client_vertical: string | null;
+  channel: ReportChannel;
   period_label: string;
   period_start: string;
   period_end: string;
@@ -71,6 +114,7 @@ export interface ReportListRow {
   client_id: number;
   client_name: string;
   client_display_name: string | null;
+  channel: ReportChannel;
   period_label: string;
   period_start: string;
   period_end: string;
@@ -103,6 +147,7 @@ const REPORT_SELECT = `
   SELECT r.id, r.client_id,
          c.name AS client_name, c.display_name AS client_display_name,
          c.vertical AS client_vertical,
+         r.channel,
          r.period_label, r.period_start, r.period_end, r.status,
          r.contact_name, r.contact_email,
          r.worked_on_md, r.focus_next_md,
@@ -122,12 +167,14 @@ const REPORT_SELECT = `
 export async function listReports(opts: {
   clientId?: number;
   status?: ReportStatus;
+  channel?: ReportChannel;
   limit?: number;
 } = {}): Promise<ReportListRow[]> {
   const where: string[] = [];
   const args: (string | number)[] = [];
   if (opts.clientId) { where.push('r.client_id = ?'); args.push(opts.clientId); }
   if (opts.status) { where.push('r.status = ?'); args.push(opts.status); }
+  if (opts.channel) { where.push('r.channel = ?'); args.push(opts.channel); }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const limit = opts.limit ?? 200;
@@ -135,6 +182,7 @@ export async function listReports(opts: {
   return rows<ReportListRow>(`
     SELECT r.id, r.client_id,
            c.name AS client_name, c.display_name AS client_display_name,
+           r.channel,
            r.period_label, r.period_start, r.period_end, r.status,
            r.ai_generated_at,
            r.submitted_for_review_at, r.submitted_for_review_by,
@@ -180,6 +228,7 @@ export async function listScreenshots(reportId: number): Promise<ScreenshotRow[]
 
 export async function createReport(params: {
   clientId: number;
+  channel: ReportChannel;
   periodLabel: string;
   periodStart: string;   // YYYY-MM-DD
   periodEnd: string;     // YYYY-MM-DD
@@ -187,19 +236,24 @@ export async function createReport(params: {
 }): Promise<number> {
   const result = await db.execute({
     sql: `INSERT INTO client_reports
-            (client_id, period_label, period_start, period_end, created_by)
-          VALUES (?, ?, ?, ?, ?)
+            (client_id, channel, period_label, period_start, period_end, created_by)
+          VALUES (?, ?, ?, ?, ?, ?)
           RETURNING id`,
-    args: [params.clientId, params.periodLabel, params.periodStart, params.periodEnd, params.createdBy],
+    args: [params.clientId, params.channel, params.periodLabel, params.periodStart, params.periodEnd, params.createdBy],
   });
   return Number(result.rows[0].id);
 }
 
-export async function findReport(clientId: number, periodStart: string, periodEnd: string): Promise<number | null> {
+export async function findReport(
+  clientId: number,
+  periodStart: string,
+  periodEnd: string,
+  channel: ReportChannel,
+): Promise<number | null> {
   const id = await scalar<number>(
     `SELECT id FROM client_reports
-     WHERE client_id = ? AND period_start = ? AND period_end = ?`,
-    [clientId, periodStart, periodEnd],
+     WHERE client_id = ? AND period_start = ? AND period_end = ? AND channel = ?`,
+    [clientId, periodStart, periodEnd, channel],
   );
   return id ?? null;
 }
@@ -478,4 +532,38 @@ export async function getClientGadsCustomerIds(clientId: number): Promise<string
     [clientId],
   );
   return result.map(r => r.gads_customer_id);
+}
+
+/**
+ * Which channels a client is set up on (by account/source mappings), so the
+ * report UI and cron only offer channels that can produce a report.
+ *   - google_ads: a gads_account_client_map row exists
+ *   - meta:       a client_source_mappings(source='meta') row exists
+ *   - seo:        a client_source_mappings(source in 'gsc','ga4') row OR a
+ *                 geogrid scan exists
+ * Mapping-based (not period-specific) — a channel with a mapping but no data
+ * for the month still generates a clean "no activity" report.
+ */
+export async function getClientActiveChannels(clientId: number): Promise<ReportChannel[]> {
+  const active: ReportChannel[] = [];
+
+  const gads = await scalar<number>(
+    'SELECT COUNT(*) FROM gads_account_client_map WHERE client_id = ?', [clientId]);
+  if (Number(gads) > 0) active.push('google_ads');
+
+  const meta = await scalar<number>(
+    "SELECT COUNT(*) FROM client_source_mappings WHERE client_id = ? AND source = 'meta'", [clientId]);
+  if (Number(meta) > 0) active.push('meta');
+
+  const seoMap = await scalar<number>(
+    "SELECT COUNT(*) FROM client_source_mappings WHERE client_id = ? AND source IN ('gsc','ga4')", [clientId]);
+  let seo = Number(seoMap) > 0;
+  if (!seo) {
+    const geo = await scalar<number>(
+      'SELECT COUNT(*) FROM geogrid_scans WHERE client_id = ?', [clientId]).catch(() => 0);
+    seo = Number(geo) > 0;
+  }
+  if (seo) active.push('seo');
+
+  return active;
 }

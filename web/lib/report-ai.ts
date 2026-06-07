@@ -73,8 +73,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ImageBlockParam, TextBlockParam, Tool } from '@anthropic-ai/sdk/resources/messages.js';
 import { trackUsage } from './usage-tracker.js';
-import { PLATFORM_OPTIONS, type ScreenshotPlatform } from './queries/reports.js';
-import type { GoogleAdsPeriodSummary } from './reports/gads-summary.js';
+import { PLATFORM_OPTIONS, channelLabel, type ScreenshotPlatform, type ReportChannel } from './queries/reports.js';
 import { renderStyleAddendum } from './reports/report-style.js';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -82,6 +81,8 @@ const MODEL = 'claude-sonnet-4-6';
 export interface ReportAiInput {
   clientName: string;
   vertical: string | null;
+  /** The single channel this report covers. No other channel may appear. */
+  channel: ReportChannel;
   periodLabel: string;
   workedOnMd: string;
   focusNextMd: string;
@@ -91,14 +92,12 @@ export interface ReportAiInput {
     url: string;
   }>;
   /**
-   * Optional canonical Google Ads data for the period. When provided AND
-   * `has_data` is true, the prompt builder injects a structured text block
-   * before any screenshots and instructs Claude to treat the structured
-   * numbers as canonical — preferred over re-deriving from Google Ads
-   * screenshots. Other platforms (Meta, GA4, GSC, etc.) remain
-   * screenshot-driven for now.
+   * Canonical, channel-pure data block (from channel-summary.ts) for the
+   * report's channel. Injected before screenshots; the model treats it as
+   * authoritative over screenshot OCR. Empty string when the channel had no
+   * activity this period.
    */
-  googleAdsSummary?: GoogleAdsPeriodSummary;
+  channelData?: string;
   /**
    * Optional internal meeting context — what was discussed in the client's
    * calls this period (from Fathom summaries). Used to ground the qualitative
@@ -144,7 +143,7 @@ You will be given:
 - Optionally, an "Internal meeting context" block — short summaries of the calls held with the client this period
 - Optionally, a "Work completed this period" list — Asana tasks closed and meeting actions for the account
 
-If a STRUCTURED GOOGLE ADS DATA block is provided, use those numbers as canonical — do not re-derive from the Google Ads screenshot. Screenshots may still be present for visual context (e.g. trend charts) but the structured block is authoritative.
+If a STRUCTURED [CHANNEL] DATA block is provided, use those numbers as canonical — do not re-derive them from a screenshot. Screenshots may still be present for visual context (e.g. trend charts) but the structured block is authoritative.
 
 Internal meeting context — handle with care:
 - This is internal background (auto-generated call summaries) to help you understand what was worked on and discussed. It is NOT client-facing text.
@@ -177,11 +176,42 @@ Tone — read carefully:
 Call the \`submit_report\` tool with all five fields filled in. Every field is required — do not return an empty string for any of them. The performance_summary field MUST contain a structured metric breakdown extracted from the screenshots; the others are short narrative blocks.`;
 
 /**
- * Final system prompt = base rules + optional style standard / few-shot
- * examples distilled from past reports (see report-style.ts). When the style
- * module is unconfigured this is identical to the base prompt.
+ * Channel-purity directive. This is the hard rule that keeps a report to a
+ * single channel — no Meta data in a Google Ads report, etc. — plus the
+ * client-facing terminology for that channel.
  */
-const SYSTEM_PROMPT = `${BASE_SYSTEM_PROMPT}${renderStyleAddendum()}`;
+function channelDirective(channel: ReportChannel): string {
+  const label = channelLabel(channel);
+  const others = (['google_ads', 'meta', 'seo'] as ReportChannel[])
+    .filter(c => c !== channel)
+    .map(channelLabel)
+    .join(' and ');
+
+  const terminology: Record<ReportChannel, string> = {
+    google_ads:
+      'This is a Google Ads (Paid Search) report. Use Paid Search terminology: "enquiries" / "leads" and "cost per lead" (£X per lead) for lead-gen; "revenue", "spend" and "ROAS" for ecommerce. Refer to campaigns by clean client-facing names (strip internal "VD |" / "Search -" prefixes).',
+    meta:
+      'This is a Meta (Paid Social) report. Talk only about the Meta/Facebook/Instagram ad campaigns. Use "results" / "leads", "cost per lead" / "cost per result", "ROAS" and "spend". For dental clients the Meta conversion event is View Content — treat it as the leads metric (per the dental rule). Clean campaign names; never show internal prefixes.',
+    seo:
+      'This is an SEO (Organic Search) report. Talk only about organic search performance: organic users/traffic, clicks, impressions, average position, keyword rankings, top pages, local map (GeoGrid) rankings, and organic leads. There is NO ad spend, CPL or ROAS in an SEO report — do not invent paid metrics.',
+  };
+
+  return `
+
+----------------------------------------------------------------------------
+CHANNEL — THIS REPORT IS ${label.toUpperCase()} ONLY.
+----------------------------------------------------------------------------
+${terminology[channel]}
+Write EXCLUSIVELY about ${label}. Do NOT mention, compare to, or include any data, campaigns, wins, risks, or recommendations relating to ${others}. If the internal meeting/completed-work context references ${others}, IGNORE those parts entirely — only surface ${label} work. Every section (performance, exec summary, wins, risks, recommendations, what-we-worked-on) must be 100% ${label}.`;
+}
+
+/**
+ * Final system prompt = base rules + channel directive + optional style
+ * standard / channel-matched few-shot examples (see report-style.ts).
+ */
+function buildSystemPrompt(channel: ReportChannel): string {
+  return `${BASE_SYSTEM_PROMPT}${channelDirective(channel)}${renderStyleAddendum(channel)}`;
+}
 
 const WORKED_ON_PROPERTY = {
   type: 'string' as const,
@@ -249,58 +279,13 @@ function platformLabel(value: ScreenshotPlatform): string {
 }
 
 /**
- * Format a GBP amount as a `£X,XXX.XX` string (no currency symbol when 0 to
- * keep prose tidy; otherwise always two decimal places).
- */
-function formatGbp(value: number): string {
-  return `£${value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-/**
- * Format ROAS as `X.XX` or `n/a` when there is no attributed revenue.
- */
-function formatRoas(value: number | null): string {
-  return value === null ? 'n/a' : value.toFixed(2);
-}
-
-/**
- * Render a canonical Google Ads structured-data block. Mirrors the field
- * ordering used in the `performance_summary` tool description so Claude
- * can lift it straight into the report output. Campaigns are listed
- * highest-spend first.
- */
-function renderGoogleAdsBlock(summary: GoogleAdsPeriodSummary): string {
-  const lines: string[] = [];
-  lines.push('STRUCTURED GOOGLE ADS DATA (canonical — prefer this over any Google Ads screenshot below):');
-  lines.push('');
-  lines.push('Overall:');
-  lines.push(`- Spend: ${formatGbp(summary.overall.spend)}`);
-  lines.push(`- Conversions: ${summary.overall.conversions}`);
-  lines.push(`- CPR: ${formatGbp(summary.overall.cpr)}`);
-  lines.push(`- ROAS: ${formatRoas(summary.overall.roas)}`);
-  lines.push('');
-  lines.push('Campaigns:');
-  for (const c of summary.campaigns) {
-    lines.push('');
-    lines.push(`*${c.campaign_name}*`);
-    lines.push(`- Spend: ${formatGbp(c.spend)}`);
-    lines.push(`- Conversions: ${c.conversions}`);
-    lines.push(`- CPR: ${formatGbp(c.cpr)}`);
-    lines.push(`- ROAS: ${formatRoas(c.roas)}`);
-  }
-  return lines.join('\n');
-}
-
-/**
- * Build a multimodal message: a header text block, then (when supplied) a
- * canonical Google Ads structured-data block, then for each screenshot a
+ * Build a multimodal message: a header text block, then (when supplied) the
+ * channel's canonical structured-data block, then for each screenshot a
  * labelled text block followed by the image itself, then the narrative.
  *
- * Interleaving the platform/caption text immediately before each image gives
- * Claude a clear "this chart is Google Ads, here's what the AM said about it"
- * grouping rather than dumping all images and then all text. When a Google
- * Ads structured-data block is included, it appears BEFORE any screenshots
- * so Claude treats those numbers as canonical (per SYSTEM_PROMPT).
+ * The canonical block (channelData) is channel-pure and appears BEFORE any
+ * screenshots so Claude treats those numbers as authoritative (per the
+ * system prompt). Screenshots are already filtered to this channel upstream.
  */
 function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlockParam> {
   const blocks: Array<TextBlockParam | ImageBlockParam> = [];
@@ -308,14 +293,11 @@ function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlo
   const verticalLine = input.vertical ? `\nVertical: ${input.vertical}` : '';
   blocks.push({
     type: 'text',
-    text: `Client: ${input.clientName}${verticalLine}\nReporting period: ${input.periodLabel}`,
+    text: `Client: ${input.clientName}${verticalLine}\nChannel: ${channelLabel(input.channel)}\nReporting period: ${input.periodLabel}`,
   });
 
-  if (input.googleAdsSummary && input.googleAdsSummary.has_data) {
-    blocks.push({
-      type: 'text',
-      text: `\n${renderGoogleAdsBlock(input.googleAdsSummary)}`,
-    });
+  if (input.channelData && input.channelData.trim()) {
+    blocks.push({ type: 'text', text: `\n${input.channelData.trim()}` });
   }
 
   if (input.screenshots.length === 0) {
@@ -392,7 +374,7 @@ export async function generateReportInsights(
 
   const response = await anthropic().messages.create({
     model: MODEL,
-    system: SYSTEM_PROMPT,
+    system: buildSystemPrompt(input.channel),
     messages: [{ role: 'user', content }],
     max_tokens: 6000,
     temperature: 0.4,

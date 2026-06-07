@@ -46,7 +46,7 @@ console.log(`Test client: ${c.label} (id ${c.id})`);
 const start = '1999-12-01';
 const end = '1999-12-31';
 
-let id = await findReport(c.id, start, end);
+let id = await findReport(c.id, start, end, 'google_ads');
 if (id) {
   console.log(`Pre-existing test report id ${id} — cleaning up first`);
   await deleteReport(id);
@@ -54,6 +54,7 @@ if (id) {
 
 id = await createReport({
   clientId: c.id,
+  channel: 'google_ads',
   periodLabel: 'Smoke Test — December 1999',
   periodStart: start,
   periodEnd: end,

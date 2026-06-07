@@ -22,7 +22,7 @@
  * cron stays cheap on re-runs.
  */
 import { db } from '../queries/base.js';
-import { createReport, findReport } from '../queries/reports.js';
+import { createReport, findReport, getClientActiveChannels, channelLabel, type ReportChannel } from '../queries/reports.js';
 import { consoleLog } from '../monitors/base.js';
 import { generateReportForId } from '../reports/generate.js';
 
@@ -31,6 +31,7 @@ const LOG_SOURCE = 'monthly-client-reports';
 export interface MonthlyClientReportRow {
   clientId: number;
   clientName: string;
+  channel: ReportChannel;
   reportId: number | null;
   skipped: boolean;
   error?: string;
@@ -41,8 +42,8 @@ export interface MonthlyClientReportsResult {
   created: number;
   alreadyExisted: number;
   failed: number;
-  /** Reports that had a Google Ads structured summary attached. */
-  gadsSummaryAttached: number;
+  /** Reports whose channel had data for the period. */
+  channelsWithData: number;
   /** Reports that had an auto-generated suggested narrative attached. */
   narrativeAttached: number;
   /** Reports for which AI insights were generated successfully. */
@@ -86,7 +87,7 @@ export async function runMonthlyClientReports(): Promise<MonthlyClientReportsRes
   let created = 0;
   let alreadyExisted = 0;
   let failed = 0;
-  let gadsSummaryAttached = 0;
+  let channelsWithData = 0;
   let narrativeAttached = 0;
   let aiGenerated = 0;
   let aiFailed = 0;
@@ -94,41 +95,46 @@ export async function runMonthlyClientReports(): Promise<MonthlyClientReportsRes
   for (const c of clientsRes.rows) {
     const clientId = Number(c.id);
     const clientName = String(c.name);
-    try {
-      const existing = await findReport(clientId, period.start, period.end);
-      if (existing) {
-        alreadyExisted++;
-        rows.push({ clientId, clientName, reportId: existing, skipped: true });
-        continue;
-      }
-      const reportId = await createReport({
-        clientId,
-        periodLabel: period.label,
-        periodStart: period.start,
-        periodEnd: period.end,
-        createdBy: 'cron:monthly-client-reports',
-      });
-      created++;
-      rows.push({ clientId, clientName, reportId, skipped: false });
 
-      // Full pipeline: Google Ads summary + reconciliation guardrail, narrative
-      // context (Asana completions + meeting actions + call discussions),
-      // auto-write the "what we worked on" draft into the report, then generate
-      // the five AI blocks. Each external step degrades gracefully on failure.
-      const gen = await generateReportForId(reportId, {
-        userId: null,
-        applyNarrativeDraft: true,
-        log: (m) => consoleLog(LOG_SOURCE, m),
-      });
-      if (gen.gadsHasData) gadsSummaryAttached++;
-      if (gen.narrativeApplied) narrativeAttached++;
-      if (gen.aiGenerated) aiGenerated++;
-      else aiFailed++;
-    } catch (err) {
-      failed++;
-      const error = err instanceof Error ? err.message : String(err);
-      consoleLog(LOG_SOURCE, `Failed for ${clientName}: ${error}`);
-      rows.push({ clientId, clientName, reportId: null, skipped: false, error });
+    // One report per channel the client is set up on — channel-pure.
+    const channels = await getClientActiveChannels(clientId);
+    for (const channel of channels) {
+      try {
+        const existing = await findReport(clientId, period.start, period.end, channel);
+        if (existing) {
+          alreadyExisted++;
+          rows.push({ clientId, clientName, channel, reportId: existing, skipped: true });
+          continue;
+        }
+        const reportId = await createReport({
+          clientId,
+          channel,
+          periodLabel: period.label,
+          periodStart: period.start,
+          periodEnd: period.end,
+          createdBy: 'cron:monthly-client-reports',
+        });
+        created++;
+        rows.push({ clientId, clientName, channel, reportId, skipped: false });
+
+        // Full pipeline for this channel: channel-pure canonical summary,
+        // narrative context (Asana + meetings, filtered to this channel by the
+        // AI), auto-written "what we worked on", then the five AI blocks.
+        const gen = await generateReportForId(reportId, {
+          userId: null,
+          applyNarrativeDraft: true,
+          log: (m) => consoleLog(LOG_SOURCE, `[${channelLabel(channel)}] ${m}`),
+        });
+        if (gen.channelHasData) channelsWithData++;
+        if (gen.narrativeApplied) narrativeAttached++;
+        if (gen.aiGenerated) aiGenerated++;
+        else aiFailed++;
+      } catch (err) {
+        failed++;
+        const error = err instanceof Error ? err.message : String(err);
+        consoleLog(LOG_SOURCE, `Failed for ${clientName} (${channel}): ${error}`);
+        rows.push({ clientId, clientName, channel, reportId: null, skipped: false, error });
+      }
     }
   }
 
@@ -137,7 +143,7 @@ export async function runMonthlyClientReports(): Promise<MonthlyClientReportsRes
     created,
     alreadyExisted,
     failed,
-    gadsSummaryAttached,
+    channelsWithData,
     narrativeAttached,
     aiGenerated,
     aiFailed,

@@ -18,9 +18,13 @@
  * structure and tone, not to store client data.
  */
 
+import type { ReportChannel } from '../queries/reports.js';
+
 export interface FewShotExample {
   /** Short label, e.g. "Dental — Google Ads — Apr 2026". */
   label: string;
+  /** Which channel this example belongs to — only shown on matching reports. */
+  channel: ReportChannel;
   /** The example report body (markdown), used to anchor structure + tone. */
   content: string;
 }
@@ -92,6 +96,7 @@ VOICE:
 export const FEW_SHOT_EXAMPLES: FewShotExample[] = [
   {
     label: 'Dental — Paid Search (lead-gen)',
+    channel: 'google_ads',
     content: `Dear [Client],
 
 Hope you and the team are well.
@@ -115,6 +120,7 @@ Best wishes,`,
   },
   {
     label: 'Ecommerce — Paid Search (revenue/ROAS)',
+    channel: 'google_ads',
     content: `Hi [Client],
 
 Attached is your monthly report and loom video detailing the performance of your Paid Search campaigns for [Month Year].
@@ -137,7 +143,7 @@ Many thanks,`,
  * Compose the optional style addendum for the system prompt. Returns an empty
  * string when nothing is configured, so the caller can append unconditionally.
  */
-export function renderStyleAddendum(): string {
+export function renderStyleAddendum(channel?: ReportChannel): string {
   const sections: string[] = [];
 
   if (STYLE_GUIDE.trim()) {
@@ -149,8 +155,14 @@ export function renderStyleAddendum(): string {
     );
   }
 
-  if (FEW_SHOT_EXAMPLES.length) {
-    const examples = FEW_SHOT_EXAMPLES.map(
+  // Only show examples for the report's channel — a Meta or SEO report must not
+  // be anchored on Google Ads exemplars.
+  const examplesForChannel = channel
+    ? FEW_SHOT_EXAMPLES.filter(ex => ex.channel === channel)
+    : FEW_SHOT_EXAMPLES;
+
+  if (examplesForChannel.length) {
+    const examples = examplesForChannel.map(
       (ex, i) =>
         `\n--- EXAMPLE ${i + 1}: ${ex.label} ---\n${ex.content.trim()}`,
     ).join('\n');

@@ -55,6 +55,7 @@
         <thead>
           <tr>
             <th>Client</th>
+            <th>Channel</th>
             <th>Period</th>
             <th>Status</th>
             <th>Screenshots</th>
@@ -68,6 +69,7 @@
           <% it.items.forEach(function(r){ %>
             <tr>
               <td><a class="r-client-link" href="/reports/<%= r.id %>"><strong><%= r.client_display_name || r.client_name %></strong></a></td>
+              <td><%= ({google_ads:'Google Ads', meta:'Meta', seo:'SEO'})[r.channel] || r.channel %></td>
               <td><%= r.period_label %></td>
               <td><span class="r-status r-status-<%= r.status %>"><%= r.status %></span></td>
               <td style="text-align:center;"><%= r.screenshot_count %></td>

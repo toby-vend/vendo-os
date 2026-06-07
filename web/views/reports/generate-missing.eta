@@ -1,0 +1,32 @@
+<% layout('/layouts/base') %>
+
+<link rel="stylesheet" href="/assets/reports.css" />
+
+<div style="max-width: 640px; margin: 4rem auto; text-align: center;" class="r-editor">
+  <div class="card" style="padding: 2.5rem;">
+    <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 0.5rem;">
+      No <%= it.channelLabel %> report yet
+    </h2>
+    <p class="r-muted" style="margin: 0 0 1.5rem;">
+      <strong><%= it.clientName %></strong> has no <%= it.channelLabel %> report for
+      <strong><%= it.periodLabel %></strong>. Generate one now — it pulls
+      <%= it.channelLabel %> performance plus the month's calls and completed work,
+      and writes the draft for you to review.
+    </p>
+
+    <form method="POST" action="/api/reports/create-and-generate"
+          onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').textContent='Generating… (~15s)';">
+      <input type="hidden" name="_csrf" value="<%= it.csrfToken %>" />
+      <input type="hidden" name="client_id" value="<%= it.clientId %>" />
+      <input type="hidden" name="channel" value="<%= it.channel %>" />
+      <input type="hidden" name="month" value="<%= it.month %>" />
+      <button type="submit" class="r-btn r-btn-primary" style="padding: 0.6rem 1.4rem;">
+        Generate this report
+      </button>
+    </form>
+
+    <p style="margin-top: 1.25rem;">
+      <a class="r-muted" href="/reports" style="font-size: 13px;">← Back to all reports</a>
+    </p>
+  </div>
+</div>

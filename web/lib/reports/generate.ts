@@ -28,10 +28,11 @@ import {
   setGadsSummary,
   updateAiBlocks,
   updateNarrative,
+  CHANNEL_PLATFORMS,
 } from '../queries/reports.js';
 import { generateReportInsights } from '../report-ai.js';
-import { buildGoogleAdsPeriodSummary } from './gads-summary.js';
 import { reconcileClientGads } from './gads-reconcile.js';
+import { buildChannelSummary } from './channel-summary.js';
 import { buildNarrativeContext, saveNarrativeDraft } from './narrative-context.js';
 
 export interface GenerateReportOptions {
@@ -53,7 +54,8 @@ export interface GenerateReportOptions {
 
 export interface GenerateReportResult {
   reportId: number;
-  gadsHasData: boolean;
+  /** Whether the report's channel had any data for the period. */
+  channelHasData: boolean;
   narrativeApplied: boolean;
   meetingsUsed: number;
   asanaTasksUsed: number;
@@ -79,7 +81,7 @@ export async function generateReportForId(
 
   const result: GenerateReportResult = {
     reportId,
-    gadsHasData: false,
+    channelHasData: false,
     narrativeApplied: false,
     meetingsUsed: 0,
     asanaTasksUsed: 0,
@@ -87,33 +89,36 @@ export async function generateReportForId(
     aiGenerated: false,
   };
 
-  // 1) Google Ads structured summary — rebuilt fresh, persisted when present.
-  let googleAdsSummary: Awaited<ReturnType<typeof buildGoogleAdsPeriodSummary>> | null = null;
+  const channel = report.channel;
+
+  // 1) Channel-pure canonical summary (Google Ads / Meta / SEO). For Google Ads
+  // the structured summary is also persisted (gads_summary_json) for the
+  // dashboard, and the live-spend reconciliation guardrail runs.
+  let channelData = '';
   try {
-    googleAdsSummary = await buildGoogleAdsPeriodSummary(
-      report.client_id,
-      report.period_start,
-      report.period_end,
-    );
-    if (googleAdsSummary.has_data) {
-      await setGadsSummary(reportId, JSON.stringify(googleAdsSummary));
-      result.gadsHasData = true;
+    const summary = await buildChannelSummary(channel, report.client_id, report.period_start, report.period_end);
+    channelData = summary.canonicalText;
+    result.channelHasData = summary.hasData;
+    if (channel === 'google_ads' && summary.gadsSummary?.has_data) {
+      await setGadsSummary(reportId, JSON.stringify(summary.gadsSummary));
     }
   } catch (err) {
-    log(`Google Ads summary failed for ${report.client_name}: ${errMsg(err)}`);
+    log(`${channel} summary failed for ${report.client_name}: ${errMsg(err)}`);
   }
 
-  // 2) Reconciliation guardrail — non-blocking; logs material drift.
-  try {
-    const recon = await reconcileClientGads(report.client_id, report.period_start, report.period_end);
-    if (recon && !recon.withinTolerance) {
-      log(
-        `⚠ Google Ads spend variance for ${report.client_name}: ${recon.variancePct.toFixed(1)}% ` +
-          `(DB £${recon.dbActiveSpend.toFixed(2)} vs API £${recon.apiActiveSpend.toFixed(2)}) — report may be stale`,
-      );
+  // 2) Reconciliation guardrail — Google Ads only; non-blocking, logs drift.
+  if (channel === 'google_ads') {
+    try {
+      const recon = await reconcileClientGads(report.client_id, report.period_start, report.period_end);
+      if (recon && !recon.withinTolerance) {
+        log(
+          `⚠ Google Ads spend variance for ${report.client_name}: ${recon.variancePct.toFixed(1)}% ` +
+            `(DB £${recon.dbActiveSpend.toFixed(2)} vs API £${recon.apiActiveSpend.toFixed(2)}) — report may be stale`,
+        );
+      }
+    } catch (err) {
+      log(`Google Ads reconciliation skipped for ${report.client_name}: ${errMsg(err)}`);
     }
-  } catch (err) {
-    log(`Google Ads reconciliation skipped for ${report.client_name}: ${errMsg(err)}`);
   }
 
   // 3) Narrative context — completions + meeting actions + call discussions.
@@ -157,19 +162,23 @@ export async function generateReportForId(
     (currentWorkedOnEmpty || !!opts.forceNarrative) &&
     completedWork.length > 0;
 
-  // 5) AI insights.
-  const screenshots = await listScreenshots(reportId);
+  // 5) AI insights. Screenshots are filtered to this channel's platforms so a
+  // Google Ads report never sees a Meta screenshot, etc.
+  const allowedPlatforms = new Set(CHANNEL_PLATFORMS[channel]);
+  const screenshots = (await listScreenshots(reportId))
+    .filter(s => allowedPlatforms.has(s.platform));
   try {
     const out = await generateReportInsights(
       {
         clientName: report.client_display_name || report.client_name,
         vertical: report.client_vertical,
+        channel,
         periodLabel: report.period_label,
         workedOnMd: report.worked_on_md,
         focusNextMd: report.focus_next_md,
         screenshots: screenshots.map(s => ({ platform: s.platform, caption: s.caption, url: s.blob_url })),
         draftWorkedOn,
-        ...(googleAdsSummary && googleAdsSummary.has_data ? { googleAdsSummary } : {}),
+        ...(channelData.trim() ? { channelData } : {}),
         ...(includeMeetingContext && meetingDiscussions.length ? { meetingDiscussions } : {}),
         ...(completedWork.length ? { completedWork } : {}),
       },

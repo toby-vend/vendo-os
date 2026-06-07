@@ -9,17 +9,9 @@
 </div>
 
 <%
-  // Build the platforms list seen in this report — used in the intro line
-  // ("your monthly Meta + Google Ads Report").
-  var seen = [];
-  it.screenshots.forEach(function(s){
-    var lbl = (it.platforms.find(function(p){ return p.value === s.platform; }) || { label: s.platform }).label;
-    if (seen.indexOf(lbl) === -1) seen.push(lbl);
-  });
-  var platformPhrase = seen.length === 0 ? 'performance'
-    : seen.length === 1 ? seen[0] + ' Ads'
-    : seen.length === 2 ? seen.join(' & ')
-    : seen.slice(0, -1).join(', ') + ' & ' + seen[seen.length - 1];
+  // Channel-pure: each report covers exactly one channel.
+  var channelNames = { google_ads: 'Google Ads', meta: 'Meta', seo: 'SEO' };
+  var channelPhrase = channelNames[it.report.channel] || 'performance';
 
   var senderName = (it.user && it.user.name) ? it.user.name : 'The Vendo Team';
   var senderFirstName = senderName.split(/\s+/)[0];
@@ -31,10 +23,10 @@
 
   <p>Hope you're well!</p>
 
-  <p>Please find your monthly <%= platformPhrase %> Report for <%= it.report.period_label %> below:</p>
+  <p>Please find your monthly <%= channelPhrase %> Report for <%= it.report.period_label %> below:</p>
 
   <% if (it.report.performance_summary_md) { %>
-    <h2 class="r-email-h"><%= it.report.period_label %> <%= seen.length ? seen.join(' / ') + ' ' : '' %>Performance</h2>
+    <h2 class="r-email-h"><%= it.report.period_label %> <%= channelPhrase %> Performance</h2>
     <div class="r-prose"><%~ it.md(it.report.performance_summary_md) %></div>
   <% } %>
 

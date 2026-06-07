@@ -35,8 +35,13 @@ import {
   deleteReport,
   listActiveClientsForReports,
   PLATFORM_OPTIONS,
+  CHANNEL_OPTIONS,
+  CHANNEL_PLATFORMS,
+  channelLabel,
+  isReportChannel,
   type ScreenshotPlatform,
   type ReportStatus,
+  type ReportChannel,
 } from '../lib/queries/reports.js';
 import { generateReportForId } from '../lib/reports/generate.js';
 import { safeStringify } from '../lib/reports/dashboard-shell.js';
@@ -150,6 +155,7 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     const clients = await listActiveClientsForReports();
     return reply.render('reports/new', {
       clients,
+      channelOptions: CHANNEL_OPTIONS,
       defaultMonth: defaultMonthYYYYMM(),
     });
   });
@@ -165,13 +171,58 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     if (!report) return reply.code(404).send('Not found');
     const screenshots = await listScreenshots(id);
 
+    // Sibling reports for this client + period, so the channel selector can
+    // show which channels already have a report vs which need generating.
+    const siblings = await listReports({ clientId: report.client_id, limit: 50 });
+    const siblingByChannel: Record<string, number> = {};
+    for (const s of siblings) {
+      if (s.period_start === report.period_start && s.period_end === report.period_end) {
+        siblingByChannel[s.channel] = s.id;
+      }
+    }
+
     return reply.render('reports/editor', {
       report,
       screenshots,
       platforms: PLATFORM_OPTIONS,
+      // Only allow tagging screenshots with this report's channel platforms.
+      channelPlatforms: PLATFORM_OPTIONS.filter(p => CHANNEL_PLATFORMS[report.channel].includes(p.value)),
+      channelOptions: CHANNEL_OPTIONS,
+      channelLabel: channelLabel(report.channel),
+      monthValue: report.period_start.slice(0, 7),
+      siblingByChannel,
       isAm: isAmUser(user),
     });
   });
+
+  // Switch to a different month/channel for the same client. Redirects to the
+  // matching report, or to a "generate this report" page when none exists yet.
+  app.get<{ Querystring: { clientId?: string; month?: string; channel?: string } }>(
+    '/switch',
+    async (request, reply) => {
+      const user = (request as any).user as SessionUser | null;
+      if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+      const clientId = Number(request.query.clientId);
+      const channel: ReportChannel = isReportChannel(request.query.channel) ? request.query.channel : 'google_ads';
+      const period = monthToPeriod(request.query.month ?? '');
+      if (!Number.isFinite(clientId) || !period) return reply.code(400).send('Invalid client or month');
+
+      const existing = await findReport(clientId, period.start, period.end, channel);
+      if (existing) return reply.redirect(`/reports/${existing}`);
+
+      const clients = await listActiveClientsForReports();
+      const client = clients.find(c => c.id === clientId);
+      return reply.render('reports/generate-missing', {
+        clientId,
+        clientName: client ? (client.display_name || client.name) : `Client ${clientId}`,
+        channel,
+        channelLabel: channelLabel(channel),
+        month: request.query.month,
+        periodLabel: period.label,
+      });
+    },
+  );
 
   // ── v2 dashboard ─────────────────────────────────────────────────────────
   // Renders the React shell. The full DashboardPayload is assembled by
@@ -226,20 +277,8 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     const platformLabel = (v: ScreenshotPlatform) =>
       PLATFORM_OPTIONS.find(p => p.value === v)?.label ?? v;
 
-    // Same email-style structure as the preview page so a copy-paste lands in
-    // a client's inbox looking like the reference report.
-    const seenPlatforms: string[] = [];
-    for (const s of screenshots) {
-      const lbl = platformLabel(s.platform);
-      if (!seenPlatforms.includes(lbl)) seenPlatforms.push(lbl);
-    }
-    const platformPhrase = seenPlatforms.length === 0
-      ? 'performance'
-      : seenPlatforms.length === 1
-        ? `${seenPlatforms[0]} Ads`
-        : seenPlatforms.length === 2
-          ? seenPlatforms.join(' & ')
-          : `${seenPlatforms.slice(0, -1).join(', ')} & ${seenPlatforms[seenPlatforms.length - 1]}`;
+    // Channel-pure: the report's single channel sets the heading.
+    const channelPhrase = channelLabel(report.channel);
 
     const senderFirstName = (user.name ?? '').split(/\s+/)[0] || 'Vendo';
 
@@ -248,13 +287,13 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       '',
       `Hope you're well!`,
       '',
-      `Please find your monthly ${platformPhrase} Report for ${report.period_label} below:`,
+      `Please find your monthly ${channelPhrase} Report for ${report.period_label} below:`,
       '',
     ];
 
     if (report.performance_summary_md.trim()) {
       sections.push(
-        `## ${report.period_label}${seenPlatforms.length ? ' ' + seenPlatforms.join(' / ') : ''} Performance`,
+        `## ${report.period_label} ${channelPhrase} Performance`,
         '',
         report.performance_summary_md.trim(),
         '',
@@ -289,8 +328,7 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       report,
       screenshots,
       platforms: PLATFORM_OPTIONS,
-      seenPlatforms,
-      platformPhrase,
+      channelPhrase,
       senderFirstName,
       markdown: sections.join('\n'),
     });
@@ -354,23 +392,57 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
 
     const clientIdRaw = field(request.body, 'client_id');
     const monthRaw = field(request.body, 'month');
+    const channelRaw = field(request.body, 'channel');
     const clientId = Number(clientIdRaw);
     if (!Number.isFinite(clientId) || clientId <= 0) {
       return reply.code(400).send('Missing or invalid client_id');
     }
+    const channel: ReportChannel = isReportChannel(channelRaw) ? channelRaw : 'google_ads';
     const period = monthToPeriod(monthRaw);
     if (!period) return reply.code(400).send('Invalid month — expected YYYY-MM');
 
-    const existing = await findReport(clientId, period.start, period.end);
+    const existing = await findReport(clientId, period.start, period.end, channel);
     if (existing) return reply.redirect(`/reports/${existing}`);
 
     const id = await createReport({
       clientId,
+      channel,
       periodLabel: period.label,
       periodStart: period.start,
       periodEnd: period.end,
       createdBy: user.email,
     });
+    return reply.redirect(`/reports/${id}`);
+  });
+
+  // Create a report for a month/channel AND generate it in one step. Used by
+  // the "Generate this report" button when switching to an empty combination.
+  app.post('/create-and-generate', async (request, reply) => {
+    const user = (request as any).user as SessionUser | null;
+    if (!requireTeamUser(user)) return reply.code(403).send('Forbidden');
+
+    const clientId = Number(field(request.body, 'client_id'));
+    const channelRaw = field(request.body, 'channel');
+    const period = monthToPeriod(field(request.body, 'month'));
+    if (!Number.isFinite(clientId) || clientId <= 0) return reply.code(400).send('Invalid client_id');
+    const channel: ReportChannel = isReportChannel(channelRaw) ? channelRaw : 'google_ads';
+    if (!period) return reply.code(400).send('Invalid month — expected YYYY-MM');
+
+    let id = await findReport(clientId, period.start, period.end, channel);
+    if (!id) {
+      id = await createReport({
+        clientId, channel,
+        periodLabel: period.label,
+        periodStart: period.start,
+        periodEnd: period.end,
+        createdBy: user.email,
+      });
+      await generateReportForId(id, {
+        userId: user.id,
+        applyNarrativeDraft: true,
+        log: (m) => request.log?.info?.(m),
+      });
+    }
     return reply.redirect(`/reports/${id}`);
   });
 

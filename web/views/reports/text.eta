@@ -32,10 +32,10 @@
 
       <p>Hope you're well!</p>
 
-      <p>Please find your monthly <%= it.platformPhrase %> Report for <%= it.report.period_label %> below:</p>
+      <p>Please find your monthly <%= it.channelPhrase %> Report for <%= it.report.period_label %> below:</p>
 
       <% if (it.report.performance_summary_md) { %>
-        <h2><%= it.report.period_label %><%= it.seenPlatforms.length ? ' ' + it.seenPlatforms.join(' / ') : '' %> Performance</h2>
+        <h2><%= it.report.period_label %> <%= it.channelPhrase %> Performance</h2>
         <%~ it.md(it.report.performance_summary_md) %>
       <% } %>
 

@@ -72,12 +72,19 @@ async function main() {
   const period = arg('--period') ?? prevMonthPeriod();
   const force = hasFlag('--force');
   const forceNarrative = hasFlag('--force-narrative');
+  const channelArg = (arg('--channel') ?? 'google_ads').toLowerCase();
   const { label, start, end } = periodBounds(period);
 
   // Import AFTER dotenv so base.ts binds to TURSO_* at module init.
   const { rows } = await import('../../web/lib/queries/base.js');
-  const { createReport, findReport, getReport } = await import('../../web/lib/queries/reports.js');
+  const { createReport, findReport, getReport, getClientActiveChannels, channelLabel, isReportChannel } =
+    await import('../../web/lib/queries/reports.js');
   const { generateReportForId } = await import('../../web/lib/reports/generate.js');
+
+  if (channelArg !== 'all' && !isReportChannel(channelArg)) {
+    console.error(`Invalid --channel "${channelArg}" (expected google_ads | meta | seo | all)`);
+    process.exit(1);
+  }
 
   const usingTurso = !!process.env.TURSO_DATABASE_URL;
   console.log(`\nDB target: ${usingTurso ? 'TURSO (production)' : 'local SQLite'}`);
@@ -103,62 +110,73 @@ async function main() {
     process.exit(1);
   }
   const client = matches.find(m => m.name.toLowerCase() === clientName.toLowerCase()) ?? matches[0];
-  console.log(`Client:    ${client.name}${client.vertical ? ` (${client.vertical})` : ''}  [id ${client.id}]\n`);
+  console.log(`Client:    ${client.name}${client.vertical ? ` (${client.vertical})` : ''}  [id ${client.id}]`);
 
-  // Find or create the report row for the period.
-  let reportId = await findReport(client.id, start, end);
-  if (reportId) {
-    if (!force) {
-      console.log(`Report already exists (id ${reportId}). Re-run with --force to regenerate, or open it in the app.`);
-      console.log(linksFor(reportId));
-      process.exit(0);
+  // Resolve the channel list.
+  let channels: ('google_ads' | 'meta' | 'seo')[];
+  if (channelArg === 'all') {
+    channels = await getClientActiveChannels(client.id);
+    if (!channels.length) {
+      console.error('\nClient has no active channels (no Google Ads / Meta / SEO mappings).');
+      process.exit(1);
     }
-    console.log(`Report ${reportId} exists — regenerating (--force).`);
   } else {
-    reportId = await createReport({
-      clientId: client.id,
-      periodLabel: label,
-      periodStart: start,
-      periodEnd: end,
-      createdBy: `script:generate-one-report:${clientName}`,
-    });
-    console.log(`Created report ${reportId}.`);
+    channels = [channelArg as 'google_ads' | 'meta' | 'seo'];
   }
+  console.log(`Channels:  ${channels.map(channelLabel).join(', ')}\n`);
 
-  console.log('Generating (Google Ads + Asana + Fathom context → Sonnet)…\n');
-  const result = await generateReportForId(reportId, {
-    userId: null,
-    applyNarrativeDraft: true,
-    forceNarrative,
-    log: (m) => console.log(`  · ${m}`),
-  });
+  let anyFail = false;
+  for (const channel of channels) {
+    console.log(`\n══════════════ ${channelLabel(channel).toUpperCase()} ══════════════`);
 
-  console.log('\n--- Generation summary ---');
-  console.log(`Google Ads data:     ${result.gadsHasData ? 'yes' : 'no'}`);
-  console.log(`Asana completions:   ${result.asanaTasksUsed}`);
-  console.log(`Meeting actions:     ${result.meetingActionsUsed}`);
-  console.log(`Meetings discussed:  ${result.meetingsUsed}`);
-  console.log(`Narrative applied:   ${result.narrativeApplied ? 'yes' : 'no'}`);
-  console.log(`AI blocks generated: ${result.aiGenerated ? 'yes' : `NO — ${result.aiError ?? 'unknown error'}`}`);
-
-  if (result.aiGenerated) {
-    const fresh = await getReport(reportId);
-    if (fresh) {
-      console.log('\n=================== EXEC SUMMARY ===================\n');
-      console.log(fresh.exec_summary_md || '(empty)');
-      console.log('\n=============== PERFORMANCE SUMMARY ================\n');
-      console.log(fresh.performance_summary_md || '(empty)');
-      console.log('\n======================= WINS ======================\n');
-      console.log(fresh.wins_md || '(empty)');
-      console.log('\n====================== RISKS ======================\n');
-      console.log(fresh.risks_md || '(empty)');
-      console.log('\n================= RECOMMENDATIONS =================\n');
-      console.log(fresh.recommendations_md || '(empty)');
+    let reportId = await findReport(client.id, start, end, channel);
+    if (reportId) {
+      if (!force) {
+        console.log(`Report already exists (id ${reportId}). Re-run with --force to regenerate.`);
+        console.log(linksFor(reportId));
+        continue;
+      }
+      console.log(`Report ${reportId} exists — regenerating (--force).`);
+    } else {
+      reportId = await createReport({
+        clientId: client.id,
+        channel,
+        periodLabel: label,
+        periodStart: start,
+        periodEnd: end,
+        createdBy: `script:generate-one-report:${clientName}`,
+      });
+      console.log(`Created report ${reportId}.`);
     }
+
+    const result = await generateReportForId(reportId, {
+      userId: null,
+      applyNarrativeDraft: true,
+      forceNarrative,
+      log: (m) => console.log(`  · ${m}`),
+    });
+
+    console.log(`  ${channelLabel(channel)} data: ${result.channelHasData ? 'yes' : 'no'} | ` +
+      `Asana: ${result.asanaTasksUsed} | meetings: ${result.meetingsUsed} | ` +
+      `narrative: ${result.narrativeApplied ? 'yes' : 'no'} | ` +
+      `AI: ${result.aiGenerated ? 'yes' : `NO — ${result.aiError ?? 'error'}`}`);
+
+    if (result.aiGenerated) {
+      const fresh = await getReport(reportId);
+      if (fresh) {
+        console.log('\n--- EXEC SUMMARY ---\n' + (fresh.exec_summary_md || '(empty)'));
+        console.log('\n--- PERFORMANCE ---\n' + (fresh.performance_summary_md || '(empty)'));
+        console.log('\n--- WINS ---\n' + (fresh.wins_md || '(empty)'));
+        console.log('\n--- RISKS ---\n' + (fresh.risks_md || '(empty)'));
+        console.log('\n--- RECOMMENDATIONS ---\n' + (fresh.recommendations_md || '(empty)'));
+      }
+    } else {
+      anyFail = true;
+    }
+    console.log('\n' + linksFor(reportId));
   }
 
-  console.log('\n' + linksFor(reportId));
-  process.exit(result.aiGenerated ? 0 : 1);
+  process.exit(anyFail ? 1 : 0);
 }
 
 function linksFor(reportId: number): string {
