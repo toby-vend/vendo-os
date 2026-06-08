@@ -10,10 +10,12 @@
  *
  * Rules (from plans/2026-05-11-google-ads-autonomous-reporting.md):
  *   - Currency: GBP throughout (Vendo convention; see report-ai.ts).
- *   - £0-spend campaigns are FILTERED OUT (mirrors the "skip inactive
- *     campaigns" rule in report-ai.ts).
- *   - CPR = spend / conversions; null only if conversions == 0 (rare after
- *     the £0-spend filter).
+ *   - ALL spend for the month is included. Any campaign that spent money in the
+ *     period appears, even if it was PAUSED/REMOVED during or by the end of the
+ *     month — the client paid for that spend, so it must be reported. Paused
+ *     campaigns are LABELLED (status / is_active), never dropped. (£0-spend
+ *     campaigns are still excluded — they didn't run.)
+ *   - CPR = spend / conversions; null only if conversions == 0.
  *   - ROAS = conversion_value / spend; null when conversion_value == 0.
  *
  * The client → gads_customer_id mapping is owned by A1 and lives in
@@ -21,11 +23,7 @@
  */
 import { rows, scalar } from '../queries/base.js';
 import { getClientGadsCustomerIds } from '../queries/reports.js';
-import {
-  campaignIdFilter,
-  fetchLatestCampaignMeta,
-  isActiveStatus,
-} from './gads-active-campaigns.js';
+import { fetchLatestCampaignMeta, isActiveStatus } from './gads-active-campaigns.js';
 
 export interface GoogleAdsCampaignRow {
   campaign_id: string;
@@ -35,6 +33,10 @@ export interface GoogleAdsCampaignRow {
   conversion_value: number;
   cpr: number;                    // cost per result (spend / conversions)
   roas: number | null;            // null when no revenue attributed
+  /** End-of-period campaign status (ENABLED / PAUSED / REMOVED / null). */
+  status: string | null;
+  /** false when the campaign was paused/removed by the end of the period. */
+  is_active: boolean;
   currency: string;
 }
 
@@ -96,13 +98,14 @@ export async function buildGoogleAdsPeriodSummary(
     };
   }
 
-  // 4. Resolve the active campaign set (paused/removed campaigns are excluded
-  //    so the AI's canonical numbers match the dashboard and the client's
-  //    Google Ads backend after a restructure). See gads-active-campaigns.ts.
+  // 4. Resolve each campaign's end-of-period name + status. This is used to
+  //    LABEL campaigns (active vs paused), NOT to filter them — all spend is
+  //    reported. (Campaigns with no spend in the period never appear, so a
+  //    wound-down/restructured campaign with zero in-period spend is excluded
+  //    by the £0-spend rule below, not by status.)
   const latestMeta = await fetchLatestCampaignMeta(customerIds, periodStart, periodEnd);
   const nameById = new Map(latestMeta.map(m => [m.campaign_id, m.campaign_name]));
-  const activeIds = latestMeta.filter(m => isActiveStatus(m.campaign_status)).map(m => m.campaign_id);
-  const active = campaignIdFilter(activeIds);
+  const statusById = new Map(latestMeta.map(m => [m.campaign_id, m.campaign_status]));
 
   // Aggregate per-campaign across the period and across all mapped accounts (a
   // client may have multiple linked Google Ads customers). GROUP BY campaign_id
@@ -116,13 +119,14 @@ export async function buildGoogleAdsPeriodSummary(
             SUM(conversion_value)  AS conversion_value
        FROM gads_campaign_spend
       WHERE account_id IN (${placeholders})
-        AND date BETWEEN ? AND ?${active.clause}
+        AND date BETWEEN ? AND ?
       GROUP BY account_id, campaign_id
       ORDER BY SUM(spend) DESC`,
-    [...customerIds, periodStart, periodEnd, ...active.params],
+    [...customerIds, periodStart, periodEnd],
   );
 
-  // 5. Map → typed rows. Filter out £0-spend campaigns (inactive in period).
+  // 5. Map → typed rows. Only £0-spend campaigns are excluded (they didn't run);
+  //    paused campaigns that DID spend are kept and labelled.
   const campaigns: GoogleAdsCampaignRow[] = [];
   for (const r of spendRows) {
     const spend = Number(r.spend ?? 0);
@@ -131,6 +135,7 @@ export async function buildGoogleAdsPeriodSummary(
     const conversionValue = Number(r.conversion_value ?? 0);
     const cpr = conversions > 0 ? spend / conversions : 0;
     const roas = conversionValue > 0 ? conversionValue / spend : null;
+    const status = statusById.get(r.campaign_id) ?? null;
     campaigns.push({
       campaign_id: r.campaign_id,
       campaign_name: nameById.get(r.campaign_id) ?? '(unnamed campaign)',
@@ -139,6 +144,8 @@ export async function buildGoogleAdsPeriodSummary(
       conversion_value: conversionValue,
       cpr,
       roas,
+      status,
+      is_active: isActiveStatus(status),
       currency: 'GBP',
     });
   }

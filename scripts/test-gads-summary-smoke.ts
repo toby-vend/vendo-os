@@ -38,6 +38,8 @@ const summary: GoogleAdsPeriodSummary = {
       conversion_value: 10000,
       cpr: 50,
       roas: 10000 / 2000,
+      status: 'ENABLED',
+      is_active: true,
       currency: 'GBP',
     },
     {
@@ -48,6 +50,8 @@ const summary: GoogleAdsPeriodSummary = {
       conversion_value: 2000,
       cpr: 150,
       roas: 2000 / 1500,
+      status: 'PAUSED',
+      is_active: false,
       currency: 'GBP',
     },
   ],
@@ -64,6 +68,8 @@ const noRevenue: GoogleAdsPeriodSummary['campaigns'][number] = {
   conversion_value: 0,
   cpr: 0,
   roas: null,
+  status: 'ENABLED',
+  is_active: true,
   currency: 'GBP',
 };
 if (noRevenue.roas !== null) throw new Error('ROAS should be null when no revenue');

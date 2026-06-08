@@ -62,19 +62,25 @@ function computeRange(periodStart: string, periodEnd: string): DateRange {
 // ── renderers ───────────────────────────────────────────────────────────────
 
 function renderGoogleAds(s: GoogleAdsPeriodSummary): string {
+  const paused = s.campaigns.filter(c => !c.is_active);
   const lines: string[] = [];
   lines.push('STRUCTURED GOOGLE ADS DATA (canonical — prefer this over any screenshot):');
+  lines.push('This includes ALL spend for the period. Campaigns paused or removed during the month are INCLUDED and marked [PAUSED]; report their spend and note they were paused.');
   lines.push('');
-  lines.push('Overall:');
+  lines.push('Overall (all campaigns that spent this period):');
   lines.push(`- Spend: ${gbp(s.overall.spend)}`);
   lines.push(`- Conversions: ${s.overall.conversions}`);
   lines.push(`- CPR: ${gbp(s.overall.cpr)}`);
   lines.push(`- ROAS: ${s.overall.roas === null ? 'n/a' : s.overall.roas.toFixed(2)}`);
+  if (paused.length) {
+    lines.push(`- Note: ${paused.length} campaign(s) were paused/removed during the period but are included in the totals: ${paused.map(c => c.campaign_name).join(', ')}.`);
+  }
   lines.push('');
   lines.push('Campaigns:');
   for (const c of s.campaigns) {
+    const tag = c.is_active ? '' : ` [${(c.status || 'PAUSED').toUpperCase()} — paused during the month]`;
     lines.push('');
-    lines.push(`*${c.campaign_name}*`);
+    lines.push(`*${c.campaign_name}*${tag}`);
     lines.push(`- Spend: ${gbp(c.spend)}`);
     lines.push(`- Conversions: ${c.conversions}`);
     lines.push(`- CPR: ${gbp(c.cpr)}`);
