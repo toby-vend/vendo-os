@@ -266,6 +266,20 @@ export async function findReport(
   return id ?? null;
 }
 
+/**
+ * Strip em dashes from client-facing report copy. House rule (Toby): a client
+ * report must never contain an em dash, whether the text was AI-generated or
+ * hand-typed in the editor. Applied at the write layer so it holds for every
+ * path. An em dash (or a spaced en dash used as a pause) becomes a comma;
+ * hyphens, tight en dashes, and newlines are left intact so hyphenated words
+ * and list indentation are untouched.
+ */
+export function stripEmDashes(md: string): string {
+  return md
+    .replace(/[ \t]*—[ \t]*/g, ', ')
+    .replace(/[ \t]+–[ \t]+/g, ', ');
+}
+
 export async function updateNarrative(id: number, params: {
   workedOnMd?: string;
   focusNextMd?: string;
@@ -274,8 +288,8 @@ export async function updateNarrative(id: number, params: {
 }): Promise<void> {
   const sets: string[] = [];
   const args: (string | number)[] = [];
-  if (params.workedOnMd !== undefined) { sets.push('worked_on_md = ?'); args.push(params.workedOnMd); }
-  if (params.focusNextMd !== undefined) { sets.push('focus_next_md = ?'); args.push(params.focusNextMd); }
+  if (params.workedOnMd !== undefined) { sets.push('worked_on_md = ?'); args.push(stripEmDashes(params.workedOnMd)); }
+  if (params.focusNextMd !== undefined) { sets.push('focus_next_md = ?'); args.push(stripEmDashes(params.focusNextMd)); }
   if (params.contactName !== undefined) { sets.push('contact_name = ?'); args.push(params.contactName.slice(0, 100)); }
   if (params.changeHistory !== undefined) { sets.push('change_history = ?'); args.push(params.changeHistory.slice(0, 20000)); }
   if (!sets.length) return;
@@ -304,7 +318,14 @@ export async function updateAiBlocks(id: number, params: {
             ai_generated_at = datetime('now'),
             updated_at = datetime('now')
           WHERE id = ?`,
-    args: [params.execSummaryMd, params.performanceSummaryMd, params.winsMd, params.risksMd, params.recommendationsMd, id],
+    args: [
+      stripEmDashes(params.execSummaryMd),
+      stripEmDashes(params.performanceSummaryMd),
+      stripEmDashes(params.winsMd),
+      stripEmDashes(params.risksMd),
+      stripEmDashes(params.recommendationsMd),
+      id,
+    ],
   });
 }
 
@@ -318,7 +339,7 @@ export type AiBlockField =
 export async function updateAiBlock(id: number, field: AiBlockField, value: string): Promise<void> {
   await db.execute({
     sql: `UPDATE client_reports SET ${field} = ?, updated_at = datetime('now') WHERE id = ?`,
-    args: [value, id],
+    args: [stripEmDashes(value), id],
   });
 }
 

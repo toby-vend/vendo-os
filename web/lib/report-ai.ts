@@ -141,10 +141,11 @@ export interface ReportAiInput {
    */
   completedWork?: Array<{ label: string; date: string; source: 'asana' | 'meeting' }>;
   /**
-   * When true, ask the model to also draft the client-facing "What we worked
-   * on" narrative (returned as `worked_on`). Used by the automated flow when
-   * the team hasn't written one. When false, the model uses the supplied
-   * `workedOnMd` as-is and does not return `worked_on`.
+   * When true, the model returns the client-facing "What we did this month"
+   * narrative (`worked_on`) in house bold-label bullet style: it REFORMATS the
+   * supplied `workedOnMd` when the team has written one (preserving every fact),
+   * or DRAFTS it from completed work + meeting context when empty. When false,
+   * the model leaves `workedOnMd` untouched and does not return `worked_on`.
    */
   draftWorkedOn?: boolean;
 }
@@ -181,7 +182,9 @@ Internal meeting context — handle with care:
 - Synthesise it into client-appropriate themes of delivery (e.g. "migrated your lead capture to the new CRM", "fixed a form issue on the aligner landing page", "completed quarterly and monthly optimisations"). Never reproduce raw task names, internal contact/staff names, ticket references, or internal admin chores (e.g. "send summary email to X") verbatim.
 - Use it to ground the "what we worked on" narrative and the wins. It is not a source of metrics.
 
-When asked to draft the "What we worked on" narrative (the \`worked_on\` field): write 2–4 short, client-facing sentences or up to ~5 tight bullets describing what Vendo delivered this period, drawn from the completed-work list and meeting context, in the same confident, momentum-focused voice as the rest of the report. Lead with the client-relevant outcome, not the internal task. If there is no real delivery signal, return a brief, honest line rather than padding.
+The "What we did this month" narrative (the \`worked_on\` field) is ALWAYS returned as a markdown bullet list in house style: 3 to 6 tight bullets, each opening with a short **bold label** then a colon and the detail (the SAME format as the "Next month" plan), so a client scanning the list sees the work at a glance. Two cases:
+- If a "What we worked on" narrative is supplied below, that text is the AUTHORITATIVE source. REFORMAT it into the bold-label bullet style: preserve every fact, figure, and claim it contains; do NOT add, invent, drop, or embellish anything; only restructure into bullets, add the bold labels, and remove any em dashes. Merge near-duplicate points.
+- If no "What we worked on" narrative is supplied, draft it from the "Work completed this period" list and meeting context, leading with the client-relevant outcome (not the internal task). If there is no real delivery signal, return a brief, honest line rather than padding.
 
 Use UK English throughout. Currency is GBP (£) unless a screenshot clearly shows otherwise.
 
@@ -251,7 +254,7 @@ function buildSystemPrompt(channel: ReportChannel): string {
 const WORKED_ON_PROPERTY = {
   type: 'string' as const,
   description:
-    'The "What we did this month" section: a markdown bullet list in the SAME format as the "Next month" plan. Each bullet MUST open with a short bold label naming the work, then a colon and the detail (e.g. "**Landing page fix:** corrected a form issue on the Clear Aligners page to keep the lead journey friction-free."), so a client glancing down the list immediately sees what was done. Synthesise the "Work completed this period" list and meeting context into client-appropriate themes of delivery. RULES: each item appears EXACTLY ONCE (never the same action in two differently-worded bullets); use active voice; do NOT restate any performance metrics here (they live in the table); NEVER reproduce raw internal task names or staff/contact names. 3 to 6 tight bullets. If two source items are the same underlying action, merge them into one.',
+    'The "What we did this month" section: a markdown bullet list in the SAME format as the "Next month" plan. Each bullet MUST open with a short bold label naming the work, then a colon and the detail (e.g. "**Landing page fix:** corrected a form issue on the Clear Aligners page to keep the lead journey friction-free."), so a client glancing down the list immediately sees what was done. SOURCE: if a team-written "What we worked on" narrative is supplied, that is authoritative, reformat it into this bold-label style preserving every fact and adding nothing; otherwise synthesise the "Work completed this period" list and meeting context into client-appropriate themes of delivery. RULES: each item appears EXACTLY ONCE (never the same action in two differently-worded bullets); use active voice; no em dashes; do NOT restate any performance metrics here (they live in the table); NEVER reproduce raw internal task names or staff/contact names. 3 to 6 tight bullets. If two source items are the same underlying action, merge them into one.',
 };
 
 const REPORT_PROPERTIES = {
@@ -367,16 +370,26 @@ function buildUserContent(input: ReportAiInput): Array<TextBlockParam | ImageBlo
     }
   }
 
+  const teamWorkedOn = input.workedOnMd.trim();
   if (input.draftWorkedOn) {
-    blocks.push({
-      type: 'text',
-      text:
-        '\n## What we worked on\n_The team has not written this section — draft the client-facing `worked_on` narrative yourself from the "Work completed this period" list and meeting context below._',
-    });
+    if (teamWorkedOn) {
+      blocks.push({
+        type: 'text',
+        text:
+          '\n## What we worked on (team-written source)\n_This is the team\'s own copy and is the AUTHORITATIVE content. REFORMAT it into the `worked_on` bold-label bullet style: preserve every fact, figure, and claim, add nothing, drop nothing substantive, remove em dashes._\n\n' +
+          teamWorkedOn,
+      });
+    } else {
+      blocks.push({
+        type: 'text',
+        text:
+          '\n## What we worked on\n_The team has not written this section. Draft the client-facing `worked_on` narrative yourself from the "Work completed this period" list and meeting context below._',
+      });
+    }
   } else {
     blocks.push({
       type: 'text',
-      text: `\n## What we worked on\n${input.workedOnMd.trim() || '_(not provided)_'}`,
+      text: `\n## What we worked on\n${teamWorkedOn || '_(not provided)_'}`,
     });
   }
 

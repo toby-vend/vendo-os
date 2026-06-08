@@ -153,14 +153,17 @@ export async function generateReportForId(
     log(`Narrative context failed for ${report.client_name}: ${errMsg(err)}`);
   }
 
-  // 4) Should the AI also draft the client-facing "What we worked on"? Only in
-  // the automated flow, only when the team hasn't already written one (unless
-  // forced), and only when we actually have completed-work signal to draw on.
+  // 4) The AI always house-formats the client-facing "What we did this month"
+  // (bold-label bullets, no em dashes). When the team has written one, the
+  // model REFORMATS their copy (preserving every fact) — this runs in every
+  // flow, including the manual "Generate" button, so hand-typed narratives
+  // still come out in house style. When the team left it blank, the model
+  // drafts it from completed-work signal, but only in the automated flow (the
+  // manual button leaves a deliberately-empty section empty for the team).
   const currentWorkedOnEmpty = !report.worked_on_md || !report.worked_on_md.trim();
   const draftWorkedOn =
-    !!opts.applyNarrativeDraft &&
-    (currentWorkedOnEmpty || !!opts.forceNarrative) &&
-    completedWork.length > 0;
+    !currentWorkedOnEmpty ||
+    (!!opts.applyNarrativeDraft && completedWork.length > 0);
 
   // 5) AI insights. Files are filtered to this channel's platforms so a Google
   // Ads report never sees a Meta screenshot/CSV, etc. Images go to the model as
@@ -184,7 +187,7 @@ export async function generateReportForId(
         ...(channel === 'google_ads' && report.change_history?.trim() ? { changeHistory: report.change_history } : {}),
         ...(csvFiles.length ? {
           uploadedCsv: csvFiles.map(c => ({
-            label: `${c.file_name || 'campaign.csv'}${c.caption ? ` — ${c.caption}` : ''}`,
+            label: `${c.file_name || 'campaign.csv'}${c.caption ? `: ${c.caption}` : ''}`,
             text: c.csv_text as string,
           })),
         } : {}),
@@ -200,7 +203,8 @@ export async function generateReportForId(
       risksMd: out.risks,
       recommendationsMd: out.recommendations,
     });
-    // Persist the AI-drafted, client-ready worked-on narrative.
+    // Persist the AI-formatted, client-ready worked-on narrative (reformatted
+    // from the team's copy, or drafted from completed work).
     if (draftWorkedOn && out.worked_on && out.worked_on.trim()) {
       await updateNarrative(reportId, { workedOnMd: out.worked_on.trim() });
       result.narrativeApplied = true;
