@@ -61,6 +61,7 @@
     "report:client": "tsx scripts/functions/generate-client-report.ts",
     "report:all": "tsx scripts/functions/generate-client-report.ts --all",
     "report:one": "tsx scripts/functions/generate-one-report.ts",
+    "report:google-all": "tsx scripts/functions/generate-all-google-reports.ts",
     "report:coverage": "tsx scripts/diagnostics/report-data-coverage.ts",
     "ai:audit": "tsx scripts/utils/ai-wrapper.ts --audit",
     "qa:grade": "tsx scripts/functions/qa-grading.ts",
