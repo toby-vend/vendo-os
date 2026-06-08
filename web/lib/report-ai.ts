@@ -55,15 +55,26 @@
  *    in the data (CPL up sharply, conversion volume falling, etc.). No
  *    invented urgency. No catastrophising.
  *
- * 2026-06 CALIBRATION (from Toby's real Google Ads reports — see
+ * 2026-06 CALIBRATION (from Toby's real Google Ads reports, see
  * web/lib/reports/report-style.ts + data/report-examples/):
  *    For single-platform Google Ads / Paid Search client reports, PRESENTATION
  *    follows the real reports: prose paragraphs per campaign (not bullet
- *    tables), client-facing terms "enquiries"/"cost per lead" (not
- *    "conversions"/"CPR"), and CLEAN campaign names (strip "VD |"/"Search -").
- *    The structured bullet layout in the performance_summary tool description
- *    still applies to richer multi-platform/CRM reports. The SUBSTANTIVE rules
- *    above (1–5) are unchanged. Pending Toby's confirmation on roll-out.
+ *    tables), client-facing terms (always "leads", never "enquiries", plus
+ *    "cost per lead", not "conversions"/"CPR"), and CLEAN campaign names
+ *    (strip "VD |"/"Search -"). The structured bullet layout in the
+ *    performance_summary tool description still applies to richer
+ *    multi-platform/CRM reports. The SUBSTANTIVE rules above (1-5) are
+ *    unchanged.
+ *
+ * 2026-06-08 FEEDBACK (Toby):
+ *    - No "% of budget" column in the performance table.
+ *    - Always call enquiries "leads".
+ *    - "What we did this month" mirrors "Next month" formatting: every bullet
+ *      opens with a short bold label so it scans at a glance.
+ *    - NO em dashes anywhere in the report.
+ *    - Only emit a closing "One thing I need from you" ask when the team's own
+ *      input (Focus next period / What we worked on) explicitly contains one;
+ *      otherwise end on the focus.
  *
  * Cross-reference:
  *   - Memory: feedback_client_reports_rules.md (in
@@ -174,6 +185,8 @@ When asked to draft the "What we worked on" narrative (the \`worked_on\` field):
 
 Use UK English throughout. Currency is GBP (£) unless a screenshot clearly shows otherwise.
 
+**NO EM DASHES.** Never use an em dash (—) anywhere in the report. Do not use en dashes (–) as punctuation either. Use a comma, full stop, colon, or brackets instead. This applies to every section.
+
 Hard rules:
 - Use ONLY information visible in the screenshots, captions, or narrative. Do not fabricate metrics, percentages, monetary values, campaign names, or claims.
 - If a number is unclear or partly cut off in a screenshot, omit it rather than guessing.
@@ -188,12 +201,12 @@ Tone — read carefully:
 - Address the client directly ("you", "your campaigns"). Confident, plain English, friendly but professional. No marketing fluff.
 
 REPORT CRAFT — the difference between a good report and a credible one:
-- **Say each number ONCE.** State the headline figures (total enquiries, blended cost per lead, total spend) in the Headline, and each campaign's figures ONLY in the performance table. Do NOT restate the same metric in multiple sections — repetition reads as padding and erodes trust. Once a number is in the table, refer to the campaign by name afterwards, not by re-quoting its numbers.
+- **Say each number ONCE.** State the headline figures (total leads, blended cost per lead, total spend) in the Headline, and each campaign's figures ONLY in the performance table. Do NOT restate the same metric in multiple sections — repetition reads as padding and erodes trust. Once a number is in the table, refer to the campaign by name afterwards, not by re-quoting its numbers.
 - **No duplicate or near-duplicate lines.** Never list the same piece of work twice (e.g. once active, once passive). Each item appears exactly once. Don't split one action into two differently-worded items.
 - **Own the trade-offs; don't soften them.** If one campaign is taking a large share of budget for few results, say so plainly and show the spend split — do NOT excuse it with "naturally carries a higher cost per lead". Confront the allocation honestly and frame the planned work as the fix. A client who does the maths must feel you've addressed it, not steered around it.
-- **Earn every adjective.** Avoid empty descriptors ("strong", "excellent", "solid", "real promise") unless you can anchor them to a benchmark — a month-on-month change or a target. If there's no benchmark in the data, drop the adjective and let the number stand. "£16.34 per lead across 99 enquiries" beats "an excellent result".
+- **Earn every adjective.** Avoid empty descriptors ("strong", "excellent", "solid", "real promise") unless you can anchor them to a benchmark — a month-on-month change or a target. If there's no benchmark in the data, drop the adjective and let the number stand. "£16.34 per lead across 99 leads" beats "an excellent result".
 - **Anchor to revenue where you can.** If booking / lead-to-booking / revenue data is present, include it — booking is usually the real goal, so a report that only counts leads is incomplete. Never invent it if absent.
-- **Close with a decision.** End the recommendations with one explicit thing you need from the client — a yes/no on a specific next step — not a vague "let us know if you have questions".
+- **Only ask when the team asked.** Do NOT manufacture a closing question. End the recommendations on the next-month actions (the focus). Add a final "**One thing I need from you:**" line ONLY when the team's "Focus next period" or "What we worked on" input explicitly contains a question or decision they need from the client; then surface that specific ask. Otherwise end on the focus, and never use a vague "let us know if you have questions".
 
 Call the \`submit_report\` tool. Fill every field. \`performance_summary\` MUST be a markdown TABLE (see its description). The narrative fields are tight and non-overlapping — together they read as ONE coherent email, not repeated takes on the same facts.`;
 
@@ -211,7 +224,7 @@ function channelDirective(channel: ReportChannel): string {
 
   const terminology: Record<ReportChannel, string> = {
     google_ads:
-      'This is a Google Ads (Paid Search) report. Use Paid Search terminology: "enquiries" / "leads" and "cost per lead" (£X per lead) for lead-gen; "revenue", "spend" and "ROAS" for ecommerce. Refer to campaigns by clean client-facing names (strip internal "VD |" / "Search -" prefixes).',
+      'This is a Google Ads (Paid Search) report. Use Paid Search terminology: always call enquiries "leads", with "cost per lead" (£X per lead) for lead-gen; "revenue", "spend" and "ROAS" for ecommerce. Refer to campaigns by clean client-facing names (strip internal "VD |" / "Search -" prefixes).',
     meta:
       'This is a Meta (Paid Social) report. Talk only about the Meta/Facebook/Instagram ad campaigns. Use "results" / "leads", "cost per lead" / "cost per result", "ROAS" and "spend". For dental clients the Meta conversion event is View Content — treat it as the leads metric (per the dental rule). Clean campaign names; never show internal prefixes.',
     seo:
@@ -238,29 +251,29 @@ function buildSystemPrompt(channel: ReportChannel): string {
 const WORKED_ON_PROPERTY = {
   type: 'string' as const,
   description:
-    'The "What we did this month" section — a markdown bullet list. Synthesise the "Work completed this period" list + meeting context into client-appropriate themes of delivery. RULES: each item appears EXACTLY ONCE (never the same action in two differently-worded bullets); use active voice ("Fixed a form issue on the aligner landing page", not "A typo fix was completed"); do NOT restate any performance metrics here (they live in the table); NEVER reproduce raw internal task names or staff/contact names. 3–6 tight bullets. If two source items are the same underlying action, merge them into one.',
+    'The "What we did this month" section: a markdown bullet list in the SAME format as the "Next month" plan. Each bullet MUST open with a short bold label naming the work, then a colon and the detail (e.g. "**Landing page fix:** corrected a form issue on the Clear Aligners page to keep the lead journey friction-free."), so a client glancing down the list immediately sees what was done. Synthesise the "Work completed this period" list and meeting context into client-appropriate themes of delivery. RULES: each item appears EXACTLY ONCE (never the same action in two differently-worded bullets); use active voice; do NOT restate any performance metrics here (they live in the table); NEVER reproduce raw internal task names or staff/contact names. 3 to 6 tight bullets. If two source items are the same underlying action, merge them into one.',
 };
 
 const REPORT_PROPERTIES = {
   performance_summary: {
         type: 'string',
         description:
-          'The "Performance by campaign" section — a markdown TABLE, then ONE short interpretation paragraph.\n\nTABLE columns (in this order): Campaign | Enquiries | Cost per lead | Spend | % of budget. Add a final **Total** row. Use clean client-facing campaign names (strip internal "VD |" / "Search -" prefixes). Include EVERY campaign that spent money in the period — including any marked [PAUSED] in the data (a campaign paused or removed during the month still spent and MUST appear; append " (paused)" to its name and, in the paragraph below, note it was paused during the month). Only exclude campaigns with genuinely £0 spend. The Total row must equal the full month\'s spend. "% of budget" = that campaign\'s spend ÷ total spend, as a whole percent. Terminology by account: "Enquiries"/"Leads" + "Cost per lead" for lead-gen; "Sales"/"Purchases" + "CPA" (+ a ROAS column) for ecommerce. If booking / lead-to-booking or revenue data is present, add a column for it (e.g. Bookings, or Revenue + ROAS) — booking is usually the real goal.\n\nExample:\n\n| Campaign | Enquiries | Cost per lead | Spend | % of budget |\n|---|---|---|---|---|\n| General Dentistry | 99 | £16.34 | £1,617.66 | 61% |\n| Clear Aligners | 6 | £155.48 | £932.88 | 35% |\n| Performance Max | 7 | £13.39 | £93.73 | 4% |\n| **Total** | **112** | **£23.61** | **£2,644.32** | **100%** |\n\nThen ONE short paragraph (2–4 sentences) reading the allocation honestly — which campaign is the efficient engine, which is over/under-funded relative to results, and the resulting priority. Confront trade-offs (e.g. "Clear Aligners is taking ~a third of budget for ~5% of enquiries, so the priority is to make that spend work harder") — do NOT soften with excuses. Do NOT re-list the per-campaign numbers in this paragraph; the table already shows them.',
+          'The "Performance by campaign" section: a markdown TABLE, then ONE short interpretation paragraph.\n\nTABLE columns (in this order): Campaign | Leads | Cost per lead | Spend. Add a final **Total** row. Do NOT include a "% of budget" column. Use clean client-facing campaign names (strip internal "VD |" / "Search -" prefixes). Include EVERY campaign that spent money in the period, including any marked [PAUSED] in the data (a campaign paused or removed during the month still spent and MUST appear; append " (paused)" to its name and, in the paragraph below, note it was paused during the month). Only exclude campaigns with genuinely £0 spend. The Total row must equal the full month\'s spend. Terminology by account: "Leads" + "Cost per lead" for lead-gen; "Sales"/"Purchases" + "CPA" (plus a ROAS column) for ecommerce. If booking / lead-to-booking or revenue data is present, add a column for it (e.g. Bookings, or Revenue plus ROAS), as booking is usually the real goal.\n\nExample:\n\n| Campaign | Leads | Cost per lead | Spend |\n|---|---|---|---|\n| General Dentistry | 99 | £16.34 | £1,617.66 |\n| Clear Aligners | 6 | £155.48 | £932.88 |\n| Performance Max | 7 | £13.39 | £93.73 |\n| **Total** | **112** | **£23.61** | **£2,644.32** |\n\nThen ONE short paragraph (2 to 4 sentences) reading the allocation honestly: which campaign is the efficient engine, which is over or under-funded relative to results, and the resulting priority. Confront trade-offs (e.g. "Clear Aligners is taking around a third of the budget for roughly 5% of leads, so the priority is to make that spend work harder") and do NOT soften with excuses. Do NOT re-list the per-campaign numbers in this paragraph; the table already shows them.',
       },
       exec_summary: {
         type: 'string',
         description:
-          'The "Headline" — 2–3 sentences. State the period\'s topline ONCE (total enquiries, blended cost per lead, total spend) and the real story in one breath, including the main thing to address. Example: "112 enquiries at a blended cost per lead of £23.61, from £2,644.32 spend. General Dentistry did the heavy lifting; Performance Max was the most efficient channel; Clear Aligners remains low-volume and is the main thing to address." Plain and decisive — no empty adjectives, no benchmarks-free praise. Markdown.',
+          'The "Headline": 2 to 3 sentences. State the period\'s topline ONCE (total leads, blended cost per lead, total spend) and the real story in one breath, including the main thing to address. Example: "112 leads at a blended cost per lead of £23.61, from £2,644.32 spend. General Dentistry did the heavy lifting; Performance Max was the most efficient channel; Clear Aligners remains low-volume and is the main thing to address." Plain and decisive, no empty adjectives, no benchmark-free praise. Markdown.',
       },
       risks: {
         type: 'string',
         description:
-          'The "Watch point" — the single most important issue to flag this period, owned honestly and framed as a fix-it item (not doom). 2–4 sentences or tight bullets: name the issue with its figure, acknowledge the context, state that it\'s being treated as an action (cross-reference the next-month fix), and give a reassess point (e.g. "we\'ll reassess at the end of June"). Do NOT repeat the full campaign metrics — reference the one figure that matters. If there is genuinely nothing to watch, return "- No material concerns this period." Never invent a concern.',
+          'The "Watch point": the single most important issue to flag this period, owned honestly and framed as a fix-it item (not doom). 2 to 4 sentences or tight bullets: name the issue with its figure, acknowledge the context, state that it\'s being treated as an action (cross-reference the next-month fix), and give a reassess point (e.g. "we\'ll reassess at the end of June"). Do NOT repeat the full campaign metrics; reference the one figure that matters. If there is genuinely nothing to watch, return "- No material concerns this period." Never invent a concern.',
       },
       recommendations: {
         type: 'string',
         description:
-          'The "Next month" plan — a markdown bullet list of 2–4 specific actions, each leading with the action and stating its goal (e.g. "Clear Aligners review: full search-term and keyword analysis to cut wasted spend and add tighter negatives. Goal: lift volume and bring the cost per lead down."). Then end with ONE explicit ask on its own line, prefixed "**One thing I need from you:**" — a single yes/no decision you need from the client to proceed (e.g. a go/no-go on building a new campaign). Do not pad with vague offers to "answer questions".',
+          'The "Next month" plan: a markdown bullet list of 2 to 4 specific actions. Each bullet MUST open with a short bold label naming the action, then a colon and the detail with its goal (e.g. "**Clear Aligners review:** full search-term and keyword analysis to cut wasted spend and add tighter negatives. Goal: lift volume and bring the cost per lead down."). End on these action bullets. Do NOT add a closing "one thing I need from you" ask UNLESS the team\'s "Focus next period" or "What we worked on" input explicitly states a question or decision they need from the client. Only in that case, add it as a final line prefixed "**One thing I need from you:**" using that specific ask. If the team has not put an explicit ask in their input, simply end with the action bullets. Never invent an ask, and do not pad with vague offers to "answer questions".',
       },
 } as const;
 
