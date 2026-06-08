@@ -23,7 +23,7 @@
  */
 
 const APP_URL = process.env.APP_URL
-  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://vendo-os.vercel.app');
+  || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'https://vendo-os.vercel.app');
 
 // ───────────────────────────────────────────────────────────────────────
 // Bold + italics: convert CommonMark double markers to Slack singles.

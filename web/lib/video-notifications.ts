@@ -8,7 +8,9 @@ import { db } from './queries/base.js';
 
 const SLACK_WEBHOOK_URL = process.env.SLACK_VIDEO_WEBHOOK_URL || '';
 const MAKE_WEBHOOK_URL = process.env.MAKE_VIDEO_WEBHOOK_URL || '';
-const APP_URL = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+// Use the stable production domain, never the protection-gated per-deployment VERCEL_URL.
+const APP_URL = process.env.APP_URL
+  || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000');
 
 // ── In-app notifications ────────────────────────────────────────
 

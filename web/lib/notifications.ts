@@ -4,7 +4,11 @@
  */
 
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
-const APP_URL = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+// VERCEL_PROJECT_PRODUCTION_URL is the stable production domain (vendo-os.vercel.app).
+// Never use VERCEL_URL here — it's the per-deployment URL, which has deployment
+// protection enabled and will block recipients of invite/login links.
+const APP_URL = process.env.APP_URL
+  || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000');
 
 // Google OAuth for sending email
 const GDRIVE_CREDENTIALS_PATH = process.env.GDRIVE_CREDENTIALS_PATH || '';
