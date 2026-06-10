@@ -118,6 +118,23 @@ function fieldArray(body: unknown, key: string): string[] {
   return [];
 }
 
+/**
+ * Persist any narrative fields sent with a generate request. The editor's
+ * textareas save on blur with a debounce, so a click on Generate can race
+ * (and beat) the background save — generation would then read stale values
+ * from the DB. The generate buttons hx-include the on-screen fields; saving
+ * them here first guarantees generation always uses what the user sees.
+ */
+async function persistNarrativeFields(reportId: number, body: unknown): Promise<void> {
+  if (!body || typeof body !== 'object') return;
+  const params: Parameters<typeof updateNarrative>[1] = {};
+  if ('worked_on_md' in body) params.workedOnMd = field(body, 'worked_on_md');
+  if ('focus_next_md' in body) params.focusNextMd = field(body, 'focus_next_md');
+  if ('contact_name' in body) params.contactName = field(body, 'contact_name');
+  if ('change_history' in body) params.changeHistory = field(body, 'change_history');
+  if (Object.keys(params).length > 0) await updateNarrative(reportId, params);
+}
+
 function isValidPlatform(p: string): p is ScreenshotPlatform {
   return PLATFORM_OPTIONS.some(opt => opt.value === p);
 }
@@ -561,6 +578,9 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(400).type('text/html').send('<div class="r-error">This is Google Ads only.</div>');
     }
 
+    // Save the on-screen narrative fields first (same race as /generate).
+    await persistNarrativeFields(id, request.body);
+
     // 1) Change history → field (so it's included as context in generation).
     try {
       const ch = await fetchGadsChangeHistory(report.client_id, report.period_start, report.period_end);
@@ -777,6 +797,10 @@ export const reportsApiRoutes: FastifyPluginAsync = async (app) => {
     if (!Number.isFinite(id)) return reply.code(404).send('Not found');
     const report = await getReport(id);
     if (!report) return reply.code(404).send('Not found');
+
+    // The button hx-includes the on-screen narrative fields — save them
+    // before generating so edits made just before the click are picked up.
+    await persistNarrativeFields(id, request.body);
 
     // Shared pipeline: rebuilds the Google Ads summary on the fly, runs the
     // reconciliation guardrail, pulls narrative + meeting context, and

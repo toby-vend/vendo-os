@@ -20,15 +20,8 @@
       <span id="r-save-flash" class="r-saved" style="opacity: 0;">Saved</span>
       <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/text" target="_blank">Copy text</a>
       <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/preview" target="_blank">Preview / PDF</a>
-      <a class="r-btn r-btn-ghost" href="/reports/<%= it.report.id %>/view" target="_blank">Open dashboard</a>
 
-      <% if (it.report.status === 'draft') { %>
-        <button class="r-btn r-btn-primary"
-                hx-post="/api/reports/<%= it.report.id %>/submit-review"
-                hx-confirm="Submit this report for AM review?">
-          Submit for review
-        </button>
-      <% } else if (it.report.status === 'review') { %>
+      <% if (it.report.status === 'review') { %>
         <% if (it.isAm) { %>
           <button class="r-btn r-btn-primary"
                   hx-post="/api/reports/<%= it.report.id %>/approve"
@@ -134,6 +127,7 @@
       <div style="text-align:right; flex-shrink:0;">
         <button class="r-btn r-btn-primary" style="white-space:nowrap;"
                 hx-post="/api/reports/<%= it.report.id %>/pull-google-ads"
+                hx-include="[name='worked_on_md'],[name='focus_next_md'],[name='contact_name'],[name='change_history']"
                 hx-swap="none"
                 hx-indicator="#r-gads-spin"
                 hx-confirm="Pull the latest Google Ads metrics + change history and (re)generate this report? This overwrites the AI sections.">
@@ -248,6 +242,7 @@
       <button id="r-generate-btn"
               class="r-btn r-btn-primary"
               hx-post="/api/reports/<%= it.report.id %>/generate"
+              hx-include="[name='worked_on_md'],[name='focus_next_md'],[name='contact_name'],[name='change_history']"
               hx-target="#r-ai-blocks"
               hx-swap="outerHTML"
               hx-indicator="#r-generate-spinner">
