@@ -47,6 +47,7 @@ import {
   type ReportChannel,
 } from '../lib/queries/reports.js';
 import { generateReportForId } from '../lib/reports/generate.js';
+import { fetchMeetingDiscussions } from '../lib/reports/narrative-context.js';
 import { fetchGadsChangeHistory } from '../lib/reports/gads-change-history.js';
 import { safeStringify } from '../lib/reports/dashboard-shell.js';
 import { buildDashboardData, recomputeDashboard } from '../lib/reports/build-dashboard-data.js';
@@ -231,6 +232,13 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     if (!report) return reply.code(404).send('Not found');
     const screenshots = await listScreenshots(id);
 
+    // Fathom calls for this client + period — shown in the AI insights
+    // section so the team can see exactly which calls feed generation
+    // (they're otherwise invisible internal context).
+    const meetingContext = await fetchMeetingDiscussions(
+      report.client_id, report.period_start, report.period_end,
+    ).catch(() => []);
+
     // Sibling reports for this client + period, so the channel selector can
     // show which channels already have a report vs which need generating.
     const siblings = await listReports({ clientId: report.client_id, limit: 50 });
@@ -251,6 +259,7 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
       channelLabel: channelLabel(report.channel),
       monthValue: report.period_start.slice(0, 7),
       siblingByChannel,
+      meetingContext,
       isAm: isAmUser(user),
     });
   });

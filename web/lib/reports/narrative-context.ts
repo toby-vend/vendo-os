@@ -296,7 +296,7 @@ async function fetchMeetingActions(
  * Returns Fathom's own summary per meeting, capped in count and length. This
  * is internal context only — callers must not surface it verbatim to clients.
  */
-async function fetchMeetingDiscussions(
+export async function fetchMeetingDiscussions(
   clientId: number,
   periodStart: string,
   periodEnd: string,
