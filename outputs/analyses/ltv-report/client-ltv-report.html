@@ -1,0 +1,524 @@
+<!DOCTYPE html><html lang="en-GB"><head>
+<meta charset="utf-8">
+<title>Client LTV Report — Vendo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:        #0A1F18;
+    --card:      #142A22;
+    --mint:      #3EE89B;
+    --white:     #FFFFFF;
+    --muted:     #9CB0A8;
+    --on-mint:   #0A1F18;
+    --border:    rgba(255,255,255,0.06);
+    --rule:      rgba(255,255,255,0.08);
+    --sans: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --serif: "Instrument Serif", "EB Garamond", Georgia, serif;
+  }
+  @page { size: A4 portrait; margin: 0; }
+  *,*::before,*::after{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; background:#1a1a1a; }
+  body{ font-family: var(--sans); color: var(--white); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  .stage{ display:flex; flex-direction:column; align-items:center; gap: 18mm; padding: 18mm 0 24mm; }
+  @media print{
+    *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    .stage{ gap:0; padding:0; }
+    body{ background:#000; }
+  }
+  .page{
+    width: 210mm; height: 297mm; background: var(--bg); position: relative; overflow: hidden;
+    page-break-after: always; break-after: page; padding: 16mm 18mm 12mm 18mm;
+    display: grid; grid-template-rows: auto 1fr auto; box-shadow: 0 2mm 8mm rgba(0,0,0,.5);
+  }
+  @media print{ .page{ box-shadow:none; } }
+  .page:last-child{ page-break-after: auto; break-after: auto; }
+  .header{ display:flex; justify-content:space-between; align-items:baseline; height: 10mm; }
+  .wordmark{ font-weight: 600; font-size: 18pt; letter-spacing: -0.02em; color: var(--white); }
+  .wordmark .dot{ color: var(--mint); }
+  .header-meta{ font-size: 9pt; color: var(--muted); text-transform: uppercase; letter-spacing: 0.18em; }
+  .footer{ display:flex; justify-content:space-between; align-items:baseline; font-size: 8.5pt; color: var(--muted); padding-top: 4mm; }
+  .eyebrow{ font-size: 10pt; font-weight: 500; color: var(--mint); text-transform: uppercase; letter-spacing: 0.22em; margin: 0 0 5mm 0; }
+  .headline{ font-weight: 600; font-size: 34pt; line-height: 1.12; letter-spacing: -0.025em; color: var(--white); margin: 0; padding-bottom: 0.12em; text-wrap: balance; }
+  .headline em, .it{ font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+  .headline .mint, .headline em.mint{ color: var(--mint); }
+  .subline{ font-size: 12pt; line-height: 1.45; color: var(--muted); margin: 5mm 0 0 0; max-width: 165mm; font-weight: 400; }
+  .subline.serif{ font-family: var(--serif); font-style: italic; color: var(--white); font-size: 13pt; }
+  .body-line{ font-size: 11pt; line-height: 1.5; color: var(--white); margin: 0; }
+  .muted{ color: var(--muted); }
+  .body-zone{ display:flex; flex-direction:column; min-height:0; }
+  .card{ background: var(--card); border: 1px solid var(--border); border-radius: 6mm; padding: 7mm 9mm; display:flex; flex-direction:column; }
+  .card .label{ font-size: 9pt; font-weight: 500; color: var(--mint); text-transform: uppercase; letter-spacing: 0.22em; margin: 0 0 4mm 0; }
+  .card.hero{ background: var(--mint); border-color: transparent; color: var(--on-mint); }
+  .card.hero .label{ color: var(--on-mint); opacity:.7; }
+  .card.hero .body-line, .card.hero p{ color: var(--on-mint); }
+  table.data{ width: 100%; border-collapse: collapse; font-family: var(--sans); }
+  table.data th, table.data td{ text-align: left; padding: 2.2mm 3mm; border-bottom: 0.5pt solid var(--rule); font-size: 10.5pt; line-height: 1.3; vertical-align: baseline; }
+  table.data th{ font-size: 8.5pt; font-weight: 500; text-transform: uppercase; letter-spacing: 0.22em; color: var(--mint); padding-bottom: 3mm; }
+  table.data td.bench{ font-family: var(--serif); font-style: italic; color: var(--mint); font-size: 12.5pt; }
+  table.data td.typical{ color: var(--muted); }
+  table.data td.good{ color: var(--white); }
+  table.data tr:last-child td{ border-bottom: none; }
+  table.league th, table.league td{ font-size: 9pt; padding: 1.2mm 2.5mm; }
+  table.league td.bench{ font-size: 10.5pt; }
+  table.league th.num, table.league td:nth-child(3), table.league td:nth-child(4){ text-align: right; }
+  table.league td:nth-child(5), table.league td:nth-child(6){ white-space: nowrap; }
+  .arrow{ color: var(--mint); font-weight: 400; }
+  .stat{ text-align:center; padding: 5mm; background: var(--card); border: 1px solid var(--border); border-radius: 5mm; }
+  .stat .k{ font-size:9pt; color:var(--mint); text-transform:uppercase; letter-spacing:0.22em; }
+  .stat .v{ font-weight:600; font-size:30pt; line-height:1; margin-top:2mm; }
+</style></head>
+<body>
+<div class="stage">
+
+<!-- PAGE 01 — COVER -->
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta">June · 2026</div>
+  </header>
+  <div class="body-zone" style="justify-content:center;">
+    <p class="eyebrow" style="margin-bottom:10mm;">Internal · Finance Intelligence</p>
+    <h1 class="headline" style="font-size: 76pt; line-height: 1.0; max-width:175mm; letter-spacing:-0.03em;">
+      The Client<br>
+      LTV <em class="mint">Report</em>
+    </h1>
+    <p class="subline serif" style="margin-top: 14mm; font-size: 16pt; max-width: 145mm;">
+      Every client we have ever billed, ranked by lifetime value — straight from Xero. August 2022 to June 2026.
+    </p>
+    <div style="margin-top: 28mm; display:grid; grid-template-columns: repeat(2, 1fr); gap: 3mm 14mm; max-width:130mm; font-size: 10pt; color: var(--muted);">
+      <div><span style="color: var(--mint);">01</span>&nbsp;&nbsp;The headlines</div>
+      <div><span style="color: var(--mint);">03</span>&nbsp;&nbsp;The full league table</div>
+      <div><span style="color: var(--mint);">02</span>&nbsp;&nbsp;The top fifteen</div>
+      <div><span style="color: var(--mint);">04</span>&nbsp;&nbsp;Observations + method</div>
+    </div>
+  </div>
+  <footer class="footer" style="align-items:flex-end;">
+    <div style="max-width: 130mm;">
+      <div class="it" style="font-size: 12pt; color: var(--white); line-height:1.4;">Vendo Digital · Finance</div>
+      <div class="it" style="font-size: 11pt; color: var(--muted); margin-top: 2mm;">Source: Xero sales invoices, synced 10 June 2026</div>
+    </div>
+  </footer>
+</section>
+
+<!-- PAGE 02 — HEADLINES -->
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The headlines</p>
+    <h2 class="headline">One number per client. <em class="mint">Blended.</em></h2>
+    <p class="subline">Lifetime revenue per client, net of VAT, across every sales invoice raised since August 2022. Paid and authorised invoices only.</p>
+
+    <div style="margin-top: 10mm; display:grid; grid-template-columns: repeat(3, 1fr); gap: 4mm;">
+      <div class="stat">
+        <div class="k">Lifetime revenue</div>
+        <div class="v">£1.35m</div>
+      </div>
+      <div class="stat" style="background: var(--mint); border-color:transparent; color: var(--on-mint);">
+        <div class="k" style="color:var(--on-mint); opacity:.75;">Blended LTV</div>
+        <div class="v" style="color:var(--on-mint);">£8,634</div>
+      </div>
+      <div class="stat">
+        <div class="k">Median LTV</div>
+        <div class="v">£4,814</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 6mm; display:grid; grid-template-columns: repeat(3, 1fr); gap: 4mm;">
+      <div class="stat">
+        <div class="k">Billed clients</div>
+        <div class="v" style="font-size:24pt;">156</div>
+      </div>
+      <div class="stat">
+        <div class="k">Blended · merged entities</div>
+        <div class="v" style="font-size:24pt;">£9,418</div>
+      </div>
+      <div class="stat">
+        <div class="k">Highest single LTV</div>
+        <div class="v" style="font-size:24pt;">£117,850</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 9mm; display:grid; grid-template-columns: 1fr 1fr; gap: 4mm;">
+      <div class="card" style="padding: 6mm 8mm;">
+        <p class="label">How blended LTV is built</p>
+        <p class="body-line" style="font-size:10.5pt; line-height:1.55;">
+          Total lifetime revenue of <span style="color:var(--mint);">£1,346,827</span>
+          (£1,329,147 GBP + €20,800 converted at €1 = £0.85)
+          divided by <span style="color:var(--mint);">156</span> billed Xero contacts.
+          Consolidating related contacts — the six Kana Health Group sites, monthly and ad-hoc splits — gives 143 client entities and a blended LTV of <span style="color:var(--mint);">£9,418</span>.
+        </p>
+      </div>
+      <div class="card" style="padding: 6mm 8mm;">
+        <p class="label">Concentration</p>
+        <p class="body-line" style="font-size:10.5pt; line-height:1.55;">
+          The top fifteen client entities account for <span style="color:var(--mint);">≈45%</span> of all lifetime revenue.
+          The median client is worth £4,814 — well under the blended figure. Revenue lives at the top of the table.
+        </p>
+      </div>
+    </div>
+
+    <div class="card hero" style="margin-top: 5mm; padding: 5mm 9mm;">
+      <p class="it" style="font-size:12pt; line-height:1.45; margin:0;">
+        The blended number says £8,634. The median says £4,814. The gap between those two numbers is the story: a small group of clients carries the book.
+      </p>
+    </div>
+
+    <p class="it" style="color:var(--muted); font-size:11pt; margin-top: auto; padding-top: 6mm; text-align:center;">
+      Total outstanding across all clients: ~£9.7k — the book collects well.
+    </p>
+  </div>
+  <footer class="footer"></footer>
+</section>
+
+<!-- PAGE 03 — TOP 15 -->
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The top fifteen</p>
+    <h2 class="headline">Who carries <em class="mint">the book</em>.</h2>
+    <p class="subline">Related Xero contacts merged into single client entities — Kana Health Group sites combined, monthly and ad-hoc contacts combined.</p>
+
+    <table class="data" style="margin-top: 8mm;">
+      <thead><tr><th style="width:8mm;">#</th><th>Client</th><th style="text-align:right;">LTV (net)</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="typical">01</td><td>MR Mouldings</td><td class="bench" style="text-align:right;">£117,850</td><td class="good">Active · ~£10.7k/mo since Aug 2025</td></tr>
+        <tr><td class="typical">02</td><td>Padawan Outpost</td><td class="bench" style="text-align:right;">£74,033</td><td class="typical">Churned Oct 2023</td></tr>
+        <tr><td class="typical">03</td><td>The Sword Stall UK</td><td class="bench" style="text-align:right;">£57,000</td><td class="good">Active</td></tr>
+        <tr><td class="typical">04</td><td>Abacus Lawrence Group</td><td class="bench" style="text-align:right;">£52,295</td><td class="typical">Last invoiced Mar 2026</td></tr>
+        <tr><td class="typical">05</td><td>Access Platform Sales</td><td class="bench" style="text-align:right;">£48,979</td><td class="good">Active · £4,050 outstanding</td></tr>
+        <tr><td class="typical">06</td><td>Vulcan Cladding Systems</td><td class="bench" style="text-align:right;">£39,678</td><td class="good">Active since Sep 2022</td></tr>
+        <tr><td class="typical">07</td><td>Kane Construction Services</td><td class="bench" style="text-align:right;">£30,754</td><td class="good">Active since Sep 2022</td></tr>
+        <tr><td class="typical">08</td><td>Kana Health Group · all six sites</td><td class="bench" style="text-align:right;">£28,133</td><td class="good">Active</td></tr>
+        <tr><td class="typical">09</td><td>Lakewood Dental</td><td class="bench" style="text-align:right;">£27,375</td><td class="good">Active</td></tr>
+        <tr><td class="typical">10</td><td>St Clears Dental Studio</td><td class="bench" style="text-align:right;">£26,375</td><td class="good">Active</td></tr>
+        <tr><td class="typical">11</td><td>Sherwood Park Dental</td><td class="bench" style="text-align:right;">£24,677</td><td class="typical">Last invoiced Oct 2025</td></tr>
+        <tr><td class="typical">12</td><td>London Property Preservation</td><td class="bench" style="text-align:right;">£24,137</td><td class="good">Active since Sep 2022</td></tr>
+        <tr><td class="typical">13</td><td>Zen House Dental</td><td class="bench" style="text-align:right;">£23,230</td><td class="good">Active · £2,244 outstanding</td></tr>
+        <tr><td class="typical">14</td><td>London School of Barbering</td><td class="bench" style="text-align:right;">£21,123</td><td class="good">Active since Oct 2022</td></tr>
+        <tr><td class="typical">15</td><td>Ravensdale Dental / Dentistry.ie</td><td class="bench" style="text-align:right;">€20,800</td><td class="good">EUR-billed · started Mar 2026</td></tr>
+      </tbody>
+    </table>
+
+    <p class="it" style="color:var(--muted); font-size:11pt; margin-top: auto; padding-top: 6mm; text-align:center;">
+      Fifteen entities. Roughly forty-five pence of every pound ever billed.
+    </p>
+  </div>
+  <footer class="footer"></footer>
+</section>
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The full league table · 1–24</p>
+    <table class="data league" style="margin-top: 4mm;">
+      <thead><tr><th style="width:8mm;">#</th><th>Client</th><th class="num">Invoices</th><th class="num">LTV (net)</th><th style="white-space:nowrap;">First invoice</th><th style="white-space:nowrap;">Last invoice</th></tr></thead>
+      <tbody>
+<tr><td class="typical">01</td><td>MR Mouldings (Monthly Services)</td><td class="typical">12</td><td class="bench">£117,850</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">02</td><td>Padawan Outpost Ltd</td><td class="typical">19</td><td class="bench">£74,033</td><td class="typical">2022-09-30</td><td class="typical">2023-10-31</td></tr>
+<tr><td class="typical">03</td><td>THE SWORD STALL UK LTD</td><td class="typical">12</td><td class="bench">£57,000</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">04</td><td>Abacus Lawrence Group Ltd (Monthly Services)</td><td class="typical">9</td><td class="bench">£45,820</td><td class="typical">2025-08-01</td><td class="typical">2026-03-01</td></tr>
+<tr><td class="typical">05</td><td>Access Platform Sales Limited (Access Platform Sales) (Monthly Services)</td><td class="typical">13</td><td class="bench">£39,904</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">06</td><td>Vulcan Cladding Systems</td><td class="typical">25</td><td class="bench">£39,678</td><td class="typical">2022-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">07</td><td>Kane Construction Services Ltd</td><td class="typical">25</td><td class="bench">£30,754</td><td class="typical">2022-09-02</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">08</td><td>Lakewood Dental</td><td class="typical">11</td><td class="bench">£27,375</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">09</td><td>St Clears Dental Studio</td><td class="typical">11</td><td class="bench">£26,375</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">10</td><td>Sherwood Park Dental</td><td class="typical">20</td><td class="bench">£24,677</td><td class="typical">2022-09-01</td><td class="typical">2025-10-27</td></tr>
+<tr><td class="typical">11</td><td>London Property Preservation Ltd</td><td class="typical">25</td><td class="bench">£24,137</td><td class="typical">2022-09-02</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">12</td><td>Zen House Dental</td><td class="typical">8</td><td class="bench">£23,230</td><td class="typical">2025-12-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">13</td><td>London School Of Barbering</td><td class="typical">42</td><td class="bench">£21,123</td><td class="typical">2022-10-23</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">14</td><td>Ravensdale Dental Group / Dentistry.ie</td><td class="typical">5</td><td class="bench">€20,800</td><td class="typical">2026-03-20</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">15</td><td>Simmons Taylor Hall</td><td class="typical">22</td><td class="bench">£19,705</td><td class="typical">2022-10-28</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">16</td><td>The Denture Clinic (Dental Practice UK)</td><td class="typical">25</td><td class="bench">£19,446</td><td class="typical">2022-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">17</td><td>PBM Paints</td><td class="typical">14</td><td class="bench">£19,130</td><td class="typical">2022-09-01</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">18</td><td>BS bhandal limited / Avenue Dental</td><td class="typical">11</td><td class="bench">£18,863</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">19</td><td>Mobile Denture Repair Company</td><td class="typical">27</td><td class="bench">£18,521</td><td class="typical">2022-09-02</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">20</td><td>Arc Dental Surgery</td><td class="typical">11</td><td class="bench">£17,540</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">21</td><td>FM Marble</td><td class="typical">18</td><td class="bench">£16,941</td><td class="typical">2023-04-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">22</td><td>CDM Labels</td><td class="typical">19</td><td class="bench">£16,351</td><td class="typical">2023-03-31</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">23</td><td>Purley Dental Care</td><td class="typical">12</td><td class="bench">£14,895</td><td class="typical">2025-08-01</td><td class="typical">2026-06-05</td></tr>
+<tr><td class="typical">24</td><td>Thornley Park Dental</td><td class="typical">8</td><td class="bench">£14,590</td><td class="typical">2025-12-23</td><td class="typical">2026-06-01</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="footer"><div>Xero sales invoices · paid + authorised · net of VAT</div><div>Clients 1–24 of 156</div></footer>
+</section>
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The full league table · 25–48</p>
+    <table class="data league" style="margin-top: 4mm;">
+      <thead><tr><th style="width:8mm;">#</th><th>Client</th><th class="num">Invoices</th><th class="num">LTV (net)</th><th style="white-space:nowrap;">First invoice</th><th style="white-space:nowrap;">Last invoice</th></tr></thead>
+      <tbody>
+<tr><td class="typical">25</td><td>Blue Box Hire</td><td class="typical">23</td><td class="bench">£14,354</td><td class="typical">2022-09-08</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">26</td><td>Shams Moopen Ltd / Peak Dental</td><td class="typical">9</td><td class="bench">£14,060</td><td class="typical">2025-11-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">27</td><td>Lateral Dental Clinic Limited</td><td class="typical">9</td><td class="bench">£13,950</td><td class="typical">2025-10-24</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">28</td><td>GF Fire Solutions</td><td class="typical">24</td><td class="bench">£13,189</td><td class="typical">2022-09-02</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">29</td><td>The Solar Co</td><td class="typical">10</td><td class="bench">£12,843</td><td class="typical">2023-03-07</td><td class="typical">2023-10-31</td></tr>
+<tr><td class="typical">30</td><td>Lee Dental Practice</td><td class="typical">11</td><td class="bench">£12,040</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">31</td><td>Bright Orthodontics Limited</td><td class="typical">6</td><td class="bench">£12,015</td><td class="typical">2026-02-16</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">32</td><td>Revo Dent</td><td class="typical">11</td><td class="bench">£11,950</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">33</td><td>Stamford Dental Care</td><td class="typical">9</td><td class="bench">£11,917</td><td class="typical">2025-10-17</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">34</td><td>The Denture Shop</td><td class="typical">14</td><td class="bench">£11,667</td><td class="typical">2022-09-01</td><td class="typical">2023-10-02</td></tr>
+<tr><td class="typical">35</td><td>Just Smile Dental Ltd</td><td class="typical">9</td><td class="bench">£11,550</td><td class="typical">2025-11-03</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">36</td><td>Sun Pest Control Ltd</td><td class="typical">10</td><td class="bench">£11,375</td><td class="typical">2025-08-01</td><td class="typical">2026-05-01</td></tr>
+<tr><td class="typical">37</td><td>Squat Practise Brackley / Signature Smiles / Asaiya Ltd</td><td class="typical">8</td><td class="bench">£11,346</td><td class="typical">2025-12-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">38</td><td>R &amp; T (Lee) Clinic Limited (DH Keen)</td><td class="typical">11</td><td class="bench">£11,325</td><td class="typical">2025-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">39</td><td>Bryt Oral Care Ltd / Pearl Dental Practice</td><td class="typical">10</td><td class="bench">£10,903</td><td class="typical">2025-09-11</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">40</td><td>Wallington Cars</td><td class="typical">10</td><td class="bench">£10,900</td><td class="typical">2025-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">41</td><td>Dr Mali Dental Clinic</td><td class="typical">11</td><td class="bench">£10,725</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">42</td><td>Colbrans Home Solutions</td><td class="typical">18</td><td class="bench">£10,518</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">43</td><td>Oral Implants Limited T/A Dentist @29</td><td class="typical">11</td><td class="bench">£10,245</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">44</td><td>Howlett Health &amp; Safety Services Ltd</td><td class="typical">12</td><td class="bench">£10,132</td><td class="typical">2022-10-28</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">45</td><td>Kana Health Group</td><td class="typical">7</td><td class="bench">£10,083</td><td class="typical">2025-08-15</td><td class="typical">2026-02-01</td></tr>
+<tr><td class="typical">46</td><td>Dorking Dental Centre</td><td class="typical">9</td><td class="bench">£10,010</td><td class="typical">2025-10-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">47</td><td>HCR Systems Ltd / Price Gun Land</td><td class="typical">11</td><td class="bench">£9,900</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">48</td><td>LABEL METRICS LIMITED</td><td class="typical">11</td><td class="bench">£9,900</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="footer"><div>Xero sales invoices · paid + authorised · net of VAT</div><div>Clients 25–48 of 156</div></footer>
+</section>
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The full league table · 49–72</p>
+    <table class="data league" style="margin-top: 4mm;">
+      <thead><tr><th style="width:8mm;">#</th><th>Client</th><th class="num">Invoices</th><th class="num">LTV (net)</th><th style="white-space:nowrap;">First invoice</th><th style="white-space:nowrap;">Last invoice</th></tr></thead>
+      <tbody>
+<tr><td class="typical">49</td><td>Southern Loo Hire</td><td class="typical">15</td><td class="bench">£9,497</td><td class="typical">2022-09-30</td><td class="typical">2023-10-31</td></tr>
+<tr><td class="typical">50</td><td>Iconic Dent Ltd</td><td class="typical">6</td><td class="bench">£9,376</td><td class="typical">2025-10-02</td><td class="typical">2026-06-05</td></tr>
+<tr><td class="typical">51</td><td>SNC ASSOCIATES LIMITED - Billericay Dental</td><td class="typical">7</td><td class="bench">£9,375</td><td class="typical">2025-12-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">52</td><td>Access Platform Sales Limited (Access Platform Sales) (AdHoc)</td><td class="typical">6</td><td class="bench">£9,075</td><td class="typical">2025-12-18</td><td class="typical">2026-05-13</td></tr>
+<tr><td class="typical">53</td><td>Schryver Restoration</td><td class="typical">21</td><td class="bench">£9,074</td><td class="typical">2022-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">54</td><td>Sloane Winckless</td><td class="typical">15</td><td class="bench">£8,598</td><td class="typical">2022-09-01</td><td class="typical">2023-10-02</td></tr>
+<tr><td class="typical">55</td><td>Sone Marketing</td><td class="typical">6</td><td class="bench">£8,050</td><td class="typical">2026-01-30</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">56</td><td>DK Dental Practice &amp; Lab</td><td class="typical">8</td><td class="bench">£7,930</td><td class="typical">2026-01-22</td><td class="typical">2026-06-02</td></tr>
+<tr><td class="typical">57</td><td>Swinnow Dental</td><td class="typical">7</td><td class="bench">£7,925</td><td class="typical">2025-12-08</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">58</td><td>John Rose Eye Care</td><td class="typical">19</td><td class="bench">£7,917</td><td class="typical">2022-12-12</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">59</td><td>Gillet Flooring (Julie Gillett)</td><td class="typical">8</td><td class="bench">£7,240</td><td class="typical">2025-12-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">60</td><td>X Site Leisure</td><td class="typical">14</td><td class="bench">£6,962</td><td class="typical">2022-09-02</td><td class="typical">2023-10-02</td></tr>
+<tr><td class="typical">61</td><td>D2 KNR Ltd / The Dental Revolution</td><td class="typical">11</td><td class="bench">£6,875</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">62</td><td>The Walton Practice</td><td class="typical">9</td><td class="bench">£6,625</td><td class="typical">2023-02-01</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">63</td><td>Thornbury Dental Wellness Clinic</td><td class="typical">6</td><td class="bench">£6,580</td><td class="typical">2025-11-18</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">64</td><td>Shared Beauty Secrets Ltd</td><td class="typical">10</td><td class="bench">£6,543</td><td class="typical">2022-09-01</td><td class="typical">2023-06-02</td></tr>
+<tr><td class="typical">65</td><td>Abacus Lawrence Group (Ad Hoc)</td><td class="typical">3</td><td class="bench">£6,475</td><td class="typical">2025-09-16</td><td class="typical">2026-01-19</td></tr>
+<tr><td class="typical">66</td><td>Higgins Aquatics</td><td class="typical">12</td><td class="bench">£6,263</td><td class="typical">2022-12-01</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">67</td><td>Smile for Life</td><td class="typical">6</td><td class="bench">£6,080</td><td class="typical">2025-11-18</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">68</td><td>Studio Glide Limited</td><td class="typical">7</td><td class="bench">£6,050</td><td class="typical">2025-12-03</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">69</td><td>Veltuff UK Limited</td><td class="typical">4</td><td class="bench">£6,050</td><td class="typical">2026-04-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">70</td><td>Green Dental &amp; Implant Clinic Limited</td><td class="typical">7</td><td class="bench">£5,922</td><td class="typical">2025-08-01</td><td class="typical">2026-02-01</td></tr>
+<tr><td class="typical">71</td><td>Treat Limited</td><td class="typical">7</td><td class="bench">£5,867</td><td class="typical">2023-02-28</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">72</td><td>SQUAT SUCCESS LIMITED</td><td class="typical">4</td><td class="bench">£5,800</td><td class="typical">2025-11-27</td><td class="typical">2026-02-01</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="footer"><div>Xero sales invoices · paid + authorised · net of VAT</div><div>Clients 49–72 of 156</div></footer>
+</section>
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The full league table · 73–96</p>
+    <table class="data league" style="margin-top: 4mm;">
+      <thead><tr><th style="width:8mm;">#</th><th>Client</th><th class="num">Invoices</th><th class="num">LTV (net)</th><th style="white-space:nowrap;">First invoice</th><th style="white-space:nowrap;">Last invoice</th></tr></thead>
+      <tbody>
+<tr><td class="typical">73</td><td>Rothley Lodge Dental Practice</td><td class="typical">5</td><td class="bench">£5,750</td><td class="typical">2026-01-29</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">74</td><td>R-Dental Ltd</td><td class="typical">7</td><td class="bench">£5,550</td><td class="typical">2025-12-29</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">75</td><td>Woodberry Down Dental Practice</td><td class="typical">7</td><td class="bench">£5,450</td><td class="typical">2026-03-04</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">76</td><td>HRDP Holdings</td><td class="typical">6</td><td class="bench">£5,410</td><td class="typical">2026-01-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">77</td><td>Diamond Smile Beulah Hill</td><td class="typical">8</td><td class="bench">£4,820</td><td class="typical">2025-11-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">78</td><td>Gillett Flooring</td><td class="typical">15</td><td class="bench">£4,814</td><td class="typical">2022-09-01</td><td class="typical">2023-10-18</td></tr>
+<tr><td class="typical">79</td><td>Oxford House - Kana Health Group</td><td class="typical">5</td><td class="bench">£4,710</td><td class="typical">2026-02-05</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">80</td><td>Incollective Limited</td><td class="typical">9</td><td class="bench">£4,404</td><td class="typical">2023-02-01</td><td class="typical">2023-09-01</td></tr>
+<tr><td class="typical">81</td><td>City Stone London</td><td class="typical">2</td><td class="bench">£4,250</td><td class="typical">2025-10-22</td><td class="typical">2026-05-06</td></tr>
+<tr><td class="typical">82</td><td>Oakland Industrial Ltd</td><td class="typical">12</td><td class="bench">£4,119</td><td class="typical">2022-09-01</td><td class="typical">2023-08-02</td></tr>
+<tr><td class="typical">83</td><td>Roundtower Lime (Ireland)</td><td class="typical">15</td><td class="bench">£3,975</td><td class="typical">2022-09-01</td><td class="typical">2023-11-02</td></tr>
+<tr><td class="typical">84</td><td>Imperial Metal Recycling</td><td class="typical">24</td><td class="bench">£3,939</td><td class="typical">2022-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">85</td><td>The Event &amp; Exhibition Beverage Company</td><td class="typical">8</td><td class="bench">£3,750</td><td class="typical">2025-11-17</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">86</td><td>MK Smiles - Kana Health Group</td><td class="typical">5</td><td class="bench">£3,710</td><td class="typical">2026-02-05</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">87</td><td>Oral Healthcare Holdings Ltd</td><td class="typical">4</td><td class="bench">£3,580</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">88</td><td>Edward Byrne - Kana Health Group</td><td class="typical">5</td><td class="bench">£3,210</td><td class="typical">2026-02-05</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">89</td><td>Wilson House - Kana Health Group</td><td class="typical">5</td><td class="bench">£3,210</td><td class="typical">2026-02-05</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">90</td><td>Woburn Sands - Kana Health Group</td><td class="typical">5</td><td class="bench">£3,210</td><td class="typical">2026-02-05</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">91</td><td>SolarFastenUK</td><td class="typical">8</td><td class="bench">£3,135</td><td class="typical">2023-03-23</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">92</td><td>Williams Wood Accountants Ltd - Digital Marketing</td><td class="typical">5</td><td class="bench">£3,120</td><td class="typical">2025-08-20</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">93</td><td>Label Source</td><td class="typical">7</td><td class="bench">£3,096</td><td class="typical">2022-09-30</td><td class="typical">2023-03-31</td></tr>
+<tr><td class="typical">94</td><td>London Metal &amp; Recycling Ltd</td><td class="typical">8</td><td class="bench">£2,975</td><td class="typical">2023-03-06</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">95</td><td>Urban Dental</td><td class="typical">5</td><td class="bench">£2,825</td><td class="typical">2025-08-01</td><td class="typical">2025-12-12</td></tr>
+<tr><td class="typical">96</td><td>West London Industrial Recycling Ltd</td><td class="typical">8</td><td class="bench">£2,767</td><td class="typical">2023-02-09</td><td class="typical">2023-10-03</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="footer"><div>Xero sales invoices · paid + authorised · net of VAT</div><div>Clients 73–96 of 156</div></footer>
+</section>
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The full league table · 97–120</p>
+    <table class="data league" style="margin-top: 4mm;">
+      <thead><tr><th style="width:8mm;">#</th><th>Client</th><th class="num">Invoices</th><th class="num">LTV (net)</th><th style="white-space:nowrap;">First invoice</th><th style="white-space:nowrap;">Last invoice</th></tr></thead>
+      <tbody>
+<tr><td class="typical">97</td><td>Central Metal Waste Ltd</td><td class="typical">23</td><td class="bench">£2,737</td><td class="typical">2022-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">98</td><td>VC Dental Ltd</td><td class="typical">3</td><td class="bench">£2,700</td><td class="typical">2026-05-06</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">99</td><td>Richard Stumpbusters</td><td class="typical">8</td><td class="bench">£2,628</td><td class="typical">2023-03-11</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">100</td><td>MakeSafe Façades</td><td class="typical">1</td><td class="bench">£2,500</td><td class="typical">2025-11-19</td><td class="typical">2025-11-19</td></tr>
+<tr><td class="typical">101</td><td>One Dental Ltd</td><td class="typical">3</td><td class="bench">£2,490</td><td class="typical">2025-08-04</td><td class="typical">2025-10-01</td></tr>
+<tr><td class="typical">102</td><td>Haydon Electrical &amp; Building Services Ltd</td><td class="typical">13</td><td class="bench">£2,331</td><td class="typical">2023-05-16</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">103</td><td>Koi &amp; Water Gardens Ltd</td><td class="typical">2</td><td class="bench">£2,247</td><td class="typical">2023-09-03</td><td class="typical">2023-10-03</td></tr>
+<tr><td class="typical">104</td><td>MJ Interiors</td><td class="typical">10</td><td class="bench">£2,076</td><td class="typical">2023-02-03</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">105</td><td>Rosemor International Ltd</td><td class="typical">1</td><td class="bench">£1,770</td><td class="typical">2022-10-31</td><td class="typical">2022-10-31</td></tr>
+<tr><td class="typical">106</td><td>Pamper Paws Ltd</td><td class="typical">3</td><td class="bench">£1,767</td><td class="typical">2023-08-03</td><td class="typical">2023-10-03</td></tr>
+<tr><td class="typical">107</td><td>Sunny Dental - SS Clinical Limited</td><td class="typical">1</td><td class="bench">£1,750</td><td class="typical">2026-02-16</td><td class="typical">2026-02-16</td></tr>
+<tr><td class="typical">108</td><td>Revive Heat Ltd</td><td class="typical">14</td><td class="bench">£1,746</td><td class="typical">2023-02-06</td><td class="typical">2026-04-01</td></tr>
+<tr><td class="typical">109</td><td>John Rose</td><td class="typical">5</td><td class="bench">£1,720</td><td class="typical">2022-09-01</td><td class="typical">2022-12-01</td></tr>
+<tr><td class="typical">110</td><td>JR Aqua Landscapes</td><td class="typical">11</td><td class="bench">£1,533</td><td class="typical">2022-09-01</td><td class="typical">2023-06-02</td></tr>
+<tr><td class="typical">111</td><td>Harry's Quads N Castles</td><td class="typical">8</td><td class="bench">£1,531</td><td class="typical">2023-02-28</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">112</td><td>Cheam Village Dental Studios / K&amp;D Patel Ltd</td><td class="typical">2</td><td class="bench">£1,300</td><td class="typical">2026-04-02</td><td class="typical">2026-06-08</td></tr>
+<tr><td class="typical">113</td><td>Hire A Loo</td><td class="typical">8</td><td class="bench">£1,270</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">114</td><td>CD Clinic Ltd</td><td class="typical">2</td><td class="bench">£1,050</td><td class="typical">2026-05-06</td><td class="typical">2026-05-25</td></tr>
+<tr><td class="typical">115</td><td>Aunty Esme's</td><td class="typical">24</td><td class="bench">£995</td><td class="typical">2022-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">116</td><td>Suna Communication</td><td class="typical">24</td><td class="bench">£946</td><td class="typical">2022-09-02</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">117</td><td>Williams Wood Accountants Limited</td><td class="typical">3</td><td class="bench">£900</td><td class="typical">2026-04-02</td><td class="typical">2026-06-02</td></tr>
+<tr><td class="typical">118</td><td>Diamond Smile</td><td class="typical">1</td><td class="bench">£884</td><td class="typical">2023-10-18</td><td class="typical">2023-10-18</td></tr>
+<tr><td class="typical">119</td><td>Use Brandable Ltd</td><td class="typical">6</td><td class="bench">£882</td><td class="typical">2022-09-05</td><td class="typical">2023-06-01</td></tr>
+<tr><td class="typical">120</td><td>JD Denture Clinic</td><td class="typical">12</td><td class="bench">£812</td><td class="typical">2023-05-17</td><td class="typical">2026-04-01</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="footer"><div>Xero sales invoices · paid + authorised · net of VAT</div><div>Clients 97–120 of 156</div></footer>
+</section>
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The full league table · 121–144</p>
+    <table class="data league" style="margin-top: 4mm;">
+      <thead><tr><th style="width:8mm;">#</th><th>Client</th><th class="num">Invoices</th><th class="num">LTV (net)</th><th style="white-space:nowrap;">First invoice</th><th style="white-space:nowrap;">Last invoice</th></tr></thead>
+      <tbody>
+<tr><td class="typical">121</td><td>Total Production Movement</td><td class="typical">10</td><td class="bench">£809</td><td class="typical">2022-09-01</td><td class="typical">2023-05-02</td></tr>
+<tr><td class="typical">122</td><td>ClickTech Solutions Ltd</td><td class="typical">3</td><td class="bench">£773</td><td class="typical">2026-05-06</td><td class="typical">2026-05-06</td></tr>
+<tr><td class="typical">123</td><td>Window Genies</td><td class="typical">14</td><td class="bench">£739</td><td class="typical">2022-08-31</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">124</td><td>Oakshot Contracting</td><td class="typical">2</td><td class="bench">£736</td><td class="typical">2023-02-10</td><td class="typical">2023-05-01</td></tr>
+<tr><td class="typical">125</td><td>Ad Heat Ltd</td><td class="typical">3</td><td class="bench">£735</td><td class="typical">2023-03-01</td><td class="typical">2023-05-01</td></tr>
+<tr><td class="typical">126</td><td>Sunray Motors</td><td class="typical">23</td><td class="bench">£589</td><td class="typical">2022-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">127</td><td>One Dental</td><td class="typical">1</td><td class="bench">£589</td><td class="typical">2023-08-21</td><td class="typical">2023-08-21</td></tr>
+<tr><td class="typical">128</td><td>Quattro Barbers</td><td class="typical">18</td><td class="bench">£576</td><td class="typical">2022-11-23</td><td class="typical">2026-05-01</td></tr>
+<tr><td class="typical">129</td><td>Greener Glaze &amp; Construction</td><td class="typical">15</td><td class="bench">£571</td><td class="typical">2022-09-01</td><td class="typical">2023-10-02</td></tr>
+<tr><td class="typical">130</td><td>Pine Dental T/A Pine Belmont Limited</td><td class="typical">1</td><td class="bench">£500</td><td class="typical">2025-08-01</td><td class="typical">2025-08-01</td></tr>
+<tr><td class="typical">131</td><td>Abby Wood Stylist</td><td class="typical">14</td><td class="bench">£479</td><td class="typical">2022-09-01</td><td class="typical">2023-10-02</td></tr>
+<tr><td class="typical">132</td><td>AJ Building Group / JRT</td><td class="typical">10</td><td class="bench">£477</td><td class="typical">2023-01-11</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">133</td><td>Granger Jackson</td><td class="typical">11</td><td class="bench">£440</td><td class="typical">2025-08-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">134</td><td>Edge Dental</td><td class="typical">10</td><td class="bench">£400</td><td class="typical">2025-09-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">135</td><td>Mitchell Jenkins / MJ Interiors Ltd</td><td class="typical">8</td><td class="bench">£398</td><td class="typical">2025-10-01</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">136</td><td>Top Talent Promotions</td><td class="typical">7</td><td class="bench">£352</td><td class="typical">2023-02-13</td><td class="typical">2023-10-02</td></tr>
+<tr><td class="typical">137</td><td>Bob the Coach</td><td class="typical">1</td><td class="bench">£300</td><td class="typical">2025-08-01</td><td class="typical">2025-08-01</td></tr>
+<tr><td class="typical">138</td><td>SkyBuild</td><td class="typical">7</td><td class="bench">£280</td><td class="typical">2025-12-05</td><td class="typical">2026-06-02</td></tr>
+<tr><td class="typical">139</td><td>Vivek Shah</td><td class="typical">14</td><td class="bench">£272</td><td class="typical">2022-09-01</td><td class="typical">2023-10-01</td></tr>
+<tr><td class="typical">140</td><td>Clear It Up Waste Management</td><td class="typical">4</td><td class="bench">£263</td><td class="typical">2022-09-01</td><td class="typical">2022-12-01</td></tr>
+<tr><td class="typical">141</td><td>Rastan Stumpbusters</td><td class="typical">2</td><td class="bench">£245</td><td class="typical">2023-09-11</td><td class="typical">2023-10-02</td></tr>
+<tr><td class="typical">142</td><td>LB Roofing Specialists Ltd</td><td class="typical">1</td><td class="bench">£209</td><td class="typical">2023-03-07</td><td class="typical">2023-03-07</td></tr>
+<tr><td class="typical">143</td><td>TD Asbestos Removal</td><td class="typical">1</td><td class="bench">£162</td><td class="typical">2022-09-02</td><td class="typical">2022-09-02</td></tr>
+<tr><td class="typical">144</td><td>Street Food Union Ltd</td><td class="typical">4</td><td class="bench">£160</td><td class="typical">2025-10-01</td><td class="typical">2026-01-01</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="footer"><div>Xero sales invoices · paid + authorised · net of VAT</div><div>Clients 121–144 of 156</div></footer>
+</section>
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">The full league table · 145–156</p>
+    <table class="data league" style="margin-top: 4mm;">
+      <thead><tr><th style="width:8mm;">#</th><th>Client</th><th class="num">Invoices</th><th class="num">LTV (net)</th><th style="white-space:nowrap;">First invoice</th><th style="white-space:nowrap;">Last invoice</th></tr></thead>
+      <tbody>
+<tr><td class="typical">145</td><td>Advantage Concrete</td><td class="typical">5</td><td class="bench">£137</td><td class="typical">2023-07-06</td><td class="typical">2026-06-01</td></tr>
+<tr><td class="typical">146</td><td>Think Gardeners</td><td class="typical">14</td><td class="bench">£134</td><td class="typical">2022-09-02</td><td class="typical">2023-10-02</td></tr>
+<tr><td class="typical">147</td><td>Sonia McCarthy</td><td class="typical">1</td><td class="bench">£74</td><td class="typical">2022-12-05</td><td class="typical">2022-12-05</td></tr>
+<tr><td class="typical">148</td><td>Widcombe Practice Ltd</td><td class="typical">1</td><td class="bench">£60</td><td class="typical">2026-06-09</td><td class="typical">2026-06-09</td></tr>
+<tr><td class="typical">149</td><td>Court Drive Dental</td><td class="typical">1</td><td class="bench">£50</td><td class="typical">2026-05-07</td><td class="typical">2026-05-07</td></tr>
+<tr><td class="typical">150</td><td>Hollyhedge Dental</td><td class="typical">1</td><td class="bench">£50</td><td class="typical">2026-05-07</td><td class="typical">2026-05-07</td></tr>
+<tr><td class="typical">151</td><td>Kiara Smiles Limited / The Dental Edit</td><td class="typical">1</td><td class="bench">£50</td><td class="typical">2026-02-24</td><td class="typical">2026-02-24</td></tr>
+<tr><td class="typical">152</td><td>R-Health Ltd</td><td class="typical">1</td><td class="bench">£50</td><td class="typical">2026-05-22</td><td class="typical">2026-05-22</td></tr>
+<tr><td class="typical">153</td><td>Stoke Bishop Dental Centre</td><td class="typical">1</td><td class="bench">£50</td><td class="typical">2026-06-10</td><td class="typical">2026-06-10</td></tr>
+<tr><td class="typical">154</td><td>Lighter Work Electrical Ltd</td><td class="typical">2</td><td class="bench">£49</td><td class="typical">2022-09-01</td><td class="typical">2023-06-11</td></tr>
+<tr><td class="typical">155</td><td>Katherine Richards Design</td><td class="typical">1</td><td class="bench">£39</td><td class="typical">2022-10-28</td><td class="typical">2022-10-28</td></tr>
+<tr><td class="typical">156</td><td>JPW Solutions</td><td class="typical">2</td><td class="bench">£29</td><td class="typical">2022-09-01</td><td class="typical">2022-10-01</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="footer"><div>Xero sales invoices · paid + authorised · net of VAT</div><div>Clients 145–156 of 156</div></footer>
+</section>
+
+<section class="page">
+  <header class="header">
+    <div class="wordmark">Vendo<span class="dot">.</span></div>
+    <div class="header-meta"></div>
+  </header>
+  <div class="body-zone">
+    <p class="eyebrow">Observations + method</p>
+    <h2 class="headline">What the table <em class="mint">says</em>.</h2>
+
+    <div style="margin-top: 8mm; display:flex; flex-direction:column; gap: 4mm;">
+      <div class="card" style="padding: 5mm 8mm;">
+        <p class="label" style="margin-bottom:3mm;">01 — The dental cohort is mid-table and climbing</p>
+        <p class="body-line" style="font-size:10.5pt; line-height:1.5;">Most clients onboarded since August 2025 sit in the £10–27k range and are still active — their LTVs are unfinished numbers. The current book is young.</p>
+      </div>
+      <div class="card" style="padding: 5mm 8mm;">
+        <p class="label" style="margin-bottom:3mm;">02 — Tenure beats ticket size</p>
+        <p class="body-line" style="font-size:10.5pt; line-height:1.5;">Vulcan Cladding, Kane Construction and London Property Preservation bill modest monthly amounts but have 3.5+ years of tenure — all three sit comfortably in the top twelve.</p>
+      </div>
+      <div class="card" style="padding: 5mm 8mm;">
+        <p class="label" style="margin-bottom:3mm;">03 — The book collects well</p>
+        <p class="body-line" style="font-size:10.5pt; line-height:1.5;">Total outstanding across all 156 clients is roughly £9.7k. The largest single balance is Access Platform Sales at £4,050.</p>
+      </div>
+      <div class="card" style="padding: 5mm 8mm;">
+        <p class="label" style="margin-bottom:3mm;">04 — Blended vs median is the gap to watch</p>
+        <p class="body-line" style="font-size:10.5pt; line-height:1.5;">Blended LTV £8,634 · median £4,814. Every new client retained past month twelve pulls the median towards the blend.</p>
+      </div>
+    </div>
+
+    <div style="margin: 8mm 0 6mm 0; height: 0.5pt; background: var(--rule);"></div>
+
+    <p class="eyebrow" style="font-size:9pt;">Method</p>
+    <p class="body-line muted" style="font-size:10pt; line-height:1.55; max-width:165mm;">
+      Source: Xero sales invoices (ACCREC), statuses PAID and AUTHORISED, net of VAT. Voided, deleted and draft invoices excluded.
+      Period: 31 August 2022 to 10 June 2026, synced 10 June 2026.
+      LTV = sum of invoice subtotals per Xero contact. Blended LTV = total lifetime revenue ÷ number of billed contacts.
+      EUR converted at €1 = £0.85 for blended figures; EUR rows shown in € in the league table.
+    </p>
+
+    <p class="it" style="color:var(--muted); font-size:11pt; margin-top:auto; padding-top: 6mm; text-align:center;">
+      Generated from the Vendo OS · outputs/analyses/2026-06-10-client-ltv.md holds the working data.
+    </p>
+  </div>
+  <footer class="footer"><div>Vendo Digital · Finance Intelligence</div><div>June 2026</div></footer>
+</section>
+
+</div>
+</body></html>
