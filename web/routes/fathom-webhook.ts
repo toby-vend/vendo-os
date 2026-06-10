@@ -8,6 +8,7 @@ import { classifyMeeting } from '../lib/classification/meeting-classifier.js';
 import { logRoutingDecision } from '../lib/classification/router.js';
 import { postDirectorActionItems, dmTobyFailsafe } from '../lib/classification/slack.js';
 import { parseActionItems } from '../lib/jobs/sync-actions-to-asana.js';
+import { extractActionItems } from '../lib/action-items.js';
 
 /**
  * Fathom Webhook Handler
@@ -392,6 +393,12 @@ async function upsertMeeting(meeting: MeetingPayload): Promise<void> {
       meeting.calendar_invitees_domains_type || null,
     ],
   });
+
+  // Persist parsed action items — narrative-context (client reports) and the
+  // query tooling read from action_items, not raw_action_items. Extraction
+  // used to live only in the local process-meetings script, so the table
+  // silently went stale when the webhook became the sync path.
+  await extractActionItems(id, actionItems, meeting.created_at);
 
   await db.execute({
     sql: 'DELETE FROM meetings_fts WHERE rowid = (SELECT rowid FROM meetings WHERE id = ?)',
