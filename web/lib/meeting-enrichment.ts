@@ -203,7 +203,7 @@ async function buildMatchContextFromTurso(): Promise<MatchContext> {
   };
 }
 
-async function getMatchContext(): Promise<MatchContext> {
+export async function getMatchContext(): Promise<MatchContext> {
   const now = Date.now();
   if (_cachedContext && now - _cachedContext.builtAt < CONTEXT_TTL_MS) {
     return _cachedContext.context;
