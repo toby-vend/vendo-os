@@ -64,6 +64,39 @@ interface MeetingRow {
   invitee_domains_type: string | null;
 }
 
+/** Normalise for canonical-name comparison (mirrors build-match-context). */
+function normForCompare(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\b(ltd|limited|llp|plc|inc|uk|t\/a)\b/g, '')
+    .replace(/\(.*?\)/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Resolve a matched name to the canonical clients.name. Some strategies
+ * (attendee_name, GHL-derived lookups) return near-miss names like
+ * "Thornbury Dental Wellness" for the client "Thornbury Dental Wellness
+ * Clinic" — reports link meetings by exact clients.name, so a near-miss is
+ * as bad as no match. Exact match wins; otherwise a unique prefix-normalised
+ * match; otherwise keep the original.
+ */
+async function canonicaliseClientName(name: string): Promise<string> {
+  const exact = await rows<{ name: string }>(`SELECT name FROM clients WHERE name = ? LIMIT 1`, [name]);
+  if (exact.length) return name;
+
+  const all = await rows<{ name: string }>(`SELECT name FROM clients`);
+  const target = normForCompare(name);
+  if (!target) return name;
+  const hits = all.filter(c => {
+    const cn = normForCompare(c.name);
+    return cn === target || cn.startsWith(`${target} `) || target.startsWith(`${cn} `);
+  });
+  return hits.length === 1 ? hits[0].name : name;
+}
+
 async function main() {
   const dateFilter = ALL ? '' : "AND date >= date('now', '-90 days')";
   const meetings = await rows<MeetingRow>(
@@ -126,10 +159,13 @@ async function main() {
       continue;
     }
 
+    const canonicalName = await canonicaliseClientName(result.client_name);
+
     matched++;
     console.log(
-      `  ✓ ${m.date.slice(0, 10)} "${m.title}" → ${result.client_name} ` +
-      `[${result.method}/${result.confidence}]`,
+      `  ✓ ${m.date.slice(0, 10)} "${m.title}" → ${canonicalName} ` +
+      `[${result.method}/${result.confidence}]` +
+      (canonicalName !== result.client_name ? ` (canonicalised from "${result.client_name}")` : ''),
     );
     if (!DRY_RUN) {
       await db.execute({
@@ -138,7 +174,7 @@ async function main() {
                   needs_review = ?
               WHERE id = ? AND (client_name IS NULL OR length(trim(client_name)) = 0)`,
         args: [
-          result.client_name,
+          canonicalName,
           result.method,
           result.confidence,
           result.confidence === 'high' ? 0 : 1,
