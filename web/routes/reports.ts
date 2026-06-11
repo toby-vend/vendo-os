@@ -37,6 +37,7 @@ import {
   reopenReport,
   deleteReport,
   listActiveClientsForReports,
+  latestClientContactName,
   PLATFORM_OPTIONS,
   CHANNEL_OPTIONS,
   CHANNEL_PLATFORMS,
@@ -231,6 +232,17 @@ export const reportsUiRoutes: FastifyPluginAsync = async (app) => {
     const report = await getReport(id);
     if (!report) return reply.code(404).send('Not found');
     const screenshots = await listScreenshots(id);
+
+    // Backfill the contact name from the client's most recent report — covers
+    // reports created (e.g. by the monthly cron) before a name had been saved
+    // anywhere for this client.
+    if (!report.contact_name.trim()) {
+      const inherited = await latestClientContactName(report.client_id, id);
+      if (inherited) {
+        await updateNarrative(id, { contactName: inherited });
+        report.contact_name = inherited;
+      }
+    }
 
     // Fathom calls for this client + period — shown in the AI insights
     // section so the team can see exactly which calls feed generation

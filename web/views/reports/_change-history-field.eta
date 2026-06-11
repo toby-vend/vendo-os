@@ -3,7 +3,7 @@
           rows="8"
           placeholder="2026-05-03  Budget increased on General Dentistry  £40 → £55/day&#10;2026-05-12  Added 14 negative keywords to Clear Aligners&#10;2026-05-19  Paused underperforming ad group…"
           hx-post="/api/reports/<%= it.report.id %>/narrative"
-          hx-trigger="blur changed delay:500ms"
+          hx-trigger="input changed delay:1s, blur changed"
           hx-swap="none"
 ><%= it.report.change_history %></textarea>
 <% if (it.note) { %>

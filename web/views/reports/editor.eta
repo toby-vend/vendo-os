@@ -112,7 +112,7 @@
            maxlength="100"
            style="max-width: 320px;"
            hx-post="/api/reports/<%= it.report.id %>/narrative"
-           hx-trigger="blur changed delay:500ms"
+           hx-trigger="input changed delay:600ms, blur changed"
            hx-swap="none" />
   </section>
 
@@ -211,7 +211,7 @@
               rows="8"
               placeholder="- Launched the new high-intent search campaign on May 3rd…&#10;- Refreshed Meta creatives — 6 new variants live"
               hx-post="/api/reports/<%= it.report.id %>/narrative"
-              hx-trigger="blur changed delay:500ms"
+              hx-trigger="input changed delay:1s, blur changed"
               hx-swap="none"
     ><%= it.report.worked_on_md %></textarea>
   </section>
@@ -227,7 +227,7 @@
               rows="8"
               placeholder="- Test broad-match expansion on Google Ads&#10;- Brief two new UGC creators for Meta"
               hx-post="/api/reports/<%= it.report.id %>/narrative"
-              hx-trigger="blur changed delay:500ms"
+              hx-trigger="input changed delay:1s, blur changed"
               hx-swap="none"
     ><%= it.report.focus_next_md %></textarea>
   </section>
@@ -258,9 +258,11 @@
               hx-swap="outerHTML"
               hx-indicator="#r-generate-spinner">
         <span class="r-generate-label"><%= it.report.ai_generated_at ? 'Regenerate' : 'Generate' %></span>
-        <span id="r-generate-spinner" class="htmx-indicator">…thinking</span>
+        <span id="r-generate-spinner" class="htmx-indicator">Generating… (~30s, keep this tab open)</span>
       </button>
     </header>
+
+    <div id="r-generate-error"></div>
 
     <%~ include('/reports/_ai-blocks', { report: it.report }) %>
   </section>
@@ -313,6 +315,71 @@
         }
         // For other 4xx/5xx, the response body is already swapped into errBox by hx-target-{4xx,5xx}.
       }
+    });
+  })();
+
+  // Failed requests are invisible by default — htmx 2.x doesn't swap 4xx/5xx
+  // responses, so a failed Generate or background save just looked like the
+  // button "doing nothing". Surface every failure: generation errors go into
+  // the chip under the AI insights header; save failures turn the header
+  // flash red so people know their edits did NOT persist.
+  (function(){
+    var genErr = document.getElementById('r-generate-error');
+    var genBtn = document.getElementById('r-generate-btn');
+
+    function isGenerate(elt){
+      return !!(elt && elt.getAttribute &&
+        /\/(generate|pull-google-ads)$/.test(elt.getAttribute('hx-post') || ''));
+    }
+
+    function showSaveFailed(){
+      var f = document.getElementById('r-save-flash');
+      if (!f) return;
+      f.textContent = 'Save failed — retrying on your next edit';
+      f.style.color = '#F87171';
+      f.style.opacity = '1';
+      clearTimeout(window._rSaveTimer);
+      window._rSaveTimer = setTimeout(function(){ f.style.opacity = '0'; }, 5000);
+    }
+
+    function showGenerateError(html){
+      if (genErr) genErr.innerHTML = html;
+    }
+
+    document.body.addEventListener('htmx:responseError', function(evt){
+      var elt = evt.detail.elt;
+      if (elt && elt.closest && elt.closest('#r-upload-form')) return; // upload handles its own
+      var xhr = evt.detail.xhr;
+      if (isGenerate(elt)) {
+        if (xhr && xhr.responseText && xhr.responseText.indexOf('r-error') !== -1) {
+          showGenerateError(xhr.responseText);
+        } else if (xhr && xhr.status === 403) {
+          showGenerateError('<div class="r-error">Your session has expired or you lack access. Refresh the page and sign in again, then retry.</div>');
+        } else {
+          showGenerateError('<div class="r-error">Generation failed (HTTP ' + (xhr ? xhr.status : '?') + '). Try again in a minute.</div>');
+        }
+      } else {
+        showSaveFailed();
+      }
+    });
+
+    document.body.addEventListener('htmx:sendError', function(evt){
+      var elt = evt.detail.elt;
+      if (elt && elt.closest && elt.closest('#r-upload-form')) return;
+      if (isGenerate(elt)) {
+        showGenerateError('<div class="r-error">Network error. The report may still be generating on the server — wait a minute, refresh the page to check, then retry if needed.</div>');
+      } else {
+        showSaveFailed();
+      }
+    });
+
+    document.body.addEventListener('htmx:beforeRequest', function(evt){
+      if (!isGenerate(evt.detail.elt)) return;
+      if (genErr) genErr.innerHTML = '';
+      if (genBtn) genBtn.disabled = true;
+    });
+    document.body.addEventListener('htmx:afterRequest', function(evt){
+      if (isGenerate(evt.detail.elt) && genBtn) genBtn.disabled = false;
     });
   })();
 </script>

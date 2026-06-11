@@ -242,14 +242,35 @@ export async function createReport(params: {
   periodEnd: string;     // YYYY-MM-DD
   createdBy: string;
 }): Promise<number> {
+  // contact_name is inherited from the client's most recent report so the
+  // team only ever types the contact's first name once per client.
   const result = await db.execute({
     sql: `INSERT INTO client_reports
-            (client_id, channel, period_label, period_start, period_end, created_by)
-          VALUES (?, ?, ?, ?, ?, ?)
+            (client_id, channel, period_label, period_start, period_end, created_by, contact_name)
+          VALUES (?, ?, ?, ?, ?, ?, COALESCE((
+            SELECT contact_name FROM client_reports
+            WHERE client_id = ? AND TRIM(contact_name) <> ''
+            ORDER BY updated_at DESC LIMIT 1
+          ), ''))
           RETURNING id`,
-    args: [params.clientId, params.channel, params.periodLabel, params.periodStart, params.periodEnd, params.createdBy],
+    args: [params.clientId, params.channel, params.periodLabel, params.periodStart, params.periodEnd, params.createdBy, params.clientId],
   });
   return Number(result.rows[0].id);
+}
+
+/**
+ * The most recently saved contact name across a client's reports (excluding
+ * the given report). Used to backfill reports created before a name was
+ * known — e.g. the monthly cron drafts — when the editor opens them.
+ */
+export async function latestClientContactName(clientId: number, excludeReportId: number): Promise<string | null> {
+  const name = await scalar<string>(
+    `SELECT contact_name FROM client_reports
+     WHERE client_id = ? AND id != ? AND TRIM(contact_name) <> ''
+     ORDER BY updated_at DESC LIMIT 1`,
+    [clientId, excludeReportId],
+  );
+  return name && name.trim() ? name : null;
 }
 
 export async function findReport(

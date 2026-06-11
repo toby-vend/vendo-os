@@ -2,7 +2,7 @@
   <% if (!it.report.ai_generated_at) { %>
     <p class="r-muted r-ai-empty">No AI insights generated yet. Click <strong>Generate</strong> above once you've added screenshots and narrative.</p>
   <% } else { %>
-    <p class="r-muted" style="font-size: 12px; margin-bottom: 1rem;">Generated <%= it.report.ai_generated_at.slice(0,16).replace('T',' ') %> · edit any block; changes save on blur.</p>
+    <p class="r-muted" style="font-size: 12px; margin-bottom: 1rem;">Generated <%= it.report.ai_generated_at.slice(0,16).replace('T',' ') %> · edit any block; changes save automatically as you type.</p>
   <% } %>
 
   <% var blocks = [
@@ -21,7 +21,7 @@
                 rows="<%= b.rows %>"
                 placeholder="<%= it.report.ai_generated_at ? '' : 'Will be generated…' %>"
                 hx-post="/api/reports/<%= it.report.id %>/ai/<%= b.key %>"
-                hx-trigger="blur changed delay:500ms"
+                hx-trigger="input changed delay:1s, blur changed"
                 hx-swap="none"
       ><%= b.value %></textarea>
     </div>
