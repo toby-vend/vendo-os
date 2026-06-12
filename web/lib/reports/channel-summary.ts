@@ -151,6 +151,9 @@ function renderMeta(
     }
   }
   lines.push('');
+  if (active.some(c => (c.name ?? '').includes('[Old account:'))) {
+    lines.push('NOTE: campaigns prefixed "[Old account: …]" ran on the legacy pre-consolidation ad accounts. Keep a "(legacy account)" tag on those rows in the performance table and briefly note in the report that these are the old accounts — do NOT strip this distinction when cleaning campaign names.');
+  }
   lines.push('Campaigns (bottom-funnel — exclude vanity metrics):');
   for (const c of active) {
     lines.push('');
