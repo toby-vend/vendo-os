@@ -106,6 +106,7 @@ function renderMeta(
   currency: string,
   metaPurchases: MetaPurchases | null,
   platformLeads: Array<{ name: string | null; leads: number; spend: number }> = [],
+  dentalLeads = false,
 ): { text: string; hasData: boolean } {
   const money = moneyIn(currency);
   const spend = tile(block.topline, 'spend');
@@ -141,7 +142,9 @@ function renderMeta(
   const totalPlatformLeads = platformLeads.reduce((s, p) => s + p.leads, 0);
   if (totalPlatformLeads > 0) {
     lines.push('');
-    lines.push('Meta-reported leads (platform lead forms/pixel). When the CRM lead counts above are 0 or missing, use these as the lead numbers:');
+    lines.push(dentalLeads
+      ? 'Meta-reported leads (lead forms + View Content — View Content IS the lead metric for this client; never report it separately or as missing). Use these as the campaign lead figures in the performance breakdown:'
+      : 'Meta-reported leads (platform lead forms/pixel). When the CRM lead counts above are 0 or missing, use these as the lead numbers:');
     lines.push(`- Total: ${num(totalPlatformLeads)} leads, CPL ${money((spend?.value ?? 0) / totalPlatformLeads)}`);
     for (const p of platformLeads) {
       lines.push(`- ${p.name ?? '(unnamed campaign)'}: ${num(p.leads)} leads, CPL ${money(p.spend / p.leads)}`);
@@ -255,11 +258,20 @@ export async function buildChannelSummary(
     // Platform-reported leads (lead forms / pixel) from the actions JSON —
     // the fallback when the CRM has no Paid Social opportunities for the
     // period (e.g. clients migrated off GHL, or the GHL sync is down).
+    // Dental rule: the Meta conversion event for dental clients is View
+    // Content, and View Content IS the lead metric — so view_content actions
+    // count as leads alongside form leads. For everyone else (ecommerce etc.)
+    // a content view is a product view, not a lead.
+    const vertical = await rows<{ vertical: string | null }>(
+      'SELECT vertical FROM clients WHERE id = ?', [clientId],
+    );
+    const isDental = (vertical[0]?.vertical ?? '').toLowerCase() === 'dental';
+    const leadActions = isDental ? `('lead', 'view_content')` : `('lead')`;
     let platformLeads: Array<{ name: string | null; leads: number; spend: number }> = [];
     try {
       platformLeads = await rows<{ name: string | null; leads: number; spend: number }>(
         `SELECT mi.campaign_name AS name,
-                COALESCE(SUM(CASE WHEN json_extract(je.value, '$.action_type') = 'lead'
+                COALESCE(SUM(CASE WHEN json_extract(je.value, '$.action_type') IN ${leadActions}
                                   THEN CAST(json_extract(je.value, '$.value') AS REAL) ELSE 0 END), 0) AS leads,
                 COALESCE(SUM(mi.spend), 0) AS spend
            FROM meta_insights mi
@@ -282,7 +294,7 @@ export async function buildChannelSummary(
     const metaPurchases = (extra[0]?.value ?? 0) > 0
       ? { purchases: extra[0].purchases, value: extra[0].value }
       : null;
-    const { text, hasData } = renderMeta(block, currency, metaPurchases, platformLeads);
+    const { text, hasData } = renderMeta(block, currency, metaPurchases, platformLeads, isDental);
     return { channel, label, hasData, canonicalText: hasData ? text : '' };
   }
 
