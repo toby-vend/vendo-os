@@ -353,8 +353,10 @@
       if (isGenerate(elt)) {
         if (xhr && xhr.responseText && xhr.responseText.indexOf('r-error') !== -1) {
           showGenerateError(xhr.responseText);
+        } else if (xhr && xhr.status === 401) {
+          showGenerateError('<div class="r-error">Your session has expired. Refresh the page and sign in again, then retry.</div>');
         } else if (xhr && xhr.status === 403) {
-          showGenerateError('<div class="r-error">Your session has expired or you lack access. Refresh the page and sign in again, then retry.</div>');
+          showGenerateError('<div class="r-error">You don\'t have access to do this. Ask an admin to check your Reports access, then refresh and retry.</div>');
         } else {
           showGenerateError('<div class="r-error">Generation failed (HTTP ' + (xhr ? xhr.status : '?') + '). Try again in a minute.</div>');
         }

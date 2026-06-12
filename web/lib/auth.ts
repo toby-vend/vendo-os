@@ -130,7 +130,13 @@ const ROUTE_MAP: [string, string][] = [
   ['/operations', 'operations'],
   ['/onboarding', 'clients'],
   ['/video-production', 'video-production'],
+  // The reports editor posts to /api/reports/* (HTMX mutations). Both prefixes
+  // must map to the same slug or standard users with Reports access can view
+  // the editor but every action in it is 403'd by the deny-by-default gate.
   ['/reports', 'reports'],
+  ['/api/reports', 'reports'],
+  // Alert ack/resolve buttons on the health dashboard post here.
+  ['/api/alerts', 'dashboards'],
 ];
 
 export function getRouteSlug(url: string): string | null {
