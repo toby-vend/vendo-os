@@ -203,15 +203,21 @@ async function main() {
         console.warn(`WARN ${accountName}: campaign spend sum ${sum.toFixed(2)} vs account total ${allRow.spend.toFixed(2)} (diff ${diff.toFixed(2)})`);
         if (diff > 0) {
           const impSum = campaigns.reduce((s, c) => s + c.impressions, 0);
+          const leadSum = campaigns.reduce((s, c) => s + (c.leads ?? 0), 0);
+          const cvSum = campaigns.reduce((s, c) => s + (c.contentViews ?? 0), 0);
+          const leadDiff = Math.max(0, (allRow.leads ?? 0) - leadSum);
+          const cvDiff = Math.max(0, (allRow.contentViews ?? 0) - cvSum);
           campaigns = [...campaigns, {
             ...allRow,
             campaign: 'Other campaigns (not broken out in export)',
             spend: diff,
             impressions: Math.max(0, allRow.impressions - impSum),
-            purchaseValue: null, contentViews: null, leads: null,
+            leads: leadDiff > 0 ? leadDiff : null,
+            contentViews: cvDiff > 0 ? cvDiff : null,
+            purchaseValue: null,
             costPerPurchase: null, frequency: null, ctr: null, cpm: null,
           }];
-          console.log(`  → added remainder row for ${accountName}: ${diff.toFixed(2)}`);
+          console.log(`  → added remainder row for ${accountName}: ${diff.toFixed(2)} spend, ${leadDiff} leads, ${cvDiff} content views`);
         }
       }
     }
