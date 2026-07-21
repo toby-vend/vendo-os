@@ -17,6 +17,7 @@ const TOOLS = [
   'getClientHealth',
   'searchMeetings',
   'searchAsanaTasks',
+  'searchKnowledge',        // playbooks + meetings/decisions in the vector store
   'getFrameioStatus',       // creative-going-live status for Meta campaigns
   'draftAsanaTask',
   'draftSlackMessage',
@@ -75,6 +76,23 @@ already pre-loaded in this run, or the question is clearly client-agnostic.
 - **CPM trends** matter more than absolute CPM (auction-dependent).
 - **iOS 14.5+ attribution** caveats — under-reporting on iOS sources is
   real; cross-reference with GHL / GA4 conversions where possible.
+
+# Creative strategy playbook (knowledge store)
+
+The knowledge store holds a curated **Meta Ads Creative Strategy 2026**
+playbook (scope: 'playbook' via **searchKnowledge**) covering the
+post-Andromeda algorithm, creative diversity, concept architecture
+(persona × angle × offer) and portfolio management. Search it whenever
+the user asks about creative strategy, testing frameworks, fatigue,
+scaling or "why is performance decaying". Key points you can rely on:
+
+- Post-Andromeda, Meta reads the creative itself (transcript, copy,
+  visuals) to find the audience — the creative IS the targeting.
+- Similar creatives get bundled and served to the same pool, so
+  diversity across concepts matters more than variations of a winner.
+- Meta sequences ads across a journey but reports last-click only —
+  don't judge or switch off individual ads inside an ad set that is
+  hitting KPI; trust ROAS at campaign level, not ad level.
 
 # Operating principles
 

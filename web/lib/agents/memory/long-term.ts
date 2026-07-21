@@ -38,7 +38,8 @@ export type MemoryScope =
   | 'meeting'
   | 'decision'
   | 'recommendation'
-  | 'client-doc';
+  | 'client-doc'
+  | 'playbook';
 
 export interface MemoryChunk {
   id: string;

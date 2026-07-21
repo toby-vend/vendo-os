@@ -12,7 +12,7 @@ import type { ToolCtx } from '../types.js';
 const inputSchema = z.object({
   query: z.string().min(2),
   scope: z
-    .enum(['meeting', 'decision', 'recommendation', 'client-doc', 'all'])
+    .enum(['meeting', 'decision', 'recommendation', 'client-doc', 'playbook', 'all'])
     .default('all'),
   limit: z.number().int().min(1).max(20).default(8),
   /**
@@ -41,7 +41,7 @@ export const searchKnowledge = (ctx: ToolCtx) =>
     {
       name: 'searchKnowledge',
       description:
-        'Search the vector knowledge store of meeting summaries, decisions, and approved recommendations. Returns up to 8 semantically-relevant hits. Pass `clientId` to restrict to one client.',
+        'Search the vector knowledge store of meeting summaries, decisions, approved recommendations, and playbooks (curated strategy/reference material, e.g. Meta creative strategy). Returns up to 8 semantically-relevant hits. Pass `clientId` to restrict to one client, or scope: "playbook" for strategy reference only.',
       hasSideEffect: false,
       capability: CAPABILITIES.KNOWLEDGE_READ,
       input: inputSchema,
