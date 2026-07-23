@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendo Digital × Compound — Growth Proposal</title>
+<style>
+  :root {
+    --green: #16A34A;
+    --green-dark: #15803D;
+    --green-subtle: #F0FDF4;
+    --ink: #0F172A;
+    --body: #334155;
+    --muted: #64748B;
+    --border: #E2E8F0;
+    --surface: #F8FAFC;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--body);
+    font-size: 15px;
+    line-height: 1.6;
+    background: #EEF1F5;
+  }
+  .page {
+    background: #fff;
+    max-width: 210mm;
+    min-height: 297mm;
+    margin: 24px auto;
+    padding: 22mm 20mm;
+    box-shadow: 0 2px 24px rgba(15,23,42,.08);
+    position: relative;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; min-height: auto; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+  }
+  @page { size: A4; margin: 0; }
+
+  .brandbar { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid var(--green); padding-bottom: 14px; margin-bottom: 34px; }
+  .brandbar .logo { font-size: 20px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+  .brandbar .logo span { color: var(--green); }
+  .brandbar .doc { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; }
+
+  .eyebrow { color: var(--green-dark); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 10px; }
+  h1 { color: var(--ink); font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 14px; }
+  h2 { color: var(--ink); font-size: 21px; font-weight: 800; letter-spacing: -0.015em; margin: 30px 0 12px; }
+  h2:first-of-type { margin-top: 0; }
+  h3 { color: var(--ink); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  p + p { margin-top: 10px; }
+  .lead { font-size: 17px; color: var(--body); max-width: 40em; }
+  strong { color: var(--ink); }
+
+  ul.points { list-style: none; padding: 0; margin: 10px 0; }
+  ul.points li { padding-left: 22px; position: relative; margin-bottom: 7px; }
+  ul.points li::before { content: ""; position: absolute; left: 0; top: 8px; width: 8px; height: 8px; background: var(--green); border-radius: 2px; }
+
+  .grid { display: grid; gap: 14px; margin: 14px 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; }
+  .card.hl { background: var(--green-subtle); border-color: var(--green); }
+  .card .big { font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .card .cap { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 12px 0; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+  td:first-child { color: var(--ink); font-weight: 600; }
+  td.num, th.num { text-align: right; }
+  tr.total td { border-top: 2px solid var(--ink); border-bottom: none; font-weight: 800; color: var(--ink); }
+
+  .note { color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+  .footer { position: absolute; bottom: 12mm; left: 20mm; right: 20mm; display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); padding-top: 8px; }
+  @media print { .footer { position: static; margin-top: 40px; } }
+
+  .cover { display: flex; flex-direction: column; justify-content: center; }
+  .cover .meta { margin-top: 44px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; max-width: 420px; font-size: 14px; }
+  .cover .meta dt { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+  .cover .meta dd { color: var(--ink); font-weight: 600; }
+
+  .step { display: flex; gap: 14px; margin-bottom: 14px; }
+  .step .n { flex: 0 0 30px; height: 30px; border-radius: 50%; background: var(--green); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1: COVER ============ -->
+<div class="page cover">
+  <div class="brandbar">
+    <div class="logo">Vendo<span>Digital</span></div>
+    <div class="doc">Growth Proposal</div>
+  </div>
+  <div class="eyebrow">Prepared for Compound</div>
+  <h1>Paid Social &amp; Paid Search,<br>powered by a proper creative engine.</h1>
+  <p class="lead">A proposal to put Compound in front of the businesses, individuals and advisors who need a modern pension — with professionally shot video and static creative refreshed every six months, managed end-to-end by one team.</p>
+  <dl class="meta">
+    <dt>Prepared for</dt><dt>Prepared by</dt>
+    <dd>Compound — compoundapp.co.uk</dd><dd>Toby, Vendo Digital</dd>
+    <dt>Date</dt><dt>Valid until</dt>
+    <dd>23 July 2026</dd><dd>22 August 2026</dd>
+  </dl>
+  <div class="footer"><span>Vendo Digital</span><span>Private &amp; confidential</span></div>
+</div>
+
+<!-- ============ PAGE 2: UNDERSTANDING + APPROACH ============ -->
+<div class="page">
+  <div class="brandbar">
+    <div class="logo">Vendo<span>Digital</span></div>
+    <div class="doc">Growth Proposal</div>
+  </div>
+
+  <h2>Where Compound is</h2>
+  <p>Compound is building the modern workplace pension — an app that makes pensions simple for the people who hold them, the employers who provide them, and the accountants and advisors who manage them. You're tackling a genuinely large problem (the UK's ~£50 billion in lost pensions) with a product designed to be understood in plain terms.</p>
+  <p>That gives you three distinct audiences, each of which responds to different messaging and lives on different channels:</p>
+  <div class="grid cols-3">
+    <div class="card"><h3>Employers</h3><p style="font-size:13.5px">Businesses choosing or switching their workplace pension provider. Considered, multi-stakeholder decision.</p></div>
+    <div class="card"><h3>Individuals</h3><p style="font-size:13.5px">People with lost or scattered pension pots. Emotional, curiosity-driven hook — "find your lost pensions in 60 seconds."</p></div>
+    <div class="card"><h3>Accountants &amp; advisors</h3><p style="font-size:13.5px">Professionals managing pensions for multiple clients. A partner channel that multiplies every win.</p></div>
+  </div>
+  <p>Fintech advertising lives or dies on <strong>creative quality and message clarity</strong>. Stock imagery and generic "sort your pension" ads don't cut through — real founders, real product UI, and plain-English explanations do. That's the engine we build for you.</p>
+
+  <h2>Our recommended approach</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>Paid Social — Meta</h3>
+      <ul class="points" style="font-size:13.5px">
+        <li>Video-led campaigns built from your content shoot — founder-to-camera, product demos, explainer cuts</li>
+        <li>Static ads designed in-house to test hooks, offers and audiences quickly</li>
+        <li>Separate campaign structures per audience (individuals vs employers/advisors)</li>
+        <li>Full pixel, Conversions API and event tracking setup</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Paid Search — Google</h3>
+      <ul class="points" style="font-size:13.5px">
+        <li>Capture high-intent demand: lost pension search, pension consolidation, workplace pension provider comparisons</li>
+        <li>Brand protection so competitors can't sit on your name</li>
+        <li>Conversion tracking wired to the actions that matter (app installs, sign-ups, demo requests)</li>
+        <li>Continuous search-term mining and negative keyword management</li>
+      </ul>
+    </div>
+  </div>
+  <p>The two channels compound each other: Meta builds awareness and demand; Google captures it when people go looking. Running both under one roof means one strategy, one feedback loop, one report.</p>
+
+  <p class="note"><strong>A note on compliance:</strong> financial promotions on Meta and Google require FCA-authorised advertiser verification. As Compound is FCA-regulated this is straightforward — we handle the verification process and build ads to financial-promotion standards (clear risk wording, no misleading claims) as standard.</p>
+
+  <div class="footer"><span>Vendo Digital</span><span>Page 2</span></div>
+</div>
+
+<!-- ============ PAGE 3: CREATIVE ENGINE + TRAINING ============ -->
+<div class="page">
+  <div class="brandbar">
+    <div class="logo">Vendo<span>Digital</span></div>
+    <div class="doc">Growth Proposal</div>
+  </div>
+
+  <h2>The creative engine</h2>
+  <p>Most agencies ask you for assets. We come and make them. Your package includes:</p>
+  <ul class="points">
+    <li><strong>Upfront content shoot</strong> — a professional videography day at the start of the engagement. We plan the shot list around the ad concepts we want to run: founder pieces, product walk-throughs, testimonial-style content and hook variations.</li>
+    <li><strong>A fresh shoot every 6 months</strong> — creative fatigues; audiences stop responding to ads they've seen. A refresh shoot each cycle keeps the account fed with new video without you lifting a finger.</li>
+    <li><strong>Static ad design, ongoing</strong> — our in-house design team produces static creative throughout: new hooks, seasonal angles, audience-specific messages. Statics let us test fast between shoots.</li>
+  </ul>
+  <p>Everything we shoot is yours — the footage works across your website, socials and sales materials, not just the ad account.</p>
+
+  <h2>What ongoing management looks like</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>Every week</h3>
+      <ul class="points" style="font-size:13.5px">
+        <li>Budget pacing, bid and audience optimisation</li>
+        <li>Creative performance review — scale winners, kill losers</li>
+        <li>Search-term and placement hygiene</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Every month</h3>
+      <ul class="points" style="font-size:13.5px">
+        <li>Performance report in plain English</li>
+        <li>Strategy call — results, learnings, next tests</li>
+        <li>New creative briefs into design and the next shoot plan</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Growing with you: your future marketing hire</h2>
+  <p>As Compound scales, you'll likely bring marketing in-house. We see that as a milestone, not a threat. When you're ready to hire, we'll help you <strong>onboard and train your new marketing team member</strong> — walking them through the account structures, creative learnings and reporting we've built, so they start from everything we've learned rather than from zero. We can then flex into a supporting role: shoots, creative production and specialist channel management alongside your in-house lead.</p>
+
+  <div class="footer"><span>Vendo Digital</span><span>Page 3</span></div>
+</div>
+
+<!-- ============ PAGE 4: INVESTMENT + NEXT STEPS ============ -->
+<div class="page">
+  <div class="brandbar">
+    <div class="logo">Vendo<span>Digital</span></div>
+    <div class="doc">Growth Proposal</div>
+  </div>
+
+  <h2>Investment</h2>
+  <table>
+    <thead><tr><th>Service</th><th>What's included</th><th class="num">Monthly fee</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Paid Social (Meta)</td>
+        <td>Full campaign management up to £2,000/mo ad spend, content shoots (upfront + every 6 months), ongoing static ad design</td>
+        <td class="num">£1,000 + VAT</td>
+      </tr>
+      <tr>
+        <td>Paid Search (Google)</td>
+        <td>Full campaign management up to £2,000/mo ad spend, conversion tracking, brand protection</td>
+        <td class="num">£500 + VAT</td>
+      </tr>
+      <tr class="total">
+        <td>Total management fee</td>
+        <td></td>
+        <td class="num">£1,500 + VAT /mo</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table>
+    <thead><tr><th>One-off</th><th></th><th class="num">Fee</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Setup</td>
+        <td>Account builds, tracking &amp; Conversions API setup, FCA advertiser verification, first shoot planning &amp; creative strategy</td>
+        <td class="num">£1,250 + VAT</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="grid cols-3">
+    <div class="card hl"><div class="big">£4,000</div><div class="cap">Recommended monthly ad spend (£2k Meta + £2k Google), paid by you directly to the platforms — we take no margin on media</div></div>
+    <div class="card"><div class="big">2×</div><div class="cap">Content shoots per year, included in your fee</div></div>
+    <div class="card"><div class="big">6 mo</div><div class="cap">Initial term, then rolling monthly with 30 days' notice</div></div>
+  </div>
+
+  <p class="note">Ad spend is billed directly to your card by Meta and Google — it never touches our account, so you keep full ownership of your ad accounts, data and billing. Additional shoots beyond those included are available at £750 + VAT. Management fees scale only if you choose to increase ad spend.</p>
+
+  <h2>Next steps</h2>
+  <div class="step"><div class="n">1</div><div><h3>Say yes</h3><p style="font-size:13.5px">We'll send the agreement and get access to your ad accounts, or set them up fresh.</p></div></div>
+  <div class="step"><div class="n">2</div><div><h3>Week 1–2: Setup &amp; shoot planning</h3><p style="font-size:13.5px">Tracking, verification and account builds while we plan your first content shoot around agreed ad concepts.</p></div></div>
+  <div class="step"><div class="n">3</div><div><h3>Week 3–4: Shoot &amp; launch</h3><p style="font-size:13.5px">Content day, edits into ad-ready cuts, statics designed — campaigns live on both channels.</p></div></div>
+  <div class="step"><div class="n">4</div><div><h3>Ongoing: Optimise &amp; report</h3><p style="font-size:13.5px">Weekly optimisation, monthly reporting and strategy calls, fresh creative every cycle.</p></div></div>
+
+  <div class="footer"><span>Vendo Digital — toby@vendodigital.co.uk</span><span>Page 4</span></div>
+</div>
+
+</body>
+</html>
