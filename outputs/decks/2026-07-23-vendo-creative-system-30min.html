@@ -1,0 +1,474 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Vendo Creative System — 30-Minute Version</title>
+<style>
+  :root {
+    --bg: #0B0B0B;
+    --surface: #141414;
+    --surface-2: #1A1A1A;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.12);
+    --green: #22C55E;
+    --green-subtle: rgba(34,197,94,0.10);
+    --text: #E2E8F0;
+    --muted: #94A3B8;
+    --heading: #FFFFFF;
+    --bad: #F87171;
+    --warn: #FBBF24;
+    --font: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font);
+    font-size: clamp(15px, 1.4vw, 20px); line-height: 1.5; overflow: hidden;
+  }
+  .slide {
+    position: absolute; inset: 0; display: none; flex-direction: column;
+    justify-content: center; padding: 4.5vh 7vw 11vh; overflow-y: auto;
+  }
+  .slide.active { display: flex; }
+  @media (prefers-reduced-motion: no-preference) {
+    .slide.active { animation: slidein .28s ease; }
+    @keyframes slidein { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+  }
+  .eyebrow { color: var(--green); font-size: .66em; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 1em; }
+  h1 { color: var(--heading); font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; margin-bottom: .5em; }
+  h2 { color: var(--heading); font-size: clamp(1.6rem, 3.4vw, 2.5rem); font-weight: 800; letter-spacing: -0.015em; line-height: 1.14; text-wrap: balance; margin-bottom: .7em; }
+  h3 { color: var(--heading); font-size: 1em; font-weight: 700; margin-bottom: .3em; }
+  p.lead { font-size: 1.15em; max-width: 30em; }
+  p.note { color: var(--muted); font-size: .84em; margin-top: 1.4em; max-width: 40em; }
+  strong { color: var(--heading); font-weight: 700; }
+  .g { color: var(--green); }
+  .r { color: var(--bad); }
+
+  ul.points { list-style: none; padding: 0; display: flex; flex-direction: column; gap: .65em; max-width: 36em; }
+  ul.points li { padding-left: 1.4em; position: relative; }
+  ul.points li::before { content: ""; position: absolute; left: 0; top: .5em; width: .5em; height: .5em; background: var(--green); border-radius: 1px; }
+
+  .grid { display: grid; gap: 1em; margin-top: .4em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1em 1.1em; }
+  .card.hl { border-color: var(--green); background: var(--green-subtle); }
+  .card .big { font-size: 2.4em; font-weight: 800; color: var(--heading); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .card .big.g { color: var(--green); }
+  .card .cap { color: var(--muted); font-size: .82em; margin-top: .3em; }
+
+  table { border-collapse: collapse; width: 100%; font-size: .95em; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: .55em .9em; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-size: .76em; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+  td:first-child { color: var(--heading); font-weight: 600; }
+  .tablewrap { overflow-x: auto; }
+
+  .flow { display: flex; align-items: stretch; gap: .6em; flex-wrap: wrap; margin-top: .5em; }
+  .flow .step { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .8em 1em; flex: 1; min-width: 8em; }
+  .flow .step .n { color: var(--green); font-weight: 800; font-size: .76em; letter-spacing: .1em; }
+  .flow .arrow { align-self: center; color: var(--muted); }
+
+  .divider { justify-content: center; }
+  .divider .num { color: var(--green); font-weight: 800; font-size: .9em; letter-spacing: .18em; margin-bottom: 1em; }
+  .divider h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); max-width: 12em; }
+  .divider p { color: var(--muted); max-width: 28em; font-size: 1.1em; }
+
+  /* Image placeholder */
+  .ph {
+    border: 2px dashed var(--border-strong); border-radius: 10px;
+    background: var(--surface); color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 1.2em; gap: .4em; min-height: 9em;
+  }
+  .ph .tag { color: var(--warn); font-weight: 800; font-size: .72em; letter-spacing: .14em; }
+  .ph .what { font-size: .88em; max-width: 22em; }
+
+  /* Schematic diagrams */
+  .diagram { margin-top: .6em; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .dlabel { fill: #94A3B8; font-family: var(--font); font-size: 13px; }
+  .dlabel.h { fill: #FFFFFF; font-weight: 700; }
+
+  .hud {
+    position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center;
+    justify-content: space-between; padding: .9em 2em; font-size: .78em; color: var(--muted);
+    background: linear-gradient(transparent, rgba(11,11,11,.92) 40%); z-index: 5;
+  }
+  .hud .brand { font-weight: 800; color: var(--heading); }
+  .hud .brand span { color: var(--green); }
+  .hud .count { font-variant-numeric: tabular-nums; }
+  .hud button { background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); border-radius: 6px; font: inherit; padding: .35em .9em; cursor: pointer; margin-left: .4em; }
+  .hud button:hover { background: var(--surface-2); }
+  .hud button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--green); width: 0; z-index: 6; transition: width .2s ease; }
+
+  .dd { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+  .dd .card h3 { text-transform: uppercase; font-size: .76em; letter-spacing: .14em; }
+  .dd .do h3 { color: var(--green); }
+  .dd .dont h3 { color: var(--bad); }
+  .dd ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: .5em; font-size: .95em; }
+  .dd .do li::before { content: "✓  "; color: var(--green); font-weight: 800; }
+  .dd .dont li::before { content: "✕  "; color: var(--bad); font-weight: 800; }
+
+  @media (max-width: 760px) {
+    .cols-2, .cols-3, .cols-4, .dd { grid-template-columns: 1fr; }
+    .slide { padding: 3.5vh 6vw 13vh; justify-content: flex-start; padding-top: 8vh; }
+    .flow { flex-direction: column; }
+    .flow .arrow { display: none; }
+  }
+</style>
+
+<div class="progress" id="progress"></div>
+
+<!-- 1 · TITLE -->
+<section class="slide divider active">
+  <div class="num">VENDO DIGITAL · TEAM SESSION · 30 MIN</div>
+  <h1>The creative is the targeting.</h1>
+  <p style="margin-top:1em;">How paid social works in 2026 — and the system we run.</p>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="eyebrow">The shift</div>
+  <h2>Media buying is no longer the edge</h2>
+  <div class="grid cols-2" style="align-items:center;">
+    <ul class="points">
+      <li>Targeting is automated — broad is the default</li>
+      <li>Meta's <strong>Andromeda</strong> update decides distribution by reading the creative itself</li>
+      <li>The old hacks (duplicating ad sets, bid tricks) are dead</li>
+    </ul>
+    <div class="ph">
+      <div class="tag">IMAGE 1</div>
+      <div class="what">Ads Manager screenshot from one of our accounts: a broad ad set with no interest targeting, performing well</div>
+    </div>
+  </div>
+  <p class="note">The edge moved to creative — and most teams are still bad at it. That gap is ours to take.</p>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="eyebrow">The shift</div>
+  <h2>Run a portfolio, never heroes</h2>
+  <p class="lead"><strong>Every ad fatigues. Every ad has a spend ceiling.</strong> So spread the load:</p>
+  <div class="diagram" aria-label="One hero ad versus three ads sharing the same spend">
+    <svg viewBox="0 0 720 190" role="img">
+      <rect x="20" y="30" width="150" height="110" rx="8" fill="#141414" stroke="#F87171"/>
+      <text x="95" y="80" text-anchor="middle" class="dlabel h">1 ad</text>
+      <text x="95" y="102" text-anchor="middle" class="dlabel">£1,000/day · 4x</text>
+      <text x="95" y="165" text-anchor="middle" class="dlabel" fill="#F87171">fatigues → you're done</text>
+      <text x="240" y="92" text-anchor="middle" class="dlabel h" font-size="18">vs</text>
+      <rect x="300" y="30" width="120" height="110" rx="8" fill="#141414" stroke="#22C55E"/>
+      <rect x="440" y="30" width="120" height="110" rx="8" fill="#141414" stroke="#22C55E"/>
+      <rect x="580" y="30" width="120" height="110" rx="8" fill="#141414" stroke="#22C55E"/>
+      <text x="360" y="92" text-anchor="middle" class="dlabel h">ad A</text>
+      <text x="500" y="92" text-anchor="middle" class="dlabel h">ad B</text>
+      <text x="640" y="92" text-anchor="middle" class="dlabel h">ad C</text>
+      <text x="500" y="165" text-anchor="middle" class="dlabel" fill="#22C55E">same £1,000/day · 4x — any one can die, the others hold</text>
+    </svg>
+  </div>
+  <p class="note">Brands built on two or three hero creatives arrive 40% down year-on-year when they all fatigue together. The fix happens six months before the problem shows.</p>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="eyebrow">The algorithm</div>
+  <h2>The creative you load in IS the targeting</h2>
+  <div class="grid cols-2">
+    <div class="card"><h3 class="r">Before</h3><p style="font-size:.95em;">You picked the audience, then added creative.</p></div>
+    <div class="card hl"><h3 class="g">Now</h3><p style="font-size:.95em;">Meta reads the ad — transcript, copy, visuals — and finds the people for it.</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.1em;">A vague ad gives Meta nothing to target with. An ad clearly for <strong>one person</strong> tells Meta exactly who to find.</p>
+  <p class="note">Meta auto-transcribes every ad — the opening line mechanically steers who sees it.</p>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="eyebrow">The algorithm</div>
+  <h2>Similar ads get bundled — and bundles decay</h2>
+  <div class="diagram" aria-label="Similar creatives serve one shared pool; different concepts each reach their own audience">
+    <svg viewBox="0 0 720 200" role="img">
+      <circle cx="130" cy="80" r="52" fill="rgba(248,113,113,.12)" stroke="#F87171"/>
+      <circle cx="160" cy="80" r="52" fill="rgba(248,113,113,.12)" stroke="#F87171"/>
+      <circle cx="190" cy="80" r="52" fill="rgba(248,113,113,.12)" stroke="#F87171"/>
+      <text x="160" y="170" text-anchor="middle" class="dlabel" fill="#F87171">3 variants → same pool</text>
+      <text x="160" y="188" text-anchor="middle" class="dlabel">frequency ↑ reach ↓ results ↓</text>
+      <circle cx="430" cy="80" r="48" fill="rgba(34,197,94,.12)" stroke="#22C55E"/>
+      <circle cx="545" cy="80" r="48" fill="rgba(34,197,94,.12)" stroke="#22C55E"/>
+      <circle cx="660" cy="80" r="48" fill="rgba(34,197,94,.12)" stroke="#22C55E"/>
+      <text x="545" y="170" text-anchor="middle" class="dlabel" fill="#22C55E">3 concepts → 3 audiences</text>
+      <text x="545" y="188" text-anchor="middle" class="dlabel">frequency ↓ spend unlocks</text>
+    </svg>
+  </div>
+  <div class="grid cols-2" style="margin-top:.8em;">
+    <div class="card"><div class="big">2</div><div class="cap">Purchase probability collapses after two views of the same ad. A <strong>novel</strong> ad as the third touch keeps it high.</div></div>
+    <div class="card hl"><div class="big">&gt; 2.0</div><div class="cap">Frequency on a cold campaign = fatigue red flag. We check every account this week.</div></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="eyebrow">The algorithm</div>
+  <h2>The last-click trap</h2>
+  <p class="lead">Meta <strong>sequences</strong> ads across a journey — then puts all the credit on the last click.</p>
+  <div class="flow">
+    <div class="step"><div class="n">AD 1 · WARMS</div><span style="color:var(--muted)">shows 1.4x</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">AD 2 · EDUCATES</div><span style="color:var(--muted)">shows 2x</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">AD 3 · CLOSES</div><span class="g">shows 6x — takes all the credit</span></div>
+  </div>
+  <p class="lead" style="margin-top:1.1em;"><strong class="r">Never switch off an ad inside an ad set that's hitting KPI.</strong> Killing ads 1 and 2 destroys the sequence that made ad 3 work.</p>
+  <p class="note">Trust numbers at campaign level (7-day click), roughly at ad-set level, never at ad level. For dental, GHL is the source of truth — leads, booked consults, treatment value.</p>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="eyebrow">Concepts</div>
+  <h2>Concept = persona × angle × offer</h2>
+  <div class="grid cols-3">
+    <div class="card"><h3>Persona</h3><p style="font-size:.9em;">Who we're talking to — and who's on screen</p></div>
+    <div class="card"><h3>Angle</h3><p style="font-size:.9em;">The argument: which pain, what proof, what belief we challenge</p></div>
+    <div class="card"><h3>Offer</h3><p style="font-size:.9em;">Product + value framing: consult, bundle, finance</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.1em;">Format is a weak fourth lever — it comes <strong>last</strong>, never first. Diversity means changing at least one of the three.</p>
+  <p class="note">Structural rule: <strong>one concept per ad set</strong>. Mixed concepts confuse targeting and make results unreadable.</p>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="eyebrow">Concepts</div>
+  <h2>Personas are problems, not demographics</h2>
+  <div class="grid cols-2" style="align-items:center;">
+    <div>
+      <p class="lead" style="margin-bottom:.8em;"><span class="r">"Women 25–45"</span> is not a persona.</p>
+      <p class="lead"><span class="g">"The professional who hides their smile on video calls and has been thinking about Invisalign for two years"</span> — that's a persona. You can already see the script.</p>
+    </div>
+    <div class="ph">
+      <div class="tag">IMAGE 2</div>
+      <div class="what">Two stills from real client ads showing clearly different personas on screen (e.g. young professional vs 60+ patient)</div>
+    </div>
+  </div>
+  <p class="note">2–4 core personas per client, built manually from real pain points — then AI expands the list, never the other way round.</p>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="eyebrow">Concepts</div>
+  <h2>Test in this order</h2>
+  <div class="flow">
+    <div class="step"><div class="n">1 · ANGLE</div>If a proven persona isn't buying, the message is wrong</div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">2 · OFFER</div>Value framing — powerful but finite</div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">3 · PERSONA</div>New pools to scale into</div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">4 · FORMAT</div>Last. "Let's test UGC" is not a strategy</div>
+  </div>
+  <p class="lead" style="margin-top:1.2em;">Most teams do the <strong>exact opposite</strong> — format first, angle never. If an account is underperforming, start at the angle.</p>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="eyebrow">Hooks</div>
+  <h2>The hook is most of the ad</h2>
+  <div class="grid cols-2">
+    <div class="card"><div class="big">80%</div><div class="cap">of viewers never watch past the first 3 seconds</div></div>
+    <div class="card hl"><div class="big">15 + 2</div><div class="cap">15 hooks on 2 bodies beats 2 hooks on 5 bodies — the performance delta lives in the hook</div></div>
+  </div>
+  <div class="grid cols-2" style="margin-top:1em; align-items:center;">
+    <ul class="points" style="font-size:.92em;">
+      <li>Grade hooks on: <strong>clarity · relevance · novelty · specificity · credibility</strong></li>
+      <li>Agitate the problem — persona call-outs ("if you're a mum of two…") are overrated</li>
+      <li>Two criteria done well = a good hook</li>
+    </ul>
+    <div class="ph">
+      <div class="tag">IMAGE 3</div>
+      <div class="what">2–3 frames of our best-performing hooks (from Motion), with their hook rates</div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="eyebrow">Hooks</div>
+  <h2>Introduce the offer as late as possible</h2>
+  <div class="diagram" aria-label="Move viewers up the awareness stages across the ad; don't jump to the product early">
+    <svg viewBox="0 0 720 210" role="img">
+      <rect x="30"  y="150" width="120" height="30" rx="4" fill="#141414" stroke="rgba(255,255,255,.12)"/>
+      <rect x="170" y="115" width="120" height="65" rx="4" fill="#141414" stroke="rgba(255,255,255,.12)"/>
+      <rect x="310" y="80"  width="120" height="100" rx="4" fill="#141414" stroke="rgba(255,255,255,.12)"/>
+      <rect x="450" y="45"  width="120" height="135" rx="4" fill="#141414" stroke="rgba(255,255,255,.12)"/>
+      <rect x="590" y="10"  width="120" height="170" rx="4" fill="rgba(34,197,94,.12)" stroke="#22C55E"/>
+      <text x="90"  y="142" text-anchor="middle" class="dlabel">unaware</text>
+      <text x="230" y="107" text-anchor="middle" class="dlabel">problem aware</text>
+      <text x="370" y="72"  text-anchor="middle" class="dlabel">solution aware</text>
+      <text x="510" y="37"  text-anchor="middle" class="dlabel">product aware</text>
+      <text x="650" y="2"   text-anchor="middle" class="dlabel h" dy="0"> </text>
+      <text x="650" y="200" text-anchor="middle" class="dlabel" fill="#22C55E">offer lands here</text>
+      <text x="90" y="200" text-anchor="middle" class="dlabel">hook lands here</text>
+    </svg>
+  </div>
+  <p class="lead" style="margin-top:.8em;">A great hook then an instant sales pitch ruins the asset. Later product introduction = more qualified viewers = <strong>more</strong> total conversions, not fewer.</p>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="eyebrow">Hooks</div>
+  <h2>Hook swaps are nearly free spend</h2>
+  <ul class="points">
+    <li>A new hook = a <strong>new creative ID</strong> to Meta — fresh audience, not bundled with the original</li>
+    <li>Fatigued winners + new hooks have delivered <strong>another $100K of spend at the same efficiency</strong> for an hour of shooting</li>
+  </ul>
+  <div class="card hl" style="margin-top:1.1em; max-width:34em;">
+    <h3>Shoot rule</h3>
+    <p style="font-size:.94em;">Every shoot captures <strong>multiple hook takes per concept</strong>. Standard line on every shot list from now on.</p>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="eyebrow">Formats</div>
+  <h2>Three format opinions the data backs</h2>
+  <div class="grid cols-2" style="align-items:center;">
+    <ul class="points">
+      <li><strong>Statics are underrated</strong> — cheap, fast, and "statics only work bottom-of-funnel" is a skill issue. Long-copy statics crush with older Facebook audiences — exactly the dental patient base</li>
+      <li><strong>Partnership ads</strong> — content through the clinician's or creator's own profile borrows their audience and doesn't feel like an ad</li>
+      <li><strong class="r">DPA warning (ecomm)</strong> — catalogue ROAS flatters heavily; check incremental attribution before shifting budget into it</li>
+    </ul>
+    <div class="ph">
+      <div class="tag">IMAGE 4</div>
+      <div class="what">One winning static and one partnership ad from our accounts, side by side</div>
+    </div>
+  </div>
+  <p class="note">Production mix does the funnel maths now: ~70–90% of what we make is top-of-funnel.</p>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="eyebrow">Testing &amp; volume</div>
+  <h2>The honest maths</h2>
+  <div class="grid cols-3">
+    <div class="card"><div class="big">~5%</div><div class="cap">typical hit rate → ~20 ads per expected winner</div></div>
+    <div class="card"><div class="big">3</div><div class="cap">concepts done properly at £1–3K budgets — few and deep beats many and thin</div></div>
+    <div class="card hl"><div class="big">1 / £1K</div><div class="cap">at least 1 genuinely new ad per £1,000 of monthly spend, before hook variants</div></div>
+  </div>
+  <p class="lead" style="margin-top:1.2em;">Metric order: <strong>amount spent → CPL/ROAS (7-day click) → CTR/CPC → hook &amp; hold rate</strong> (diagnostics only). Winners are untouchable — new ads go in a <strong>new ad set</strong>.</p>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="eyebrow">Portfolio</div>
+  <h2>What we make, in what proportions</h2>
+  <div class="grid cols-3">
+    <div class="card hl"><div class="big g">50–60%</div><div class="cap"><strong>Replicating winners</strong> — hook iterations, format translations. Highest leverage, most under-done</div></div>
+    <div class="card"><div class="big">20–30%</div><div class="cap"><strong>Iterations</strong> — fixing underperformers, adapting winners to new personas</div></div>
+    <div class="card"><div class="big">20–30%</div><div class="cap"><strong>Net-new concepts</strong> — essential, but the most commonly overweighted</div></div>
+  </div>
+  <p class="lead" style="margin-top:1.2em;">And shift the emotional mix towards <strong>60/40 pain-led vs desire-led</strong> — most brand content is 90/10 the wrong way.</p>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <div class="eyebrow">Our system</div>
+  <h2>AI in the middle, humans at the edges</h2>
+  <div class="flow">
+    <div class="step"><div class="n">IDEATION</div><strong>Human</strong> — LLMs output the average</div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">BRIEFS &amp; SCRIPTS</div><strong class="g">AI-heavy</strong></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">PRODUCTION</div><strong class="g">AI-leveraged</strong></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">ANALYSIS</div><strong>Human-led</strong> — AI misses context</div>
+  </div>
+  <p class="note">Our stack: Atlas (carries this playbook), Motion (why ads perform), Frame.io (approval → live), trial reels on client pages to pre-test hooks before they cost ad spend.</p>
+</section>
+
+<!-- 17 -->
+<section class="slide">
+  <div class="eyebrow">The rules</div>
+  <h2>The rules card</h2>
+  <div class="dd">
+    <div class="card do">
+      <h3>Always</h3>
+      <ul>
+        <li>One concept per ad set</li>
+        <li>Judge at campaign level, 7-day click</li>
+        <li>Cross-check against GHL</li>
+        <li>New ads for a winner → new ad set</li>
+        <li>Hook-swap fatigued winners</li>
+        <li>Multiple hook takes at every shoot</li>
+      </ul>
+    </div>
+    <div class="card dont">
+      <h3>Never</h3>
+      <ul>
+        <li>Kill an ad in an ad set hitting KPI</li>
+        <li>Trust ad-level ROAS or CPL</li>
+        <li>Inject ads into a winning ad set</li>
+        <li>Duplicate ad sets to "scale"</li>
+        <li>Test format before angle</li>
+        <li>Let a client ride one or two hero ads</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <div class="eyebrow">Next steps</div>
+  <h2>Starting this week</h2>
+  <ul class="points">
+    <li><strong>Frequency audit</strong> — every account, cold campaigns, last 30–60 days; flag anything above 2.0</li>
+    <li><strong>Concept docs</strong> — persona × angle × offer map per client, biggest spenders first</li>
+    <li><strong>Shot lists</strong> — hook takes become a standard line on every shoot brief</li>
+    <li><strong>Structure check</strong> — one concept per ad set everywhere (note, don't touch, anything hitting KPI)</li>
+  </ul>
+  <p class="note">Owners and dates: agreed now, in this session.</p>
+</section>
+
+<!-- 19 · CLOSE -->
+<section class="slide divider">
+  <div class="num">VENDO DIGITAL</div>
+  <h1>Volume, above the bar.</h1>
+  <p>Nobody can pick winners above the quality bar — clear it every time and let the portfolio do the rest. Questions →</p>
+</section>
+
+<div class="hud">
+  <div class="brand">vendo<span>.</span> creative system · 30 min</div>
+  <div>
+    <span class="count" id="count">1 / 19</span>
+    <button id="prev" aria-label="Previous slide">←</button>
+    <button id="next" aria-label="Next slide">→</button>
+  </div>
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = Math.min(parseInt(location.hash.slice(1)) || 0, slides.length - 1);
+  const count = document.getElementById('count');
+  const bar = document.getElementById('progress');
+  function show(n) {
+    i = Math.max(0, Math.min(n, slides.length - 1));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    count.textContent = (i + 1) + ' / ' + slides.length;
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    history.replaceState(null, '', '#' + i);
+    slides[i].scrollTop = 0;
+  }
+  document.getElementById('next').onclick = () => show(i + 1);
+  document.getElementById('prev').onclick = () => show(i - 1);
+  addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(i + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(i - 1); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(slides.length - 1);
+  });
+  let tx = null;
+  addEventListener('touchstart', e => tx = e.touches[0].clientX, {passive: true});
+  addEventListener('touchend', e => {
+    if (tx === null) return;
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 60) show(i + (dx < 0 ? 1 : -1));
+    tx = null;
+  }, {passive: true});
+  show(i);
+</script>
