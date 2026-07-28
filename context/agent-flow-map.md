@@ -1,8 +1,8 @@
 # Agent-to-Flow Map — Vendo OS
 
-> Maps all 39 operational flows to RuFlo agent types, automation level, triggers, data dependencies, and escalation paths.
+> Maps all 40 operational flows to RuFlo agent types, automation level, triggers, data dependencies, and escalation paths.
 
-Last updated: 2026-04-02
+Last updated: 2026-07-28
 
 ---
 
@@ -62,6 +62,7 @@ Last updated: 2026-04-02
 | 11 | QA Grading | tester, reviewer | Semi-automated | Event-driven (campaign ready) | meta_insights, gads_campaign_spend, skills | Delivery Lead |
 | 12 | Reporting | task-orchestrator, content-writer | Automated | Scheduled (monthly) | meta_insights, gads_campaign_spend, xero_invoices, clients | Account Manager |
 | 31 | Vendor Management | task-orchestrator, researcher | Semi-automated | Scheduled (quarterly) | xero_contacts, xero_invoices | Toby |
+| 40 | Persona-to-Creative Pipeline | External: Paid Social Agent (persona-research, creative-strategist, static-creative agents) + claude.ai Audience Research project + Claude Design/Figma | Semi-automated | Manual | brand_hub, meta_ad_library; brand files in `~/Paid Social Agent/brands/` (external repo) | Delivery Lead |
 | 32 | Emergency Outage | task-orchestrator, backend-dev | Semi-automated | Event-driven (alert) | meta_ad_accounts, gads_accounts, clients | Toby (immediate) |
 
 ---
@@ -117,8 +118,8 @@ Last updated: 2026-04-02
 
 | Level | Count | Percentage |
 |-------|-------|------------|
-| Automated | 8 | 21% |
-| Semi-automated | 27 | 69% |
+| Automated | 8 | 20% |
+| Semi-automated | 28 | 70% |
 | Manual | 4 | 10% |
 
 ## Summary: Trigger Distribution
@@ -127,7 +128,7 @@ Last updated: 2026-04-02
 |---------|-------|
 | Scheduled | 17 |
 | Event-driven | 17 |
-| Manual | 5 |
+| Manual | 6 |
 
 ## Summary: Most-Used Agent Types
 
