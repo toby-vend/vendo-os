@@ -1,0 +1,118 @@
+<% layout('/layouts/base') %>
+
+<h1>Creative Pipeline</h1>
+<p style="color:#64748B; max-width: 70ch;">Runs the Paid Social Agent's persona-to-creative pipeline (research → cheat sheet → concepts → rendered statics + Claude Design mirror) as a background job on this machine. The two sign-off gates are the form fields below.</p>
+
+<div class="card" style="margin: 20px 0; padding: 20px; max-width: 720px;">
+  <h2 style="margin-top:0;">New run</h2>
+  <form id="cp-form">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <label>Existing client
+        <select name="client" style="width:100%;">
+          <option value="">— none (new client) —</option>
+          <% it.brands.forEach(b => { %>
+            <option value="<%= b.slug %>"><%= b.slug %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>…or new client website URL
+        <input type="url" name="websiteUrl" placeholder="https://www.example.co.uk/" style="width:100%;">
+      </label>
+    </div>
+    <label style="display:block; margin-top:14px;">Treatments / offers to push <span style="color:#EF4444;">*</span>
+      <input type="text" name="treatments" required placeholder="e.g. Invisalign, new patient consultation" style="width:100%;">
+    </label>
+    <label style="display:block; margin-top:14px;">Approved prices &amp; finance figures for ad copy <span style="color:#EF4444;">*</span>
+      <input type="text" name="prices" required placeholder="e.g. Invisalign from £4,995; consult £95; 36mo 0% (rep example pending)" style="width:100%;">
+    </label>
+    <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-top:14px;">
+      <label>Scope
+        <select name="stage" style="width:100%;">
+          <option value="full">Full pipeline</option>
+          <option value="research">Research only (Stages 1–2)</option>
+          <option value="concepts">Concept map only (Stage 3)</option>
+          <option value="creatives">Creatives only (Stage 4)</option>
+        </select>
+      </label>
+      <label>Notes (optional)
+        <input type="text" name="notes" placeholder="anything the run should know" style="width:100%;">
+      </label>
+    </div>
+    <button type="submit" class="btn" style="margin-top:16px;">Start run</button>
+    <span id="cp-form-msg" style="margin-left:12px; color:#64748B;"></span>
+  </form>
+</div>
+
+<h2>Runs</h2>
+<% if (!it.runs.length) { %>
+  <p>No runs yet.</p>
+<% } else { %>
+<table class="compact">
+  <thead><tr><th>Started</th><th>Client</th><th>Scope</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+    <% it.runs.forEach(r => { %>
+    <tr data-run-id="<%= r.id %>">
+      <td><%= r.startedAt.replace('T',' ').slice(0,16) %></td>
+      <td><%= r.client || r.websiteUrl %></td>
+      <td><%= r.stage %></td>
+      <td class="cp-status"><%= r.status %></td>
+      <td><a href="#" onclick="cpShowLog('<%= r.id %>'); return false;">Log</a></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% } %>
+
+<pre id="cp-log" style="display:none; background:#0B0B0B; color:#B9C7C0; padding:16px; border-radius:8px; max-height:420px; overflow:auto; font-size:12px; white-space:pre-wrap;"></pre>
+
+<h2 style="margin-top:32px;">Creatives</h2>
+<% it.galleries.forEach(g => { %>
+  <h3 style="margin: 18px 0 10px;"><%= g.slug %></h3>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;">
+    <% g.files.forEach(f => { %>
+      <a href="/creative-pipeline/image/<%= g.slug %>/<%= f %>" target="_blank" style="display:block;">
+        <img src="/creative-pipeline/image/<%= g.slug %>/<%= f %>" alt="<%= f %>" loading="lazy" style="width:100%; border-radius:6px; border:1px solid rgba(255,255,255,.08);">
+        <span style="font-size:11px; color:#64748B;"><%= f %></span>
+      </a>
+    <% }) %>
+  </div>
+<% }) %>
+
+<script>
+  document.getElementById('cp-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = document.getElementById('cp-form-msg');
+    msg.textContent = 'Starting…';
+    var data = Object.fromEntries(new FormData(this).entries());
+    var res = await fetch('/creative-pipeline/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    var out = await res.json();
+    if (!res.ok) { msg.textContent = out.error || 'Failed'; return; }
+    msg.textContent = 'Run started.';
+    setTimeout(function () { location.reload(); }, 800);
+  });
+
+  function cpShowLog(id) {
+    var pre = document.getElementById('cp-log');
+    pre.style.display = 'block';
+    function tick() {
+      fetch('/creative-pipeline/runs/' + id).then(function (r) { return r.json(); }).then(function (run) {
+        pre.textContent = '[' + run.status + ']\n\n' + (run.log || '(no output yet)');
+        var row = document.querySelector('tr[data-run-id="' + id + '"] .cp-status');
+        if (row) row.textContent = run.status;
+        if (run.status === 'running') setTimeout(tick, 4000);
+      });
+    }
+    tick();
+  }
+
+  // Poll any running rows so statuses flip without a manual refresh.
+  document.querySelectorAll('tr[data-run-id]').forEach(function (tr) {
+    if (tr.querySelector('.cp-status').textContent.trim() === 'running') {
+      cpShowLog(tr.getAttribute('data-run-id'));
+    }
+  });
+</script>

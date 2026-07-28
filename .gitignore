@@ -43,3 +43,4 @@ outputs/creatives/
 # Raw uploaded client reports (anonymised copies live in report-style.ts)
 data/report-examples/*
 !data/report-examples/README.md
+data/creative-pipeline-runs/

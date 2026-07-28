@@ -75,6 +75,7 @@
 |---------|---------|----------------|--------|----------|
 | Fathom | Meeting transcription and notes | MCP | **Connected** | Medium |
 | Motion | AI scheduling and task prioritisation | Manual | Not connected | Low |
+| Paid Social Agent | Multi-agent paid social delivery system (Claude Code project at `~/Paid Social Agent/`) incl. persona-to-creative pipeline | Local project + shared git repo | **Active** | High |
 
 ### SEO
 

@@ -51,6 +51,7 @@ export const DEFAULT_SIDEBAR_CONFIG: SidebarConfig = [
       { id: 'reporting-hub', label: 'Reporting Hub', href: '/dashboards/reporting-hub', permission: 'dashboards' },
       { id: 'client-reports', label: 'Client Reports', href: '/reports', permission: 'reports' },
       { id: 'ads-manager', label: 'Ads Manager', href: '/ads', permission: 'ads' },
+      { id: 'creative-pipeline', label: 'Creative Pipeline', href: '/creative-pipeline', permission: 'ads' },
     ],
   },
   {

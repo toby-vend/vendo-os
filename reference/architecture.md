@@ -171,6 +171,8 @@ This is what turns your AI OS from a tool you use into a system that works for y
 
 You don't have to build every function from scratch. External tools can act as specialised brains that your AI OS calls on when it needs domain expertise.
 
+**Paid Social Command Centre** (local Claude Code project at `~/Paid Social Agent/`, shared repo `toby-vend/paid-social-agent`) is the in-house example. It runs 16 specialist agents (media buying, creative strategy, scriptwriting, compliance QA, reporting and more) over per-client brand folders in `brands/[client-slug]/`. Its persona-to-creative pipeline (`system/10-persona-creative-pipeline.md` in that repo) takes a client from audience research (via the claude.ai Audience Research project) through a persona/angle/offer concept map to finished statics built in Claude Design and Figma. Flow 40 in `context/agent-flow-map.md` maps it into Vendo OS delivery. Its outputs (personas, concept maps, performance logs) are Data-layer inputs for client reporting and profitability flows.
+
 **AgencyOSX** (https://app.agencyosx.ai) is one example. It gives you 15 AI employees across 4 teams:
 
 | Team | AI Employees | What They Handle |
