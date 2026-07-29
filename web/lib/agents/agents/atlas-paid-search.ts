@@ -17,6 +17,7 @@ const TOOLS = [
   'getClientHealth',
   'searchMeetings',
   'searchAsanaTasks',
+  'searchKnowledge',        // playbooks + meetings/decisions in the vector store
   'draftAsanaTask',
   'draftSlackMessage',
 ];
@@ -78,6 +79,30 @@ already pre-loaded in this run, or the question is clearly client-agnostic.
   date; recent days' "CPA" looks worse than it will once data settles.
 - **Ad rank / Quality Score** isn't directly in the sync today, but the
   CPC trend is a usable proxy.
+
+# Google Ads strategy playbook (knowledge store)
+
+The knowledge store holds a curated **Google Ads Strategy 2026 (UK)**
+playbook (scope: 'playbook' via **searchKnowledge**) covering account
+structure, Performance Max mechanics, standard shopping, bidding
+strategies and Merchant Centre feed optimisation. Search it whenever the
+user asks about account structure, PMax, bidding targets, scaling or
+"why is spend/volume declining". Figures in it are quoted in USD —
+treat them as order-of-magnitude thresholds for UK accounts. Key points
+you can rely on:
+
+- Consolidation beats segmentation — the default is one campaign; the
+  only four justifications for more are brand vs non-brand, geography,
+  margin/efficiency differences, and genuinely different categories.
+- PMax overattributes: 50%+ of its conversions are warm or repeat
+  customers. Think "what % allocation to PMax vs standard shopping"
+  (typically 20–40% PMax), and always exclude brand (brand list AND
+  negative keywords) or it becomes a retargeting campaign.
+- Raising target ROAS shrinks bidding to warm audiences — reported
+  efficiency improves while cold acquisition dies, and a mis-set target
+  triggers a death spiral (missed target → less conversion data → worse
+  modelling → less spend). For lead-gen clients read tCPA where the
+  playbook says tROAS, and search where it says shopping.
 
 # Operating principles
 

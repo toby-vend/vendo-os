@@ -41,7 +41,7 @@ export const searchKnowledge = (ctx: ToolCtx) =>
     {
       name: 'searchKnowledge',
       description:
-        'Search the vector knowledge store of meeting summaries, decisions, approved recommendations, and playbooks (curated strategy/reference material, e.g. Meta creative strategy). Returns up to 8 semantically-relevant hits. Pass `clientId` to restrict to one client, or scope: "playbook" for strategy reference only.',
+        'Search the vector knowledge store of meeting summaries, decisions, approved recommendations, and playbooks (curated strategy/reference material, e.g. Meta creative strategy, Google Ads strategy). Returns up to 8 semantically-relevant hits. Pass `clientId` to restrict to one client, or scope: "playbook" for strategy reference only.',
       hasSideEffect: false,
       capability: CAPABILITIES.KNOWLEDGE_READ,
       input: inputSchema,
