@@ -12,18 +12,18 @@ Verified against bonddental.co.uk on 31 July 2026:
 
 | Claim | Live site (verified) | Creative set (as designed) |
 |---|---|---|
-| Invisalign price | **£3,599** (bundle incl. £95 consult, iTero scan, retainers worth £395/arch, whitening worth £595) | £4,995 |
-| Finance | **£99.97/month, 36 months, 0%** | £116.14/month, 60 months |
+| Invisalign price | **£3,599** (bundle incl. £95 consult, iTero scan, retainers worth £395/arch, whitening worth £595) | £3,995 (updated 31 Jul, was £4,995) |
+| Finance | **£99.97/month, 36 months, 0%** | £92.89/month, 60 months (updated 31 Jul) |
 | Clinics | **Five** (Marylebone, Mayfair, King's Cross, Kensington W14, Notting Hill) | "Four Central London clinics" |
 
 Ads cannot run with on-image figures that contradict the landing page (CAP/Meta compliance and a conversion killer). Before launch, the client must confirm ONE of:
-1. **Site is correct** → creatives showing £4,995 / £116.14 / "four clinics" must be corrected in the Figma file and re-exported (BD-23, BD-25, BD-30, BD-32 for price; the "four clinics" line appears across most of the set).
+1. **Site is correct** → creatives showing £3,995 / £92.89 / "four clinics" must be corrected in the Figma file and re-exported (BD-23, BD-25, BD-30, BD-32 for price; the "four clinics" line appears across most of the set).
 2. **New pricing is planned** → site and landing pages must be updated first, then creatives stand.
 
 All copy in this brief uses the **verified site figures**. If option 2 is confirmed, swap figures per the table above.
 
 ### Other launch gates
-- **BD-30 and BD-32 (finance)**: pending legal sign-off (CONC 3.5). Build PAUSED. Representative example must lead the primary text; placeholder below until legal supplies wording. Finance is via Chrysalis Finance; Kevom Ltd t/a Bond Dental London is an FCA-authorised credit broker (FRN 832135), not a lender.
+- **BD-30 and BD-32 (finance)**: pending legal sign-off (CONC 3.5). ⚠ The 31 Jul price update REMOVED the on-image representative-example/credit-broker footnote from BD-30, BD-32 and BD-47 — it must be restored (or legal must approve its absence) before any finance creative runs. Build PAUSED. Representative example must lead the primary text; placeholder below until legal supplies wording. Finance is via Chrysalis Finance; Kevom Ltd t/a Bond Dental London is an FCA-authorised credit broker (FRN 832135), not a lender.
 - **BD-11 / BD-14**: marked HOLD in the design doc. Neither is in this campaign.
 - Site shows a conflicting £27.40 consultation price on one FAQ page vs the £95 fee schedule (flagged in the Audience Intelligence Report) — reconcile before consultation-led copy runs.
 
@@ -66,9 +66,9 @@ Budget posture follows the Audience Intelligence Report tiering: Tier 1 (Camera-
 |---|---|---|
 | Hook | `BD-24_closed-mouth-photo-smile_feed/story` | |
 | Hook | `BD-21_veneers-vs-bonding-comparison_feed/story` | |
-| Consider | `BD-23_fixed-braces-vs-invisalign_feed/story` | ⚠ shows £4,995 — gated on pricing reconciliation |
+| Consider | `BD-23_fixed-braces-vs-invisalign_feed/story` | ⚠ shows £3,995 (updated) — still differs from site £3,599; gated |
 | Convert | `BD-13_four-clinics-open-late-saturdays_feed/story` | ⚠ says "four clinics" — gated |
-| Convert (PAUSED, legal) | `BD-30_invisalign-116-14-monthly-finance_feed/story` | ⚠ price + legal gated |
+| Convert (PAUSED, legal) | `BD-30_invisalign-92-89-monthly-finance_feed/story` | ⚠ price + legal gated |
 
 **Primary text variants (PAS):**
 
@@ -109,7 +109,7 @@ Budget posture follows the Audience Intelligence Report tiering: Tier 1 (Camera-
 **Creatives:**
 | Stage | File | Note |
 |---|---|---|
-| Hook | `BD-25_thirties-smile-invisalign_feed/story` | ⚠ shows £4,995 — gated |
+| Hook | `BD-25_thirties-smile-invisalign_feed/story` | ⚠ shows £3,995 (updated) — still differs from site £3,599; gated |
 | Consider | `BD-22_something-big-in-diary-timelines_feed/story` | |
 | Convert | `BD-20_bonding-one-tooth-one-visit-395_feed/story` | |
 | Convert (PAUSED, legal) | `BD-32_afford-it-everything-else-objection_feed/story` | ⚠ price + legal gated |
