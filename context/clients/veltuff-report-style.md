@@ -56,6 +56,30 @@ Thanks
 3. **Shopify sales basis.** Shopify retroactively deducts sales for submitted return requests (a Jul-2025 bulk closure inflated LY July by ~£10K). Always compute gross sales from original order values and state the basis when quoting YoY.
 4. **Meta narrative continuity.** Track the threads he cares about: prospecting/upper-funnel creative vs DPA (catalogue) performance, Meta ROAS vs LY (+62–78% improvements are the trend), CAC trajectory (down from £27 to ~£18).
 
+## Metric priorities (Stuart's, stated 2026-08-04)
+
+Headline metrics — lead every market section with these:
+1. **ROAS** — Meta ROAS and blended ROAS/MER (total sales ÷ total ad spend).
+2. **Sales increase** — revenue and orders, WoW and YoY.
+3. **Awareness → overall performance** — how Meta's upper-funnel presence lifts the whole account. Always report reach, frequency, CPM, CPC, CTR, and prospecting vs retargeting spend split, and connect them to total Shopify sessions/direct traffic where the data allows ("reach up X%, CPM down Y%, and total site sessions/direct sales moved Z%"). Meta-attributed ROAS alone undersells this — the blended view is the proof.
+
+## Weekly upload pack (what Toby exports)
+
+**Meta Ads Manager** — one CSV, campaign level, daily or weekly breakdown, covering the report week (plus the prior week and the same week LY if using compare or a wider range). Columns:
+- Amount spent, Purchases, Purchases conversion value, Purchase ROAS
+- Reach, Frequency, Impressions, CPM
+- Link clicks, CPC (cost per link click), CTR (link click-through rate)
+- Optional but useful: Landing page views, Adds to cart, Checkouts initiated, ThruPlays
+Campaign names carry the prospecting/retargeting/DPA split — keep them in the export.
+
+**Shopify** (Analytics → Reports) — per store (UK and EU):
+- Total sales over time (weekly granularity, prior-year comparison on) — gross sales, discounts, returns, net
+- Total orders + AOV over time
+- Online store sessions over time and conversion rate over time
+- Sessions/sales by traffic source or channel (for the direct/branded lift signal)
+- Returning customer rate
+Sales basis rule applies: gross from original order values; note that Shopify retro-deducts submitted return requests.
+
 ## Data sources
 
 **v1 (current): upload-driven.** Toby uploads both exports each week; no API data is used.
