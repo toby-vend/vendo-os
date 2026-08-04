@@ -6,7 +6,7 @@ How to write the weekly Vendo report to Stuart Hames (stuart.hames@veltuff.com).
 
 - **Send:** Tuesday morning, as a **standalone thread** (not a reply to his email).
 - **Subject:** `Vendo Weekly — Paid Performance WK nn` (ISO week number, matching his numbering).
-- **Coverage window:** the prior ISO week, Monday–Sunday.
+- **Coverage window:** the prior ISO week, Monday–Sunday. Verified against Stuart's own WK31 dashboard: "Jul 27, 2026 – Aug 2, 2026" = ISO-8601 week 31, reported the following Monday. His week numbers are ISO week numbers. Month End Summaries use the calendar month (Jul 1–31), separate from the week grid.
 - **Mode (v1):** Claude composes the message text from Toby's uploaded data; Toby copies it into Gmail and sends manually. Never auto-send.
 - First Tuesday of the month: add a **Month End Summary** section above the weekly section, as he does.
 
