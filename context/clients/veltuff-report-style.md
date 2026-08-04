@@ -7,7 +7,7 @@ How to write the weekly Vendo report to Stuart Hames (stuart.hames@veltuff.com).
 - **Send:** Tuesday morning, as a **standalone thread** (not a reply to his email).
 - **Subject:** `Vendo Weekly — Paid Performance WK nn` (ISO week number, matching his numbering).
 - **Coverage window:** the prior ISO week, Monday–Sunday.
-- **Mode:** Gmail draft generated automatically; Toby reviews and sends. Never auto-send.
+- **Mode (v1):** Claude composes the message text from Toby's uploaded data; Toby copies it into Gmail and sends manually. Never auto-send.
 - First Tuesday of the month: add a **Month End Summary** section above the weekly section, as he does.
 
 ## Structure
@@ -58,6 +58,9 @@ Thanks
 
 ## Data sources
 
-- Meta: `data/vendo.db` → `meta_insights` (account 496760751455236, VELTUFF® UK, DKK-billed). Purchase revenue is in `action_values` (omni_purchase). EU/UK split at campaign level — confirm mapping.
-- Shopify: manual upload for now — Toby drops exports into `data/veltuff/uploads/`. Use most recent file for the report week.
+**v1 (current): upload-driven.** Toby uploads both exports each week; no API data is used.
+- Meta: newest file(s) in `data/veltuff/uploads/meta/`
+- Shopify: newest file(s) in `data/veltuff/uploads/shopify/`
 - Budgets: `data/veltuff/budgets.json` (weekly spend and ROAS targets per market) — populate from Stuart's budget sheet when received.
+
+**Later (dormant):** `data/vendo.db` → `meta_insights` via `sync-meta-ads.ts` + `scripts/functions/veltuff-weekly-meta.ts` (account 496760751455236, VELTUFF® UK, DKK-billed; purchase revenue in `action_values`/omni_purchase). Blocked on a fresh META_ACCESS_TOKEN; EU account mapping unconfirmed.
