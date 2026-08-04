@@ -80,6 +80,8 @@ Campaign names carry the prospecting/retargeting/DPA split — keep them in the 
 - Returning customer rate
 Sales basis rule applies: gross from original order values; note that Shopify retro-deducts submitted return requests.
 
+**Month-end pack** — after each calendar month closes, Toby additionally uploads the same Meta and Shopify exports for the full calendar month (1st–last day, prior-year comparison on where available). This feeds the Month End Summary section in the first report after month close, mirroring Stuart's own format (his months are calendar months, separate from the week grid). Name the files so the period is obvious, e.g. `meta-2026-07.csv`, `shopify-uk-2026-07.csv`.
+
 ## Data sources
 
 **v1 (current): upload-driven.** Toby uploads both exports each week; no API data is used.

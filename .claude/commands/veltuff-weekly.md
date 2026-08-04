@@ -13,6 +13,8 @@ Generate the weekly Vendo report email to Stuart Hames (Veltuff), mirroring his 
    - Shopify export(s): newest file(s) in `data/veltuff/uploads/shopify/`
    Accept whatever format Toby dropped in (CSV, XLSX, PDF, screenshots). Confirm the date range in each file actually covers the report week; if a file is stale or a market is missing, tell Toby exactly what's missing before composing — do not fill gaps by estimating.
 
+   **First report after a month closes:** Toby also uploads full-calendar-month exports (Meta + Shopify) to the same folders. Use them for the Month End Summary section — calendar month boundaries (1st–last day), not week roll-ups. If the month-end files are absent when a Month End Summary is due, ask for them.
+
 2. **Extract the week's numbers**
    - Meta per market (UK in £, EU in Kr. where the data allows): spend, purchases/conversions, revenue, ROAS, CPA, CTR, and WoW/YoY deltas if the export includes comparison periods.
    - Shopify: gross sales, orders, AOV, returning customer rate, refund rate. Sales basis rule: gross sales from original order values — Shopify retro-deducts submitted return requests, so say which basis the export uses if it's ambiguous.
