@@ -1,0 +1,13 @@
+{
+  "_note": "Maps Meta ad accounts to Veltuff report markets. fx_rate converts account currency to report currency when set (else raw account currency is reported). EU account TBC — confirm whether EU spend runs from a second account or campaigns within the UK account.",
+  "accounts": [
+    {
+      "account_id": "496760751455236",
+      "label": "VELTUFF UK",
+      "market": "UK",
+      "account_currency": "DKK",
+      "report_currency": "GBP",
+      "fx_rate": null
+    }
+  ]
+}

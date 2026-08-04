@@ -43,6 +43,7 @@ export interface MetaInsightRow {
   cost_per_action_type?: Array<{ action_type: string; value: string }>;
   conversions?: Array<{ action_type: string; value: string }>;
   conversion_values?: Array<{ action_type: string; value: string }>;
+  action_values?: Array<{ action_type: string; value: string }>;
 }
 
 export interface MetaAdLibraryResult {
@@ -176,7 +177,7 @@ export class MetaClient {
       'impressions', 'clicks', 'spend',
       'cpc', 'cpm', 'ctr', 'reach', 'frequency',
       'actions', 'cost_per_action_type',
-      'conversions', 'conversion_values',
+      'conversions', 'conversion_values', 'action_values',
     ].join(',');
 
     const rows: MetaInsightRow[] = [];

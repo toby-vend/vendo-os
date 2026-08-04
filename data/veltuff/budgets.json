@@ -1,0 +1,5 @@
+{
+  "_note": "Weekly Meta budget and ROAS targets per market, from Stuart's budget sheet. Populate before vs-budget lines can appear in the report. Amounts in the market's reporting currency (UK: GBP, EU: DKK).",
+  "UK": { "weekly_meta_spend": null, "target_roas_pct": null },
+  "EU": { "weekly_meta_spend": null, "target_roas_pct": null }
+}

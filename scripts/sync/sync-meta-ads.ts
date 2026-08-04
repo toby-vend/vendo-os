@@ -33,6 +33,10 @@ async function syncMetaAds() {
 
   await initSchema();
   const db = await getDb();
+
+  // Migration-safe: purchase revenue lives in action_values (omni_purchase), not conversion_values
+  try { db.run('ALTER TABLE meta_insights ADD COLUMN action_values TEXT'); } catch { /* already exists */ }
+
   const client = new MetaClient(accessToken);
 
   try {
@@ -159,13 +163,13 @@ async function syncMetaAds() {
 
 function upsertInsights(db: any, rows: MetaInsightRow[], level: string) {
   const stmt = db.prepare(
-    `INSERT INTO meta_insights (date, account_id, account_name, level, campaign_id, campaign_name, adset_id, adset_name, ad_id, ad_name, impressions, clicks, spend, cpc, cpm, ctr, reach, frequency, conversions, conversion_values, actions, cost_per_action, synced_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO meta_insights (date, account_id, account_name, level, campaign_id, campaign_name, adset_id, adset_name, ad_id, ad_name, impressions, clicks, spend, cpc, cpm, ctr, reach, frequency, conversions, conversion_values, action_values, actions, cost_per_action, synced_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(date, account_id, level, campaign_id, adset_id, ad_id) DO UPDATE SET
        account_name=excluded.account_name, campaign_name=excluded.campaign_name, adset_name=excluded.adset_name, ad_name=excluded.ad_name,
        impressions=excluded.impressions, clicks=excluded.clicks, spend=excluded.spend,
        cpc=excluded.cpc, cpm=excluded.cpm, ctr=excluded.ctr, reach=excluded.reach, frequency=excluded.frequency,
-       conversions=excluded.conversions, conversion_values=excluded.conversion_values,
+       conversions=excluded.conversions, conversion_values=excluded.conversion_values, action_values=excluded.action_values,
        actions=excluded.actions, cost_per_action=excluded.cost_per_action, synced_at=excluded.synced_at`
   );
 
@@ -193,6 +197,7 @@ function upsertInsights(db: any, rows: MetaInsightRow[], level: string) {
       parseNum(row.frequency),
       row.conversions ? JSON.stringify(row.conversions) : null,
       row.conversion_values ? JSON.stringify(row.conversion_values) : null,
+      row.action_values ? JSON.stringify(row.action_values) : null,
       row.actions ? JSON.stringify(row.actions) : null,
       row.cost_per_action_type ? JSON.stringify(row.cost_per_action_type) : null,
       now,
