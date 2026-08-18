@@ -47,6 +47,49 @@ export const CAPABILITIES = {
 export type Capability = (typeof CAPABILITIES)[keyof typeof CAPABILITIES];
 
 // ---------------------------------------------------------------------------
+// Route slug → implied read capabilities.
+//
+// The /admin/permissions matrix grants ROUTE slugs (e.g. 'clients'), not
+// capability slugs (e.g. 'clients:read') — nothing in the admin UI ever
+// hands out a capability directly, so without this mapping every non-admin
+// hit `permission_denied` on every agent tool. A user who can already open
+// a page is allowed to read the same data through chat.
+//
+// Deliberately NOT derivable from routes: decisions:read, xero:read
+// (financial/strategic — admin-only) and every write capability (writes
+// stay admin-only; graduation then governs dry-run vs execute).
+// ---------------------------------------------------------------------------
+
+const ROUTE_CAPABILITY_GRANTS: Record<string, Capability[]> = {
+  clients: [CAPABILITIES.CLIENTS_READ, CAPABILITIES.HEALTH_READ, CAPABILITIES.KNOWLEDGE_READ],
+  meetings: [CAPABILITIES.MEETINGS_READ, CAPABILITIES.CONCERNS_READ],
+  ads: [CAPABILITIES.CAMPAIGNS_READ],
+  dashboards: [CAPABILITIES.CAMPAIGNS_READ, CAPABILITIES.TRAFFIC_READ],
+  reports: [CAPABILITIES.CAMPAIGNS_READ, CAPABILITIES.TRAFFIC_READ],
+  'action-items': [CAPABILITIES.ASANA_READ],
+  'asana-tasks': [CAPABILITIES.ASANA_READ],
+  'time-tracking': [CAPABILITIES.TIME_READ],
+  capacity: [CAPABILITIES.TIME_READ],
+  'video-production': [CAPABILITIES.FRAMEIO_READ],
+  pipeline: [CAPABILITIES.GHL_READ],
+};
+
+export function capabilitiesForRoutes(routeSlugs: string[]): Set<string> {
+  const caps = new Set<string>();
+  for (const slug of routeSlugs) {
+    for (const cap of ROUTE_CAPABILITY_GRANTS[slug] ?? []) caps.add(cap);
+    // Any chat variant (chat, chat-am, chat-paid-social…) implies the user
+    // may talk to agents, which delegate to sub-agents and read the user's
+    // own calendar.
+    if (slug === 'chat' || slug.startsWith('chat-')) {
+      caps.add(CAPABILITIES.AGENTS_INVOKE);
+      caps.add(CAPABILITIES.CALENDAR_READ);
+    }
+  }
+  return caps;
+}
+
+// ---------------------------------------------------------------------------
 // Capability check — used by defineTool's permission gate.
 // ---------------------------------------------------------------------------
 
@@ -55,10 +98,16 @@ export function hasCapability(user: SessionUser, capability: string): boolean {
   // graduation gate, so this only widens what admins can DRAFT, not what
   // they can EXECUTE without approval.
   if (user.role === 'admin') return true;
-  return (
+  // Explicit capability slugs (a channel or override named e.g.
+  // 'clients:read') are honoured as-is…
+  if (
     user.channels.includes(capability) ||
     user.allowedRoutes.includes(capability)
-  );
+  ) {
+    return true;
+  }
+  // …otherwise derive read capabilities from the route slugs the user holds.
+  return capabilitiesForRoutes(user.allowedRoutes).has(capability);
 }
 
 // ---------------------------------------------------------------------------
