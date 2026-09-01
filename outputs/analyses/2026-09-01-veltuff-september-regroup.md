@@ -70,6 +70,19 @@ So the plan:
 
 ---
 
+## 8. Was relaunching ProTex1 a good idea? (Stuart's "we've put budget back into Protex1")
+
+Yes — the data says the mistake was the July pause, not the relaunch.
+
+- **History:** ProTex1 ran continuously from Aug 2025 to 21 Jul 2026 and is the account's best long-run campaign. Pre-pause 12 weeks (May–mid Jul): 733% ROAS on ~950 DKK/week, 146 purchases. It was paused 22 Jul–18 Aug during the account restructure, while still running 318–577% in its final weeks.
+- **Cost of the pause:** the account ran at 312% for the 4 weeks it was off. At its trailing run-rate the pause forfeited roughly 19–23K DKK (~£2.2–2.6K) of attributed revenue — in exactly the month Stuart is comparing YoY.
+- **Since relaunch (19 Aug–1 Sep):** 4,483 DKK at 509%, 29 purchases — at 2.3x its previous weekly spend. Marginal ROAS is down from 733% (expected at higher spend) but still above the 5.0 target and the account average.
+- **No cannibalisation:** the rest of the account ran 398% in the relaunch fortnight vs 312% during the pause — everything improved together.
+- **Seasonality supports scaling further:** last year ProTex1 climbed from ~300% in late Aug to 670–870% through Sept and 1,000–1,400% Oct–Nov, sustaining ~2,300–2,700 DKK/week. Current spend is already at that level a month earlier; its strongest three months are ahead.
+- **Watch:** w/c 26 Aug dipped to 346%. One week, against a volatile weekly history — check the next export before reading anything into it.
+
+---
+
 ## Draft reply to Stuart
 
 Subject: Re: September regroup
