@@ -88,7 +88,7 @@ UGC. As we agreed when we set it live, UGC is top of funnel. It gets people in, 
 
 Awareness. Roughly £425 for August, reaching ~125K people a week at a fraction of sales-campaign CPMs. It will never show its own ROAS but it feeds everything downstream and the B2B play. If pure ROAS is the September priority it's a lever we can trim. I'll bring the maths for both options.
 
-Getting to 5x. Prune first, then scale. Cutting the two weak creative-test ad sets alone would have made August 425%, and the sales layer excluding awareness ran at 469%. From there we scale Protex1, hi-vis and the catalogue campaigns, and fill the offer slot clearance covered last year. On the call I'd also like to agree ROAS targets per layer, because 5x blended and beating LY revenue fight each other at the current budget.
+Getting to 5x. Prune first, then scale. Cutting the two weak creative-test ad sets alone would have made August 425%, and the sales layer excluding awareness ran at 469%. From there we scale Protex1, hi-vis and the catalogue campaigns, and fill the offer slot clearance covered last year. Now we have your tracker I'll report against your targets directly each week, Meta at 5.0 and blended at 4.6 for September, and on the call I'd like to agree what each layer needs to do to get there, since 5x Meta and beating LY revenue pull against each other at the current budget.
 
 Swift trainer. Edit is in internal review now. First cut to you tomorrow, final Thursday, ahead of launch on the 5th.
 
