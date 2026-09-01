@@ -76,23 +76,22 @@ Subject: Re: September regroup
 
 Morning Stuart,
 
-Agreed, let's get a call in this week to set September up properly. I'll send some times over. Full August wrap-up is ready, quick answers on your points below.
+Agreed on the regroup, I'll send some times over for this week. Quick take on each point before we speak:
 
-August overall. You're right on Meta: matched weeks, spend was 14 percent down on last year and revenue moved in line with it, with ROAS flat at 3.7x. Worth holding alongside that: the store itself beat last year. Total sales £67.2K, up 7 percent, on 8 percent fewer sessions, with conversion rate up 23 percent and AOV up 14 percent. Last year also had a clearance campaign running through late August, which is part of the purchase gap. The final week of August was the strongest of the month, 3.9x on the highest spend, so the new structure is heading the right way into September.
+August. Meta ROAS was level with LY (368% vs 372%) but spend was 14% down so revenue followed it. The store overall was up though: total sales £67.2K +7% YoY on stronger AOV and CvR. Worth noting LY had clearance running through late August and we haven't replaced that offer, which is most of the purchase gap. The final week of August was the best of the month at 389%, so the relaunches are pulling the right way into September.
 
-Protex1 and trousers. Confirmed working. Protex1 prospecting ran at 5.2x across August, and the Seasonal Best Sellers catalogue push opened exceptionally. You can see it on site, Protex1 Softshell sessions up 54 percent and the stretch trousers page up 373 percent.
+Protex1 / trousers. Working. Protex1 ran 520% for the month, Seasonal Best Sellers opened very strong and trousers are solid. We're backing these harder now they're out of learning.
 
-Hi-vis. Still the anchor. 349 percent on prospecting, 452 percent to existing customers, and the Reflex hi-vis lines are the top sellers on Shopify, one of them up 106 percent year on year.
+Hi-vis. Still the anchor. 349% prospecting, 452% to existing customers, and Reflex hi-vis is the top seller on the site.
 
-UGC. The reason it hasn't shown up in the summaries is that its job was never last-click sales, and the reports so far have only shown last-click. As we discussed when we set it live, UGC is the introduction: people see it, engage, go in and have a look, and the purchase then closes on a later ad, usually the catalogue retargeting, which takes the credit in Meta's reporting. The funnel data backs that up. People who click a UGC ad add to cart at exactly the same rate as every other ad in the account, they just complete the purchase later, so the revenue lands against the closing ad. On top of that the UGC ads have the strongest attention numbers in the account by some distance, roughly three times the account average hook rate. Even on pure last-click it has covered its own cost at 2.4x. What we'll change so you can see it in the numbers: from this month the weekly report will show UGC on the measures that match its job, cost per visitor landed, adds to cart, hook rate and new reach, alongside the blended prospecting plus retargeting return. The one genuine issue is delivery, Meta's algorithm keeps starving it of spend because it optimises to last-click, so we'd give it a small ring-fenced budget to do its top of funnel job properly. Detail on the call.
+UGC. As we agreed when we set it live, UGC is top of funnel. It gets people in, then the purchase closes on the catalogue and retargeting ads, so the credit never lands on the UGC ad itself. The data backs this up: people who click a UGC ad add to cart at the same rate as every other ad in the account, and the hook rate is 3x the account average. The gap is that our summaries have only shown last-click, so you've never seen that side of it. Fixing that from this week: the report will show UGC on the job it's actually doing (visitors in, adds to cart, hook rate) alongside the blended prospecting plus retargeting return. We'll also ring-fence it a small budget, as Meta keeps starving it of spend because it optimises to last-click.
 
-Awareness. About 7.6 percent of spend, roughly £425 for the month, reaching around 125K people a week at a fraction of sales-campaign CPMs. It will never show a direct ROAS as a reach objective, and it does pull the blended number down, so it's a genuine choice: it supports the brand and B2B recognition play we discussed, but if pure ROAS is the September priority it's one of the levers. We'll bring the maths for both.
+Awareness. Roughly £425 for August, reaching ~125K people a week at a fraction of sales-campaign CPMs. It will never show its own ROAS but it feeds everything downstream and the B2B play. If pure ROAS is the September priority it's a lever we can trim. I'll bring the maths for both options.
 
-Getting to 5x. The plan is pruning first, then scaling. Cutting the two underperforming creative-test ad sets would have put August at 4.25x on its own, and the sales layer excluding awareness ran at 4.7x. From there: scale Protex1, hi-vis, and the catalogue campaigns, and fill the late-summer offer slot, since last year's clearance was covering this exact window. We'd also like to agree ROAS targets per layer rather than one blended number, because 5x blended and beating last year's revenue pull against each other at the current budget.
+Getting to 5x. Prune first, then scale. Cutting the two weak creative-test ad sets alone would have made August 425%, and the sales layer excluding awareness ran at 469%. From there we scale Protex1, hi-vis and the catalogue campaigns, and fill the offer slot clearance covered last year. On the call I'd also like to agree ROAS targets per layer, because 5x blended and beating LY revenue fight each other at the current budget.
 
-Swift trainer. The edit went into internal review this morning. First cut to you tomorrow, and with amends back Wednesday we deliver the final on Thursday 4th, ahead of launch on the 5th.
+Swift trainer. Edit is in internal review now. First cut to you tomorrow, final Thursday, ahead of launch on the 5th.
 
-Call times to follow.
+Any questions let me know.
 
 Thanks
-Toby
