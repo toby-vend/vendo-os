@@ -27,11 +27,13 @@
     }
   },
   "EU": {
-    "currency": "DKK (unconfirmed - verify with Stuart)",
+    "managed_by_vendo": false,
+    "_note": "Vendo does NOT manage the EU side (Toby, 2026-09-01). Retained for context only - Stuart's tracker covers both markets. Never report on or make recommendations for EU spend.",
+    "currency": "DKK (unconfirmed)",
     "revenue_target": {"Sep": 130000, "Oct": 238000, "Nov": 265000, "Dec": 199000},
     "meta_budget": {"Jul": 7000, "Aug": 12180, "Sep": 12180, "Oct": 22410, "Nov": 24900, "Dec": 18702},
     "meta_planned_roas": 3.15,
     "blended_mer_target": {"Sep": 7.12, "Oct": 7.08, "Nov": 7.10, "Dec": 7.09},
-    "actuals_2026_stuart_mtd": {"meta_spend_aug": 16838, "note": "EU Meta ran 138% of its Aug budget on Stuart's tracker; May hit 328%. EU is chronically over Meta budget while UK runs under. EU not yet in Vendo reporting."}
+    "actuals_2026_stuart_mtd": {"meta_spend_aug": 16838, "note": "EU Meta ran 138% of its Aug budget on Stuart's tracker; May hit 328%. Context only - EU is not Vendo-managed."}
   }
 }

@@ -1,5 +1,5 @@
 {
-  "_note": "Populated 2026-09-01 from Stuart's Media Spend Tracker 2026.xlsx (see data/veltuff/media-budget-2026.json for the full year). Weekly = monthly daily budget x 7. UK in GBP; EU currency reads as DKK - confirm before first EU vs-budget line.",
+  "_note": "Populated 2026-09-01 from Stuart's Media Spend Tracker 2026.xlsx (see data/veltuff/media-budget-2026.json for the full year). Weekly = monthly daily budget x 7. UK in GBP. Vendo manages the UK Meta account ONLY - the EU side is not managed by Vendo (Toby, 2026-09-01); EU figures are context, never report vs-budget on EU.",
   "UK": {
     "weekly_meta_spend": 1750,
     "target_roas_pct": 500,
@@ -9,9 +9,7 @@
     "fx_dkk_to_gbp": 0.1147
   },
   "EU": {
-    "weekly_meta_spend": 2842,
-    "target_roas_pct": 315,
-    "monthly_meta_budget": 12180,
-    "currency_unconfirmed": true
+    "managed_by_vendo": false,
+    "note": "EU account not managed by Vendo. Tracker figures retained in media-budget-2026.json for context only."
   }
 }

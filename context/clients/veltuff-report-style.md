@@ -24,9 +24,6 @@ Week nn Summary
 Meta — UK
 - bullets
 
-Meta — EU
-- bullets
-
 Shopify view
 - bullets
 
@@ -43,7 +40,7 @@ Thanks
 - Open "Morning Stuart," (he writes "Morning all,").
 - Plain bullets. One metric + one comment per line. No tables, no bold, no headings beyond section names, no emojis, no em dashes.
 - Every headline metric carries **YoY %** and, where we have targets, **vs budget %**: "Spend £2,610 -24% YoY and -8% vs budget."
-- UK figures in £, EU figures in Kr. (DKK). ROAS as a percentage ("424%"), not a multiple.
+- UK figures in £. ROAS as a percentage ("424%"), not a multiple. (Stuart's own emails carry EU sections in Kr., but Vendo manages UK only — never report EU performance or vs-budget; his tracker's EU figures are background context.)
 - His metric vocabulary: Gross sales, orders, AOV, CvR, blended ROAS, Meta ROAS, PPC ROAS, CAC, returning customer rate, GP1, refund rate, AP orders, clearance share.
 - Be blunt about misses. State the miss, then the hypothesis, then the action. He writes "My gut feel is…" — we can flag judgement the same way, but ours should lean on data.
 - No praise, no filler, no agency-speak. Short declaratives.
@@ -72,7 +69,7 @@ Headline metrics — lead every market section with these:
 - Optional but useful: Landing page views, Adds to cart, Checkouts initiated, ThruPlays
 Campaign names carry the prospecting/retargeting/DPA split — keep them in the export.
 
-**Shopify** (Analytics → Reports) — per store (UK and EU):
+**Shopify** (Analytics → Reports) — UK store (Vendo manages UK only; no EU reporting):
 - Total sales over time (weekly granularity, prior-year comparison on) — gross sales, discounts, returns, net
 - Total orders + AOV over time
 - Online store sessions over time and conversion rate over time
@@ -91,4 +88,4 @@ Sales basis rule applies: gross from original order values; note that Shopify re
 - **FX basis:** Stuart converts UK Meta spend DKK→GBP at ~0.1147 (his Total Spend sheet). Use ~0.115, not 0.11, or GBP spend reads ~4% low against his tracker and the vs-budget % won't reconcile.
 - **Targets vocabulary (his sheet):** "Meta Planned ROAS" = 5.0 UK Aug–Dec (this is what "5x" means — platform ROAS, not blended). "Blended ROAS Target (MER)" = separate, Sep 4.62 rising to ~5.6 by Dec. Quote vs the right one.
 
-**Later (dormant):** `data/vendo.db` → `meta_insights` via `sync-meta-ads.ts` + `scripts/functions/veltuff-weekly-meta.ts` (account 496760751455236, VELTUFF® UK, DKK-billed; purchase revenue in `action_values`/omni_purchase). Blocked on a fresh META_ACCESS_TOKEN; EU account mapping unconfirmed.
+**Later (dormant):** `data/vendo.db` → `meta_insights` via `sync-meta-ads.ts` + `scripts/functions/veltuff-weekly-meta.ts` (account 496760751455236, VELTUFF® UK, DKK-billed; purchase revenue in `action_values`/omni_purchase). Blocked on a fresh META_ACCESS_TOKEN. EU side is not Vendo-managed — no EU account mapping needed.
