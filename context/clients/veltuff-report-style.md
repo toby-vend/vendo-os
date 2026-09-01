@@ -87,6 +87,8 @@ Sales basis rule applies: gross from original order values; note that Shopify re
 **v1 (current): upload-driven.** Toby uploads both exports each week; no API data is used.
 - Meta: newest file(s) in `data/veltuff/uploads/meta/`
 - Shopify: newest file(s) in `data/veltuff/uploads/shopify/`
-- Budgets: `data/veltuff/budgets.json` (weekly spend and ROAS targets per market) — populate from Stuart's budget sheet when received.
+- Budgets: `data/veltuff/budgets.json` (current-month weekly targets) and `data/veltuff/media-budget-2026.json` (full-year tracker: monthly Meta/Google budgets, revenue targets, Meta planned ROAS, blended MER targets, Stuart's own MTD actuals and 2025 baselines). Source: Stuart's Media Spend Tracker 2026.xlsx (received 2026-09-01, copy in `data/veltuff/uploads/`). Ask for a refreshed copy monthly — his MTD actuals and revised budgets live in it.
+- **FX basis:** Stuart converts UK Meta spend DKK→GBP at ~0.1147 (his Total Spend sheet). Use ~0.115, not 0.11, or GBP spend reads ~4% low against his tracker and the vs-budget % won't reconcile.
+- **Targets vocabulary (his sheet):** "Meta Planned ROAS" = 5.0 UK Aug–Dec (this is what "5x" means — platform ROAS, not blended). "Blended ROAS Target (MER)" = separate, Sep 4.62 rising to ~5.6 by Dec. Quote vs the right one.
 
 **Later (dormant):** `data/vendo.db` → `meta_insights` via `sync-meta-ads.ts` + `scripts/functions/veltuff-weekly-meta.ts` (account 496760751455236, VELTUFF® UK, DKK-billed; purchase revenue in `action_values`/omni_purchase). Blocked on a fresh META_ACCESS_TOKEN; EU account mapping unconfirmed.

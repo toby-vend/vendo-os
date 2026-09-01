@@ -1,0 +1,37 @@
+{
+  "_source": "Stuart Hames's 'Media Spend Tracker 2026.xlsx', received 2026-09-01. Original in data/veltuff/uploads/Media-Spend-Tracker-2026.xlsx. Sheets: Media Budget Tracker (UK, GBP), Media Budget Tracker EU (currency reads as DKK/Kr — CONFIRM with Stuart), Total Spend (daily; UK Meta billed in DKK, converted to GBP at ~0.1147), UK/INT Orders, Budget Allocation.",
+  "_notes": [
+    "Media split UK: Google non-brand 63%, Google brand 7%, Meta 30% of media budget.",
+    "'Actual Meta Spend VENDO' row = the Meta budget agreed with Vendo (April cut 8000->5600, May-Jun 3600, back to 7500 from July).",
+    "Stuart's '5x' = the Meta Planned ROAS row: 5.0 every month Aug-Dec (UK). Blended MER target is separate: Sep 4.5 rising to ~5.4 by Dec.",
+    "His tracker converts UK Meta DKK->GBP at ~0.1147 (from Total Spend sheet). Our reports have used 0.11 - switch to ~0.115 or state basis, else spend reads ~4% low vs his numbers.",
+    "He reconciles Meta spend via PayPal withdrawals (GBP 500 threshold) and Google via bank charges (GBP 1000 threshold)."
+  ],
+  "UK": {
+    "currency": "GBP",
+    "revenue_target": {"Jan": 72000, "Feb": 72000, "Mar": 72000, "Apr": 68000, "May": 68000, "Jun": 68000, "Jul": 84430, "Aug": 64350, "Sep": 90000, "Oct": 95000, "Nov": 125000, "Dec": 95000},
+    "meta_budget_vendo": {"Jan": 8000, "Feb": 8000, "Mar": 7500, "Apr": 5600, "May": 3600, "Jun": 3600, "Jul": 7500, "Aug": 7500, "Sep": 7500, "Oct": 7500, "Nov": 9000, "Dec": 7500},
+    "meta_daily_budget": {"Sep": 250, "Oct": 242, "Nov": 300, "Dec": 242},
+    "google_budget_total": {"Sep": 12000, "Oct": 12000, "Nov": 15000, "Dec": 9500},
+    "meta_planned_roas": {"Jan": 5.8, "Feb": 3.5, "Mar": 3.5, "Apr": 7.0, "May": 8.0, "Jun": 9.0, "Jul": 5.8, "Aug": 5.0, "Sep": 5.0, "Oct": 5.0, "Nov": 5.0, "Dec": 5.0},
+    "blended_mer_target_new": {"Apr": 4.36, "May": 5.0, "Jun": 5.0, "Jul": 5.12, "Aug": 3.79, "Sep": 4.62, "Oct": 4.87, "Nov": 5.21, "Dec": 5.59},
+    "actuals_2026_stuart_mtd": {
+      "meta_spend": {"Jan": 8032, "Feb": 8061, "Mar": 8403, "Apr": 5760, "May": 3861, "Jun": 4488, "Jul": 4661, "Aug": 6330},
+      "revenue": {"Jan": 111191, "Feb": 102132, "Mar": 90062, "Apr": 81043, "May": 72952, "Jun": 73282, "Jul": 65128, "Aug": 73483},
+      "blended_roas": {"Jul": 5.13, "Aug": 5.04}
+    },
+    "actuals_2025": {
+      "meta_spend": {"Jan": 6882, "Feb": 6471, "Mar": 7177, "Apr": 6946, "May": 6691, "Jun": 5280, "Jul": 7478, "Aug": 7495, "Sep": 7214, "Oct": 6401, "Nov": 11143, "Dec": 7225},
+      "revenue": {"Aug": 69638, "Sep": 88933, "Oct": 97130, "Nov": 192940, "Dec": 95839},
+      "blended_roas": {"Aug": 4.60, "Sep": 5.31, "Oct": 5.43, "Nov": 7.01, "Dec": 5.64}
+    }
+  },
+  "EU": {
+    "currency": "DKK (unconfirmed - verify with Stuart)",
+    "revenue_target": {"Sep": 130000, "Oct": 238000, "Nov": 265000, "Dec": 199000},
+    "meta_budget": {"Jul": 7000, "Aug": 12180, "Sep": 12180, "Oct": 22410, "Nov": 24900, "Dec": 18702},
+    "meta_planned_roas": 3.15,
+    "blended_mer_target": {"Sep": 7.12, "Oct": 7.08, "Nov": 7.10, "Dec": 7.09},
+    "actuals_2026_stuart_mtd": {"meta_spend_aug": 16838, "note": "EU Meta ran 138% of its Aug budget on Stuart's tracker; May hit 328%. EU is chronically over Meta budget while UK runs under. EU not yet in Vendo reporting."}
+  }
+}

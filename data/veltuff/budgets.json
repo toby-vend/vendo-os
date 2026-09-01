@@ -1,5 +1,17 @@
 {
-  "_note": "Weekly Meta budget and ROAS targets per market, from Stuart's budget sheet. Populate before vs-budget lines can appear in the report. Amounts in the market's reporting currency (UK: GBP, EU: DKK).",
-  "UK": { "weekly_meta_spend": null, "target_roas_pct": null },
-  "EU": { "weekly_meta_spend": null, "target_roas_pct": null }
+  "_note": "Populated 2026-09-01 from Stuart's Media Spend Tracker 2026.xlsx (see data/veltuff/media-budget-2026.json for the full year). Weekly = monthly daily budget x 7. UK in GBP; EU currency reads as DKK - confirm before first EU vs-budget line.",
+  "UK": {
+    "weekly_meta_spend": 1750,
+    "target_roas_pct": 500,
+    "blended_mer_target_pct": 462,
+    "monthly_meta_budget": 7500,
+    "daily_meta_budget": 250,
+    "fx_dkk_to_gbp": 0.1147
+  },
+  "EU": {
+    "weekly_meta_spend": 2842,
+    "target_roas_pct": 315,
+    "monthly_meta_budget": 12180,
+    "currency_unconfirmed": true
+  }
 }
