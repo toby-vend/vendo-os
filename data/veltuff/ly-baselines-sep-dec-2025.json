@@ -1,0 +1,229 @@
+{
+ "_note": "LY (Sept-Dec 2025) monthly baselines per campaign layer, from the Jul-2023-Aug-2026 weekly campaign export (Tue-Mon weeks). For Stuart 2 Sept ask: prove UGC/awareness feed the lower funnel via YoY CVR/CPA on those campaigns; and the two acceptance criteria for creative investment. CVR here = purchases/link clicks. CPA/CPM in DKK.",
+ "months": {
+  "2025-09": {
+   "awareness": {
+    "spend_dkk": 310,
+    "revenue_dkk": 0,
+    "roas_pct": 0,
+    "purchases": 0,
+    "cpa_dkk": 0,
+    "click_to_purchase_cvr_pct": 0.0,
+    "cpm_dkk": 7.99,
+    "impressions": 38738,
+    "reach": 35138,
+    "atc": 0
+   },
+   "broad prospecting": {
+    "spend_dkk": 34970,
+    "revenue_dkk": 141119,
+    "roas_pct": 404,
+    "purchases": 250,
+    "cpa_dkk": 139.9,
+    "click_to_purchase_cvr_pct": 1.32,
+    "cpm_dkk": 38.71,
+    "impressions": 903405,
+    "reach": 357432,
+    "atc": 1229
+   },
+   "category": {
+    "spend_dkk": 24640,
+    "revenue_dkk": 131311,
+    "roas_pct": 533,
+    "purchases": 183,
+    "cpa_dkk": 134.6,
+    "click_to_purchase_cvr_pct": 2.1,
+    "cpm_dkk": 47.48,
+    "impressions": 518981,
+    "reach": 229558,
+    "atc": 789
+   },
+   "offer/clearance (LY only)": {
+    "spend_dkk": 2614,
+    "revenue_dkk": 13502,
+    "roas_pct": 516,
+    "purchases": 29,
+    "cpa_dkk": 90.1,
+    "click_to_purchase_cvr_pct": 2.99,
+    "cpm_dkk": 43.35,
+    "impressions": 60308,
+    "reach": 20393,
+    "atc": 171
+   },
+   "other": {
+    "spend_dkk": 4409,
+    "revenue_dkk": 41061,
+    "roas_pct": 931,
+    "purchases": 33,
+    "cpa_dkk": 133.6,
+    "click_to_purchase_cvr_pct": 4.49,
+    "cpm_dkk": 50.63,
+    "impressions": 87086,
+    "reach": 40464,
+    "atc": 183
+   },
+   "retargeting DPA": {
+    "spend_dkk": 3496,
+    "revenue_dkk": 25083,
+    "roas_pct": 717,
+    "purchases": 35,
+    "cpa_dkk": 99.9,
+    "click_to_purchase_cvr_pct": 2.82,
+    "cpm_dkk": 72.61,
+    "impressions": 48147,
+    "reach": 21203,
+    "atc": 143
+   }
+  },
+  "2025-10": {
+   "broad prospecting": {
+    "spend_dkk": 28027,
+    "revenue_dkk": 171750,
+    "roas_pct": 613,
+    "purchases": 295,
+    "cpa_dkk": 95.0,
+    "click_to_purchase_cvr_pct": 1.69,
+    "cpm_dkk": 34.37,
+    "impressions": 815418,
+    "reach": 355522,
+    "atc": 1369
+   },
+   "category": {
+    "spend_dkk": 19274,
+    "revenue_dkk": 128636,
+    "roas_pct": 667,
+    "purchases": 165,
+    "cpa_dkk": 116.8,
+    "click_to_purchase_cvr_pct": 2.26,
+    "cpm_dkk": 47.22,
+    "impressions": 408179,
+    "reach": 179427,
+    "atc": 660
+   },
+   "offer/clearance (LY only)": {
+    "spend_dkk": 4881,
+    "revenue_dkk": 21347,
+    "roas_pct": 437,
+    "purchases": 59,
+    "cpa_dkk": 82.7,
+    "click_to_purchase_cvr_pct": 1.65,
+    "cpm_dkk": 33.08,
+    "impressions": 147553,
+    "reach": 78566,
+    "atc": 377
+   },
+   "retargeting DPA": {
+    "spend_dkk": 2802,
+    "revenue_dkk": 15489,
+    "roas_pct": 553,
+    "purchases": 22,
+    "cpa_dkk": 127.4,
+    "click_to_purchase_cvr_pct": 1.88,
+    "cpm_dkk": 68.64,
+    "impressions": 40821,
+    "reach": 17403,
+    "atc": 118
+   }
+  },
+  "2025-11": {
+   "broad prospecting": {
+    "spend_dkk": 26685,
+    "revenue_dkk": 237129,
+    "roas_pct": 889,
+    "purchases": 500,
+    "cpa_dkk": 53.4,
+    "click_to_purchase_cvr_pct": 3.21,
+    "cpm_dkk": 41.74,
+    "impressions": 639334,
+    "reach": 335269,
+    "atc": 1847
+   },
+   "category": {
+    "spend_dkk": 18743,
+    "revenue_dkk": 201327,
+    "roas_pct": 1074,
+    "purchases": 338,
+    "cpa_dkk": 55.5,
+    "click_to_purchase_cvr_pct": 4.27,
+    "cpm_dkk": 51.82,
+    "impressions": 361694,
+    "reach": 175522,
+    "atc": 1188
+   },
+   "offer/clearance (LY only)": {
+    "spend_dkk": 39435,
+    "revenue_dkk": 299713,
+    "roas_pct": 760,
+    "purchases": 657,
+    "cpa_dkk": 60.0,
+    "click_to_purchase_cvr_pct": 2.48,
+    "cpm_dkk": 38.97,
+    "impressions": 1012006,
+    "reach": 428755,
+    "atc": 3315
+   },
+   "retargeting DPA": {
+    "spend_dkk": 2800,
+    "revenue_dkk": 18982,
+    "roas_pct": 678,
+    "purchases": 37,
+    "cpa_dkk": 75.7,
+    "click_to_purchase_cvr_pct": 3.3,
+    "cpm_dkk": 82.22,
+    "impressions": 34053,
+    "reach": 13492,
+    "atc": 164
+   }
+  },
+  "2025-12": {
+   "broad prospecting": {
+    "spend_dkk": 26206,
+    "revenue_dkk": 148565,
+    "roas_pct": 567,
+    "purchases": 318,
+    "cpa_dkk": 82.4,
+    "click_to_purchase_cvr_pct": 1.67,
+    "cpm_dkk": 29.96,
+    "impressions": 874695,
+    "reach": 423979,
+    "atc": 1664
+   },
+   "category": {
+    "spend_dkk": 21739,
+    "revenue_dkk": 130145,
+    "roas_pct": 599,
+    "purchases": 228,
+    "cpa_dkk": 95.3,
+    "click_to_purchase_cvr_pct": 2.51,
+    "cpm_dkk": 40.56,
+    "impressions": 535942,
+    "reach": 221360,
+    "atc": 917
+   },
+   "offer/clearance (LY only)": {
+    "spend_dkk": 19751,
+    "revenue_dkk": 76249,
+    "roas_pct": 386,
+    "purchases": 163,
+    "cpa_dkk": 121.2,
+    "click_to_purchase_cvr_pct": 1.86,
+    "cpm_dkk": 41.11,
+    "impressions": 480395,
+    "reach": 195907,
+    "atc": 967
+   },
+   "retargeting DPA": {
+    "spend_dkk": 3502,
+    "revenue_dkk": 17853,
+    "roas_pct": 510,
+    "purchases": 24,
+    "cpa_dkk": 145.9,
+    "click_to_purchase_cvr_pct": 1.38,
+    "cpm_dkk": 61.65,
+    "impressions": 56810,
+    "reach": 25290,
+    "atc": 110
+   }
+  }
+ }
+}

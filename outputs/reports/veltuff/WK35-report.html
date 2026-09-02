@@ -1,0 +1,192 @@
+<title>Veltuff WK35</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+:root{
+  --paper:#FAF9F6; --card:#FFFFFF; --ink:#21242A; --ink2:#5A5F6A; --ink3:#8A8F99;
+  --hair:#E4E1D8; --accent:#9A7B0A; --accent-soft:#F3EBD2;
+  --bar:#31639F; --bar-soft:#E3EBF5;
+  --good:#2E7D52; --good-soft:#E3F0E8; --warn:#B25E0B; --warn-soft:#F7EBDC; --crit:#A33B2E; --crit-soft:#F5E4E1;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14161B; --card:#1C1F26; --ink:#ECEDEF; --ink2:#9AA0AB; --ink3:#6D7380;
+    --hair:#2C3038; --accent:#E3C34C; --accent-soft:#332C12;
+    --bar:#74A4D6; --bar-soft:#243244;
+    --good:#58B98A; --good-soft:#17301F; --warn:#E09B4C; --warn-soft:#33250F; --crit:#D97A6C; --crit-soft:#331714;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14161B; --card:#1C1F26; --ink:#ECEDEF; --ink2:#9AA0AB; --ink3:#6D7380;
+  --hair:#2C3038; --accent:#E3C34C; --accent-soft:#332C12;
+  --bar:#74A4D6; --bar-soft:#243244;
+  --good:#58B98A; --good-soft:#17301F; --warn:#E09B4C; --warn-soft:#33250F; --crit:#D97A6C; --crit-soft:#331714;
+}
+*{box-sizing:border-box}
+body{background:var(--paper); color:var(--ink); font:15px/1.55 "Public Sans",system-ui,sans-serif; margin:0; padding:32px 20px 56px;}
+.page{max-width:920px; margin:0 auto; display:flex; flex-direction:column; gap:26px;}
+h1,h2,h3{font-family:"Barlow Semi Condensed","Public Sans",sans-serif; margin:0; text-wrap:balance;}
+.stripe{height:8px; border-radius:2px; background:repeating-linear-gradient(45deg,var(--accent) 0 14px,transparent 14px 28px); opacity:.85;}
+header .brandrow{display:flex; justify-content:space-between; align-items:baseline; margin-top:14px;}
+.brand{font-family:"Barlow Semi Condensed"; font-weight:700; font-size:15px; letter-spacing:.14em; text-transform:uppercase;}
+.brand span{color:var(--accent);}
+.docmeta{color:var(--ink2); font-size:13px;}
+h1{font-size:34px; font-weight:700; margin-top:6px;}
+.sub{color:var(--ink2); margin-top:2px; font-size:15px;}
+section{background:var(--card); border:1px solid var(--hair); border-radius:6px; padding:20px 22px;}
+.eyebrow{font-family:"Barlow Semi Condensed"; font-weight:600; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:12px; display:flex; align-items:center; gap:10px;}
+.eyebrow .new{background:var(--accent-soft); color:var(--accent); border-radius:3px; padding:1px 7px; letter-spacing:.08em;}
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;}
+.tile{border:1px solid var(--hair); border-radius:6px; padding:14px 16px; display:flex; flex-direction:column; gap:4px; background:var(--card);}
+.tile .k{font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-family:"Barlow Semi Condensed"; font-weight:600;}
+.tile .v{font-size:27px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
+.tile .d{font-size:13px; color:var(--ink2);}
+.pill{display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; border-radius:999px; padding:2px 9px; vertical-align:2px;}
+.pill.good{background:var(--good-soft); color:var(--good);}
+.pill.warn{background:var(--warn-soft); color:var(--warn);}
+.pill.crit{background:var(--crit-soft); color:var(--crit);}
+.up{color:var(--good); font-weight:600;} .down{color:var(--crit); font-weight:600;} .flat{color:var(--ink2); font-weight:600;}
+table{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums;}
+th{font-family:"Barlow Semi Condensed"; font-weight:600; font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); text-align:right; padding:7px 10px; border-bottom:1px solid var(--hair);}
+th:first-child, td:first-child{text-align:left; padding-left:0;}
+td{padding:8px 10px; text-align:right; border-bottom:1px solid var(--hair); font-size:14.5px;}
+tr:last-child td{border-bottom:none;}
+.tablewrap{overflow-x:auto;}
+.campname{font-weight:600;}
+.barcell{min-width:150px;}
+.bar{display:flex; align-items:center; gap:8px;}
+.bar .track{flex:1; height:14px; background:var(--bar-soft); border-radius:3px; overflow:hidden;}
+.bar .fill{height:100%; background:var(--bar); border-radius:3px 3px 3px 3px;}
+.bar .num{width:48px; text-align:right; font-weight:600;}
+.muted{color:var(--ink2);}
+.small{font-size:13px;}
+.split{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.ugcgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:12px 0 14px;}
+.ugcstat{border:1px solid var(--hair); border-radius:6px; padding:11px 13px;}
+.ugcstat .v{font-size:21px; font-weight:700; font-variant-numeric:tabular-nums;}
+.ugcstat .k{font-size:12px; color:var(--ink2); margin-top:2px;}
+p{margin:0 0 10px; max-width:72ch;}
+ul.actions{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:9px;}
+ul.actions li{padding-left:20px; position:relative; max-width:78ch;}
+ul.actions li::before{content:""; position:absolute; left:0; top:8px; width:9px; height:9px; background:var(--accent); border-radius:2px;}
+footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:86ch;}
+@media print{
+  body{padding:0; background:#fff;}
+  section{break-inside:avoid; border-color:#ddd;}
+  .stripe{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+}
+</style>
+
+<div class="page">
+<header>
+  <div class="stripe"></div>
+  <div class="brandrow">
+    <div class="brand">Vendo <span>×</span> Veltuff® UK</div>
+    <div class="docmeta">Prepared by Vendo Digital · 2 Sept 2026</div>
+  </div>
+  <h1>Weekly Paid Performance — WK35</h1>
+  <div class="sub">Monday 24 – Sunday 30 August 2026 · UK · Meta + Shopify · August month end included</div>
+</header>
+
+<section>
+  <div class="eyebrow">Week 35 headlines</div>
+  <div class="tiles">
+    <div class="tile"><div class="k">Meta spend</div><div class="v">£1,697</div><div class="d">97% of £1,750 budget <span class="pill good">On budget</span></div><div class="d"><span class="flat">−3% YoY</span> · 14,798 DKK</div></div>
+    <div class="tile"><div class="k">Meta ROAS</div><div class="v">364%</div><div class="d">Target 500% <span class="pill warn">Below target</span></div><div class="d"><span class="up">+12% YoY</span> (325% LY)</div></div>
+    <div class="tile"><div class="k">Meta revenue</div><div class="v">£6,174</div><div class="d">53,829 DKK · <span class="up">+9% YoY</span> on less spend</div></div>
+    <div class="tile"><div class="k">Purchases · CPA</div><div class="v">101 · £16.81</div><div class="d">Purchases <span class="up">+29% YoY</span> · CPA <span class="up">−25% YoY</span></div></div>
+    <div class="tile"><div class="k">Blended MER</div><div class="v">1,084%</div><div class="d">£18,394 total sales ÷ £1,697 Meta spend</div></div>
+    <div class="tile"><div class="k">Shopify total sales</div><div class="v">£18,394</div><div class="d"><span class="up">+20% WoW</span> · <span class="up">+10% YoY</span> · best week of the summer</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Meta — campaigns, WK35</div>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Campaign</th><th>Spend (DKK)</th><th class="barcell">ROAS</th><th>Purchases</th><th>Note</th></tr>
+    <tr><td class="campname">Broad prospecting</td><td>3,620</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:47%"></div></div><div class="num">376%</div></div></td><td>29</td><td class="muted small">Improving, was 286% a fortnight ago</td></tr>
+    <tr><td class="campname">Hi-Vis</td><td>3,351</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:28%"></div></div><div class="num">226%</div></div></td><td>16</td><td class="muted small">Dip from 511% — diagnosing this week</td></tr>
+    <tr><td class="campname">ProTex1</td><td>2,243</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:68%"></div></div><div class="num">546%</div></div></td><td>16</td><td class="muted small">2nd week since relaunch, holding scale</td></tr>
+    <tr><td class="campname">Retargeting DPA</td><td>1,489</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:65%"></div></div><div class="num">522%</div></div></td><td>14</td><td class="muted small">Consistent closer</td></tr>
+    <tr><td class="campname">Awareness</td><td>1,414</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><div class="num muted">—</div></div></td><td class="muted">—</td><td class="muted small">172,349 people reached · 5.76 DKK CPM</td></tr>
+    <tr><td class="campname">Trousers DPA</td><td>1,345</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:17%"></div></div><div class="num">137%</div></div></td><td>6</td><td class="muted small">Soft week, reviewing product focus</td></tr>
+    <tr><td class="campname">Seasonal Best Sellers</td><td>1,336</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:100%"></div></div><div class="num">807%</div></div></td><td>19</td><td class="muted small">Room to push harder</td></tr>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Lower-funnel YoY <span class="new">New — tracks the creative question</span></div>
+  <p class="small muted">Same week last year (LY grid runs Tue–Mon, a two-day offset). CVR = purchases ÷ link clicks. This table runs weekly through September to show whether upper-funnel work (UGC, awareness, creative) is lifting the campaigns that close.</p>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Layer</th><th>Spend (DKK)</th><th>ROAS</th><th>vs LY</th><th>CPA (DKK)</th><th>vs LY</th><th>CVR</th><th>vs LY</th></tr>
+    <tr><td class="campname">Retargeting DPA</td><td>1,489</td><td>522%</td><td><span class="up">+352 pts</span></td><td>106</td><td><span class="up">−70%</span></td><td>2.19%</td><td><span class="up">+1.26 pts</span></td></tr>
+    <tr><td class="campname">Category (Hi-Vis, ProTex1, Trousers, SB)</td><td>8,275</td><td>392%</td><td><span class="up">+93 pts</span></td><td>145</td><td><span class="up">−19%</span></td><td>1.82%</td><td><span class="up">+0.30 pts</span></td></tr>
+    <tr><td class="campname">Broad prospecting</td><td>3,620</td><td>376%</td><td><span class="flat">+9 pts</span></td><td>125</td><td><span class="up">−34%</span></td><td>1.89%</td><td><span class="up">+0.68 pts</span></td></tr>
+    <tr><td class="campname">Awareness (reach objective)</td><td>1,414</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td></tr>
+  </table>
+  </div>
+  <p class="small" style="margin-top:12px;">Account reach <strong>294,691 (+8% YoY)</strong> and impressions <strong>+9% YoY</strong> on <strong>−3% spend</strong> — more coverage for the same money, with conversion metrics up on every sales layer.</p>
+</section>
+
+<section>
+  <div class="eyebrow">UGC — top of funnel view</div>
+  <p class="small">UGC's job is the introduction; the purchase closes later on a catalogue or retargeting ad, which takes the last-click credit. These are the measures that match the job.</p>
+  <div class="ugcgrid">
+    <div class="ugcstat"><div class="v">9% = 9%</div><div class="k">Click → add-to-cart, UGC vs account (Jul–Aug) — parity</div></div>
+    <div class="ugcstat"><div class="v">≈3×</div><div class="k">Hook rate vs account average — strongest in account</div></div>
+    <div class="ugcstat"><div class="v">236%</div><div class="k">Lifetime last-click ROAS — covers its own cost as a floor</div></div>
+    <div class="ugcstat"><div class="v">£16</div><div class="k">Delivery this week — the real issue; ring-fenced budget live this week</div></div>
+  </div>
+  <p class="small muted">This week on limited delivery: 25 landed visitors, 12 adds to cart, 2.46% CTR vs 1.81% sales-campaign average. Weekly from here: cost per visitor, adds to cart, hook rate, new reach, and whether the blended prospecting + retargeting return holds as UGC spend scales.</p>
+</section>
+
+<div class="split">
+<section>
+  <div class="eyebrow">Shopify — week 35</div>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Metric</th><th>WK35</th><th>Change</th></tr>
+    <tr><td>Total sales</td><td>£18,394</td><td><span class="up">+20% WoW · +10% YoY</span></td></tr>
+    <tr><td>Gross sales</td><td>£15,503</td><td><span class="up">+10% YoY</span></td></tr>
+    <tr><td>Sessions</td><td>11,771</td><td><span class="up">+8% WoW</span> · level YoY</td></tr>
+    <tr><td>Conversion rate</td><td>1.4%</td><td class="muted small">LY 1.94% ran clearance — offer-driven gap</td></tr>
+    <tr><td>AOV</td><td>£50.35</td><td class="muted small">Holding without discounting</td></tr>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">August month end</div>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Metric</th><th>Aug 2026</th><th>Change</th></tr>
+    <tr><td>Meta spend (tracker)</td><td>£6,330</td><td class="muted small">84% of £7,500 budget</td></tr>
+    <tr><td>Meta ROAS</td><td>368%</td><td class="flat">372% LY — level</td></tr>
+    <tr><td>Blended (tracker basis)</td><td>5.04</td><td><span class="up">vs 3.68 target</span> <span class="pill good">Ahead</span></td></tr>
+    <tr><td>Shopify total sales</td><td>£67,192</td><td><span class="up">+7% YoY</span></td></tr>
+    <tr><td>AOV · CvR</td><td>£47.86 · 1.87%</td><td><span class="up">+14% · +23% YoY</span></td></tr>
+    <tr><td>Revenue vs revised target</td><td>£73,483</td><td><span class="up">+14%</span> vs £64,350</td></tr>
+  </table>
+  </div>
+</section>
+</div>
+
+<section>
+  <div class="eyebrow">Actions this week</div>
+  <ul class="actions">
+    <li>Diagnose the Hi-Vis dip (511% → 226%); rotate creative if it reads as fatigue. Report back next week.</li>
+    <li>Hold ProTex1 scale into its strongest season (ran 670–1,400% Sept–Nov last year); push Seasonal Best Sellers harder.</li>
+    <li>Shift budget out of the two weak creative-test ad sets (84% / 188%) into the catalogue sets.</li>
+    <li>UGC ring-fenced budget live this week; top-of-funnel measures now report weekly (section above).</li>
+    <li>September per the tracker: £250/day, Meta ROAS target 5.0, blended 4.62 — reported against weekly.</li>
+    <li>September offer slot still open — last year clearance covered this window. Decision at the regroup.</li>
+  </ul>
+</section>
+
+<footer>
+  Data: Meta Ads Manager exports 24–30 Aug 2026 (all campaigns) and weekly YoY export (Tue–Mon grid, two-day offset on LY comparisons) · Shopify UK analytics 24–30 Aug 2026 and matching week 25–31 Aug 2025 · Stuart's Media Spend Tracker for budget and blended-target lines · DKK→£ at 0.1147, the tracker's own rate. Prepared by Vendo Digital for Veltuff® UK.
+</footer>
+</div>

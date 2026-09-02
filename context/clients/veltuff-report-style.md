@@ -53,6 +53,17 @@ Thanks
 3. **Shopify sales basis.** Shopify retroactively deducts sales for submitted return requests (a Jul-2025 bulk closure inflated LY July by ~£10K). Always compute gross sales from original order values and state the basis when quoting YoY.
 4. **Meta narrative continuity.** Track the threads he cares about: prospecting/upper-funnel creative vs DPA (catalogue) performance, Meta ROAS vs LY (+62–78% improvements are the trend), CAC trajectory (down from £27 to ~£18).
 
+## Creative-investment acceptance criteria (Stuart, 2 Sept 2026 — standing)
+
+Stuart will back further creative production investment only if ONE of these is true, and every weekly report from Sept 2026 must build the evidence:
+
+1. **Brand trade:** similar revenue, costs and ROAS to LY, but with materially more reach and impressions.
+2. **Attribution proof:** clear YoY improvement in core conversion metrics (CVR, CPA) on the lower-funnel campaigns specifically, attributable to UGC/awareness/creative.
+
+Weekly requirement from Sept 2026: a **lower-funnel YoY table** — retargeting DPA + category campaigns vs the same period LY on CVR (purchases/clicks), CPA, ROAS, plus account reach/impressions YoY. LY baselines: `data/veltuff/ly-baselines-sep-dec-2025.json` (Sept–Dec 2025 monthly by layer, from the campaign YoY export). His quote: "What I want to avoid is putting more effort into creative production if it just lands us back at similar performance to last year's basic catalogue ads."
+
+He also asked for "a physical report with metrics pulled out" — a formatted metrics document alongside the email, not prose only.
+
 ## Metric priorities (Stuart's, stated 2026-08-04)
 
 Headline metrics — lead every market section with these:
