@@ -1,0 +1,89 @@
+/* ============================================================
+   Vendo Digital — Colour tokens
+   Source of truth: VD_2026 Brand Sheet + Vendo OS product CSS.
+   Vendo is a DARK-FIRST brand: near-black green surfaces,
+   luminous mint-green accent, generous neutral text.
+   ============================================================ */
+
+:root {
+  /* ---- Brand core (official brand sheet hexes) ---- */
+  --vendo-green:    #8EFEBB; /* Pantone 352C — luminous mint, the signature accent */
+  --vendo-black:    #051412; /* Pantone Black C — deep green-black, primary canvas */
+  --vendo-sage:     #09221F; /* Pantone 5463C — dark sage, raised surfaces */
+  --charcoal:       #2C2C2C; /* Pantone Neutral Black C */
+  --gray:           #ABABAB; /* Pantone Cool Gray 6C */
+  --white:          #FFFFFF;
+
+  /* ---- Mint green scale (derived from --vendo-green) ---- */
+  --green-50:  #ECFFF4;
+  --green-100: #C9FEDD;
+  --green-200: #A7FEC9;
+  --green-300: #8EFEBB; /* = brand green */
+  --green-400: #5DEFA0;
+  --green-500: #22C55E; /* product "signal" green — interactive / success */
+  --green-600: #16A34A;
+  --green-700: #0E7C38;
+
+  /* ---- Green-black ink scale (canvas → raised → hairline) ---- */
+  --ink-950: #030D0B; /* darkest — page void behind cards */
+  --ink-900: #051412; /* = vendo-black, primary canvas */
+  --ink-850: #071916;
+  --ink-800: #09221F; /* = vendo-sage, card / panel surface */
+  --ink-700: #0E2C28; /* raised / hover surface */
+  --ink-600: #143A35; /* strong border / divider on dark */
+
+  /* ---- Neutral text ramp ---- */
+  --neutral-0:   #FFFFFF;
+  --neutral-100: #E8F2EC; /* primary body text on dark */
+  --neutral-300: #B9C7C0; /* secondary text */
+  --neutral-400: #ABABAB; /* = gray, muted/meta text */
+  --neutral-600: #6B7B74; /* disabled, faint labels */
+  --neutral-800: #2C2C2C; /* = charcoal */
+
+  /* ---- Functional / status ---- */
+  --signal-positive: #22C55E;
+  --signal-warning:  #F5D674;
+  --signal-negative: #EF4444;
+  --signal-info:     #60A5FA;
+
+  /* ============================================================
+     SEMANTIC ALIASES — reference these in product code
+     ============================================================ */
+
+  /* Surfaces (dark-first) */
+  --surface-canvas:   var(--ink-900);
+  --surface-sunken:   var(--ink-950);
+  --surface-card:     var(--ink-800);
+  --surface-raised:   var(--ink-700);
+  --surface-inverse:  var(--white);  /* light sections (e.g. leaflet / print) */
+
+  /* Translucent glass (product dashboards) */
+  --glass-fill:        rgba(9, 34, 31, 0.55);
+  --glass-fill-strong: rgba(9, 34, 31, 0.72);
+  --glass-border:      rgba(255, 255, 255, 0.08);
+
+  /* Text */
+  --text-heading:    var(--white);
+  --text-body:       var(--neutral-100);
+  --text-secondary:  var(--neutral-300);
+  --text-muted:      var(--neutral-400);
+  --text-disabled:   var(--neutral-600);
+  --text-on-accent:  var(--ink-900); /* dark text on mint buttons */
+  --text-accent:     var(--vendo-green);
+
+  /* Borders & dividers */
+  --border-hairline: rgba(255, 255, 255, 0.06);
+  --border-subtle:   rgba(255, 255, 255, 0.10);
+  --border-strong:   rgba(142, 254, 187, 0.30);
+
+  /* Accent */
+  --accent:          var(--vendo-green);
+  --accent-hover:    var(--green-200);
+  --accent-press:    var(--green-400);
+  --accent-soft:     rgba(142, 254, 187, 0.12);
+  --accent-glow:     rgba(142, 254, 187, 0.18);
+  --accent-signal:   var(--green-500); /* brighter functional green */
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px rgba(142, 254, 187, 0.45);
+}

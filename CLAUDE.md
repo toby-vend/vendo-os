@@ -230,6 +230,7 @@ If Claude lacks access or credentials for something, ask the user to **grant acc
 - Decision logs live in `data/decisions/` with dated filenames
 - Keep context files current — stale context limits the system's effectiveness
 - Always maintain this file (CLAUDE.md) when making structural changes
+- **Brand system for all visual output:** before building any artifact, HTML report, deck, landing page, or other designed deliverable, load the `vendo-brand` skill (`.claude/skills/vendo-brand/` — tokens, logos, components, UI kits) and build on its tokens and guidelines. Link `styles.css` or use the token files directly; use the official logo assets, never redrawn marks. Vendo is dark-first (`--vendo-black` canvas, `--vendo-green` accent). Client-branded creative (e.g. ads in a client's own brand) is the only exception.
 
 ---
 
