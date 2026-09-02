@@ -1,110 +1,106 @@
 <title>Veltuff WK35</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Public+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Instrument+Serif:ital@1&display=swap">
 <style>
 :root{
-  --paper:#FAF9F6; --card:#FFFFFF; --ink:#21242A; --ink2:#5A5F6A; --ink3:#8A8F99;
-  --hair:#E4E1D8; --accent:#9A7B0A; --accent-soft:#F3EBD2;
-  --bar:#31639F; --bar-soft:#E3EBF5;
-  --good:#2E7D52; --good-soft:#E3F0E8; --warn:#B25E0B; --warn-soft:#F7EBDC; --crit:#A33B2E; --crit-soft:#F5E4E1;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#14161B; --card:#1C1F26; --ink:#ECEDEF; --ink2:#9AA0AB; --ink3:#6D7380;
-    --hair:#2C3038; --accent:#E3C34C; --accent-soft:#332C12;
-    --bar:#74A4D6; --bar-soft:#243244;
-    --good:#58B98A; --good-soft:#17301F; --warn:#E09B4C; --warn-soft:#33250F; --crit:#D97A6C; --crit-soft:#331714;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#14161B; --card:#1C1F26; --ink:#ECEDEF; --ink2:#9AA0AB; --ink3:#6D7380;
-  --hair:#2C3038; --accent:#E3C34C; --accent-soft:#332C12;
-  --bar:#74A4D6; --bar-soft:#243244;
-  --good:#58B98A; --good-soft:#17301F; --warn:#E09B4C; --warn-soft:#33250F; --crit:#D97A6C; --crit-soft:#331714;
+  --vendo-green:#8EFEBB; --vendo-black:#051412;
+  --ink-950:#030D0B; --ink-800:#09221F; --ink-700:#0E2C28; --ink-600:#143A35;
+  --text-heading:#FFFFFF; --text-body:#E8F2EC; --text-secondary:#B9C7C0; --text-muted:#ABABAB; --text-faint:#6B7B74;
+  --border-hairline:rgba(255,255,255,.06); --border-subtle:rgba(255,255,255,.10); --border-strong:rgba(142,254,187,.30);
+  --accent:#8EFEBB; --accent-soft:rgba(142,254,187,.12); --accent-glow:rgba(142,254,187,.18);
+  --good:#22C55E; --good-soft:rgba(34,197,94,.14); --warn:#F5D674; --warn-soft:rgba(245,214,116,.13); --neg:#EF4444; --neg-soft:rgba(239,68,68,.13);
+  --radius-sm:10px; --radius-md:14px; --radius-lg:20px; --radius-pill:999px;
+  --shadow-lg:0 8px 32px rgba(0,0,0,.35);
+  --font-sans:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --font-accent:'Instrument Serif','Times New Roman',Georgia,serif;
 }
 *{box-sizing:border-box}
-body{background:var(--paper); color:var(--ink); font:15px/1.55 "Public Sans",system-ui,sans-serif; margin:0; padding:32px 20px 56px;}
-.page{max-width:920px; margin:0 auto; display:flex; flex-direction:column; gap:26px;}
-h1,h2,h3{font-family:"Barlow Semi Condensed","Public Sans",sans-serif; margin:0; text-wrap:balance;}
-.stripe{height:8px; border-radius:2px; background:repeating-linear-gradient(45deg,var(--accent) 0 14px,transparent 14px 28px); opacity:.85;}
-header .brandrow{display:flex; justify-content:space-between; align-items:baseline; margin-top:14px;}
-.brand{font-family:"Barlow Semi Condensed"; font-weight:700; font-size:15px; letter-spacing:.14em; text-transform:uppercase;}
-.brand span{color:var(--accent);}
-.docmeta{color:var(--ink2); font-size:13px;}
-h1{font-size:34px; font-weight:700; margin-top:6px;}
-.sub{color:var(--ink2); margin-top:2px; font-size:15px;}
-section{background:var(--card); border:1px solid var(--hair); border-radius:6px; padding:20px 22px;}
-.eyebrow{font-family:"Barlow Semi Condensed"; font-weight:600; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
-.eyebrow .new{background:var(--accent-soft); color:var(--accent); border-radius:3px; padding:1px 7px; letter-spacing:.08em;}
+body{
+  background:var(--vendo-black);
+  background-image:radial-gradient(rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:24px 24px;
+  color:var(--text-body); font:15px/1.55 var(--font-sans); margin:0; padding:36px 20px 64px;
+}
+.page{max-width:940px; margin:0 auto; display:flex; flex-direction:column; gap:22px;}
+h1{font:800 clamp(30px,4.5vw,42px)/1.05 var(--font-sans); letter-spacing:-.03em; color:var(--text-heading); margin:14px 0 4px; text-wrap:balance;}
+h1 .fl{font:italic 400 1.06em var(--font-accent); color:var(--accent); letter-spacing:0;}
+.brandrow{display:flex; justify-content:space-between; align-items:center; gap:16px;}
+.brandrow img{height:26px; display:block;}
+.docmeta{color:var(--text-muted); font-size:13px;}
+.sub{color:var(--text-secondary); font-size:15px;}
+section{background:var(--ink-800); border:1px solid var(--border-hairline); border-radius:var(--radius-md); padding:22px 24px; box-shadow:var(--shadow-lg);}
+.eyebrow{font:600 12px/1 var(--font-sans); letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.eyebrow .new{background:var(--accent-soft); color:var(--accent); border-radius:var(--radius-pill); padding:3px 10px; letter-spacing:.04em;}
 .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;}
-.tile{border:1px solid var(--hair); border-radius:6px; padding:14px 16px; display:flex; flex-direction:column; gap:4px; background:var(--card);}
-.tile .k{font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); font-family:"Barlow Semi Condensed"; font-weight:600;}
-.tile .v{font-size:27px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
-.tile .d{font-size:13px; color:var(--ink2);}
-.pill{display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; border-radius:999px; padding:2px 9px; vertical-align:2px;}
+.tile{border:1px solid var(--border-hairline); border-radius:var(--radius-sm); padding:15px 17px; display:flex; flex-direction:column; gap:4px; background:var(--ink-700);}
+.tile .k{font:600 11.5px/1.3 var(--font-sans); letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted);}
+.tile .v{font:800 27px/1.1 var(--font-sans); letter-spacing:-.02em; color:var(--text-heading); font-variant-numeric:tabular-nums;}
+.tile .v.acc{color:var(--accent);}
+.tile .d{font-size:13px; color:var(--text-secondary);}
+.pill{display:inline-block; font:700 11px/1 var(--font-sans); letter-spacing:.05em; text-transform:uppercase; border-radius:var(--radius-pill); padding:3px 10px; vertical-align:2px;}
 .pill.good{background:var(--good-soft); color:var(--good);}
 .pill.warn{background:var(--warn-soft); color:var(--warn);}
-.pill.crit{background:var(--crit-soft); color:var(--crit);}
-.up{color:var(--good); font-weight:600;} .down{color:var(--crit); font-weight:600;} .flat{color:var(--ink2); font-weight:600;}
+.up{color:var(--good); font-weight:600;} .down{color:var(--neg); font-weight:600;} .flat{color:var(--text-secondary); font-weight:600;}
 table{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums;}
-th{font-family:"Barlow Semi Condensed"; font-weight:600; font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); text-align:right; padding:7px 10px; border-bottom:1px solid var(--hair);}
+th{font:600 11.5px/1.3 var(--font-sans); letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); text-align:right; padding:8px 10px; border-bottom:1px solid var(--border-subtle);}
 th:first-child, td:first-child{text-align:left; padding-left:0;}
-td{padding:8px 10px; text-align:right; border-bottom:1px solid var(--hair); font-size:14.5px;}
+td{padding:9px 10px; text-align:right; border-bottom:1px solid var(--border-hairline); font-size:14.5px; color:var(--text-body);}
 tr:last-child td{border-bottom:none;}
 .tablewrap{overflow-x:auto;}
-.campname{font-weight:600;}
-.ly{color:var(--ink3); font-size:12.5px;}
+.campname{font-weight:600; color:var(--text-heading);}
+.ly{color:var(--text-faint); font-size:12.5px;}
 .barcell{min-width:150px;}
 .bar{display:flex; align-items:center; gap:8px;}
-.bar .track{flex:1; height:14px; background:var(--bar-soft); border-radius:3px; overflow:hidden;}
-.bar .fill{height:100%; background:var(--bar); border-radius:3px;}
-.bar .num{width:48px; text-align:right; font-weight:600;}
-.muted{color:var(--ink2);}
+.bar .track{flex:1; height:13px; background:var(--ink-950); border-radius:4px; overflow:hidden;}
+.bar .fill{height:100%; background:var(--accent); border-radius:4px; box-shadow:0 0 12px var(--accent-glow);}
+.bar .num{width:48px; text-align:right; font-weight:700; color:var(--text-heading);}
+.muted{color:var(--text-muted);}
 .small{font-size:13px;}
 .split{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
 @media (max-width:720px){.split{grid-template-columns:1fr}}
 .ugcgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:12px 0 14px;}
-.ugcstat{border:1px solid var(--hair); border-radius:6px; padding:11px 13px;}
-.ugcstat .v{font-size:21px; font-weight:700; font-variant-numeric:tabular-nums;}
-.ugcstat .k{font-size:12px; color:var(--ink2); margin-top:2px;}
+.ugcstat{border:1px solid var(--border-hairline); border-radius:var(--radius-sm); padding:12px 14px; background:var(--ink-700);}
+.ugcstat .v{font:800 21px/1.2 var(--font-sans); color:var(--accent); font-variant-numeric:tabular-nums;}
+.ugcstat .k{font-size:12px; color:var(--text-secondary); margin-top:3px;}
 .journey{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin:14px 0;}
-.jstep{border:1px solid var(--hair); border-radius:6px; padding:12px 14px; position:relative;}
-.jstep .n{font-family:"Barlow Semi Condensed"; font-weight:700; font-size:12px; letter-spacing:.12em; color:var(--accent); text-transform:uppercase; margin-bottom:5px;}
-.jstep .t{font-weight:600; font-size:14px; margin-bottom:4px; line-height:1.35;}
-.jstep .s{font-size:12.5px; color:var(--ink2); line-height:1.45;}
-.jstep .s strong{color:var(--ink);}
-.jstep.credit{border-left:4px solid var(--bar);}
+.jstep{border:1px solid var(--border-hairline); border-radius:var(--radius-sm); padding:13px 15px; background:var(--ink-700);}
+.jstep .n{font:700 11px/1 var(--font-sans); letter-spacing:.09em; color:var(--accent); text-transform:uppercase; margin-bottom:6px;}
+.jstep .t{font-weight:700; font-size:14px; margin-bottom:4px; line-height:1.35; color:var(--text-heading);}
+.jstep .s{font-size:12.5px; color:var(--text-secondary); line-height:1.5;}
+.jstep .s strong{color:var(--text-heading);}
+.jstep.credit{border-color:var(--border-strong); background:linear-gradient(var(--accent-soft),var(--accent-soft)) , var(--ink-700);}
 .crit-cards{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px;}
 @media (max-width:720px){.crit-cards{grid-template-columns:1fr}}
-.crit-card{border:1px solid var(--hair); border-left:4px solid var(--accent); border-radius:6px; padding:13px 15px;}
-.crit-card .t{font-family:"Barlow Semi Condensed"; font-weight:600; font-size:14px; margin-bottom:4px;}
-.path{display:flex; align-items:stretch; gap:0; margin:14px 0 10px; flex-wrap:wrap;}
-.step{flex:1; min-width:150px; border:1px solid var(--hair); padding:12px 14px; position:relative;}
-.step:first-child{border-radius:6px 0 0 6px;}
-.step:last-child{border-radius:0 6px 6px 0;}
-.step + .step{border-left:none;}
-.step .v{font-size:23px; font-weight:700; font-variant-numeric:tabular-nums;}
-.step .k{font-size:12px; color:var(--ink2); margin-top:2px; line-height:1.4;}
-.step.target{background:var(--accent-soft);}
-p{margin:0 0 10px; max-width:76ch;}
-ul.actions{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:9px;}
-ul.actions li{padding-left:20px; position:relative; max-width:80ch;}
-ul.actions li::before{content:""; position:absolute; left:0; top:8px; width:9px; height:9px; background:var(--accent); border-radius:2px;}
-footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
+.crit-card{border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:14px 16px; background:var(--ink-700);}
+.crit-card .t{font-weight:700; font-size:14px; margin-bottom:4px; color:var(--text-heading);}
+.path{display:flex; align-items:stretch; gap:10px; margin:14px 0 10px; flex-wrap:wrap;}
+.step{flex:1; min-width:150px; border:1px solid var(--border-hairline); border-radius:var(--radius-sm); padding:13px 15px; background:var(--ink-700);}
+.step .v{font:800 23px/1.2 var(--font-sans); color:var(--text-heading); font-variant-numeric:tabular-nums;}
+.step .k{font-size:12px; color:var(--text-secondary); margin-top:3px; line-height:1.45;}
+.step.target{border-color:var(--border-strong); background:linear-gradient(var(--accent-soft),var(--accent-soft)), var(--ink-700);}
+.step.target .v{color:var(--accent);}
+p{margin:0 0 10px; max-width:78ch;}
+ul.actions{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
+ul.actions li{padding-left:22px; position:relative; max-width:82ch;}
+ul.actions li::before{content:""; position:absolute; left:0; top:7px; width:10px; height:10px; background:var(--accent); border-radius:3px;}
+footer{color:var(--text-faint); font-size:12.5px; line-height:1.6; max-width:90ch;}
+a{color:var(--accent);}
 @media print{
-  body{padding:0; background:#fff;}
-  section{break-inside:avoid; border-color:#ddd;}
-  .stripe{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  body{padding:12px; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  section{break-inside:avoid; box-shadow:none;}
+}
+@media (prefers-reduced-motion:no-preference){
+  section{animation:rise .4s cubic-bezier(.16,1,.3,1) both;}
+  @keyframes rise{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
 }
 </style>
 
 <div class="page">
 <header>
-  <div class="stripe"></div>
   <div class="brandrow">
-    <div class="brand">Vendo <span>×</span> Veltuff® UK</div>
-    <div class="docmeta">Prepared by Vendo Digital · 2 Sept 2026</div>
+    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODYwIiBoZWlnaHQ9IjM5MiIgdmlld0JveD0iMCAwIDg2MCAzOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxtYXNrIGlkPSJtYXNrMF85ODJfMTk4OSIgc3R5bGU9Im1hc2stdHlwZTphbHBoYSIgbWFza1VuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeD0iMCIgeT0iMCIgd2lkdGg9Ijg2MCIgaGVpZ2h0PSIzOTIiPgo8cmVjdCB3aWR0aD0iODYwIiBoZWlnaHQ9IjM5MiIgZmlsbD0id2hpdGUiPjwvcmVjdD4KPC9tYXNrPgo8ZyBtYXNrPSJ1cmwoI21hc2swXzk4Ml8xOTg5KSI+CjxwYXRoIGQ9Ik0zNTkuNjk3IDIxOS4yNjlIMjg5LjQ4M0MyODkuOTY3IDIyNS41NzcgMjkxLjk5IDIzMC4zODkgMjk1LjU1OSAyMzMuNzIzQzI5OS4xMiAyMzcuMDU3IDMwMy41MDkgMjM4LjcyNCAzMDguNzEgMjM4LjcyNEMzMTYuNDQ5IDIzOC43MjQgMzIxLjgzIDIzNS40NTIgMzI0Ljg2IDIyOC45MDJIMzU3Ljg3OEMzNTYuMTgzIDIzNS41NyAzNTMuMTMgMjQxLjU3MiAzNDguNzE3IDI0Ni45MDFDMzQ0LjMwNSAyNTIuMjM4IDMzOC43NjggMjU2LjQxNyAzMzIuMTE1IDI1OS40NDZDMzI1LjQ2MSAyNjIuNDc0IDMxOC4wMTkgMjYzLjk5MiAzMDkuNzk1IDI2My45OTJDMjk5Ljg3OCAyNjMuOTkyIDI5MS4wNDUgMjYxLjg3MSAyODMuMzA2IDI1Ny42M0MyNzUuNTY3IDI1My4zODkgMjY5LjUxNSAyNDcuMzMyIDI2NS4xNjUgMjM5LjQ1MUMyNjAuODA3IDIzMS41NzEgMjU4LjYzNiAyMjIuMzYgMjU4LjYzNiAyMTEuODE5QzI1OC42MzYgMjAxLjI3OCAyNjAuNzg0IDE5Mi4wNjggMjY1LjA3OSAxODQuMTg3QzI2OS4zNzQgMTc2LjMwNyAyNzUuMzg3IDE3MC4yNSAyODMuMTM0IDE2Ni4wMDlDMjkwLjg3MyAxNjEuNzY3IDI5OS43NjggMTU5LjY0NiAzMDkuODAzIDE1OS42NDZDMzE5LjgzOCAxNTkuNjQ2IDMyOC4zMTEgMTYxLjcxMiAzMzUuOTMzIDE2NS44MjlDMzQzLjU1NSAxNjkuOTUzIDM0OS41MTQgMTc1LjgzIDM1My44MDEgMTgzLjQ2N0MzNTguMDk2IDE5MS4xMDUgMzYwLjI0NCAyMDAuMDExIDM2MC4yNDQgMjEwLjE5MkMzNjAuMjQ0IDIxMy4xMDMgMzYwLjA2NCAyMTYuMTMxIDM1OS42OTcgMjE5LjI4NVYyMTkuMjY5Wk0zMjguNDkxIDIwMS45OThDMzI4LjQ5MSAxOTYuNjY5IDMyNi42NzkgMTkyLjQyOCAzMjMuMDQ4IDE4OS4yNzRDMzE5LjQxNyAxODYuMTIgMzE0Ljg3OSAxODQuNTQ3IDMwOS40MzYgMTg0LjU0N0MzMDMuOTkzIDE4NC41NDcgMjk5Ljg0NiAxODYuMDY1IDI5Ni4yODUgMTg5LjA5NEMyOTIuNzE2IDE5Mi4xMjIgMjkwLjUwNiAxOTYuNDI2IDI4OS42NjMgMjAyLjAwNkgzMjguNDkxVjIwMS45OThaIiBmaWxsPSJ3aGl0ZSI+PC9wYXRoPgo8cGF0aCBkPSJNNDU5LjQgMTcxLjU0MUM0NjYuNDc1IDE3OS4yNDIgNDcwLjAxMyAxODkuODE0IDQ3MC4wMTMgMjAzLjI2NlYyNjIuNTM3SDQzOS4xNjZWMjA3LjQ0NUM0MzkuMTY2IDIwMC42NiA0MzcuNDA5IDE5NS4zODYgNDMzLjkwMiAxOTEuNjI5QzQzMC4zOTYgMTg3Ljg3MyA0MjUuNjc5IDE4NS45OTUgNDE5Ljc1MiAxODUuOTk1QzQxMy44MjQgMTg1Ljk5NSA0MDkuMTA3IDE4Ny44NzMgNDA1LjYwMSAxOTEuNjI5QzQwMi4wODcgMTk1LjM4NiA0MDAuMzM3IDIwMC42NiA0MDAuMzM3IDIwNy40NDVWMjYyLjUzN0gzNjkuMzExVjE2MS4wODZINDAwLjMzN1YxNzQuNTM5QzQwMy40NzcgMTcwLjA1NCA0MDcuNzA5IDE2Ni41MSA0MTMuMDM1IDE2My45MDRDNDE4LjM1NCAxNjEuMjk4IDQyNC4zNDMgMTU5Ljk5MSA0MzAuOTk3IDE1OS45OTFDNDQyLjg1MiAxNTkuOTkxIDQ1Mi4zMTcgMTYzLjg0MSA0NTkuMzkyIDE3MS41MzRMNDU5LjQgMTcxLjU0MVoiIGZpbGw9IndoaXRlIj48L3BhdGg+CjxwYXRoIGQ9Ik00ODQuMDcxIDE4NC4xOEM0ODcuOTk5IDE3Ni4yOTkgNDkzLjM1NyAxNzAuMjQyIDUwMC4xMjcgMTY2LjAwMUM1MDYuODk4IDE2MS43NTkgNTE0LjQ1OCAxNTkuNjM5IDUyMi44MDYgMTU5LjYzOUM1MjkuNDU5IDE1OS42MzkgNTM1LjUzNSAxNjEuMDMyIDU0MS4wNDEgMTYzLjgxN0M1NDYuNTQ2IDE2Ni42MTEgNTUwLjg2NSAxNzAuMzYgNTU0LjAxMiAxNzUuMDg2VjEyOEg1ODUuMDM5VjI2Mi41NDRINTU0LjAxMlYyNDcuOTk3QzU1MS4xMDcgMjUyLjg0OSA1NDYuOTY4IDI1Ni43MjIgNTQxLjU4NyAyNTkuNjMzQzUzNi4yMDcgMjYyLjU0NCA1MjkuOTQ0IDI2NCA1MjIuODA2IDI2NEM1MTQuNDU4IDI2NCA1MDYuODk4IDI2MS44NDggNTAwLjEyNyAyNTcuNTQ0QzQ5My4zNDkgMjUzLjI0IDQ4Ny45OTkgMjQ3LjEyIDQ4NC4wNzEgMjM5LjE3N0M0ODAuMTQzIDIzMS4yNDIgNDc4LjE3NSAyMjIuMDU1IDQ3OC4xNzUgMjExLjYzMkM0NzguMTc1IDIwMS4yMDggNDgwLjE0MyAxOTIuMDYgNDg0LjA3MSAxODQuMThaTTU0Ny41NzcgMTkzLjQ1M0M1NDMuMjgyIDE4OC45NjkgNTM4LjA1IDE4Ni43MjMgNTMxLjg4IDE4Ni43MjNDNTI1LjcxMSAxODYuNzIzIDUyMC40NzkgMTg4LjkzNyA1MTYuMTgzIDE5My4zNTlDNTExLjg4OCAxOTcuNzg4IDUwOS43NDEgMjAzLjg3NiA1MDkuNzQxIDIxMS42MzJDNTA5Ljc0MSAyMTkuMzg3IDUxMS44ODggMjI1LjUzNyA1MTYuMTgzIDIzMC4wODRDNTIwLjQ3OSAyMzQuNjMxIDUyNS43MTEgMjM2LjkgNTMxLjg4IDIzNi45QzUzOC4wNSAyMzYuOSA1NDMuMjgyIDIzNC42NTQgNTQ3LjU3NyAyMzAuMTdDNTUxLjg3MiAyMjUuNjg2IDU1NC4wMiAyMTkuNTY3IDU1NC4wMiAyMTEuODA0QzU1NC4wMiAyMDQuMDQxIDU1MS44NzIgMTk3LjkyOSA1NDcuNTc3IDE5My40MzdWMTkzLjQ1M1oiIGZpbGw9IndoaXRlIj48L3BhdGg+CjxwYXRoIGQ9Ik02MTkuNTk5IDI1Ny42M0M2MTEuNjczIDI1My4zODkgNjA1LjQ0OSAyNDcuMzMyIDYwMC45MTIgMjM5LjQ1MUM1OTYuMzc0IDIzMS41NzEgNTk0LjExIDIyMi4zNiA1OTQuMTEgMjExLjgxOUM1OTQuMTEgMjAxLjI3OCA1OTYuNDA1IDE5Mi4yMTYgNjAxLjAwNSAxODQuMjczQzYwNS41OTcgMTc2LjMzOCA2MTEuODkxIDE3MC4yNDIgNjE5Ljg3MyAxNjYuMDAxQzYyNy44NTQgMTYxLjc1OSA2MzYuODAzIDE1OS42MzkgNjQ2LjcyOSAxNTkuNjM5QzY1Ni42NTUgMTU5LjYzOSA2NjUuNTk3IDE2MS43NTkgNjczLjU3OCAxNjYuMDAxQzY4MS41NTkgMTcwLjI0MiA2ODcuODQ2IDE3Ni4zMzggNjkyLjQ0NSAxODQuMjczQzY5Ny4wMzcgMTkyLjIxNiA2OTkuMzQxIDIwMS4zOTYgNjk5LjM0MSAyMTEuODE5QzY5OS4zNDEgMjIyLjI0MyA2OTcuMDE0IDIzMS40MyA2OTIuMzU5IDIzOS4zNjVDNjg3LjcwNSAyNDcuMzA4IDY4MS4zNDggMjUzLjM5NiA2NzMuMzA1IDI1Ny42MzhDNjY1LjI2MSAyNjEuODc5IDY1Ni4yOCAyNjQgNjQ2LjM2MiAyNjRDNjM2LjQ0NCAyNjQgNjI3LjUxOCAyNjEuODc5IDYxOS41OTkgMjU3LjYzOFYyNTcuNjNaTTY2MS41MTIgMjMwLjU0NkM2NjUuNjgzIDIyNi4xNzkgNjY3Ljc2OCAyMTkuOTQyIDY2Ny43NjggMjExLjgxOUM2NjcuNzY4IDIwMy42OTYgNjY1Ljc0NSAxOTcuNDU5IDY2MS42OTIgMTkzLjA5M0M2NTcuNjM5IDE4OC43MjYgNjUyLjY0OSAxODYuNTUxIDY0Ni43MjEgMTg2LjU1MUM2NDAuNzk0IDE4Ni41NTEgNjM1LjY1NSAxODguNzAzIDYzMS42NjUgMTkzLjAwN0M2MjcuNjc0IDE5Ny4zMTEgNjI1LjY3NSAyMDMuNTg3IDYyNS42NzUgMjExLjgyN0M2MjUuNjc1IDIyMC4wNjcgNjI3LjY0MyAyMjYuMTg3IDYzMS41NzEgMjMwLjU1NEM2MzUuNDk5IDIzNC45MiA2NDAuNDI3IDIzNy4wOTYgNjQ2LjM2MiAyMzcuMDk2QzY1Mi4yOTcgMjM3LjA5NiA2NTcuMzQyIDIzNC45MTIgNjYxLjUxMiAyMzAuNTU0VjIzMC41NDZaIiBmaWxsPSJ3aGl0ZSI+PC9wYXRoPgo8cGF0aCBkPSJNNzMwIDI0Ni40OTNDNzMwIDI1My43NjQgNzI0LjExOCAyNTkuNjU5IDcxNi44NjEgMjU5LjY1OUM3MDkuNjA1IDI1OS42NTkgNzAzLjcyMyAyNTMuNzY0IDcwMy43MjMgMjQ2LjQ5M0M3MDMuNzIzIDIzOS4yMjEgNzA5LjYwNSAyMzMuMzI3IDcxNi44NjEgMjMzLjMyN0M3MjQuMTE4IDIzMy4zMjcgNzMwIDIzOS4yMjEgNzMwIDI0Ni40OTNaIiBmaWxsPSJ3aGl0ZSI+PC9wYXRoPgo8cGF0aCBkPSJNMjU5LjE4MyAxMzQuOTFMMjE0LjAwNiAyNjIuNTQ0SDE3NS4xNzdMMTMwIDEzNC45MUgxNjMuMDI2TDE5NC41OTkgMjMxLjI3NEwyMjYuMzUyIDEzNC45MUgyNTkuMTgzWiIgZmlsbD0id2hpdGUiPjwvcGF0aD4KPC9nPgo8L3N2Zz4=" alt="Vendo.">
+    <div class="docmeta">Veltuff® UK · Prepared by Vendo Digital · 2 Sept 2026</div>
   </div>
-  <h1>Weekly Paid Performance — WK35</h1>
+  <h1>Weekly paid <span class="fl">performance</span> — WK35</h1>
   <div class="sub">Monday 24 – Sunday 30 August 2026 · UK · Meta + Shopify · August month end included</div>
 </header>
 
@@ -112,11 +108,11 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
   <div class="eyebrow">Week 35 headlines</div>
   <div class="tiles">
     <div class="tile"><div class="k">Meta spend</div><div class="v">£1,697</div><div class="d">97% of £1,750 budget <span class="pill good">On budget</span></div><div class="d"><span class="flat">−3% YoY</span> · 14,798 DKK</div></div>
-    <div class="tile"><div class="k">Meta ROAS</div><div class="v">364%</div><div class="d">Target 500% <span class="pill warn">Below target</span></div><div class="d"><span class="up">+12% YoY</span> (325% LY)</div></div>
-    <div class="tile"><div class="k">Meta revenue</div><div class="v">£6,174</div><div class="d">53,829 DKK · <span class="up">+9% YoY</span> on less spend</div></div>
-    <div class="tile"><div class="k">Purchases · CPA</div><div class="v">101 · £16.81</div><div class="d">Purchases <span class="up">+29% YoY</span> · CPA <span class="up">−25% YoY</span></div></div>
-    <div class="tile"><div class="k">Blended MER</div><div class="v">1,084%</div><div class="d">£18,394 total sales ÷ £1,697 Meta spend</div></div>
-    <div class="tile"><div class="k">Shopify total sales</div><div class="v">£18,394</div><div class="d"><span class="up">+20% WoW</span> · <span class="up">+10% YoY</span> · best week of the summer</div></div>
+    <div class="tile"><div class="k">Meta ROAS</div><div class="v">364%</div><div class="d">Target 500% <span class="pill warn">Below target</span></div><div class="d"><span class="up">↗ 12% YoY</span> (325% LY)</div></div>
+    <div class="tile"><div class="k">Meta revenue</div><div class="v acc">£6,174</div><div class="d">53,829 DKK · <span class="up">↗ 9% YoY</span> on less spend</div></div>
+    <div class="tile"><div class="k">Purchases · CPA</div><div class="v">101 · £16.81</div><div class="d">Purchases <span class="up">↗ 29% YoY</span> · CPA <span class="up">↘ 25% YoY</span></div></div>
+    <div class="tile"><div class="k">Blended MER</div><div class="v acc">1,084%</div><div class="d">£18,394 total sales ÷ £1,697 Meta spend</div></div>
+    <div class="tile"><div class="k">Shopify total sales</div><div class="v">£18,394</div><div class="d"><span class="up">↗ 20% WoW</span> · <span class="up">↗ 10% YoY</span> · best week of the summer</div></div>
   </div>
 </section>
 
@@ -156,7 +152,7 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
 
 <section>
   <div class="eyebrow">Lower-funnel YoY <span class="new">The running scoreboard</span></div>
-  <p class="small muted">Same week last year in grey beneath each figure (LY grid runs Tue–Mon, a two-day offset). CVR = purchases ÷ link clicks.</p>
+  <p class="small muted">Same week last year in faint text beneath each figure (LY grid runs Tue–Mon, a two-day offset). CVR = purchases ÷ link clicks.</p>
   <div class="tablewrap">
   <table>
     <tr><th>Layer</th><th>Spend (DKK)</th><th>ROAS</th><th>CPA (DKK)</th><th>CVR</th></tr>
@@ -183,7 +179,7 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
     </tr>
   </table>
   </div>
-  <p class="small" style="margin-top:12px;">Account reach <strong>294,691 (+8% YoY)</strong> and impressions <strong>+9% YoY</strong> on <strong>−3% spend</strong> — more coverage for the same money, with conversion metrics up on every sales layer.</p>
+  <p class="small" style="margin-top:12px;">Account reach <strong>294,691 (↗ 8% YoY)</strong> and impressions <strong>↗ 9% YoY</strong> on <strong>−3% spend</strong> — more coverage for the same money, with conversion metrics up on every sales layer.</p>
 </section>
 
 <section>
@@ -254,9 +250,9 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
   <div class="tablewrap">
   <table>
     <tr><th>Metric</th><th>WK35</th><th>Change</th></tr>
-    <tr><td>Total sales</td><td>£18,394</td><td><span class="up">+20% WoW · +10% YoY</span></td></tr>
-    <tr><td>Gross sales</td><td>£15,503</td><td><span class="up">+10% YoY</span></td></tr>
-    <tr><td>Sessions</td><td>11,771</td><td><span class="up">+8% WoW</span> · level YoY</td></tr>
+    <tr><td>Total sales</td><td>£18,394</td><td><span class="up">↗ 20% WoW · ↗ 10% YoY</span></td></tr>
+    <tr><td>Gross sales</td><td>£15,503</td><td><span class="up">↗ 10% YoY</span></td></tr>
+    <tr><td>Sessions</td><td>11,771</td><td><span class="up">↗ 8% WoW</span> · level YoY</td></tr>
     <tr><td>Conversion rate</td><td>1.4%</td><td class="muted small">LY 1.94% ran clearance — offer-driven gap</td></tr>
     <tr><td>AOV</td><td>£50.35</td><td class="muted small">Holding without discounting</td></tr>
   </table>
@@ -272,9 +268,9 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
     <tr><td>Meta ROAS</td><td>368%</td><td class="flat">372% LY — level</td></tr>
     <tr><td>Meta purchases</td><td>347</td><td class="muted small">464 LY, which included clearance</td></tr>
     <tr><td>Blended (tracker basis)</td><td>5.04</td><td><span class="up">vs 3.68 target</span> <span class="pill good">Ahead</span></td></tr>
-    <tr><td>Shopify total sales</td><td>£67,192</td><td><span class="up">+7% YoY</span> on 14% less ad spend</td></tr>
-    <tr><td>AOV · CvR</td><td>£47.86 · 1.87%</td><td><span class="up">+14% · +23% YoY</span></td></tr>
-    <tr><td>Revenue vs revised target</td><td>£73,483</td><td><span class="up">+14%</span> vs £64,350</td></tr>
+    <tr><td>Shopify total sales</td><td>£67,192</td><td><span class="up">↗ 7% YoY</span> on 14% less ad spend</td></tr>
+    <tr><td>AOV · CvR</td><td>£47.86 · 1.87%</td><td><span class="up">↗ 14% · ↗ 23% YoY</span></td></tr>
+    <tr><td>Revenue vs revised target</td><td>£73,483</td><td><span class="up">↗ 14%</span> vs £64,350</td></tr>
   </table>
   </div>
   <p class="small muted" style="margin-top:10px;">The efficiency trade in one line: store sales +7% YoY on 14% less ad spend — the account is doing more with less while part of the media budget covers fees.</p>
@@ -286,7 +282,7 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
   <div class="tiles">
     <div class="tile"><div class="k">Revenue target</div><div class="v">£90,000</div><div class="d">vs £73,483 August actual (+22% step-up)</div></div>
     <div class="tile"><div class="k">Meta budget</div><div class="v">£7,500</div><div class="d">£250/day — configured and delivering 97%</div></div>
-    <div class="tile"><div class="k">Meta ROAS target</div><div class="v">5.0</div><div class="d">Blended MER target 4.62 · reported weekly</div></div>
+    <div class="tile"><div class="k">Meta ROAS target</div><div class="v acc">5.0</div><div class="d">Blended MER target 4.62 · reported weekly</div></div>
     <div class="tile"><div class="k">Seasonal tailwind</div><div class="v">Sept–Nov</div><div class="d">ProTex1's strongest window LY · offer slot open</div></div>
   </div>
 </section>
