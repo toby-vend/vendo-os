@@ -66,6 +66,13 @@ tr:last-child td{border-bottom:none;}
 .ugcstat{border:1px solid var(--hair); border-radius:6px; padding:11px 13px;}
 .ugcstat .v{font-size:21px; font-weight:700; font-variant-numeric:tabular-nums;}
 .ugcstat .k{font-size:12px; color:var(--ink2); margin-top:2px;}
+.journey{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin:14px 0;}
+.jstep{border:1px solid var(--hair); border-radius:6px; padding:12px 14px; position:relative;}
+.jstep .n{font-family:"Barlow Semi Condensed"; font-weight:700; font-size:12px; letter-spacing:.12em; color:var(--accent); text-transform:uppercase; margin-bottom:5px;}
+.jstep .t{font-weight:600; font-size:14px; margin-bottom:4px; line-height:1.35;}
+.jstep .s{font-size:12.5px; color:var(--ink2); line-height:1.45;}
+.jstep .s strong{color:var(--ink);}
+.jstep.credit{border-left:4px solid var(--bar);}
 .crit-cards{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px;}
 @media (max-width:720px){.crit-cards{grid-template-columns:1fr}}
 .crit-card{border:1px solid var(--hair); border-left:4px solid var(--accent); border-radius:6px; padding:13px 15px;}
@@ -179,17 +186,43 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
   <p class="small" style="margin-top:12px;">Account reach <strong>294,691 (+8% YoY)</strong> and impressions <strong>+9% YoY</strong> on <strong>−3% spend</strong> — more coverage for the same money, with conversion metrics up on every sales layer.</p>
 </section>
 
-<div class="split">
 <section>
-  <div class="eyebrow">UGC — top of funnel view</div>
-  <p class="small">UGC's job is the introduction; the purchase closes later on a catalogue or retargeting ad, which takes the last-click credit. These measures match the job.</p>
-  <div class="ugcgrid">
-    <div class="ugcstat"><div class="v">9% = 9%</div><div class="k">Click → add-to-cart, UGC vs account — parity</div></div>
-    <div class="ugcstat"><div class="v">≈3×</div><div class="k">Hook rate vs account average</div></div>
-    <div class="ugcstat"><div class="v">236%</div><div class="k">Lifetime last-click ROAS — the floor</div></div>
-    <div class="ugcstat"><div class="v">£16</div><div class="k">Delivery this week — ring-fenced budget live this week</div></div>
+  <div class="eyebrow">UGC — top of funnel view <span class="new">Answers "where is the UGC value?"</span></div>
+  <p class="small">UGC was never built to close sales on its own ad. Its job is the introduction, and Meta's last-click reporting hands the sale to whichever ad finishes it. Read left to right — this is what actually happens to a UGC viewer:</p>
+  <div class="journey">
+    <div class="jstep">
+      <div class="n">Step 1 · Stop the scroll</div>
+      <div class="t">UGC earns the attention</div>
+      <div class="s">Hook rate <strong>≈3× the account average</strong> — the strongest attention numbers in the account.</div>
+    </div>
+    <div class="jstep">
+      <div class="n">Step 2 · Visit</div>
+      <div class="t">They click through to the store</div>
+      <div class="s">CTR <strong>2.46%</strong> this week vs <strong>1.81%</strong> across the sales campaigns.</div>
+    </div>
+    <div class="jstep">
+      <div class="n">Step 3 · Shop</div>
+      <div class="t">They shop like any other visitor</div>
+      <div class="s"><strong>9% of clickers add to cart</strong> — identical to the account average (Jul–Aug). UGC traffic is real shopping traffic, not empty engagement.</div>
+    </div>
+    <div class="jstep credit">
+      <div class="n">Step 4 · The close</div>
+      <div class="t">A catalogue or retargeting ad finishes the sale — and takes the credit</div>
+      <div class="s">That closing layer ran <strong>372%</strong> Jul–Aug. This is why UGC looks invisible in last-click summaries.</div>
+    </div>
   </div>
-  <p class="small muted">This week: 25 landed visitors, 12 adds to cart, 2.46% CTR vs 1.81% sales average. Tracked weekly: cost per visitor, adds to cart, hook rate, new reach, and the blended prospecting + retargeting return as UGC spend scales.</p>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Weekly UGC scoreboard</th><th>WK35</th><th>Context</th></tr>
+    <tr><td>Spend</td><td>£16</td><td class="muted small">Throttled by Meta's last-click optimisation — ring-fenced budget live this week</td></tr>
+    <tr><td>Visitors landed</td><td>25</td><td class="muted small">Cost per visitor tracked as spend scales</td></tr>
+    <tr><td>Adds to cart</td><td>12</td><td class="muted small">The shopping signal the closing ads pick up</td></tr>
+    <tr><td>CTR</td><td>2.46%</td><td class="muted small">vs 1.81% sales-campaign average</td></tr>
+    <tr><td>Hook rate</td><td>≈3× account avg</td><td class="muted small">Attention quality — the introduction working</td></tr>
+    <tr><td>Last-click floor</td><td>236% lifetime ROAS</td><td class="muted small">4,255 DKK spend since launch — covers its own cost before any assisted value</td></tr>
+  </table>
+  </div>
+  <p class="small muted" style="margin-top:12px;">The September proof: with the ring-fenced budget live, this scoreboard runs weekly — and the decider is whether the blended prospecting + retargeting return holds or improves as UGC delivery grows. If the introduction feeds the close, it shows up there.</p>
 </section>
 
 <section>
@@ -202,7 +235,6 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
   </div>
   <p class="small muted">A reach objective never shows its own ROAS. Its case is coverage (criterion 1) and the returning-customer and conversion-rate lift behind the sales campaigns. Also underpins the B2B recognition play.</p>
 </section>
-</div>
 
 <section>
   <div class="eyebrow">Path to the 5.0 target</div>
