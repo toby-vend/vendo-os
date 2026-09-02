@@ -438,7 +438,7 @@ async function main() {
   di.views = [{ state: 'frozen', ySplit: 1 }];
 
   for (const p of PRACTICES) for (const m of MONTHS) { const st = statsFor(p, m); console.log(p.code, m, 'G', st.gSpend.toFixed(0), st.gLeads, st.gPat, st.gRev, '| M', st.mSpend.toFixed(0), st.mLeads, st.mPat, st.mRev); }
-  wb.worksheets.find((w) => w.name === 'Strategy')!.orderNo = 0;
+  (wb.worksheets.find((w) => w.name === 'Strategy') as any).orderNo = 0;
   await wb.xlsx.writeFile(OUT);
   console.log('wrote', OUT, 'patients', patients.length);
 }
