@@ -33,7 +33,7 @@ header .brandrow{display:flex; justify-content:space-between; align-items:baseli
 h1{font-size:34px; font-weight:700; margin-top:6px;}
 .sub{color:var(--ink2); margin-top:2px; font-size:15px;}
 section{background:var(--card); border:1px solid var(--hair); border-radius:6px; padding:20px 22px;}
-.eyebrow{font-family:"Barlow Semi Condensed"; font-weight:600; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:12px; display:flex; align-items:center; gap:10px;}
+.eyebrow{font-family:"Barlow Semi Condensed"; font-weight:600; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
 .eyebrow .new{background:var(--accent-soft); color:var(--accent); border-radius:3px; padding:1px 7px; letter-spacing:.08em;}
 .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;}
 .tile{border:1px solid var(--hair); border-radius:6px; padding:14px 16px; display:flex; flex-direction:column; gap:4px; background:var(--card);}
@@ -52,10 +52,11 @@ td{padding:8px 10px; text-align:right; border-bottom:1px solid var(--hair); font
 tr:last-child td{border-bottom:none;}
 .tablewrap{overflow-x:auto;}
 .campname{font-weight:600;}
+.ly{color:var(--ink3); font-size:12.5px;}
 .barcell{min-width:150px;}
 .bar{display:flex; align-items:center; gap:8px;}
 .bar .track{flex:1; height:14px; background:var(--bar-soft); border-radius:3px; overflow:hidden;}
-.bar .fill{height:100%; background:var(--bar); border-radius:3px 3px 3px 3px;}
+.bar .fill{height:100%; background:var(--bar); border-radius:3px;}
 .bar .num{width:48px; text-align:right; font-weight:600;}
 .muted{color:var(--ink2);}
 .small{font-size:13px;}
@@ -65,11 +66,23 @@ tr:last-child td{border-bottom:none;}
 .ugcstat{border:1px solid var(--hair); border-radius:6px; padding:11px 13px;}
 .ugcstat .v{font-size:21px; font-weight:700; font-variant-numeric:tabular-nums;}
 .ugcstat .k{font-size:12px; color:var(--ink2); margin-top:2px;}
-p{margin:0 0 10px; max-width:72ch;}
+.crit-cards{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px;}
+@media (max-width:720px){.crit-cards{grid-template-columns:1fr}}
+.crit-card{border:1px solid var(--hair); border-left:4px solid var(--accent); border-radius:6px; padding:13px 15px;}
+.crit-card .t{font-family:"Barlow Semi Condensed"; font-weight:600; font-size:14px; margin-bottom:4px;}
+.path{display:flex; align-items:stretch; gap:0; margin:14px 0 10px; flex-wrap:wrap;}
+.step{flex:1; min-width:150px; border:1px solid var(--hair); padding:12px 14px; position:relative;}
+.step:first-child{border-radius:6px 0 0 6px;}
+.step:last-child{border-radius:0 6px 6px 0;}
+.step + .step{border-left:none;}
+.step .v{font-size:23px; font-weight:700; font-variant-numeric:tabular-nums;}
+.step .k{font-size:12px; color:var(--ink2); margin-top:2px; line-height:1.4;}
+.step.target{background:var(--accent-soft);}
+p{margin:0 0 10px; max-width:76ch;}
 ul.actions{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:9px;}
-ul.actions li{padding-left:20px; position:relative; max-width:78ch;}
+ul.actions li{padding-left:20px; position:relative; max-width:80ch;}
 ul.actions li::before{content:""; position:absolute; left:0; top:8px; width:9px; height:9px; background:var(--accent); border-radius:2px;}
-footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:86ch;}
+footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:88ch;}
 @media print{
   body{padding:0; background:#fff;}
   section{break-inside:avoid; border-color:#ddd;}
@@ -101,15 +114,33 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:86ch;}
 </section>
 
 <section>
+  <div class="eyebrow">The creative test <span class="new">Agreed 2 Sept — tracked weekly</span></div>
+  <p class="small">Further creative-production investment is justified only if one of these holds. Both are measured in this report every week through September.</p>
+  <div class="crit-cards">
+    <div class="crit-card">
+      <div class="t">1 · Brand trade — same results, more coverage</div>
+      <div class="small muted">Similar revenue, cost and ROAS to LY with materially more reach and impressions.</div>
+      <div class="small" style="margin-top:6px;">WK35: reach <strong>+8% YoY</strong>, impressions <strong>+9% YoY</strong> on <strong>−3% spend</strong>, revenue +9% <span class="pill good">Tracking</span></div>
+    </div>
+    <div class="crit-card">
+      <div class="t">2 · Attribution proof — lower funnel converts better</div>
+      <div class="small muted">Clear YoY improvement in CVR and CPA on the campaigns that close, attributable to UGC / awareness / creative.</div>
+      <div class="small" style="margin-top:6px;">WK35: CVR and CPA improved YoY on every sales layer (table below) <span class="pill good">Tracking</span></div>
+    </div>
+  </div>
+  <p class="small muted" style="margin-top:10px;">One week of data — September decides it. The lower-funnel table below is the running scoreboard.</p>
+</section>
+
+<section>
   <div class="eyebrow">Meta — campaigns, WK35</div>
   <div class="tablewrap">
   <table>
     <tr><th>Campaign</th><th>Spend (DKK)</th><th class="barcell">ROAS</th><th>Purchases</th><th>Note</th></tr>
     <tr><td class="campname">Broad prospecting</td><td>3,620</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:47%"></div></div><div class="num">376%</div></div></td><td>29</td><td class="muted small">Improving, was 286% a fortnight ago</td></tr>
-    <tr><td class="campname">Hi-Vis</td><td>3,351</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:28%"></div></div><div class="num">226%</div></div></td><td>16</td><td class="muted small">Dip from 511% — diagnosing this week</td></tr>
-    <tr><td class="campname">ProTex1</td><td>2,243</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:68%"></div></div><div class="num">546%</div></div></td><td>16</td><td class="muted small">2nd week since relaunch, holding scale</td></tr>
+    <tr><td class="campname">Hi-Vis</td><td>3,351</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:28%"></div></div><div class="num">226%</div></div></td><td>16</td><td class="muted small">Dip from 511% — not fatigue (CTR up, frequency down); conversion-side, see actions</td></tr>
+    <tr><td class="campname">ProTex1</td><td>2,243</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:68%"></div></div><div class="num">546%</div></div></td><td>16</td><td class="muted small">2nd week since relaunch · ran 670–1,400% Sept–Nov LY</td></tr>
     <tr><td class="campname">Retargeting DPA</td><td>1,489</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:65%"></div></div><div class="num">522%</div></div></td><td>14</td><td class="muted small">Consistent closer</td></tr>
-    <tr><td class="campname">Awareness</td><td>1,414</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><div class="num muted">—</div></div></td><td class="muted">—</td><td class="muted small">172,349 people reached · 5.76 DKK CPM</td></tr>
+    <tr><td class="campname">Awareness</td><td>1,414</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><div class="num muted">—</div></div></td><td class="muted">—</td><td class="muted small">Reach objective — panel below</td></tr>
     <tr><td class="campname">Trousers DPA</td><td>1,345</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:17%"></div></div><div class="num">137%</div></div></td><td>6</td><td class="muted small">Soft week, reviewing product focus</td></tr>
     <tr><td class="campname">Seasonal Best Sellers</td><td>1,336</td><td class="barcell"><div class="bar"><div class="track"><div class="fill" style="width:100%"></div></div><div class="num">807%</div></div></td><td>19</td><td class="muted small">Room to push harder</td></tr>
   </table>
@@ -117,30 +148,72 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:86ch;}
 </section>
 
 <section>
-  <div class="eyebrow">Lower-funnel YoY <span class="new">New — tracks the creative question</span></div>
-  <p class="small muted">Same week last year (LY grid runs Tue–Mon, a two-day offset). CVR = purchases ÷ link clicks. This table runs weekly through September to show whether upper-funnel work (UGC, awareness, creative) is lifting the campaigns that close.</p>
+  <div class="eyebrow">Lower-funnel YoY <span class="new">The running scoreboard</span></div>
+  <p class="small muted">Same week last year in grey beneath each figure (LY grid runs Tue–Mon, a two-day offset). CVR = purchases ÷ link clicks.</p>
   <div class="tablewrap">
   <table>
-    <tr><th>Layer</th><th>Spend (DKK)</th><th>ROAS</th><th>vs LY</th><th>CPA (DKK)</th><th>vs LY</th><th>CVR</th><th>vs LY</th></tr>
-    <tr><td class="campname">Retargeting DPA</td><td>1,489</td><td>522%</td><td><span class="up">+352 pts</span></td><td>106</td><td><span class="up">−70%</span></td><td>2.19%</td><td><span class="up">+1.26 pts</span></td></tr>
-    <tr><td class="campname">Category (Hi-Vis, ProTex1, Trousers, SB)</td><td>8,275</td><td>392%</td><td><span class="up">+93 pts</span></td><td>145</td><td><span class="up">−19%</span></td><td>1.82%</td><td><span class="up">+0.30 pts</span></td></tr>
-    <tr><td class="campname">Broad prospecting</td><td>3,620</td><td>376%</td><td><span class="flat">+9 pts</span></td><td>125</td><td><span class="up">−34%</span></td><td>1.89%</td><td><span class="up">+0.68 pts</span></td></tr>
-    <tr><td class="campname">Awareness (reach objective)</td><td>1,414</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td></tr>
+    <tr><th>Layer</th><th>Spend (DKK)</th><th>ROAS</th><th>CPA (DKK)</th><th>CVR</th></tr>
+    <tr>
+      <td class="campname">Retargeting DPA</td>
+      <td>1,489<div class="ly">LY 702</div></td>
+      <td><span class="up">522%</span><div class="ly">LY 170%</div></td>
+      <td><span class="up">106</span><div class="ly">LY 351 · −70%</div></td>
+      <td><span class="up">2.19%</span><div class="ly">LY 0.93%</div></td>
+    </tr>
+    <tr>
+      <td class="campname">Category (Hi-Vis, ProTex1, Trousers, SB)</td>
+      <td>8,275<div class="ly">LY 5,361</div></td>
+      <td><span class="up">392%</span><div class="ly">LY 299%</div></td>
+      <td><span class="up">145</span><div class="ly">LY 179 · −19%</div></td>
+      <td><span class="up">1.82%</span><div class="ly">LY 1.52%</div></td>
+    </tr>
+    <tr>
+      <td class="campname">Broad prospecting</td>
+      <td>3,620<div class="ly">LY 8,452</div></td>
+      <td><span class="flat">376%</span><div class="ly">LY 367%</div></td>
+      <td><span class="up">125</span><div class="ly">LY 188 · −34%</div></td>
+      <td><span class="up">1.89%</span><div class="ly">LY 1.21%</div></td>
+    </tr>
   </table>
   </div>
   <p class="small" style="margin-top:12px;">Account reach <strong>294,691 (+8% YoY)</strong> and impressions <strong>+9% YoY</strong> on <strong>−3% spend</strong> — more coverage for the same money, with conversion metrics up on every sales layer.</p>
 </section>
 
+<div class="split">
 <section>
   <div class="eyebrow">UGC — top of funnel view</div>
-  <p class="small">UGC's job is the introduction; the purchase closes later on a catalogue or retargeting ad, which takes the last-click credit. These are the measures that match the job.</p>
+  <p class="small">UGC's job is the introduction; the purchase closes later on a catalogue or retargeting ad, which takes the last-click credit. These measures match the job.</p>
   <div class="ugcgrid">
-    <div class="ugcstat"><div class="v">9% = 9%</div><div class="k">Click → add-to-cart, UGC vs account (Jul–Aug) — parity</div></div>
-    <div class="ugcstat"><div class="v">≈3×</div><div class="k">Hook rate vs account average — strongest in account</div></div>
-    <div class="ugcstat"><div class="v">236%</div><div class="k">Lifetime last-click ROAS — covers its own cost as a floor</div></div>
-    <div class="ugcstat"><div class="v">£16</div><div class="k">Delivery this week — the real issue; ring-fenced budget live this week</div></div>
+    <div class="ugcstat"><div class="v">9% = 9%</div><div class="k">Click → add-to-cart, UGC vs account — parity</div></div>
+    <div class="ugcstat"><div class="v">≈3×</div><div class="k">Hook rate vs account average</div></div>
+    <div class="ugcstat"><div class="v">236%</div><div class="k">Lifetime last-click ROAS — the floor</div></div>
+    <div class="ugcstat"><div class="v">£16</div><div class="k">Delivery this week — ring-fenced budget live this week</div></div>
   </div>
-  <p class="small muted">This week on limited delivery: 25 landed visitors, 12 adds to cart, 2.46% CTR vs 1.81% sales-campaign average. Weekly from here: cost per visitor, adds to cart, hook rate, new reach, and whether the blended prospecting + retargeting return holds as UGC spend scales.</p>
+  <p class="small muted">This week: 25 landed visitors, 12 adds to cart, 2.46% CTR vs 1.81% sales average. Tracked weekly: cost per visitor, adds to cart, hook rate, new reach, and the blended prospecting + retargeting return as UGC spend scales.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Awareness — contribution</div>
+  <div class="ugcgrid">
+    <div class="ugcstat"><div class="v">172,349</div><div class="k">People reached · 46% of all impressions served</div></div>
+    <div class="ugcstat"><div class="v">5.76 DKK</div><div class="k">CPM — vs 45.59 DKK on sales campaigns (8× cheaper)</div></div>
+    <div class="ugcstat"><div class="v">£162</div><div class="k">Cost this week · 8% of spend</div></div>
+    <div class="ugcstat"><div class="v">36.29%</div><div class="k">Aug returning customer rate, +8% YoY — the downstream signal</div></div>
+  </div>
+  <p class="small muted">A reach objective never shows its own ROAS. Its case is coverage (criterion 1) and the returning-customer and conversion-rate lift behind the sales campaigns. Also underpins the B2B recognition play.</p>
+</section>
+</div>
+
+<section>
+  <div class="eyebrow">Path to the 5.0 target</div>
+  <p class="small">Pruning gets most of the way before any scaling. August maths on Meta-attributed ROAS:</p>
+  <div class="path">
+    <div class="step"><div class="v">368%</div><div class="k">August as run</div></div>
+    <div class="step"><div class="v">425%</div><div class="k">Cut the two weak creative-test ad sets (8.7K DKK at ~90%)</div></div>
+    <div class="step"><div class="v">469%</div><div class="k">Sales layer excluding awareness</div></div>
+    <div class="step target"><div class="v">500%</div><div class="k">Close the rest: scale ProTex1, SB + catalogue; fix Hi-Vis; fill the offer slot LY clearance covered</div></div>
+  </div>
+  <p class="small muted">Trade-off to agree at the regroup: 5.0 Meta ROAS and beating LY revenue pull against each other at the current budget — proposal is per-layer targets with blended MER as the health check.</p>
 </section>
 
 <div class="split">
@@ -165,28 +238,40 @@ footer{color:var(--ink3); font-size:12.5px; line-height:1.6; max-width:86ch;}
     <tr><th>Metric</th><th>Aug 2026</th><th>Change</th></tr>
     <tr><td>Meta spend (tracker)</td><td>£6,330</td><td class="muted small">84% of £7,500 budget</td></tr>
     <tr><td>Meta ROAS</td><td>368%</td><td class="flat">372% LY — level</td></tr>
+    <tr><td>Meta purchases</td><td>347</td><td class="muted small">464 LY, which included clearance</td></tr>
     <tr><td>Blended (tracker basis)</td><td>5.04</td><td><span class="up">vs 3.68 target</span> <span class="pill good">Ahead</span></td></tr>
-    <tr><td>Shopify total sales</td><td>£67,192</td><td><span class="up">+7% YoY</span></td></tr>
+    <tr><td>Shopify total sales</td><td>£67,192</td><td><span class="up">+7% YoY</span> on 14% less ad spend</td></tr>
     <tr><td>AOV · CvR</td><td>£47.86 · 1.87%</td><td><span class="up">+14% · +23% YoY</span></td></tr>
     <tr><td>Revenue vs revised target</td><td>£73,483</td><td><span class="up">+14%</span> vs £64,350</td></tr>
   </table>
   </div>
+  <p class="small muted" style="margin-top:10px;">The efficiency trade in one line: store sales +7% YoY on 14% less ad spend — the account is doing more with less while part of the media budget covers fees.</p>
 </section>
 </div>
 
 <section>
+  <div class="eyebrow">September set-up</div>
+  <div class="tiles">
+    <div class="tile"><div class="k">Revenue target</div><div class="v">£90,000</div><div class="d">vs £73,483 August actual (+22% step-up)</div></div>
+    <div class="tile"><div class="k">Meta budget</div><div class="v">£7,500</div><div class="d">£250/day — configured and delivering 97%</div></div>
+    <div class="tile"><div class="k">Meta ROAS target</div><div class="v">5.0</div><div class="d">Blended MER target 4.62 · reported weekly</div></div>
+    <div class="tile"><div class="k">Seasonal tailwind</div><div class="v">Sept–Nov</div><div class="d">ProTex1's strongest window LY · offer slot open</div></div>
+  </div>
+</section>
+
+<section>
   <div class="eyebrow">Actions this week</div>
   <ul class="actions">
-    <li>Diagnose the Hi-Vis dip (511% → 226%); rotate creative if it reads as fatigue. Report back next week.</li>
-    <li>Hold ProTex1 scale into its strongest season (ran 670–1,400% Sept–Nov last year); push Seasonal Best Sellers harder.</li>
+    <li>Hi-Vis dip: not creative fatigue — CTR rose (1.57% → 1.70%) and frequency fell (2.50 → 2.33) while reach grew 26%. Clicks held, conversion didn't. Checking audience expansion, product mix and landing experience. Report back next week.</li>
+    <li>Hold ProTex1 scale into its strongest season; push Seasonal Best Sellers harder (807% with headroom).</li>
     <li>Shift budget out of the two weak creative-test ad sets (84% / 188%) into the catalogue sets.</li>
-    <li>UGC ring-fenced budget live this week; top-of-funnel measures now report weekly (section above).</li>
-    <li>September per the tracker: £250/day, Meta ROAS target 5.0, blended 4.62 — reported against weekly.</li>
-    <li>September offer slot still open — last year clearance covered this window. Decision at the regroup.</li>
+    <li>UGC ring-fenced budget live this week; top-of-funnel measures report weekly above.</li>
+    <li>Swift trainer video: final edit due Thursday 4th, ahead of the Friday 5th launch.</li>
+    <li>Regroup call this week — September offer slot and per-layer targets to agree.</li>
   </ul>
 </section>
 
 <footer>
-  Data: Meta Ads Manager exports 24–30 Aug 2026 (all campaigns) and weekly YoY export (Tue–Mon grid, two-day offset on LY comparisons) · Shopify UK analytics 24–30 Aug 2026 and matching week 25–31 Aug 2025 · Stuart's Media Spend Tracker for budget and blended-target lines · DKK→£ at 0.1147, the tracker's own rate. Prepared by Vendo Digital for Veltuff® UK.
+  Data: Meta Ads Manager exports 24–30 Aug 2026 (all campaigns) and weekly YoY export (Tue–Mon grid, two-day offset on LY comparisons) · Shopify UK analytics 24–30 Aug 2026 and matching week 25–31 Aug 2025 · Stuart's Media Spend Tracker for budget and blended-target lines · DKK→£ at 0.1147, the tracker's own rate · Shopify gross sales on Shopify's own basis; sales reversals reflect submitted return requests. Prepared by Vendo Digital for Veltuff® UK.
 </footer>
 </div>
