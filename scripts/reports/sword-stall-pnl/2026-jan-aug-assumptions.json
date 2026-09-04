@@ -1,0 +1,197 @@
+{
+ "inputs": [
+  {
+   "key": "txn_fee",
+   "name": "Payment processing fee (% of amount charged)",
+   "value": 0.035,
+   "unit": "% ",
+   "status": "ASSUMED",
+   "note": "Framework default is 3%. Set to 3.5% because James said (3 Sep 2026 call) the high-risk card provider Patriot Payments was 'losing 5% of everything in costs' and ~90% of volume ran through PayPal (~2.9–3.4% + fixed). True blended Q2 rate could be 3–5%. NEEDS: Q2 fee statements from Patriot Payments / PayPal / Klarna / Shopify Payments."
+  },
+  {
+   "key": "ship_per_order",
+   "name": "Carrier cost per order (DPD retail → DX)",
+   "value": 6.5,
+   "unit": "£ per order",
+   "status": "ESTIMATED",
+   "note": "14 May 2026 call, James: 'in April alone, we did 6,000 just with DPD'; average parcel '8 or 9 quid' on DPD retail, expected '6 or 7' on DX (95% of orders as standard parcel); shipping ≈ '10% of our costs'; free shipping over £200. £6,000 ÷ 950 April orders = £6.32, plus Royal Mail for small items → £6.50 blended. NEEDS: DPD/Royal Mail/DX invoices for Apr, May, Jun and the DX switch date."
+  },
+  {
+   "key": "pack_per_order",
+   "name": "Packaging & consumables per order",
+   "value": 0,
+   "unit": "£ per order",
+   "status": "UNKNOWN",
+   "note": "Never quantified on any call. Boxes/foam/tape for swords are not trivial – ask James for monthly packaging spend or a per-parcel figure. Left at £0 so it does not silently flatter or punish the margin."
+  }
+ ],
+ "opex": [
+  {
+   "name": "Vendo management fee (treated as a staff cost)",
+   "monthly": 5500,
+   "status": "ACTUAL",
+   "xero": true,
+   "note": "Sits in OpEx, not in advertising, because the agency is effectively a member of staff – it does not scale when revenue doubles, only in-platform spend does. James called it ~£3,500 on the 4 Jun call; Xero is the hard source."
+  },
+  {
+   "name": "Klaviyo (email)",
+   "monthly": {
+    "2026-01": 350,
+    "2026-02": 350,
+    "2026-03": 350,
+    "2026-04": 350,
+    "2026-05": 700,
+    "2026-06": 720,
+    "2026-07": 1000,
+    "2026-08": 1000
+   },
+   "status": "ESTIMATED",
+   "note": "Apr £350 / May £700 / Jun £720 as entered on the Q2 sheet (currency exchange from Klaviyo invoices). Jan–Mar carried at Apr's £350 (no earlier invoice seen); Jul–Aug at £1,000 per James on 17 Aug 2026: 'Klaviyo is over £1,000 a month at the minute'. NEEDS: Klaviyo invoices Jan–Mar and Jul–Aug."
+  },
+  {
+   "name": "Gorgias (customer service + AI agent)",
+   "monthly": 1000,
+   "status": "ESTIMATED",
+   "note": "17 Aug 2026: 'Gorgias, which is £1,000 a month'; 3 Sep 2026: 'costing us nearly a thousand pounds a month with the AI agent'. Charged per AI interaction, so varies; applied flat to every month. NEEDS: invoices."
+  },
+  {
+   "name": "Esendex (SMS)",
+   "monthly": 1000,
+   "status": "ESTIMATED",
+   "note": "17 Aug 2026: 'our Esendex text message spend, which is about £1,000 a month'. Applied flat. Previously also used for the Win With Skippy side venture – confirm how much is Sword Stall."
+  },
+  {
+   "name": "Triple Whale (attribution)",
+   "monthly": 490,
+   "status": "ESTIMATED",
+   "note": "£490/month as entered on the Q2 sheet (USD bill converted). Applied flat."
+  },
+  {
+   "name": "Premises (warehouse/unit rent, rates, utilities, insurance)",
+   "monthly": 2860,
+   "status": "ESTIMATED",
+   "note": "£2,860/month as entered on the Q2 sheet (pulled from Triple Whale). Applied flat. Confirm against the actual rent, rates, utilities and insurance."
+  },
+  {
+   "name": "Shopify plan + other apps (Loox, Trustpilot, Klarna, theme apps etc.)",
+   "monthly": 49,
+   "status": "ACTUAL",
+   "note": "Shopify annual plan ÷ 12, as entered on the Q2 sheet. App subscriptions (Loox, Trustpilot, Klarna, Gorgias AI tier, theme apps) still not listed – add when known."
+  },
+  {
+   "name": "Events & conventions (staff, vehicles, transport)",
+   "monthly": 0,
+   "status": "UNKNOWN",
+   "note": "9 Jul 2026: 'we need to take six, seven grand just to break even' per event. Confirm which months had an event and the cost."
+  },
+  {
+   "name": "Staff wages & NI (warehouse, purchasing, CS, photography)",
+   "monthly": 7181,
+   "status": "ESTIMATED",
+   "note": "£7,181/month as entered on the Q2 sheet (pulled from Triple Whale). Applied flat to every month. NEEDS: payroll by month incl. employer NI/pension."
+  },
+  {
+   "name": "Owner drawings / director salaries",
+   "monthly": 0,
+   "status": "UNKNOWN",
+   "note": "Not discussed. Only include if James wants a 'true' profit after paying himself and Marlize."
+  },
+  {
+   "name": "Accountancy, bookkeeping, legal, bank charges",
+   "monthly": 0,
+   "status": "UNKNOWN",
+   "note": "Bookkeeper and accountant both referenced, no cost given."
+  }
+ ],
+ "questions": [
+  [
+   "What were the actual payment-processing fees for Jan–Aug 2026 (Patriot Payments, PayPal, Klarna, Shopify Payments)? Blended % and any monthly minimums / chargeback fees.",
+   "Transaction fees are the second-biggest cost of delivery. James quoted ~5% on the high-risk provider; a 2-point swing on £425k of takings is ~£8.5k of profit for the quarter.",
+   "3.5% of Total sales (incl. VAT) – ASSUMED"
+  ],
+  [
+   "What were the DPD, Royal Mail and DX (if switched) invoices for Jan–Aug 2026, and how many parcels shipped? When did the DX switch happen?",
+   "Carrier cost ÷ orders is the per-order fulfilment rate the P&L needs. Currently inferred from 'April alone, we did 6,000 just with DPD' (14 May call) – May and June are extrapolated.",
+   "£6.50 per order – from call"
+  ],
+  [
+   "Packaging spend for Jan–Aug (boxes, foam, tape) or a per-parcel figure.",
+   "Never discussed; currently counted as £0, so gross margin is overstated by whatever this is.",
+   "£0 – UNKNOWN"
+  ],
+  [
+   "The product variants with no cost recorded in Shopify (see the 'COGS – Estimated' tab, listed by month) – can the supplier cost prices be added? Priority is the largest-value rows at the top of each month.",
+   "Recorded COGS covers 94–98% of net sales each month; the estimated tab fills the gap at supplier-average ratios, but real costs beat estimates.",
+   "Estimated on the 'COGS – Estimated' tab"
+  ],
+  [
+   "Affiliate payouts for Apr, May, Jun (commission actually paid, by month).",
+   "Commission is a direct marketing cost that scales with revenue; May implied ~£1.4k/month, July ~£2–4k/month, so Q2 is a range not a number.",
+   "£1,400/month – from May call"
+  ],
+  [
+   "Are Shopify's product costs landed costs (supplier price + freight + import duty) or just the supplier price? Does 'cost of sales' on the accountant's P&L include container freight and duty?",
+   "James said on 3 Sep that his P&L tracks cost of sales as a total driven by container arrivals, not per unit. If Shopify's cost field excludes freight/duty, add a % uplift to COGS.",
+   "Shopify cost field taken as-is"
+  ],
+  [
+   "Monthly premises cost: rent, business rates, utilities, insurance.",
+   "Fixed opex; needed for net profit. James referenced 'the cost of the building' but gave no number.",
+   "£0 – UNKNOWN"
+  ],
+  [
+   "monthly payroll: total wages + employer NI + pension for warehouse, purchasing, customer service. Do James and Marlize take a salary or drawings, and should the P&L show it?",
+   "Usually the largest opex line for a business this size; without it net profit is meaningless.",
+   "£0 – UNKNOWN"
+  ],
+  [
+   "Shopify plan tier and the full app subscription list (Loox, Trustpilot, Klarna, Gorgias AI tier, theme apps) with monthly costs.",
+   "Software is already ~£3.5k/month from the four tools he named; the rest is likely another £0.5–2k.",
+   "£0 for un-named apps"
+  ],
+  [
+   "Klaviyo, Gorgias, Esendex, Triple Whale invoices for Jan–Mar and Jul–Aug (Apr–Jun Klaviyo is in; the other tools are Aug quotes applied flat). How much of Esendex was Sword Stall vs Win With Skippy?",
+   "Software totals were quoted in Aug/Sep; usage-based tools (Gorgias AI, Klaviyo by list size, SMS) move month to month.",
+   "Aug 2026 quotes applied flat"
+  ],
+  [
+   "Were any influencers, affiliates or paid UGC creators paid in Jan–Aug? Any other marketing costs on the accountant's P&L (this is where his 27% vs our ~17.8% gap will be)?",
+   "James said on 17 Aug the bookkeeper's P&L has marketing at 27% of revenue with Vendo at 18%; the other ~9% is unexplained – possibly software, creators, Shopify apps or VAT-inclusive coding.",
+   "£0 influencer; software listed separately"
+  ],
+  [
+   "Accountancy/bookkeeping fees, bank charges, any loan/finance repayments or stock-finance interest.",
+   "Small individually, but they belong in opex for a true net profit.",
+   "£0 – UNKNOWN"
+  ],
+  [
+   "A copy of the accountant's Q2 P&L (the one showing <3% profit).",
+   "Lets us reconcile line by line and restructure it into the four-block format inside Xero, rather than rebuilding from exports each month.",
+   "n/a"
+  ],
+  [
+   "On the 14 May call you mentioned April came in 'under five grand' – was that net profit per the bookkeeper? If so, what did it include?",
+   "A hard anchor to reconcile this model against.",
+   "n/a"
+  ],
+  [
+   "Vendo invoices for Jul and Aug 2026 – confirm they are the same £5,500 + VAT as Jan–Jun.",
+   "Xero's connection expired on 4 Sep 2026 so Jul–Aug are carried forward, not read from Xero. Re-authorise with `npm run xero:auth` and the sync fills them in.",
+   "£5,500 carried forward – ESTIMATED"
+  ]
+ ],
+ "direct": [
+  {
+   "name": "Affiliate commission (10% of affiliate-referred sales)",
+   "monthly": 1400,
+   "status": "ESTIMATED",
+   "note": "14 May 2026: 3 active affiliates drove ~£14k in the last 30 days at 10% customer discount + 10% commission (discount is already netted in Shopify Net sales, so only the commission is a cost here) → ~£1,400/month. 23 Jul 2026: affiliates at ~£20k/month sales, '£2–4k a month commission' – June may be higher than £1,400. Jan–Mar and Jul–Aug carried at the same £1,400 – no earlier or later figure given. NEEDS: affiliate payout report for Jan–Aug."
+  },
+  {
+   "name": "Influencer / creator fees & gifted product",
+   "monthly": 0,
+   "status": "UNKNOWN",
+   "note": "5 Mar 2026: happy to gift '£300–400' of product per creator; no count of creators or cash fees given for any month. Confirm."
+  }
+ ]
+}
