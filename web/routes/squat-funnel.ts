@@ -138,24 +138,64 @@ async function upsertContact(c: ContactInput): Promise<string> {
     postalCode: c.postalCode || undefined,
     country: 'GB',
     source: c.source,
-    tags: c.tags,
   };
   const data = await ghl<{ contact: { id: string } }>('POST', '/contacts/upsert', body);
   const id = data?.contact?.id;
   if (!id) throw new Error('GHL upsert returned no contact id');
-  // Upsert replaces tags on some accounts; add explicitly so existing tags survive.
-  try { await ghl('POST', `/contacts/${id}/tags`, { tags: c.tags }); } catch { /* non-fatal */ }
+  // Tags are added separately: passing them to upsert REPLACES the contact's tags.
+  await ghl('POST', `/contacts/${id}/tags`, { tags: c.tags });
   return id;
 }
 
 interface Opportunity { id: string; pipelineStageId: string; status: string; name?: string }
 
-async function findOpportunity(contactId: string, pipelineId: string): Promise<Opportunity | null> {
+async function searchOpportunity(contactId: string, pipelineId: string): Promise<Opportunity | null> {
   const data = await ghl<{ opportunities: Opportunity[] }>(
     'GET', `/opportunities/search?location_id=${LOCATION_ID}&pipeline_id=${pipelineId}&contact_id=${contactId}&limit=20`,
   );
-  const open = (data.opportunities || []).find((o) => o.status === 'open') || (data.opportunities || [])[0];
-  return open || null;
+  const list = data.opportunities || [];
+  return list.find((o) => o.status === 'open') || list[0] || null;
+}
+
+async function getOpportunity(id: string): Promise<Opportunity | null> {
+  try {
+    const data = await ghl<{ opportunity: Opportunity & { pipelineId?: string; contactId?: string; contact?: { id: string } } }>('GET', `/opportunities/${id}`);
+    return data.opportunity || null;
+  } catch { return null; }
+}
+
+/**
+ * GHL's opportunity search is index-backed and lags a few seconds behind writes —
+ * exactly the window between "form submitted" and "order placed". So: first try the
+ * id we recorded for this email, then the search, then (if a create is refused as a
+ * duplicate) retry the search with back-off.
+ */
+async function findOpportunity(contactId: string, pipelineId: string, email: string | null): Promise<Opportunity | null> {
+  if (email) {
+    try {
+      await ensureSchema();
+      const r = await db.execute({
+        sql: `SELECT result FROM squat_funnel_events WHERE email = ? AND status = 'ok' AND result IS NOT NULL ORDER BY id DESC LIMIT 5`,
+        args: [email],
+      });
+      for (const row of r.rows as Array<{ result: string }>) {
+        const parsed = JSON.parse(String(row.result)) as { opportunityId?: string };
+        if (!parsed.opportunityId) continue;
+        const opp = await getOpportunity(parsed.opportunityId);
+        if (opp && opp.status === 'open') return opp;
+      }
+    } catch { /* fall through to search */ }
+  }
+  return searchOpportunity(contactId, pipelineId);
+}
+
+async function findOpportunityWithRetry(contactId: string, pipelineId: string, email: string | null): Promise<Opportunity | null> {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, 1500 * attempt));
+    const opp = await findOpportunity(contactId, pipelineId, email);
+    if (opp) return opp;
+  }
+  return null;
 }
 
 async function createOpportunity(contactId: string, pipeline: Pipeline, stage: string, name: string, value: number): Promise<Opportunity> {
@@ -249,12 +289,18 @@ export const squatFunnelRoutes: FastifyPluginAsync = async (app) => {
     try {
       const pipeline = await getPipeline();
       const contactId = await upsertContact(contactInput);
-      let opp = await findOpportunity(contactId, pipeline.id);
+      let opp = await findOpportunity(contactId, pipeline.id, email);
       let created = false;
       if (!opp) {
         const name = `${[contactInput.firstName, contactInput.lastName].filter(Boolean).join(' ') || email} — Dental Freedom Blueprint`;
-        opp = await createOpportunity(contactId, pipeline, STAGE_LEAD, name, 4.95);
-        created = true;
+        try {
+          opp = await createOpportunity(contactId, pipeline, STAGE_LEAD, name, 4.95);
+          created = true;
+        } catch (err) {
+          if (!/duplicate/i.test((err as Error).message)) throw err;
+          opp = await findOpportunityWithRetry(contactId, pipeline.id, email);
+          if (!opp) throw err;
+        }
       }
       const result = { contactId, opportunityId: opp.id, created };
       await finishEvent(eventId, 'ok', result);
@@ -310,15 +356,20 @@ export const squatFunnelRoutes: FastifyPluginAsync = async (app) => {
     try {
       const pipeline = await getPipeline();
       const contactId = await upsertContact(contactInput);
-      let opp = await findOpportunity(contactId, pipeline.id);
+      let opp = await findOpportunity(contactId, pipeline.id, email);
       let created = false;
-      if (opp) {
-        await moveOpportunity(opp.id, pipeline, STAGE_RECEIVED);
-      } else {
+      if (!opp) {
         const name = `${[contactInput.firstName, contactInput.lastName].filter(Boolean).join(' ') || email} — Dental Freedom Blueprint`;
-        opp = await createOpportunity(contactId, pipeline, STAGE_RECEIVED, name, Number(order.total_price) || 4.95);
-        created = true;
+        try {
+          opp = await createOpportunity(contactId, pipeline, STAGE_RECEIVED, name, Number(order.total_price) || 4.95);
+          created = true;
+        } catch (err) {
+          if (!/duplicate/i.test((err as Error).message)) throw err;
+          opp = await findOpportunityWithRetry(contactId, pipeline.id, email);
+          if (!opp) throw err;
+        }
       }
+      if (!created) await moveOpportunity(opp.id, pipeline, STAGE_RECEIVED);
       const result = { contactId, opportunityId: opp.id, created, order: orderName };
       await finishEvent(eventId, 'ok', result);
       request.log.info(result, 'squat order → GHL');
