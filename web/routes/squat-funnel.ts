@@ -176,6 +176,33 @@ async function attributionFieldIds(): Promise<Partial<Record<keyof Attribution, 
   return byKey;
 }
 
+async function upsertContact(c: ContactInput): Promise<string> {
+  const body: Record<string, unknown> = {
+    locationId: LOCATION_ID,
+    email: c.email,
+    firstName: c.firstName || undefined,
+    lastName: c.lastName || undefined,
+    phone: c.phone || undefined,
+    address1: c.address1 || undefined,
+    city: c.city || undefined,
+    postalCode: c.postalCode || undefined,
+    country: 'GB',
+    source: c.source,
+  };
+  const attr = c.attribution;
+  if (attr && ATTR_KEYS.some((k) => attr[k])) {
+    const ids = await attributionFieldIds();
+    const cf = ATTR_KEYS.filter((k) => attr[k] && ids[k]).map((k) => ({ id: ids[k] as string, value: String(attr[k]).slice(0, 250) }));
+    if (cf.length) body.customFields = cf;
+  }
+  const data = await ghl<{ contact: { id: string } }>('POST', '/contacts/upsert', body);
+  const id = data?.contact?.id;
+  if (!id) throw new Error('GHL upsert returned no contact id');
+  // Tags are added separately: passing them to upsert REPLACES the contact's tags.
+  await ghl('POST', `/contacts/${id}/tags`, { tags: c.tags });
+  return id;
+}
+
 interface Opportunity { id: string; pipelineStageId: string; status: string; name?: string }
 
 async function searchOpportunity(contactId: string, pipelineId: string): Promise<Opportunity | null> {
