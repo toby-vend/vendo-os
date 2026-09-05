@@ -22,7 +22,7 @@ To refresh the Google Sheet: rebuild the xlsx, upload it to Drive via Chrome (pa
 python3 scripts/reports/sword-stall-pnl/build_pnl_sheet_range.py <out.xlsx> scripts/reports/sword-stall-pnl/2026-jan-aug-assumptions.json --from=2026-01 --to=2026-08
 ```
 
-Same layout, months as a parameter, real monthly COGS instead of a pro-rated quarter. Native Google Sheet: https://docs.google.com/spreadsheets/d/1c5pYjMKAH_ojGd6vgasf4vdrvmlR8kEEGLp8ARQ-gyo/edit
+Same layout, months as a parameter, real monthly COGS instead of a pro-rated quarter. Native Google Sheets: Jan–Aug 2026 https://docs.google.com/spreadsheets/d/1c5pYjMKAH_ojGd6vgasf4vdrvmlR8kEEGLp8ARQ-gyo/edit · Oct 2025–Aug 2026 https://docs.google.com/spreadsheets/d/1UKUHxlm5iphMceTqi0OKSgpbOns5sChNQWjbv_o1j_c/edit (`2025-10-to-2026-08-assumptions.json`, carries Toby's 5 Sep edits: carrier £4, affiliate £0, Gorgias £0 before Apr 2026, Shopify apps £150)
 
 Inputs live in `data/sword-stall/uploads/shopify/ql/` and come from ShopifyQL run inside the Shopify admin (the Export button and the Shopify MCP both need a download/OAuth step, so this avoids them):
 1. Open any report under Analytics → Reports in Chrome, hook `window.fetch` to capture the `AnalyticsShopifyQlQuery` POST, then replay it with your own ShopifyQL (`window.__ql(ql)` in the 4 Sep 2026 session).

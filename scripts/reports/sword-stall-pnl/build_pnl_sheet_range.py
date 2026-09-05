@@ -54,7 +54,7 @@ BAS_I = 3 + N; SRC_I = 4 + N
 
 # ---------------- data ----------------
 DAILY_CSV = f"{QL}/daily-sales-{first_day}-{last_day}.csv"
-COGS_CSV = sorted(glob.glob(f"{QL}/cogs-by-variant-by-month-*.csv"))[-1]
+COGS_CSV = f"{QL}/cogs-by-variant-by-month-{FROM}-{TO}.csv"
 NAMES = {"orders": "Orders", "gross_sales": "Gross sales", "discounts": "Discounts", "sales_reversals": "Sales reversals",
          "net_sales": "Net sales", "shipping_charges": "Shipping charges", "duties": "Duties", "additional_fees": "Additional fees",
          "taxes": "Taxes", "total_sales": "Total sales"}
@@ -72,11 +72,12 @@ for m, sp, cv, cval, syn in con.execute(
         "select substr(date,1,7), sum(spend), sum(conversions), sum(conversion_value), max(synced_at) "
         "from gads_campaign_spend where account_id like '%2310522325%' and date between ? and ? group by 1", (first_day, last_day)):
     gads[m] = dict(spend=sp, conv=cv, value=cval, synced=syn)
-xero = {}
-for m, sub, inv in con.execute(
-        "select substr(date,1,7), sum(subtotal), group_concat(invoice_number) from xero_invoices "
-        "where contact_name like '%Sword Stall%' and type='ACCREC' and date between ? and ? group by 1", (first_day, last_day + "T23:59:59")):
-    xero[m] = (sub, inv)
+xero = defaultdict(dict)          # reference -> month -> (net, invoice numbers)
+for ref_, m, sub, inv in con.execute(
+        "select coalesce(reference,''), substr(date,1,7), sum(subtotal), group_concat(invoice_number) from xero_invoices "
+        "where contact_name like '%Sword Stall%' and type='ACCREC' and date between ? and ? group by 1, 2", (first_day, last_day + "T23:59:59")):
+    xero[ref_][m] = (sub, inv)
+xero_last = con.execute("select max(substr(date,1,7)) from xero_invoices where contact_name like '%Sword Stall%' and type='ACCREC'").fetchone()[0]
 
 money = lambda s: n((s or "").replace("£", "").replace(",", ""))
 meta_am = defaultdict(float); meta_am_end = {}
@@ -89,7 +90,7 @@ for f in META_DAILY:                       # a daily export for a month override
 meta_tw = defaultdict(float); tw_last = ""
 for row in csv.DictReader(open(TW_CSV)):
     if row["Source"] == "Meta": meta_tw[row["Date"][:7]] += money(row["Ad Spend"]); tw_last = max(tw_last, row["Date"])
-tw_full = {m for m in MONTHS if m < tw_last[:7]}   # months the TW feed covers end to end
+tw_full = {m for m in MONTHS if m in meta_tw and m < tw_last[:7]}   # months the TW feed covers end to end
 
 rows = [r for r in csv.DictReader(open(COGS_CSV)) if r["month"] in MONTHS]
 for r in rows:
@@ -169,17 +170,19 @@ for it in cfg["inputs"]:
     wsI.cell(row=r, column=SRC_I, value=it["note"]).alignment = Alignment(wrap_text=True, vertical="top")
     INPUT[it["key"]] = f"Inputs!$B${r}"; r += 1
 
-# Vendo fee from Xero where synced, otherwise the fallback in the JSON
+# Xero-backed opex lines ("xero": <invoice reference>): actual where an invoice is synced for the month; for months
+# after the last synced invoice the JSON fallback is carried forward (ESTIMATED); months before that with no invoice are £0 (ACTUAL).
 for it in cfg["opex"]:
     if it.get("xero"):
-        vals, sts = [], []
+        inv = xero.get(it["xero"], {}); vals, sts = [], []
         for m in MONTHS:
-            if m in xero: vals.append(round(xero[m][0], 2)); sts.append("ACTUAL")
-            else: vals.append(it["monthly"]); sts.append("ESTIMATED")
+            if m in inv: vals.append(round(inv[m][0], 2)); sts.append("ACTUAL")
+            elif m > xero_last: vals.append(it["monthly"]); sts.append("ESTIMATED")
+            else: vals.append(0); sts.append("ACTUAL")
         it["monthly"] = vals; it["status"] = sts
-        have = [m for m in MONTHS if m in xero]; lack = [m for m in MONTHS if m not in xero]
-        it["note"] = (f"Xero invoices {', '.join(xero[m][1] for m in have)}: £{xero[have[0]][0]:,.0f} net + VAT per month ({ML[have[0]]}–{ML[have[-1]]}), all paid. "
-                      + (f"{', '.join(ML[m] for m in lack)} not yet in the Xero sync (refresh token expired 4 Sep 2026 – run `npm run xero:auth`), carried at the same £{it['monthly'][-1]:,.0f}. " if lack else "")
+        have = [m for m in MONTHS if m in inv]; lack = [m for m in MONTHS if m > xero_last]
+        it["note"] = ((f"Xero: {', '.join(f'{inv[m][1]} {ML[m]} £{inv[m][0]:,.0f}' for m in have)} (net, + VAT), all paid. " if have else "")
+                      + (f"{', '.join(ML[m] for m in lack)} not yet in the Xero sync (refresh token expired 4 Sep 2026 – run `npm run xero:auth`), carried at £{it['monthly'][-1]:,.0f}. " if lack else "")
                       + it["note"])
 
 def block(title, items):
