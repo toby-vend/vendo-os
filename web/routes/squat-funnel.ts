@@ -133,13 +133,23 @@ interface ContactInput {
   attribution?: Attribution;
 }
 
-/** "meta / book-evergreen" style label for the Source field on the contact and opportunity. */
+/**
+ * Channel label for the Source field on the contact and opportunity.
+ * GHL sources are channel-only in Vendo reporting ("Paid Social", not "fb_ads / cpc / campaign");
+ * the raw UTMs live in the contact's custom fields.
+ */
 function sourceLabel(a: Attribution | undefined, fallback: string): string {
   if (!a) return fallback;
-  const parts = [a.utm_source, a.utm_medium, a.utm_campaign].filter(Boolean);
-  if (!parts.length && a.gclid) parts.push('google', 'cpc');
-  if (!parts.length && a.fbclid) parts.push('facebook', 'paid');
-  return parts.length ? parts.join(' / ').slice(0, 120) : fallback;
+  const src = (a.utm_source || '').toLowerCase().trim();
+  const med = (a.utm_medium || '').toLowerCase().trim();
+  const paidMedium = /^(paid|cpc|ppc|paid[-_ ]?social|paidsocial|social[-_ ]?paid|ads?|display)$/.test(med);
+  if (/^(fb[-_ ]?ads?|facebook|fb|meta|meta[-_ ]?ads?|instagram|ig|ig[-_ ]?ads?|tiktok|linkedin)$/.test(src) || a.fbclid) return 'Paid Social';
+  if (/^(google|google[-_ ]?ads?|gads|adwords|bing|microsoft)$/.test(src) || a.gclid) return 'Paid Search';
+  if (/^(email|newsletter|ghl|gohighlevel|mailchimp|klaviyo)$/.test(src) || med === 'email') return 'Email';
+  if (/^(youtube|yt)$/.test(src)) return 'YouTube';
+  if (paidMedium && src) return 'Paid Social';
+  if (src) return src.charAt(0).toUpperCase() + src.slice(1).slice(0, 40);
+  return fallback;
 }
 
 /** Contact custom fields for attribution, created on first use (needs locations/customFields.write).
@@ -342,7 +352,7 @@ export const squatFunnelRoutes: FastifyPluginAsync = async (app) => {
     };
     const attribution: Attribution = {};
     for (const k of ATTR_KEYS) { const v = str(b[k], 500); if (v) attribution[k] = v; }
-    contactInput.source = sourceLabel(attribution, str(b.source, 120) || 'book.squatsuccess.co.uk');
+    contactInput.source = sourceLabel(attribution, 'Website');
     contactInput.attribution = attribution;
 
     const eventId = await logEvent('claim', email, null, b).catch(() => 0);
@@ -429,7 +439,7 @@ export const squatFunnelRoutes: FastifyPluginAsync = async (app) => {
         const k = String(na.name || '').toLowerCase(); if ((ATTR_KEYS as string[]).includes(k) && na.value) (attribution as any)[k] = String(na.value).slice(0, 250);
       }
       contactInput.attribution = attribution;
-      contactInput.source = sourceLabel(attribution, 'shopify-order');
+      contactInput.source = sourceLabel(attribution, 'Website');
     }
 
     try {
