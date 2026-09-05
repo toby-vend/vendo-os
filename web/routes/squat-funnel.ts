@@ -121,9 +121,49 @@ function stageId(p: Pipeline, name: string): string {
   return s.id;
 }
 
+interface Attribution {
+  utm_source?: string; utm_medium?: string; utm_campaign?: string; utm_content?: string; utm_term?: string;
+  gclid?: string; fbclid?: string; landing_page?: string; referrer?: string;
+}
+const ATTR_KEYS: Array<keyof Attribution> = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid', 'landing_page', 'referrer'];
+
 interface ContactInput {
   email: string; firstName: string; lastName: string; phone?: string;
   address1?: string; city?: string; postalCode?: string; source: string; tags: string[];
+  attribution?: Attribution;
+}
+
+/** "meta / book-evergreen" style label for the Source field on the contact and opportunity. */
+function sourceLabel(a: Attribution | undefined, fallback: string): string {
+  if (!a) return fallback;
+  const parts = [a.utm_source, a.utm_medium, a.utm_campaign].filter(Boolean);
+  if (!parts.length && a.gclid) parts.push('google', 'cpc');
+  if (!parts.length && a.fbclid) parts.push('facebook', 'paid');
+  return parts.length ? parts.join(' / ').slice(0, 120) : fallback;
+}
+
+/** Contact custom fields for attribution, created on first use (needs locations/customFields.write). */
+let customFieldCache: { at: number; byKey: Record<string, string> } | null = null;
+async function attributionFieldIds(): Promise<Record<string, string> | null> {
+  if (customFieldCache && Date.now() - customFieldCache.at < 60 * 60 * 1000) return customFieldCache.byKey;
+  try {
+    const data = await ghl<{ customFields: Array<{ id: string; name: string; fieldKey?: string }> }>('GET', `/locations/${LOCATION_ID}/customFields?model=contact`);
+    const byKey: Record<string, string> = {};
+    for (const f of data.customFields || []) {
+      const key = String(f.fieldKey || '').replace(/^contact\./, '').toLowerCase() || f.name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      byKey[key] = f.id;
+    }
+    for (const k of ATTR_KEYS) {
+      if (byKey[k]) continue;
+      const created = await ghl<{ customField: { id: string } }>('POST', `/locations/${LOCATION_ID}/customFields`, { name: k, dataType: 'TEXT', model: 'contact', placeholder: '' });
+      byKey[k] = created.customField.id;
+    }
+    customFieldCache = { at: Date.now(), byKey };
+    return byKey;
+  } catch (err) {
+    console.warn('[squat] attribution custom fields unavailable:', (err as Error).message);
+    return null;
+  }
 }
 
 async function upsertContact(c: ContactInput): Promise<string> {
@@ -139,6 +179,13 @@ async function upsertContact(c: ContactInput): Promise<string> {
     country: 'GB',
     source: c.source,
   };
+  const attr = c.attribution;
+  if (attr && ATTR_KEYS.some((k) => attr[k])) {
+    const ids = await attributionFieldIds();
+    if (ids) {
+      body.customFields = ATTR_KEYS.filter((k) => attr[k] && ids[k]).map((k) => ({ id: ids[k], value: String(attr[k]).slice(0, 250) }));
+    }
+  }
   const data = await ghl<{ contact: { id: string } }>('POST', '/contacts/upsert', body);
   const id = data?.contact?.id;
   if (!id) throw new Error('GHL upsert returned no contact id');
@@ -198,7 +245,7 @@ async function findOpportunityWithRetry(contactId: string, pipelineId: string, e
   return null;
 }
 
-async function createOpportunity(contactId: string, pipeline: Pipeline, stage: string, name: string, value: number): Promise<Opportunity> {
+async function createOpportunity(contactId: string, pipeline: Pipeline, stage: string, name: string, value: number, source: string): Promise<Opportunity> {
   const data = await ghl<{ opportunity: Opportunity }>('POST', '/opportunities/', {
     pipelineId: pipeline.id,
     locationId: LOCATION_ID,
@@ -207,7 +254,7 @@ async function createOpportunity(contactId: string, pipeline: Pipeline, stage: s
     status: 'open',
     contactId,
     monetaryValue: value,
-    source: 'book.squatsuccess.co.uk',
+    source,
   });
   return data.opportunity;
 }
@@ -281,9 +328,13 @@ export const squatFunnelRoutes: FastifyPluginAsync = async (app) => {
       address1: str(b.address1, 60),
       city: str(b.city, 60),
       postalCode: str(b.postal_code, 12).toUpperCase(),
-      source: str(b.source, 120) || 'book.squatsuccess.co.uk',
+      source: 'book.squatsuccess.co.uk',
       tags: [TAG_FORM],
     };
+    const attribution: Attribution = {};
+    for (const k of ATTR_KEYS) { const v = str(b[k], 500); if (v) attribution[k] = v; }
+    contactInput.source = sourceLabel(attribution, str(b.source, 120) || 'book.squatsuccess.co.uk');
+    contactInput.attribution = attribution;
 
     const eventId = await logEvent('claim', email, null, b).catch(() => 0);
     try {
@@ -292,9 +343,9 @@ export const squatFunnelRoutes: FastifyPluginAsync = async (app) => {
       let opp = await findOpportunity(contactId, pipeline.id, email);
       let created = false;
       if (!opp) {
-        const name = `${[contactInput.firstName, contactInput.lastName].filter(Boolean).join(' ') || email} — Dental Freedom Blueprint`;
+        const name = [contactInput.firstName, contactInput.lastName].filter(Boolean).join(' ') || email;
         try {
-          opp = await createOpportunity(contactId, pipeline, STAGE_LEAD, name, 4.95);
+          opp = await createOpportunity(contactId, pipeline, STAGE_LEAD, name, 4.95, contactInput.source);
           created = true;
         } catch (err) {
           if (!/duplicate/i.test((err as Error).message)) throw err;
@@ -352,6 +403,25 @@ export const squatFunnelRoutes: FastifyPluginAsync = async (app) => {
       source: 'shopify-order',
       tags: [TAG_RECEIVED],
     };
+    {
+      const attribution: Attribution = {};
+      const landing = str(order.landing_site, 500);
+      if (landing) {
+        attribution.landing_page = landing;
+        try {
+          const qs = new URL(landing, 'https://book.squatsuccess.co.uk').searchParams;
+          for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid'] as const) {
+            const v = qs.get(k); if (v) attribution[k] = v.slice(0, 250);
+          }
+        } catch { /* ignore */ }
+      }
+      const ref = str(order.referring_site, 500); if (ref) attribution.referrer = ref;
+      for (const na of (order.note_attributes || []) as Array<{ name: string; value: string }>) {
+        const k = String(na.name || '').toLowerCase(); if ((ATTR_KEYS as string[]).includes(k) && na.value) (attribution as any)[k] = String(na.value).slice(0, 250);
+      }
+      contactInput.attribution = attribution;
+      contactInput.source = sourceLabel(attribution, 'shopify-order');
+    }
 
     try {
       const pipeline = await getPipeline();
@@ -359,9 +429,9 @@ export const squatFunnelRoutes: FastifyPluginAsync = async (app) => {
       let opp = await findOpportunity(contactId, pipeline.id, email);
       let created = false;
       if (!opp) {
-        const name = `${[contactInput.firstName, contactInput.lastName].filter(Boolean).join(' ') || email} — Dental Freedom Blueprint`;
+        const name = [contactInput.firstName, contactInput.lastName].filter(Boolean).join(' ') || email;
         try {
-          opp = await createOpportunity(contactId, pipeline, STAGE_RECEIVED, name, Number(order.total_price) || 4.95);
+          opp = await createOpportunity(contactId, pipeline, STAGE_RECEIVED, name, Number(order.total_price) || 4.95, contactInput.source);
           created = true;
         } catch (err) {
           if (!/duplicate/i.test((err as Error).message)) throw err;
