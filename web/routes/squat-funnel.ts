@@ -178,7 +178,7 @@ async function findOpportunity(contactId: string, pipelineId: string, email: str
         sql: `SELECT result FROM squat_funnel_events WHERE email = ? AND status = 'ok' AND result IS NOT NULL ORDER BY id DESC LIMIT 5`,
         args: [email],
       });
-      for (const row of r.rows as Array<{ result: string }>) {
+      for (const row of r.rows as unknown as Array<{ result: string }>) {
         const parsed = JSON.parse(String(row.result)) as { opportunityId?: string };
         if (!parsed.opportunityId) continue;
         const opp = await getOpportunity(parsed.opportunityId);
