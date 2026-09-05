@@ -142,56 +142,38 @@ function sourceLabel(a: Attribution | undefined, fallback: string): string {
   return parts.length ? parts.join(' / ').slice(0, 120) : fallback;
 }
 
-/** Contact custom fields for attribution, created on first use (needs locations/customFields.write). */
-let customFieldCache: { at: number; byKey: Record<string, string> } | null = null;
-async function attributionFieldIds(): Promise<Record<string, string> | null> {
+/** Contact custom fields for attribution, created on first use (needs locations/customFields.write).
+ *  GHL reserves some names as standard fields (e.g. "gclid"), so click ids get their own names. */
+const ATTR_FIELD_NAME: Record<keyof Attribution, string> = {
+  utm_source: 'utm_source', utm_medium: 'utm_medium', utm_campaign: 'utm_campaign', utm_content: 'utm_content', utm_term: 'utm_term',
+  gclid: 'gclid_click_id', fbclid: 'fbclid_click_id', landing_page: 'landing_page', referrer: 'referrer',
+};
+let customFieldCache: { at: number; byKey: Partial<Record<keyof Attribution, string>> } | null = null;
+async function attributionFieldIds(): Promise<Partial<Record<keyof Attribution, string>>> {
   if (customFieldCache && Date.now() - customFieldCache.at < 60 * 60 * 1000) return customFieldCache.byKey;
+  const byKey: Partial<Record<keyof Attribution, string>> = {};
   try {
     const data = await ghl<{ customFields: Array<{ id: string; name: string; fieldKey?: string }> }>('GET', `/locations/${LOCATION_ID}/customFields?model=contact`);
-    const byKey: Record<string, string> = {};
+    const existing: Record<string, string> = {};
     for (const f of data.customFields || []) {
       const key = String(f.fieldKey || '').replace(/^contact\./, '').toLowerCase() || f.name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-      byKey[key] = f.id;
+      existing[key] = f.id;
     }
     for (const k of ATTR_KEYS) {
-      if (byKey[k]) continue;
-      const created = await ghl<{ customField: { id: string } }>('POST', `/locations/${LOCATION_ID}/customFields`, { name: k, dataType: 'TEXT', model: 'contact', placeholder: '' });
-      byKey[k] = created.customField.id;
+      const name = ATTR_FIELD_NAME[k];
+      if (existing[name]) { byKey[k] = existing[name]; continue; }
+      try {
+        const created = await ghl<{ customField: { id: string } }>('POST', `/locations/${LOCATION_ID}/customFields`, { name, dataType: 'TEXT', model: 'contact' });
+        byKey[k] = created.customField.id;
+      } catch (err) {
+        console.warn(`[squat] could not create custom field ${name}:`, (err as Error).message);
+      }
     }
     customFieldCache = { at: Date.now(), byKey };
-    return byKey;
   } catch (err) {
     console.warn('[squat] attribution custom fields unavailable:', (err as Error).message);
-    return null;
   }
-}
-
-async function upsertContact(c: ContactInput): Promise<string> {
-  const body: Record<string, unknown> = {
-    locationId: LOCATION_ID,
-    email: c.email,
-    firstName: c.firstName || undefined,
-    lastName: c.lastName || undefined,
-    phone: c.phone || undefined,
-    address1: c.address1 || undefined,
-    city: c.city || undefined,
-    postalCode: c.postalCode || undefined,
-    country: 'GB',
-    source: c.source,
-  };
-  const attr = c.attribution;
-  if (attr && ATTR_KEYS.some((k) => attr[k])) {
-    const ids = await attributionFieldIds();
-    if (ids) {
-      body.customFields = ATTR_KEYS.filter((k) => attr[k] && ids[k]).map((k) => ({ id: ids[k], value: String(attr[k]).slice(0, 250) }));
-    }
-  }
-  const data = await ghl<{ contact: { id: string } }>('POST', '/contacts/upsert', body);
-  const id = data?.contact?.id;
-  if (!id) throw new Error('GHL upsert returned no contact id');
-  // Tags are added separately: passing them to upsert REPLACES the contact's tags.
-  await ghl('POST', `/contacts/${id}/tags`, { tags: c.tags });
-  return id;
+  return byKey;
 }
 
 interface Opportunity { id: string; pipelineStageId: string; status: string; name?: string }
