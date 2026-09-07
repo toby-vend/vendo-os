@@ -44,6 +44,7 @@ import { runMonthlyClientReports } from '../../lib/jobs/monthly-client-reports.j
 import { runCapacityDigest } from '../../lib/jobs/capacity-digest.js';
 import { runSalesPipelineDigest } from '../../lib/jobs/sales-pipeline-digest.js';
 import { runCaseStudyDetection } from '../../lib/jobs/case-study-detection.js';
+import { runDeliverablesHoursSheet } from '../../lib/jobs/deliverables-hours-sheet.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -292,6 +293,99 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[cron/pull-onboarding-from-portal] Failed:', msg);
       return reply.code(500).send({ ok: false, message: 'CD onboarding sync failed', error: msg });
+    }
+  });
+
+  /**
+   * GET /portal-sync — Both directions of the ClientDashboard bridge in one
+   * cron (every 6h). Merged from the separate /pull-onboarding-from-portal
+   * and /push-clients-to-portal crons, which already fired at the same
+   * minute: Vercel Pro caps a project at 40 cron entries and we were at the
+   * limit. Both individual routes above still work for manual triggering.
+   *
+   * Pull runs first so a freshly-mirrored onboarding record is visible to
+   * the push in the same run. A pull failure does not skip the push — they
+   * are independent — so both are reported and the route fails if either did.
+   */
+  app.get('/portal-sync', async (_request, reply) => {
+    const errors: string[] = [];
+
+    let pull: Awaited<ReturnType<typeof pullOnboardingFromPortal>> | null = null;
+    try {
+      pull = await pullOnboardingFromPortal();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/portal-sync] pull failed:', msg);
+      errors.push(`pull: ${msg}`);
+    }
+
+    let push: Awaited<ReturnType<typeof pushClientsToPortal>> | null = null;
+    try {
+      push = await pushClientsToPortal();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/portal-sync] push failed:', msg);
+      errors.push(`push: ${msg}`);
+    }
+
+    if (errors.length > 0) {
+      return reply.code(500).send({
+        ok: false,
+        message: 'Portal sync partially failed',
+        error: errors.join('; '),
+        pull,
+        push,
+      });
+    }
+
+    return reply.send({
+      ok: true,
+      message: 'Portal sync completed',
+      pull: {
+        loaded: pull?.loaded,
+        upserted: pull?.upserted,
+        skipped: pull?.skipped,
+        warnings: pull?.warnings.length,
+      },
+      push: {
+        loaded: push?.loaded,
+        prepared: push?.prepared,
+        written: push?.written,
+        collisions: push?.collisions,
+        warnings: push?.warnings.length,
+      },
+    });
+  });
+
+  /**
+   * GET /deliverables-hours-sheet — Weekly Friday. Writes month-to-date
+   * Harvest hours per client into the deliverables Google Sheet, split into
+   * the AM and CM columns of the current month's column pair.
+   *
+   * Idempotent: overwrites the same two cells per row on every run, so the
+   * figure simply grows through the month. Aborts without writing if the
+   * month's column pair can't be positively identified on the tab.
+   */
+  app.get('/deliverables-hours-sheet', async (_request, reply) => {
+    try {
+      const result = await runDeliverablesHoursSheet();
+      return reply.send({
+        ok: true,
+        message: 'Deliverables hours sheet updated',
+        month: result.month,
+        tab: result.tab,
+        rows: result.planned.length,
+        cellsWritten: result.written,
+        unmatchedRows: result.unmatchedRows,
+        unmatchedClients: result.unmatchedClients,
+        durationMs: result.durationMs,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/deliverables-hours-sheet] Failed:', msg);
+      return reply
+        .code(500)
+        .send({ ok: false, message: 'Deliverables hours sheet failed', error: msg });
     }
   });
 

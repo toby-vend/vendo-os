@@ -6,14 +6,22 @@
       "use": "@vercel/node",
       "config": {
         "maxDuration": 300,
-        "includeFiles": ["web/views/**", "web/views/**/*", "web/public/**", "context/**", ".claude/commands/skills/**"]
+        "includeFiles": [
+          "web/views/**",
+          "web/views/**/*",
+          "web/public/**",
+          "context/**",
+          ".claude/commands/skills/**"
+        ]
       }
     },
     {
       "src": "api/chat.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["context/**"]
+        "includeFiles": [
+          "context/**"
+        ]
       }
     },
     {
@@ -69,42 +77,58 @@
     {
       "src": "api/cron/atlas-churn-risk.ts",
       "use": "@vercel/node",
-      "config": { "maxDuration": 300 }
+      "config": {
+        "maxDuration": 300
+      }
     },
     {
       "src": "api/cron/atlas-upsell.ts",
       "use": "@vercel/node",
-      "config": { "maxDuration": 300 }
+      "config": {
+        "maxDuration": 300
+      }
     },
     {
       "src": "api/cron/atlas-lead-quality.ts",
       "use": "@vercel/node",
-      "config": { "maxDuration": 300 }
+      "config": {
+        "maxDuration": 300
+      }
     },
     {
       "src": "api/cron/atlas-case-study.ts",
       "use": "@vercel/node",
-      "config": { "maxDuration": 300 }
+      "config": {
+        "maxDuration": 300
+      }
     },
     {
       "src": "api/cron/atlas-profitability.ts",
       "use": "@vercel/node",
-      "config": { "maxDuration": 300 }
+      "config": {
+        "maxDuration": 300
+      }
     },
     {
       "src": "api/cron/atlas-feature-prioritiser.ts",
       "use": "@vercel/node",
-      "config": { "maxDuration": 300 }
+      "config": {
+        "maxDuration": 300
+      }
     },
     {
       "src": "api/cron/atlas-growth.ts",
       "use": "@vercel/node",
-      "config": { "maxDuration": 300 }
+      "config": {
+        "maxDuration": 300
+      }
     },
     {
       "src": "api/cron/atlas-qa.ts",
       "use": "@vercel/node",
-      "config": { "maxDuration": 300 }
+      "config": {
+        "maxDuration": 300
+      }
     },
     {
       "src": "api/agent/chat.ts",
@@ -266,16 +290,8 @@
       "schedule": "0 * * * *"
     },
     {
-      "path": "/api/cron/pull-onboarding-from-portal",
-      "schedule": "0 */6 * * *"
-    },
-    {
       "path": "/api/cron/client-profitability",
       "schedule": "0 4 * * *"
-    },
-    {
-      "path": "/api/cron/push-clients-to-portal",
-      "schedule": "0 */6 * * *"
     },
     {
       "path": "/api/cron/push-reports-to-portal",
@@ -292,32 +308,183 @@
     {
       "path": "/api/cron/sync-frameio",
       "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/portal-sync",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/deliverables-hours-sheet",
+      "schedule": "0 17 * * 5"
     }
   ],
   "routes": [
-    { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
-    { "src": "/sw.js", "headers": { "Cache-Control": "public, max-age=0, must-revalidate" }, "dest": "/public/sw.js" },
-    { "src": "/manifest.json", "dest": "/public/manifest.json" },
-    { "src": "/api/chat", "dest": "/api/chat.ts", "methods": ["POST"] },
-    { "src": "/api/skills/generate", "dest": "/api/skills-generate.ts", "methods": ["POST"] },
-    { "src": "/api/skills/save", "dest": "/api/skills-save.ts", "methods": ["POST"] },
-    { "src": "/api/skills/outputs", "dest": "/api/skills-outputs.ts", "methods": ["GET"] },
-    { "src": "/api/slack/events", "dest": "/api/slack/events.ts", "methods": ["POST"] },
-    { "src": "/api/slack/commands", "dest": "/api/slack/commands.ts", "methods": ["POST"] },
-    { "src": "/api/cron/atlas-brief", "dest": "/api/cron/atlas-brief.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/concern-monitor", "dest": "/api/cron/concern-monitor.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/codebase-health", "dest": "/api/cron/codebase-health.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/atlas-churn-risk", "dest": "/api/cron/atlas-churn-risk.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/atlas-upsell", "dest": "/api/cron/atlas-upsell.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/atlas-lead-quality", "dest": "/api/cron/atlas-lead-quality.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/atlas-case-study", "dest": "/api/cron/atlas-case-study.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/atlas-profitability", "dest": "/api/cron/atlas-profitability.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/atlas-feature-prioritiser", "dest": "/api/cron/atlas-feature-prioritiser.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/atlas-growth", "dest": "/api/cron/atlas-growth.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/cron/atlas-qa", "dest": "/api/cron/atlas-qa.ts", "methods": ["GET", "POST"] },
-    { "src": "/api/agent/chat", "dest": "/api/agent/chat.ts", "methods": ["POST"] },
-    { "src": "/api/agent/approve", "dest": "/api/agent/approve.ts", "methods": ["POST"] },
-    { "src": "/api/agent/conversations(/.*)?", "dest": "/api/agent/conversations.ts" },
-    { "src": "/(.*)", "dest": "/api/index.ts" }
+    {
+      "src": "/assets/(.*)",
+      "dest": "/public/assets/$1"
+    },
+    {
+      "src": "/sw.js",
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      },
+      "dest": "/public/sw.js"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/public/manifest.json"
+    },
+    {
+      "src": "/api/chat",
+      "dest": "/api/chat.ts",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/skills/generate",
+      "dest": "/api/skills-generate.ts",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/skills/save",
+      "dest": "/api/skills-save.ts",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/skills/outputs",
+      "dest": "/api/skills-outputs.ts",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "src": "/api/slack/events",
+      "dest": "/api/slack/events.ts",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/slack/commands",
+      "dest": "/api/slack/commands.ts",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-brief",
+      "dest": "/api/cron/atlas-brief.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/concern-monitor",
+      "dest": "/api/cron/concern-monitor.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/codebase-health",
+      "dest": "/api/cron/codebase-health.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-churn-risk",
+      "dest": "/api/cron/atlas-churn-risk.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-upsell",
+      "dest": "/api/cron/atlas-upsell.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-lead-quality",
+      "dest": "/api/cron/atlas-lead-quality.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-case-study",
+      "dest": "/api/cron/atlas-case-study.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-profitability",
+      "dest": "/api/cron/atlas-profitability.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-feature-prioritiser",
+      "dest": "/api/cron/atlas-feature-prioritiser.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-growth",
+      "dest": "/api/cron/atlas-growth.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/cron/atlas-qa",
+      "dest": "/api/cron/atlas-qa.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/agent/chat",
+      "dest": "/api/agent/chat.ts",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/agent/approve",
+      "dest": "/api/agent/approve.ts",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "src": "/api/agent/conversations(/.*)?",
+      "dest": "/api/agent/conversations.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.ts"
+    }
   ]
 }

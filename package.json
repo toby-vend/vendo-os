@@ -124,7 +124,9 @@
     "auto:traffic-light": "tsx scripts/automation/traffic-light-alerts.ts",
     "auto:daily-brief": "tsx scripts/automation/daily-slack-brief.ts",
     "scan:codehealth": "tsx scripts/agents/codebase-health-preview.ts",
-    "creative:sheet": "tsx scripts/creative/generate-figma-sheet.ts"
+    "creative:sheet": "tsx scripts/creative/generate-figma-sheet.ts",
+    "sheets:auth": "tsx scripts/auth/google-sheets-auth.ts",
+    "sheet:deliverables": "node --env-file=.env.local --import tsx/esm scripts/reports/deliverables-hours-sheet.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.179",
