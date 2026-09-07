@@ -303,7 +303,9 @@ export function readAccountRows(
   for (let r = layout.headerRow + 1; r < grid.length; r++) {
     const account = (grid[r]?.[layout.accountCol] ?? '').trim();
     if (!account) continue;
-    if (NON_CLIENT_ROWS.has(normaliseHeader(account))) continue;
+    // Footer labels are written with trailing punctuation on some tabs
+    // ("Current Workload:"), so compare without it.
+    if (NON_CLIENT_ROWS.has(normaliseHeader(account).replace(/[:\s]+$/, ''))) continue;
     out.push({ row: r, account });
   }
   return out;

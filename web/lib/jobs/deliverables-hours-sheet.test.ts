@@ -37,6 +37,8 @@ function sampleGrid(): string[][] {
       '3.50', '', '', ''],
     ['', '', '', '', '', '39', '47', '', '', '', '18.00', '0.50', '', ''],
     ['Working Month', '162', 'Hours', '', '', '', '', '', '', '', '', '', '', ''],
+    // Some tabs write footer labels with a trailing colon.
+    ['Current Workload:', '86', 'Hours', '', '', '', '', '', '', '', '', '', '', ''],
   ];
 }
 
