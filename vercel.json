@@ -315,7 +315,7 @@
     },
     {
       "path": "/api/cron/deliverables-hours-sheet",
-      "schedule": "0 17 * * 5"
+      "schedule": "0 18 * * *"
     }
   ],
   "routes": [

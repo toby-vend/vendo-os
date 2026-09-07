@@ -1,8 +1,12 @@
 /**
- * Deliverables hours → Google Sheet — weekly Friday.
+ * Deliverables hours → Google Sheet — daily, end of day.
  *
  * Writes month-to-date Harvest hours per client into the deliverables
  * tracker, split into AM and CM columns.
+ *
+ * Each run is a full restatement of the month so far, not an increment, so
+ * running daily simply keeps the figure current: time logged after the run
+ * is picked up by the next one.
  *
  * Split rule (set by Toby, 2026-09-07):
  *   AM = the whole "Account Management — *" family, plus every
@@ -17,7 +21,7 @@
  *
  * Reads the Harvest API directly rather than harvest_time_entries: that
  * table is populated by a manual local `npm run sync:harvest` and runs
- * days stale, which would silently under-report on a Friday evening.
+ * days stale, which would silently under-report.
  *
  * Writes are idempotent — each run overwrites the current month's column
  * pair with the month-to-date total, so re-running is always safe.

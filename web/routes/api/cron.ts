@@ -358,9 +358,10 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
   });
 
   /**
-   * GET /deliverables-hours-sheet — Weekly Friday. Writes month-to-date
-   * Harvest hours per client into the deliverables Google Sheet, split into
-   * the AM and CM columns of the current month's column pair.
+   * GET /deliverables-hours-sheet — Daily at 18:00 UTC (never before 18:00
+   * UK local, since UTC trails BST). Writes month-to-date Harvest hours per
+   * client into the deliverables Google Sheet, split into the AM and CM
+   * columns of the current month's column pair.
    *
    * Idempotent: overwrites the same two cells per row on every run, so the
    * figure simply grows through the month. Aborts without writing if the
