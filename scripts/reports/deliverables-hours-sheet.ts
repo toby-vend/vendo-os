@@ -11,7 +11,17 @@
 import { config } from 'dotenv';
 config({ path: '.env.local', override: true });
 
+import { existsSync, readFileSync } from 'fs';
 import { runDeliverablesHoursSheet } from '../../web/lib/jobs/deliverables-hours-sheet.js';
+
+// Locally, fall back to the token file written by `npm run sheets:auth` so a
+// dry run works straight after authorising. On Vercel the env var is the only
+// source — there is no filesystem to read.
+const TOKEN_PATH = '.secrets/google-sheets-tokens.json';
+if (!process.env.GOOGLE_SHEETS_REFRESH_TOKEN && existsSync(TOKEN_PATH)) {
+  const saved = JSON.parse(readFileSync(TOKEN_PATH, 'utf-8')) as { refresh_token?: string };
+  if (saved.refresh_token) process.env.GOOGLE_SHEETS_REFRESH_TOKEN = saved.refresh_token;
+}
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
