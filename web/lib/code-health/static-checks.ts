@@ -236,10 +236,22 @@ async function cronDrift(): Promise<Finding[]> {
   const cronDir = resolve(REPO_ROOT, 'api/cron');
   const cronFiles = existsSync(cronDir) ? new Set(readdirSync(cronDir)) : new Set<string>();
 
+  // Only a minority of crons are dedicated Vercel functions. The rest fall
+  // through the catch-all route in vercel.json into Fastify, so a missing
+  // api/cron/*.ts file is only drift if no Fastify route claims the path
+  // either. Without this the check reported a P0 for every routed cron.
+  const fastifyRoutes = new Set<string>();
+  for (const rel of ['web/routes/api/cron.ts', 'web/routes/drive-cron.ts']) {
+    const routeFile = resolve(REPO_ROOT, rel);
+    if (!existsSync(routeFile)) continue;
+    const src = await readFile(routeFile, 'utf-8');
+    for (const m of src.matchAll(/app\.get\(\s*'\/([^']+)'/g)) fastifyRoutes.add(m[1]);
+  }
+
   for (const cron of cfg.crons ?? []) {
     const handler = cron.path.replace(/^\/api\/cron\//, '');
     const tsFile = `${handler}.ts`;
-    if (!cronFiles.has(tsFile)) {
+    if (!cronFiles.has(tsFile) && !fastifyRoutes.has(handler)) {
       findings.push({
         file_path: 'vercel.json',
         line_start: null,
@@ -248,8 +260,8 @@ async function cronDrift(): Promise<Finding[]> {
         severity: 'P0',
         source: 'static:cron-drift',
         title: `Cron path has no handler: ${cron.path}`,
-        description: `vercel.json declares a cron at ${cron.path} (schedule: ${cron.schedule}) but api/cron/${tsFile} does not exist. The cron will 404 on every fire.`,
-        proposed_fix: `Either create api/cron/${tsFile} or remove the cron entry.`,
+        description: `vercel.json declares a cron at ${cron.path} (schedule: ${cron.schedule}) but there is no api/cron/${tsFile} and no Fastify route for /${handler}. The cron will 404 on every fire.`,
+        proposed_fix: `Create api/cron/${tsFile}, register a Fastify route at /${handler} in web/routes/api/cron.ts, or remove the cron entry.`,
       });
     }
     // Build entry drift — every cron handler also needs an explicit build entry.
