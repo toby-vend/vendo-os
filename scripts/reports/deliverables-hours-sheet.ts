@@ -54,6 +54,18 @@ if (result.planned.length > 0) {
 
 if (!result.dryRun) console.log(`Cells written: ${result.written}`);
 
+if (result.prior) {
+  const p = result.prior;
+  console.log('');
+  console.log(
+    `Month-end close — restated ${p.month}: ${p.entries} entries, ` +
+      `${p.planned.length} rows, ${result.dryRun ? '0 (dry run)' : p.written} cells written`,
+  );
+} else if (result.priorSkipped) {
+  console.log('');
+  console.log(`Month-end close skipped: ${result.priorSkipped}`);
+}
+
 if (result.unmatchedRows.length > 0) {
   console.log('');
   console.log('Sheet rows with no Harvest client match (left untouched):');

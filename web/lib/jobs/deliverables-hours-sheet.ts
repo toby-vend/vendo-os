@@ -73,6 +73,17 @@ export interface PlannedWrite {
   cmHours: number;
 }
 
+/** One month's computed and written column pair. */
+export interface MonthResult {
+  month: string;
+  userName: string;
+  entries: number;
+  written: number;
+  planned: PlannedWrite[];
+  unmatchedRows: string[];
+  unmatchedClients: string[];
+}
+
 export interface DeliverablesSheetResult {
   month: string;
   tab: string;
@@ -85,6 +96,10 @@ export interface DeliverablesSheetResult {
   unmatchedRows: string[];
   /** Harvest clients with hours that have no row on this tab. */
   unmatchedClients: string[];
+  /** The previous month, restated during the month-end close window. */
+  prior: MonthResult | null;
+  /** Why the previous month was not restated, when it wasn't. */
+  priorSkipped: string | null;
   durationMs: number;
 }
 
@@ -373,6 +388,108 @@ async function ensureSchema(): Promise<void> {
 
 // --- Main ---
 
+/** Inclusive Harvest date window for a month, clamped so it never runs ahead of today. */
+export function monthWindow(month: string, now: Date): { from: string; to: string } {
+  const [y, m] = month.split('-').map(Number);
+  const monthEnd = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+  const today = now.toISOString().slice(0, 10);
+  return { from: `${month}-01`, to: monthEnd < today ? monthEnd : today };
+}
+
+/** The YYYY-MM before the given one. */
+export function previousMonth(month: string): string {
+  const [y, m] = month.split('-').map(Number);
+  const d = new Date(Date.UTC(y, m - 2, 1));
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+interface MonthContext {
+  accessToken: string;
+  spreadsheetId: string;
+  quoted: string;
+  grid: string[][];
+  harvestByNorm: Map<string, string>;
+  userId: number;
+  dryRun: boolean;
+  now: Date;
+}
+
+/**
+ * Compute and (unless dry run) write one month's column pair.
+ *
+ * Throws if the month's columns can't be positively identified — the caller
+ * decides whether that is fatal (current month) or skippable (prior month).
+ */
+async function writeMonth(ctx: MonthContext, month: string): Promise<MonthResult> {
+  const { from, to } = monthWindow(month, ctx.now);
+  consoleLog(LOG_SOURCE, `Building ${month} (${from} → ${to}) for Harvest user ${ctx.userId}`);
+
+  const entries = await fetchHarvestEntries(ctx.userId, from, to);
+
+  const byClient = new Map<string, { am: number; cm: number }>();
+  for (const e of entries) {
+    const client = e.client?.name?.trim();
+    if (!client || isInternalClient(client)) continue;
+    const bucket = classifyTask(e.task?.name ?? '');
+    if (bucket === 'skip') continue;
+    const acc = byClient.get(client) ?? { am: 0, cm: 0 };
+    acc[bucket] += e.hours ?? 0;
+    byClient.set(client, acc);
+  }
+
+  const layout = findLayout(ctx.grid, month);
+  const accountRows = readAccountRows(ctx.grid, layout);
+
+  // Clients with hours always resolve, even if absent from /clients.
+  const resolveMap = new Map(ctx.harvestByNorm);
+  for (const name of byClient.keys()) resolveMap.set(normaliseClient(name), name);
+
+  const planned: PlannedWrite[] = [];
+  const unmatchedRows: string[] = [];
+  const matchedHarvest = new Set<string>();
+
+  for (const { row, account } of accountRows) {
+    const harvestClient = resolveClient(account, resolveMap);
+    if (!harvestClient) {
+      unmatchedRows.push(account);
+      continue;
+    }
+    matchedHarvest.add(harvestClient);
+    const totals = byClient.get(harvestClient) ?? { am: 0, cm: 0 };
+    // +1 because grid indices are 0-based and A1 rows are 1-based.
+    const a1Row = row + 1;
+    planned.push({
+      account,
+      harvestClient,
+      row: a1Row,
+      amRange: `${ctx.quoted}!${columnLetter(layout.amCol)}${a1Row}`,
+      amHours: round2(totals.am),
+      cmRange: `${ctx.quoted}!${columnLetter(layout.cmCol)}${a1Row}`,
+      cmHours: round2(totals.cm),
+    });
+  }
+
+  let written = 0;
+  if (!ctx.dryRun) {
+    const writes: CellWrite[] = [];
+    for (const p of planned) {
+      writes.push({ range: p.amRange, value: p.amHours });
+      writes.push({ range: p.cmRange, value: p.cmHours });
+    }
+    written = await batchUpdateValues(ctx.accessToken, ctx.spreadsheetId, writes);
+  }
+
+  return {
+    month,
+    userName: entries.find((e) => e.user?.name)?.user?.name ?? `user ${ctx.userId}`,
+    entries: entries.length,
+    written,
+    planned,
+    unmatchedRows,
+    unmatchedClients: [...byClient.keys()].filter((c) => !matchedHarvest.has(c)),
+  };
+}
+
 export async function runDeliverablesHoursSheet(
   options: DeliverablesSheetOptions = {},
 ): Promise<DeliverablesSheetResult> {
@@ -387,32 +504,10 @@ export async function runDeliverablesHoursSheet(
   if (!Number.isFinite(userId)) throw new Error('DELIVERABLES_SHEET_USER_ID must be set');
 
   const now = new Date();
+  const explicitMonth = options.month != null;
   const month =
     options.month ?? `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
-  const from = `${month}-01`;
-  // End of the target month, clamped to today so a mid-month run reports
-  // month-to-date rather than reaching into the future.
-  const [my, mm] = month.split('-').map(Number);
-  const monthEnd = new Date(Date.UTC(my, mm, 0)).toISOString().slice(0, 10);
-  const today = now.toISOString().slice(0, 10);
-  const to = monthEnd < today ? monthEnd : today;
-
-  consoleLog(LOG_SOURCE, `Building ${month} (${from} → ${to}) for Harvest user ${userId}`);
-
-  // --- Harvest ---
-  const entries = await fetchHarvestEntries(userId, from, to);
-  const userName = entries.find((e) => e.user?.name)?.user?.name ?? `user ${userId}`;
-
-  const byClient = new Map<string, { am: number; cm: number }>();
-  for (const e of entries) {
-    const client = e.client?.name?.trim();
-    if (!client || isInternalClient(client)) continue;
-    const bucket = classifyTask(e.task?.name ?? '');
-    if (bucket === 'skip') continue;
-    const acc = byClient.get(client) ?? { am: 0, cm: 0 };
-    acc[bucket] += e.hours ?? 0;
-    byClient.set(client, acc);
-  }
+  const dryRun = options.dryRun ?? false;
 
   // --- Sheet ---
   const accessToken = await mintSheetsAccessToken();
@@ -428,87 +523,89 @@ export async function runDeliverablesHoursSheet(
 
   const quoted = quoteSheetName(target.title);
   const grid = await readGrid(accessToken, spreadsheetId, `${quoted}!A1:CZ200`);
-  const layout = findLayout(grid, month);
-  const accountRows = readAccountRows(grid, layout);
 
-  // --- Match sheet rows to Harvest clients ---
-  // Resolve against every Harvest client so a row with no hours this month
+  // Resolve against every Harvest client so a row with no hours in the month
   // still matches and gets a zero, rather than being reported as unmatched.
-  const allClients = await fetchHarvestClients();
   const harvestByNorm = new Map<string, string>();
-  for (const name of allClients) {
+  for (const name of await fetchHarvestClients()) {
     if (isInternalClient(name)) continue;
     harvestByNorm.set(normaliseClient(name), name);
   }
-  // Anything with hours but somehow absent from /clients still resolves.
-  for (const name of byClient.keys()) harvestByNorm.set(normaliseClient(name), name);
 
-  const planned: PlannedWrite[] = [];
-  const unmatchedRows: string[] = [];
-  const matchedHarvest = new Set<string>();
+  const ctx: MonthContext = {
+    accessToken, spreadsheetId, quoted, grid, harvestByNorm, userId, dryRun, now,
+  };
 
-  for (const { row, account } of accountRows) {
-    const harvestClient = resolveClient(account, harvestByNorm);
-    if (!harvestClient) {
-      unmatchedRows.push(account);
-      continue;
+  // --- Close the previous month ---
+  // A daily run only ever restates the month it is in, so time logged late on
+  // the last day — or backdated in the first days of the new month — would
+  // otherwise never reach the sheet. For a short grace window, restate the
+  // previous month first. Best-effort: if that month has no column pair on the
+  // tab there is nothing to close, and the current month must still run.
+  const closeDays = Number(process.env.DELIVERABLES_SHEET_CLOSE_DAYS?.trim() || '5');
+  let prior: MonthResult | null = null;
+  let priorSkipped: string | null = null;
+
+  if (explicitMonth) {
+    priorSkipped = 'an explicit --month was given';
+  } else if (now.getUTCDate() > closeDays) {
+    priorSkipped = `day ${now.getUTCDate()} is past the ${closeDays}-day close window`;
+  } else {
+    const priorMonthKey = previousMonth(month);
+    try {
+      prior = await writeMonth(ctx, priorMonthKey);
+      consoleLog(
+        LOG_SOURCE,
+        `${dryRun ? '[dry run] ' : ''}closed ${priorMonthKey}: ${prior.written} cells written`,
+      );
+    } catch (err) {
+      priorSkipped = err instanceof Error ? err.message : String(err);
+      consoleLog(LOG_SOURCE, `Skipped closing ${priorMonthKey}: ${priorSkipped}`);
     }
-    matchedHarvest.add(harvestClient);
-    const totals = byClient.get(harvestClient) ?? { am: 0, cm: 0 };
-    // +1 because grid indices are 0-based and A1 rows are 1-based.
-    const a1Row = row + 1;
-    planned.push({
-      account,
-      harvestClient,
-      row: a1Row,
-      amRange: `${quoted}!${columnLetter(layout.amCol)}${a1Row}`,
-      amHours: round2(totals.am),
-      cmRange: `${quoted}!${columnLetter(layout.cmCol)}${a1Row}`,
-      cmHours: round2(totals.cm),
+  }
+
+  // --- Current month ---
+  const current = await writeMonth(ctx, month);
+
+  // Prefer a name seen in the current month; fall back to the prior month's
+  // entries when this month has none yet (e.g. a run on the 1st).
+  const userName =
+    current.entries > 0 ? current.userName : (prior?.userName ?? current.userName);
+
+  for (const r of [prior, current]) {
+    if (!r) continue;
+    await db.execute({
+      sql: `INSERT INTO deliverables_sheet_runs
+              (run_at, month, tab, user_name, entries, cells_written,
+               unmatched_rows, unmatched_clients, dry_run)
+            VALUES (datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        r.month, target.title, userName, r.entries, r.written,
+        r.unmatchedRows.length, r.unmatchedClients.length, dryRun ? 1 : 0,
+      ],
     });
   }
 
-  const unmatchedClients = [...byClient.keys()].filter((c) => !matchedHarvest.has(c));
-
-  // --- Write ---
-  const dryRun = options.dryRun ?? false;
-  let written = 0;
-  if (!dryRun) {
-    const writes: CellWrite[] = [];
-    for (const p of planned) {
-      writes.push({ range: p.amRange, value: p.amHours });
-      writes.push({ range: p.cmRange, value: p.cmHours });
-    }
-    written = await batchUpdateValues(accessToken, spreadsheetId, writes);
-  }
-
-  await db.execute({
-    sql: `INSERT INTO deliverables_sheet_runs
-            (run_at, month, tab, user_name, entries, cells_written,
-             unmatched_rows, unmatched_clients, dry_run)
-          VALUES (datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?)`,
-    args: [
-      month, target.title, userName, entries.length, written,
-      unmatchedRows.length, unmatchedClients.length, dryRun ? 1 : 0,
-    ],
-  });
-
   consoleLog(
     LOG_SOURCE,
-    `${dryRun ? '[dry run] ' : ''}${planned.length} rows, ${written} cells written, ` +
-      `${unmatchedRows.length} unmatched rows, ${unmatchedClients.length} unmatched clients`,
+    `${dryRun ? '[dry run] ' : ''}${current.planned.length} rows, ` +
+      `${current.written + (prior?.written ?? 0)} cells written, ` +
+      `${current.unmatchedRows.length} unmatched rows, ` +
+      `${current.unmatchedClients.length} unmatched clients`,
   );
 
   return {
     month,
     tab: target.title,
     userName,
-    entries: entries.length,
-    written,
+    entries: current.entries,
+    written: current.written,
     dryRun,
-    planned,
-    unmatchedRows,
-    unmatchedClients,
+    planned: current.planned,
+    unmatchedRows: current.unmatchedRows,
+    unmatchedClients: current.unmatchedClients,
+    prior,
+    priorSkipped,
     durationMs: Date.now() - start,
   };
 }

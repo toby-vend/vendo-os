@@ -17,6 +17,8 @@ import {
   findLayout,
   readAccountRows,
   resolveClient,
+  previousMonth,
+  monthWindow,
 } from './deliverables-hours-sheet.js';
 
 /**
@@ -173,5 +175,41 @@ describe('readAccountRows', () => {
     );
     // Row indices are 0-based here; the job converts to 1-based A1 rows.
     assert.deepEqual(rows.map((r) => r.row), [2, 3, 4]);
+  });
+});
+
+describe('previousMonth', () => {
+  it('steps back within a year', () => {
+    assert.equal(previousMonth('2026-09'), '2026-08');
+    assert.equal(previousMonth('2026-03'), '2026-02');
+  });
+
+  it('crosses the year boundary', () => {
+    assert.equal(previousMonth('2026-01'), '2025-12');
+  });
+});
+
+describe('monthWindow', () => {
+  it('clamps a mid-month run to today rather than reaching into the future', () => {
+    const w = monthWindow('2026-09', new Date('2026-09-07T18:00:00Z'));
+    assert.deepEqual(w, { from: '2026-09-01', to: '2026-09-07' });
+  });
+
+  it('covers a completed month in full when closing it', () => {
+    // The month-end close case: running on 2 Oct must restate all of September.
+    const w = monthWindow('2026-09', new Date('2026-10-02T18:00:00Z'));
+    assert.deepEqual(w, { from: '2026-09-01', to: '2026-09-30' });
+  });
+
+  it('handles 31-day and February month ends', () => {
+    assert.equal(monthWindow('2026-08', new Date('2026-09-01T00:00:00Z')).to, '2026-08-31');
+    assert.equal(monthWindow('2026-02', new Date('2026-03-01T00:00:00Z')).to, '2026-02-28');
+    // 2028 is a leap year.
+    assert.equal(monthWindow('2028-02', new Date('2028-03-01T00:00:00Z')).to, '2028-02-29');
+  });
+
+  it('covers the whole month on its final day', () => {
+    const w = monthWindow('2026-09', new Date('2026-09-30T18:00:00Z'));
+    assert.deepEqual(w, { from: '2026-09-01', to: '2026-09-30' });
   });
 });

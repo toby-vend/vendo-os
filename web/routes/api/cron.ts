@@ -377,6 +377,10 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
         tab: result.tab,
         rows: result.planned.length,
         cellsWritten: result.written,
+        priorMonthClosed: result.prior
+          ? { month: result.prior.month, cellsWritten: result.prior.written }
+          : null,
+        priorMonthSkipped: result.priorSkipped,
         unmatchedRows: result.unmatchedRows,
         unmatchedClients: result.unmatchedClients,
         durationMs: result.durationMs,
