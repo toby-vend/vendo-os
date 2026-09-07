@@ -145,6 +145,43 @@ async function fetchHarvestEntries(
   return out;
 }
 
+/**
+ * Every client in the Harvest account, not just those with hours this month.
+ *
+ * Without this a sheet row can't tell "you logged nothing here" apart from
+ * "this name matches no Harvest client" — the first is normal and should
+ * write a zero, the second is a mapping gap that needs reporting.
+ */
+async function fetchHarvestClients(): Promise<string[]> {
+  const accountId = process.env.HARVEST_ACCOUNT_ID?.trim();
+  const token = process.env.HARVEST_ACCESS_TOKEN?.trim();
+  if (!accountId || !token) {
+    throw new Error('HARVEST_ACCOUNT_ID and HARVEST_ACCESS_TOKEN must be set');
+  }
+
+  const out: string[] = [];
+  for (let page = 1; page <= 20; page++) {
+    const resp = await fetch(`${HARVEST_BASE}/clients?per_page=100&page=${page}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Harvest-Account-Id': accountId,
+        'User-Agent': 'VendoOS (vendo-os@vendodigital.co.uk)',
+      },
+    });
+    if (!resp.ok) {
+      const body = await resp.text();
+      throw new Error(`Harvest clients API ${resp.status}: ${body.slice(0, 300)}`);
+    }
+    const data = (await resp.json()) as {
+      clients?: Array<{ name?: string }>;
+      total_pages?: number;
+    };
+    for (const c of data.clients ?? []) if (c.name) out.push(c.name);
+    if (page >= (data.total_pages ?? 1)) break;
+  }
+  return out;
+}
+
 // --- Classification ---
 
 /** Lowercase, collapse whitespace, normalise em/en dashes to a hyphen. */
@@ -391,7 +428,15 @@ export async function runDeliverablesHoursSheet(
   const accountRows = readAccountRows(grid, layout);
 
   // --- Match sheet rows to Harvest clients ---
+  // Resolve against every Harvest client so a row with no hours this month
+  // still matches and gets a zero, rather than being reported as unmatched.
+  const allClients = await fetchHarvestClients();
   const harvestByNorm = new Map<string, string>();
+  for (const name of allClients) {
+    if (isInternalClient(name)) continue;
+    harvestByNorm.set(normaliseClient(name), name);
+  }
+  // Anything with hours but somehow absent from /clients still resolves.
   for (const name of byClient.keys()) harvestByNorm.set(normaliseClient(name), name);
 
   const planned: PlannedWrite[] = [];
