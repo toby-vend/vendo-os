@@ -1,5 +1,5 @@
 /**
- * Google Sheets OAuth 2.0 authorisation flow (Desktop client).
+ * Google Sheets OAuth 2.0 authorisation flow.
  *
  * Run: npm run sheets:auth
  *
@@ -8,9 +8,10 @@
  * Google Ads and Search Console syncs depend on; minting a second token for
  * the Sheets scope alone keeps those untouched.
  *
- * Uses the same Desktop OAuth client (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET)
- * and the loopback redirect, which Desktop clients support without needing a
- * registered redirect URI.
+ * Uses the same OAuth client (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET) and
+ * the same loopback redirect as the Ads flow. That client is a Web client,
+ * so the redirect URI must match one registered in the Google Cloud console
+ * exactly — see the PORT constant below.
  */
 import { config } from 'dotenv';
 config({ path: '.env.local' });
@@ -36,8 +37,12 @@ const state = randomBytes(16).toString('hex');
 // this account, so no Drive-level access is needed to open or edit it.
 const scopes = ['https://www.googleapis.com/auth/spreadsheets'];
 
-// Port 3458 so this can run alongside the Ads flow (3457) without clashing.
-const PORT = 3458;
+// Must be 3457. GOOGLE_CLIENT_ID is a Web OAuth client, not a Desktop one,
+// so Google only accepts redirect URIs registered against it — and
+// http://localhost:3457/callback is the only loopback URI registered (it is
+// what scripts/auth/google-ads-auth.ts uses). Any other port fails with
+// "Error 400: redirect_uri_mismatch". The two flows are never run at once.
+const PORT = 3457;
 const TOKEN_PATH = '.secrets/google-sheets-tokens.json';
 
 const server = createServer(async (req, res) => {
