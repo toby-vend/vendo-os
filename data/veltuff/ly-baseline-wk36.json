@@ -1,0 +1,151 @@
+{
+ "_note": "LY baseline for WK36 2026 comparison. Source: Jul-2023-Aug-2026 weekly campaign export, Tue-Mon window 2025-09-02..2025-09-08 (the two-day-offset convention used in WK34/WK35). CVR = purchases/link clicks. Spend/revenue/CPM in DKK; GBP at 0.1147.",
+ "window": "2025-09-02..2025-09-08",
+ "campaigns": {
+  "Ongoing | Sales | ProTex1 | Advantage+ | SH": {
+   "spend_dkk": 2241.42,
+   "revenue_dkk": 5843.71,
+   "purchases": 10,
+   "roas_pct": 260.7,
+   "reach": 28009,
+   "impressions": 56155,
+   "link_clicks": 872,
+   "ctr_pct": 1.553,
+   "cpm_dkk": 39.91,
+   "layer": "category"
+  },
+  "Ongoing | Sales | Hi-Vis Only | Advantage+ | SH": {
+   "spend_dkk": 2256.38,
+   "revenue_dkk": 5748.34,
+   "purchases": 11,
+   "roas_pct": 254.8,
+   "reach": 15742,
+   "impressions": 41100,
+   "link_clicks": 818,
+   "ctr_pct": 1.99,
+   "cpm_dkk": 54.9,
+   "layer": "category"
+  },
+  "Customised Workwear | Awareness | Advantage+ | SH Campaign \u2013 Copy": {
+   "spend_dkk": 309.67,
+   "revenue_dkk": 0.0,
+   "purchases": 0,
+   "roas_pct": 0.0,
+   "reach": 35138,
+   "impressions": 38738,
+   "link_clicks": 16,
+   "ctr_pct": 0.041,
+   "cpm_dkk": 7.99,
+   "layer": "awareness"
+  },
+  "Customised Workwear | Sales | Advantage+ | SH Campaign": {
+   "spend_dkk": 1398.29,
+   "revenue_dkk": 8794.52,
+   "purchases": 10,
+   "roas_pct": 628.9,
+   "reach": 12930,
+   "impressions": 28696,
+   "link_clicks": 231,
+   "ctr_pct": 0.805,
+   "cpm_dkk": 48.73,
+   "layer": "category"
+  },
+  "Ongoing | Retargeting | Sales | Dynamic Abandoned Cart - 30 Days | SH": {
+   "spend_dkk": 700.15,
+   "revenue_dkk": 3941.02,
+   "purchases": 7,
+   "roas_pct": 562.9,
+   "reach": 3613,
+   "impressions": 9031,
+   "link_clicks": 256,
+   "ctr_pct": 2.835,
+   "cpm_dkk": 77.53,
+   "layer": "retargeting DPA"
+  },
+  "Ongoing | Prospecting | Sales | Broad | Advantage+ | SH Campaign": {
+   "spend_dkk": 7033.39,
+   "revenue_dkk": 27430.54,
+   "purchases": 52,
+   "roas_pct": 390.0,
+   "reach": 69676,
+   "impressions": 187818,
+   "link_clicks": 3860,
+   "ctr_pct": 2.055,
+   "cpm_dkk": 37.45,
+   "layer": "broad prospecting"
+  }
+ },
+ "layers": {
+  "category": {
+   "spend_dkk": 5896.09,
+   "spend_gbp": 676.28,
+   "revenue_dkk": 20386.57,
+   "purchases": 31,
+   "roas_pct": 345.8,
+   "cpa_gbp": 21.82,
+   "click_to_purchase_cvr_pct": 1.61,
+   "cpm_dkk": 46.81,
+   "impressions": 125951,
+   "reach": 56681,
+   "link_clicks": 1921,
+   "atc": 159
+  },
+  "awareness": {
+   "spend_dkk": 309.67,
+   "spend_gbp": 35.52,
+   "revenue_dkk": 0.0,
+   "purchases": 0,
+   "roas_pct": 0.0,
+   "cpa_gbp": null,
+   "click_to_purchase_cvr_pct": 0.0,
+   "cpm_dkk": 7.99,
+   "impressions": 38738,
+   "reach": 35138,
+   "link_clicks": 16,
+   "atc": 0
+  },
+  "retargeting DPA": {
+   "spend_dkk": 700.15,
+   "spend_gbp": 80.31,
+   "revenue_dkk": 3941.02,
+   "purchases": 7,
+   "roas_pct": 562.9,
+   "cpa_gbp": 11.47,
+   "click_to_purchase_cvr_pct": 2.73,
+   "cpm_dkk": 77.53,
+   "impressions": 9031,
+   "reach": 3613,
+   "link_clicks": 256,
+   "atc": 40
+  },
+  "broad prospecting": {
+   "spend_dkk": 7033.39,
+   "spend_gbp": 806.73,
+   "revenue_dkk": 27430.54,
+   "purchases": 52,
+   "roas_pct": 390.0,
+   "cpa_gbp": 15.51,
+   "click_to_purchase_cvr_pct": 1.35,
+   "cpm_dkk": 37.45,
+   "impressions": 187818,
+   "reach": 69676,
+   "link_clicks": 3860,
+   "atc": 220
+  }
+ },
+ "total": {
+  "spend_dkk": 13939.3,
+  "spend_gbp": 1598.84,
+  "revenue_dkk": 51758.13,
+  "revenue_gbp": 5936.66,
+  "purchases": 90,
+  "roas_pct": 371.3,
+  "cpa_gbp": 17.76,
+  "click_to_purchase_cvr_pct": 1.49,
+  "cpm_dkk": 38.56,
+  "impressions": 361538,
+  "reach": 165108,
+  "link_clicks": 6053,
+  "atc": 419
+ }
+}

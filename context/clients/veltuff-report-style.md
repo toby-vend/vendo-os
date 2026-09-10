@@ -100,3 +100,9 @@ Sales basis rule applies: gross from original order values; note that Shopify re
 - **Targets vocabulary (his sheet):** "Meta Planned ROAS" = 5.0 UK Aug–Dec (this is what "5x" means — platform ROAS, not blended). "Blended ROAS Target (MER)" = separate, Sep 4.62 rising to ~5.6 by Dec. Quote vs the right one.
 
 **Later (dormant):** `data/vendo.db` → `meta_insights` via `sync-meta-ads.ts` + `scripts/functions/veltuff-weekly-meta.ts` (account 496760751455236, VELTUFF® UK, DKK-billed; purchase revenue in `action_values`/omni_purchase). Blocked on a fresh META_ACCESS_TOKEN. EU side is not Vendo-managed — no EU account mapping needed.
+
+## Framing rule (Toby, 2026-09-10) — do not quote his asks back at him
+
+Never label a section or headline by what Stuart requested. "The metrics you asked for", "Your two criteria", "The table you asked for", "both of the tests you set are passed", "the one on your side" all read as passive aggressive, as though we are marking him against his own demands.
+
+State the substance in our own voice instead: "The case for further creative investment", "Lower funnel year on year", "Both of the things worth proving are moving the right way". Same for targets and tooling: "the £250 daily budget" and "September planned ROAS", not "your budget" / "your tracker" / "your target". Grep the finished report and email for "you ", "your ", "You " before handing over.

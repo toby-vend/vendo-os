@@ -1,0 +1,91 @@
+{
+ "_note": "Shopify UK WK36 2026 (31 Aug - 6 Sept) vs LY (31 Aug - 6 Sept 2025). Extracted from full-resolution screenshots in data/veltuff/uploads/shopify/shopify-uk-wk36-*.png, verified by cropping and upscaling each panel. All deltas are YoY. Sales basis: Shopify's own gross-sales figure (original order values before discounts/reversals) - state the basis when quoting.",
+ "window": "2026-08-31..2026-09-06",
+ "compare": "2025-08-31..2025-09-06",
+ "headline": {
+  "gross_sales_gbp": 17920.33, "gross_sales_yoy_pct": 21,
+  "total_sales_gbp": 20545.44, "total_sales_yoy_pct": 27,
+  "net_sales_gbp": 15890.00, "net_sales_yoy_pct": 26,
+  "discounts_gbp": -1075.64, "discounts_yoy_pct": -80,
+  "sales_reversals_gbp": -954.69, "sales_reversals_yoy_pct": 40,
+  "shipping_gbp": 1259.13, "shipping_yoy_pct": 44,
+  "taxes_gbp": 3396.31, "taxes_yoy_pct": 30,
+  "return_fees_gbp": 0.0,
+  "orders": 313, "orders_yoy_pct": 32,
+  "orders_fulfilled": 286, "orders_fulfilled_yoy_pct": -5,
+  "aov_gbp": 53.35, "aov_yoy_pct": -9,
+  "returning_customer_rate_pct": 31.35, "returning_customer_rate_yoy_pct": 10,
+  "sessions": 12286, "sessions_yoy_pct": 3,
+  "cvr_pct": 1.56, "cvr_yoy_pct": -15
+ },
+ "funnel": {
+  "sessions": {"n": 12286, "yoy_pct": 3},
+  "added_to_cart": {"n": 674, "rate_pct": 5.48, "yoy_pct": 22},
+  "reached_checkout": {"n": 319, "rate_pct": 2.59, "yoy_pct": -4},
+  "completed_checkout": {"n": 192, "rate_pct": 1.56, "yoy_pct": -12}
+ },
+ "channels_total_sales_gbp": {
+  "online_store": {"v": 17000, "yoy_pct": 17},
+  "hulk_product_options": {"v": 1600, "yoy_pct": 15},
+  "draft_orders": {"v": 948, "yoy_pct": null},
+  "marketplace_connect": {"v": 713, "yoy_pct": null},
+  "_note": "Draft Orders and Marketplace Connect have no LY comparison, which is why total sales (+27%) outruns online store (+17%)."
+ },
+ "sales_by_referrer_gbp": {
+  "search_google": {"v": 7800, "ly": 5100, "yoy_pct": 53},
+  "none_none": {"v": 7700, "ly": 3000, "yoy_pct": 158},
+  "social_facebook": {"v": 2100, "ly": 1700, "yoy_pct": 23},
+  "none_veltuff": {"v": 2000, "ly": 3500, "yoy_pct": -43},
+  "search_bing": {"v": 406, "ly": 800, "yoy_pct": -49},
+  "_direct_combined_note": "none_none and none_veltuff are both direct/untracked buckets and the split between them moved YoY. Combined: 9700 vs 6500 LY = +49%. Report the combined figure, not the 158%."
+ },
+ "sessions_by_social_referrer": {
+  "facebook": {"n": 3200, "ly": 2800, "yoy_pct": 12},
+  "instagram": {"n": 281, "ly": 404, "yoy_pct": -30},
+  "youtube": {"n": 4, "ly": 5, "yoy_pct": -20},
+  "linkedin": {"n": 0, "ly": 3, "yoy_pct": -100}
+ },
+ "sessions_by_referrer": {
+  "search_google_none": {"n": 489, "ly": 315, "yoy_pct": 55},
+  "direct_none_none": {"n": 454, "ly": 317, "yoy_pct": 43},
+  "social_facebook_none": {"n": 255, "ly": 214, "yoy_pct": 19},
+  "search_google_manchester": {"n": 184, "ly": 87, "yoy_pct": 111},
+  "direct_none_london": {"n": 174, "ly": 126, "yoy_pct": 38}
+ },
+ "sessions_by_device": {
+  "mobile": {"n": 10300, "yoy_pct": 7},
+  "desktop": {"n": 1700, "yoy_pct": -15},
+  "tablet": {"n": 168, "yoy_pct": -0.6},
+  "other": {"n": 9, "yoy_pct": -80},
+  "total": {"n": 12200, "yoy_pct": 3}
+ },
+ "sessions_by_location": {
+  "uk_unspecified": {"n": 1000, "ly": 832, "yoy_pct": 22},
+  "glasgow": {"n": 471, "ly": 346, "yoy_pct": 36},
+  "manchester": {"n": 440, "ly": 224, "yoy_pct": 96},
+  "birmingham": {"n": 385, "ly": 176, "yoy_pct": 119},
+  "city_of_london": {"n": 361, "ly": 139, "yoy_pct": 160}
+ },
+ "sales_by_social_referrer_gbp": {
+  "facebook": {"v": 2100, "ly": 1700, "yoy_pct": 23},
+  "instagram": {"v": 155, "ly": 590, "yoy_pct": -74}
+ },
+ "top_products_total_sales_gbp": {
+  "protex1_softshell_jacket": {"v": 1900, "ly": 321, "yoy_pct": 492},
+  "reflex_softshell_hi_vis_jacket": {"v": 1800, "ly": 1400, "yoy_pct": 31},
+  "reflex_hi_vis_trousers": {"v": 1100, "ly": 1000, "yoy_pct": 18}
+ },
+ "sessions_by_landing_page": {
+  "homepage": {"n": 1530, "yoy_pct": -3},
+  "protex1-softshell-jacket": {"n": 1266, "yoy_pct": 31},
+  "reflex-hi-vis-trousers": {"n": 654, "yoy_pct": 39},
+  "reflex-softshell-hi-vis-jacket": {"n": 544, "yoy_pct": 27},
+  "two-tone-softshell-jacket": {"n": 405, "yoy_pct": 98},
+  "stretch-multi-pocket-trousers": {"n": 359, "yoy_pct": 420},
+  "reflex-winter-hi-vis-jacket": {"n": 326, "yoy_pct": -24},
+  "class-1-winter-hi-vis-jacket": {"n": 302, "yoy_pct": -42},
+  "protex1-full-zip-sweatshirt": {"n": 276, "yoy_pct": 18},
+  "cargo-pocket-work-trousers": {"n": 241, "yoy_pct": -3}
+ },
+ "paid_referring_channel_gbp": {"adwords": 424}
+}
