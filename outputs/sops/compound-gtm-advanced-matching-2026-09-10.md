@@ -44,6 +44,26 @@ The good news is you are not buying anything new. `compoundapp.co.uk` already ru
 
 ---
 
+## Status: what is actually live (10/09/2026)
+
+The landing pages now carry `GTM-PHVS5RLL`, and the Lead is firing, verified in Preview end to end:
+`lp_lead` pushed, `VD | Meta - Lead` succeeded once, and the payload arrived populated
+(`lp_page: "employee"`, `lead.first_name`, `lead.email`), so advanced matching carries `em` and `fn`.
+
+**It was built the no-deploy way.** Rather than the `lp-core.js` change below, a Custom HTML tag
+(`VD | LP - dataLayer bridge`, on Initialization - All Pages) wraps `CompoundLPCore.submit` and pushes
+`lp_lead`. That covers all three landing pages, because every conversion on every page routes through
+that one function.
+
+Container state: Version 10 "App Download Tracking" is live and carries the store-click tracking.
+The Lead work sits in workspace 12, five changes, **awaiting Submit**.
+
+Still worth doing the `lp-core.js` change when the plugin next ships: it carries a shared `event_id`
+that the bridge cannot, which is what lets a server-side CAPI call deduplicate against the browser
+event. Delete the bridge tag at that point.
+
+---
+
 ## 1. The one code change
 
 Everything below hangs off a single dataLayer push. Because every conversion on all three pages routes through `CompoundLPCore.submit`, you hook it once.
