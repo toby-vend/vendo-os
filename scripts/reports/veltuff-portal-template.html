@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vendo Reporting — VELTUFF UK · Paid Social</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#0a0f0a; --panel:#101710; --panel-2:#0d130d; --panel-hd:#131b13;
+  --line:rgba(180,210,170,.10); --line-2:rgba(180,210,170,.16);
+  --text:#eef2ea; --muted:#8b9484; --muted-2:#69715f;
+  --green:#8ee6a8; --green-bright:#7fe3a0; --green-deep:#0a0f0a; --green-dim:#3f8b5c;
+  --pos:#8ee6a8; --neg:#e59a86; --amber:#e6c988;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.5}
+a{color:var(--green);text-decoration:none}a:hover{color:var(--green-bright)}
+h1,h2,h3,h4{font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{border-right:1px solid var(--line);padding:22px 18px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh;background:var(--panel-2)}
+.brand{display:flex;align-items:center;gap:11px;padding:0 4px}
+.brand .mark{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--green);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:800;font-size:16px;flex:none}
+.brand .bt{line-height:1.15}
+.brand .bt .n1{font-family:'Archivo';font-weight:700;font-size:14.5px;color:var(--text)}
+.brand .bt .n2{font-size:10.5px;color:var(--muted-2);letter-spacing:.02em}
+.acct{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+.acct .av{width:34px;height:34px;border-radius:9px;background:linear-gradient(150deg,#2e5e3f,#8ee6a8);color:var(--green-deep);display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:800;font-size:13px;flex:none}
+.acct .at{line-height:1.25;flex:1;min-width:0}
+.acct .at .a1{font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acct .at .a2{font-size:10.5px;color:var(--muted-2)}
+.navgrp{display:flex;flex-direction:column;gap:2px}
+.navgrp .gl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);padding:0 10px 8px}
+.nav-i{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:9px;color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer;transition:background .12s,color .12s;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.nav-i:hover{background:rgba(180,210,170,.05);color:var(--text)}
+.nav-i.active{background:var(--green);color:var(--green-deep);font-weight:700}
+.nav-i .ic{width:16px;height:16px;flex:none;opacity:.85}
+.nav-i.active .ic{opacity:1}
+.nav-i .lbl{flex:1}
+.nav-i .tag{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;color:var(--muted-2)}
+.nav-i.active .tag{color:var(--green-deep);opacity:.7}
+.side .foot{margin-top:auto;padding:0 8px;display:flex;flex-direction:column;gap:6px}
+.side .foot .sync{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.side .foot .sync .d{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none;box-shadow:0 0 0 3px rgba(142,230,168,.14)}
+.side .foot .ver{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted-2)}
+.main{min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 34px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,15,10,.86);backdrop-filter:blur(10px);z-index:20}
+.crumb{display:flex;align-items:center;gap:9px;font-size:13.5px}
+.crumb .c1{color:var(--muted)}.crumb .sep{color:var(--muted-2)}.crumb .c2{color:var(--text);font-weight:600}
+.tb-actions{display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:'Hanken Grotesk';font-size:13px;font-weight:600;padding:9px 15px;border-radius:9px;border:1px solid var(--line-2);background:transparent;color:var(--text);cursor:pointer;transition:all .14s}
+.btn:hover{border-color:var(--green-dim);background:rgba(180,210,170,.04)}
+.btn .ic{width:15px;height:15px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+.seg button{font-family:'Hanken Grotesk';font-size:12.5px;font-weight:600;padding:8px 13px;background:transparent;color:var(--muted);border:none;cursor:pointer}
+.seg button.on{background:var(--green);color:var(--green-deep)}
+.dd{position:relative}
+.dd-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:230px;max-height:340px;overflow:auto;background:var(--panel);border:1px solid var(--line-2);border-radius:11px;padding:5px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:40;display:none}
+.dd-menu.open{display:block}
+.dd-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer}
+.dd-item:hover{background:rgba(180,210,170,.06);color:var(--text)}
+.dd-item.sel{color:var(--green);font-weight:600}
+.dd-item .pt{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted-2)}
+.content{padding:30px 34px 60px;max-width:1500px}
+.view{display:none}.view.on{display:block}
+.sec{margin-bottom:38px}
+.sec-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:16px;flex-wrap:wrap}
+.sec-hd .st{font-size:20px;color:var(--text)}
+.sec-hd .ss{margin-top:5px;font-size:13.5px;color:var(--muted);max-width:80ch}
+.pill{display:inline-flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.03em;padding:5px 11px;border-radius:999px;border:1px solid var(--green-dim);color:var(--green)}
+.pill .d{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.pill.warn{border-color:var(--amber);color:var(--amber)}.pill.warn .d{background:var(--amber)}
+.kpanel{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
+.krow{display:grid;grid-template-columns:repeat(4,1fr)}
+.krow+.krow{border-top:1px solid var(--line)}
+.kcell{padding:20px 22px;border-right:1px solid var(--line);min-height:132px;display:flex;flex-direction:column}
+.kcell:last-child{border-right:none}
+.kcell .kl{font-size:12.5px;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kcell .kl .rate{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--green-deep);background:var(--green);padding:3px 8px;border-radius:6px;font-weight:600;text-transform:uppercase}
+.kcell .kv{font-family:'Archivo';font-weight:800;font-size:30px;letter-spacing:-.03em;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.kcell .kv .u{font-size:16px;font-weight:700;color:var(--muted-2)}
+.kcell .kd{margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500}
+.kcell .kd.pos{color:var(--pos)}.kcell .kd.neg{color:var(--neg)}.kcell .kd.flat{color:var(--muted)}
+.kcell .kd .sub{color:var(--muted-2);font-weight:400}
+.kcell .spark{margin-top:auto;height:34px;width:100%}
+.tcard{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);font-weight:500;text-align:right;padding:14px 18px;background:var(--panel-hd);border-bottom:1px solid var(--line);white-space:nowrap}
+thead th.l{text-align:left}
+thead th.srt{cursor:pointer;user-select:none}
+thead th.srt:hover{color:var(--green)}
+tbody td{padding:14px 18px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text);white-space:nowrap}
+tbody td.l{text-align:left;font-family:'Hanken Grotesk';font-size:14px;white-space:normal}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(180,210,170,.025)}
+tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted-2);margin-top:3px}
+.cn{font-weight:600;color:var(--text)}
+.tag-l{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:5px;background:var(--panel-hd);color:var(--muted);border:1px solid var(--line)}
+.roas{display:inline-flex;align-items:center;justify-content:flex-end;gap:7px;font-weight:600}
+.roas .sw{width:7px;height:7px;border-radius:50%;flex:none}
+.totrow td{background:var(--panel-hd);font-family:'Archivo';font-weight:700;color:var(--text)}
+.rowlink{cursor:pointer}
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.ccard{border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.ccard .cbody{padding:14px 15px 16px}
+.ccard .ct-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.ccard .ct-rk{font-family:'Archivo';font-weight:800;font-size:15px;color:var(--muted-2)}
+.ccard .rb{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;background:var(--panel-hd);display:inline-flex;align-items:center;gap:6px;color:var(--text)}
+.ccard .rb .sw{width:6px;height:6px;border-radius:50%}
+.ccard .ct{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.3;min-height:35px;word-break:break-word}
+.ccard .cstats{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px 8px}
+.ccard .cstats .st{display:flex;flex-direction:column;gap:2px}
+.ccard .cstats .sl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2)}
+.ccard .cstats .sv{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--text)}
+.share{display:inline-flex;align-items:center;gap:10px;justify-content:flex-end}
+.share .bar{width:90px;height:7px;border-radius:4px;background:rgba(180,210,170,.12);overflow:hidden}
+.share .bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green-dim),var(--green))}
+.share .pc{min-width:44px;text-align:right;color:var(--muted)}
+.foot-note{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted-2);margin-top:14px;line-height:1.7;max-width:110ch}
+.ai-card{border:1px solid var(--green-dim);border-radius:16px;background:linear-gradient(168deg,rgba(142,230,168,.06),rgba(142,230,168,.01) 55%),var(--panel);overflow:hidden}
+.ai-hd{display:flex;align-items:center;gap:13px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.ai-hd .spk{width:34px;height:34px;border-radius:10px;background:var(--green);color:var(--green-deep);display:flex;align-items:center;justify-content:center;flex:none}
+.ai-hd .spk svg{width:19px;height:19px}
+.ai-hd .htx{flex:1}
+.ai-hd .htx .h1x{font-family:'Archivo';font-weight:700;font-size:15px;color:var(--text)}
+.ai-hd .htx .h2x{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;color:var(--muted-2);margin-top:2px}
+.ai-hd .stamp{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);border:1px solid var(--green-dim);border-radius:999px;padding:5px 11px}
+.ai-body{padding:20px 22px 22px}
+.ai-lead{font-size:15px;line-height:1.6;color:var(--text);margin-bottom:20px}
+.ai-lead b{color:var(--green-bright);font-weight:700}
+.ai-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ai-block .bl-hd{display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);margin-bottom:11px}
+.ai-block .bl-hd .dt{width:6px;height:6px;border-radius:50%}
+.ai-list{list-style:none;display:flex;flex-direction:column;gap:11px}
+.ai-list li{display:flex;gap:11px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.ai-list li .mk{flex:none;margin-top:2px;width:15px;height:15px}
+.ai-list li b{color:var(--text);font-weight:600}
+.ai-list li .fig{font-family:'IBM Plex Mono',monospace;color:var(--green-bright);font-weight:600}
+.ai-list li .fign{font-family:'IBM Plex Mono',monospace;color:var(--neg);font-weight:600}
+.foot-note-ai{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted-2);margin-top:16px;padding-top:14px;border-top:1px solid var(--line);line-height:1.6}
+.totalline{display:flex;gap:22px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.totalline b{color:var(--text);font-weight:600}
+.chartcard{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:20px 22px;margin-bottom:16px}
+.chartcard .chd{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.chartcard .chd .ct{font-family:'Archivo';font-weight:700;font-size:15px}
+.legend{display:flex;gap:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.banner{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--amber);border-left-width:3px;border-radius:12px;background:rgba(230,201,136,.06);padding:13px 16px;margin-bottom:20px;font-size:13.5px;color:var(--text)}
+.banner b{color:var(--amber)}
+@media (max-width:1080px){
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  .krow{grid-template-columns:repeat(2,1fr)}
+  .kcell:nth-child(2n){border-right:none}
+  .cgrid{grid-template-columns:repeat(2,1fr)}
+  .ai-cols{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .krow{grid-template-columns:1fr}
+  .kcell{border-right:none}
+  .cgrid{grid-template-columns:1fr}
+  .content{padding:22px 16px 50px}
+  .topbar{padding:14px 16px;flex-wrap:wrap}
+}
+@media print{
+  .side,.topbar{display:none}
+  body{background:#fff;color:#111}
+  .app{display:block}
+  .view{display:block !important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">V.</div>
+      <div class="bt"><div class="n1">Vendo Reporting</div><div class="n2">Vendo Digital</div></div>
+    </div>
+    <div class="acct">
+      <div class="av">VU</div>
+      <div class="at"><div class="a1">VELTUFF UK</div><div class="a2">United Kingdom</div></div>
+    </div>
+    <nav class="navgrp">
+      <div class="gl">Reporting</div>
+      <button class="nav-i active" data-view="perf"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="3.2"/><circle cx="11" cy="8" r="3.2"/></svg><span class="lbl">Paid Social</span><span class="tag">Meta</span></button>
+      <button class="nav-i" data-view="weeks"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="13" height="12" rx="1.5"/><path d="M1.5 6h13M5 1v3M11 1v3"/></svg><span class="lbl">Weeks</span><span class="tag" id="navWeeksN"></span></button>
+      <button class="nav-i" data-view="months"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="8" width="3" height="6" rx="1"/><rect x="6.5" y="5" width="3" height="9" rx="1"/><rect x="11" y="2" width="3" height="12" rx="1"/></svg><span class="lbl">Months</span><span class="tag" id="navMonthsN"></span></button>
+    </nav>
+    <nav class="navgrp">
+      <div class="gl">Breakdown</div>
+      <button class="nav-i" data-view="campaigns"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="1.5"/><path d="M1.5 6.5h13"/></svg><span class="lbl">Campaigns</span></button>
+      <button class="nav-i" data-view="adsets"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="2.6"/></svg><span class="lbl">Ad sets</span></button>
+      <button class="nav-i" data-view="ads"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg><span class="lbl">Ads</span></button>
+    </nav>
+    <div class="foot">
+      <div class="sync"><span class="d"></span> Data built <span id="builtAt"></span></div>
+      <div class="ver" id="verLine"></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb"><span class="c1">VELTUFF UK</span><span class="sep">/</span><span class="c2" id="crumb2">Paid Social</span></div>
+      <div class="tb-actions">
+        <div class="seg" id="granSeg">
+          <button data-g="months" class="on">Months</button>
+          <button data-g="weeks">Weeks</button>
+        </div>
+        <div class="dd" id="perDD">
+          <button class="btn" type="button" id="perBtn"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="13" height="12" rx="1.5"/><path d="M1.5 6h13M5 1v3M11 1v3"/></svg> <span id="perBtnLbl">—</span> <span style="color:var(--muted-2)">▾</span></button>
+          <div class="dd-menu" id="perMenu"></div>
+        </div>
+        <div class="dd" id="adDD" style="display:none">
+          <button class="btn" type="button" id="adPerBtn"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="13" height="12" rx="1.5"/><path d="M1.5 6h13M5 1v3M11 1v3"/></svg> <span id="adPerBtnLbl">—</span> <span style="color:var(--muted-2)">▾</span></button>
+          <div class="dd-menu" id="adPerMenu"></div>
+        </div>
+        <button class="btn" type="button" onclick="window.print()"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5v7M5 6l3 3 3-3M2.5 11.5v2h11v-2"/></svg> Print</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- ============ PERFORMANCE ============ -->
+      <div class="view on" id="v-perf">
+        <div id="perfBanner"></div>
+        <section class="sec">
+          <div class="sec-hd">
+            <div>
+              <div class="st" id="perfTitle">Meta — Paid Social</div>
+              <div class="ss">Facebook and Instagram performance across prospecting, category, retargeting and offer campaigns. Headline figures exclude the reach and awareness campaigns, which carry no purchase objective and are shown separately below.</div>
+            </div>
+            <span class="pill" id="perfPill"><span class="d"></span> <span></span></span>
+          </div>
+          <div class="kpanel"><div class="krow" id="krow1"></div><div class="krow" id="krow2"></div></div>
+          <div class="foot-note" id="kpiFoot"></div>
+        </section>
+
+        <section class="sec">
+          <div class="ai-card">
+            <div class="ai-hd">
+              <div class="spk"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.2l1.9 4.7 4.9.4-3.7 3.2 1.1 4.8L10 11.7 5.8 14.3l1.1-4.8L3.2 6.3l4.9-.4z"/><circle cx="16" cy="3.4" r="1.3"/></svg></div>
+              <div class="htx"><div class="h1x" id="aiTitle">Summary</div><div class="h2x">Computed from the account export, excluding awareness</div></div>
+              <span class="stamp">Computed, not estimated</span>
+            </div>
+            <div class="ai-body">
+              <p class="ai-lead" id="aiLead"></p>
+              <div class="ai-cols">
+                <div class="ai-block"><div class="bl-hd"><span class="dt" style="background:var(--green)"></span> What is working</div><ul class="ai-list" id="aiWins"></ul></div>
+                <div class="ai-block"><div class="bl-hd"><span class="dt" style="background:var(--amber)"></span> Watch and act</div><ul class="ai-list" id="aiWatch"></ul></div>
+              </div>
+              <div class="foot-note-ai">Every figure here is derived directly from the Meta export for the selected period. Nothing is estimated or interpolated, and lines only appear when the data supports them.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st">Breakdown by layer</div><div class="ss">Performance by campaign type, sorted by revenue share.</div></div>
+            <div class="totalline" id="brkTot"></div>
+          </div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr><th class="l">Layer</th><th>Spend</th><th>Sales</th><th>Cost / sale</th><th>Revenue</th><th>ROAS</th><th>Share of revenue</th></tr></thead>
+            <tbody id="brkBody"></tbody>
+          </table></div></div>
+        </section>
+      </div>
+
+      <!-- ============ WEEKS ============ -->
+      <div class="view" id="v-weeks">
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st">Week performance breakdown</div><div class="ss" id="weeksSub"></div></div>
+            <span class="pill"><span class="d"></span> <span id="weeksCount"></span></span>
+          </div>
+          <div class="chartcard">
+            <div class="chd"><div class="ct">Spend and return, week by week</div>
+              <div class="legend"><span><i style="background:var(--green-dim)"></i>Spend</span><span><i style="background:var(--green)"></i>ROAS</span></div>
+            </div>
+            <div id="weeksChart"></div>
+          </div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr>
+              <th class="l srt" data-k="start">Week</th><th class="srt" data-k="spend">Spend</th><th class="srt" data-k="imp">Impr.</th>
+              <th class="srt" data-k="clk">Clicks</th><th class="srt" data-k="ctr">CTR</th><th class="srt" data-k="pur">Sales</th>
+              <th class="srt" data-k="cps">Cost / sale</th><th class="srt" data-k="cvr">CVR</th><th class="srt" data-k="rev">Revenue</th><th class="srt" data-k="roas">ROAS</th>
+            </tr></thead>
+            <tbody id="weeksBody"></tbody>
+          </table></div></div>
+          <div class="foot-note" id="weeksFoot"></div>
+        </section>
+      </div>
+
+      <!-- ============ MONTHS ============ -->
+      <div class="view" id="v-months">
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st">Month performance breakdown</div><div class="ss" id="monthsSub"></div></div>
+            <span class="pill"><span class="d"></span> <span id="monthsCount"></span></span>
+          </div>
+          <div class="chartcard">
+            <div class="chd"><div class="ct">Spend and return, month by month</div>
+              <div class="legend"><span><i style="background:var(--green-dim)"></i>Spend</span><span><i style="background:var(--green)"></i>ROAS</span></div>
+            </div>
+            <div id="monthsChart"></div>
+          </div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr>
+              <th class="l srt" data-k="start">Period</th><th class="srt" data-k="spend">Spend</th><th class="srt" data-k="imp">Impr.</th>
+              <th class="srt" data-k="clk">Clicks</th><th class="srt" data-k="ctr">CTR</th><th class="srt" data-k="pur">Sales</th>
+              <th class="srt" data-k="cps">Cost / sale</th><th class="srt" data-k="cvr">CVR</th><th class="srt" data-k="rev">Revenue</th><th class="srt" data-k="roas">ROAS</th>
+            </tr></thead>
+            <tbody id="monthsBody"></tbody>
+          </table></div></div>
+          <div class="foot-note" id="monthsFoot"></div>
+        </section>
+      </div>
+
+      <!-- ============ CAMPAIGNS ============ -->
+      <div class="view" id="v-campaigns">
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st">Campaigns</div><div class="ss" id="campSub"></div></div>
+            <span class="pill" id="campPill"><span class="d"></span> <span></span></span>
+          </div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr><th class="l">Campaign</th><th>Layer</th><th>Spend</th><th>Impr.</th><th>Reach</th><th>Freq</th><th>Clicks</th><th>CTR</th><th>Sales</th><th>Cost / sale</th><th>Revenue</th><th>ROAS</th></tr></thead>
+            <tbody id="campBody"></tbody>
+          </table></div></div>
+          <div class="foot-note">Campaign level data covers the full account history. Awareness campaigns are optimised for reach rather than purchases, so they carry no cost per sale or return and are held out of the headline figures by design.</div>
+        </section>
+      </div>
+
+      <!-- ============ AD SETS ============ -->
+      <div class="view" id="v-adsets">
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st">Ad sets</div><div class="ss" id="adsetSub"></div></div>
+          </div>
+          <div id="adsetBanner"></div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr><th class="l">Ad set</th><th>Layer</th><th>Spend</th><th>Impr.</th><th>Reach</th><th>Freq</th><th>Clicks</th><th>CTR</th><th>Sales</th><th>Cost / sale</th><th>Revenue</th><th>ROAS</th></tr></thead>
+            <tbody id="adsetBody"></tbody>
+          </table></div></div>
+          <div class="foot-note" id="adsetFoot"></div>
+        </section>
+      </div>
+
+      <!-- ============ ADS ============ -->
+      <div class="view" id="v-ads">
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st">Ads</div><div class="ss" id="adsSub"></div></div>
+          </div>
+          <div id="adsBanner"></div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr><th class="l">Ad</th><th class="l">Ad set</th><th>Spend</th><th>Impr.</th><th>Clicks</th><th>CTR</th><th>ATC</th><th>Sales</th><th>Cost / sale</th><th>Revenue</th><th>ROAS</th></tr></thead>
+            <tbody id="adsBody"></tbody>
+          </table></div></div>
+          <div class="foot-note" id="adsFoot"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script id="portal-data" type="application/json">__PORTAL_DATA__</script>
+<script>
+const D = JSON.parse(document.getElementById('portal-data').textContent);
+const FX = D.fx;
+const gbp  = v => "£" + Math.round(v * FX).toLocaleString("en-GB");
+const gbp2 = v => "£" + (v * FX).toLocaleString("en-GB", {minimumFractionDigits:2, maximumFractionDigits:2});
+const n0   = v => Math.round(v).toLocaleString("en-GB");
+const roasColor = r => r >= 7 ? '#8ee6a8' : r >= 3 ? '#e6c988' : '#e59a86';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---- derive metrics for a period (ex-awareness for headline maths) ---- */
+function derive(p){
+  const perf = p.campaigns.filter(c => c.t !== 'Awareness');
+  const s = k => perf.reduce((a,c) => a + c[k], 0);
+  const spend=s('spend'), imp=s('imp'), clk=s('clk'), pur=s('pur'), rev=s('rev');
+  const aw = p.campaigns.filter(c => c.t === 'Awareness');
+  return { spend, imp, clk, pur, rev,
+    ctr: imp ? clk/imp*100 : 0, cpc: clk ? spend/clk : 0, cps: pur ? spend/pur : 0,
+    roas: spend ? rev/spend : 0, cvr: clk ? pur/clk*100 : 0,
+    awSpend: aw.reduce((a,c)=>a+c.spend,0), awReach: aw.reduce((a,c)=>a+c.reach,0),
+    awImp: aw.reduce((a,c)=>a+c.imp,0), totImp: p.campaigns.reduce((a,c)=>a+c.imp,0) };
+}
+D.weeks.forEach(p => p.m = derive(p));
+D.months.forEach(p => p.m = derive(p));
+
+/* ---- sparkline ---- */
+function spark(series){
+  if(series.length < 2) return '<svg class="spark"></svg>';
+  const W=200,H=34,pad=3;
+  const min=Math.min(...series), max=Math.max(...series), rng=(max-min)||1;
+  const step=(W-pad*2)/(series.length-1);
+  const pts=series.map((v,i)=>[pad+i*step, H-pad-((v-min)/rng)*(H-pad*2)]);
+  const line=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const last=pts[pts.length-1];
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <polygon points="${pts[0][0]},${H} ${line} ${last[0]},${H}" fill="rgba(142,230,168,.10)"/>
+    <polyline points="${line}" fill="none" stroke="#8ee6a8" stroke-width="1.8" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6" fill="#8ee6a8"/></svg>`;
+}
+
+/* ---- combo chart: spend bars + ROAS line ---- */
+function comboChart(list, maxBars){
+  const data = list.slice(-maxBars);
+  const W=1100, H=210, padL=6, padR=6, padT=12, padB=26;
+  const bw = (W-padL-padR)/data.length;
+  const maxSpend = Math.max(...data.map(p=>p.m.spend), 1);
+  const maxRoas  = Math.max(...data.map(p=>p.m.roas), 1);
+  const bars = data.map((p,i)=>{
+    const h=(p.m.spend/maxSpend)*(H-padT-padB);
+    return `<rect x="${(padL+i*bw+bw*0.16).toFixed(1)}" y="${(H-padB-h).toFixed(1)}" width="${(bw*0.68).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="#3f8b5c" opacity=".75"><title>${esc(p.label)} · spend ${gbp(p.m.spend)} · ROAS ${(p.m.roas*100).toFixed(0)}%</title></rect>`;
+  }).join('');
+  const pts = data.map((p,i)=>[padL+i*bw+bw/2, H-padB-(p.m.roas/maxRoas)*(H-padT-padB)]);
+  const line = pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const ticks = data.map((p,i)=> (data.length<=14 || i%Math.ceil(data.length/12)===0)
+    ? `<text x="${(padL+i*bw+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#69715f">${esc(p.tick||p.sub||p.label)}</text>` : '').join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    ${bars}
+    <polyline points="${line}" fill="none" stroke="#8ee6a8" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    ${ticks}
+  </svg>`;
+}
+
+/* ---- state ---- */
+let gran = 'months';
+let idx = 0;
+const list = () => gran === 'months' ? D.months : D.weeks;
+
+/* ---- KPI cells ---- */
+function delta(cur, prev, goodDown, prevLabel){
+  if(prev == null || !isFinite(prev) || prev === 0) return `<div class="kd flat"><span class="sub">no prior period</span></div>`;
+  const pc = (cur/prev - 1) * 100;
+  const cls = Math.abs(pc) < 0.5 ? 'flat' : ((goodDown ? pc < 0 : pc > 0) ? 'pos' : 'neg');
+  return `<div class="kd ${cls}">${pc >= 0 ? '▲' : '▼'} ${(pc>=0?'+':'')+pc.toFixed(1)}% <span class="sub">vs ${esc(prevLabel)}</span></div>`;
+}
+const kcell = k => `<div class="kcell">
+    <div class="kl"><span>${k.l}</span>${k.rate?`<span class="rate">${k.rate}</span>`:''}</div>
+    <div class="kv">${k.v}${k.u?`<span class="u">${k.u}</span>`:''}</div>
+    ${delta(k.cur,k.prev,k.dd,k.pl)}${spark(k.s)}</div>`;
+
+function renderPerf(){
+  const L = list(), p = L[idx], K = p.m, prev = idx > 0 ? L[idx-1] : null, P = prev ? prev.m : null;
+  const pl = prev ? (prev.short || prev.label) : '';
+  const hist = L.slice(Math.max(0, idx-11), idx+1);
+  const ser = k => hist.map(x => x.m[k]);
+
+  document.getElementById('perfTitle').textContent = `Meta — ${p.label}`;
+  document.getElementById('perBtnLbl').textContent = p.label;
+  document.getElementById('perfPill').innerHTML = p.partial
+    ? `<span class="d"></span> ${esc(p.partial)}` : `<span class="d"></span> ${p.days} days`;
+  document.getElementById('perfPill').className = p.partial ? 'pill warn' : 'pill';
+
+  const KPIS = [
+    {l:"Spend",         v:gbp(K.spend),              s:ser('spend'), dd:false, prev:P&&P.spend, cur:K.spend, pl},
+    {l:"Clicks",        v:n0(K.clk),                 s:ser('clk'),   dd:false, prev:P&&P.clk,   cur:K.clk,   pl},
+    {l:"Link CTR",      v:K.ctr.toFixed(2)+"%",      s:ser('ctr'),   dd:false, prev:P&&P.ctr,   cur:K.ctr,   pl},
+    {l:"CPC",           v:gbp2(K.cpc),               s:ser('cpc'),   dd:true,  prev:P&&P.cpc,   cur:K.cpc,   pl},
+    {l:"Purchases",     v:n0(K.pur),                 s:ser('pur'),   dd:false, prev:P&&P.pur,   cur:K.pur,   pl},
+    {l:"Cost per sale", v:K.pur?gbp2(K.cps):'—',     s:ser('cps'),   dd:true,  prev:P&&P.cps,   cur:K.cps,   pl, rate:"CVR "+K.cvr.toFixed(2)+"%"},
+    {l:"Revenue",       v:gbp(K.rev),                s:ser('rev'),   dd:false, prev:P&&P.rev,   cur:K.rev,   pl},
+    {l:"ROAS",          v:(K.roas*100).toFixed(0),u:"%", s:ser('roas'),dd:false,prev:P&&P.roas, cur:K.roas,  pl},
+  ];
+  document.getElementById('krow1').innerHTML = KPIS.slice(0,4).map(kcell).join('');
+  document.getElementById('krow2').innerHTML = KPIS.slice(4).map(kcell).join('');
+  document.getElementById('kpiFoot').innerHTML =
+    `Spend and revenue are native to the ad account in DKK, shown here in GBP at 1 DKK = £${FX}, the rate used in the Media Spend Tracker. `+
+    `Sparklines trace the ${hist.length} periods to ${esc(p.label)}; deltas compare against ${prev?esc(pl):'no prior period'}. `+
+    `Cost per sale and CPC falling is better, so a downward move reads green.`;
+
+  /* banner for partial or gap-adjacent periods */
+  const b = document.getElementById('perfBanner');
+  const isLatest = idx === L.length - 1;
+  b.innerHTML = p.partial
+    ? `<div class="banner"><div><b>${isLatest ? 'In progress.' : 'Shorter period.'}</b> ${esc(p.partial)}. Rates such as return, cost per sale and CTR compare directly with any other period; absolute totals do not.</div></div>` : '';
+
+  renderCampaigns(p);
+
+  /* breakdown by layer */
+  const by = {};
+  p.campaigns.forEach(c => {
+    const b2 = by[c.t] || (by[c.t] = {n:c.t, spend:0, pur:0, rev:0});
+    b2.spend += c.spend; b2.pur += c.pur; b2.rev += c.rev;
+  });
+  const brk = Object.values(by).sort((a,b2)=>b2.rev-a.rev || b2.spend-a.spend);
+  const totRev = brk.reduce((s,b2)=>s+b2.rev,0), totSp = brk.reduce((s,b2)=>s+b2.spend,0);
+  document.getElementById('brkBody').innerHTML = brk.map(b2 => {
+    const sh = totRev ? b2.rev/totRev*100 : 0;
+    return `<tr><td class="l"><span class="cn">${esc(b2.n)}</span></td>
+      <td>${gbp(b2.spend)}<span class="sub">DKK ${n0(b2.spend)}</span></td>
+      <td>${b2.pur||'—'}</td><td>${b2.pur?gbp2(b2.spend/b2.pur):'—'}</td>
+      <td>${b2.rev?gbp(b2.rev):'—'}</td>
+      <td>${b2.rev?(b2.rev/b2.spend*100).toFixed(0)+'%':'<span style="color:var(--muted-2)">n/a</span>'}</td>
+      <td><span class="share"><span class="bar"><i style="width:${sh}%"></i></span><span class="pc">${sh.toFixed(1)}%</span></span></td></tr>`;
+  }).join('');
+  document.getElementById('brkTot').innerHTML =
+    `<span>Total spend <b>${gbp(totSp)}</b></span><span>Total revenue <b>${gbp(totRev)}</b></span><span>Blended <b>${(totRev/totSp*100).toFixed(0)}%</b></span>`;
+
+  aiSummary(p, prev);
+}
+
+/* ---- summary, computed from the selected period only ---- */
+function aiSummary(p, prev){
+  const K = p.m, P = prev ? prev.m : null;
+  const pct = (c,pr) => (c/pr - 1) * 100;
+  const sgn = v => (v>=0?'+':'') + v.toFixed(0) + '%';
+  const up = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#8ee6a8" stroke-width="1.6"><path d="M3 11l4-4 3 3 4-5"/><path d="M11 5h3v3"/></svg>';
+  const dn = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#8ee6a8" stroke-width="1.6"><path d="M3 5l4 4 3-3 4 5"/><path d="M11 11h3V8"/></svg>';
+  const wr = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#e6c988" stroke-width="1.6"><path d="M8 2l6 11H2z"/><path d="M8 7v3M8 11.5v.5"/></svg>';
+
+  document.getElementById('aiTitle').textContent = `Summary — ${p.label}`;
+
+  let lead;
+  if(!P){
+    lead = `${esc(p.label)} recorded <b>${gbp(K.spend)}</b> of spend excluding awareness, returning <b>${(K.roas*100).toFixed(0)}%</b> on ${K.pur} tracked sales at <b>${K.pur?gbp2(K.cps):'—'}</b> each.`;
+  } else {
+    const dS=pct(K.spend,P.spend), dR=pct(K.roas,P.roas), dP=pct(K.pur,P.pur);
+    lead = `Spend excluding awareness was <b>${dS>=0?'up '+sgn(dS):'down '+sgn(dS).replace('-','')}</b> at <b>${gbp(K.spend)}</b>. `+
+      `Cost per sale ${P.cps && K.cps<=P.cps ? 'improved to' : 'rose to'} <b>${K.pur?gbp2(K.cps):'—'}</b>, `+
+      `return ${dR>=0?'lifted':'eased'} to <b>${(K.roas*100).toFixed(0)}%</b>, and sales came in at <b>${K.pur}</b> (${sgn(dP)} on ${esc(prev.short||prev.label)}).`;
+  }
+  if(p.partial) lead += ` <span style="color:var(--muted)">This period covers ${p.days} days, so compare rates rather than totals.</span>`;
+  document.getElementById('aiLead').innerHTML = lead;
+
+  const wins = [], watch = [];
+  if(P && K.cps && P.cps && K.cps < P.cps) wins.push(`${dn}<span><b>Cost per sale down ${Math.abs(pct(K.cps,P.cps)).toFixed(0)}%</b> to <span class="fig">${gbp2(K.cps)}</span>.</span>`);
+  if(P && K.roas > P.roas) wins.push(`${up}<span><b>Return improved to <span class="fig">${(K.roas*100).toFixed(0)}%</span></b> from ${(P.roas*100).toFixed(0)}%.</span>`);
+  const best = p.campaigns.filter(c=>c.t!=='Awareness' && c.spend>0 && c.rev>0).sort((a,b)=>(b.rev/b.spend)-(a.rev/a.spend))[0];
+  if(best) wins.push(`${up}<span><b>${esc(best.n)}</b> is the strongest campaign at <span class="fig">${(best.rev/best.spend*100).toFixed(0)}%</span> on ${gbp(best.spend)}.</span>`);
+  if(K.awSpend > 0) wins.push(`${up}<span><b>Awareness reached <span class="fig">${n0(K.awReach)}</span> people</b> for ${gbp(K.awSpend)}, carrying ${(K.awImp/K.totImp*100).toFixed(0)}% of everything the account served.</span>`);
+  if(P && K.spend > P.spend && K.ctr >= P.ctr) wins.push(`${up}<span><b>Spend scaled ${sgn(pct(K.spend,P.spend))}</b> while CTR held at <span class="fig">${K.ctr.toFixed(2)}%</span>.</span>`);
+
+  const weak = p.campaigns.filter(c=>c.t!=='Awareness' && c.spend>0 && (c.rev/c.spend) < 2);
+  if(weak.length) watch.push(`${wr}<span><b>${weak.length} campaign${weak.length>1?'s':''} below 200% return</b>: ${weak.map(c=>esc(c.n)).join(', ')}. Candidate${weak.length>1?'s':''} for budget reallocation.</span>`);
+  if(P && K.cps && P.cps && K.cps > P.cps) watch.push(`${wr}<span><b>Cost per sale rose</b> to <span class="fign">${gbp2(K.cps)}</span> from ${gbp2(P.cps)}. Check mix and audience saturation.</span>`);
+  if(P && K.cpc > P.cpc) watch.push(`${wr}<span><b>CPC ticked up</b> to <span class="fign">${gbp2(K.cpc)}</span> from ${gbp2(P.cpc)}.</span>`);
+  const hiFreq = p.campaigns.filter(c=>c.reach>0 && c.imp/c.reach > 5);
+  if(hiFreq.length) watch.push(`${wr}<span><b>High frequency</b> on ${hiFreq.map(c=>esc(c.n)+' ('+(c.imp/c.reach).toFixed(1)+'x)').join(', ')}. A pool size problem rather than a creative one.</span>`);
+  const conc = p.campaigns.filter(c=>c.t!=='Awareness').sort((a,b)=>b.spend-a.spend);
+  if(conc.length>2){
+    const top = conc.slice(0,2).reduce((s,c)=>s+c.spend,0), all = conc.reduce((s,c)=>s+c.spend,0);
+    if(top/all > 0.55) watch.push(`${wr}<span><b>Spend concentration:</b> the top two campaigns absorb <span class="fign">${(top/all*100).toFixed(0)}%</span> of the budget.</span>`);
+  }
+  if(K.roas > 0 && K.roas < 5) watch.push(`${wr}<span><b>Below the 5.0 planned return</b> at <span class="fign">${(K.roas*100).toFixed(0)}%</span>, the Meta target carried in the Media Spend Tracker from August 2026.</span>`);
+  if(P && K.ctr < P.ctr) watch.push(`${wr}<span><b>CTR eased</b> to <span class="fign">${K.ctr.toFixed(2)}%</span> from ${P.ctr.toFixed(2)}%.</span>`);
+  document.getElementById('aiWins').innerHTML  = wins.slice(0,4).map(w=>`<li>${w}</li>`).join('') || '<li><span>No standout movements in this period.</span></li>';
+  document.getElementById('aiWatch').innerHTML = watch.slice(0,4).map(w=>`<li>${w}</li>`).join('') || '<li><span>Nothing flagged for this period.</span></li>';
+}
+
+/* ---- breakdown tables (weeks / months) ---- */
+let sortState = { weeks:{k:'start',dir:-1}, months:{k:'start',dir:-1} };
+function renderBreakdown(kind){
+  const L = kind === 'weeks' ? D.weeks : D.months;
+  const st = sortState[kind];
+  const rows = [...L].sort((a,b)=>{
+    const va = st.k==='start' ? a.start : a.m[st.k], vb = st.k==='start' ? b.start : b.m[st.k];
+    return (va < vb ? -1 : va > vb ? 1 : 0) * st.dir;
+  });
+  document.getElementById(kind+'Body').innerHTML = rows.map(p=>{
+    const m=p.m;
+    return `<tr class="rowlink" data-key="${esc(p.key)}" data-kind="${kind}">
+      <td class="l"><span class="cn">${esc(p.label)}</span><span class="sub">${esc(p.sub||'')}${p.partial?' · '+esc(p.partial):''}</span></td>
+      <td>${gbp(m.spend)}</td><td>${n0(m.imp)}</td><td>${n0(m.clk)}</td>
+      <td>${m.ctr.toFixed(2)}%</td><td>${m.pur||'—'}</td>
+      <td>${m.pur?gbp2(m.cps):'—'}</td><td>${m.cvr.toFixed(2)}%</td>
+      <td>${gbp(m.rev)}</td>
+      <td><span class="roas"><span class="sw" style="background:${roasColor(m.roas)}"></span>${(m.roas*100).toFixed(0)}%</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById(kind+'Chart').innerHTML = comboChart(L, kind==='weeks'?52:38);
+  const tot = L.reduce((a,p)=>({s:a.s+p.m.spend, r:a.r+p.m.rev, p:a.p+p.m.pur}), {s:0,r:0,p:0});
+  document.getElementById(kind+'Count').textContent = `${L.length} periods`;
+  document.getElementById(kind+'Sub').textContent =
+    `Every ${kind==='weeks'?'week':'month'} the account has exported data for, ${L[0].label} to ${L[L.length-1].label}. `+
+    `Click any row to open it in the Paid Social view. Column headings sort.`;
+  document.getElementById(kind+'Foot').innerHTML =
+    `Lifetime across these periods: <b style="color:var(--text)">${gbp(tot.s)}</b> spend, <b style="color:var(--text)">${gbp(tot.r)}</b> revenue, `+
+    `<b style="color:var(--text)">${n0(tot.p)}</b> sales, blended <b style="color:var(--text)">${(tot.r/tot.s*100).toFixed(0)}%</b>. `+
+    `All figures exclude awareness campaigns, which carry no purchase objective. `+
+    (kind==='months'
+      ? `Months are built from the weekly export grid and bucketed by the week's start date, so a "month" is four or five whole weeks rather than exact calendar dates.`
+      : `Weeks up to 10 August 2026 come from the account history export on a Tuesday to Monday grid; later windows are Monday to Sunday.`) +
+    (D.gap ? ` <b style="color:var(--amber)">No export covers ${esc(D.gap)}, so that span is absent rather than zero.</b>`
+           : ` Coverage is continuous with no missing weeks.`);
+}
+document.querySelectorAll('th.srt').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const kind = th.closest('#v-weeks') ? 'weeks' : 'months';
+    const k = th.dataset.k;
+    const st = sortState[kind];
+    st.dir = st.k === k ? -st.dir : -1; st.k = k;
+    renderBreakdown(kind);
+  });
+});
+document.addEventListener('click', e=>{
+  const tr = e.target.closest('tr.rowlink'); if(!tr) return;
+  const kind = tr.dataset.kind;
+  gran = kind;
+  document.querySelectorAll('#granSeg button').forEach(b=>b.classList.toggle('on', b.dataset.g===gran));
+  idx = list().findIndex(p=>p.key===tr.dataset.key);
+  buildMenu(); renderPerf(); showView('perf');
+});
+
+/* ---- campaigns ---- */
+function renderCampaigns(p){
+  const perf = p.campaigns.filter(c => c.t !== 'Awareness');
+  const t = k => perf.reduce((a,c)=>a+c[k],0);
+  document.getElementById('campSub').textContent =
+    `Every campaign that spent in ${p.label}. Revenue and return are as reported by Meta on a last click basis.`;
+  const pill = document.getElementById('campPill');
+  pill.className = p.partial ? 'pill warn' : 'pill';
+  pill.innerHTML = `<span class="d"></span> ${esc(p.label)}${p.partial ? ' · ' + esc(p.partial) : ''}`;
+  document.getElementById('campBody').innerHTML = p.campaigns.map(c => `
+    <tr>
+      <td class="l"><span class="cn">${esc(c.n)}</span></td>
+      <td><span class="tag-l">${esc(c.t)}</span></td>
+      <td>${gbp(c.spend)}<span class="sub">DKK ${n0(c.spend)}</span></td>
+      <td>${n0(c.imp)}</td><td>${n0(c.reach)}</td>
+      <td>${c.reach ? (c.imp/c.reach).toFixed(2) : '—'}</td>
+      <td>${n0(c.clk)}</td><td>${c.imp ? (c.clk/c.imp*100).toFixed(2)+'%' : '—'}</td>
+      <td>${c.pur || '—'}</td>
+      <td>${c.pur ? gbp2(c.spend/c.pur) : '—'}</td>
+      <td>${c.rev ? gbp(c.rev) : '—'}</td>
+      <td>${c.t==='Awareness' ? '<span style="color:var(--muted-2)">n/a</span>'
+           : `<span class="roas"><span class="sw" style="background:${roasColor(c.rev/c.spend)}"></span>${(c.rev/c.spend*100).toFixed(0)}%</span>`}</td>
+    </tr>`).join('') + `
+    <tr class="totrow"><td class="l">Total, excluding awareness</td><td></td>
+      <td>${gbp(t('spend'))}</td><td>${n0(t('imp'))}</td><td>${n0(t('reach'))}</td><td></td>
+      <td>${n0(t('clk'))}</td><td>${(t('clk')/t('imp')*100).toFixed(2)}%</td>
+      <td>${t('pur')}</td><td>${t('pur')?gbp2(t('spend')/t('pur')):'—'}</td>
+      <td>${gbp(t('rev'))}</td><td>${(t('rev')/t('spend')*100).toFixed(0)}%</td></tr>`;
+}
+
+/* ---- ad sets and ads (own period, from the ad level exports) ---- */
+let adIdx = 0;
+function adPeriod(){ return D.adPeriods[adIdx]; }
+function unitRow(u, withParent){
+  const roas = u.spend ? u.rev/u.spend : 0;
+  return `<tr>
+    <td class="l"><span class="cn">${esc(u.n)}</span>${withParent?'':`<span class="sub">${esc(u.t)}</span>`}</td>
+    ${withParent ? `<td class="l"><span style="color:var(--muted);font-size:12.5px">${esc(u.parent||'—')}</span></td>`
+                 : `<td><span class="tag-l">${esc(u.t)}</span></td>`}
+    <td>${gbp(u.spend)}<span class="sub">DKK ${n0(u.spend)}</span></td>
+    <td>${n0(u.imp)}</td>
+    ${withParent ? '' : `<td>${n0(u.reach)}</td><td>${u.reach ? (u.imp/u.reach).toFixed(2) : '—'}</td>`}
+    <td>${n0(u.clk)}</td><td>${u.imp ? (u.clk/u.imp*100).toFixed(2)+'%' : '—'}</td>
+    ${withParent ? `<td>${u.atc || '—'}</td>` : ''}
+    <td>${u.pur || '—'}</td>
+    <td>${u.pur ? gbp2(u.spend/u.pur) : '—'}</td>
+    <td>${u.rev ? gbp(u.rev) : '—'}</td>
+    <td>${u.rev ? `<span class="roas"><span class="sw" style="background:${roasColor(roas)}"></span>${(roas*100).toFixed(0)}%</span>`
+                : '<span style="color:var(--muted-2)">0%</span>'}</td>
+  </tr>`;
+}
+function renderUnits(){
+  const p = adPeriod();
+  const cov = `${D.adPeriods[1].start} to ${D.adPeriods[D.adPeriods.length-1].end}`;
+  const banner = p.partial
+    ? `<div class="banner"><div><b>Shorter window.</b> ${esc(p.partial)}. Rates compare directly with any other window; absolute totals do not.</div></div>` : '';
+  document.getElementById('adsetBanner').innerHTML = banner;
+  document.getElementById('adsBanner').innerHTML = banner;
+
+  document.getElementById('adsetSub').textContent =
+    `Every ad set that spent in ${p.label}. An ad set is the audience and budget layer inside a campaign.`;
+  document.getElementById('adsSub').textContent =
+    `Every ad that spent in ${p.label}. The same creative running in two ad sets is listed once per ad set, never merged.`;
+
+  document.getElementById('adsetBody').innerHTML = p.adSets.map(u => unitRow(u, false)).join('');
+  document.getElementById('adsBody').innerHTML   = p.ads.map(u => unitRow(u, true)).join('');
+
+  const dupes = new Map();
+  p.ads.forEach(a => dupes.set(a.n, (dupes.get(a.n)||0) + 1));
+  const nDup = [...dupes.values()].filter(v => v > 1).length;
+  const foot = `Ad level exports cover ${esc(cov)} only, so earlier periods have no ad set or ad detail. `+
+    `Return is as reported by Meta on a last click basis, so creative whose job is introducing the brand will under-read here. `+
+    (nDup ? `${nDup} creative${nDup>1?'s are':' is'} running in more than one ad set and ${nDup>1?'are':'is'} shown separately per ad set rather than combined.` : '');
+  document.getElementById('adsetFoot').innerHTML = foot;
+  document.getElementById('adsFoot').innerHTML = foot;
+  document.getElementById('adPerBtnLbl').textContent = p.label;
+  buildAdMenu();
+}
+function buildAdMenu(){
+  document.getElementById('adPerMenu').innerHTML = D.adPeriods.map((p,i)=>
+    `<div class="dd-item${i===adIdx?' sel':''}" data-i="${i}"><span>${esc(p.label)}</span><span class="pt">${esc(p.sub||'')}</span></div>`).join('');
+}
+
+/* ---- period picker ---- */
+function buildMenu(){
+  const L = list();
+  const menu = document.getElementById('perMenu');
+  menu.innerHTML = L.map((p,i)=>`<div class="dd-item${i===idx?' sel':''}" data-i="${i}">
+    <span>${esc(p.label)}</span><span class="pt">${esc(p.sub||'')}${p.partial?' ·':''}</span></div>`).reverse().join('');
+}
+document.getElementById('perBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  const m = document.getElementById('perMenu');
+  m.classList.toggle('open');
+  const sel = m.querySelector('.dd-item.sel'); if(sel) sel.scrollIntoView({block:'center'});
+});
+document.addEventListener('click', ()=>document.getElementById('perMenu').classList.remove('open'));
+document.getElementById('perMenu').addEventListener('click', e=>{
+  const it = e.target.closest('.dd-item'); if(!it) return;
+  idx = +it.dataset.i; buildMenu(); renderPerf();
+  document.getElementById('perMenu').classList.remove('open');
+});
+document.getElementById('adPerBtn').addEventListener('click', e=>{
+  e.stopPropagation();
+  const m = document.getElementById('adPerMenu'); m.classList.toggle('open');
+});
+document.addEventListener('click', ()=>document.getElementById('adPerMenu').classList.remove('open'));
+document.getElementById('adPerMenu').addEventListener('click', e=>{
+  const it = e.target.closest('.dd-item'); if(!it) return;
+  adIdx = +it.dataset.i; renderUnits();
+  document.getElementById('adPerMenu').classList.remove('open');
+});
+document.querySelectorAll('#granSeg button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    gran = b.dataset.g;
+    document.querySelectorAll('#granSeg button').forEach(x=>x.classList.toggle('on', x===b));
+    idx = list().length - 1; buildMenu(); renderPerf();
+  });
+});
+
+/* ---- view switching ---- */
+function showView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on', el.id === 'v-'+v));
+  document.querySelectorAll('.nav-i').forEach(el=>el.classList.toggle('active', el.dataset.view === v));
+  document.getElementById('crumb2').textContent =
+    ({perf:'Paid Social', weeks:'Week performance breakdown', months:'Month performance breakdown',
+      campaigns:'Campaigns', adsets:'Ad sets', ads:'Ads'})[v];
+  const mainPicker = v==='perf' || v==='campaigns';
+  document.getElementById('perDD').style.display = mainPicker ? '' : 'none';
+  document.getElementById('granSeg').style.display = mainPicker ? '' : 'none';
+  document.getElementById('adDD').style.display = (v==='adsets'||v==='ads') ? '' : 'none';
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.nav-i').forEach(b=>b.addEventListener('click', ()=>showView(b.dataset.view)));
+
+/* ---- boot ---- */
+document.getElementById('builtAt').textContent = D.generatedAt;
+document.getElementById('verLine').textContent = `${D.weeks.length} weeks · ${D.months.length} months`;
+document.getElementById('navWeeksN').textContent = D.weeks.length;
+document.getElementById('navMonthsN').textContent = D.months.length;
+idx = D.months.length - 1;
+buildMenu(); renderPerf(); renderBreakdown('weeks'); renderBreakdown('months');
+adIdx = 0; renderUnits();
+</script>
+</body>
+</html>
