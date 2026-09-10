@@ -16,6 +16,12 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
 const FX = 0.1147; // DKK -> GBP, the rate Stuart's Media Spend Tracker uses
+
+// When Vendo took the account on. Derived from the first "VD |" prefixed
+// campaigns, which launched in the week of 7 April 2026. The Progress view is
+// scoped to this so it shows the engagement rather than the account's whole
+// history. Change this one line if the real start date differs.
+const ENGAGEMENT_START = '2026-04-01';
 const ROOT = process.cwd();
 const META = join(ROOT, 'data/veltuff/uploads/meta');
 const OUT = join(ROOT, 'outputs/reports/veltuff');
@@ -330,6 +336,7 @@ const budget = existsSync(join(ROOT, 'data/veltuff/media-budget-2026.json'))
 
 const payload = {
   fx: FX,
+  engagementStart: ENGAGEMENT_START,
   targets: budget?.UK ?? null,
   generatedAt: new Date().toISOString().slice(0, 10),
   gap: gapList.join('; '),

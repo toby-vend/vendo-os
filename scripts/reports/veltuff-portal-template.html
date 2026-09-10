@@ -184,9 +184,12 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
 .storycard .tile{padding:12px 14px;}
 .storycard .tile .v{font-size:20px;}
 .storycard .ai-list li{font-size:13px;}
-.target-bar{display:inline-flex; align-items:center; gap:9px; justify-content:flex-end;}
-.target-bar .tb{width:74px; height:7px; border-radius:4px; background:rgba(180,210,170,.12); overflow:hidden;}
-.target-bar .tb i{display:block; height:100%; border-radius:4px;}
+.target-bar{display:inline-flex; align-items:center; gap:10px; justify-content:flex-end;}
+.target-bar .tb{position:relative; width:92px; height:8px; border-radius:4px; background:rgba(180,210,170,.12); overflow:hidden; flex:none;}
+.target-bar .tb i{position:absolute; left:0; top:0; height:100%; border-radius:4px;}
+.target-bar .tb i.over{border-radius:4px; box-shadow:0 0 8px rgba(142,230,168,.45);}
+.target-bar .pcv{min-width:40px; text-align:right; font-weight:600;}
+.target-bar .pcv.hit{color:var(--green);}
 </style>
 </head>
 <body>
@@ -833,23 +836,33 @@ function renderStory(){
   }
   document.getElementById('nextList').innerHTML = next.slice(0,5).map(x=>`<li>${x}</li>`).join('');
 
-  /* Progress table: last 12 months */
-  const rows = D.months.slice(-12).reverse();
+  /* Progress table: the engagement to date, not the account's whole history */
+  const since = D.engagementStart || '';
+  const rows = D.months.filter(x => x.key >= since.slice(0,7)).reverse();
+  const sinceLabel = rows.length ? rows[rows.length-1].label : '';
   document.getElementById('progSub').textContent =
-    `The last ${rows.length} months against the ${(tgt*100).toFixed(0)}% planned return. Newest first.`;
+    `Every month since Vendo took the account on, ${sinceLabel} to ${rows[0] ? rows[0].label : ''}, against the ${(tgt*100).toFixed(0)}% planned return. Newest first.`;
   document.getElementById('progBody').innerHTML = rows.map(p=>{
-    const k=p.m, ratio=k.roas/tgt, w=Math.min(ratio,1.4)/1.4*100;
-    const col = ratio>=1 ? 'var(--green)' : ratio>=0.75 ? 'var(--amber)' : 'var(--neg)';
+    const k=p.m, ratio=k.roas/tgt;
+    // The bar fills to the target, then the surplus wraps back across it,
+    // so 100% is a full bar and anything beyond reads as the overshoot.
+    const base = Math.min(ratio,1)*100;
+    const over = ratio>1 ? Math.min(ratio-1,1)*100 : 0;
+    const baseCol = ratio>=1 ? 'var(--green-dim)' : ratio>=0.75 ? 'var(--amber)' : 'var(--neg)';
+    const bar = `<span class="tb"><i style="width:${base}%;background:${baseCol}"></i>`+
+      (over ? `<i class="over" style="width:${over}%;background:var(--green)"></i>` : '')+`</span>`;
     return `<tr class="rowlink" data-key="${esc(p.key)}" data-kind="months">
       <td class="l"><span class="cn">${esc(p.label)}</span><span class="sub">${esc(p.sub||'')}${p.partial?' · '+esc(p.partial):''}</span></td>
       <td>${gbp(k.spend)}</td><td>${gbp(k.rev)}</td>
       <td><span class="roas"><span class="sw" style="background:${roasColor(k.roas)}"></span>${(k.roas*100).toFixed(0)}%</span></td>
-      <td><span class="target-bar"><span class="tb"><i style="width:${w}%;background:${col}"></i></span>${(ratio*100).toFixed(0)}%</span></td>
+      <td><span class="target-bar">${bar}<span class="pcv${ratio>=1?' hit':''}">${(ratio*100).toFixed(0)}%</span></span></td>
       <td>${n0(k.pur)}</td><td>${k.pur?gbp2(k.cps):'—'}</td><td>${k.cvr.toFixed(2)}%</td><td>${n0(k.totReach)}</td>
     </tr>`;
   }).join('');
   document.getElementById('progFoot').innerHTML =
     `Planned return of ${(tgt*100).toFixed(0)}% is the Meta figure carried in the Media Spend Tracker from August 2026; earlier months are shown against the same bar for a like for like read. `+
+    `Scoped to the Vendo engagement, which starts with the first VD campaigns in April 2026. The full account history back to 2023 sits under Months and Weeks. `+
+    `The bar fills to the target and the surplus wraps back over it, so a full bar is target met and the brighter overlay is the overshoot. `+
     `Reach is summed across campaigns and is not deduplicated between them. Click any row to open that month in Paid Social.`;
 }
 
