@@ -5,8 +5,10 @@
    "Set",
    "Audience / Folder",
    "Creative Name",
+   "Preview (Square 1x1)",
    "Format",
    "Files in folder",
+   "Open in Drive",
    "On-creative headline (do not repeat verbatim)",
    "Primary Text",
    "Headline",
@@ -23,8 +25,10 @@
     "B2C",
     "Awareness",
     "Lost Pot Counter",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1BU1FlTZdkJzwG3AHfn2jXvY8PnQ8hQiW=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1TSGgRTEc0JCVk_LVOCuF9BnrxLN_-Sw9\", \"Open folder\")",
     "£31,100,000,000 sitting in 3.3 million forgotten pension pots.",
     "You have probably left a pension behind. Most people who have changed jobs a few times have.\n\nThere is an estimated £31.1bn sitting in 3.3 million forgotten pension pots in the UK, with an average of £9,470 in each one. One of them might have your name on it.\n\nCompound helps you find your old workplace pensions and bring them together in one place.\n\nSource: Pensions Policy Institute, 2024.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Find your lost pensions",
@@ -40,8 +44,10 @@
     "B2C",
     "Awareness",
     "Open Apology",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1_lJ8CaFishMOON-XOSNyIQL6_g744v0E=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1II9MuUYDukc5IHRw94FO56zhHKBwISQx\", \"Open folder\")",
     "From the founders: An open apology.",
     "An open letter to everyone who has had more than three jobs.\n\nSomewhere out there is a pension from a job you left years ago, and nobody has reminded you about it since. There is an estimated £31.1bn sitting in lost UK pensions, roughly £9,470 a pot.\n\nCompound helps you track down your old workplace pensions and bring them into one pot that moves with you from job to job.\n\nSource: PPI Lost Pensions Survey, 2024.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "An open apology",
@@ -57,8 +63,10 @@
     "B2C",
     "Awareness",
     "Pension Texting – Purple",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/13YOwxBPrGl7atBSTF9EG5sYDU46g8yZ0=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1RsKMnl7_hl59liZhHV2HqUQ9r6bwVLPH\", \"Open folder\")",
     "Your old pension has been texting.",
     "Your 2019 workplace pension is still sitting at your old job. Quietly. With your money in it.\n\nNobody is going to chase you about it. It does not send letters any more and it will not ring.\n\nCompound helps you find old workplace pensions and bring them together in one pot that follows you. One search, one app.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Reply to your pension",
@@ -74,8 +82,10 @@
     "B2C",
     "Awareness",
     "Pension Texting – White",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1gul_w-72jNHjgOeLfXlmriHahXETrZRL=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1kAONyHcjOQi8N3YnZn09qn-yzXzHeK-4\", \"Open folder\")",
     "Your old pension has been texting.",
     "Your 2019 workplace pension is still sitting at your old job. Quietly. With your money in it.\n\nNobody is going to chase you about it. It does not send letters any more and it will not ring.\n\nCompound helps you find old workplace pensions and bring them together in one pot that follows you. One search, one app.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Reply to your pension",
@@ -91,8 +101,10 @@
     "B2C",
     "Awareness",
     "Trademark – Called Dibs",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1gg--QYQgsCarP_xidIQtL6wTL3YV9Xzd=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/18Uj_ygYisKiFLzdtagMkoWxg0W2QGtPl\", \"Open folder\")",
     "Einstein called it the eighth wonder of the world. We called dibs.",
     "Einstein allegedly called compound interest the eighth wonder of the world.\n\nIt is the effect where investment returns go on to generate further returns over time. Your money is invested to make that happen, which means it can fall as well as rise.\n\nCompound is now a registered trade mark in UK finance. It is also a workplace pension built so that people actually open it.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "We called dibs",
@@ -108,8 +120,10 @@
     "B2C",
     "Awareness",
     "Trademark – Gradient",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1VihLSHVv8dIw6DtPdsRi__6m2VTkzDtn=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/13Y03PMoJurmurgEyIwaP7AisScK27vZ9\", \"Open folder\")",
     "We own the word Compound. Legally.",
     "We now own the word Compound in UK finance. Registered with the UK Intellectual Property Office.\n\nIt is a strange thing to own a word, so here is what we intend to do with it: build a workplace pension people actually open, understand and keep hold of when they change jobs.\n\nCompound interest is an investment effect. Returns generate further returns, and they can go the other way too.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "We own the word. Legally.",
@@ -125,8 +139,10 @@
     "B2B",
     "Accountants & IFAs",
     "Callout – 50 Clients 5 Providers",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1zL25XhQCMB-RvqT_yFwDKoIHKQAUdlF5=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1Euc5B4-PYhUKskXYGApl4jrVtq59UWL8\", \"Open folder\")",
     "Managing pensions for 50 clients across 5 providers?",
     "Fifty clients. Five pension providers.\n\nFive logins. Five sets of deadlines. Five different ways of telling you a contribution has failed, usually after the client has already noticed.\n\nNone of it is chargeable work and all of it lands on your desk anyway.\n\nCompound puts every client scheme in one dashboard with a direct payroll connection, and it is free for your practice.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "One dashboard, every scheme",
@@ -142,8 +158,10 @@
     "B2B",
     "Accountants & IFAs",
     "Callout – Unwanted Job",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1pQBtW-BfWStnECfRVCNgv3g1WiyCcEdz=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/13sOrKTiQrwmNvuU7B0dWCGanxvsiv2AH\", \"Open folder\")",
     "Every practice has one job nobody wants. It is usually the pension.",
     "Every practice has one job nobody wants. It is usually the pension.\n\nThe portals. The re-enrolment dates you have to hold in your head. The client who rings with a question you are not allowed to answer.\n\nIt is not advice work, it is not billable, and it still has to be right.\n\nThere is a version of this where it runs itself.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Nobody wants the pension job",
@@ -159,8 +177,10 @@
     "B2B",
     "Accountants & IFAs",
     "Cheat Sheet (Carousel)",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1lf1pEoIsXjxln5tAx-Hqy0cBq98rvDJq=w600\", 1)",
     "Carousel, 5 cards",
     "Card 1 of 5 to Card 5 of 5",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1ooU2D3M4qPPqFVT5aJonOWSLr7F2vdph\", \"Open folder\")",
     "Auto enrolment 2026/27: the numbers your clients will ask you for.",
     "The auto enrolment numbers your clients will ask you for in 2026/27, in one place.\n\nEarnings trigger: £10,000.\nQualifying earnings band: £6,240 to £50,270.\nAssessment: every pay period.\nRe-enrolment: every three years.\n\nSave it, send it to a client, or stick it on the wall behind the kettle.\n\nCapital at risk. Investments can go down as well as up.",
     "Auto enrolment 2026/27",
@@ -176,8 +196,10 @@
     "B2B",
     "Accountants & IFAs",
     "Objection – Whole Price List",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1UrY9M_VGp91r2l7hsHASNNHTFG3prmeB=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1T_ODmAMvaZodJGHFqDrCadLCFNSvYtxs\", \"Open folder\")",
     "\"What does it cost us?\" The whole price list, right here.",
     "\"What does it cost us?\" is usually the second question a practice asks.\n\nSo here is the whole price list, with nothing held back.\n\nAccountants and bureaus: free.\nEmployers: £15 a month, capped, and waived where the firm is introduced by a partner.\nEmployees: 0.51% plus fund fee.\n\nThat is the list.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest. Compound does not provide financial advice.",
     "The whole price list",
@@ -193,8 +215,10 @@
     "B2B",
     "Accountants & IFAs",
     "Objections (Carousel)",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1x7BdjGR5MvfI9-vXp0kMFCnFO7XPZcMN=w600\", 1)",
     "Carousel, 5 cards",
     "Card 1 of 5 to Card 5 of 5",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1A3oKTaZrSkZnEhIZX57X2BcqxV_hKoiC\", \"Open folder\")",
     "Three things practices ask before moving a client across.",
     "Three things practices ask before they move a client across.\n\nDo we have to move everyone at once? No. You can migrate one client at a time.\n\nDoes it get more expensive as we add clients? No. It is free at any volume.\n\nWhat about the current provider's notice period? That is handled.\n\nSetup is a fifteen minute call.\n\nCapital at risk. Investments can go down as well as up.",
     "Before you move a client",
@@ -210,8 +234,10 @@
     "B2B",
     "Accountants & IFAs",
     "Open Apology",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1JsWdsvP1HcBFK4jPl1IBaDZnN1WsPEKi=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/13c-w6xDnFmvIxiApaOTUDrsRSN1-Nz-u\", \"Open folder\")",
     "From the founders: An open apology. To every accountant who inherited auto enrolment.",
     "To every accountant who inherited auto enrolment without being asked.\n\nA separate portal for every client. A client ringing with a pension question you are not allowed to answer. A job that quietly became yours, and nobody checked with you first.\n\nWe did not build that, but we did build the alternative. One dashboard for every client. A direct payroll connection. Contributions posted without the file.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "An open apology",
@@ -227,8 +253,10 @@
     "B2B",
     "Accountants & IFAs",
     "Partner Proof (Carousel)",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1W4inuzoeR3Q4TGlUfUzTl02USvyL4FdB=w600\", 1)",
     "Carousel, 5 cards",
     "Card 1 of 5 to Card 5 of 5",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1ArU6Hdrx9Cv4phiLpbmyn3pmvdqjgp1W\", \"Open folder\")",
     "Practice dashboard: 42 schemes, compliant.",
     "This is what the practice dashboard looks like when the pension part is not fighting you.\n\nEvery client scheme behind one login. Payroll run status you can see without ringing anyone. Pension pots visible per client.\n\nThe figures shown are an illustration of the dashboard, not a real client account.\n\nFree for your practice, at any client count.\n\nCapital at risk. Investments can go down as well as up.",
     "Inside the dashboard",
@@ -244,8 +272,10 @@
     "B2B",
     "General Awareness",
     "Callout – First Employee",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1O1ZArmHdpxwrLCfDD3q3YdVtGx5Rcj4S=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1MbsPAJG80YD5TjvQG20Eqpb62W5fKTS7\", \"Open folder\")",
     "Just hired your first employee? Congratulations. You now have a legal duty.",
     "You have just hired your first employee. Congratulations.\n\nSomewhere in the excitement you also picked up a legal duty. You have to assess them for a workplace pension, enrol them if they qualify, pay contributions and declare compliance with The Pensions Regulator.\n\nMissing it is not a small thing.\n\nCompound sets it up and keeps it running.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "First hire? New legal duty",
@@ -261,8 +291,10 @@
     "B2B",
     "IFAs",
     "Adviser Scheme 2014",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1RlgUoXKxj_n2ZrGPco2s0FsK45DZp1_m=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1MY_pXiKRSVTLjUiQWMjmiS0_xzi35N57\", \"Open folder\")",
     "The scheme your client chose in 2014 is still the scheme your client has.",
     "The scheme your client chose in 2014 is still the scheme your client has.\n\nSame default fund. Same portal nobody logs into. Same annual statement that goes from the doormat to the bin without being opened. Their staff could not tell you what is in it.\n\nSee what a workplace pension looks like when the members actually open it.\n\nService led. No incentives.\n\nCapital at risk. Investments can go down as well as up. Compound does not provide financial advice.",
     "Still on the 2014 scheme?",
@@ -278,8 +310,10 @@
     "B2B",
     "Umbrella Companies",
     "Callout – 3000 Contractors",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1KSZAWiovaZocekfBAcfoUa2at24OeWrJ=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/110DsOjx4ldj_lzsVBqP5HnrvZVhETSQG\", \"Open folder\")",
     "3,000 contractors. One pension headache.",
     "Three thousand contractors, each one starting and ending assignments at a different time.\n\nAnd a pension that has to keep up with all of it.\n\nThe figure is an illustration. The headache is not.\n\nCompound gives every contractor one pot that stays with them when a contract ends and keeps taking contributions on the next one, and gives you one platform to run it all from.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "One pot, every contract",
@@ -295,8 +329,10 @@
     "B2B",
     "Payroll Bureaus",
     "Blame – Pension Bounced",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1oieMAQPhHdR0pnIdnPQbbvFz16nWpRGq=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/18G4Ye8j6Q3t0ggmsoT1aJPZTQPYlufyD\", \"Open folder\")",
     "You did the payroll correctly. The pension still bounced.",
     "You ran the payroll correctly. The file went in on time. The pension still bounced.\n\nAnd now it is your name on the email chain, not the provider's, because you are the one the client actually talks to.\n\nCompound assesses every pay period, posts contributions on time and shows status per client, so when something does go wrong you see it before the client rings.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "You did it right. It bounced.",
@@ -312,8 +348,10 @@
     "B2B",
     "Payroll Bureaus",
     "Blame – Re-Enrolment",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1s5W_e51za6C7dAJocjxK8eDWAQdVPnPH=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1_AYzL-MMqBPl2CDLwtJkaA5RU8lWWwGs\", \"Open folder\")",
     "Re-enrolment is every three years. It never feels like it.",
     "Re-enrolment comes round every three years. It never feels like three years.\n\nIt feels like a date you half remember, attached to a client you have not thought about since the last one, with a deadline that started counting before anyone mentioned it.\n\nCompound assesses every pay period and shows status per client, so the three year cycle stops being something you have to carry in your head.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Re-enrolment, every 3 years",
@@ -329,8 +367,10 @@
     "B2B",
     "Payroll Bureaus",
     "Blame – Who Do They Ring",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1vm-6AQ3b6Xhj3i7wXy0TFSPdo2VDBaCN=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1OivaQ_YJHSe4z22Tl_TffFjvu05aANHD\", \"Open folder\")",
     "The client misses an assessment. Who do they ring?",
     "A client misses an assessment. Who do they ring?\n\nNot the provider. Not the regulator. They ring you, because you are the one who touches their payroll every single month.\n\nCompound assesses every pay period, posts contributions on time and shows status per client, so the answer stops being an apology.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Who do they ring? You.",
@@ -346,8 +386,10 @@
     "B2B",
     "Payroll Bureaus",
     "Callout – 40 Payrolls",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1jG33k77yJGlUQwfmtuH1sqoPz2P5f0oF=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1wF84N0YPJ3aRiRUXNq5L80CK684wgRwv\", \"Open folder\")",
     "You process 40 payrolls. You manage 12 pension providers.",
     "Forty payrolls a month. Twelve pension providers.\n\nTwelve logins. Twelve upload formats. Twelve different ways of telling you a contribution has failed validation, none of which explain why.\n\nThe numbers are an illustration, but you know the shape of it.\n\nCompound puts every client scheme behind one login, with a direct payroll connection.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "40 payrolls, 12 providers",
@@ -363,8 +405,10 @@
     "B2B",
     "Payroll Bureaus",
     "Callout – Other Peoples Clients",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1ydXc3YvugniffSYJqNrOYiUoILNtG38M=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1hQaTEMjHWUrZSslWIj-BmEUJaVFRE45_\", \"Open folder\")",
     "Do you run payroll for other people's clients?",
     "If you run payroll for other people's clients, the pension part was never really your job.\n\nIt became your job anyway. One portal at a time, one failed contribution file at a time, until it was simply assumed.\n\nCompound puts every client scheme behind one login, posts contributions through a direct payroll connection and shows you the status of each one.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Other people's clients?",
@@ -380,8 +424,10 @@
     "B2B",
     "Payroll Bureaus",
     "Objections (Carousel)",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1jv3_K_Qn57oLRieQWFVWsoosrLoZKt21=w600\", 1)",
     "Carousel, 5 cards",
     "Card 1 of 5 to Card 5 of 5",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1EOsbwahNy1zjog6NFbMkLGhzzN5BjLbv\", \"Open folder\")",
     "Three things bureaus ask before switching a client.",
     "Three things bureaus ask before they switch a client across.\n\nDo we have to move them all at once? No. One client at a time.\n\nDoes the price go up as we add clients? No. It is free at any volume.\n\nWhat about the provider's notice period? That is handled.\n\nSetup is a fifteen minute call.\n\nCapital at risk. Investments can go down as well as up.",
     "Before you switch a client",
@@ -397,8 +443,10 @@
     "B2B",
     "Payroll Bureaus",
     "Open Apology",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1wHEOI7rhD8IuwQhxAukYq9acj5N274rh=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/18VNb4OWMul7XWnCntOetHPxh6KC6M1q1\", \"Open folder\")",
     "From the founders: An open apology. To everyone who runs payroll for other people's clients.",
     "To everyone who runs payroll for other people's clients.\n\nA separate portal for every client. A contribution file that fails validation for no explained reason. A job that became yours, and nobody asked you first.\n\nWe did not build that, but we did build the alternative. One dashboard for every client. A direct payroll connection. Contributions posted without the file.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "An open apology",
@@ -414,8 +462,10 @@
     "B2B",
     "Payroll Bureaus",
     "Partner Pitch",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1qr5gspelM38-a2MuqhwS_Pf8gCU_lydv=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/11UbKqLruZDTk2Ocv2a7Gg3y-EfTuBh3P\", \"Open folder\")",
     "The pension partner built for people who actually do payroll.",
     "A pension partner programme built by people who have watched what payroll actually involves.\n\nFree at any client count. Every client scheme in one dashboard. A dedicated account manager who picks up. Bulk migration when you are ready, not before.\n\nIf pensions are the part of the month you dread, this is the part where that stops.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Built for people who do payroll",
@@ -431,8 +481,10 @@
     "B2B",
     "Payroll Bureaus",
     "Twenty Client Line",
+    "=IMAGE(\"https://lh3.googleusercontent.com/d/1vx40KnG0H6K3Ajs0w8hB_viN-61ixQuC=w600\", 1)",
     "Single image",
     "Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1",
+    "=HYPERLINK(\"https://drive.google.com/drive/folders/1WYgxP76YgfFulOXSfvmVQSPsLrqaeWvh\", \"Open folder\")",
     "If you run payroll for fewer than 20 clients, this is not for you.",
     "If you run payroll for fewer than twenty clients, this is not for you.\n\nIf you run twenty, fifty, or two hundred, and the pension part is the bit of the month you quietly dread, it probably is.\n\nOne dashboard for every client scheme. A direct payroll connection. Free at any client count.\n\nCapital at risk. The value of your investments can go down as well as up and you may get back less than you invest.",
     "Fewer than 20 clients?",
@@ -449,8 +501,10 @@
    7,
    20,
    30,
+   28,
    16,
    30,
+   15,
    40,
    78,
    30,
@@ -460,7 +514,9 @@
    44,
    22,
    62
-  ]
+  ],
+  "approvalCol": 15,
+  "frozenCols": 5
  },
  "rules": {
   "head": [
@@ -590,5 +646,107 @@
    66
   ]
  },
- "folder": "https://drive.google.com/drive/folders/1-BHOGzJ_EaELKNk8-07SUgWxU_7n33PM"
+ "folder": "https://drive.google.com/drive/folders/1-BHOGzJ_EaELKNk8-07SUgWxU_7n33PM",
+ "assets": {
+  "B2C-01": {
+   "image": "https://drive.google.com/file/d/1BU1FlTZdkJzwG3AHfn2jXvY8PnQ8hQiW/view",
+   "folder": "https://drive.google.com/drive/folders/1TSGgRTEc0JCVk_LVOCuF9BnrxLN_-Sw9"
+  },
+  "B2C-02": {
+   "image": "https://drive.google.com/file/d/1_lJ8CaFishMOON-XOSNyIQL6_g744v0E/view",
+   "folder": "https://drive.google.com/drive/folders/1II9MuUYDukc5IHRw94FO56zhHKBwISQx"
+  },
+  "B2C-03": {
+   "image": "https://drive.google.com/file/d/13YOwxBPrGl7atBSTF9EG5sYDU46g8yZ0/view",
+   "folder": "https://drive.google.com/drive/folders/1RsKMnl7_hl59liZhHV2HqUQ9r6bwVLPH"
+  },
+  "B2C-04": {
+   "image": "https://drive.google.com/file/d/1gul_w-72jNHjgOeLfXlmriHahXETrZRL/view",
+   "folder": "https://drive.google.com/drive/folders/1kAONyHcjOQi8N3YnZn09qn-yzXzHeK-4"
+  },
+  "B2C-05": {
+   "image": "https://drive.google.com/file/d/1gg--QYQgsCarP_xidIQtL6wTL3YV9Xzd/view",
+   "folder": "https://drive.google.com/drive/folders/18Uj_ygYisKiFLzdtagMkoWxg0W2QGtPl"
+  },
+  "B2C-06": {
+   "image": "https://drive.google.com/file/d/1VihLSHVv8dIw6DtPdsRi__6m2VTkzDtn/view",
+   "folder": "https://drive.google.com/drive/folders/13Y03PMoJurmurgEyIwaP7AisScK27vZ9"
+  },
+  "B2B-01": {
+   "image": "https://drive.google.com/file/d/1zL25XhQCMB-RvqT_yFwDKoIHKQAUdlF5/view",
+   "folder": "https://drive.google.com/drive/folders/1Euc5B4-PYhUKskXYGApl4jrVtq59UWL8"
+  },
+  "B2B-02": {
+   "image": "https://drive.google.com/file/d/1pQBtW-BfWStnECfRVCNgv3g1WiyCcEdz/view",
+   "folder": "https://drive.google.com/drive/folders/13sOrKTiQrwmNvuU7B0dWCGanxvsiv2AH"
+  },
+  "B2B-03": {
+   "image": "https://drive.google.com/file/d/1lf1pEoIsXjxln5tAx-Hqy0cBq98rvDJq/view",
+   "folder": "https://drive.google.com/drive/folders/1ooU2D3M4qPPqFVT5aJonOWSLr7F2vdph"
+  },
+  "B2B-04": {
+   "image": "https://drive.google.com/file/d/1UrY9M_VGp91r2l7hsHASNNHTFG3prmeB/view",
+   "folder": "https://drive.google.com/drive/folders/1T_ODmAMvaZodJGHFqDrCadLCFNSvYtxs"
+  },
+  "B2B-05": {
+   "image": "https://drive.google.com/file/d/1x7BdjGR5MvfI9-vXp0kMFCnFO7XPZcMN/view",
+   "folder": "https://drive.google.com/drive/folders/1A3oKTaZrSkZnEhIZX57X2BcqxV_hKoiC"
+  },
+  "B2B-06": {
+   "image": "https://drive.google.com/file/d/1JsWdsvP1HcBFK4jPl1IBaDZnN1WsPEKi/view",
+   "folder": "https://drive.google.com/drive/folders/13c-w6xDnFmvIxiApaOTUDrsRSN1-Nz-u"
+  },
+  "B2B-07": {
+   "image": "https://drive.google.com/file/d/1W4inuzoeR3Q4TGlUfUzTl02USvyL4FdB/view",
+   "folder": "https://drive.google.com/drive/folders/1ArU6Hdrx9Cv4phiLpbmyn3pmvdqjgp1W"
+  },
+  "B2B-08": {
+   "image": "https://drive.google.com/file/d/1O1ZArmHdpxwrLCfDD3q3YdVtGx5Rcj4S/view",
+   "folder": "https://drive.google.com/drive/folders/1MbsPAJG80YD5TjvQG20Eqpb62W5fKTS7"
+  },
+  "B2B-09": {
+   "image": "https://drive.google.com/file/d/1RlgUoXKxj_n2ZrGPco2s0FsK45DZp1_m/view",
+   "folder": "https://drive.google.com/drive/folders/1MY_pXiKRSVTLjUiQWMjmiS0_xzi35N57"
+  },
+  "B2B-10": {
+   "image": "https://drive.google.com/file/d/1KSZAWiovaZocekfBAcfoUa2at24OeWrJ/view",
+   "folder": "https://drive.google.com/drive/folders/110DsOjx4ldj_lzsVBqP5HnrvZVhETSQG"
+  },
+  "B2B-11": {
+   "image": "https://drive.google.com/file/d/1oieMAQPhHdR0pnIdnPQbbvFz16nWpRGq/view",
+   "folder": "https://drive.google.com/drive/folders/18G4Ye8j6Q3t0ggmsoT1aJPZTQPYlufyD"
+  },
+  "B2B-12": {
+   "image": "https://drive.google.com/file/d/1s5W_e51za6C7dAJocjxK8eDWAQdVPnPH/view",
+   "folder": "https://drive.google.com/drive/folders/1_AYzL-MMqBPl2CDLwtJkaA5RU8lWWwGs"
+  },
+  "B2B-13": {
+   "image": "https://drive.google.com/file/d/1vm-6AQ3b6Xhj3i7wXy0TFSPdo2VDBaCN/view",
+   "folder": "https://drive.google.com/drive/folders/1OivaQ_YJHSe4z22Tl_TffFjvu05aANHD"
+  },
+  "B2B-14": {
+   "image": "https://drive.google.com/file/d/1jG33k77yJGlUQwfmtuH1sqoPz2P5f0oF/view",
+   "folder": "https://drive.google.com/drive/folders/1wF84N0YPJ3aRiRUXNq5L80CK684wgRwv"
+  },
+  "B2B-15": {
+   "image": "https://drive.google.com/file/d/1ydXc3YvugniffSYJqNrOYiUoILNtG38M/view",
+   "folder": "https://drive.google.com/drive/folders/1hQaTEMjHWUrZSslWIj-BmEUJaVFRE45_"
+  },
+  "B2B-16": {
+   "image": "https://drive.google.com/file/d/1jv3_K_Qn57oLRieQWFVWsoosrLoZKt21/view",
+   "folder": "https://drive.google.com/drive/folders/1EOsbwahNy1zjog6NFbMkLGhzzN5BjLbv"
+  },
+  "B2B-17": {
+   "image": "https://drive.google.com/file/d/1wHEOI7rhD8IuwQhxAukYq9acj5N274rh/view",
+   "folder": "https://drive.google.com/drive/folders/18VNb4OWMul7XWnCntOetHPxh6KC6M1q1"
+  },
+  "B2B-18": {
+   "image": "https://drive.google.com/file/d/1qr5gspelM38-a2MuqhwS_Pf8gCU_lydv/view",
+   "folder": "https://drive.google.com/drive/folders/11UbKqLruZDTk2Ocv2a7Gg3y-EfTuBh3P"
+  },
+  "B2B-19": {
+   "image": "https://drive.google.com/file/d/1vx40KnG0H6K3Ajs0w8hB_viN-61ixQuC/view",
+   "folder": "https://drive.google.com/drive/folders/1WYgxP76YgfFulOXSfvmVQSPsLrqaeWvh"
+  }
+ }
 }

@@ -32,6 +32,9 @@ interface Tab {
   head: string[];
   rows: string[][];
   widths: number[];
+  /** Ad Copy only: 0-based index of the RiskSave status column, tinted green. */
+  approvalCol?: number;
+  frozenCols?: number;
 }
 interface Payload {
   adcopy: Tab;
@@ -73,7 +76,7 @@ async function api<T>(path: string, method: string, body?: unknown): Promise<T> 
 
 const INTRO_ID = 0;
 const DATA_TABS = [
-  { key: 'adcopy' as const, title: 'Ad Copy', sheetId: 1, frozenCols: 4, rowHeight: 250 },
+  { key: 'adcopy' as const, title: 'Ad Copy', sheetId: 1, frozenCols: 5, rowHeight: 210 },
   { key: 'rules' as const, title: 'RiskSave Rules', sheetId: 2, frozenCols: 1, rowHeight: 118 },
   { key: 'hold' as const, title: 'On Hold', sheetId: 3, frozenCols: 1, rowHeight: 150 },
 ];
@@ -197,7 +200,7 @@ const created = existingId
               rowCount: payload[t.key].rows.length + 2,
               columnCount: payload[t.key].head.length,
               frozenRowCount: 1,
-              frozenColumnCount: t.frozenCols,
+              frozenColumnCount: payload[t.key].frozenCols ?? t.frozenCols,
             },
           },
         })),
@@ -206,9 +209,41 @@ const created = existingId
 
 const id = created.spreadsheetId;
 
+// On a rebuild the tabs were sized for the previous column set, and a write
+// past the grid edge is rejected. Resize before writing any values.
+if (existingId) {
+  await api(`/${id}:batchUpdate`, 'POST', {
+    requests: [
+      {
+        updateSheetProperties: {
+          properties: {
+            sheetId: INTRO_ID,
+            gridProperties: { rowCount: INTRO.length + 4, columnCount: 1 },
+          },
+          fields: 'gridProperties(rowCount,columnCount)',
+        },
+      },
+      ...DATA_TABS.map((t) => ({
+        updateSheetProperties: {
+          properties: {
+            sheetId: t.sheetId,
+            gridProperties: {
+              rowCount: payload[t.key].rows.length + 2,
+              columnCount: payload[t.key].head.length,
+              frozenRowCount: 1,
+              frozenColumnCount: payload[t.key].frozenCols ?? t.frozenCols,
+            },
+          },
+          fields: 'gridProperties(rowCount,columnCount,frozenRowCount,frozenColumnCount)',
+        },
+      })),
+    ],
+  });
+}
+
 // --- values ------------------------------------------------------------------
 await api(`/${id}/values:batchUpdate`, 'POST', {
-  valueInputOption: 'RAW',
+  valueInputOption: 'USER_ENTERED',
   data: [
     { range: `'Start Here'!A1`, majorDimension: 'ROWS', values: INTRO.map((r) => [r.text]) },
     ...DATA_TABS.map((t) => ({
@@ -378,14 +413,46 @@ DATA_TABS.forEach((t) => {
         fields: 'userEnteredFormat.textFormat',
       },
     });
-    // Approval column (N) tinted, so a non-approved row would stand out at once.
-    requests.push({
-      repeatCell: {
-        range: { sheetId, startRowIndex: 1, endRowIndex: 1 + dataRows, startColumnIndex: 13, endColumnIndex: 14 },
-        cell: { userEnteredFormat: { backgroundColor: APPROVED } },
-        fields: 'userEnteredFormat.backgroundColor',
-      },
-    });
+    // Approval column tinted, so a non-approved row would stand out at once.
+    const approvalCol = tab.approvalCol ?? -1;
+    if (approvalCol >= 0) {
+      requests.push({
+        repeatCell: {
+          range: {
+            sheetId,
+            startRowIndex: 1,
+            endRowIndex: 1 + dataRows,
+            startColumnIndex: approvalCol,
+            endColumnIndex: approvalCol + 1,
+          },
+          cell: { userEnteredFormat: { backgroundColor: APPROVED } },
+          fields: 'userEnteredFormat.backgroundColor',
+        },
+      });
+    }
+    // Preview column: centre the thumbnail rather than top-left it.
+    const previewCol = tab.head.indexOf('Preview (Square 1x1)');
+    if (previewCol >= 0) {
+      requests.push({
+        repeatCell: {
+          range: {
+            sheetId,
+            startRowIndex: 1,
+            endRowIndex: 1 + dataRows,
+            startColumnIndex: previewCol,
+            endColumnIndex: previewCol + 1,
+          },
+          cell: {
+            userEnteredFormat: {
+              horizontalAlignment: 'CENTER',
+              verticalAlignment: 'MIDDLE',
+              padding: { top: 4, bottom: 4, left: 4, right: 4 },
+            },
+          },
+          fields: 'userEnteredFormat(horizontalAlignment,verticalAlignment,padding)',
+        },
+      });
+    }
   }
 
   if (t.key === 'hold') {

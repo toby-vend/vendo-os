@@ -18,6 +18,8 @@ Copy is written only for the 25 creatives RiskSave approved on 09-10/09/2026. Co
 ### B2C-01 · Lost Pot Counter
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1TSGgRTEc0JCVk_LVOCuF9BnrxLN_-Sw9  
+**Preview image:** https://drive.google.com/file/d/1BU1FlTZdkJzwG3AHfn2jXvY8PnQ8hQiW/view  
 **On creative:** £31,100,000,000 sitting in 3.3 million forgotten pension pots.
 
 **Primary Text:**
@@ -47,6 +49,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2C-02 · Open Apology
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1II9MuUYDukc5IHRw94FO56zhHKBwISQx  
+**Preview image:** https://drive.google.com/file/d/1_lJ8CaFishMOON-XOSNyIQL6_g744v0E/view  
 **On creative:** From the founders: An open apology.
 
 **Primary Text:**
@@ -76,6 +80,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2C-03 · Pension Texting – Purple
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1RsKMnl7_hl59liZhHV2HqUQ9r6bwVLPH  
+**Preview image:** https://drive.google.com/file/d/13YOwxBPrGl7atBSTF9EG5sYDU46g8yZ0/view  
 **On creative:** Your old pension has been texting.
 
 **Primary Text:**
@@ -103,6 +109,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2C-04 · Pension Texting – White
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1kAONyHcjOQi8N3YnZn09qn-yzXzHeK-4  
+**Preview image:** https://drive.google.com/file/d/1gul_w-72jNHjgOeLfXlmriHahXETrZRL/view  
 **On creative:** Your old pension has been texting.
 
 **Primary Text:**
@@ -130,6 +138,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2C-05 · Trademark – Called Dibs
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/18Uj_ygYisKiFLzdtagMkoWxg0W2QGtPl  
+**Preview image:** https://drive.google.com/file/d/1gg--QYQgsCarP_xidIQtL6wTL3YV9Xzd/view  
 **On creative:** Einstein called it the eighth wonder of the world. We called dibs.
 
 **Primary Text:**
@@ -157,6 +167,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2C-06 · Trademark – Gradient
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/13Y03PMoJurmurgEyIwaP7AisScK27vZ9  
+**Preview image:** https://drive.google.com/file/d/1VihLSHVv8dIw6DtPdsRi__6m2VTkzDtn/view  
 **On creative:** We own the word Compound. Legally.
 
 **Primary Text:**
@@ -187,6 +199,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-01 · Callout – 50 Clients 5 Providers
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1Euc5B4-PYhUKskXYGApl4jrVtq59UWL8  
+**Preview image:** https://drive.google.com/file/d/1zL25XhQCMB-RvqT_yFwDKoIHKQAUdlF5/view  
 **On creative:** Managing pensions for 50 clients across 5 providers?
 
 **Primary Text:**
@@ -216,6 +230,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-02 · Callout – Unwanted Job
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/13sOrKTiQrwmNvuU7B0dWCGanxvsiv2AH  
+**Preview image:** https://drive.google.com/file/d/1pQBtW-BfWStnECfRVCNgv3g1WiyCcEdz/view  
 **On creative:** Every practice has one job nobody wants. It is usually the pension.
 
 **Primary Text:**
@@ -245,6 +261,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-03 · Cheat Sheet (Carousel)
 
 **Format:** Carousel, 5 cards (Card 1 of 5 to Card 5 of 5)  
+**Creative folder:** https://drive.google.com/drive/folders/1ooU2D3M4qPPqFVT5aJonOWSLr7F2vdph  
+**Preview image:** https://drive.google.com/file/d/1lf1pEoIsXjxln5tAx-Hqy0cBq98rvDJq/view  
 **On creative:** Auto enrolment 2026/27: the numbers your clients will ask you for.
 
 **Primary Text:**
@@ -275,6 +293,8 @@ Capital at risk. Investments can go down as well as up.
 ### B2B-04 · Objection – Whole Price List
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1T_ODmAMvaZodJGHFqDrCadLCFNSvYtxs  
+**Preview image:** https://drive.google.com/file/d/1UrY9M_VGp91r2l7hsHASNNHTFG3prmeB/view  
 **On creative:** "What does it cost us?" The whole price list, right here.
 
 **Primary Text:**
@@ -306,6 +326,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-05 · Objections (Carousel)
 
 **Format:** Carousel, 5 cards (Card 1 of 5 to Card 5 of 5)  
+**Creative folder:** https://drive.google.com/drive/folders/1A3oKTaZrSkZnEhIZX57X2BcqxV_hKoiC  
+**Preview image:** https://drive.google.com/file/d/1x7BdjGR5MvfI9-vXp0kMFCnFO7XPZcMN/view  
 **On creative:** Three things practices ask before moving a client across.
 
 **Primary Text:**
@@ -337,6 +359,8 @@ Capital at risk. Investments can go down as well as up.
 ### B2B-06 · Open Apology
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/13c-w6xDnFmvIxiApaOTUDrsRSN1-Nz-u  
+**Preview image:** https://drive.google.com/file/d/1JsWdsvP1HcBFK4jPl1IBaDZnN1WsPEKi/view  
 **On creative:** From the founders: An open apology. To every accountant who inherited auto enrolment.
 
 **Primary Text:**
@@ -364,6 +388,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-07 · Partner Proof (Carousel)
 
 **Format:** Carousel, 5 cards (Card 1 of 5 to Card 5 of 5)  
+**Creative folder:** https://drive.google.com/drive/folders/1ArU6Hdrx9Cv4phiLpbmyn3pmvdqjgp1W  
+**Preview image:** https://drive.google.com/file/d/1W4inuzoeR3Q4TGlUfUzTl02USvyL4FdB/view  
 **On creative:** Practice dashboard: 42 schemes, compliant.
 
 **Primary Text:**
@@ -396,6 +422,8 @@ Capital at risk. Investments can go down as well as up.
 ### B2B-08 · Callout – First Employee
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1MbsPAJG80YD5TjvQG20Eqpb62W5fKTS7  
+**Preview image:** https://drive.google.com/file/d/1O1ZArmHdpxwrLCfDD3q3YdVtGx5Rcj4S/view  
 **On creative:** Just hired your first employee? Congratulations. You now have a legal duty.
 
 **Primary Text:**
@@ -428,6 +456,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-09 · Adviser Scheme 2014
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1MY_pXiKRSVTLjUiQWMjmiS0_xzi35N57  
+**Preview image:** https://drive.google.com/file/d/1RlgUoXKxj_n2ZrGPco2s0FsK45DZp1_m/view  
 **On creative:** The scheme your client chose in 2014 is still the scheme your client has.
 
 **Primary Text:**
@@ -460,6 +490,8 @@ Capital at risk. Investments can go down as well as up. Compound does not provid
 ### B2B-10 · Callout – 3000 Contractors
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/110DsOjx4ldj_lzsVBqP5HnrvZVhETSQG  
+**Preview image:** https://drive.google.com/file/d/1KSZAWiovaZocekfBAcfoUa2at24OeWrJ/view  
 **On creative:** 3,000 contractors. One pension headache.
 
 **Primary Text:**
@@ -492,6 +524,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-11 · Blame – Pension Bounced
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/18G4Ye8j6Q3t0ggmsoT1aJPZTQPYlufyD  
+**Preview image:** https://drive.google.com/file/d/1oieMAQPhHdR0pnIdnPQbbvFz16nWpRGq/view  
 **On creative:** You did the payroll correctly. The pension still bounced.
 
 **Primary Text:**
@@ -519,6 +553,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-12 · Blame – Re-Enrolment
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1_AYzL-MMqBPl2CDLwtJkaA5RU8lWWwGs  
+**Preview image:** https://drive.google.com/file/d/1s5W_e51za6C7dAJocjxK8eDWAQdVPnPH/view  
 **On creative:** Re-enrolment is every three years. It never feels like it.
 
 **Primary Text:**
@@ -546,6 +582,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-13 · Blame – Who Do They Ring
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1OivaQ_YJHSe4z22Tl_TffFjvu05aANHD  
+**Preview image:** https://drive.google.com/file/d/1vm-6AQ3b6Xhj3i7wXy0TFSPdo2VDBaCN/view  
 **On creative:** The client misses an assessment. Who do they ring?
 
 **Primary Text:**
@@ -573,6 +611,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-14 · Callout – 40 Payrolls
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1wF84N0YPJ3aRiRUXNq5L80CK684wgRwv  
+**Preview image:** https://drive.google.com/file/d/1jG33k77yJGlUQwfmtuH1sqoPz2P5f0oF/view  
 **On creative:** You process 40 payrolls. You manage 12 pension providers.
 
 **Primary Text:**
@@ -602,6 +642,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-15 · Callout – Other Peoples Clients
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1hQaTEMjHWUrZSslWIj-BmEUJaVFRE45_  
+**Preview image:** https://drive.google.com/file/d/1ydXc3YvugniffSYJqNrOYiUoILNtG38M/view  
 **On creative:** Do you run payroll for other people's clients?
 
 **Primary Text:**
@@ -629,6 +671,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-16 · Objections (Carousel)
 
 **Format:** Carousel, 5 cards (Card 1 of 5 to Card 5 of 5)  
+**Creative folder:** https://drive.google.com/drive/folders/1EOsbwahNy1zjog6NFbMkLGhzzN5BjLbv  
+**Preview image:** https://drive.google.com/file/d/1jv3_K_Qn57oLRieQWFVWsoosrLoZKt21/view  
 **On creative:** Three things bureaus ask before switching a client.
 
 **Primary Text:**
@@ -660,6 +704,8 @@ Capital at risk. Investments can go down as well as up.
 ### B2B-17 · Open Apology
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/18VNb4OWMul7XWnCntOetHPxh6KC6M1q1  
+**Preview image:** https://drive.google.com/file/d/1wHEOI7rhD8IuwQhxAukYq9acj5N274rh/view  
 **On creative:** From the founders: An open apology. To everyone who runs payroll for other people's clients.
 
 **Primary Text:**
@@ -687,6 +733,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-18 · Partner Pitch
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/11UbKqLruZDTk2Ocv2a7Gg3y-EfTuBh3P  
+**Preview image:** https://drive.google.com/file/d/1qr5gspelM38-a2MuqhwS_Pf8gCU_lydv/view  
 **On creative:** The pension partner built for people who actually do payroll.
 
 **Primary Text:**
@@ -714,6 +762,8 @@ Capital at risk. The value of your investments can go down as well as up and you
 ### B2B-19 · Twenty Client Line
 
 **Format:** Single image (Square 1x1, Portrait 4x5, Story 9x16, Landscape 1.91x1)  
+**Creative folder:** https://drive.google.com/drive/folders/1WYgxP76YgfFulOXSfvmVQSPsLrqaeWvh  
+**Preview image:** https://drive.google.com/file/d/1vx40KnG0H6K3Ajs0w8hB_viN-61ixQuC/view  
 **On creative:** If you run payroll for fewer than 20 clients, this is not for you.
 
 **Primary Text:**
