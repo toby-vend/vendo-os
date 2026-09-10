@@ -1,0 +1,38 @@
+<!--
+  Compound accountants landing page: contact fields for the booking card.
+
+  INSERT: immediately after the "Practice name" field block, and before the
+  "Employer clients you run payroll for" block, inside <div data-if="notBooked">.
+
+  The styling is copied verbatim from the existing Practice name field so the
+  three inputs are identical. lp-fc-3 is the shared focus ring
+  (.lp-fc-3:focus in assets/css/accountants.css) and is safe to reuse.
+
+  inputmode and autocomplete are additions rather than copies. They let mobile
+  browsers show the right keyboard and offer autofill, which lifts completion
+  and, in turn, the quality of the data we can match on.
+-->
+
+<div style="display:flex;flex-direction:column;gap:6px">
+  <label for="bk-email" style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#555">Work email</label>
+  <input id="bk-email" type="email" inputmode="email" autocomplete="email" placeholder="you@practice.co.uk" data-input="onEmail" style="border:1.5px solid #DCDCDC;border-radius:14px;padding:14px 16px;font-family:'Archivo',sans-serif;font-size:15px;outline:none" class="lp-fc-3">
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+  <label for="bk-phone" style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#555">Phone <span style="text-transform:none;letter-spacing:0;font-weight:500;color:#999">(optional)</span></label>
+  <input id="bk-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07700 900123" data-input="onPhone" style="border:1.5px solid #DCDCDC;border-radius:14px;padding:14px 16px;font-family:'Archivo',sans-serif;font-size:15px;outline:none" class="lp-fc-3">
+</div>
+
+
+<!--
+  REPLACE: the small print under the "Confirm the call" button.
+
+  The current line says "These three answers", which stops being true once the
+  contact fields are added, and it makes no mention of contacting the person.
+  The replacement mirrors the wording already approved on the payroll bureau
+  page. This is promotional small print, so RiskSave needs to see it.
+
+  CURRENT:
+  <div style="font-size:12px;color:#888;line-height:1.5;text-align:center">These three answers let us prep a demo on a book like yours — nothing else. <a href="https://compoundapp.co.uk/legal-documents/privacy-policy" style="color:#6C1AF9">Privacy policy</a>. Marketing consent is separate and never assumed.</div>
+-->
+
+<div style="font-size:12px;color:#888;line-height:1.5;text-align:center">We use these answers to prep a demo on a book like yours, and your details to confirm the call. By submitting you agree to Compound contacting you about your enquiry. See our <a href="https://compoundapp.co.uk/legal-documents/privacy-policy" style="color:#6C1AF9">Privacy policy</a>. Marketing consent is separate and never assumed.</div>
