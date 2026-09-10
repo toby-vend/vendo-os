@@ -14,8 +14,9 @@ I read the live pages and the plugin JavaScript before writing this, because the
 |---|---|
 | **No `<form>` elements anywhere.** The pages are WordPress running a custom plugin, `compound-landing-pages`. Each page is a JS state machine mounted on `#compound-lp`, driven by `data-action` attributes | GTM's **Form Submission trigger will never fire**. Neither will Meta's Automatic Advanced Matching, which scrapes form fields |
 | **No dataLayer.** Zero references across all three pages | Every trigger below depends on adding one |
-| **No tracking of any kind** currently. No GTM, no GA4, no pixel | Clean install, nothing to migrate or untangle |
-| **No consent banner.** Zero cookie/CMP code | See blocker B below |
+| **No tracking of any kind on the `lp.` subdomain.** No GTM, no GA4, no pixel | Clean install on the landing pages themselves |
+| **The main site already has all of it.** `compoundapp.co.uk` runs GTM `GTM-PHVS5RLL`, GA4 `G-YLQ1RKVTBL` and Consent Pro (Finsweet, site id `690e0c094326e424764ffb04`) | Do not create a new container. Put `GTM-PHVS5RLL` on the landing pages so both properties share one setup, one pixel and one consent state |
+| **No consent banner on the `lp.` subdomain**, though the main site has one | See blocker B below |
 | **The conversion never changes the URL.** Success is a state flag (`step: 5`, `booked: true`, `done: true`) | No page-view or thank-you-URL trigger is possible. Must be event-based |
 | **All three pages funnel through one function:** `CompoundLPCore.submit(page, data)` in `lp-core.js`, which POSTs to `https://lp.compoundapp.co.uk/wp-json/compound-lp/v1/submit` | This is the gift. **One hook covers all three pages and every conversion** |
 
@@ -36,8 +37,10 @@ This decides what you can advanced-match on, and it is not the same across pages
 **A. The accountants page captures no contact details at all.**
 `confirmBooking` validates practice name, client band, software and slot, then submits. There is no email, no phone, no name. Two consequences: there is nothing to advanced-match on, and more importantly **you cannot contact the person who just booked a call**. That page is the destination for seven approved creatives (B2B-01 to B2B-07). Add an email field, ideally email plus phone, to the booking step. This is a bigger problem than the tracking.
 
-**B. There is no consent mechanism on a UK financial services site.**
-You are about to send hashed email addresses to Meta from a page with no cookie banner and no Consent Mode. Under UK GDPR and PECR that needs consent, not legitimate interest, and RiskSave is reviewing these pages right now. Get a CMP in place with Google Consent Mode v2 before the pixel goes live, and set GTM's consent settings on the Meta tags so they hold until `ad_user_data` and `ad_personalization` are granted.
+**B. The landing pages have no consent mechanism, though the main site does.**
+You are about to send hashed email addresses to Meta from pages with no cookie banner and no Consent Mode. Under UK GDPR and PECR that needs consent, not legitimate interest, and RiskSave is reviewing these pages right now.
+
+The good news is you are not buying anything new. `compoundapp.co.uk` already runs **Consent Pro** (Finsweet, site id `690e0c094326e424764ffb04`). Extend the same licence and configuration to `lp.compoundapp.co.uk`, so a visitor's choice is consistent across both, then set GTM's consent settings on the Meta tags to hold until `ad_user_data` and `ad_personalization` are granted.
 
 ---
 

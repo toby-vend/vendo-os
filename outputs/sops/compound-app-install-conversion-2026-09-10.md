@@ -38,6 +38,59 @@ That is good design, and it has two consequences:
 
 This one is genuinely easy, because unlike the booking forms the store links are ordinary `<a href>` elements. The built-in click trigger works, no code change needed.
 
+### Where the two buttons actually are
+
+Both buttons live **only on `lp.compoundapp.co.uk/employee/`**, inside the `isDone` state. I checked `compoundapp.co.uk` and there are no store links on the main site at all, so nothing to track there yet. If they get added to the main site later, the same trigger works as long as both properties run the same container.
+
+```
+App Store    https://apps.apple.com/gb/app/compound/id6743077429
+Google Play  https://play.google.com/store/apps/details?id=com.compounddigital.investorapp
+```
+
+Neither has `target="_blank"`, so both navigate the current tab away. That is why Wait for Tags is not optional below.
+
+### Build it, click by click
+
+Use the existing container, `GTM-PHVS5RLL`, not a new one.
+
+**Step 1. Turn on the click variables.**
+Variables → Configure → tick **Click URL**, **Click Element**, **Click Text**. Without Click URL the trigger has nothing to match on, which is the usual reason a first attempt silently never fires.
+
+**Step 2. Create the platform variable.**
+Variables → New → Custom JavaScript, name it `JS - store platform`:
+
+```js
+function () {
+  var u = String({{Click URL}} || '');
+  if (u.indexOf('apps.apple.com') > -1) { return 'ios'; }
+  if (u.indexOf('play.google.com') > -1) { return 'android'; }
+  return undefined;
+}
+```
+
+One trigger and one tag covers both buttons, with this variable telling them apart. Two of everything would be twice the maintenance for the same data.
+
+**Step 3. Create the trigger.**
+Triggers → New → Click → **Just Links**.
+
+| Setting | Value |
+|---|---|
+| Wait for Tags | ticked, 2000 |
+| Check Validation | ticked |
+| Enable this trigger when | `Page URL` contains `lp.compoundapp.co.uk/employee` |
+| This trigger fires on | Some Link Clicks |
+| Condition | `Click URL` matches RegEx `apps\.apple\.com\|play\.google\.com` |
+
+Name it `Click - App Store`.
+
+**Step 4. Add the two tags** (Meta and GA4, below), both on that trigger.
+
+**Step 5. Preview and test.**
+The gotcha: **the buttons are hidden until the estimate is submitted.** In Preview you have to fill in name, age and a valid email and click "Show my estimate" before the buttons exist. Then click each one and confirm `Click - App Store` fires with `JS - store platform` reading `ios` then `android`.
+
+**Step 6. Make it usable in Meta.**
+Events Manager → Custom Conversions → New, built on the `AppStoreClick` event. If you want the two buttons as separate conversions, create two and filter each on the `platform` parameter.
+
 ### Variable
 
 `JS - store platform`
