@@ -195,6 +195,16 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
 .target-bar .tb i.over{border-radius:4px; box-shadow:0 0 8px rgba(142,230,168,.45);}
 .target-bar .pcv{min-width:40px; text-align:right; font-weight:600;}
 .target-bar .pcv.hit{color:var(--green);}
+
+.commentary{border:1px solid var(--line); border-radius:14px; background:var(--panel); padding:20px 24px; margin-top:16px;}
+.commentary .cm-hd{display:flex; align-items:baseline; gap:12px; font-family:'Archivo'; font-weight:700; font-size:14px; color:var(--text); margin-bottom:14px; flex-wrap:wrap;}
+.commentary .cm-src{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted-2); font-weight:400;}
+.commentary h4{font-family:'Archivo'; font-weight:700; font-size:13.5px; color:var(--green); margin:16px 0 8px; letter-spacing:.01em;}
+.commentary h4:first-of-type{margin-top:0;}
+.commentary p{font-size:14px; line-height:1.6; color:var(--text-body); margin:0 0 10px; max-width:100ch;}
+.commentary .cm-list{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:9px;}
+.commentary .cm-list li{font-size:14px; line-height:1.6; color:var(--muted); max-width:100ch;}
+.commentary .cm-list li b{color:var(--text);}
 </style>
 </head>
 <body>
@@ -284,6 +294,20 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
             <tbody id="ugcBody"></tbody>
           </table></div></div>
           <div class="note" id="ugcNote"></div>
+
+          <div class="commentary">
+            <div class="cm-hd">Analysis <span class="cm-src">Vendo, last 30 days to 2 September 2026</span></div>
+            <h4>UGC</h4>
+            <p>UGC is doing the top of funnel job we set it up to do. It brings people in, then the sale closes on the catalogue, retargeting or ProTex1, which is the same point made above about where the last click lands. Here is the last 30 days of creative data.</p>
+            <ol class="cm-list">
+              <li><b>It is punching above its budget.</b> UGC took &pound;4,684 of the &pound;15,790 we spent on creative, about 30% of the money, and returned 32 of the 89 purchases, 36% of the sales.</li>
+              <li><b>Cost per purchase is lower.</b> &pound;146 against &pound;195 on everything else, so we are buying customers roughly 25% cheaper through it.</li>
+              <li><b>Click through to site is more than three times better.</b> 1.34% outbound CTR against 0.39%, and every single UGC creative in the pull beats the non UGC average, not just the winners.</li>
+              <li><b>It is expensive to reach people with, which is the honest trade off.</b> &pound;44.44 CPM against &pound;12.15, so we get 105K impressions where the rest of the account gets 914K. That is why it looks small in the reporting. What it buys is attention quality: hold rates of 4 to 8% and thumbstop ratios north of 20% on the best clips, meaning people are genuinely watching rather than scrolling past.</li>
+            </ol>
+            <h4>Awareness</h4>
+            <p>Around &pound;425 for August, reaching roughly 125K people a week at a fraction of what sales campaigns cost us on CPMs. It will never show a ROAS of its own, but it feeds everything underneath it and supports the B2B side. If pure ROAS is the September priority then it is a lever we can pull, and we will bring the maths on both options so the trade off is visible.</p>
+          </div>
         </section>
 
         <section class="sec">
@@ -555,7 +579,7 @@ function renderPerf(){
   document.getElementById('krow1').innerHTML = KPIS.slice(0,4).map(kcell).join('');
   document.getElementById('krow2').innerHTML = KPIS.slice(4).map(kcell).join('');
   document.getElementById('kpiFoot').innerHTML =
-    `Spend and revenue are native to the ad account in DKK, shown here in GBP at 1 DKK = £${FX}, the rate used in the Media Spend Tracker. `+
+    `Every figure is in GBP. The account bills in DKK and is converted at 1 DKK = £${FX}, the rate used in the Media Spend Tracker; the smaller figure under each spend is the native DKK amount. `+
     `Sparklines trace the ${hist.length} periods to ${esc(p.label)}; deltas compare against ${prev?esc(pl):'no prior period'}. `+
     `Cost per sale and CPC falling is better, so a downward move reads green.`;
 
@@ -817,7 +841,7 @@ function renderStory(){
   /* 01 What: the case in one paragraph, then the soft metrics */
   const adAll = D.adPeriods.find(x => x.key === 'aALL');
   const liveAds = adAll ? adAll.liveAds : 0;
-  let lead = `The account reached <b>${n0(K.totReach)}</b> people from <b>${n0(K.totImp)}</b> impressions at <b>${cpm(K).toFixed(1)} Kr.</b> per thousand`;
+  let lead = `The account reached <b>${n0(K.totReach)}</b> people from <b>${n0(K.totImp)}</b> impressions at <b>${gbp2(cpm(K))}</b> per thousand`;
   if(P) lead += `, ${cpm(K) <= cpm(P) ? 'down' : 'up'} <b>${Math.abs(pct(cpm(K),cpm(P))).toFixed(0)}%</b> on ${esc(prev.short)}`;
   lead += `. Cost per sale is <b>${K.pur?gbp2(K.cps):'—'}</b> and return <b>${(K.roas*100).toFixed(0)}%</b>.`;
   if(m.partial) lead += ` <span style="color:var(--muted)">${esc(m.partial)}, so rates rather than totals.</span>`;
@@ -830,7 +854,7 @@ function renderStory(){
   };
   const tile = (k,v,d2) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d2}</div></div>`;
   document.getElementById('whatTiles').innerHTML =
-    tile('Cost per 1,000', cpm(K).toFixed(1)+' Kr.', cmp(cpm(K), P&&cpm(P), true, `on ${esc(prev?prev.short:'')}`)) +
+    tile('Cost per 1,000', gbp2(cpm(K)), cmp(cpm(K), P&&cpm(P), true, `on ${esc(prev?prev.short:'')}`)) +
     tile('People reached', n0(K.totReach), m.partial ? '<span class="flat">part month</span>' : cmp(K.totReach, P&&P.totReach, false, `on ${esc(prev?prev.short:'')}`)) +
     tile('Frequency', freq(K).toFixed(2)+'x', cmp(freq(K), P&&freq(P), true, 'fatigue risk')) +
     tile('Creative live', n0(liveAds), adAll ? `across ${esc(adAll.label.replace('All, ',''))}` : '');
@@ -840,7 +864,7 @@ function renderStory(){
   const why = [];
   if(F.upSpend > 0){
     why.push(`${up}<span><b>Upper funnel bought <span class="fig">${n0(F.upReach)}</span> people</b> for ${gbp(F.upSpend)}, ${(F.upImp/K.totImp*100).toFixed(0)}% of everything the account served for ${(F.upSpend/K.totSpend*100).toFixed(0)}% of the budget.</span>`);
-    why.push(`${ar}<span>It buys impressions at <span class="fig">${(F.upSpend/F.upImp*1000).toFixed(1)} Kr.</span> per thousand against <span class="fig">${(F.lowSpend/F.lowImp*1000).toFixed(1)} Kr.</span> on the revenue driving campaigns. That is the reach argument in one line.</span>`);
+    why.push(`${ar}<span>It buys impressions at <span class="fig">${gbp2(F.upSpend/F.upImp*1000)}</span> per thousand against <span class="fig">${gbp2(F.lowSpend/F.lowImp*1000)}</span> on the revenue driving campaigns. That is the reach argument in one line.</span>`);
   }
   if(FP && F.lowClk && FP.lowClk){
     const ctrNow = F.lowClk/F.lowImp*100, ctrPrev = FP.lowClk/FP.lowImp*100;
@@ -879,7 +903,7 @@ function renderStory(){
   document.getElementById('awTiles').innerHTML =
     tile('Awareness spend', gbp(F.upSpend), `${(F.upSpend/K.totSpend*100).toFixed(0)}% of the month's budget`) +
     tile('People it reached', n0(F.upReach), `${(F.upImp/K.totImp*100).toFixed(0)}% of all impressions served`) +
-    tile('Cost per 1,000', F.upImp?(F.upSpend/F.upImp*1000).toFixed(1)+' Kr.':'—', `against ${F.lowImp?(F.lowSpend/F.lowImp*1000).toFixed(1):'—'} Kr. on revenue campaigns`) +
+    tile('Cost per 1,000', F.upImp?gbp2(F.upSpend/F.upImp*1000):'—', `against ${F.lowImp?gbp2(F.lowSpend/F.lowImp*1000):'—'} on revenue campaigns`) +
     tile('Creative live', n0(liveAds), 'variety is what keeps frequency down');
   if(adAll){
     document.getElementById('ugcBody').innerHTML = adAll.families.map(f=>`
@@ -889,7 +913,7 @@ function renderStory(){
         <td>${gbp(f.spend)}</td>
         <td>${n0(f.imp)}</td>
         <td>${n0(f.reach)}</td>
-        <td>${f.imp?(f.spend/f.imp*1000).toFixed(1)+' Kr.':'—'}</td>
+        <td>${f.imp?gbp2(f.spend/f.imp*1000):'—'}</td>
         <td>${f.imp?(f.clk/f.imp*100).toFixed(2)+'%':'—'}</td>
         <td>${n0(f.atc)}</td>
         <td>${n0(f.pur)}</td>
@@ -898,7 +922,7 @@ function renderStory(){
     const cat = adAll.families.find(f=>f.n==='Catalogue and DPA');
     document.getElementById('ugcNote').innerHTML = ugc && cat
       ? `<strong>Reading this honestly.</strong> UGC and organic creative bought <b>${n0(ugc.imp)}</b> impressions for <b>${gbp(ugc.spend)}</b>, `+
-        `<b>${(ugc.spend/ugc.imp*1000).toFixed(1)} Kr.</b> per thousand against <b>${(cat.spend/cat.imp*1000).toFixed(1)} Kr.</b> on catalogue. `+
+        `<b>${gbp2(ugc.spend/ugc.imp*1000)}</b> per thousand against <b>${gbp2(cat.spend/cat.imp*1000)}</b> on catalogue. `+
         `Its click rate is low because it is bought on reach rather than clicks, and its last click sales are low because the purchase closes on a catalogue or retargeting ad that takes the credit. `+
         `The honest measure is whether the campaigns underneath it improve while it runs, which is the table below.`
       : '';

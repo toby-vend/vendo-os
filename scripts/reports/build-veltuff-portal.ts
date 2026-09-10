@@ -253,31 +253,53 @@ for (const [mon, recs] of [...isoBuckets.entries()].sort()) {
 }
 weeks.sort((a, b) => a.start.localeCompare(b.start));
 
-// ── 3. months, bucketed by window start ────────────────────────────────────
-const monthBuckets = new Map<string, Period[]>();
-for (const w of weeks) {
-  // bucket by the window's midpoint so a window straddling a month end lands
-  // in the month it mostly covers (31 Aug to 10 Sept is September, not August)
-  const mid = new Date(d(w.start).getTime() + Math.floor((w.days - 1) / 2) * 864e5);
-  const k = mid.toISOString().slice(0, 7);
-  (monthBuckets.get(k) ?? monthBuckets.set(k, []).get(k)!).push(w);
+// ── 3. months ──────────────────────────────────────────────────────────────
+// Where daily rows exist a month is a true calendar month. Before that the
+// only source is the weekly history export, so those months are whole weeks
+// bucketed by their midpoint and are labelled as such.
+type Atom = { month: string; days: number; recs: Record<string, string>[] };
+const atoms: Atom[] = [];
+
+// weekly history windows land in the month holding their midpoint
+for (const [k, recs] of [...byWindow.entries()].sort()) {
+  const [start, end] = k.split('|');
+  const len = days(start, end);
+  if (len < 7) continue;
+  if (dailyFrom && start >= dailyFrom) continue;
+  const mid = new Date(d(start).getTime() + Math.floor((len - 1) / 2) * 864e5);
+  atoms.push({ month: mid.toISOString().slice(0, 7), days: len, recs });
 }
+// daily rows land in their own calendar month, exactly
+for (const dt of dailyDates) atoms.push({ month: dt.slice(0, 7), days: 1, recs: byDay.get(dt)! });
+
+const monthBuckets = new Map<string, Atom[]>();
+for (const a of atoms) (monthBuckets.get(a.month) ?? monthBuckets.set(a.month, []).get(a.month)!).push(a);
+
 const months: Period[] = [];
-for (const [k, ws] of [...monthBuckets.entries()].sort()) {
+const today = new Date().toISOString().slice(0, 10);
+for (const [k, list] of [...monthBuckets.entries()].sort()) {
   const merged = new Map<string, Row>();
-  for (const w of ws) for (const c of w.campaigns) {
+  for (const a of list) for (const c of rowsFrom(a.recs)) {
     const cur = merged.get(c.n);
     if (!cur) { merged.set(c.n, { ...c }); continue; }
     for (const f of ['spend','imp','reach','clk','pur','rev','atc','co'] as const) cur[f] += c[f];
   }
   const [y, m] = k.split('-').map(Number);
-  const covered = ws.reduce((s, w) => s + w.days, 0);
+  const covered = list.reduce((s2, a) => s2 + a.days, 0);
   const inMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const isCurrent = k === today.slice(0, 7);
+  const elapsed = isCurrent ? Math.min(inMonth, Number(today.slice(8, 10))) : inMonth;
+  const daily = list.every(a => a.days === 1);
   months.push({
-    key: k, label: `${MONTHS[m - 1]} ${y}`, sub: `${ws.length} weeks, ${covered} days`,
+    key: k, label: `${MONTHS[m - 1]} ${y}`,
+    sub: daily ? `${covered} days` : `${list.length} weeks, ${covered} days`,
     short: `${SHORT[m - 1]} ${y}`, tick: `${SHORT[m - 1]} ${String(y).slice(2)}`,
-    start: ws[0].start, end: ws[ws.length - 1].end, days: covered,
-    partial: covered < inMonth - 4 ? `${covered} days so far` : undefined,
+    start: list[0] ? (daily ? `${k}-01` : '') || `${k}-01` : `${k}-01`,
+    end: `${k}-${String(inMonth).padStart(2, '0')}`,
+    days: covered,
+    partial: covered < elapsed - 1
+      ? (isCurrent ? `${covered} days so far` : `${covered} of ${inMonth} days covered`)
+      : (isCurrent ? `${covered} days so far` : undefined),
     campaigns: [...merged.values()].sort((a, b) => b.rev - a.rev || b.spend - a.spend),
   });
 }
