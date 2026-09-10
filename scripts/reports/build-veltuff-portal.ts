@@ -163,7 +163,38 @@ function isoWeek(s: string): number {
 type Period = { key: string; label: string; sub: string; short: string; tick: string; start: string; end: string;
                 days: number; partial?: string; campaigns: Row[] };
 
-// ── 1. weekly spine from the full history export ───────────────────────────
+// ── 1. daily exports, the authoritative grid where they reach ──────────────
+// Day level exports let every recent week be a true Monday to Sunday ISO week
+// rather than inheriting the Tuesday to Monday grid the history export uses.
+const DAILY = [
+  'VELTUFF®-UK-Campaigns-Mar-30-2026-Jun-28-2026.csv',
+  'VELTUFF®-UK-Campaigns-Jun-29-2026-Sep-6-2026.csv',
+];
+const byDay = new Map<string, Record<string, string>[]>();
+for (const f of DAILY) {
+  if (!existsSync(join(META, f))) { console.warn(`  skip (missing): ${f}`); continue; }
+  for (const r of readCsv(f)) {
+    if (num(r, 'Amount spent (DKK)') <= 0) continue;
+    if (r['Reporting starts'] !== r['Reporting ends']) continue; // day rows only
+    const k = r['Reporting starts'];
+    (byDay.get(k) ?? byDay.set(k, []).get(k)!).push(r);
+  }
+}
+const dailyDates = [...byDay.keys()].sort();
+const dailyFrom = dailyDates[0], dailyTo = dailyDates[dailyDates.length - 1];
+
+/** Monday of the ISO week containing this date. */
+function mondayOf(s: string): string {
+  const t = d(s);
+  t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7));
+  return t.toISOString().slice(0, 10);
+}
+const addDays = (s: string, n: number) =>
+  new Date(d(s).getTime() + n * 864e5).toISOString().slice(0, 10);
+
+const weeks: Period[] = [];
+
+// ── 2. history export covers everything before the daily data starts ───────
 const HIST = 'VELTUFF®-UK-Campaigns-Jul-11-2023-Aug-11-2026.csv';
 const hist = readCsv(HIST);
 const byWindow = new Map<string, Record<string, string>[]>();
@@ -172,47 +203,53 @@ for (const r of hist) {
   const k = `${r['Reporting starts']}|${r['Reporting ends']}`;
   (byWindow.get(k) ?? byWindow.set(k, []).get(k)!).push(r);
 }
-
-const weeks: Period[] = [];
+let lastHistEnd = '';
 for (const [k, recs] of [...byWindow.entries()].sort()) {
   const [start, end] = k.split('|');
   const len = days(start, end);
-  if (len < 7) continue; // drop the 1-day stub at the end of the history export
+  if (len < 7) continue;                       // 1 day stub at the export's edge
+  if (dailyFrom && end >= dailyFrom) continue; // daily data owns this period
   const iso = isIsoWeek(start, len);
   weeks.push({ key: `w${start}`, label: fmtRange(start, end),
                sub: iso ? `WK${isoWeek(start)}` : gridNote(start, end, len),
                short: iso ? `WK${isoWeek(start)}` : fmtRange(start, end),
                tick: tickOf(start), start, end, days: len, campaigns: rowsFrom(recs) });
+  lastHistEnd = end;
 }
 
-// ── 2. append the recent discrete windows (Mon-Sun grid) ───────────────────
-// Windows pulled straight from Ads Manager to close the gap the history export
-// left and to give week 36 its true Monday to Sunday range. The 11 day
-// 31 Aug to 10 Sept export is deliberately not used here: it is superseded by
-// the real week 36 below, and is kept only for its ad level detail.
-const RECENT = [
-  'VELTUFF®-UK-Campaigns-Aug-11-2026-Aug-16-2026.csv',
-  'VELTUFF®-UK-Campaigns-Aug-17-2026-Aug-23-2026.csv',
-  'VELTUFF®-UK-Campaigns-Aug-24-2026-Aug-30-2026 (1).csv',
-  'VELTUFF®-UK-Campaigns-Aug-31-2026-Sep-6-2026.csv',
-];
-for (const f of RECENT) {
-  if (!existsSync(join(META, f))) { console.warn(`  skip (missing): ${f}`); continue; }
-  const recs = readCsv(f).filter(r => num(r, 'Amount spent (DKK)') > 0);
-  if (!recs.length) continue;
-  const start = recs[0]['Reporting starts'], end = recs[0]['Reporting ends'];
-  if (weeks.some(w => w.start === start)) continue;
-  const len = days(start, end);
-  // Only a genuine 7 day window earns a WK label. An 11 day export is not a week
-  // and must never be presented as one.
-  const isWeek = isIsoWeek(start, len);
-  weeks.push({ key: `w${start}`, label: fmtRange(start, end),
-               sub: isWeek ? `WK${isoWeek(start)}` : gridNote(start, end, len),
-               short: isWeek ? `WK${isoWeek(start)}` : fmtRange(start, end),
-               tick: tickOf(start),
-               start, end, days: len, campaigns: rowsFrom(recs),
-               partial: isWeek ? undefined
-                 : `${len} day window bridging the two export grids` });
+// ── 2b. the seam. The history grid ends on a Monday and ISO weeks start on a
+// Monday, so the two can never abut exactly. Whatever days fall between are
+// emitted once, labelled for what they are, rather than silently dropped.
+if (lastHistEnd && dailyFrom && days(lastHistEnd, dailyFrom) > 2) {
+  const bStart = addDays(lastHistEnd, 1), bEnd = addDays(dailyFrom, -1);
+  const bridge = [...byWindow.entries()]
+    .filter(([k]) => { const [st] = k.split('|'); return st >= bStart && st <= bEnd; })
+    .flatMap(([, r]) => r);
+  if (bridge.length) weeks.push({
+    key: `w${bStart}`, label: fmtRange(bStart, bEnd),
+    sub: gridNote(bStart, bEnd, days(bStart, bEnd)),
+    short: fmtRange(bStart, bEnd), tick: tickOf(bStart),
+    start: bStart, end: bEnd, days: days(bStart, bEnd),
+    partial: `where the two export grids meet`, campaigns: rowsFrom(bridge),
+  });
+}
+
+// ── 2c. true ISO weeks, built from the daily rows ──────────────────────────
+const isoBuckets = new Map<string, Record<string, string>[]>();
+for (const dt of dailyDates) {
+  const k = mondayOf(dt);
+  (isoBuckets.get(k) ?? isoBuckets.set(k, []).get(k)!).push(...byDay.get(dt)!);
+}
+for (const [mon, recs] of [...isoBuckets.entries()].sort()) {
+  const covered = dailyDates.filter(x => mondayOf(x) === mon).length;
+  const end = addDays(mon, 6);
+  weeks.push({
+    key: `w${mon}`, label: fmtRange(mon, end), sub: `WK${isoWeek(mon)}`,
+    short: `WK${isoWeek(mon)}`, tick: tickOf(mon),
+    start: mon, end, days: covered,
+    partial: covered < 7 ? `${covered} of 7 days so far` : undefined,
+    campaigns: rowsFrom(recs),
+  });
 }
 weeks.sort((a, b) => a.start.localeCompare(b.start));
 
@@ -385,7 +422,7 @@ const payload = {
   weeks, months, adPeriods,
   sources: [
     `${HIST} (weekly Tue to Mon windows, the account history spine)`,
-    ...RECENT.map(f => `${f} (single window)`),
+    ...DAILY.map(f => `${f} (day level, the ISO week grid)`),
     ...AD_FILES.map(f => `${f} (ad level)`),
   ],
 };

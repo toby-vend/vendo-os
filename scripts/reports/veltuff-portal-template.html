@@ -178,9 +178,6 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
 .tile .k{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-2);}
 .tile .v{font-family:'Archivo'; font-weight:800; font-size:22px; letter-spacing:-.02em; color:var(--text); font-variant-numeric:tabular-nums;}
 .tile .d{font-size:12.5px; color:var(--muted);}
-.qbox{border:1px solid var(--green-dim); border-left-width:3px; border-radius:12px; background:linear-gradient(150deg,rgba(142,230,168,.07),transparent 60%),var(--panel); padding:15px 18px; margin-bottom:18px;}
-.qbox .ql{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--green); margin-bottom:7px;}
-.qbox .qt{font-size:14.5px; line-height:1.55; color:var(--text); max-width:110ch;}
 .storygrid{display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:16px;}
 @media (max-width:1180px){.storygrid{grid-template-columns:1fr}}
 .storycard{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:20px 22px;}
@@ -258,10 +255,6 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
             <div><div class="st" id="storyTitle"></div><div class="ss" id="storySub"></div></div>
             <span class="pill" id="storyPill"><span class="d"></span> <span></span></span>
           </div>
-          <div class="qbox">
-            <div class="ql">The question this answers</div>
-            <div class="qt">Is the strategy of creative diversity and upper funnel helping hit the ROAS and sales goals, and if it is not quite there but moving in the right direction, what are the metrics that validate that?</div>
-          </div>
           <div class="storygrid">
             <div class="storycard">
               <div class="sc-hd"><span class="n">01</span> What</div>
@@ -317,7 +310,6 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
 
       <!-- ============ PERFORMANCE ============ -->
       <div class="view" id="v-perf">
-        <div id="perfBanner"></div>
         <section class="sec">
           <div class="sec-hd">
             <div>
@@ -335,7 +327,6 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
             <div class="ai-hd">
               <div class="spk"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.2l1.9 4.7 4.9.4-3.7 3.2 1.1 4.8L10 11.7 5.8 14.3l1.1-4.8L3.2 6.3l4.9-.4z"/><circle cx="16" cy="3.4" r="1.3"/></svg></div>
               <div class="htx"><div class="h1x" id="aiTitle">Summary</div><div class="h2x">Computed from the account export, excluding awareness</div></div>
-              <span class="stamp">Computed, not estimated</span>
             </div>
             <div class="ai-body">
               <p class="ai-lead" id="aiLead"></p>
@@ -568,12 +559,6 @@ function renderPerf(){
     `Sparklines trace the ${hist.length} periods to ${esc(p.label)}; deltas compare against ${prev?esc(pl):'no prior period'}. `+
     `Cost per sale and CPC falling is better, so a downward move reads green.`;
 
-  /* banner for partial or gap-adjacent periods */
-  const b = document.getElementById('perfBanner');
-  const isLatest = idx === L.length - 1;
-  b.innerHTML = p.partial
-    ? `<div class="banner"><div><b>${isLatest ? 'In progress.' : 'Shorter period.'}</b> ${esc(p.partial)}. Rates such as return, cost per sale and CTR compare directly with any other period; absolute totals do not.</div></div>` : '';
-
   renderCampaigns(p);
 
   /* breakdown by layer */
@@ -703,8 +688,10 @@ document.addEventListener('click', e=>{
 
 /* ---- campaigns ---- */
 function renderCampaigns(p){
-  const perf = p.campaigns.filter(c => c.t !== 'Awareness');
-  const t = k => perf.reduce((a,c)=>a+c[k],0);
+  // Blended: awareness is included in the total. It spends real budget and
+  // buys real reach, so carving it out of the total understates what the
+  // account costs and overstates the return.
+  const t = k => p.campaigns.reduce((a,c)=>a+c[k],0);
   document.getElementById('campSub').textContent =
     `Every campaign that spent in ${p.label}. Revenue and return are as reported by Meta on a last click basis.`;
   const pill = document.getElementById('campPill');
@@ -724,7 +711,7 @@ function renderCampaigns(p){
       <td>${c.t==='Awareness' ? '<span style="color:var(--muted-2)">n/a</span>'
            : `<span class="roas"><span class="sw" style="background:${roasColor(c.rev/c.spend)}"></span>${(c.rev/c.spend*100).toFixed(0)}%</span>`}</td>
     </tr>`).join('') + `
-    <tr class="totrow"><td class="l">Total, excluding awareness</td><td></td>
+    <tr class="totrow"><td class="l">Total, blended</td><td></td>
       <td>${gbp(t('spend'))}</td><td>${n0(t('imp'))}</td><td>${n0(t('reach'))}</td><td></td>
       <td>${n0(t('clk'))}</td><td>${(t('clk')/t('imp')*100).toFixed(2)}%</td>
       <td>${t('pur')}</td><td>${t('pur')?gbp2(t('spend')/t('pur')):'—'}</td>
