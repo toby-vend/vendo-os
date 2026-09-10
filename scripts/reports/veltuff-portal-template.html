@@ -28,7 +28,7 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:-.02
 .brand .bt .n1{font-family:'Archivo';font-weight:700;font-size:14.5px;color:var(--text)}
 .brand .bt .n2{font-size:10.5px;color:var(--muted-2);letter-spacing:.02em}
 .acct{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
-.acct .av{width:34px;height:34px;border-radius:9px;background:linear-gradient(150deg,#2e5e3f,#8ee6a8);color:var(--green-deep);display:flex;align-items:center;justify-content:center;font-family:'Archivo';font-weight:800;font-size:13px;flex:none}
+.acct .av{width:34px;height:34px;border-radius:9px;flex:none;object-fit:contain;background:#232323;display:block}
 .acct .at{line-height:1.25;flex:1;min-width:0}
 .acct .at .a1{font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .acct .at .a2{font-size:10.5px;color:var(--muted-2)}
@@ -172,6 +172,21 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
   .app{display:block}
   .view{display:block !important}
 }
+
+.storygrid{display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:16px;}
+@media (max-width:1180px){.storygrid{grid-template-columns:1fr}}
+.storycard{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:20px 22px;}
+.storycard .sc-hd{display:flex; align-items:center; gap:10px; font-family:'Archivo'; font-weight:700; font-size:15px; color:var(--text); margin-bottom:14px;}
+.storycard .sc-hd .n{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; color:var(--green-deep); background:var(--green); border-radius:5px; padding:3px 7px;}
+.storycard .sc-lead{font-size:14px; line-height:1.6; color:var(--text); margin-bottom:16px;}
+.storycard .sc-lead b{color:var(--green-bright); font-weight:700;}
+.storycard .tiles{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+.storycard .tile{padding:12px 14px;}
+.storycard .tile .v{font-size:20px;}
+.storycard .ai-list li{font-size:13px;}
+.target-bar{display:inline-flex; align-items:center; gap:9px; justify-content:flex-end;}
+.target-bar .tb{width:74px; height:7px; border-radius:4px; background:rgba(180,210,170,.12); overflow:hidden;}
+.target-bar .tb i{display:block; height:100%; border-radius:4px;}
 </style>
 </head>
 <body>
@@ -182,12 +197,13 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
       <div class="bt"><div class="n1">Vendo Reporting</div><div class="n2">Vendo Digital</div></div>
     </div>
     <div class="acct">
-      <div class="av">VU</div>
+      <img class="av" src="__VELTUFF_ICON__" alt="VELTUFF" />
       <div class="at"><div class="a1">VELTUFF UK</div><div class="a2">United Kingdom</div></div>
     </div>
     <nav class="navgrp">
       <div class="gl">Reporting</div>
-      <button class="nav-i active" data-view="perf"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="3.2"/><circle cx="11" cy="8" r="3.2"/></svg><span class="lbl">Paid Social</span><span class="tag">Meta</span></button>
+      <button class="nav-i active" data-view="story"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2.5h10v11H3z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><span class="lbl">What &amp; why</span><span class="tag">Month</span></button>
+      <button class="nav-i" data-view="perf"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="3.2"/><circle cx="11" cy="8" r="3.2"/></svg><span class="lbl">Paid Social</span><span class="tag">Meta</span></button>
       <button class="nav-i" data-view="weeks"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="13" height="12" rx="1.5"/><path d="M1.5 6h13M5 1v3M11 1v3"/></svg><span class="lbl">Weeks</span><span class="tag" id="navWeeksN"></span></button>
       <button class="nav-i" data-view="months"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="8" width="3" height="6" rx="1"/><rect x="6.5" y="5" width="3" height="9" rx="1"/><rect x="11" y="2" width="3" height="12" rx="1"/></svg><span class="lbl">Months</span><span class="tag" id="navMonthsN"></span></button>
     </nav>
@@ -224,8 +240,43 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
     </div>
 
     <div class="content">
+      <!-- ============ WHAT, WHY, WHAT NEXT ============ -->
+      <div class="view on" id="v-story">
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st" id="storyTitle"></div><div class="ss" id="storySub"></div></div>
+            <span class="pill" id="storyPill"><span class="d"></span> <span></span></span>
+          </div>
+          <div class="storygrid">
+            <div class="storycard">
+              <div class="sc-hd"><span class="n">01</span> What happened</div>
+              <p class="sc-lead" id="whatLead"></p>
+              <div class="tiles" id="whatTiles"></div>
+            </div>
+            <div class="storycard">
+              <div class="sc-hd"><span class="n">02</span> Why</div>
+              <ul class="ai-list" id="whyList"></ul>
+            </div>
+            <div class="storycard">
+              <div class="sc-hd"><span class="n">03</span> What is next</div>
+              <ul class="ai-list" id="nextList"></ul>
+              <div class="foot-note" style="margin-top:14px">Drawn from the numbers above using fixed thresholds, so it moves as the account moves. Judgement calls from the team sit alongside it, not inside it.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="sec">
+          <div class="sec-hd"><div><div class="st">Progress</div><div class="ss" id="progSub"></div></div></div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr><th class="l">Month</th><th>Spend</th><th>Revenue</th><th>ROAS</th><th>vs 5.0 target</th><th>Sales</th><th>Cost / sale</th><th>CVR</th><th>Reach</th></tr></thead>
+            <tbody id="progBody"></tbody>
+          </table></div></div>
+          <div class="foot-note" id="progFoot"></div>
+        </section>
+      </div>
+
       <!-- ============ PERFORMANCE ============ -->
-      <div class="view on" id="v-perf">
+      <div class="view" id="v-perf">
         <div id="perfBanner"></div>
         <section class="sec">
           <div class="sec-hd">
@@ -387,7 +438,8 @@ function derive(p){
     ctr: imp ? clk/imp*100 : 0, cpc: clk ? spend/clk : 0, cps: pur ? spend/pur : 0,
     roas: spend ? rev/spend : 0, cvr: clk ? pur/clk*100 : 0,
     awSpend: aw.reduce((a,c)=>a+c.spend,0), awReach: aw.reduce((a,c)=>a+c.reach,0),
-    awImp: aw.reduce((a,c)=>a+c.imp,0), totImp: p.campaigns.reduce((a,c)=>a+c.imp,0) };
+    awImp: aw.reduce((a,c)=>a+c.imp,0), totImp: p.campaigns.reduce((a,c)=>a+c.imp,0),
+    totReach: p.campaigns.reduce((a,c)=>a+c.reach,0) };
 }
 D.weeks.forEach(p => p.m = derive(p));
 D.months.forEach(p => p.m = derive(p));
@@ -691,6 +743,116 @@ function buildAdMenu(){
     `<div class="dd-item${i===adIdx?' sel':''}" data-i="${i}"><span>${esc(p.label)}</span><span class="pt">${esc(p.sub||'')}</span></div>`).join('');
 }
 
+
+/* ---- What, why and what is next: latest month and progress ---- */
+function monthYoY(i){
+  const m = D.months[i];
+  const [y, mm] = m.key.split('-').map(Number);
+  return D.months.find(x => x.key === `${y-1}-${String(mm).padStart(2,'0')}`) || null;
+}
+function renderStory(){
+  const i = D.months.length - 1;
+  const m = D.months[i], K = m.m;
+  const prev = D.months[i-1], P = prev ? prev.m : null;
+  const ly = monthYoY(i), L = ly ? ly.m : null;
+  const pct = (c,p) => (c/p - 1) * 100;
+  const sgn = v => (v>=0?'+':'') + v.toFixed(0) + '%';
+  const up = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#8ee6a8" stroke-width="1.6"><path d="M3 11l4-4 3 3 4-5"/><path d="M11 5h3v3"/></svg>';
+  const wr = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#e6c988" stroke-width="1.6"><path d="M8 2l6 11H2z"/><path d="M8 7v3M8 11.5v.5"/></svg>';
+  const ar = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#8b9484" stroke-width="1.6"><path d="M3 8h9M9 5l3 3-3 3"/></svg>';
+
+  document.getElementById('storyTitle').textContent = `${m.label}: what, why and what is next`;
+  document.getElementById('storySub').textContent =
+    `The latest month and how it sits against the months before it. This view tracks the month and the direction of travel, not a single week.`;
+  const pill = document.getElementById('storyPill');
+  pill.className = m.partial ? 'pill warn' : 'pill';
+  pill.innerHTML = `<span class="d"></span> ${m.partial ? esc(m.partial) : m.days + ' days'}`;
+
+  /* 01 What */
+  let lead = `${esc(m.label)} has delivered <b>${gbp(K.rev)}</b> of tracked revenue on <b>${gbp(K.spend)}</b> of spend, a return of <b>${(K.roas*100).toFixed(0)}%</b> at <b>${K.pur?gbp2(K.cps):'—'}</b> per sale.`;
+  if(L) lead += ` Against the same month last year that is <b>${sgn(pct(K.roas,L.roas))}</b> on return and <b>${sgn(pct(K.cps,L.cps))}</b> on cost per sale.`;
+  if(m.partial) lead += ` <span style="color:var(--muted)">${esc(m.partial)}, so compare rates rather than totals.</span>`;
+  document.getElementById('whatLead').innerHTML = lead;
+
+  const tile = (k,v,d2) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d2}</div></div>`;
+  const cmp = (cur,base,label,goodDown) => {
+    if(!base) return '<span class="flat">no comparison</span>';
+    const p = pct(cur,base), good = goodDown ? p<0 : p>0;
+    return `<span class="${Math.abs(p)<0.5?'flat':(good?'up':'down')}">${sgn(p)}</span> ${label}`;
+  };
+  // A month still in progress cannot be compared on volume against a whole month,
+  // so absolute deltas are withheld until the month closes. Rates still compare.
+  const partOfMonth = !!m.partial;
+  const volCmp = (cur, base, label) => partOfMonth
+    ? '<span class="flat">part month, no volume comparison</span>'
+    : cmp(cur, base, label);
+  document.getElementById('whatTiles').innerHTML =
+    tile('Return', (K.roas*100).toFixed(0)+'%', cmp(K.roas, L&&L.roas, 'on last year')) +
+    tile('Cost per sale', K.pur?gbp2(K.cps):'—', cmp(K.cps, L&&L.cps, 'on last year', true)) +
+    tile('Sales', n0(K.pur), volCmp(K.pur, P&&P.pur, 'on last month')) +
+    tile('People reached', n0(K.totReach), volCmp(K.totReach, L&&L.totReach, 'on last year'));
+
+  /* 02 Why: the layers and campaigns that actually moved it */
+  const why = [];
+  const layers = {};
+  m.campaigns.forEach(c => { const b = layers[c.t] || (layers[c.t] = {t:c.t, spend:0, rev:0, pur:0}); b.spend+=c.spend; b.rev+=c.rev; b.pur+=c.pur; });
+  const perfLayers = Object.values(layers).filter(l => l.t !== 'Awareness' && l.spend > 0);
+  const byRev = [...perfLayers].sort((a,b)=>b.rev-a.rev);
+  if(byRev[0]) why.push(`${up}<span><b>${esc(byRev[0].t)} carried the month</b>, ${gbp(byRev[0].rev)} of revenue on ${gbp(byRev[0].spend)}, a <span class="fig">${(byRev[0].rev/byRev[0].spend*100).toFixed(0)}%</span> return.</span>`);
+  const weakest = [...perfLayers].sort((a,b)=>(a.rev/a.spend)-(b.rev/b.spend))[0];
+  if(weakest && byRev[0] && weakest.t !== byRev[0].t)
+    why.push(`${wr}<span><b>${esc(weakest.t)} is the drag</b> at <span class="fign">${(weakest.rev/weakest.spend*100).toFixed(0)}%</span> on ${gbp(weakest.spend)}.</span>`);
+  const bestC = m.campaigns.filter(c=>c.t!=='Awareness'&&c.spend>0&&c.rev>0).sort((a,b)=>(b.rev/b.spend)-(a.rev/a.spend))[0];
+  if(bestC) why.push(`${up}<span><b>${esc(bestC.n)}</b> is the strongest single campaign at <span class="fig">${(bestC.rev/bestC.spend*100).toFixed(0)}%</span>.</span>`);
+  if(K.awSpend > 0) why.push(`${ar}<span><b>Awareness reached <span class="fig">${n0(K.awReach)}</span> people</b> for ${gbp(K.awSpend)}, ${(K.awImp/K.totImp*100).toFixed(0)}% of everything served. It books no last click revenue by design.</span>`);
+  if(P && !m.partial) {
+    const dS = pct(K.spend,P.spend);
+    if(Math.abs(dS) > 12) why.push(`${ar}<span><b>Spend ${dS>0?'rose':'fell'} ${sgn(dS)}</b> on ${esc(prev.short)}, which moves the totals before anything else does.</span>`);
+  }
+  if(P && m.partial) {
+    const perDayNow = K.spend/m.days, perDayPrev = P.spend/prev.days;
+    why.push(`${ar}<span><b>Running at ${gbp2(perDayNow)} a day</b> against ${gbp2(perDayPrev)} through ${esc(prev.short)}, the fair comparison while the month is part done.</span>`);
+  }
+  document.getElementById('whyList').innerHTML = why.slice(0,5).map(x=>`<li>${x}</li>`).join('');
+
+  /* 03 What is next */
+  const next = [];
+  const tgt = D.targets && D.targets.target_roas_pct ? D.targets.target_roas_pct/100 : 5;
+  const hiFreq = m.campaigns.filter(c=>c.reach>0 && c.imp/c.reach > 5);
+  if(hiFreq.length) next.push(`${wr}<span><b>Widen ${esc(hiFreq[0].n)}</b>. Frequency is <span class="fign">${(hiFreq[0].imp/hiFreq[0].reach).toFixed(1)}x</span> on ${n0(hiFreq[0].reach)} people, which is a pool size problem rather than a creative one.</span>`);
+  const under = m.campaigns.filter(c=>c.t!=='Awareness'&&c.spend>0&&(c.rev/c.spend)<2);
+  if(under.length) next.push(`${wr}<span><b>Reallocate from ${under.map(c=>esc(c.n)).join(', ')}</b>, below 200% return this month.</span>`);
+  const starved = m.campaigns.filter(c=>c.t!=='Awareness'&&c.spend>0&&(c.rev/c.spend)>tgt*1.5)
+    .sort((a,b)=>a.spend-b.spend)[0];
+  if(starved) next.push(`${up}<span><b>Give ${esc(starved.n)} more budget.</b> It returned <span class="fig">${(starved.rev/starved.spend*100).toFixed(0)}%</span> on only ${gbp(starved.spend)}.</span>`);
+  if(K.roas < tgt) next.push(`${ar}<span><b>Return is ${(K.roas*100).toFixed(0)}% against the ${(tgt*100).toFixed(0)}% planned figure.</b> Closing that is the month's single biggest lever.</span>`);
+  else next.push(`${up}<span><b>Return is above the ${(tgt*100).toFixed(0)}% planned figure</b> at ${(K.roas*100).toFixed(0)}%. The question turns from efficiency to how much volume it will hold.</span>`);
+  if(D.targets && D.targets.daily_meta_budget){
+    const perDay = K.spend*FX/m.days, pc = perDay/D.targets.daily_meta_budget*100;
+    if(pc < 92) next.push(`${wr}<span><b>Spend is running at ${gbp2(K.spend/m.days)} a day</b> against the ${'£'+D.targets.daily_meta_budget} budgeted, <span class="fign">${pc.toFixed(0)}%</span>.</span>`);
+  }
+  document.getElementById('nextList').innerHTML = next.slice(0,5).map(x=>`<li>${x}</li>`).join('');
+
+  /* Progress table: last 12 months */
+  const rows = D.months.slice(-12).reverse();
+  document.getElementById('progSub').textContent =
+    `The last ${rows.length} months against the ${(tgt*100).toFixed(0)}% planned return. Newest first.`;
+  document.getElementById('progBody').innerHTML = rows.map(p=>{
+    const k=p.m, ratio=k.roas/tgt, w=Math.min(ratio,1.4)/1.4*100;
+    const col = ratio>=1 ? 'var(--green)' : ratio>=0.75 ? 'var(--amber)' : 'var(--neg)';
+    return `<tr class="rowlink" data-key="${esc(p.key)}" data-kind="months">
+      <td class="l"><span class="cn">${esc(p.label)}</span><span class="sub">${esc(p.sub||'')}${p.partial?' · '+esc(p.partial):''}</span></td>
+      <td>${gbp(k.spend)}</td><td>${gbp(k.rev)}</td>
+      <td><span class="roas"><span class="sw" style="background:${roasColor(k.roas)}"></span>${(k.roas*100).toFixed(0)}%</span></td>
+      <td><span class="target-bar"><span class="tb"><i style="width:${w}%;background:${col}"></i></span>${(ratio*100).toFixed(0)}%</span></td>
+      <td>${n0(k.pur)}</td><td>${k.pur?gbp2(k.cps):'—'}</td><td>${k.cvr.toFixed(2)}%</td><td>${n0(k.totReach)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('progFoot').innerHTML =
+    `Planned return of ${(tgt*100).toFixed(0)}% is the Meta figure carried in the Media Spend Tracker from August 2026; earlier months are shown against the same bar for a like for like read. `+
+    `Reach is summed across campaigns and is not deduplicated between them. Click any row to open that month in Paid Social.`;
+}
+
 /* ---- period picker ---- */
 function buildMenu(){
   const L = list();
@@ -733,8 +895,8 @@ function showView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on', el.id === 'v-'+v));
   document.querySelectorAll('.nav-i').forEach(el=>el.classList.toggle('active', el.dataset.view === v));
   document.getElementById('crumb2').textContent =
-    ({perf:'Paid Social', weeks:'Week performance breakdown', months:'Month performance breakdown',
-      campaigns:'Campaigns', adsets:'Ad sets', ads:'Ads'})[v];
+    ({story:'What, why and what is next', perf:'Paid Social', weeks:'Week performance breakdown',
+      months:'Month performance breakdown', campaigns:'Campaigns', adsets:'Ad sets', ads:'Ads'})[v];
   const mainPicker = v==='perf' || v==='campaigns';
   document.getElementById('perDD').style.display = mainPicker ? '' : 'none';
   document.getElementById('granSeg').style.display = mainPicker ? '' : 'none';
@@ -750,7 +912,7 @@ document.getElementById('navWeeksN').textContent = D.weeks.length;
 document.getElementById('navMonthsN').textContent = D.months.length;
 idx = D.months.length - 1;
 buildMenu(); renderPerf(); renderBreakdown('weeks'); renderBreakdown('months');
-adIdx = 0; renderUnits();
+adIdx = 0; renderUnits(); renderStory(); showView('story');
 </script>
 </body>
 </html>

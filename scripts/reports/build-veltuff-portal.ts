@@ -128,6 +128,17 @@ function fmtRange(a: string, b: string): string {
   if (am === bm) return `${A.getUTCDate()} to ${B.getUTCDate()} ${bm} ${ay}`;
   return `${A.getUTCDate()} ${am} to ${B.getUTCDate()} ${bm} ${ay}`;
 }
+/** True only for a 7 day window that starts on a Monday, i.e. a real ISO week. */
+function isIsoWeek(start: string, len: number): boolean {
+  return len === 7 && d(start).getUTCDay() === 1;
+}
+const DAYNAME = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+/** Human description of a window that is not a Monday to Sunday ISO week. */
+function gridNote(start: string, end: string, len: number): string {
+  return len === 7
+    ? `7 days, ${DAYNAME[d(start).getUTCDay()]} to ${DAYNAME[d(end).getUTCDay()]}`
+    : `${len} days, not a full week`;
+}
 /** Compact axis label, e.g. "8 Sep 26". */
 function tickOf(s: string): string {
   const t = d(s);
@@ -161,9 +172,11 @@ for (const [k, recs] of [...byWindow.entries()].sort()) {
   const [start, end] = k.split('|');
   const len = days(start, end);
   if (len < 7) continue; // drop the 1-day stub at the end of the history export
-  weeks.push({ key: `w${start}`, label: fmtRange(start, end), sub: `WK${isoWeek(start)}`,
-               short: `WK${isoWeek(start)}`, tick: tickOf(start),
-               start, end, days: len, campaigns: rowsFrom(recs) });
+  const iso = isIsoWeek(start, len);
+  weeks.push({ key: `w${start}`, label: fmtRange(start, end),
+               sub: iso ? `WK${isoWeek(start)}` : gridNote(start, end, len),
+               short: iso ? `WK${isoWeek(start)}` : fmtRange(start, end),
+               tick: tickOf(start), start, end, days: len, campaigns: rowsFrom(recs) });
 }
 
 // ── 2. append the recent discrete windows (Mon-Sun grid) ───────────────────
@@ -186,9 +199,9 @@ for (const f of RECENT) {
   const len = days(start, end);
   // Only a genuine 7 day window earns a WK label. An 11 day export is not a week
   // and must never be presented as one.
-  const isWeek = len === 7;
+  const isWeek = isIsoWeek(start, len);
   weeks.push({ key: `w${start}`, label: fmtRange(start, end),
-               sub: isWeek ? `WK${isoWeek(start)}` : `${len} days, not a full week`,
+               sub: isWeek ? `WK${isoWeek(start)}` : gridNote(start, end, len),
                short: isWeek ? `WK${isoWeek(start)}` : fmtRange(start, end),
                tick: tickOf(start),
                start, end, days: len, campaigns: rowsFrom(recs),
@@ -278,10 +291,10 @@ const adPeriods: AdPeriod[] = [];
 for (const [k, recs] of [...adWindows.entries()].sort()) {
   const [start, end] = k.split('|');
   const len = days(start, end);
-  const isWeek = len === 7;
+  const isWeek = isIsoWeek(start, len);
   adPeriods.push({
     key: `a${start}`, label: fmtRange(start, end),
-    sub: isWeek ? `WK${isoWeek(start)}` : `${len} days, not a full week`,
+    sub: isWeek ? `WK${isoWeek(start)}` : gridNote(start, end, len),
     short: isWeek ? `WK${isoWeek(start)}` : fmtRange(start, end),
     start, end, days: len,
     partial: isWeek ? undefined : `${len} day window covering ${fmtRange(start, end)}, not a single week`,
@@ -310,8 +323,14 @@ for (let i = 1; i < weeks.length; i++) {
     new Date(d(weeks[i].start).getTime() - 864e5).toISOString().slice(0, 10)));
 }
 
+// Targets from Stuart's Media Spend Tracker, for the progress view
+const budget = existsSync(join(ROOT, 'data/veltuff/media-budget-2026.json'))
+  ? JSON.parse(readFileSync(join(ROOT, 'data/veltuff/media-budget-2026.json'), 'utf8'))
+  : null;
+
 const payload = {
   fx: FX,
+  targets: budget?.UK ?? null,
   generatedAt: new Date().toISOString().slice(0, 10),
   gap: gapList.join('; '),
   weeks, months, adPeriods,
@@ -325,8 +344,17 @@ const payload = {
 writeFileSync(join(OUT, 'portal-data.json'), JSON.stringify(payload));
 
 // inject into the template to produce the standalone portal
-const tpl = readFileSync(join(ROOT, 'scripts/reports/veltuff-portal-template.html'), 'utf8');
+let tpl = readFileSync(join(ROOT, 'scripts/reports/veltuff-portal-template.html'), 'utf8');
 if (!tpl.includes('__PORTAL_DATA__')) throw new Error('template placeholder missing');
+
+// Veltuff's own mark, taken from their site rather than redrawn
+const iconPath = join(ROOT, 'data/veltuff/assets/veltuff-icon.png');
+if (existsSync(iconPath)) {
+  tpl = tpl.replace('__VELTUFF_ICON__',
+    'data:image/png;base64,' + readFileSync(iconPath).toString('base64'));
+} else {
+  console.warn('  client icon missing, sidebar will show a broken image');
+}
 const json = JSON.stringify(payload).replace(/</g, '\\u003c');
 writeFileSync(join(OUT, 'VELTUFF-portal.html'), tpl.replace('__PORTAL_DATA__', json));
 console.log(`portal: outputs/reports/veltuff/VELTUFF-portal.html`);
