@@ -106,3 +106,21 @@ Sales basis rule applies: gross from original order values; note that Shopify re
 Never label a section or headline by what Stuart requested. "The metrics you asked for", "Your two criteria", "The table you asked for", "both of the tests you set are passed", "the one on your side" all read as passive aggressive, as though we are marking him against his own demands.
 
 State the substance in our own voice instead: "The case for further creative investment", "Lower funnel year on year", "Both of the things worth proving are moving the right way". Same for targets and tooling: "the £250 daily budget" and "September planned ROAS", not "your budget" / "your tracker" / "your target". Grep the finished report and email for "you ", "your ", "You " before handing over.
+
+## What Stuart actually needs (Fathom, 16 June 2026 + emails 1-3 Sept 2026)
+
+Source: `https://fathom.video/calls/711442921` and the "Re: Wk. 34 Meta Summary" thread. Read these before changing the reporting narrative.
+
+**He does not make the case on ROAS.** His words: "If you took revenue and ROAS out of it, what other things would we be looking at to say this is doing a good job?" He has to win a short internal window for budget: "I've got that small window to get the green light." Nobody at Veltuff opens the reports; it is top line or nothing.
+
+**Year on year is not the spine.** "Any year-on-year analysis is kind of irrelevant because it wasn't being done great before... last year wasn't a relatively important baseline." Lead on month on month and on direction of travel. Keep YoY available, do not build the argument on it.
+
+**The metrics he named himself**, in his order: more reach and impressions for less cost; CPM down; creative diversity so a similar click rate is spread across more campaigns and fatigue risk falls; cost per sale down; new versus existing customer cost; CAC down (he tracks it himself, £30 to ~£15); retained customer uplift.
+
+**Agreed metric set:** blended CPM, blended frequency, blended ROAS, plus the CTR of the revenue-driving campaigns on their own. His reasoning: "if we're spending X on upper funnel and we're seeing our click-through rate of our lower funnel ads increase, you can join the dots." Trigger to act: CPM up 20% over seven days.
+
+**The proof point he responded to:** the pre-existing catalogue campaigns now running at their highest ever return with nothing changed except a funnel above them. "That in itself, in a really simple form, is all I'm looking for in terms of your summary."
+
+**The two questions he has asked repeatedly and not had answered** (1 Sept): "I'm still unclear on the value UGC ads are having. I'm still yet to see it in the numbers and/or summaries" and "What is the contribution of awareness ads now?" Both must be isolated and visible every time.
+
+**The report structure he asked for** (3 Sept): "What, why and what's next... Ultimately the commentary should come back to 'is the strategy of creative diversity and upper funnel helping hit the ROAS and sales goals.' If it's not quite there but moving in the right direction, what are the metrics that validate that."

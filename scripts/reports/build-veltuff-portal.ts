@@ -292,7 +292,45 @@ for (const r of adRecs) {
   (adWindows.get(k) ?? adWindows.set(k, []).get(k)!).push(r);
 }
 type AdPeriod = { key: string; label: string; sub: string; short: string; start: string; end: string;
-                  days: number; partial?: string; adSets: Unit[]; ads: Unit[] };
+                  days: number; partial?: string; adSets: Unit[]; ads: Unit[];
+                  families: CreativeFamily[]; liveAds: number };
+/** Creative family, from the ad name. UGC and organic-style content is what
+ *  Stuart has repeatedly asked to see isolated. */
+function creativeType(name: string): string {
+  const n = name.toLowerCase();
+  if (/organic|ugc|testimonial/.test(n)) return 'UGC and organic';
+  if (/video/.test(n)) return 'Video';
+  if (/dpa|catalog|catalogue/.test(n)) return 'Catalogue and DPA';
+  if (/static/.test(n)) return 'Static';
+  return 'Other creative';
+}
+type CreativeFamily = { n: string; ads: number; spend: number; imp: number; reach: number;
+                        clk: number; pur: number; rev: number; atc: number; thru: number };
+function familiesFrom(recs: Record<string, string>[]): CreativeFamily[] {
+  const by = new Map<string, CreativeFamily>();
+  const seen = new Map<string, Set<string>>();
+  for (const r of recs) {
+    const spend = num(r, 'Amount spent (DKK)');
+    if (spend <= 0) continue;
+    const k = creativeType(r['Ad name'] ?? '');
+    const cur = by.get(k) ?? { n: k, ads: 0, spend: 0, imp: 0, reach: 0, clk: 0, pur: 0, rev: 0, atc: 0, thru: 0 };
+    cur.spend += spend;
+    cur.imp += num(r, 'Impressions');
+    cur.reach += num(r, 'Reach');
+    cur.clk += num(r, 'Link clicks');
+    cur.pur += num(r, 'Purchases');
+    cur.rev += num(r, 'Results value');
+    cur.atc += num(r, 'Adds to cart');
+    cur.thru += num(r, 'ThruPlays');
+    by.set(k, cur);
+    const set = seen.get(k) ?? new Set<string>();
+    set.add(`${r['Ad set name']}\u0000${r['Ad name']}`);
+    seen.set(k, set);
+  }
+  for (const [k, set] of seen) by.get(k)!.ads = set.size;
+  return [...by.values()].sort((a, b) => b.spend - a.spend);
+}
+
 const adPeriods: AdPeriod[] = [];
 for (const [k, recs] of [...adWindows.entries()].sort()) {
   const [start, end] = k.split('|');
@@ -306,6 +344,8 @@ for (const [k, recs] of [...adWindows.entries()].sort()) {
     partial: isWeek ? undefined : `${len} day window covering ${fmtRange(start, end)}, not a single week`,
     adSets: unitsFrom(recs, 'Ad set name', false),
     ads: unitsFrom(recs, 'Ad name', true),
+    families: familiesFrom(recs),
+    liveAds: unitsFrom(recs, 'Ad name', true).length,
   });
 }
 // an "everything" roll-up across the ad level coverage
@@ -317,6 +357,8 @@ if (adPeriods.length) {
     days: adPeriods.reduce((s, p) => s + p.days, 0),
     adSets: unitsFrom(adRecs, 'Ad set name', false),
     ads: unitsFrom(adRecs, 'Ad name', true),
+    families: familiesFrom(adRecs),
+    liveAds: unitsFrom(adRecs, 'Ad name', true).length,
   });
 }
 

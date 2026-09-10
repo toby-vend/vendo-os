@@ -173,6 +173,14 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
   .view{display:block !important}
 }
 
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px;}
+.tile{border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:var(--panel); display:flex; flex-direction:column; gap:4px;}
+.tile .k{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-2);}
+.tile .v{font-family:'Archivo'; font-weight:800; font-size:22px; letter-spacing:-.02em; color:var(--text); font-variant-numeric:tabular-nums;}
+.tile .d{font-size:12.5px; color:var(--muted);}
+.qbox{border:1px solid var(--green-dim); border-left-width:3px; border-radius:12px; background:linear-gradient(150deg,rgba(142,230,168,.07),transparent 60%),var(--panel); padding:15px 18px; margin-bottom:18px;}
+.qbox .ql{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--green); margin-bottom:7px;}
+.qbox .qt{font-size:14.5px; line-height:1.55; color:var(--text); max-width:110ch;}
 .storygrid{display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:16px;}
 @media (max-width:1180px){.storygrid{grid-template-columns:1fr}}
 .storycard{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:20px 22px;}
@@ -250,9 +258,13 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
             <div><div class="st" id="storyTitle"></div><div class="ss" id="storySub"></div></div>
             <span class="pill" id="storyPill"><span class="d"></span> <span></span></span>
           </div>
+          <div class="qbox">
+            <div class="ql">The question this answers</div>
+            <div class="qt">Is the strategy of creative diversity and upper funnel helping hit the ROAS and sales goals, and if it is not quite there but moving in the right direction, what are the metrics that validate that?</div>
+          </div>
           <div class="storygrid">
             <div class="storycard">
-              <div class="sc-hd"><span class="n">01</span> What happened</div>
+              <div class="sc-hd"><span class="n">01</span> What</div>
               <p class="sc-lead" id="whatLead"></p>
               <div class="tiles" id="whatTiles"></div>
             </div>
@@ -263,9 +275,34 @@ tbody td .sub{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5
             <div class="storycard">
               <div class="sc-hd"><span class="n">03</span> What is next</div>
               <ul class="ai-list" id="nextList"></ul>
-              <div class="foot-note" style="margin-top:14px">Drawn from the numbers above using fixed thresholds, so it moves as the account moves. Judgement calls from the team sit alongside it, not inside it.</div>
+              <div class="foot-note" style="margin-top:14px">Drawn from the numbers using fixed thresholds, so it moves as the account moves.</div>
             </div>
           </div>
+        </section>
+
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st">Awareness and UGC contribution</div>
+              <div class="ss" id="ugcSub"></div></div>
+          </div>
+          <div class="tiles" id="awTiles" style="margin-bottom:16px"></div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr><th class="l">Creative type</th><th>Live ads</th><th>Spend</th><th>Impressions</th><th>Reach</th><th>Cost per 1,000</th><th>CTR</th><th>Adds to cart</th><th>Last click sales</th></tr></thead>
+            <tbody id="ugcBody"></tbody>
+          </table></div></div>
+          <div class="note" id="ugcNote"></div>
+        </section>
+
+        <section class="sec">
+          <div class="sec-hd">
+            <div><div class="st">Does the lower funnel move when the top of funnel runs</div>
+              <div class="ss">The revenue driving campaigns on their own, month by month. If upper funnel is doing its job, these should improve while it runs.</div></div>
+          </div>
+          <div class="tcard"><div class="tablewrap"><table>
+            <thead><tr><th class="l">Month</th><th>Upper funnel spend</th><th>Lower funnel CTR</th><th>Lower funnel cost per sale</th><th>Lower funnel sales</th><th>Lower funnel return</th></tr></thead>
+            <tbody id="lfBody"></tbody>
+          </table></div></div>
+          <div class="foot-note" id="lfFoot"></div>
         </section>
 
         <section class="sec">
@@ -442,7 +479,8 @@ function derive(p){
     roas: spend ? rev/spend : 0, cvr: clk ? pur/clk*100 : 0,
     awSpend: aw.reduce((a,c)=>a+c.spend,0), awReach: aw.reduce((a,c)=>a+c.reach,0),
     awImp: aw.reduce((a,c)=>a+c.imp,0), totImp: p.campaigns.reduce((a,c)=>a+c.imp,0),
-    totReach: p.campaigns.reduce((a,c)=>a+c.reach,0) };
+    totReach: p.campaigns.reduce((a,c)=>a+c.reach,0),
+    totSpend: p.campaigns.reduce((a,c)=>a+c.spend,0) };
 }
 D.weeks.forEach(p => p.m = derive(p));
 D.months.forEach(p => p.m = derive(p));
@@ -747,96 +785,156 @@ function buildAdMenu(){
 }
 
 
-/* ---- What, why and what is next: latest month and progress ---- */
+/* ---- What, why and what is next ------------------------------------------
+   Built around what Stuart has actually asked for: the softer metrics that
+   justify the spend when ROAS alone will not, awareness and UGC isolated, and
+   whether the lower funnel moves while upper funnel runs. Year on year is
+   deliberately not the spine here; he has said it is not a useful baseline. */
 function monthYoY(i){
-  const m = D.months[i];
-  const [y, mm] = m.key.split('-').map(Number);
+  const m = D.months[i], [y, mm] = m.key.split('-').map(Number);
   return D.months.find(x => x.key === `${y-1}-${String(mm).padStart(2,'0')}`) || null;
+}
+const LOWER = ['Category','Retargeting'];
+function funnelSplit(p){
+  const low = p.campaigns.filter(c => LOWER.includes(c.t));
+  const up  = p.campaigns.filter(c => c.t === 'Awareness');
+  const sum = (a,k) => a.reduce((s,c)=>s+c[k],0);
+  return {
+    lowSpend:sum(low,'spend'), lowImp:sum(low,'imp'), lowClk:sum(low,'clk'),
+    lowPur:sum(low,'pur'), lowRev:sum(low,'rev'),
+    upSpend:sum(up,'spend'), upImp:sum(up,'imp'), upReach:sum(up,'reach'),
+  };
 }
 function renderStory(){
   const i = D.months.length - 1;
   const m = D.months[i], K = m.m;
   const prev = D.months[i-1], P = prev ? prev.m : null;
-  const ly = monthYoY(i), L = ly ? ly.m : null;
   const pct = (c,p) => (c/p - 1) * 100;
   const sgn = v => (v>=0?'+':'') + v.toFixed(0) + '%';
   const up = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#8ee6a8" stroke-width="1.6"><path d="M3 11l4-4 3 3 4-5"/><path d="M11 5h3v3"/></svg>';
+  const dn = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#8ee6a8" stroke-width="1.6"><path d="M3 5l4 4 3-3 4 5"/><path d="M11 11h3V8"/></svg>';
   const wr = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#e6c988" stroke-width="1.6"><path d="M8 2l6 11H2z"/><path d="M8 7v3M8 11.5v.5"/></svg>';
   const ar = '<svg class="mk" viewBox="0 0 16 16" fill="none" stroke="#8b9484" stroke-width="1.6"><path d="M3 8h9M9 5l3 3-3 3"/></svg>';
+  // Blended, i.e. the whole account including awareness. Stuart asked for
+  // blended CPM and blended frequency specifically.
+  const cpm = k => k.totImp ? (k.totSpend/k.totImp*1000) : 0;
+  const freq = k => k.totReach ? k.totImp/k.totReach : 0;
 
   document.getElementById('storyTitle').textContent = `${m.label}: what, why and what is next`;
   document.getElementById('storySub').textContent =
-    `The latest month and how it sits against the months before it. This view tracks the month and the direction of travel, not a single week.`;
+    `The metrics that validate the strategy when return alone will not carry the argument. Month on month, because last year is not a like for like baseline.`;
   const pill = document.getElementById('storyPill');
   pill.className = m.partial ? 'pill warn' : 'pill';
   pill.innerHTML = `<span class="d"></span> ${m.partial ? esc(m.partial) : m.days + ' days'}`;
 
-  /* 01 What */
-  let lead = `${esc(m.label)} has delivered <b>${gbp(K.rev)}</b> of tracked revenue on <b>${gbp(K.spend)}</b> of spend, a return of <b>${(K.roas*100).toFixed(0)}%</b> at <b>${K.pur?gbp2(K.cps):'—'}</b> per sale.`;
-  if(L) lead += ` Against the same month last year that is <b>${sgn(pct(K.roas,L.roas))}</b> on return and <b>${sgn(pct(K.cps,L.cps))}</b> on cost per sale.`;
-  if(m.partial) lead += ` <span style="color:var(--muted)">${esc(m.partial)}, so compare rates rather than totals.</span>`;
+  /* 01 What: the case in one paragraph, then the soft metrics */
+  const adAll = D.adPeriods.find(x => x.key === 'aALL');
+  const liveAds = adAll ? adAll.liveAds : 0;
+  let lead = `The account reached <b>${n0(K.totReach)}</b> people from <b>${n0(K.totImp)}</b> impressions at <b>${cpm(K).toFixed(1)} Kr.</b> per thousand`;
+  if(P) lead += `, ${cpm(K) <= cpm(P) ? 'down' : 'up'} <b>${Math.abs(pct(cpm(K),cpm(P))).toFixed(0)}%</b> on ${esc(prev.short)}`;
+  lead += `. Cost per sale is <b>${K.pur?gbp2(K.cps):'—'}</b> and return <b>${(K.roas*100).toFixed(0)}%</b>.`;
+  if(m.partial) lead += ` <span style="color:var(--muted)">${esc(m.partial)}, so rates rather than totals.</span>`;
   document.getElementById('whatLead').innerHTML = lead;
 
-  const tile = (k,v,d2) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d2}</div></div>`;
-  const cmp = (cur,base,label,goodDown) => {
-    if(!base) return '<span class="flat">no comparison</span>';
+  const cmp = (cur,base,goodDown,label) => {
+    if(!base) return '<span class="flat">no prior month</span>';
     const p = pct(cur,base), good = goodDown ? p<0 : p>0;
     return `<span class="${Math.abs(p)<0.5?'flat':(good?'up':'down')}">${sgn(p)}</span> ${label}`;
   };
-  // A month still in progress cannot be compared on volume against a whole month,
-  // so absolute deltas are withheld until the month closes. Rates still compare.
-  const partOfMonth = !!m.partial;
-  const volCmp = (cur, base, label) => partOfMonth
-    ? '<span class="flat">part month, no volume comparison</span>'
-    : cmp(cur, base, label);
+  const tile = (k,v,d2) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d2}</div></div>`;
   document.getElementById('whatTiles').innerHTML =
-    tile('Return', (K.roas*100).toFixed(0)+'%', cmp(K.roas, L&&L.roas, 'on last year')) +
-    tile('Cost per sale', K.pur?gbp2(K.cps):'—', cmp(K.cps, L&&L.cps, 'on last year', true)) +
-    tile('Sales', n0(K.pur), volCmp(K.pur, P&&P.pur, 'on last month')) +
-    tile('People reached', n0(K.totReach), volCmp(K.totReach, L&&L.totReach, 'on last year'));
+    tile('Cost per 1,000', cpm(K).toFixed(1)+' Kr.', cmp(cpm(K), P&&cpm(P), true, `on ${esc(prev?prev.short:'')}`)) +
+    tile('People reached', n0(K.totReach), m.partial ? '<span class="flat">part month</span>' : cmp(K.totReach, P&&P.totReach, false, `on ${esc(prev?prev.short:'')}`)) +
+    tile('Frequency', freq(K).toFixed(2)+'x', cmp(freq(K), P&&freq(P), true, 'fatigue risk')) +
+    tile('Creative live', n0(liveAds), adAll ? `across ${esc(adAll.label.replace('All, ',''))}` : '');
 
-  /* 02 Why: the layers and campaigns that actually moved it */
+  /* 02 Why: the mechanism, upper funnel into lower funnel */
+  const F = funnelSplit(m), FP = prev ? funnelSplit(prev) : null;
   const why = [];
+  if(F.upSpend > 0){
+    why.push(`${up}<span><b>Upper funnel bought <span class="fig">${n0(F.upReach)}</span> people</b> for ${gbp(F.upSpend)}, ${(F.upImp/K.totImp*100).toFixed(0)}% of everything the account served for ${(F.upSpend/K.totSpend*100).toFixed(0)}% of the budget.</span>`);
+    why.push(`${ar}<span>It buys impressions at <span class="fig">${(F.upSpend/F.upImp*1000).toFixed(1)} Kr.</span> per thousand against <span class="fig">${(F.lowSpend/F.lowImp*1000).toFixed(1)} Kr.</span> on the revenue driving campaigns. That is the reach argument in one line.</span>`);
+  }
+  if(FP && F.lowClk && FP.lowClk){
+    const ctrNow = F.lowClk/F.lowImp*100, ctrPrev = FP.lowClk/FP.lowImp*100;
+    why.push(`${ctrNow>=ctrPrev?up:wr}<span><b>Lower funnel click through is <span class="${ctrNow>=ctrPrev?'fig':'fign'}">${ctrNow.toFixed(2)}%</span></b> against ${ctrPrev.toFixed(2)}% in ${esc(prev.short)}. This is the join the dots metric: spend on top of funnel should show up here.</span>`);
+    const cpsNow = F.lowSpend/F.lowPur, cpsPrev = FP.lowSpend/FP.lowPur;
+    if(F.lowPur && FP.lowPur) why.push(`${cpsNow<=cpsPrev?dn:wr}<span><b>Lower funnel cost per sale <span class="${cpsNow<=cpsPrev?'fig':'fign'}">${gbp2(cpsNow)}</span></b> against ${gbp2(cpsPrev)}.</span>`);
+  }
   const layers = {};
-  m.campaigns.forEach(c => { const b = layers[c.t] || (layers[c.t] = {t:c.t, spend:0, rev:0, pur:0}); b.spend+=c.spend; b.rev+=c.rev; b.pur+=c.pur; });
-  const perfLayers = Object.values(layers).filter(l => l.t !== 'Awareness' && l.spend > 0);
-  const byRev = [...perfLayers].sort((a,b)=>b.rev-a.rev);
-  if(byRev[0]) why.push(`${up}<span><b>${esc(byRev[0].t)} carried the month</b>, ${gbp(byRev[0].rev)} of revenue on ${gbp(byRev[0].spend)}, a <span class="fig">${(byRev[0].rev/byRev[0].spend*100).toFixed(0)}%</span> return.</span>`);
-  const weakest = [...perfLayers].sort((a,b)=>(a.rev/a.spend)-(b.rev/b.spend))[0];
-  if(weakest && byRev[0] && weakest.t !== byRev[0].t)
-    why.push(`${wr}<span><b>${esc(weakest.t)} is the drag</b> at <span class="fign">${(weakest.rev/weakest.spend*100).toFixed(0)}%</span> on ${gbp(weakest.spend)}.</span>`);
-  const bestC = m.campaigns.filter(c=>c.t!=='Awareness'&&c.spend>0&&c.rev>0).sort((a,b)=>(b.rev/b.spend)-(a.rev/a.spend))[0];
-  if(bestC) why.push(`${up}<span><b>${esc(bestC.n)}</b> is the strongest single campaign at <span class="fig">${(bestC.rev/bestC.spend*100).toFixed(0)}%</span>.</span>`);
-  if(K.awSpend > 0) why.push(`${ar}<span><b>Awareness reached <span class="fig">${n0(K.awReach)}</span> people</b> for ${gbp(K.awSpend)}, ${(K.awImp/K.totImp*100).toFixed(0)}% of everything served. It books no last click revenue by design.</span>`);
-  if(P && !m.partial) {
-    const dS = pct(K.spend,P.spend);
-    if(Math.abs(dS) > 12) why.push(`${ar}<span><b>Spend ${dS>0?'rose':'fell'} ${sgn(dS)}</b> on ${esc(prev.short)}, which moves the totals before anything else does.</span>`);
-  }
-  if(P && m.partial) {
-    const perDayNow = K.spend/m.days, perDayPrev = P.spend/prev.days;
-    why.push(`${ar}<span><b>Running at ${gbp2(perDayNow)} a day</b> against ${gbp2(perDayPrev)} through ${esc(prev.short)}, the fair comparison while the month is part done.</span>`);
-  }
+  m.campaigns.forEach(c => { const b = layers[c.t] || (layers[c.t] = {t:c.t, spend:0, rev:0}); b.spend+=c.spend; b.rev+=c.rev; });
+  const best = Object.values(layers).filter(l=>l.t!=='Awareness'&&l.spend>0).sort((a,b)=>(b.rev/b.spend)-(a.rev/a.spend))[0];
+  if(best) why.push(`${up}<span><b>${esc(best.t)} is carrying the return</b> at <span class="fig">${(best.rev/best.spend*100).toFixed(0)}%</span>.</span>`);
   document.getElementById('whyList').innerHTML = why.slice(0,5).map(x=>`<li>${x}</li>`).join('');
 
   /* 03 What is next */
-  const next = [];
   const tgt = D.targets && D.targets.target_roas_pct ? D.targets.target_roas_pct/100 : 5;
-  const hiFreq = m.campaigns.filter(c=>c.reach>0 && c.imp/c.reach > 5);
-  if(hiFreq.length) next.push(`${wr}<span><b>Widen ${esc(hiFreq[0].n)}</b>. Frequency is <span class="fign">${(hiFreq[0].imp/hiFreq[0].reach).toFixed(1)}x</span> on ${n0(hiFreq[0].reach)} people, which is a pool size problem rather than a creative one.</span>`);
-  const under = m.campaigns.filter(c=>c.t!=='Awareness'&&c.spend>0&&(c.rev/c.spend)<2);
-  if(under.length) next.push(`${wr}<span><b>Reallocate from ${under.map(c=>esc(c.n)).join(', ')}</b>, below 200% return this month.</span>`);
-  const starved = m.campaigns.filter(c=>c.t!=='Awareness'&&c.spend>0&&(c.rev/c.spend)>tgt*1.5)
-    .sort((a,b)=>a.spend-b.spend)[0];
-  if(starved) next.push(`${up}<span><b>Give ${esc(starved.n)} more budget.</b> It returned <span class="fig">${(starved.rev/starved.spend*100).toFixed(0)}%</span> on only ${gbp(starved.spend)}.</span>`);
-  if(K.roas < tgt) next.push(`${ar}<span><b>Return is ${(K.roas*100).toFixed(0)}% against the ${(tgt*100).toFixed(0)}% planned figure.</b> Closing that is the month's single biggest lever.</span>`);
-  else next.push(`${up}<span><b>Return is above the ${(tgt*100).toFixed(0)}% planned figure</b> at ${(K.roas*100).toFixed(0)}%. The question turns from efficiency to how much volume it will hold.</span>`);
-  if(D.targets && D.targets.daily_meta_budget){
-    const perDay = K.spend*FX/m.days, pc = perDay/D.targets.daily_meta_budget*100;
-    if(pc < 92) next.push(`${wr}<span><b>Spend is running at ${gbp2(K.spend/m.days)} a day</b> against the ${'£'+D.targets.daily_meta_budget} budgeted, <span class="fign">${pc.toFixed(0)}%</span>.</span>`);
+  const next = [];
+  if(K.roas < tgt){
+    const gap = ((tgt/K.roas - 1) * 100).toFixed(0);
+    next.push(`${ar}<span><b>Return needs ${gap}% more to reach the ${(tgt*100).toFixed(0)}% goal.</b> The levers below are ranked by how much of that gap they can close.</span>`);
+  } else {
+    next.push(`${up}<span><b>Return is above the ${(tgt*100).toFixed(0)}% goal</b> at ${(K.roas*100).toFixed(0)}%. The question moves from efficiency to how much volume it holds.</span>`);
   }
+  const starved = m.campaigns.filter(c=>c.t!=='Awareness'&&c.spend>0&&(c.rev/c.spend)>tgt*1.5).sort((a,b)=>a.spend-b.spend)[0];
+  if(starved) next.push(`${up}<span><b>Move budget into ${esc(starved.n)}</b>, returning <span class="fig">${(starved.rev/starved.spend*100).toFixed(0)}%</span> on only ${gbp(starved.spend)}.</span>`);
+  const under = m.campaigns.filter(c=>c.t!=='Awareness'&&c.spend>0&&(c.rev/c.spend)<2);
+  if(under.length) next.push(`${wr}<span><b>Pull back ${under.map(c=>esc(c.n)).join(', ')}</b>, below 200% this month.</span>`);
+  const hiFreq = m.campaigns.filter(c=>c.reach>0 && c.imp/c.reach > 5);
+  if(hiFreq.length) next.push(`${wr}<span><b>Widen ${esc(hiFreq[0].n)}</b>, showing <span class="fign">${(hiFreq[0].imp/hiFreq[0].reach).toFixed(1)}x</span> to only ${n0(hiFreq[0].reach)} people. Pool size, not creative.</span>`);
+  if(P && cpm(K) > cpm(P)*1.2) next.push(`${wr}<span><b>Cost per thousand is up ${sgn(pct(cpm(K),cpm(P)))}</b>, the agreed trigger for a fresh batch of creative.</span>`);
   document.getElementById('nextList').innerHTML = next.slice(0,5).map(x=>`<li>${x}</li>`).join('');
 
-  /* Progress table: the engagement to date, not the account's whole history */
+  /* Awareness and UGC contribution */
+  const cov = adAll ? adAll.label.replace('All, ','') : '';
+  document.getElementById('ugcSub').textContent =
+    `Awareness and UGC isolated, the two contributions that have been hardest to see in the weekly numbers. Creative level data covers ${cov}.`;
+  document.getElementById('awTiles').innerHTML =
+    tile('Awareness spend', gbp(F.upSpend), `${(F.upSpend/K.totSpend*100).toFixed(0)}% of the month's budget`) +
+    tile('People it reached', n0(F.upReach), `${(F.upImp/K.totImp*100).toFixed(0)}% of all impressions served`) +
+    tile('Cost per 1,000', F.upImp?(F.upSpend/F.upImp*1000).toFixed(1)+' Kr.':'—', `against ${F.lowImp?(F.lowSpend/F.lowImp*1000).toFixed(1):'—'} Kr. on revenue campaigns`) +
+    tile('Creative live', n0(liveAds), 'variety is what keeps frequency down');
+  if(adAll){
+    document.getElementById('ugcBody').innerHTML = adAll.families.map(f=>`
+      <tr>
+        <td class="l"><span class="cn">${esc(f.n)}</span></td>
+        <td>${n0(f.ads)}</td>
+        <td>${gbp(f.spend)}</td>
+        <td>${n0(f.imp)}</td>
+        <td>${n0(f.reach)}</td>
+        <td>${f.imp?(f.spend/f.imp*1000).toFixed(1)+' Kr.':'—'}</td>
+        <td>${f.imp?(f.clk/f.imp*100).toFixed(2)+'%':'—'}</td>
+        <td>${n0(f.atc)}</td>
+        <td>${n0(f.pur)}</td>
+      </tr>`).join('');
+    const ugc = adAll.families.find(f=>f.n==='UGC and organic');
+    const cat = adAll.families.find(f=>f.n==='Catalogue and DPA');
+    document.getElementById('ugcNote').innerHTML = ugc && cat
+      ? `<strong>Reading this honestly.</strong> UGC and organic creative bought <b>${n0(ugc.imp)}</b> impressions for <b>${gbp(ugc.spend)}</b>, `+
+        `<b>${(ugc.spend/ugc.imp*1000).toFixed(1)} Kr.</b> per thousand against <b>${(cat.spend/cat.imp*1000).toFixed(1)} Kr.</b> on catalogue. `+
+        `Its click rate is low because it is bought on reach rather than clicks, and its last click sales are low because the purchase closes on a catalogue or retargeting ad that takes the credit. `+
+        `The honest measure is whether the campaigns underneath it improve while it runs, which is the table below.`
+      : '';
+  }
+
+  /* Lower funnel over time */
+  const lfRows = D.months.slice(-8).reverse();
+  document.getElementById('lfBody').innerHTML = lfRows.map(p=>{
+    const f = funnelSplit(p);
+    return `<tr class="rowlink" data-key="${esc(p.key)}" data-kind="months">
+      <td class="l"><span class="cn">${esc(p.label)}</span>${p.partial?`<span class="sub">${esc(p.partial)}</span>`:''}</td>
+      <td>${f.upSpend?gbp(f.upSpend):'<span style="color:var(--muted-2)">none</span>'}</td>
+      <td>${f.lowImp?(f.lowClk/f.lowImp*100).toFixed(2)+'%':'—'}</td>
+      <td>${f.lowPur?gbp2(f.lowSpend/f.lowPur):'—'}</td>
+      <td>${n0(f.lowPur)}</td>
+      <td>${f.lowSpend?`<span class="roas"><span class="sw" style="background:${roasColor(f.lowRev/f.lowSpend)}"></span>${(f.lowRev/f.lowSpend*100).toFixed(0)}%</span>`:'—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('lfFoot').innerHTML =
+    `Lower funnel is the category and retargeting campaigns, the ones that carry the revenue. Upper funnel is the awareness campaigns, which started in May 2026. `+
+    `If creative diversity and upper funnel are working, these columns improve while the awareness column is funded.`;
+
+  /* Progress */
   const since = D.engagementStart || '';
   const rows = D.months.filter(x => x.key >= since.slice(0,7)).reverse();
   const sinceLabel = rows.length ? rows[rows.length-1].label : '';
@@ -844,10 +942,7 @@ function renderStory(){
     `Every month since Vendo took the account on, ${sinceLabel} to ${rows[0] ? rows[0].label : ''}, against the ${(tgt*100).toFixed(0)}% planned return. Newest first.`;
   document.getElementById('progBody').innerHTML = rows.map(p=>{
     const k=p.m, ratio=k.roas/tgt;
-    // The bar fills to the target, then the surplus wraps back across it,
-    // so 100% is a full bar and anything beyond reads as the overshoot.
-    const base = Math.min(ratio,1)*100;
-    const over = ratio>1 ? Math.min(ratio-1,1)*100 : 0;
+    const base = Math.min(ratio,1)*100, over = ratio>1 ? Math.min(ratio-1,1)*100 : 0;
     const baseCol = ratio>=1 ? 'var(--green-dim)' : ratio>=0.75 ? 'var(--amber)' : 'var(--neg)';
     const bar = `<span class="tb"><i style="width:${base}%;background:${baseCol}"></i>`+
       (over ? `<i class="over" style="width:${over}%;background:var(--green)"></i>` : '')+`</span>`;
@@ -860,10 +955,8 @@ function renderStory(){
     </tr>`;
   }).join('');
   document.getElementById('progFoot').innerHTML =
-    `Planned return of ${(tgt*100).toFixed(0)}% is the Meta figure carried in the Media Spend Tracker from August 2026; earlier months are shown against the same bar for a like for like read. `+
-    `Scoped to the Vendo engagement, which starts with the first VD campaigns in April 2026. The full account history back to 2023 sits under Months and Weeks. `+
-    `The bar fills to the target and the surplus wraps back over it, so a full bar is target met and the brighter overlay is the overshoot. `+
-    `Reach is summed across campaigns and is not deduplicated between them. Click any row to open that month in Paid Social.`;
+    `Scoped to the Vendo engagement from April 2026. The bar fills to the target and the surplus wraps back over it. `+
+    `Reach is summed across campaigns and is not deduplicated. Click any row to open that month in Paid Social.`;
 }
 
 /* ---- period picker ---- */
