@@ -232,12 +232,16 @@ const INTRO: IntroRow[] = [
     text:
       'DESTINATION URL: the landing page was supplied as an HTML file, so the live URL is not in this sheet. Add it in Ads Manager.',
   },
-  {
-    kind: 'warn',
-    text:
-      `MISSING FROM DRIVE: ${missing.join(', ')} are in the brand pack but not in the Drive creative folder, so they have no ` +
-      'preview. Upload the square and story files, then rerun the builder to fill the previews in.',
-  },
+  ...(missing.length
+    ? [
+        {
+          kind: 'warn' as const,
+          text:
+            `MISSING FROM DRIVE: ${missing.join(', ')} are in the brand pack but not in the Drive creative folder, so they have no ` +
+            'preview. Upload the square and story files, then rerun the builder to fill the previews in.',
+        },
+      ]
+    : []),
   {
     kind: 'warn',
     text:
@@ -312,6 +316,9 @@ const created = existingId
 const id = created.spreadsheetId;
 
 if (existingId) {
+  // Start Here can shrink between runs (e.g. the missing-previews warning drops
+  // out), so clear it rather than leave a stale trailing row.
+  await api(`/${id}/values:batchClear`, 'POST', { ranges: [`'Start Here'`] });
   await api(`/${id}:batchUpdate`, 'POST', {
     requests: [
       {
