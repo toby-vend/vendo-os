@@ -1,0 +1,438 @@
+{
+  "folderId": "1NHCL-EX1DPtRn-adTczRw689wPTkmP7E",
+  "squareIds": {
+    "1a": "1q1pIAzc9zwmAR95aKzJO1kAF2OLeI4l4",
+    "1b": "1x-Hp_zE-iGfPbuM643xy31Fjux9BjrDo",
+    "1c": "1uHErd-2eEU2SgA6ZkkGom6-g4yZNSi1V",
+    "1d": "1DWHXChJCt0xNpGqJ0XaWVj59Dg1fVO3w",
+    "1e": "1lrqXs5r0dOMDBmCfk9wr0BxnUY-RQ15E",
+    "1f": "1abmkfxtuvCsxoqLo7rhioCa4McUbx7NV",
+    "1g": "1VvfAnPy_e0V4_RMZdAD0ew24FLoHVhh0",
+    "1h": "1_oKFAgzJalRhVQHKk3EPcyqPg4W3-MlR",
+    "2a": "1FsD9hCwsdBf88o1Wf-WILePzlq3HwDJL",
+    "2b": "1Rw1AOtkQHQbwpnMbtx1A4djL-Ijt9WIj",
+    "2c": "1Hi22ifQ_tyMX94TF9ulqm5vw2FYY2NNo",
+    "2d": "1RdURG76-EkQDA2GTuDXqRxyzpIhgDRk6",
+    "2e": "1UXCM5RPQFQ3qOsnLiHy0hTgbXT3mlwNV",
+    "2g": "1dD5VzZjmj-pSYWjVhUKzZ4qXyXTw7s5M",
+    "2h": "1uL_MenEPoBDrY4JrA-8OT2e_BlFPx7GA",
+    "3a": "1PTSbG2oUrl2zoSKuzywT7O93Fn2Q2QZr",
+    "3b": "12R4lK4pMLcIrbUL9xiZBjIpV0nZAiTPJ",
+    "3c": "1c5EPzDEQohrfV5m0qnyAT8Ce58M98UCL",
+    "3d": "12fspRkJ1kvPDgUxgTvl9FbcKVD5vRYC_",
+    "3e": "1AocPCA14X41H1-2diX1agXp9nw4JO5dn",
+    "3f": "1NcgcMA6zOyj3l_8DfMkosjgcNcNT65eB",
+    "4a": "1mvO8sGDpF0PtAm4btjQSeJHCjootccyn",
+    "4b": "1It60h8r2KEuWRe3b6vh8DrYG9d1N9r8v",
+    "4c": "1JDy8OO2LlFDoxvoG06eV45ZW1mOnv5kq",
+    "4d": "1uOnPepUt0UqHlKdKMMCB0xfxDYJj_7IU",
+    "4e": "1Cl3OQ4fIQq60sS8p3OAxE-1R5qbMewE_",
+    "5a": "1DEm5fNhhiyZViEnykezP27mD7EOnGGi1",
+    "5b": "1vWYVJI0x7tJHFz2_cwl-dQgj4sAiamci",
+    "5c": "1fm2yAme9PolZMfkgjOTXOr-8IesHT61f",
+    "5d": "1Hd5LroZsoFt2amDvrQsij5jkyxNKfnQE",
+    "5e": "1GJTWorCK6dBpgvHnPnnWo6M-0_giCVEx",
+    "6a": "10E6GByEm8Me-jpaN2tcaq3f82fk_A_Xk",
+    "6b": "1P7PmASLpqTLX_jMhbwR7cO69zjSHNiFp",
+    "6c": "1U9gkJ_6MjxLGOyaWsn2CjWqnnL2Yhq1_",
+    "6d": "1PXk8ksvMnKpGsZLkHbf-ATMv_W-JvFHt",
+    "6e": "1fjCArLjm82TK3YD7xLKM0rJRjrsi5x4g",
+    "6f": "1QcoxgHm7VEtfeGNe4lduuUSMyN2yRQBA",
+    "6g": "1-61f69Fg6ZgZoCDfs4z2w9AOcJ3hVH70",
+    "6h": "1ov1TxwwvJIAXQyoTBiG5Iqf3RExXxYEY",
+    "6i": "1Xq53LiFivYkEBnGXeX32BcQDB45EEipR",
+    "6j": "1P-y7Q-xIWnnb7vxaEnmAc2xRGVWk6COG",
+    "6k": "1nLLesF9_MlX0qMAZJ87zj28ibpBF5Jms",
+    "6l": "1LqWuoRuJJN_oYIy4eH2QMHeI7m2ya-q4",
+    "6m": "1dP5IcKkyZS84AKbzlqP0I4_yGkaTC9Db",
+    "6n": "1ecvgppwy0ECn55ZUx7ZbA_b-laXxMzrw",
+    "7a-01": "11LgxIIoa-QuQ9DYHAxFiOAj2_Fb1Axyr",
+    "7a-02": "1ItwecJMVCV4eoUEiElnQyHg_5tsqtnDM",
+    "7a-03": "1glIsI4ymVH8xrdv7lAFYlfkX1N7JpsGE",
+    "7a-04": "1Efc01Gh6d9aD3AUMVF26lyBQm9sIUHVO",
+    "7a-05": "1DqmP9lenvjUVVeeXI8ETD1lLoG4bxgHE",
+    "7a-06": "17nQNDnQMPNbImugimSWTSFvp3pHodc_M",
+    "7a-07": "14L9lAsvI502hm6t5hilFzXT_QPGJYgDy",
+    "7a-08": "1kkteYt4XRScJvLMt9SepkQoJJ1x1BMSo"
+  },
+  "ads": [
+    {
+      "ref": "2b", "set": "Brand photo", "file": "2b-square.png",
+      "onCreative": "Your move, Oxted. Reformer, Mat & Barre. Classes capped at 10. Now open. Start with 3 for £29.",
+      "angle": "Expert instructors", "pain": "Paying for classes where nobody teaches you anything",
+      "primary": "Ever left a fitness class unsure you did a single move right?\n\nThe instructor shouts from the front, you copy whoever is nearest, and you walk out feeling it in all the wrong places. A few weeks later you quietly stop going.\n\nStudio Glide brings London-quality instruction to Oxted. Our team know their stuff, keep every class to 10 people and correct your form in the moment, so every 50 minutes actually counts.\n\nNow open on Station Road East. New members start with 3 classes for £29.",
+      "headline": "Instructors who teach", "headlineAlt": "London-quality, in Oxted", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "2c", "set": "Brand photo", "file": "2c-square.png",
+      "onCreative": "Oxted, this one's for you. Your new studio, in the heart of Oxted. New members: 3 classes for £29.",
+      "angle": "London standard without London", "pain": "Boutique studios mean a train ride, London prices and a late journey home",
+      "primary": "Why should the best Pilates in Surrey be a train ride away?\n\nBoutique studios in town mean London prices, a rushed commute and getting home too late to enjoy the evening. So the good intentions last about a fortnight.\n\nStudio Glide brings that same boutique Reformer, Mat and Barre experience to the heart of Oxted, with expert instructors and classes capped at 10.\n\nNew members: 3 classes for £29.",
+      "headline": "Boutique Pilates, Oxted", "headlineAlt": "No train ride needed", "description": "New members: 3 for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "2d", "set": "Brand photo", "file": "2d-square.png",
+      "onCreative": "Move. Breathe. Reset. Boutique Reformer Pilates, now open in Oxted. 3 classes for £29, new members only.",
+      "angle": "Headspace and me-time", "pain": "Never switching off; even downtime is spent scrolling",
+      "primary": "When was the last hour that was genuinely just for you?\n\nWork, school runs, the group chat, a to-do list that never shrinks. Even your downtime gets spent scrolling, and you still go to bed wired.\n\nFifty minutes on the reformer changes that. Slow, controlled movement, steady breathing and one instruction at a time. Phone in your bag, head finally quiet.\n\nBoutique Reformer Pilates, now open in Oxted. New members start with 3 classes for £29.",
+      "headline": "50 minutes just for you", "headlineAlt": "Your hour, back", "description": "New members: 3 for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "2e", "set": "Brand photo", "file": "2e-square.png",
+      "onCreative": "Undo the desk day. Posture, core strength and a clear head, 50 minutes on the reformer. Reformer Pilates, now open in Oxted.",
+      "angle": "Desk workers / posture", "pain": "Long days sat at a desk, shoulders creeping up, sitting still being the most tiring part of the day",
+      "primary": "Eight hours at a desk. Shoulders creeping up towards your ears.\n\nIt builds quietly. A stiff morning here, a slouch you catch in a shop window there, and before long sitting still has become the most tiring part of your day.\n\nReformer Pilates works the core and postural muscles that desk life switches off. Fifty minutes, with an instructor watching your alignment the whole way through.\n\nLunchtime and after-work classes in Oxted. New members: 3 classes for £29.",
+      "headline": "The lunchtime reset", "headlineAlt": "After-work Reformer, Oxted", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Kept to desk habits and posture, no medical or pain-relief claims (Meta health and personal attributes policy)."
+    },
+    {
+      "ref": "2f", "set": "Brand photo", "file": "2f-square.png",
+      "onCreative": "Never tried Reformer? Start here. Every class is built for all levels, with expert instructors guiding your very first session.",
+      "angle": "Beginner reassurance", "pain": "Fear of being the only one who doesn't know what they're doing",
+      "primary": "Scared you'll be the only one who doesn't know what they're doing?\n\nReformers look complicated. Springs, straps, a moving carriage and a room full of people who seem to have done it for years. So it stays on the 'maybe next month' list.\n\nEvery class at Studio Glide is coached for all levels. Arrive 10 minutes early for your first one and we'll set your reformer up with you, step by step. Grippy socks and a water bottle are all you need to bring.\n\nNew to Studio Glide? Start with 3 classes for £29.",
+      "headline": "No experience needed", "headlineAlt": "Your first class, sorted", "description": "Now open in Oxted", "cta": "Book Now",
+      "notes": "2f is in the brand zip but NOT in the Drive creative folder. Preview uploaded to _sheet-previews; upload the full square and story files before building."
+    },
+    {
+      "ref": "2g", "set": "Brand photo", "file": "2g-square.png",
+      "onCreative": "More than a workout. Community, calm and strength, led by expert instructors. Banstead · Oxted now open.",
+      "angle": "Community", "pain": "Anonymous gym sessions where nobody would notice if you stopped turning up",
+      "primary": "Most workouts end the moment you walk out the door. This one doesn't.\n\nHeadphones in, eyes down, nobody says hello. After a few weeks the motivation drains away, because nobody would notice if you stopped turning up.\n\nStudio Glide is a community as much as a studio. Classes of 10, instructors who learn your name and familiar faces you'll look forward to seeing. Already loved in Banstead, now open in Oxted.\n\nNew members: 3 classes for £29.",
+      "headline": "Find your people, Oxted", "headlineAlt": "Rated 5.0 on Google", "description": "3 classes for £29", "cta": "Learn More",
+      "notes": ""
+    },
+    {
+      "ref": "3a", "set": "Intro offer", "file": "3a-intro-pack-hero-square.png",
+      "onCreative": "The Studio Glide intro pack. 3 classes £29. Use them across Reformer, Mat and Barre. Oxted · Now open.",
+      "angle": "Low-risk first step", "pain": "Studios that want a membership before you know if you like it",
+      "primary": "Finding out if you like boutique Pilates shouldn't mean signing up for months.\n\nMost studios want a membership before you've set foot on a reformer. You commit, realise it isn't quite right, and you're stuck paying for something you don't use.\n\nOur intro pack is 3 classes for £29. Use them across Reformer, Mat and Barre: one of each, or three of your favourite. No contract, no membership.\n\nNew members only, now open in Oxted.",
+      "headline": "Try it before you commit", "headlineAlt": "Under £10 a class", "description": "Reformer, Mat & Barre", "cta": "Get Offer",
+      "notes": ""
+    },
+    {
+      "ref": "3b", "set": "Intro offer", "file": "3b-photo-scrim-square.png",
+      "onCreative": "Looking for your next obsession? The intro pack: 3 classes for £29. Any mix of Reformer, Mat and Barre.",
+      "angle": "A workout that sticks", "pain": "Starting routines with good intentions and giving up after three weeks",
+      "primary": "Bought the trainers. Downloaded the app. Lasted three weeks. Sound familiar?\n\nIt isn't a willpower problem. Most workouts are either boring, brutal or both, so of course they don't stick.\n\nReformer Pilates is different. Fifty low-impact minutes that challenge every muscle, in a calm studio you'll actually want to walk into. It's the one people get hooked on.\n\nTry Reformer, Mat and Barre with our intro pack: 3 classes for £29.",
+      "headline": "The workout that sticks", "headlineAlt": "Find the one you fall for", "description": "New members, Oxted", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "3c", "set": "Intro offer", "file": "3c-cream-editorial-square.png",
+      "onCreative": "Start with three. Your Pilates era, made simpler. 3 classes · £29 once · 2/wk any style.",
+      "angle": "Simplicity / decision fatigue", "pain": "Meaning to start for months but overwhelmed by options",
+      "primary": "Been meaning to start Pilates for months, but never actually booked?\n\nToo many studios, too many class names, too many membership options. So you save the posts, tell yourself you'll sort it next week, and nothing changes.\n\nWe've made it simple. 3 classes for £29, any style. Pick a class, turn up in grippy socks and let our instructors do the rest.\n\nNow open in Oxted. New members only.",
+      "headline": "Pilates, made simple", "headlineAlt": "Your first 3 classes, £29", "description": "Any style, new members", "cta": "Get Offer",
+      "notes": "Creative says '2/wk'. The intro pack is 3 classes total, so check this isn't read as 2 classes a week for £29."
+    },
+    {
+      "ref": "3d", "set": "Intro offer", "file": "3d-intro-announcement-square.png",
+      "onCreative": "Now open in Oxted. The doors open. Once. Intro pack: 3 classes for £29. Any style.",
+      "angle": "Scarcity: classes fill", "pain": "Waiting for a quieter week and finding the best slots gone",
+      "primary": "Waiting for a quieter week to start? The 06:30 class won't wait with you.\n\nClasses are capped at 10, and the early morning and after-work slots are the first to go. Leave it until life calms down and you'll be looking at a full timetable.\n\nNew members get one go at our intro pack: 3 classes for £29 across Reformer, Mat and Barre. Booking opens 7 days ahead, so the sooner you're in, the better your pick.\n\nNow open in Oxted.",
+      "headline": "Mornings fill first", "headlineAlt": "One intro offer each", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "3e", "set": "Intro offer", "file": "3e-cream-invitation-square.png",
+      "onCreative": "You're invited · Oxted. £29 for three classes. Every class open to everyone.",
+      "angle": "Belonging / not intimidating", "pain": "Walking into a studio and feeling like an outsider",
+      "primary": "Ever walked into a studio and felt like everyone else got a memo you didn't?\n\nThe perfect kit, the in-jokes, the instructor who only talks to the regulars. It's enough to put you off before you've even started.\n\nAt Studio Glide every class is open to everyone. Small groups, welcoming instructors and a calm, beautiful studio from the moment you walk in.\n\nConsider this your invitation: 3 classes for £29, new members only.",
+      "headline": "Consider yourself invited", "headlineAlt": "Every class, all levels", "description": "53 Station Road East", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "3f", "set": "Intro offer", "file": "3f-dark-price-led-square.png",
+      "onCreative": "Now open in Oxted. Three classes. One new obsession. £29 · Any: Reformer · Mat · Barre.",
+      "angle": "Find the style you love", "pain": "Never finding a workout that feels like yours",
+      "primary": "Still searching for a workout you don't dread?\n\nRunning feels like a chore, the gym bores you and HIIT flattens you for two days. Nothing has ever felt like yours, so nothing has lasted.\n\nUse three intro classes to find it. Reformer for strength and control, Mat for classical core work, Barre to sculpt and burn.\n\n3 classes for £29, any mix. Now open in Oxted.",
+      "headline": "Find the one you love", "headlineAlt": "Reformer, Mat or Barre?", "description": "3 for £29, new members", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "8a", "set": "3 for £29 offer", "file": "8a-price-hero-square.png",
+      "onCreative": "New to Studio Glide? 3 classes £29. Use them across Reformer, Mat and Barre. Find the one you'll fall for.",
+      "angle": "Price / value", "pain": "Boutique classes feel too expensive to do often enough to notice a difference",
+      "primary": "One boutique Pilates class can cost more than a takeaway for two.\n\nSo you ration it. A class here and there, never enough to feel the difference, and the habit never forms.\n\nOur intro pack gets you three 50-minute classes for £29. Enough to settle in, learn the reformer and find the style you'll keep coming back for.\n\nReformer, Mat and Barre in Oxted. New members only.",
+      "headline": "Less than £10 a class", "headlineAlt": "Three classes, one payment", "description": "New members only", "cta": "Get Offer",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews; upload the full square and story files before building."
+    },
+    {
+      "ref": "8b", "set": "3 for £29 offer", "file": "8b-cream-breakdown-square.png",
+      "onCreative": "Three classes. Every way to move. 3 classes · £29 once · Any class style. Reformer · Mat · Barre, mix as you like.",
+      "angle": "Variety", "pain": "Boredom from the same routine on repeat",
+      "primary": "Same treadmill, same playlist, same 45 minutes. Bored yet?\n\nDoing one thing on repeat is the fastest way to lose interest, and once the interest goes, so does the habit.\n\nMix it up. Use your 3 intro classes across Reformer, Mat and Barre however you like. Strength on the reformer one day, a slow burn at the barre the next.\n\n3 classes for £29 for new members in Oxted.",
+      "headline": "Break the routine", "headlineAlt": "Mix Reformer, Mat & Barre", "description": "3 classes, £29", "cta": "Get Offer",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "8c", "set": "3 for £29 offer", "file": "8c-photo-welcome-square.png",
+      "onCreative": "New here? Start with three. 3 classes for £29, Reformer, Mat or Barre.",
+      "angle": "Procrastination", "pain": "Always starting 'after the holiday' or 'after the busy patch'",
+      "primary": "You'll start after the holidays. After the busy patch at work. After the kids go back.\n\nThere's always a reason to put it off, and before you know it another season has gone by without the thing you keep promising yourself.\n\nMake it easy. Book three classes for £29 at our new Oxted studio, two minutes from the station. Reformers, props and towels are all provided, so you only need grippy socks.\n\nReformer, Mat or Barre. Your call.",
+      "headline": "Start this week", "headlineAlt": "Everything provided", "description": "New members: 3 for £29", "cta": "Book Now",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "8d", "set": "3 for £29 offer", "file": "8d-try-all-three-square.png",
+      "onCreative": "3 classes · £29 · New members. One for each. Then pick a favourite. Reformer / Mat / Barre. Or three of one, you choose.",
+      "angle": "Try every style", "pain": "Picking the wrong first class and writing Pilates off",
+      "primary": "Not sure if you're a Reformer, Mat or Barre person? Don't guess.\n\nBook the wrong class first and you could write off Pilates altogether, when a different style would have been the perfect fit.\n\nSo try all three. One Reformer, one Mat, one Barre, then pick your favourite. Or three of the one you fall for. You choose.\n\nIntro pack: 3 classes for £29, new members only.",
+      "headline": "Try all three styles", "headlineAlt": "Find your favourite", "description": "3 classes for £29", "cta": "Get Offer",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "8e", "set": "3 for £29 offer", "file": "8e-per-class-maths-square.png",
+      "onCreative": "The intro offer, done properly. Under a tenner a class. The cheapest way to find out what everyone's on about.",
+      "angle": "Curiosity / social buzz", "pain": "Hearing about reformer Pilates everywhere but not wanting to pay full price to try it",
+      "primary": "Everyone seems to be talking about reformer Pilates. Still wondering what the fuss is about?\n\nIt's hard to justify full price for something you're not sure you'll like, so you stay on the sidelines, nodding along while friends rave about it.\n\nOur intro offer makes it an easy yes. 3 classes for £29, under a tenner each, across Reformer, Mat and Barre.\n\nNew members only. Now open on Station Road East.",
+      "headline": "See what the fuss is about", "headlineAlt": "3 classes, under £10 each", "description": "New members only", "cta": "Get Offer",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "8f", "set": "3 for £29 offer", "file": "8f-beginner-nerves-square.png",
+      "onCreative": "Never touched a reformer? Perfect. 3 beginner-friendly classes for £29. Small groups, no experience needed.",
+      "angle": "Beginner nerves", "pain": "Picturing yourself tangled in the straps while everyone else glides through",
+      "primary": "Worried you'll be the only beginner in the room?\n\nIt's the thing that keeps most people off the reformer. Picturing yourself tangled in the straps while everyone else glides through is enough to close the booking page.\n\nOur classes are built for all levels and capped at 10, so your instructor can guide you through every move. First time? Arrive 10 minutes early and we'll set your reformer up with you. As Lauren put it: \"I was nervous having never touched a reformer. Within one class I was hooked.\"\n\n3 classes for £29. No experience needed.",
+      "headline": "Beginners genuinely welcome", "headlineAlt": "Your first class, sorted", "description": "Classes capped at 10", "cta": "Book Now",
+      "notes": "Lauren A quote is from the landing page review block (em dash replaced with a full stop). Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "8g", "set": "3 for £29 offer", "file": "8g-easiest-yes-square.png",
+      "onCreative": "The easiest yes in Oxted. Three classes, twenty-nine pounds, zero commitment. Reformer, Mat or Barre.",
+      "angle": "No commitment", "pain": "Gym contracts that make leaving harder than joining",
+      "primary": "Sick of gyms that make leaving harder than joining?\n\nTwelve-month contracts, notice periods and direct debits you forget to cancel. No wonder you hesitate before signing up to anything.\n\nOur intro pack is one payment of £29 for three classes. No contract, no membership, nothing to cancel. Spend them on Reformer, Mat or Barre however you like.\n\nNow open in Oxted. New members only.",
+      "headline": "No contract. No catch.", "headlineAlt": "One payment, 3 classes", "description": "Reformer, Mat & Barre", "cta": "Get Offer",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "8h", "set": "3 for £29 offer", "file": "8h-whats-included-square.png",
+      "onCreative": "Everything your first month needs. 01 Three classes. 02 Small classes of 10. 03 Reformers, props and towels provided.",
+      "angle": "Small classes, real attention", "pain": "Being invisible at the back of a big class",
+      "primary": "Ever spent a whole class at the back, copying the person in front and hoping for the best?\n\nIn big classes you're invisible. Nobody checks your form, you feel it in the wrong places and you leave unsure whether it did anything at all.\n\nStudio Glide classes are capped at 10, so your instructor sees every rep. Reformers, props and towels are all provided. Just bring grippy socks and a water bottle.\n\nStart with 3 classes for £29, any mix of Reformer, Mat and Barre.",
+      "headline": "Never lost at the back", "headlineAlt": "Everything provided", "description": "New members, Oxted", "cta": "Book Now",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "8i", "set": "3 for £29 offer", "file": "8i-photo-split-square.png",
+      "onCreative": "New members · Oxted. 3 classes for £29. Any style.",
+      "angle": "Time-poor", "pain": "Workouts that never fit around work and family",
+      "primary": "No time to work out? You might have more than you think.\n\nWhen a workout means a drive, a hunt for parking and a 90-minute session, it never fits around work and family. So it's the first thing to fall off the list.\n\nOur classes are 50 minutes, two minutes from Oxted station, with 06:30 starts, lunchtime and evening classes plus weekends. Long enough to feel it, short enough to fit before the school run or after work.\n\nNew members: 3 classes for £29, any style.",
+      "headline": "50 minutes. Done.", "headlineAlt": "Fits before the school run", "description": "Classes from 06:30", "cta": "Book Now",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "8j", "set": "3 for £29 offer", "file": "8j-no-strings-square.png",
+      "onCreative": "No contract · No membership. Just come and move. 3 classes for £29, try Reformer, Mat and Barre before you commit.",
+      "angle": "Not fit enough yet", "pain": "Waiting until you're fitter or more flexible before trying Pilates",
+      "primary": "Waiting until you're 'fit enough' to try Pilates? That day never quite arrives.\n\nYou'll start once you've got a bit stronger, a bit more flexible, a bit more confident. But the longer you put it off, the bigger that first class feels.\n\nYou don't need to be flexible, strong or experienced. Every class is coached for all levels. Try Reformer, Mat and Barre with 3 classes for £29 before committing to anything.\n\nNew members only, now open in Oxted.",
+      "headline": "No fitness level needed", "headlineAlt": "Try it before you commit", "description": "No contract, no membership", "cta": "Book Now",
+      "notes": "Not in the Drive creative folder. Preview uploaded to _sheet-previews."
+    },
+    {
+      "ref": "4a", "set": "Chat mock-up", "file": "4a-chat-discovery-square.png",
+      "onCreative": "Chat: 'Have you seen the new studio opening on Station Road East?' 'They do an intro pack, 3 classes for £29' '3 for £29?? Book us in for Saturday'. Footer: 3 classes for £29 · Book now.",
+      "angle": "Word of mouth / FOMO", "pain": "Hearing about the good thing after everyone else has booked",
+      "primary": "Heard about the new reformer studio on Station Road East?\n\nThere's always one friend who finds out after everyone else is hooked, by which point Saturday morning is already full. Classes are capped at 10, so the best slots go quickly.\n\nStudio Glide is now open, with an intro pack of 3 classes for £29 across Reformer, Mat and Barre. Grab a friend, book the same class, coffee after.\n\nNew members only.",
+      "headline": "Book in for Saturday", "headlineAlt": "Bring a friend along", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "4b", "set": "Chat mock-up", "file": "4b-chat-intro-pack-square.png",
+      "onCreative": "Chat: 'Don't judge me but I've just booked 3 pilates classes for £29' '...that's actually really good' 'New members only, go before I change my mind'.",
+      "angle": "Guilt-free treat", "pain": "Feeling boutique fitness is an indulgence you have to justify",
+      "primary": "Treating yourself shouldn't come with a side of guilt.\n\nBoutique fitness can feel like something you have to justify. So you talk yourself out of it, even though it's the one hour that makes the rest of your week easier.\n\nAt 3 classes for £29, there's nothing to justify. Reformer, Mat or Barre, 50 minutes each, in a beautiful new studio in Oxted.\n\nNew members only. Book before you change your mind.",
+      "headline": "A treat you can justify", "headlineAlt": "3 classes, under £10 each", "description": "New members only", "cta": "Get Offer",
+      "notes": ""
+    },
+    {
+      "ref": "4c", "set": "Chat mock-up", "file": "4c-dark-chat-square.png",
+      "onCreative": "Chat: 'Plans this weekend?' 'The new pilates studio in Oxted does an intro pack' 'Saturday morning?' 'Booked the 9am. Don't be late'.",
+      "angle": "Weekend ritual", "pain": "Weekends disappearing into errands and scrolling",
+      "primary": "Another weekend gone in a blur of errands and scrolling?\n\nSaturday arrives and somehow disappears. Nothing just for you, nothing that leaves you feeling better by Sunday night.\n\nStart a new weekend ritual. Saturday 9am Strength on the reformer, or ease in with Sunday 9am Signature. Then coffee on Station Road East.\n\nNew members: 3 classes for £29, any style.",
+      "headline": "Saturday 9am, sorted", "headlineAlt": "Your new weekend ritual", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Class times match the landing page timetable (Sat 09:00 Strength, Sun 09:00 Signature)."
+    },
+    {
+      "ref": "4d", "set": "Chat mock-up", "file": "4d-chat-square.png",
+      "onCreative": "Chat: 'Reformer pilates is finally coming to Oxted' 'About time. When?' 'It's on Station Road East, they do 3 classes for £29' 'Adding myself now'.",
+      "angle": "Finally, a proper local studio", "pain": "Local options that don't match what you want: big gym classes, village halls, no one checking form",
+      "primary": "Finally, a proper reformer studio in Oxted. About time.\n\nUntil now, local options meant a crowded gym class, a chilly hall or a routine nobody checks you're doing right. Good for ticking a box, not for actually getting stronger.\n\nStudio Glide brings London-quality Reformer, Mat and Barre to 53 Station Road East, with expert instructors and classes capped at 10.\n\nNew members start with 3 classes for £29.",
+      "headline": "About time, Oxted", "headlineAlt": "London-quality, local", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Creative copy says 'coming to Oxted'. The studio is open, so check the chat still reads right for evergreen."
+    },
+    {
+      "ref": "4e", "set": "Chat mock-up", "file": "4e-native-chat-square.png",
+      "onCreative": "iMessage-style chat, same script as 4a: 'Have you seen the new studio opening on Station Road East?' '3 for £29?? Book us in for Saturday'.",
+      "angle": "Accountability buddy", "pain": "Cancelling on yourself because no one else is counting on you",
+      "primary": "Keep cancelling on yourself? Book with a friend instead.\n\nIt's easy to skip a class when the only person you're letting down is you. Tired, busy, raining. There's always a reason.\n\nMake a plan with someone who won't let you bail. Both grab our intro pack, 3 classes for £29, and book the same Saturday morning class.\n\nReformer, Mat and Barre. Now open in Oxted.",
+      "headline": "Book it with a friend", "headlineAlt": "The plan you'll keep", "description": "New members: 3 for £29", "cta": "Book Now",
+      "notes": "Native iOS message styling can be flagged by Meta review as imitating system UI. Keep 4a (branded) as the fallback."
+    },
+    {
+      "ref": "5b", "set": "Phone native", "file": "5b-notes-square.png",
+      "onCreative": "Notes: 'pilates plans: book Saturday 9am reformer (intro credit 1 of 3), rope Emma into Mat & Barre Sunday (credits 2 & 3), dig out grip socks, coffee on Station Road East after'.",
+      "angle": "Good intentions that stick", "pain": "Weekly plans that fall apart by Wednesday",
+      "primary": "Every week starts with good intentions. By Wednesday, the plan has gone.\n\nThe workout gets bumped, then the next one, and suddenly it's been a month since you last did anything just for you.\n\nPut it on the list and make it stick. Book Saturday 9am on the reformer, rope a friend into your next two classes and dig out the grippy socks. That's your intro pack sorted.\n\n3 classes for £29 for new members in Oxted.",
+      "headline": "Make the plan stick", "headlineAlt": "Start with Saturday 9am", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Creative mentions Mat & Barre on Sunday. The landing page timetable has no Sunday Mat or Barre (Sun is Signature, Yoga Flow, Strength). Amend creative or accept the mismatch."
+    },
+    {
+      "ref": "5c", "set": "Phone native", "file": "5c-calendar-square.png",
+      "onCreative": "Calendar week view: Work Mon-Fri, school run, Reformer 7am Tue, Reformer 9am Sat (Booked), Mat & Barre 10am Sun.",
+      "angle": "Fits a full week", "pain": "Every slot in the calendar spoken for, exercise the first thing dropped",
+      "primary": "Work, school run, work, work, dinner. Where exactly is the time for you?\n\nWhen every slot is spoken for, exercise is the first thing to drop off the calendar and the last thing to come back.\n\nOur timetable runs seven days a week, from 06:30 starts to evening classes, and every class is 50 minutes. Before work, at lunchtime or on Saturday morning, there's a slot that fits.\n\nNew members: 3 classes for £29.",
+      "headline": "A class that fits your week", "headlineAlt": "Classes from 06:30", "description": "Reformer, Mat & Barre", "cta": "Book Now",
+      "notes": "Creative shows Reformer 7am Tue and Mat & Barre 10am Sun. Neither is on the timetable (Tue 06:30 Strength; Sun 10:00 Yoga Flow). Worth correcting before spend."
+    },
+    {
+      "ref": "5e", "set": "Phone native", "file": "5e-instagram-dm-square.png",
+      "onCreative": "Instagram DM to studioglidepilates: 'do you have beginner classes?' 'Every class is coached for all levels, the 3-for-£29 intro pack is the perfect first go.' 'booking now'.",
+      "angle": "Not sure it's for me", "pain": "Feeling awkward asking if a class is suitable for a beginner",
+      "primary": "Too nervous to ask whether you're 'good enough' for a Pilates class?\n\nPlenty of people never book because they aren't sure a class is right for them, and asking feels awkward.\n\nSo here's the answer: every class is coached for all levels, and our Signature class is the best place to start. Arrive 10 minutes early for your first and we'll set your reformer up with you.\n\nThe 3-for-£29 intro pack is the perfect first go.",
+      "headline": "Beginners start here", "headlineAlt": "Every class, all levels", "description": "New members, Oxted", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "6a", "set": "Phone native", "file": "6a-wallet-pass-square.png",
+      "onCreative": "Wallet pass: Intro offer · Class: Reformer · Saturday 9:00 · Oxted · 3 for £29. 'Your Saturday morning, sorted. Book your first class.'",
+      "angle": "Start the weekend well", "pain": "Saturdays lost to errands, leaving nothing done just for you",
+      "primary": "Another Saturday lost to lie-ins that run into lunch and errands that eat the day?\n\nBy Sunday evening you're left with the nagging feeling you did nothing just for you, and Monday arrives regardless.\n\nStart the weekend on the reformer. Fifty minutes of strength and control at 9am, and the rest of your Saturday feels earned.\n\nYour ticket in: 3 classes for £29, new members only.",
+      "headline": "Saturday 9am Reformer", "headlineAlt": "Start the weekend strong", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Timetable check: Saturday 09:00 is Strength (Reformer). Matches."
+    },
+    {
+      "ref": "6b", "set": "Phone native", "file": "6b-class-widgets-square.png",
+      "onCreative": "Widgets: Your next class 9am tomorrow · Saturday 24°, sunny, perfect for a 9am · Tomorrow Reformer 9am, 3 for £29. 'Book your next class.'",
+      "angle": "Something to look forward to", "pain": "Mornings that are just alarm, rush, repeat",
+      "primary": "When did you last look forward to tomorrow morning?\n\nMost mornings are alarm, rush, commute, repeat. Nothing in the diary just for you, nothing that makes getting up feel worth it.\n\nPut a 9am Reformer class in there. A calm studio, a small class of 10 and 50 minutes that set the tone for the whole day.\n\nBook your first with our intro pack: 3 classes for £29.",
+      "headline": "Your 9am, booked", "headlineAlt": "Mornings worth waking for", "description": "New members, Oxted", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "6c", "set": "Phone native", "file": "6c-delivery-tracking-square.png",
+      "onCreative": "Order tracking: 1x Reformer studio, Oxted. Booked Saturday. Ordered (Oxted asked, we listened · February) › Being prepared (July) › Out for delivery (final touches this week) › Your first class awaits.",
+      "angle": "Oxted asked, we delivered", "pain": "Waiting years for a proper studio locally",
+      "primary": "Oxted asked for a proper reformer studio. It's here.\n\nFor too long the nearest good class meant a drive out of town, and the extra effort meant most weeks it simply didn't happen.\n\nThe reformers are in, the studio is finished and your first class is waiting on Station Road East. Expert instructors, classes capped at 10 and Reformer, Mat and Barre under one roof.\n\nClaim your intro pack: 3 classes for £29.",
+      "headline": "Your first class awaits", "headlineAlt": "Now open, Station Road East", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Creative still says 'Out for delivery · final touches this week', which is pre-launch wording. Update to 'Delivered' for evergreen or retire."
+    },
+    {
+      "ref": "6d", "set": "Phone native", "file": "6d-maps-square.png",
+      "onCreative": "Maps card: Studio Glide Pilates & Wellness · 5.0 ★ (114) · 53 Station Road East, Oxted · Now open · Intro pack, 3 classes for £29 · 0.3 mi.",
+      "angle": "Convenience / location", "pain": "Getting to class taking longer than the class itself",
+      "primary": "If getting to class takes longer than the class, you won't keep going.\n\nTraffic, parking and a drive each way turn a 50-minute workout into a two-hour mission, and it's always the first thing to get cancelled.\n\nStudio Glide is at 53 Station Road East, two minutes from Oxted station, with Ellice Road Car Park around the corner. Rated 5.0 on Google.\n\nNew members: 3 classes for £29.",
+      "headline": "2 mins from Oxted station", "headlineAlt": "Rated 5.0 on Google", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Confirm the (114) review count on the creative is current and belongs to the Oxted listing. Google Maps styling may draw Meta review scrutiny."
+    },
+    {
+      "ref": "6e", "set": "Phone native", "file": "6e-group-chat-square.png",
+      "onCreative": "Group chat 'Saturday plans': 'who's free saturday morning?' 'the new pilates studio in Oxted?? I'm in' 'booked the 9am, there's an intro pack, 3 for £29' 'making it a group thing then. coffee after'.",
+      "angle": "Healthier catch-ups", "pain": "Every catch-up with friends revolving around food and drink",
+      "primary": "Seeing friends shouldn't always mean another bottle of wine and a big brunch.\n\nCatch-ups revolve around sitting down, eating and drinking, and you come home feeling sluggish rather than lifted.\n\nMake it a group thing. Book the same Saturday 9am Reformer class, laugh your way through it, then head for coffee. Classes are capped at 10, so book together early.\n\nNew members: 3 classes for £29 each.",
+      "headline": "Friends, reformers, coffee", "headlineAlt": "Book the same class", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "6f", "set": "Phone native", "file": "6f-community-thread-square.png",
+      "onCreative": "Community post, 'Jane · Oxted Noticeboard': 'Does anyone know what's going into the old unit on Station Road East?' Replies: 'Studio Glide! Now open' 'intro pack, 3 classes for £29' 'About time we had one in Oxted'.",
+      "angle": "Local curiosity", "pain": "Walking past a new place for weeks without knowing if it's worth a look",
+      "primary": "Wondering what's opened in the old unit on Station Road East?\n\nYou've walked past for weeks, seen the work going on and still aren't sure whether it's worth a look. Meanwhile the early classes are filling up.\n\nIt's Studio Glide, a boutique Reformer Pilates studio, and it's now open. Expert instructors, classes capped at 10 and a 5.0 rating on Google.\n\nBe one of the first through the doors: 3 classes for £29 for new members.",
+      "headline": "Now open, Station Road East", "headlineAlt": "Be first through the doors", "description": "3 classes for £29", "cta": "Learn More",
+      "notes": "Named 'Oxted Noticeboard' post could be read as a real Facebook group. Check the client is comfortable, as it mimics third-party content."
+    },
+    {
+      "ref": "6g", "set": "Phone native", "file": "6g-review-card-square.png",
+      "onCreative": "Review card, Sarah M., verified member, 5 stars: 'The best hour of my week. The coaches actually coach, I've never felt stronger.'",
+      "angle": "Coaching quality", "pain": "Paying for classes where the instructor just calls out moves",
+      "primary": "Paying for classes where the instructor just calls out moves from the front?\n\nYou don't learn anything, you're never sure you're doing it right, and after a while you start wondering why you're paying at all.\n\nAt Studio Glide our coaches actually coach. Classes of 10 and real attention on your form, every single class. Rated 5.0 on Google.\n\nSee for yourself: 3 classes for £29, new members only.",
+      "headline": "Coaches who actually coach", "headlineAlt": "Rated 5.0 on Google", "description": "Now open in Oxted", "cta": "Book Now",
+      "notes": "Sarah M. is not one of the reviews on the landing page. Confirm it's a genuine review before running (Meta and CAP rules on testimonials)."
+    },
+    {
+      "ref": "6h", "set": "Phone native", "file": "6h-poll-square.png",
+      "onCreative": "Poll: 'Tomorrow's classes, which first?' Reformer 68% / Mat & Barre 32% · 1,208 votes · Studio Glide Oxted. 'Why not both · Book now'.",
+      "angle": "Indecision", "pain": "Comparing options so long you never book either",
+      "primary": "Reformer or Mat and Barre? Can't decide? You don't have to.\n\nEndless comparing just means you never book either, and choosing the wrong one first can put you off for good.\n\nOur intro pack lets you do both. 3 classes for £29, split between Reformer, Mat and Barre however you like, then stick with the one you love.\n\nNow open in Oxted. New members only.",
+      "headline": "Why not both?", "headlineAlt": "Split 3 classes your way", "description": "3 classes for £29", "cta": "Get Offer",
+      "notes": "'1,208 votes' is presented as real data. Confirm it's from a genuine Instagram poll or remove the figure from the creative."
+    },
+    {
+      "ref": "6i", "set": "Phone native", "file": "6i-screen-time-square.png",
+      "onCreative": "Your weekly report: Less scrolling. More gliding. Scrolling ↓42%, Pilates ↑200%. 'Swap three hours of scrolling for time on the reformer, start with 3 classes for £29.'",
+      "angle": "Screen time swap", "pain": "Hours lost to scrolling while claiming there's no time to work out",
+      "primary": "Hours on your phone every day, and still 'no time' to work out?\n\nThe scroll starts as five minutes and ends with a foggy head and an evening gone. We've all been there.\n\nSwap some of that screen time for the reformer. Fifty minutes, phone away, fully present, and you'll walk out standing a little taller than when you arrived.\n\nStart with 3 classes for £29 at our new Oxted studio.",
+      "headline": "Swap the scroll", "headlineAlt": "50 minutes, phone away", "description": "New members: 3 for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "6j", "set": "Phone native", "file": "6j-activity-rings-square.png",
+      "onCreative": "Activity ring 2/2 classes this week. Goal, closed. Reformer · Tue 7am, Mat & Barre · Sat 10am, 3 classes for £29 · New members.",
+      "angle": "Hitting your weekly goal", "pain": "Setting a goal of two workouts a week and managing none",
+      "primary": "Set a goal of two workouts a week, then managed none? Again?\n\nIt usually isn't motivation. It's having nothing booked, nowhere to be and nobody expecting you.\n\nBook it and it happens. An early Reformer class midweek and a Saturday session is a rhythm you can actually keep, with classes seven days a week from 06:30.\n\nStart your streak with 3 classes for £29.",
+      "headline": "Book it and it happens", "headlineAlt": "Two a week, goal closed", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Creative shows Reformer Tue 7am and Mat & Barre Sat 10am. Not on the timetable (Tue 06:30 Strength; Sat 10:00 Sweat). Correct before spend."
+    },
+    {
+      "ref": "6k", "set": "Phone native", "file": "6k-playlist-square.png",
+      "onCreative": "Playlist 'Saturday 9am Reformer': Breathe In (warm-up), Glide (now playing), Stronger Every Week (flow), Coffee After (cool-down). 'Press play on your next class.'",
+      "angle": "Exercise you enjoy", "pain": "Clock-watching through workouts you don't enjoy",
+      "primary": "Workouts that feel like a chore don't last. The ones you enjoy do.\n\nIf you're counting down the minutes on the cross trainer, you've already checked out, and next week you'll find a reason to skip.\n\nOur classes flow from warm-up to cool-down in 50 focused minutes, in a calm, beautiful studio with a small group of 10. Time flies, and you'll want to come back.\n\nPress play on your first class: 3 for £29, new members only.",
+      "headline": "Press play on Saturday", "headlineAlt": "Exercise to look forward to", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "6m", "set": "Phone native", "file": "6m-voice-note-square.png",
+      "onCreative": "Voice note from Emma: 'You NEED to see the new studio on Station Road East, I've booked us reformer Saturday morning, we can use the 3-for-£29 intro, don't be late...' Reply: 'on it. booking now'.",
+      "angle": "Friend recommendation", "pain": "Watching friends rave about something while you stay stuck in the same routine",
+      "primary": "You know that friend who won't stop talking about their Pilates class?\n\nIt's easy to roll your eyes, right up until you notice they actually look forward to exercising, while you're still stuck in the same old routine.\n\nStudio Glide is now open on Station Road East. Small classes, expert instructors and an intro pack worth passing on: 3 classes for £29.\n\nBook yours and see what they keep going on about.",
+      "headline": "Your friend was right", "headlineAlt": "The class worth sharing", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": ""
+    },
+    {
+      "ref": "6n", "set": "Phone native", "file": "6n-search-results-square.png",
+      "onCreative": "Search 'reformer pilates near me'. Result: Reformer Pilates in Oxted | 3 Classes for £29 · 5.0 · 114 reviews. Second result: studios in Redhill (12 mi), Caterham (8 mi).",
+      "angle": "Local search intent", "pain": "Searching for reformer Pilates and only finding studios miles away",
+      "primary": "Searched 'reformer pilates near me' and found nothing closer than a drive away?\n\nEndless listings for other towns, working out journey times and parking, and giving up before you book anything.\n\nHere's the result you were looking for: Reformer Pilates in Oxted, two minutes from the station, rated 5.0 on Google, with classes capped at 10.\n\nNew members: 3 classes for £29 across Reformer, Mat and Barre.",
+      "headline": "Reformer Pilates, Oxted", "headlineAlt": "The studio near you", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Google search styling and the '114 reviews' figure: confirm the count, and note Meta may flag imitation of Google UI."
+    },
+    {
+      "ref": "7a", "set": "Reviews carousel", "file": "7a-carousel-01-cover.png",
+      "onCreative": "8-card carousel. Cover: 'Don't take our word for it. What members say · Swipe'. Cards 2-7: Grace B., Molly F., Lauren A., Kelly T., Charlotte, Vicky P. Card 8: 'Now open in Oxted' + intro offer.",
+      "angle": "Social proof", "pain": "Nerves about starting, and not trusting a studio's own claims",
+      "primary": "Nervous about starting something new? Hear it from people who felt the same.\n\nAny studio can tell you it's great. It means more coming from members who were once complete novices, anxious about turning up and convinced exercise wasn't for them.\n\nStudio Glide is rated 5.0 on Google, and our members say it better than we can. Swipe to see why.\n\nNow open in Oxted. New members start with 3 classes for £29.",
+      "headline": "Rated 5.0 on Google", "headlineAlt": "Hear it from our members", "description": "3 classes for £29", "cta": "Book Now",
+      "notes": "Card-level headlines are on the Carousel Cards tab. Only Grace B, Molly F and Lauren A appear on the landing page, and their wording differs from the carousel quotes. Confirm all six quotes are verbatim Google reviews."
+    }
+  ],
+  "carousel": [
+    { "card": "01 Cover", "file": "7a-carousel-01-cover.png", "id": "7a-01", "onCreative": "Don't take our word for it. What members say · Swipe", "headline": "Rated 5.0 on Google", "description": "Swipe to hear why" },
+    { "card": "02 Grace B.", "file": "7a-carousel-02.png", "id": "7a-02", "onCreative": "\"Classes are London standard, actually better. You can tell they're super selective with their instructors.\"", "headline": "London standard, locally", "description": "Expert instructors" },
+    { "card": "03 Molly F.", "file": "7a-carousel-03.png", "id": "7a-03", "onCreative": "\"I drive 40 minutes each way, past 4 other studios, to attend these classes, and I would drive even further!\"", "headline": "Worth the drive", "description": "Now it's on your doorstep" },
+    { "card": "04 Lauren A.", "file": "7a-carousel-04.png", "id": "7a-04", "onCreative": "\"Obsessed with this studio... finally a slice of the London pilates experience locally. Every instructor is amazing.\"", "headline": "Obsessed from day one", "description": "Boutique Pilates in Oxted" },
+    { "card": "05 Kelly T.", "file": "7a-carousel-05.png", "id": "7a-05", "onCreative": "\"Having never really enjoyed exercise, I've finally found something I enjoy! I now go twice a week.\"", "headline": "Exercise you'll enjoy", "description": "Even if you never have" },
+    { "card": "06 Charlotte", "file": "7a-carousel-06.png", "id": "7a-06", "onCreative": "\"As a complete novice I felt really anxious about turning up. Studio Glide feels like a calming, safe space.\"", "headline": "Beginners feel at home", "description": "Every class, all levels" },
+    { "card": "07 Vicky P.", "file": "7a-carousel-07.png", "id": "7a-07", "onCreative": "\"Five months into my pilates journey, I feel so much stronger, both physically and mentally.\"", "headline": "Stronger, inside and out", "description": "Classes capped at 10" },
+    { "card": "08 CTA", "file": "7a-carousel-08-cta.png", "id": "7a-08", "onCreative": "Now open in Oxted. Intro offer: 3 classes for £29 across Reformer, Mat & Barre. Book your class.", "headline": "3 classes for £29", "description": "New members only" }
+  ],
+  "hold": [
+    { "ref": "1a", "file": "1a-square.png", "onCreative": "Oxted, we're coming. New here? Start with 3 classes for £29. Join the priority list.", "reason": "Pre-launch: 'we're coming' + 'Join the priority list'. Landing page is evergreen and says now open.", "fix": "Swap headline to a now-open line and CTA to 'Start with three'." },
+    { "ref": "1b", "file": "1b-square.png", "onCreative": "Reformer Pilates, now in Oxted. £10 a class for a year. Join the priority list.", "reason": "£10 a class for a year offer isn't on the landing page; priority-list CTA is pre-launch.", "fix": "Re-export with the 3 for £29 offer, or confirm the annual offer is still live and give it its own destination." },
+    { "ref": "1c", "file": "1c-square.png", "onCreative": "New members. £10 a class. Any mix of Reformer, Mat and Barre. Join the priority list.", "reason": "£10 a class offer conflicts with the landing page offer (3 for £29).", "fix": "Re-export with the 3 for £29 offer." },
+    { "ref": "1d", "file": "1d-square.png", "onCreative": "A new studio, Oxted. Move, breathe & reset. New members start with 3 classes for £29. Join the priority list.", "reason": "Priority-list CTA is pre-launch.", "fix": "Change CTA to 'Start with three'. Offer line is already correct." },
+    { "ref": "1e", "file": "1e-square.png", "onCreative": "New studio. Oxted, we're coming. New here? Start with 3 classes for £29. Join the priority list.", "reason": "Pre-launch headline and CTA.", "fix": "Swap to a now-open headline and CTA." },
+    { "ref": "1f", "file": "1f-square.png", "onCreative": "Oxted · Now open. Strength. Confidence. Community. £10 a class across Reformer, Mat and Barre. Join the priority list.", "reason": "£10 a class offer conflicts with the landing page; priority-list CTA.", "fix": "Re-export with 3 for £29 and a booking CTA. Strong headline, worth saving." },
+    { "ref": "1g", "file": "1g-square.png", "onCreative": "Oxted, your studio is coming. Join the priority list.", "reason": "Pre-launch headline and CTA.", "fix": "Change to 'Oxted, your studio is open.' with a booking CTA." },
+    { "ref": "1h", "file": "1h-square.png", "onCreative": "Oxted, we're coming. Coming August 2026. 3 classes for £29, new members only. Join the priority list.", "reason": "Dated 'Coming August 2026'. Now out of date.", "fix": "Remove the date line and swap to now-open messaging." },
+    { "ref": "2a", "file": "2a-scrim-square.png", "onCreative": "Oxted, we're coming. Coming August 2026. 3 classes for £29, new members only. Join the priority list.", "reason": "Dated 'Coming August 2026'. Now out of date.", "fix": "Remove the date line and swap to now-open messaging." },
+    { "ref": "2h", "file": "2h-square.png", "onCreative": "Reformer Pilates, redefined. Challenge your strength. Find your flow. Restore your calm. Coming to Oxted, August 2026.", "reason": "Dated 'Coming to Oxted, August 2026' footer.", "fix": "Change footer to 'Now open in Oxted · 3 classes for £29'. Headline is evergreen." },
+    { "ref": "5a", "file": "5a-notes-intro-pack-square.png", "onCreative": "Notes: reasons to book the intro pack. '...reformer pilate experts' 'only 100 places, claim mine TODAY'.", "reason": "'Only 100 places' scarcity isn't on the landing page, and the evergreen intro pack has no cap. Also a typo: 'reformer pilate experts'.", "fix": "Remove the 100 places line and fix 'pilate' to 'Pilates'." },
+    { "ref": "5d", "file": "5d-lock-screen-square.png", "onCreative": "Lock screen notifications incl. 'Your Saturday 9am is booked. 100 classes · £1,200 · first pick of the timetable'.", "reason": "References a 100 classes for £1,200 founder offer that isn't on the landing page.", "fix": "Replace the third notification with an intro pack line." },
+    { "ref": "5f", "file": "5f-lock-screen-glass-square.png", "onCreative": "Lock screen (glass). Header 'Two classes a week · £12 a class'. Notification '100 classes · £1,200'.", "reason": "£12 a class and £1,200 offers aren't on the landing page. Also not in the Drive creative folder.", "fix": "Re-export with the 3 for £29 offer, then upload to Drive." },
+    { "ref": "6l", "file": "6l-receipt-square.png", "onCreative": "Receipt: Intro pack 3 classes @ £9.67 = £29.00, drop-in equivalent £66, YOU SAVE £1,000, TOTAL £1,200, only 100 places.", "reason": "Totals mix two offers (£29 intro and £1,200 pack), and the maths doesn't add up as shown. Savings claims must be accurate under CAP rules.", "fix": "Rebuild the receipt for the intro pack only: 3 classes, drop-in equivalent, you save, total £29. Confirm the real drop-in price first." }
+  ]
+}
