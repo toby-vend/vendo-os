@@ -63,7 +63,9 @@
     "8g": "1L83UKow2hYXJQd0LnPNN2bB-0Bhvu9aW",
     "8h": "1c6X0PrLtPpyZ2jtMBlMbBRlw6s70b2Vx",
     "8i": "1MItrVKUy1P-ZcAv321ZDxjveCqBH1or0",
-    "8j": "1LfHZtTZYm80msG4kQT0AfA7x9MJFgRof"
+    "8j": "1LfHZtTZYm80msG4kQT0AfA7x9MJFgRof",
+    "2f": "10_SAPFLs8UG5Lf5xwLdfROXKd93VHXxo",
+    "5f": "1SuKpRLXjXNnvtG7c4NyZwErMR9T5jid1"
   },
   "ads": [
     {
@@ -134,7 +136,7 @@
       "headlineAlt": "Your first class, sorted",
       "description": "Now open in Oxted",
       "cta": "Book Now",
-      "notes": "2f is in the brand zip but not in the Drive creative folder. Upload the square and story files to show the preview."
+      "notes": ""
     },
     {
       "ref": "2g",
@@ -838,7 +840,7 @@
       "ref": "5f",
       "file": "5f-lock-screen-glass-square.png",
       "onCreative": "Lock screen (glass). Header 'Two classes a week · £12 a class'. Notification '100 classes · £1,200'.",
-      "reason": "£12 a class and £1,200 offers aren't on the landing page. Also not in the Drive creative folder.",
+      "reason": "£12 a class and £1,200 offers aren't on the landing page.",
       "fix": "Re-export with the 3 for £29 offer, then upload to Drive."
     },
     {
