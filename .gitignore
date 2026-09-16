@@ -44,3 +44,8 @@ outputs/creatives/
 data/report-examples/*
 !data/report-examples/README.md
 data/creative-pipeline-runs/
+
+# Client video assets pulled from Dropbox (large binaries, re-downloadable)
+data/maylands/videos/*
+!data/maylands/videos/README.md
+!data/maylands/videos/manifest.json
