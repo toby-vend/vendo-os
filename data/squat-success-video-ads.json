@@ -1,0 +1,62 @@
+{
+  "source": {
+    "share": "https://f.io/9-qAA-mE",
+    "shareUrl": "https://next.frame.io/share/45e3ecb9-d447-4c9d-bfd5-707f9f75ce18/",
+    "sharedBy": "Helen Walker, 26/08/2026",
+    "approvedBy": "Beniamin Androne (Operations Manager, Squat Success), 27/08/2026",
+    "approvalWording": "Everything looks great, thank you very much.",
+    "note": "Blanket approval on the folder, not per clip. Bobby Bhandal was on the original intro email of 15/08/2026 but off the thread from 18/08 onward, so there is no approval from him on record."
+  },
+  "folders": {
+    "testimonialLongForm": "https://next.frame.io/share/45e3ecb9-d447-4c9d-bfd5-707f9f75ce18/57a22191-3b36-4040-b2de-9b1a97f980c9",
+    "testimonialSnippets2": "https://next.frame.io/share/45e3ecb9-d447-4c9d-bfd5-707f9f75ce18/108e5352-9a7a-4746-892e-1a1c4768cbc2",
+    "testimonialSnippets1": "https://next.frame.io/share/45e3ecb9-d447-4c9d-bfd5-707f9f75ce18/6f7ccb0b-0aa0-4b6c-a779-9d4160649aa5",
+    "bobbyCarSnippets": "https://next.frame.io/share/45e3ecb9-d447-4c9d-bfd5-707f9f75ce18/e1508f14-ae19-4c4c-87a4-2f72d51dbd02",
+    "bobbyCarLongForm": "https://next.frame.io/share/45e3ecb9-d447-4c9d-bfd5-707f9f75ce18/6017da3a-6dab-4a66-83dd-41d80f229ab2",
+    "podcastSnippets": "https://next.frame.io/share/45e3ecb9-d447-4c9d-bfd5-707f9f75ce18/3453435f-3655-4077-83c3-35572054d97c",
+    "podcastLongForm": "https://next.frame.io/share/45e3ecb9-d447-4c9d-bfd5-707f9f75ce18/4536cda7-1ff2-47a0-aacb-fe4b58d2cc9b"
+  },
+  "videos": [
+    { "group": "Testimonial compilation", "name": "Squat Success Testimonial Compilation.mov", "length": "02:40", "folder": "testimonialLongForm", "use": "LinkedIn, YouTube", "block": "SS-03", "notes": "Too long for a cold Meta feed placement. Helen flagged it as one of the two that suit LinkedIn." },
+    { "group": "Testimonial compilation", "name": "Squat Success Testimonial Comp 2.mov", "length": "03:23", "folder": "testimonialLongForm", "use": "LinkedIn, YouTube", "block": "SS-03", "notes": "Second cut of the compilation. Same placement caveat as Comp 1." },
+
+    { "group": "Testimonial snippets (Comp 1)", "name": "Squat Success Testimonial Snippet 1.mov", "length": "00:19", "folder": "testimonialSnippets1", "use": "Meta video ad", "block": "SS-03", "notes": "Speaker and topic not confirmed. Watch before assigning to an ad set." },
+    { "group": "Testimonial snippets (Comp 1)", "name": "Squat Success Testimonial Snippet 2.mov", "length": "00:25", "folder": "testimonialSnippets1", "use": "Meta video ad", "block": "SS-03", "notes": "Speaker and topic not confirmed. Watch before assigning to an ad set." },
+    { "group": "Testimonial snippets (Comp 1)", "name": "Squat Success Testimonial Snippet 3.mov", "length": "00:39", "folder": "testimonialSnippets1", "use": "Meta video ad", "block": "SS-03", "notes": "Longest of the Comp 1 snippets. Speaker and topic not confirmed." },
+    { "group": "Testimonial snippets (Comp 1)", "name": "Squat Success Testimonial Snippet 4.mov", "length": "00:21", "folder": "testimonialSnippets1", "use": "Meta video ad", "block": "SS-03", "notes": "Speaker and topic not confirmed. Watch before assigning to an ad set." },
+    { "group": "Testimonial snippets (Comp 1)", "name": "Squat Success Testimonial Snippet 5.mov", "length": "00:18", "folder": "testimonialSnippets1", "use": "Meta video ad", "block": "SS-03", "notes": "v2 on Frame.io. Shortest snippet in the set." },
+    { "group": "Testimonial snippets (Comp 1)", "name": "Squat Success Testimonial Snippet 6.mov", "length": "00:28", "folder": "testimonialSnippets1", "use": "Meta video ad", "block": "SS-03", "notes": "Speaker and topic not confirmed. Watch before assigning to an ad set." },
+
+    { "group": "Testimonial snippets (Comp 2)", "name": "Squat Success Testimonial Comp 2 Snippet 1.mov", "length": "00:40", "folder": "testimonialSnippets2", "use": "Meta video ad", "block": "SS-03", "notes": "All Comp 2 snippets are v2, cut 27/08 after the end-frame feedback." },
+    { "group": "Testimonial snippets (Comp 2)", "name": "Squat Success Testimonial Comp 2 Snippet 2.mov", "length": "00:24", "folder": "testimonialSnippets2", "use": "Meta video ad", "block": "SS-03", "notes": "v2. Speaker and topic not confirmed." },
+    { "group": "Testimonial snippets (Comp 2)", "name": "Squat Success Testimonial Comp 2 Snippet 3.mov", "length": "00:24", "folder": "testimonialSnippets2", "use": "Meta video ad", "block": "SS-03", "notes": "v2. Speaker and topic not confirmed." },
+    { "group": "Testimonial snippets (Comp 2)", "name": "Squat Success Testimonial Comp 2 Snippet 4.mov", "length": "00:22", "folder": "testimonialSnippets2", "use": "Meta video ad", "block": "SS-03", "notes": "v2. Speaker and topic not confirmed." },
+    { "group": "Testimonial snippets (Comp 2)", "name": "Squat Success Testimonial Comp 2 Snippet 5.mov", "length": "00:25", "folder": "testimonialSnippets2", "use": "Meta video ad", "block": "SS-03", "notes": "v2. Speaker and topic not confirmed." },
+    { "group": "Testimonial snippets (Comp 2)", "name": "Squat Success Testimonial Comp 2 Snippet 6.mov", "length": "00:23", "folder": "testimonialSnippets2", "use": "Meta video ad", "block": "SS-03", "notes": "v2. Speaker and topic not confirmed." },
+    { "group": "Testimonial snippets (Comp 2)", "name": "Squat Success Testimonial Comp 2 Snippet 7.mov", "length": "00:24", "folder": "testimonialSnippets2", "use": "Meta video ad", "block": "SS-03", "notes": "v2. Speaker and topic not confirmed." },
+    { "group": "Testimonial snippets (Comp 2)", "name": "Squat Success Testimonial Comp 2 Snippet 8.mov", "length": "00:26", "folder": "testimonialSnippets2", "use": "Meta video ad", "block": "SS-03", "notes": "v2. Speaker and topic not confirmed." },
+
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Snippet 1.mov", "length": "00:25", "folder": "bobbyCarSnippets", "use": "Meta video ad", "block": "SS-05", "notes": "Topic not confirmed. SS-05 is the safest default for Bobby-to-camera on the associate route out, but watch before committing." },
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Snippet 2.mov", "length": "00:38", "folder": "bobbyCarSnippets", "use": "Meta video ad", "block": "SS-05", "notes": "Topic not confirmed. Watch before committing to a block." },
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Snippet 3.mov", "length": "00:37", "folder": "bobbyCarSnippets", "use": "Meta video ad", "block": "SS-05", "notes": "Topic not confirmed. Watch before committing to a block." },
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Snippet 4.mov", "length": "00:58", "folder": "bobbyCarSnippets", "use": "Meta video ad", "block": "SS-05", "notes": "Longest car snippet. Topic not confirmed." },
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Snippet 5.mov", "length": "00:53", "folder": "bobbyCarSnippets", "use": "Meta video ad", "block": "SS-05", "notes": "Topic not confirmed. Watch before committing to a block." },
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Snippet 6.mov", "length": "00:36", "folder": "bobbyCarSnippets", "use": "Meta video ad", "block": "SS-05", "notes": "Topic not confirmed. Watch before committing to a block." },
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Snippet 7.mov", "length": "00:50", "folder": "bobbyCarSnippets", "use": "Meta video ad", "block": "SS-05", "notes": "Topic not confirmed. Watch before committing to a block." },
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Long-form CTA 1.mov", "length": "04:40", "folder": "bobbyCarLongForm", "use": "LinkedIn, YouTube", "block": "SS-01", "notes": "Carries its own CTA. Check what that CTA points at before running it on the book funnel, because it was cut for the programme and events, not the book." },
+    { "group": "Bobby car (SS promo)", "name": "Squat Success Bobby Car Long-form CTA 2.mov", "length": "04:40", "folder": "bobbyCarLongForm", "use": "LinkedIn, YouTube", "block": "SS-01", "notes": "Alternate CTA cut of the same 4:40 video. Same check applies." },
+
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 1 - Personal Brand.mov", "length": "00:23", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-06", "notes": "Maps to chapter 8, the Personal Brand Blueprint." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 2 - Why Matt Joined SS.mov", "length": "00:25", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-03", "notes": "Testimonial in substance, so it pairs with the testimonial-led copy." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 3 - Support From SS.mov", "length": "00:18", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-03", "notes": "Talks about the paid programme. The copy must keep the book and the programme distinct, as SS-03 does." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 4 - Why Open a Squat.mov", "length": "00:25", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-05", "notes": "Closest of the podcast clips to the cold pain-led angle." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 5 - Pros and Cons.mov", "length": "00:30", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-09", "notes": "Squat versus buy territory, which is what SS-09 is built on." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 6 - CareStack Promo.mov", "length": "00:20", "folder": "podcastSnippets", "use": "NOT FOR ADS", "block": "", "notes": "Promotes CareStack, a third party. Do not run this on the book funnel. It is in the approved folder but it is sponsor content, not Squat Success marketing." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 7 - Same Team.mov", "length": "00:24", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-10", "notes": "Team and culture, which is chapter 7, the A-Team Algorithm." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 8 - Recruitment.mov", "length": "00:19", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-10", "notes": "Hiring, chapter 7. Aimed at people already building rather than deciding." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 9 - Trusting Others.mov", "length": "00:20", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-10", "notes": "Delegation and team, so it suits the mid-build audience." },
+    { "group": "Podcast w/ Matt", "name": "SS podcast snippet 10 - People & Support.mov", "length": "00:26", "folder": "podcastSnippets", "use": "Meta video ad", "block": "SS-03", "notes": "Support and people, closest to the testimonial angle." },
+    { "group": "Podcast w/ Matt", "name": "Squat Success Podcast w caps.mov", "length": "33:50", "folder": "podcastLongForm", "use": "YouTube only", "block": "", "notes": "Full episode with captions. Not an ad. Landscape, so it is the one asset that suits YouTube proper rather than Shorts." },
+    { "group": "Podcast w/ Matt", "name": "Squat Success Podcast no caps.mov", "length": "33:50", "folder": "podcastLongForm", "use": "YouTube only", "block": "", "notes": "Full episode without captions. Not an ad." }
+  ]
+}
