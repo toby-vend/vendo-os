@@ -35,6 +35,7 @@
     "build:chat:watch": "tsx scripts/build-agent-chat.ts --watch",
     "build:report": "tsx scripts/build-client-report.ts",
     "build:report:watch": "tsx scripts/build-client-report.ts --watch",
+    "drive:auth": "tsx scripts/auth/google-drive-auth.ts",
     "drive:reindex": "tsx scripts/sync/sync-drive.ts",
     "drive:reindex:watch": "tsx scripts/sync/sync-drive.ts --watch",
     "drive:process": "tsx scripts/sync/process-drive-queue.ts",

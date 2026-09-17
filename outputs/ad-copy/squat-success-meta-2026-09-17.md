@@ -6,6 +6,7 @@
 **Date:** 2026-09-17  
 **Destination:** https://book.squatsuccess.co.uk/  
 **Live sheet:** https://docs.google.com/spreadsheets/d/1yI9SYYsnwUmYbH9XWVcPqj5Y9cnfBhEVkk8DstRROhM/edit  
+**Creative folder:** https://drive.google.com/drive/folders/142O4RgIWP_QmB_qbDEtQljFxWZhAZ-jU  
 **Creatives:** 24 concepts, `exports 8` (sets 1, 2, 4, 5, 6)
 
 Copy is written in long-form direct response structure: hook, proof stack, offer reveal,
@@ -28,9 +29,7 @@ rather than one rewrite per creative.
 **Primary Text:**
 
 ```
-A dentist in Leamington Spa is posting his book to strangers for the price of a stamp.
-
-There is a reason, and it is not a noble one.
+There is a reason this book is free, and it is not a generous one.
 
 📖 The Dental Freedom Blueprint. Nine chapters on opening your own dental practice.
 🏗️ Written by Dr Bobby Bhandal, who built Avenue Dental from an empty unit as a squat.
@@ -672,9 +671,9 @@ P.P.S. If it isn't useful, email hello@squatsuccess.co.uk and the postage comes 
 ```
 "I'd rather this book was in a thousand hands than sold to two hundred."
 
-A dentist is posting his book on practice ownership for the price of a stamp.
+That is why The Dental Freedom Blueprint is free. You cover the £4.95 stamp.
 
-👉 Claim your free copy at book.squatsuccess.co.uk
+👉 Claim your copy at book.squatsuccess.co.uk
 ```
 
 **Headline:** Why is the book free? (21 chars)  

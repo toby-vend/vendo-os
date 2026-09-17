@@ -19,7 +19,7 @@
         "Curiosity led: why is he giving it away?",
         "Cold / prospecting",
         "Curiosity gap",
-        "A dentist in Leamington Spa is posting his book to strangers for the price of a stamp.\n\nThere is a reason, and it is not a noble one.\n\n📖 The Dental Freedom Blueprint. Nine chapters on opening your own dental practice.\n🏗️ Written by Dr Bobby Bhandal, who built Avenue Dental from an empty unit as a squat.\n🩺 Ten years an associate across NHS and private before he did it.\n📦 Printed to order in the UK, with you in 5 to 7 working days.\n💷 The book is free. You cover £4.95 postage and nothing else.\n\n👉 book.squatsuccess.co.uk\n\nSo if you are sick of:\n🚫 Researching locations on the train home and then doing nothing about it\n🚫 Business plan templates downloaded and never finished\n🚫 Talking yourself into it and back out of it, again\n🚫 Watching a diary someone else built fill with work someone else priced\n\nAnd you want more.\nMore say over the week.\nMore clinical range than a corporate target allows.\nMore at the end of ten years than another payslip.\n\nThen hit the link and claim your copy.\n👉 book.squatsuccess.co.uk\n\nHere is the honest answer to \"why free\".\n\nBobby runs a programme called Squat Success, where he works with dentists through the whole build. The ones who get the most out of it had already decided before they arrived. They were not looking to be convinced, they were looking for a route.\n\nThis book is how people decide.\n\nSome will read it and realise ownership is not for them, and save themselves years of \"one day\". Some will read it and do the entire thing on their own, which is exactly what it was written for. A few will get to the end and want help with the build.\n\nIn his words: \"I'd rather this book was in a thousand hands than sold to two hundred.\"\n\nThat is the whole thing. You cover the postage because Royal Mail don't work for free.\n\n👉 book.squatsuccess.co.uk\n\nP.S. Printed to order rather than sat in a warehouse, posted from the UK, UK addresses only for now.\nP.P.S. Read it and it isn't useful? Email hello@squatsuccess.co.uk and we refund your postage, no questions.",
+        "There is a reason this book is free, and it is not a generous one.\n\n📖 The Dental Freedom Blueprint. Nine chapters on opening your own dental practice.\n🏗️ Written by Dr Bobby Bhandal, who built Avenue Dental from an empty unit as a squat.\n🩺 Ten years an associate across NHS and private before he did it.\n📦 Printed to order in the UK, with you in 5 to 7 working days.\n💷 The book is free. You cover £4.95 postage and nothing else.\n\n👉 book.squatsuccess.co.uk\n\nSo if you are sick of:\n🚫 Researching locations on the train home and then doing nothing about it\n🚫 Business plan templates downloaded and never finished\n🚫 Talking yourself into it and back out of it, again\n🚫 Watching a diary someone else built fill with work someone else priced\n\nAnd you want more.\nMore say over the week.\nMore clinical range than a corporate target allows.\nMore at the end of ten years than another payslip.\n\nThen hit the link and claim your copy.\n👉 book.squatsuccess.co.uk\n\nHere is the honest answer to \"why free\".\n\nBobby runs a programme called Squat Success, where he works with dentists through the whole build. The ones who get the most out of it had already decided before they arrived. They were not looking to be convinced, they were looking for a route.\n\nThis book is how people decide.\n\nSome will read it and realise ownership is not for them, and save themselves years of \"one day\". Some will read it and do the entire thing on their own, which is exactly what it was written for. A few will get to the end and want help with the build.\n\nIn his words: \"I'd rather this book was in a thousand hands than sold to two hundred.\"\n\nThat is the whole thing. You cover the postage because Royal Mail don't work for free.\n\n👉 book.squatsuccess.co.uk\n\nP.S. Printed to order rather than sat in a warehouse, posted from the UK, UK addresses only for now.\nP.P.S. Read it and it isn't useful? Email hello@squatsuccess.co.uk and we refund your postage, no questions.",
         "Why is the book free?",
         "A thousand hands, not two hundred\nHe posts it for a stamp\nFree book. The catch is £4.95.",
         "Free book, £4.95 postage",
@@ -178,9 +178,10 @@
       "Ref",
       "Set",
       "Creative Name",
+      "Preview (feed)",
       "On-creative headline (do not repeat verbatim)",
       "Formats exported",
-      "Export file stem",
+      "Open in Drive",
       "Copy block"
     ],
     "rows": [
@@ -188,226 +189,251 @@
         "1a",
         "1 Offer",
         "The Offer",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1ZFsSuFq-6oQR-fs95Zci3DxZJC35miik=w500\", 1)",
         "A free book for dentists who keep saying \"one day.\"",
         "Feed 1x1, Landscape 1.91x1, Story 9x16",
-        "1a-the-offer",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1ZFsSuFq-6oQR-fs95Zci3DxZJC35miik/view\", \"Open file\")",
         "SS-01"
       ],
       [
         "1b",
         "1 Offer",
         "The Catch",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1NLgBVwmXgUkv1XS5tnAGfGseS0SFT889=w500\", 1)",
         "The book is free. The stamp isn't.",
         "Feed 1x1, Landscape 1.91x1, Story 9x16",
-        "1b-the-catch",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1NLgBVwmXgUkv1XS5tnAGfGseS0SFT889/view\", \"Open file\")",
         "SS-04"
       ],
       [
         "1c",
         "1 Offer",
         "Printed And Posted",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1qdT7byE5YucYGk_UXiWU33655p0IakCS=w500\", 1)",
         "We'll post you the book. You cover the stamp.",
         "Feed 1x1, Landscape 1.91x1, Story 9x16",
-        "1c-printed-and-posted",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1qdT7byE5YucYGk_UXiWU33655p0IakCS/view\", \"Open file\")",
         "SS-04"
       ],
       [
         "1d",
         "1 Offer",
         "What's Inside",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1jKT3SebWxveM_CeEZpd7aVNjSiYXIjDT=w500\", 1)",
         "What it actually costs to open a squat, with the real numbers.",
         "Feed 1x1, Landscape 1.91x1, Story 9x16",
-        "1d-whats-inside",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1jKT3SebWxveM_CeEZpd7aVNjSiYXIjDT/view\", \"Open file\")",
         "SS-06"
       ],
       [
         "2a",
         "2 Offer + proof",
         "Someone Else's Dream",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1Ga1OpTFrA5U1jPnMJaJ5H2Lb4Q6U-_7I=w500\", 1)",
         "Every patient you see builds someone else's practice.",
         "Feed 4x5, Story 9x16",
-        "2a-someone-elses-dream",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1Ga1OpTFrA5U1jPnMJaJ5H2Lb4Q6U-_7I/view\", \"Open file\")",
         "SS-05"
       ],
       [
         "2b",
         "2 Offer + proof",
         "No Catch",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1suiIxbm5OD8S_UeTMA8uUMDys5K923Xx=w500\", 1)",
         "A free book. No catch. Seriously.",
         "Feed 4x5, Story 9x16",
-        "2b-no-catch",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1suiIxbm5OD8S_UeTMA8uUMDys5K923Xx/view\", \"Open file\")",
         "SS-04"
       ],
       [
         "2c",
         "2 Offer + proof",
         "Table Of Contents",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1a5u14vudsCXtyA6FQZr7WLk4VWxPHB_T=w500\", 1)",
         "9 chapters. From \"should I?\" to your first 12 months.",
         "Feed 4x5, Story 9x16",
-        "2c-table-of-contents",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1a5u14vudsCXtyA6FQZr7WLk4VWxPHB_T/view\", \"Open file\")",
         "SS-06"
       ],
       [
         "2d",
         "2 Offer + proof",
         "Us Vs Them",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/12i0RXOlhDSk12H7MrFLFthN64VFzB45w=w500\", 1)",
         "Squat advice, without the sales pitch.",
         "Feed 4x5, Story 9x16",
-        "2d-us-vs-them",
+        "=HYPERLINK(\"https://drive.google.com/file/d/12i0RXOlhDSk12H7MrFLFthN64VFzB45w/view\", \"Open file\")",
         "SS-07"
       ],
       [
         "2e",
         "2 Offer + proof",
         "The Stat 61%",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1qCE7yrpl9ZkC0cJ7ubYJ9Wbe8pwDs1Rk=w500\", 1)",
         "61% of the UK dental workforce scored high for emotional exhaustion. (Br Dent J, 2025)",
         "Feed 4x5, Story 9x16",
-        "2e-the-stat-61pc",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1qCE7yrpl9ZkC0cJ7ubYJ9Wbe8pwDs1Rk/view\", \"Open file\")",
         "SS-02"
       ],
       [
         "2f",
         "2 Offer + proof",
         "Why Free",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1S42_MLL2xhwZjFpMmcUge3m_uJjnQV9Y=w500\", 1)",
         "\"I'd rather this book was in a thousand hands than sold to two hundred.\" Dr Bobby Bhandal",
         "Feed 4x5, Story 9x16",
-        "2f-why-free",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1S42_MLL2xhwZjFpMmcUge3m_uJjnQV9Y/view\", \"Open file\")",
         "SS-01"
       ],
       [
         "4a",
         "4 Book content",
         "Three Infections",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1Mcg-UNO8GoNwbDdR01E6-vT0-haEKSPq=w500\", 1)",
         "Three infections keep good dentists stuck.",
         "Feed 4x5, Story 9x16",
-        "4a-three-infections",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1Mcg-UNO8GoNwbDdR01E6-vT0-haEKSPq/view\", \"Open file\")",
         "SS-06"
       ],
       [
         "4b",
         "4 Book content",
         "Certainty Compass",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1T3mAD96qYwqmBc3NBQ3LC44WEhMwelxk=w500\", 1)",
         "Three decisions settle almost everything.",
         "Feed 4x5, Story 9x16",
-        "4b-certainty-compass",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1T3mAD96qYwqmBc3NBQ3LC44WEhMwelxk/view\", \"Open file\")",
         "SS-06"
       ],
       [
         "4c",
         "4 Book content",
         "Invisible Waiting List",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1L6FVT_c2VBYzCc25RhcXmuXxK0fStoGX=w500\", 1)",
         "There is a way to open with a queue already waiting.",
         "Feed 4x5, Story 9x16",
-        "4c-invisible-waiting-list",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1L6FVT_c2VBYzCc25RhcXmuXxK0fStoGX/view\", \"Open file\")",
         "SS-11"
       ],
       [
         "4d",
         "4 Book content",
         "Ready Now Or Twelve Months",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1iXkJa3HWjCmilMiwkuWGKYfr5cD4pMqC=w500\", 1)",
         "Ready now, or twelve months from now?",
         "Feed 4x5, Story 9x16",
-        "4d-ready-now-or-twelve-months",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1iXkJa3HWjCmilMiwkuWGKYfr5cD4pMqC/view\", \"Open file\")",
         "SS-09"
       ],
       [
         "4e",
         "4 Book content",
         "Not In The Conference Talk",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1P0ZQsDJIeHxeQOpZ76xtsGdFfqX61zTR=w500\", 1)",
         "The parts that don't make the conference talk.",
         "Feed 4x5, Story 9x16",
-        "4e-not-in-the-conference-talk",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1P0ZQsDJIeHxeQOpZ76xtsGdFfqX61zTR/view\", \"Open file\")",
         "SS-07"
       ],
       [
         "5a",
         "5 Persona",
         "Ceiling Hitter",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1i32ORtb3Uvg-4U6rzTs2DBmdJtKiW00K=w500\", 1)",
         "Your book is full. Your split hasn't moved.",
         "Feed 4x5, Story 9x16",
-        "5a-persona-ceiling-hitter",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1i32ORtb3Uvg-4U6rzTs2DBmdJtKiW00K/view\", \"Open file\")",
         "SS-05"
       ],
       [
         "5b",
         "5 Persona",
         "NHS Escapee",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1k9oI6G-lobC494uPlRWNI5e755GFzIRY=w500\", 1)",
         "Your targets were set by someone who isn't in the room.",
         "Feed 4x5, Story 9x16",
-        "5b-persona-nhs-escapee",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1k9oI6G-lobC494uPlRWNI5e755GFzIRY/view\", \"Open file\")",
         "SS-08"
       ],
       [
         "5c",
         "5 Persona",
         "Late Starter",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1IhC1Iz7YIn-vcR653YPEynlvpYf7nbtQ=w500\", 1)",
         "\"One day\" has been one day for nine years.",
         "Feed 4x5, Story 9x16",
-        "5c-persona-late-starter",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1IhC1Iz7YIn-vcR653YPEynlvpYf7nbtQ/view\", \"Open file\")",
         "SS-09"
       ],
       [
         "5d",
         "5 Persona",
         "Committed Builder",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/13ztoOcDIKmt6vmP-6NlXwps2k-T5OcXM=w500\", 1)",
         "You're past \"should I\". Now don't get it wrong.",
         "Feed 4x5, Story 9x16",
-        "5d-persona-committed-builder",
+        "=HYPERLINK(\"https://drive.google.com/file/d/13ztoOcDIKmt6vmP-6NlXwps2k-T5OcXM/view\", \"Open file\")",
         "SS-10"
       ],
       [
         "5e",
         "5 Persona",
         "Struggling New Owner",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1G8rCV8K_BpYvVltXBIosr3_LsxwkBBmP=w500\", 1)",
         "You opened. The diary didn't fill.",
         "Feed 4x5, Story 9x16",
-        "5e-persona-struggling-new-owner",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1G8rCV8K_BpYvVltXBIosr3_LsxwkBBmP/view\", \"Open file\")",
         "SS-11"
       ],
       [
         "6a",
         "6 Pain hook",
         "Associate Ceiling",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1Ton1WDdyjiCHEV45Q4dnUUPWGor3fpWV=w500\", 1)",
         "The associate lifestyle has a ceiling.",
         "Feed 4x5, Story 9x16",
-        "6a-associate-ceiling",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1Ton1WDdyjiCHEV45Q4dnUUPWGor3fpWV/view\", \"Open file\")",
         "SS-05"
       ],
       [
         "6b",
         "6 Pain hook",
         "Someone Else's Diary",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/14bg1E5x6THyEcIdRSTvWVcoZOUOaHMaW=w500\", 1)",
         "Someone else's diary. Someone else's practice.",
         "Feed 4x5, Story 9x16",
-        "6b-someone-elses-diary",
+        "=HYPERLINK(\"https://drive.google.com/file/d/14bg1E5x6THyEcIdRSTvWVcoZOUOaHMaW/view\", \"Open file\")",
         "SS-05"
       ],
       [
         "6c",
         "6 Pain hook",
         "Never Own The Asset",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1qQTnlOC7uYtEnw7AqjWD7dAOoZbPbFf5=w500\", 1)",
         "Ten years of building an asset you'll never own.",
         "Feed 4x5, Story 9x16",
-        "6c-never-own-the-asset",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1qQTnlOC7uYtEnw7AqjWD7dAOoZbPbFf5/view\", \"Open file\")",
         "SS-05"
       ],
       [
         "6d",
         "6 Pain hook",
         "Tired Of The Associate Lifestyle",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1fbOsKRdtq6YFLmdeSr1pRKr3EkBkFz41=w500\", 1)",
         "Tired of the associate lifestyle?",
         "Feed 4x5, Story 9x16",
-        "6d-tired-of-the-associate-lifestyle",
+        "=HYPERLINK(\"https://drive.google.com/file/d/1fbOsKRdtq6YFLmdeSr1pRKr3EkBkFz41/view\", \"Open file\")",
         "SS-05"
       ]
     ],
     "widths": [
       7,
       17,
+      26,
       30,
-      52,
-      30,
-      38,
+      50,
+      28,
+      14,
       12
     ],
     "frozenCols": 3
@@ -425,7 +451,7 @@
       [
         "SF-01",
         "Short form: Stories and Reels 9x16, any creative",
-        "\"I'd rather this book was in a thousand hands than sold to two hundred.\"\n\nA dentist is posting his book on practice ownership for the price of a stamp.\n\n👉 Claim your free copy at book.squatsuccess.co.uk",
+        "\"I'd rather this book was in a thousand hands than sold to two hundred.\"\n\nThat is why The Dental Freedom Blueprint is free. You cover the £4.95 stamp.\n\n👉 Claim your copy at book.squatsuccess.co.uk",
         "Why is the book free?",
         "Free book, £4.95 postage",
         "Learn More"
@@ -548,5 +574,6 @@
     "frozenCols": 1
   },
   "destination": "https://book.squatsuccess.co.uk/",
-  "date": "2026-09-17"
+  "date": "2026-09-17",
+  "creativeFolder": "https://drive.google.com/drive/folders/142O4RgIWP_QmB_qbDEtQljFxWZhAZ-jU"
 }

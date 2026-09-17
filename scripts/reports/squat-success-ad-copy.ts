@@ -18,12 +18,31 @@
  *   - Pain lists use "if you are sick of" framing, never "you are", to stay the right
  *     side of Meta's personal attributes policy.
  */
-import { mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 
 const DATE = '2026-09-17';
 const LP = 'book.squatsuccess.co.uk';
 const DEST = 'https://book.squatsuccess.co.uk/';
+// Drive manifest written by squat-upload-creatives.ts. Absent on a first run,
+// in which case the Creative Map falls back to file stems and no preview column.
+interface Assets {
+  folderId: string;
+  folderUrl: string;
+  files: Record<string, string>;
+}
+const ASSETS_PATH = 'data/squat-success-creative-assets.json';
+const ASSETS: Assets | null = existsSync(ASSETS_PATH)
+  ? (JSON.parse(readFileSync(ASSETS_PATH, 'utf-8')) as Assets)
+  : null;
+
+/** The feed export for a creative, whichever ratio that set was cut at. */
+function feedFileId(stem: string): string | null {
+  if (!ASSETS) return null;
+  const name = Object.keys(ASSETS.files).find((f) => f.startsWith(`${stem}_feed-`));
+  return name ? ASSETS.files[name] : null;
+}
+
 const SHEET =
   'https://docs.google.com/spreadsheets/d/1yI9SYYsnwUmYbH9XWVcPqj5Y9cnfBhEVkk8DstRROhM/edit';
 
@@ -48,9 +67,7 @@ const BLOCKS: Block[] = [
     angle: 'Curiosity led: why is he giving it away?',
     stage: 'Cold / prospecting',
     hookType: 'Curiosity gap',
-    primary: `A dentist in Leamington Spa is posting his book to strangers for the price of a stamp.
-
-There is a reason, and it is not a noble one.
+    primary: `There is a reason this book is free, and it is not a generous one.
 
 📖 The Dental Freedom Blueprint. Nine chapters on opening your own dental practice.
 🏗️ Written by Dr Bobby Bhandal, who built Avenue Dental from an empty unit as a squat.
@@ -664,9 +681,9 @@ const VARIANTS: Variant[] = [
     use: 'Short form: Stories and Reels 9x16, any creative',
     primary: `"I'd rather this book was in a thousand hands than sold to two hundred."
 
-A dentist is posting his book on practice ownership for the price of a stamp.
+That is why The Dental Freedom Blueprint is free. You cover the £4.95 stamp.
 
-👉 Claim your free copy at ${LP}`,
+👉 Claim your copy at ${LP}`,
     headline: 'Why is the book free?',
     description: 'Free book, £4.95 postage',
     cta: 'Learn More',
@@ -902,13 +919,28 @@ const payload = {
       'Ref',
       'Set',
       'Creative Name',
+      'Preview (feed)',
       'On-creative headline (do not repeat verbatim)',
       'Formats exported',
-      'Export file stem',
+      'Open in Drive',
       'Copy block',
     ],
-    rows: CREATIVES.map((c) => [c.ref, c.set, c.name, c.onCreative, c.formats, c.file, c.block]),
-    widths: [7, 17, 30, 52, 30, 38, 12],
+    rows: CREATIVES.map((c) => {
+      const fileId = feedFileId(c.file);
+      return [
+        c.ref,
+        c.set,
+        c.name,
+        fileId ? `=IMAGE("https://lh3.googleusercontent.com/d/${fileId}=w500", 1)` : c.file,
+        c.onCreative,
+        c.formats,
+        fileId
+          ? `=HYPERLINK("https://drive.google.com/file/d/${fileId}/view", "Open file")`
+          : c.file,
+        c.block,
+      ];
+    }),
+    widths: [7, 17, 26, 30, 50, 28, 14, 12],
     frozenCols: 3,
   },
   variants: {
@@ -925,6 +957,7 @@ const payload = {
   },
   destination: DEST,
   date: DATE,
+  creativeFolder: ASSETS?.folderUrl ?? '',
 };
 
 // --- Emit --------------------------------------------------------------------
@@ -946,6 +979,7 @@ const md = [
   `**Date:** ${DATE}  `,
   `**Destination:** ${DEST}  `,
   `**Live sheet:** ${SHEET}  `,
+  ...(ASSETS ? [`**Creative folder:** ${ASSETS.folderUrl}  `] : []),
   '**Creatives:** 24 concepts, `exports 8` (sets 1, 2, 4, 5, 6)',
   '',
   'Copy is written in long-form direct response structure: hook, proof stack, offer reveal,',

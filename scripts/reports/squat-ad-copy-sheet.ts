@@ -35,6 +35,7 @@ interface Payload {
   confirm: Tab;
   destination: string;
   date: string;
+  creativeFolder?: string;
 }
 
 const payloadPath = process.argv[2];
@@ -70,7 +71,7 @@ async function api<T>(path: string, method: string, body?: unknown): Promise<T> 
 const INTRO_ID = 0;
 const DATA_TABS = [
   { key: 'adcopy' as const, title: 'Ad Copy', sheetId: 1, frozenCols: 2, rowHeight: 320 },
-  { key: 'creatives' as const, title: 'Creative Map', sheetId: 2, frozenCols: 3, rowHeight: 74 },
+  { key: 'creatives' as const, title: 'Creative Map', sheetId: 2, frozenCols: 3, rowHeight: 250 },
   { key: 'variants' as const, title: 'Short & Retargeting', sheetId: 3, frozenCols: 2, rowHeight: 200 },
   { key: 'confirm' as const, title: 'To Confirm', sheetId: 4, frozenCols: 1, rowHeight: 120 },
 ];
@@ -175,12 +176,33 @@ const INTRO: IntroRow[] = [
       'which makes a copy limit untrue, so the P.S. carries despatch terms and the refund instead. ' +
       'If there is a genuine limit, say so and it goes in.',
   },
-  {
-    kind: 'warn',
-    text:
-      'PREVIEWS. The exports are local files rather than Drive, so the Creative Map lists file stems, ' +
-      'not thumbnails. Send a Drive folder ID and the previews drop straight in.',
-  },
+  ...(payload.creativeFolder
+    ? ([
+        { kind: 'spacer', text: '' },
+        { kind: 'h2', text: 'The creatives' },
+        {
+          kind: 'body',
+          text:
+            'All 52 exports (24 concepts across feed, story and landscape ratios) are here: ' +
+            payload.creativeFolder +
+            '  The Creative Map tab shows the feed cut of each one, and Open in Drive goes to that file.',
+        },
+        {
+          kind: 'warn',
+          text:
+            'That folder is link-shared as view-only, because Google fetches =IMAGE thumbnails without ' +
+            'the viewer\'s credentials and a private file renders as a broken cell. Anyone with the link ' +
+            'can see the creatives. Say the word and it can be restricted, at the cost of the previews.',
+        },
+      ] as IntroRow[])
+    : ([
+        {
+          kind: 'warn',
+          text:
+            'PREVIEWS. The exports are not in Drive, so the Creative Map lists file stems rather than ' +
+            'thumbnails. Run the upload script and rebuild to add them.',
+        },
+      ] as IntroRow[])),
 ];
 
 // --- create or reuse ---------------------------------------------------------
@@ -415,6 +437,29 @@ DATA_TABS.forEach((t) => {
       fields: 'userEnteredFormat.textFormat',
     },
   });
+
+  const previewCol = tab.head.indexOf('Preview (feed)');
+  if (previewCol >= 0) {
+    requests.push({
+      repeatCell: {
+        range: {
+          sheetId,
+          startRowIndex: 1,
+          endRowIndex: 1 + dataRows,
+          startColumnIndex: previewCol,
+          endColumnIndex: previewCol + 1,
+        },
+        cell: {
+          userEnteredFormat: {
+            horizontalAlignment: 'CENTER',
+            verticalAlignment: 'MIDDLE',
+            padding: { top: 4, bottom: 4, left: 4, right: 4 },
+          },
+        },
+        fields: 'userEnteredFormat(horizontalAlignment,verticalAlignment,padding)',
+      },
+    });
+  }
 
   // To Confirm: flag the first column so open items read as open at a glance.
   if (t.key === 'confirm') {
