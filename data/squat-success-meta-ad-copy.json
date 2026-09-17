@@ -179,6 +179,7 @@
       "Set",
       "Creative Name",
       "Preview (feed)",
+      "Preview (square 1x1)",
       "On-creative headline (do not repeat verbatim)",
       "Formats exported",
       "Open in Drive",
@@ -190,6 +191,7 @@
         "1 Offer",
         "The Offer",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1ZFsSuFq-6oQR-fs95Zci3DxZJC35miik=w500\", 1)",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1ZFsSuFq-6oQR-fs95Zci3DxZJC35miik=w500\", 1)",
         "A free book for dentists who keep saying \"one day.\"",
         "Feed 1x1, Landscape 1.91x1, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1ZFsSuFq-6oQR-fs95Zci3DxZJC35miik/view\", \"Open file\")",
@@ -199,6 +201,7 @@
         "1b",
         "1 Offer",
         "The Catch",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1NLgBVwmXgUkv1XS5tnAGfGseS0SFT889=w500\", 1)",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1NLgBVwmXgUkv1XS5tnAGfGseS0SFT889=w500\", 1)",
         "The book is free. The stamp isn't.",
         "Feed 1x1, Landscape 1.91x1, Story 9x16",
@@ -210,6 +213,7 @@
         "1 Offer",
         "Printed And Posted",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1qdT7byE5YucYGk_UXiWU33655p0IakCS=w500\", 1)",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1qdT7byE5YucYGk_UXiWU33655p0IakCS=w500\", 1)",
         "We'll post you the book. You cover the stamp.",
         "Feed 1x1, Landscape 1.91x1, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1qdT7byE5YucYGk_UXiWU33655p0IakCS/view\", \"Open file\")",
@@ -219,6 +223,7 @@
         "1d",
         "1 Offer",
         "What's Inside",
+        "=IMAGE(\"https://lh3.googleusercontent.com/d/1jKT3SebWxveM_CeEZpd7aVNjSiYXIjDT=w500\", 1)",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1jKT3SebWxveM_CeEZpd7aVNjSiYXIjDT=w500\", 1)",
         "What it actually costs to open a squat, with the real numbers.",
         "Feed 1x1, Landscape 1.91x1, Story 9x16",
@@ -230,6 +235,7 @@
         "2 Offer + proof",
         "Someone Else's Dream",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1Ga1OpTFrA5U1jPnMJaJ5H2Lb4Q6U-_7I=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Every patient you see builds someone else's practice.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1Ga1OpTFrA5U1jPnMJaJ5H2Lb4Q6U-_7I/view\", \"Open file\")",
@@ -240,6 +246,7 @@
         "2 Offer + proof",
         "No Catch",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1suiIxbm5OD8S_UeTMA8uUMDys5K923Xx=w500\", 1)",
+        "No 1x1 cut in this batch",
         "A free book. No catch. Seriously.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1suiIxbm5OD8S_UeTMA8uUMDys5K923Xx/view\", \"Open file\")",
@@ -250,6 +257,7 @@
         "2 Offer + proof",
         "Table Of Contents",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1a5u14vudsCXtyA6FQZr7WLk4VWxPHB_T=w500\", 1)",
+        "No 1x1 cut in this batch",
         "9 chapters. From \"should I?\" to your first 12 months.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1a5u14vudsCXtyA6FQZr7WLk4VWxPHB_T/view\", \"Open file\")",
@@ -260,6 +268,7 @@
         "2 Offer + proof",
         "Us Vs Them",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/12i0RXOlhDSk12H7MrFLFthN64VFzB45w=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Squat advice, without the sales pitch.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/12i0RXOlhDSk12H7MrFLFthN64VFzB45w/view\", \"Open file\")",
@@ -270,6 +279,7 @@
         "2 Offer + proof",
         "The Stat 61%",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1qCE7yrpl9ZkC0cJ7ubYJ9Wbe8pwDs1Rk=w500\", 1)",
+        "No 1x1 cut in this batch",
         "61% of the UK dental workforce scored high for emotional exhaustion. (Br Dent J, 2025)",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1qCE7yrpl9ZkC0cJ7ubYJ9Wbe8pwDs1Rk/view\", \"Open file\")",
@@ -280,6 +290,7 @@
         "2 Offer + proof",
         "Why Free",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1S42_MLL2xhwZjFpMmcUge3m_uJjnQV9Y=w500\", 1)",
+        "No 1x1 cut in this batch",
         "\"I'd rather this book was in a thousand hands than sold to two hundred.\" Dr Bobby Bhandal",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1S42_MLL2xhwZjFpMmcUge3m_uJjnQV9Y/view\", \"Open file\")",
@@ -290,6 +301,7 @@
         "4 Book content",
         "Three Infections",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1Mcg-UNO8GoNwbDdR01E6-vT0-haEKSPq=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Three infections keep good dentists stuck.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1Mcg-UNO8GoNwbDdR01E6-vT0-haEKSPq/view\", \"Open file\")",
@@ -300,6 +312,7 @@
         "4 Book content",
         "Certainty Compass",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1T3mAD96qYwqmBc3NBQ3LC44WEhMwelxk=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Three decisions settle almost everything.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1T3mAD96qYwqmBc3NBQ3LC44WEhMwelxk/view\", \"Open file\")",
@@ -310,6 +323,7 @@
         "4 Book content",
         "Invisible Waiting List",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1L6FVT_c2VBYzCc25RhcXmuXxK0fStoGX=w500\", 1)",
+        "No 1x1 cut in this batch",
         "There is a way to open with a queue already waiting.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1L6FVT_c2VBYzCc25RhcXmuXxK0fStoGX/view\", \"Open file\")",
@@ -320,6 +334,7 @@
         "4 Book content",
         "Ready Now Or Twelve Months",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1iXkJa3HWjCmilMiwkuWGKYfr5cD4pMqC=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Ready now, or twelve months from now?",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1iXkJa3HWjCmilMiwkuWGKYfr5cD4pMqC/view\", \"Open file\")",
@@ -330,6 +345,7 @@
         "4 Book content",
         "Not In The Conference Talk",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1P0ZQsDJIeHxeQOpZ76xtsGdFfqX61zTR=w500\", 1)",
+        "No 1x1 cut in this batch",
         "The parts that don't make the conference talk.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1P0ZQsDJIeHxeQOpZ76xtsGdFfqX61zTR/view\", \"Open file\")",
@@ -340,6 +356,7 @@
         "5 Persona",
         "Ceiling Hitter",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1i32ORtb3Uvg-4U6rzTs2DBmdJtKiW00K=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Your book is full. Your split hasn't moved.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1i32ORtb3Uvg-4U6rzTs2DBmdJtKiW00K/view\", \"Open file\")",
@@ -350,6 +367,7 @@
         "5 Persona",
         "NHS Escapee",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1k9oI6G-lobC494uPlRWNI5e755GFzIRY=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Your targets were set by someone who isn't in the room.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1k9oI6G-lobC494uPlRWNI5e755GFzIRY/view\", \"Open file\")",
@@ -360,6 +378,7 @@
         "5 Persona",
         "Late Starter",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1IhC1Iz7YIn-vcR653YPEynlvpYf7nbtQ=w500\", 1)",
+        "No 1x1 cut in this batch",
         "\"One day\" has been one day for nine years.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1IhC1Iz7YIn-vcR653YPEynlvpYf7nbtQ/view\", \"Open file\")",
@@ -370,6 +389,7 @@
         "5 Persona",
         "Committed Builder",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/13ztoOcDIKmt6vmP-6NlXwps2k-T5OcXM=w500\", 1)",
+        "No 1x1 cut in this batch",
         "You're past \"should I\". Now don't get it wrong.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/13ztoOcDIKmt6vmP-6NlXwps2k-T5OcXM/view\", \"Open file\")",
@@ -380,6 +400,7 @@
         "5 Persona",
         "Struggling New Owner",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1G8rCV8K_BpYvVltXBIosr3_LsxwkBBmP=w500\", 1)",
+        "No 1x1 cut in this batch",
         "You opened. The diary didn't fill.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1G8rCV8K_BpYvVltXBIosr3_LsxwkBBmP/view\", \"Open file\")",
@@ -390,6 +411,7 @@
         "6 Pain hook",
         "Associate Ceiling",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1Ton1WDdyjiCHEV45Q4dnUUPWGor3fpWV=w500\", 1)",
+        "No 1x1 cut in this batch",
         "The associate lifestyle has a ceiling.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1Ton1WDdyjiCHEV45Q4dnUUPWGor3fpWV/view\", \"Open file\")",
@@ -400,6 +422,7 @@
         "6 Pain hook",
         "Someone Else's Diary",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/14bg1E5x6THyEcIdRSTvWVcoZOUOaHMaW=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Someone else's diary. Someone else's practice.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/14bg1E5x6THyEcIdRSTvWVcoZOUOaHMaW/view\", \"Open file\")",
@@ -410,6 +433,7 @@
         "6 Pain hook",
         "Never Own The Asset",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1qQTnlOC7uYtEnw7AqjWD7dAOoZbPbFf5=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Ten years of building an asset you'll never own.",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1qQTnlOC7uYtEnw7AqjWD7dAOoZbPbFf5/view\", \"Open file\")",
@@ -420,6 +444,7 @@
         "6 Pain hook",
         "Tired Of The Associate Lifestyle",
         "=IMAGE(\"https://lh3.googleusercontent.com/d/1fbOsKRdtq6YFLmdeSr1pRKr3EkBkFz41=w500\", 1)",
+        "No 1x1 cut in this batch",
         "Tired of the associate lifestyle?",
         "Feed 4x5, Story 9x16",
         "=HYPERLINK(\"https://drive.google.com/file/d/1fbOsKRdtq6YFLmdeSr1pRKr3EkBkFz41/view\", \"Open file\")",
@@ -428,11 +453,12 @@
     ],
     "widths": [
       7,
-      17,
-      26,
-      30,
-      50,
+      15,
+      24,
       28,
+      28,
+      46,
+      26,
       14,
       12
     ],
@@ -501,7 +527,7 @@
         "It really is just the postage",
         "Refunded if it isn't useful",
         "Get Offer",
-        "NONE IN THIS BATCH. Interim: 1b The Catch. Needs its own creative."
+        "To build: RT-a Just The Postage (see RT Creative Briefs). Interim: 1b The Catch."
       ],
       [
         "RT-02",
@@ -510,7 +536,7 @@
         "Four hours, worst case",
         "Free book, £4.95 postage",
         "Get Offer",
-        "NONE IN THIS BATCH. Interim: 1c Printed And Posted. Needs its own creative."
+        "To build: RT-b Four Hours (see RT Creative Briefs). Interim: 1c Printed And Posted."
       ],
       [
         "RT-03",
@@ -519,7 +545,7 @@
         "You were one field away",
         "Finish your order",
         "Get Offer",
-        "NONE IN THIS BATCH. No interim fits. Needs its own creative."
+        "To build: RT-c One Field Away (see RT Creative Briefs). No interim fits, hold until built."
       ]
     ],
     "widths": [
@@ -530,6 +556,66 @@
       24,
       13,
       44
+    ],
+    "frozenCols": 2
+  },
+  "briefs": {
+    "head": [
+      "Creative ref",
+      "For copy block",
+      "Angle",
+      "Headline",
+      "Sub-line / on-creative detail",
+      "CTA bar",
+      "Visual direction",
+      "Formats",
+      "Notes"
+    ],
+    "rows": [
+      [
+        "RT-a Just The Postage",
+        "RT-01",
+        "Kills the cost objection before the copy has to. The hesitation is not that £4.95 is a lot, it is that paying anything for a free book feels like the opening move of a subscription. An itemised bill answers that faster than a sentence can, because it shows the zeroes.",
+        "Here is the whole bill.",
+        "Receipt block is the hero element, set in the gold accent on the dark canvas:\n\nThe Dental Freedom Blueprint     £0.00\nUK postage                       £4.95\nSubscription                     £0.00\nAnything later                   £0.00\n________________________________\nTotal                            £4.95\n\nUnder the rule: Postage refunded if the book is not useful.",
+        "Send me my free copy →",
+        "Dark canvas, no photography. The receipt is the image. Monospaced or tabular figures with leader dots so it reads as a bill rather than a feature list. Book render small, bottom right, so the receipt keeps the weight. Eyebrow top right in letterspaced gold caps: STILL DECIDING?",
+        "1080x1080, 1080x1350, 1080x1920",
+        "Every figure on this creative must match the funnel exactly. If postage ever changes, this creative is the first thing to pull. Do not add a struck-through RRP, because the book has no published retail price."
+      ],
+      [
+        "RT-b Four Hours",
+        "RT-02",
+        "For the people who did not balk at the money. Time is the real objection and it is a fair one, so the creative does not argue with it, it reprices it. Four hours against the decision it informs is a trade that answers itself.",
+        "Four hours now, or another year of wondering.",
+        "Nine chapters. It arrives as a paperback, not another tab you leave open.",
+        "Send me my free copy →",
+        "The only warm, domestic frame in the set, and that contrast is the point. The book closed on a side table in evening lamp light, a mug beside it, out of focus room behind. No practice, no scrubs, no teeth. It has to look like the end of a day rather than more work. Eyebrow top right: FOUR HOURS.",
+        "1080x1080, 1080x1350, 1080x1920",
+        "Four hours is the landing page's own figure, so it stays as written. No reading-speed or completion claims beyond it."
+      ],
+      [
+        "RT-c One Field Away",
+        "RT-03",
+        "The narrowest and most valuable audience: people who reached the address step and stopped. Two frictions cause it, and both are mechanical rather than emotional. Name them on the creative and the ad does the support job the form could not.",
+        "One field away.",
+        "Each address line needs to be under 30 characters. That is the printer's label format, not a catch.",
+        "Finish my order →",
+        "Cream canvas, so it reads as a different moment from the dark prospecting set. A parcel address label, partly filled, recipient line blank with a cursor sitting in it. Or the book in an open padded envelope with the label not yet written. Physical and close up. The book render can be omitted here, because the parcel is the book.",
+        "1080x1080, 1080x1350, 1080x1920",
+        "Only ever served to the form-abandon audience. It makes no sense to anyone who has not seen the form, so exclude it from every broad or prospecting ad set."
+      ]
+    ],
+    "widths": [
+      24,
+      14,
+      62,
+      34,
+      46,
+      24,
+      62,
+      22,
+      50
     ],
     "frozenCols": 2
   },
@@ -573,7 +659,12 @@
       [
         "Retargeting creative",
         "RT-01 to RT-03 have no creative in this batch. All 24 concepts are built for a cold audience, and a retargeting ad showing the same image the person already scrolled past is the weak version of one. RT-03, aimed at people who abandoned the address form, has nothing that fits at all.",
-        "Sign-off to produce three warm-audience statics: the £4.95 broken down so it reads as postage rather than a price, a \"four hours\" time-cost frame, and a \"you were one field away\" form or address-label visual. Until then RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off."
+        "Briefed on the RT Creative Briefs tab: RT-a Just The Postage, RT-b Four Hours and RT-c One Field Away, each at 1080x1080, 1080x1350 and 1080x1920. Needs sign-off and a build slot. Until they exist, RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off."
+      ],
+      [
+        "Square (1:1) cuts",
+        "Only set 1 (1a to 1d) was exported at 1080x1080. The other 20 concepts exist as 1080x1350 and 1080x1920 only, so the Preview (square 1x1) column is empty for them. The Book Launch Drive folder holds the same 52 files and adds no squares. Cropping a 4x5 down to 1:1 is not safe to do blind, because it would cut into the CTA pill and the book render on most layouts.",
+        "Confirm whether 1:1 is wanted as a placement. If it is, the 20 concepts need re-exporting at 1080x1080 from source rather than cropping."
       ],
       [
         "The missing set 3",

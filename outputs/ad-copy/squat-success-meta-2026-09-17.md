@@ -808,6 +808,68 @@ If the book isn't useful when it lands, email hello@squatsuccess.co.uk and we re
 
 ---
 
+## Retargeting creative briefs (to build)
+
+Design language: match the existing Squat Success set. SQUAT SUCCESS logotype top left,
+letterspaced gold eyebrow top right, heavy sans headline with a gold emphasis phrase,
+orange CTA pill, "Free book · £4.95 postage" footer. No em dashes on artwork.
+
+### RT-a Just The Postage · for RT-01
+
+- **Angle:** Kills the cost objection before the copy has to. The hesitation is not that £4.95 is a lot, it is that paying anything for a free book feels like the opening move of a subscription. An itemised bill answers that faster than a sentence can, because it shows the zeroes.
+- **Headline:** Here is the whole bill.
+- **Sub-line / on-creative detail:**
+
+```
+Receipt block is the hero element, set in the gold accent on the dark canvas:
+
+The Dental Freedom Blueprint     £0.00
+UK postage                       £4.95
+Subscription                     £0.00
+Anything later                   £0.00
+________________________________
+Total                            £4.95
+
+Under the rule: Postage refunded if the book is not useful.
+```
+
+- **CTA bar:** Send me my free copy →
+- **Visual:** Dark canvas, no photography. The receipt is the image. Monospaced or tabular figures with leader dots so it reads as a bill rather than a feature list. Book render small, bottom right, so the receipt keeps the weight. Eyebrow top right in letterspaced gold caps: STILL DECIDING?
+- **Formats:** 1080x1080, 1080x1350, 1080x1920
+- **Notes:** Every figure on this creative must match the funnel exactly. If postage ever changes, this creative is the first thing to pull. Do not add a struck-through RRP, because the book has no published retail price.
+
+### RT-b Four Hours · for RT-02
+
+- **Angle:** For the people who did not balk at the money. Time is the real objection and it is a fair one, so the creative does not argue with it, it reprices it. Four hours against the decision it informs is a trade that answers itself.
+- **Headline:** Four hours now, or another year of wondering.
+- **Sub-line / on-creative detail:**
+
+```
+Nine chapters. It arrives as a paperback, not another tab you leave open.
+```
+
+- **CTA bar:** Send me my free copy →
+- **Visual:** The only warm, domestic frame in the set, and that contrast is the point. The book closed on a side table in evening lamp light, a mug beside it, out of focus room behind. No practice, no scrubs, no teeth. It has to look like the end of a day rather than more work. Eyebrow top right: FOUR HOURS.
+- **Formats:** 1080x1080, 1080x1350, 1080x1920
+- **Notes:** Four hours is the landing page's own figure, so it stays as written. No reading-speed or completion claims beyond it.
+
+### RT-c One Field Away · for RT-03
+
+- **Angle:** The narrowest and most valuable audience: people who reached the address step and stopped. Two frictions cause it, and both are mechanical rather than emotional. Name them on the creative and the ad does the support job the form could not.
+- **Headline:** One field away.
+- **Sub-line / on-creative detail:**
+
+```
+Each address line needs to be under 30 characters. That is the printer's label format, not a catch.
+```
+
+- **CTA bar:** Finish my order →
+- **Visual:** Cream canvas, so it reads as a different moment from the dark prospecting set. A parcel address label, partly filled, recipient line blank with a cursor sitting in it. Or the book in an open padded envelope with the label not yet written. Physical and close up. The book render can be omitted here, because the parcel is the book.
+- **Formats:** 1080x1080, 1080x1350, 1080x1920
+- **Notes:** Only ever served to the form-abandon audience. It makes no sense to anyone who has not seen the form, so exclude it from every broad or prospecting ad set.
+
+---
+
 ## Creative map
 
 | Ref | Set | Creative | On-creative headline | Copy block |
@@ -849,7 +911,8 @@ If the book isn't useful when it lands, email hello@squatsuccess.co.uk and we re
 | Bonuses | The template includes "plus X free bonuses worth £Y". Nothing on the funnel offers bonuses. | Confirm whether anything ships or emails alongside the book. If it does, it belongs in the offer reveal block. |
 | Post-purchase upsell | Deliberately not written. The upsell template needs a real price, a real discount and a real deadline, and inventing any of those is both dishonest and a compliance problem. | The offer that follows the book order: what it is, list price, welcome price, what is included, and whether the deadline is genuine and enforced. |
 | Income and earnings claims | No block contains an earnings claim, a revenue figure or a return on investment claim, so none currently needs a disclaimer. | If Bobby wants earnings or practice value figures added, they need substantiation and a typicality disclaimer before they go anywhere near an ad. |
-| Retargeting creative | RT-01 to RT-03 have no creative in this batch. All 24 concepts are built for a cold audience, and a retargeting ad showing the same image the person already scrolled past is the weak version of one. RT-03, aimed at people who abandoned the address form, has nothing that fits at all. | Sign-off to produce three warm-audience statics: the £4.95 broken down so it reads as postage rather than a price, a "four hours" time-cost frame, and a "you were one field away" form or address-label visual. Until then RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off. |
+| Retargeting creative | RT-01 to RT-03 have no creative in this batch. All 24 concepts are built for a cold audience, and a retargeting ad showing the same image the person already scrolled past is the weak version of one. RT-03, aimed at people who abandoned the address form, has nothing that fits at all. | Briefed on the RT Creative Briefs tab: RT-a Just The Postage, RT-b Four Hours and RT-c One Field Away, each at 1080x1080, 1080x1350 and 1080x1920. Needs sign-off and a build slot. Until they exist, RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off. |
+| Square (1:1) cuts | Only set 1 (1a to 1d) was exported at 1080x1080. The other 20 concepts exist as 1080x1350 and 1080x1920 only, so the Preview (square 1x1) column is empty for them. The Book Launch Drive folder holds the same 52 files and adds no squares. Cropping a 4x5 down to 1:1 is not safe to do blind, because it would cut into the CTA pill and the book render on most layouts. | Confirm whether 1:1 is wanted as a placement. If it is, the 20 concepts need re-exporting at 1080x1080 from source rather than cropping. |
 | The missing set 3 | The exports run 1, 2, 4, 5 and 6. There is no set 3 in the batch and no source for one anywhere else. | Confirm whether set 3 exists and what it was. If it was the warm or retargeting set, it closes the gap above. |
 | Video for Reels | The short-form blocks are written for Stories and Reels placements, but every export is a static. There is no video in the batch. | Confirm whether Reels video is in scope. If it is, the short-form copy stands as written and the assets need producing. |
 | Creative folder sharing | The creative folder is link-shared as view-only. That is required rather than cosmetic: Google fetches the =IMAGE thumbnails on the Creative Map without the viewer's credentials, so a private file renders as a broken cell for everyone. | Confirm that is acceptable. It can be restricted at any time, at the cost of the previews in this sheet. |

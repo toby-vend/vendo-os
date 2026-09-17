@@ -32,6 +32,7 @@ interface Payload {
   adcopy: Tab;
   creatives: Tab;
   variants: Tab;
+  briefs: Tab;
   confirm: Tab;
   destination: string;
   date: string;
@@ -73,7 +74,8 @@ const DATA_TABS = [
   { key: 'adcopy' as const, title: 'Ad Copy', sheetId: 1, frozenCols: 2, rowHeight: 320 },
   { key: 'creatives' as const, title: 'Creative Map', sheetId: 2, frozenCols: 3, rowHeight: 250 },
   { key: 'variants' as const, title: 'Short & Retargeting', sheetId: 3, frozenCols: 2, rowHeight: 200 },
-  { key: 'confirm' as const, title: 'To Confirm', sheetId: 4, frozenCols: 1, rowHeight: 120 },
+  { key: 'briefs' as const, title: 'RT Creative Briefs', sheetId: 5, frozenCols: 2, rowHeight: 260 },
+  { key: 'confirm' as const, title: 'To Confirm', sheetId: 4, frozenCols: 1, rowHeight: 130 },
 ];
 
 // --- Start Here copy ---------------------------------------------------------
@@ -242,8 +244,37 @@ const created = existingId
 const id = created.spreadsheetId;
 
 // On a rebuild the tabs were sized for the previous column set, and a write past
-// the grid edge is rejected. Resize before writing any values.
+// the grid edge is rejected. Resize before writing any values. A tab added since
+// the last build will not exist yet, so create it first rather than trying to
+// resize a sheet id the spreadsheet has never heard of.
 if (existingId) {
+  const current = await api<{ sheets: { properties: { sheetId: number } }[] }>(
+    `/${id}?fields=sheets.properties.sheetId`,
+    'GET',
+  );
+  const present = new Set(current.sheets.map((sh) => sh.properties.sheetId));
+  const missing = DATA_TABS.filter((t) => !present.has(t.sheetId));
+  if (missing.length > 0) {
+    await api(`/${id}:batchUpdate`, 'POST', {
+      requests: missing.map((t, i) => ({
+        addSheet: {
+          properties: {
+            sheetId: t.sheetId,
+            title: t.title,
+            index: DATA_TABS.indexOf(t) + 1 + i,
+            gridProperties: {
+              rowCount: payload[t.key].rows.length + 2,
+              columnCount: payload[t.key].head.length,
+              frozenRowCount: 1,
+              frozenColumnCount: payload[t.key].frozenCols ?? t.frozenCols,
+            },
+          },
+        },
+      })),
+    });
+    console.log(`added tabs: ${missing.map((t) => t.title).join(', ')}`);
+  }
+
   await api(`/${id}:batchUpdate`, 'POST', {
     requests: [
       {
@@ -438,8 +469,10 @@ DATA_TABS.forEach((t) => {
     },
   });
 
-  const previewCol = tab.head.indexOf('Preview (feed)');
-  if (previewCol >= 0) {
+  const previewCols = tab.head
+    .map((h, i) => (h.startsWith('Preview (') ? i : -1))
+    .filter((i) => i >= 0);
+  for (const previewCol of previewCols) {
     requests.push({
       repeatCell: {
         range: {

@@ -43,6 +43,16 @@ function feedFileId(stem: string): string | null {
   return name ? ASSETS.files[name] : null;
 }
 
+/**
+ * The true 1:1 export, which only set 1 has. Sets 2, 4, 5 and 6 were cut at
+ * 1080x1350 and 1080x1920 only, so most rows have no square at all.
+ */
+function squareFileId(stem: string): string | null {
+  if (!ASSETS) return null;
+  const name = Object.keys(ASSETS.files).find((f) => f === `${stem}_feed-1080x1080.png`);
+  return name ? ASSETS.files[name] : null;
+}
+
 const SHEET =
   'https://docs.google.com/spreadsheets/d/1yI9SYYsnwUmYbH9XWVcPqj5Y9cnfBhEVkk8DstRROhM/edit';
 
@@ -765,7 +775,7 @@ Read it and it isn't useful? Email hello@squatsuccess.co.uk and we refund the £
     headline: 'It really is just the postage',
     description: 'Refunded if it isn\'t useful',
     cta: 'Get Offer',
-    creative: 'NONE IN THIS BATCH. Interim: 1b The Catch. Needs its own creative.',
+    creative: 'To build: RT-a Just The Postage (see RT Creative Briefs). Interim: 1b The Catch.',
   },
   {
     ref: 'RT-02',
@@ -786,7 +796,7 @@ Free book. £4.95 postage. No subscription, ever. Postage refunded if it isn't u
     headline: 'Four hours, worst case',
     description: 'Free book, £4.95 postage',
     cta: 'Get Offer',
-    creative: 'NONE IN THIS BATCH. Interim: 1c Printed And Posted. Needs its own creative.',
+    creative: 'To build: RT-b Four Hours (see RT Creative Briefs). Interim: 1c Printed And Posted.',
   },
   {
     ref: 'RT-03',
@@ -807,7 +817,69 @@ If the book isn't useful when it lands, email hello@squatsuccess.co.uk and we re
     headline: 'You were one field away',
     description: 'Finish your order',
     cta: 'Get Offer',
-    creative: 'NONE IN THIS BATCH. No interim fits. Needs its own creative.',
+    creative: 'To build: RT-c One Field Away (see RT Creative Briefs). No interim fits, hold until built.',
+  },
+];
+
+// --- Retargeting creative briefs ---------------------------------------------
+
+interface Brief {
+  ref: string;
+  block: string;
+  angle: string;
+  headline: string;
+  subline: string;
+  ctaBar: string;
+  visual: string;
+  formats: string;
+  notes: string;
+}
+
+const BRIEFS: Brief[] = [
+  {
+    ref: 'RT-a Just The Postage',
+    block: 'RT-01',
+    angle:
+      'Kills the cost objection before the copy has to. The hesitation is not that £4.95 is a lot, it is that paying anything for a free book feels like the opening move of a subscription. An itemised bill answers that faster than a sentence can, because it shows the zeroes.',
+    headline: 'Here is the whole bill.',
+    subline:
+      'Receipt block is the hero element, set in the gold accent on the dark canvas:\n\nThe Dental Freedom Blueprint     £0.00\nUK postage                       £4.95\nSubscription                     £0.00\nAnything later                   £0.00\n________________________________\nTotal                            £4.95\n\nUnder the rule: Postage refunded if the book is not useful.',
+    ctaBar: 'Send me my free copy →',
+    visual:
+      'Dark canvas, no photography. The receipt is the image. Monospaced or tabular figures with leader dots so it reads as a bill rather than a feature list. Book render small, bottom right, so the receipt keeps the weight. Eyebrow top right in letterspaced gold caps: STILL DECIDING?',
+    formats: '1080x1080, 1080x1350, 1080x1920',
+    notes:
+      'Every figure on this creative must match the funnel exactly. If postage ever changes, this creative is the first thing to pull. Do not add a struck-through RRP, because the book has no published retail price.',
+  },
+  {
+    ref: 'RT-b Four Hours',
+    block: 'RT-02',
+    angle:
+      'For the people who did not balk at the money. Time is the real objection and it is a fair one, so the creative does not argue with it, it reprices it. Four hours against the decision it informs is a trade that answers itself.',
+    headline: 'Four hours now, or another year of wondering.',
+    subline:
+      'Nine chapters. It arrives as a paperback, not another tab you leave open.',
+    ctaBar: 'Send me my free copy →',
+    visual:
+      'The only warm, domestic frame in the set, and that contrast is the point. The book closed on a side table in evening lamp light, a mug beside it, out of focus room behind. No practice, no scrubs, no teeth. It has to look like the end of a day rather than more work. Eyebrow top right: FOUR HOURS.',
+    formats: '1080x1080, 1080x1350, 1080x1920',
+    notes:
+      'Four hours is the landing page\'s own figure, so it stays as written. No reading-speed or completion claims beyond it.',
+  },
+  {
+    ref: 'RT-c One Field Away',
+    block: 'RT-03',
+    angle:
+      'The narrowest and most valuable audience: people who reached the address step and stopped. Two frictions cause it, and both are mechanical rather than emotional. Name them on the creative and the ad does the support job the form could not.',
+    headline: 'One field away.',
+    subline:
+      'Each address line needs to be under 30 characters. That is the printer\'s label format, not a catch.',
+    ctaBar: 'Finish my order →',
+    visual:
+      'Cream canvas, so it reads as a different moment from the dark prospecting set. A parcel address label, partly filled, recipient line blank with a cursor sitting in it. Or the book in an open padded envelope with the label not yet written. Physical and close up. The book render can be omitted here, because the parcel is the book.',
+    formats: '1080x1080, 1080x1350, 1080x1920',
+    notes:
+      'Only ever served to the form-abandon audience. It makes no sense to anyone who has not seen the form, so exclude it from every broad or prospecting ad set.',
   },
 ];
 
@@ -886,7 +958,12 @@ const CONFIRM: string[][] = [
   [
     'Retargeting creative',
     'RT-01 to RT-03 have no creative in this batch. All 24 concepts are built for a cold audience, and a retargeting ad showing the same image the person already scrolled past is the weak version of one. RT-03, aimed at people who abandoned the address form, has nothing that fits at all.',
-    'Sign-off to produce three warm-audience statics: the £4.95 broken down so it reads as postage rather than a price, a "four hours" time-cost frame, and a "you were one field away" form or address-label visual. Until then RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off.',
+    'Briefed on the RT Creative Briefs tab: RT-a Just The Postage, RT-b Four Hours and RT-c One Field Away, each at 1080x1080, 1080x1350 and 1080x1920. Needs sign-off and a build slot. Until they exist, RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off.',
+  ],
+  [
+    'Square (1:1) cuts',
+    'Only set 1 (1a to 1d) was exported at 1080x1080. The other 20 concepts exist as 1080x1350 and 1080x1920 only, so the Preview (square 1x1) column is empty for them. The Book Launch Drive folder holds the same 52 files and adds no squares. Cropping a 4x5 down to 1:1 is not safe to do blind, because it would cut into the CTA pill and the book render on most layouts.',
+    'Confirm whether 1:1 is wanted as a placement. If it is, the 20 concepts need re-exporting at 1080x1080 from source rather than cropping.',
   ],
   [
     'The missing set 3',
@@ -944,6 +1021,7 @@ const payload = {
       'Set',
       'Creative Name',
       'Preview (feed)',
+      'Preview (square 1x1)',
       'On-creative headline (do not repeat verbatim)',
       'Formats exported',
       'Open in Drive',
@@ -951,11 +1029,15 @@ const payload = {
     ],
     rows: CREATIVES.map((c) => {
       const fileId = feedFileId(c.file);
+      const sqId = squareFileId(c.file);
       return [
         c.ref,
         c.set,
         c.name,
         fileId ? `=IMAGE("https://lh3.googleusercontent.com/d/${fileId}=w500", 1)` : c.file,
+        sqId
+          ? `=IMAGE("https://lh3.googleusercontent.com/d/${sqId}=w500", 1)`
+          : 'No 1x1 cut in this batch',
         c.onCreative,
         c.formats,
         fileId
@@ -964,13 +1046,39 @@ const payload = {
         c.block,
       ];
     }),
-    widths: [7, 17, 26, 30, 50, 28, 14, 12],
+    widths: [7, 15, 24, 28, 28, 46, 26, 14, 12],
     frozenCols: 3,
   },
   variants: {
     head: ['Ref', 'Use', 'Primary Text', 'Headline', 'Description', 'CTA Button', 'Creative to run it on'],
     rows: VARIANTS.map((v) => [v.ref, v.use, v.primary, v.headline, v.description, v.cta, v.creative]),
     widths: [8, 40, 84, 30, 24, 13, 44],
+    frozenCols: 2,
+  },
+  briefs: {
+    head: [
+      'Creative ref',
+      'For copy block',
+      'Angle',
+      'Headline',
+      'Sub-line / on-creative detail',
+      'CTA bar',
+      'Visual direction',
+      'Formats',
+      'Notes',
+    ],
+    rows: BRIEFS.map((b) => [
+      b.ref,
+      b.block,
+      b.angle,
+      b.headline,
+      b.subline,
+      b.ctaBar,
+      b.visual,
+      b.formats,
+      b.notes,
+    ]),
+    widths: [24, 14, 62, 34, 46, 24, 62, 22, 50],
     frozenCols: 2,
   },
   confirm: {
@@ -1051,6 +1159,31 @@ const md = [
     `**Headline:** ${v.headline} (${v.headline.length} chars)  `,
     `**Description:** ${v.description} (${v.description.length} chars)  `,
     `**CTA Button:** ${v.cta}`,
+    '',
+  ]),
+  '---',
+  '',
+  '## Retargeting creative briefs (to build)',
+  '',
+  'Design language: match the existing Squat Success set. SQUAT SUCCESS logotype top left,',
+  'letterspaced gold eyebrow top right, heavy sans headline with a gold emphasis phrase,',
+  'orange CTA pill, "Free book · £4.95 postage" footer. No em dashes on artwork.',
+  '',
+  ...BRIEFS.flatMap((b) => [
+    `### ${b.ref} · for ${b.block}`,
+    '',
+    `- **Angle:** ${b.angle}`,
+    `- **Headline:** ${b.headline}`,
+    `- **Sub-line / on-creative detail:**`,
+    '',
+    '```',
+    b.subline,
+    '```',
+    '',
+    `- **CTA bar:** ${b.ctaBar}`,
+    `- **Visual:** ${b.visual}`,
+    `- **Formats:** ${b.formats}`,
+    `- **Notes:** ${b.notes}`,
     '',
   ]),
   '---',
