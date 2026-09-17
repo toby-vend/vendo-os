@@ -43,14 +43,35 @@ function feedFileId(stem: string): string | null {
   return name ? ASSETS.files[name] : null;
 }
 
-/**
- * The true 1:1 export, which only set 1 has. Sets 2, 4, 5 and 6 were cut at
- * 1080x1350 and 1080x1920 only, so most rows have no square at all.
- */
+/** The true 1:1 export. */
 function squareFileId(stem: string): string | null {
   if (!ASSETS) return null;
   const name = Object.keys(ASSETS.files).find((f) => f === `${stem}_feed-1080x1080.png`);
   return name ? ASSETS.files[name] : null;
+}
+
+const RATIO_LABELS: Record<string, string> = {
+  '1080x1080': 'Square 1x1',
+  '1080x1350': 'Portrait 4x5',
+  '1080x1920': 'Story 9x16',
+  '1200x628': 'Landscape 1.91x1',
+};
+
+/**
+ * Read the formats off the manifest rather than hardcoding them, so a re-export
+ * that adds or drops a ratio is reflected without anyone having to remember.
+ */
+function formatsFor(stem: string): string {
+  if (!ASSETS) return '';
+  const ratios = Object.keys(ASSETS.files)
+    .filter((f) => f.startsWith(`${stem}_`))
+    .map((f) => f.match(/(\d+x\d+)\.png$/)?.[1])
+    .filter((r): r is string => Boolean(r));
+  const order = ['1080x1080', '1080x1350', '1080x1920', '1200x628'];
+  return order
+    .filter((r) => ratios.includes(r))
+    .map((r) => RATIO_LABELS[r])
+    .join(', ');
 }
 
 const SHEET =
@@ -775,7 +796,7 @@ Read it and it isn't useful? Email hello@squatsuccess.co.uk and we refund the £
     headline: 'It really is just the postage',
     description: 'Refunded if it isn\'t useful',
     cta: 'Get Offer',
-    creative: 'To build: RT-a Just The Postage (see RT Creative Briefs). Interim: 1b The Catch.',
+    creative: 'RT-a Just The Postage (built: 1x1, 4x5, 9x16). See RT Creative Briefs.',
   },
   {
     ref: 'RT-02',
@@ -796,7 +817,7 @@ Free book. £4.95 postage. No subscription, ever. Postage refunded if it isn't u
     headline: 'Four hours, worst case',
     description: 'Free book, £4.95 postage',
     cta: 'Get Offer',
-    creative: 'To build: RT-b Four Hours (see RT Creative Briefs). Interim: 1c Printed And Posted.',
+    creative: 'RT-b Four Hours (built: 1x1, 4x5, 9x16). See RT Creative Briefs.',
   },
   {
     ref: 'RT-03',
@@ -817,7 +838,7 @@ If the book isn't useful when it lands, email hello@squatsuccess.co.uk and we re
     headline: 'You were one field away',
     description: 'Finish your order',
     cta: 'Get Offer',
-    creative: 'To build: RT-c One Field Away (see RT Creative Briefs). No interim fits, hold until built.',
+    creative: 'RT-c One Field Away (built: 1x1, 4x5, 9x16). Form-abandon audience only, never a broad ad set.',
   },
 ];
 
@@ -825,6 +846,7 @@ If the book isn't useful when it lands, email hello@squatsuccess.co.uk and we re
 
 interface Brief {
   ref: string;
+  file: string;
   block: string;
   angle: string;
   headline: string;
@@ -838,6 +860,7 @@ interface Brief {
 const BRIEFS: Brief[] = [
   {
     ref: 'RT-a Just The Postage',
+    file: 'RT-a-just-the-postage',
     block: 'RT-01',
     angle:
       'Kills the cost objection before the copy has to. The hesitation is not that £4.95 is a lot, it is that paying anything for a free book feels like the opening move of a subscription. An itemised bill answers that faster than a sentence can, because it shows the zeroes.',
@@ -853,6 +876,7 @@ const BRIEFS: Brief[] = [
   },
   {
     ref: 'RT-b Four Hours',
+    file: 'RT-b-four-hours',
     block: 'RT-02',
     angle:
       'For the people who did not balk at the money. Time is the real objection and it is a fair one, so the creative does not argue with it, it reprices it. Four hours against the decision it informs is a trade that answers itself.',
@@ -868,6 +892,7 @@ const BRIEFS: Brief[] = [
   },
   {
     ref: 'RT-c One Field Away',
+    file: 'RT-c-one-field-away',
     block: 'RT-03',
     angle:
       'The narrowest and most valuable audience: people who reached the address step and stopped. Two frictions cause it, and both are mechanical rather than emotional. Name them on the creative and the ad does the support job the form could not.',
@@ -956,14 +981,14 @@ const CONFIRM: string[][] = [
     'If Bobby wants earnings or practice value figures added, they need substantiation and a typicality disclaimer before they go anywhere near an ad.',
   ],
   [
-    'Retargeting creative',
-    'RT-01 to RT-03 have no creative in this batch. All 24 concepts are built for a cold audience, and a retargeting ad showing the same image the person already scrolled past is the weak version of one. RT-03, aimed at people who abandoned the address form, has nothing that fits at all.',
-    'Briefed on the RT Creative Briefs tab: RT-a Just The Postage, RT-b Four Hours and RT-c One Field Away, each at 1080x1080, 1080x1350 and 1080x1920. Needs sign-off and a build slot. Until they exist, RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off.',
+    'RT-c audience exclusion',
+    'RT-c One Field Away is built and says "one field away" on the artwork. It only makes sense to someone who reached the address step of the form, and reads as a non sequitur to anyone else.',
+    'Confirm it is bound to the form-abandon audience only and excluded from every broad and prospecting ad set before RT-03 goes live.',
   ],
   [
-    'Square (1:1) cuts',
-    'Only set 1 (1a to 1d) was exported at 1080x1080. The other 20 concepts exist as 1080x1350 and 1080x1920 only, so the Preview (square 1x1) column is empty for them. The Book Launch Drive folder holds the same 52 files and adds no squares. Cropping a 4x5 down to 1:1 is not safe to do blind, because it would cut into the CTA pill and the book render on most layouts.',
-    'Confirm whether 1:1 is wanted as a placement. If it is, the 20 concepts need re-exporting at 1080x1080 from source rather than cropping.',
+    'Set 1 has no 4x5',
+    'Sets 2, 4, 5, 6 and the RT set are built at 1x1, 4x5 and 9x16. Set 1 (1a to 1d) is 1x1, 9x16 and 1.91x1 instead, so it is the only set that cannot serve the 4x5 feed slot.',
+    'Confirm whether that is deliberate. If 4x5 is wanted for set 1, those four need re-exporting.',
   ],
   [
     'The missing set 3',
@@ -984,7 +1009,132 @@ const CONFIRM: string[][] = [
 
 // --- Payload -----------------------------------------------------------------
 
+// One row per creative, with its copy inline. This is the build sheet: whoever
+// loads Ads Manager should never have to cross-reference a second tab. Copy is
+// repeated across the creatives that share an angle, deliberately.
+const BLOCK_BY_REF = new Map(BLOCKS.map((b) => [b.ref, b]));
+const VARIANT_BY_REF = new Map(VARIANTS.map((v) => [v.ref, v]));
+
+interface BuildRow {
+  ref: string;
+  set: string;
+  name: string;
+  file: string;
+  onCreative: string;
+  blockRef: string;
+}
+
+const BUILD_ROWS: BuildRow[] = [
+  ...CREATIVES.map((c) => ({
+    ref: c.ref,
+    set: c.set,
+    name: c.name,
+    file: c.file,
+    onCreative: c.onCreative,
+    blockRef: c.block,
+  })),
+  {
+    ref: 'RT-a',
+    set: 'RT Retargeting',
+    name: 'Just The Postage',
+    file: 'RT-a-just-the-postage',
+    onCreative: 'Here is the whole bill.',
+    blockRef: 'RT-01',
+  },
+  {
+    ref: 'RT-b',
+    set: 'RT Retargeting',
+    name: 'Four Hours',
+    file: 'RT-b-four-hours',
+    onCreative: 'Four hours now, or another year of wondering.',
+    blockRef: 'RT-02',
+  },
+  {
+    ref: 'RT-c',
+    set: 'RT Retargeting',
+    name: 'One Field Away',
+    file: 'RT-c-one-field-away',
+    onCreative: 'One field away.',
+    blockRef: 'RT-03',
+  },
+];
+
+function copyFor(blockRef: string): {
+  primary: string;
+  headline: string;
+  alts: string;
+  description: string;
+  cta: string;
+  angle: string;
+} {
+  const block = BLOCK_BY_REF.get(blockRef);
+  if (block) {
+    return {
+      primary: block.primary,
+      headline: block.headline,
+      alts: block.altHeadlines.join('\n'),
+      description: block.description,
+      cta: block.cta,
+      angle: block.angle,
+    };
+  }
+  const variant = VARIANT_BY_REF.get(blockRef);
+  if (!variant) throw new Error(`No copy block or variant for ref ${blockRef}`);
+  return {
+    primary: variant.primary,
+    headline: variant.headline,
+    alts: '',
+    description: variant.description,
+    cta: variant.cta,
+    angle: variant.use,
+  };
+}
+
 const payload = {
+  build: {
+    head: [
+      'Ref',
+      'Set',
+      'Creative Name',
+      'Preview (square 1x1)',
+      'Formats',
+      'Open in Drive',
+      'On-creative headline (do not repeat verbatim)',
+      'Copy block',
+      'Angle',
+      'Primary Text',
+      'Headline',
+      'Headline alternates (rotate)',
+      'Description',
+      'CTA Button',
+      'Destination URL',
+    ],
+    rows: BUILD_ROWS.map((r) => {
+      const sqId = squareFileId(r.file);
+      const c = copyFor(r.blockRef);
+      return [
+        r.ref,
+        r.set,
+        r.name,
+        sqId ? `=IMAGE("https://lh3.googleusercontent.com/d/${sqId}=w500", 1)` : r.file,
+        formatsFor(r.file),
+        sqId
+          ? `=HYPERLINK("https://drive.google.com/file/d/${sqId}/view", "Open file")`
+          : r.file,
+        r.onCreative,
+        r.blockRef,
+        c.angle,
+        c.primary,
+        c.headline,
+        c.alts,
+        c.description,
+        c.cta,
+        DEST,
+      ];
+    }),
+    widths: [7, 15, 24, 28, 26, 13, 44, 12, 34, 84, 30, 30, 24, 13, 32],
+    frozenCols: 3,
+  },
   adcopy: {
     head: [
       'Ref',
@@ -1039,7 +1189,7 @@ const payload = {
           ? `=IMAGE("https://lh3.googleusercontent.com/d/${sqId}=w500", 1)`
           : 'No 1x1 cut in this batch',
         c.onCreative,
-        c.formats,
+        formatsFor(c.file) || c.formats,
         fileId
           ? `=HYPERLINK("https://drive.google.com/file/d/${fileId}/view", "Open file")`
           : c.file,
@@ -1059,26 +1209,34 @@ const payload = {
     head: [
       'Creative ref',
       'For copy block',
+      'Preview (square 1x1)',
+      'Status',
       'Angle',
       'Headline',
       'Sub-line / on-creative detail',
       'CTA bar',
       'Visual direction',
-      'Formats',
+      'Formats built',
       'Notes',
     ],
-    rows: BRIEFS.map((b) => [
-      b.ref,
-      b.block,
-      b.angle,
-      b.headline,
-      b.subline,
-      b.ctaBar,
-      b.visual,
-      b.formats,
-      b.notes,
-    ]),
-    widths: [24, 14, 62, 34, 46, 24, 62, 22, 50],
+    rows: BRIEFS.map((b) => {
+      const sqId = squareFileId(b.file);
+      const built = formatsFor(b.file);
+      return [
+        b.ref,
+        b.block,
+        sqId ? `=IMAGE("https://lh3.googleusercontent.com/d/${sqId}=w500", 1)` : 'Not built yet',
+        built ? 'Built' : 'To build',
+        b.angle,
+        b.headline,
+        b.subline,
+        b.ctaBar,
+        b.visual,
+        built || b.formats,
+        b.notes,
+      ];
+    }),
+    widths: [22, 13, 28, 11, 56, 32, 44, 22, 56, 26, 46],
     frozenCols: 2,
   },
   confirm: {

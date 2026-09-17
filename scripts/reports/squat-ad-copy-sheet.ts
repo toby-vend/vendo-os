@@ -29,6 +29,7 @@ interface Tab {
   frozenCols?: number;
 }
 interface Payload {
+  build: Tab;
   adcopy: Tab;
   creatives: Tab;
   variants: Tab;
@@ -71,7 +72,8 @@ async function api<T>(path: string, method: string, body?: unknown): Promise<T> 
 
 const INTRO_ID = 0;
 const DATA_TABS = [
-  { key: 'adcopy' as const, title: 'Ad Copy', sheetId: 1, frozenCols: 2, rowHeight: 320 },
+  { key: 'build' as const, title: 'Ad Copy', sheetId: 6, frozenCols: 3, rowHeight: 300 },
+  { key: 'adcopy' as const, title: 'Copy Blocks', sheetId: 1, frozenCols: 2, rowHeight: 320 },
   { key: 'creatives' as const, title: 'Creative Map', sheetId: 2, frozenCols: 3, rowHeight: 250 },
   { key: 'variants' as const, title: 'Short & Retargeting', sheetId: 3, frozenCols: 2, rowHeight: 200 },
   { key: 'briefs' as const, title: 'RT Creative Briefs', sheetId: 5, frozenCols: 2, rowHeight: 260 },
@@ -86,8 +88,11 @@ const INTRO: IntroRow[] = [
     kind: 'body',
     text:
       'Primary text, headlines and descriptions for The Dental Freedom Blueprint book funnel. ' +
-      'Eleven long-form copy blocks on the Ad Copy tab, eight short-form and retargeting variants ' +
-      'on the next tab, and a Creative Map pairing all 24 exported creatives to a block.',
+      'The Ad Copy tab is the build sheet: one row per creative, with its preview and its copy ' +
+      'side by side, so nothing needs cross-referencing while loading Ads Manager. Copy Blocks ' +
+      'holds the eleven angles once each, which is where to edit wording. Short & Retargeting ' +
+      'carries the short-form and retargeting text, and RT Creative Briefs documents the three ' +
+      'warm-audience statics.',
   },
   { kind: 'spacer', text: '' },
   { kind: 'h2', text: 'The offer, exactly as the landing page states it' },
@@ -115,11 +120,13 @@ const INTRO: IntroRow[] = [
   {
     kind: 'body',
     text:
-      'One copy block per angle, run against the creatives named in the Pair with column. Do not ' +
-      'rewrite copy that works: when a block is performing, swap the creative and leave the words ' +
-      'alone. Worth having live at once: curiosity led (SS-01), proof led (SS-02), testimonial led ' +
-      '(SS-03), anti-ad (SS-04) and pain led (SS-05). The five persona blocks (SS-08 to SS-11) are ' +
-      'for tighter audiences once the broad angles have a winner.',
+      'One copy block per angle, run against several creatives. The Ad Copy tab repeats a block\'s ' +
+      'text on every creative that shares it, which is deliberate: it is a build sheet, not a ' +
+      'source of truth. Edit wording on Copy Blocks and it flows back through on the next build. ' +
+      'Do not rewrite copy that works: when a block is performing, swap the creative and leave the ' +
+      'words alone. Worth having live at once: curiosity led (SS-01), proof led (SS-02), ' +
+      'testimonial led (SS-03), anti-ad (SS-04) and pain led (SS-05). The persona blocks (SS-08 to ' +
+      'SS-11) are for tighter audiences once the broad angles have a winner.',
   },
   {
     kind: 'body',
@@ -248,11 +255,32 @@ const id = created.spreadsheetId;
 // the last build will not exist yet, so create it first rather than trying to
 // resize a sheet id the spreadsheet has never heard of.
 if (existingId) {
-  const current = await api<{ sheets: { properties: { sheetId: number } }[] }>(
-    `/${id}?fields=sheets.properties.sheetId`,
+  const current = await api<{ sheets: { properties: { sheetId: number; title: string } }[] }>(
+    `/${id}?fields=sheets.properties(sheetId,title)`,
     'GET',
   );
-  const present = new Set(current.sheets.map((sh) => sh.properties.sheetId));
+  const titleById = new Map(current.sheets.map((sh) => [sh.properties.sheetId, sh.properties.title]));
+
+  // Retitle before adding anything. A tab can be renamed and its old name reused by
+  // a new tab in the same build, and addSheet rejects a name that is still taken.
+  const renames = DATA_TABS.filter(
+    (t) => titleById.has(t.sheetId) && titleById.get(t.sheetId) !== t.title,
+  );
+  if (renames.length > 0) {
+    await api(`/${id}:batchUpdate`, 'POST', {
+      requests: renames.map((t) => ({
+        updateSheetProperties: {
+          properties: { sheetId: t.sheetId, title: t.title },
+          fields: 'title',
+        },
+      })),
+    });
+    console.log(
+      `renamed: ${renames.map((t) => `${titleById.get(t.sheetId)} -> ${t.title}`).join(', ')}`,
+    );
+  }
+
+  const present = new Set(titleById.keys());
   const missing = DATA_TABS.filter((t) => !present.has(t.sheetId));
   if (missing.length > 0) {
     await api(`/${id}:batchUpdate`, 'POST', {
