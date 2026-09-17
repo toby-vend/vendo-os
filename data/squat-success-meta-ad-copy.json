@@ -445,7 +445,8 @@
       "Primary Text",
       "Headline",
       "Description",
-      "CTA Button"
+      "CTA Button",
+      "Creative to run it on"
     ],
     "rows": [
       [
@@ -454,7 +455,8 @@
         "\"I'd rather this book was in a thousand hands than sold to two hundred.\"\n\nThat is why The Dental Freedom Blueprint is free. You cover the £4.95 stamp.\n\n👉 Claim your copy at book.squatsuccess.co.uk",
         "Why is the book free?",
         "Free book, £4.95 postage",
-        "Learn More"
+        "Learn More",
+        "Story 9x16 of 2f Why Free, or any story cut"
       ],
       [
         "SF-02",
@@ -462,7 +464,8 @@
         "Ten years of building an asset you will never own.\n\nThere is a nine chapter alternative. It is free, you cover the £4.95 postage.\n\n👉 Get your copy at book.squatsuccess.co.uk",
         "Ten years. No equity.",
         "Free book, £4.95 postage",
-        "Learn More"
+        "Learn More",
+        "Story 9x16 of 6a, 6b, 6c or 6d"
       ],
       [
         "SF-03",
@@ -470,7 +473,8 @@
         "The book is free. The stamp isn't.\n\n£4.95 and it is printed to order and posted to your door in 5 to 7 working days. No subscription, ever.\n\n👉 Send me my copy: book.squatsuccess.co.uk",
         "The book is free. The stamp isn't.",
         "Not a PDF. A parcel.",
-        "Learn More"
+        "Learn More",
+        "Story 9x16 of 1b The Catch or 1c Printed And Posted"
       ],
       [
         "SF-04",
@@ -478,7 +482,8 @@
         "61% of the UK dental workforce scored high for emotional exhaustion. (Br Dent J, 2025)\n\nThere is another way to practise, and it is written down.\n\n👉 Free book at book.squatsuccess.co.uk",
         "Six in ten. Br Dent J, 2025.",
         "Free book, £4.95 postage",
-        "Learn More"
+        "Learn More",
+        "Story 9x16 of 2e The Stat 61%"
       ],
       [
         "SF-05",
@@ -486,7 +491,8 @@
         "Nine chapters. From \"should I?\" to the end of your first twelve months.\n\nFree. You cover the postage.\n\n👉 Claim your copy at book.squatsuccess.co.uk",
         "Nine chapters. No filler.",
         "Free book, £4.95 postage",
-        "Learn More"
+        "Learn More",
+        "Story 9x16 of 2c Table Of Contents or 1d What's Inside"
       ],
       [
         "RT-01",
@@ -494,7 +500,8 @@
         "You had a look at the book and didn't order it.\n\nIf we had to guess, it was the £4.95.\n\nNot because £4.95 is a lot. Because paying anything for a \"free\" book feels like the start of something. A trial. A subscription. A list you cannot get off.\n\nIt isn't. The £4.95 is postage. Royal Mail don't work for free, and the book is printed to order rather than sat in a warehouse. There is no second charge and no subscription, ever.\n\nWhy it is free at all: Bobby runs a programme for dentists building squats. The ones who get the most from it had already decided before they arrived. This book is how people decide. Some read it and rule ownership out. Some build the whole thing alone. A few want help at the end. All three are fine by him.\n\n\"I'd rather this book was in a thousand hands than sold to two hundred.\"\n\nDon't tell yourself you will come back to it later. That is what \"one day\" is made of.\n\n👉 book.squatsuccess.co.uk\n\nRead it and it isn't useful? Email hello@squatsuccess.co.uk and we refund the £4.95, no questions. You keep the book.",
         "It really is just the postage",
         "Refunded if it isn't useful",
-        "Get Offer"
+        "Get Offer",
+        "NONE IN THIS BATCH. Interim: 1b The Catch. Needs its own creative."
       ],
       [
         "RT-02",
@@ -502,7 +509,8 @@
         "Didn't order the book?\n\nIf it wasn't the postage, it was probably time. Fair enough. Nobody is short of things to read.\n\nIt is about four hours, and it is a paperback rather than another tab left open. It arrives in 5 to 7 working days, printed to order in the UK, and it sits on the side until a quiet evening.\n\nWorst case, you close it knowing for certain that practice ownership is not for you, and you stop spending energy on a \"one day\" that was never going to happen.\n\nBest case, you are reading the instructions for the next ten years of your career.\n\n👉 book.squatsuccess.co.uk\n\nFree book. £4.95 postage. No subscription, ever. Postage refunded if it isn't useful.",
         "Four hours, worst case",
         "Free book, £4.95 postage",
-        "Get Offer"
+        "Get Offer",
+        "NONE IN THIS BATCH. Interim: 1c Printed And Posted. Needs its own creative."
       ],
       [
         "RT-03",
@@ -510,16 +518,18 @@
         "You got as far as the address and stopped.\n\nTwo things people hesitate on at that point, so here they are straight.\n\nThe £4.95 is postage and it is the only charge. No trial, no subscription, nothing that starts billing later.\n\nThe address lines need to stay under 30 characters each, because the printer's label format says so. That is the only reason the form is fussy about it.\n\nUK addresses only for now. Printed to order, posted from the UK, with you in 5 to 7 working days.\n\n👉 Finish it here: book.squatsuccess.co.uk\n\nIf the book isn't useful when it lands, email hello@squatsuccess.co.uk and we refund the postage, no questions.",
         "You were one field away",
         "Finish your order",
-        "Get Offer"
+        "Get Offer",
+        "NONE IN THIS BATCH. No interim fits. Needs its own creative."
       ]
     ],
     "widths": [
       8,
-      44,
-      90,
-      32,
-      26,
-      13
+      40,
+      84,
+      30,
+      24,
+      13,
+      44
     ],
     "frozenCols": 2
   },
@@ -561,9 +571,24 @@
         "If Bobby wants earnings or practice value figures added, they need substantiation and a typicality disclaimer before they go anywhere near an ad."
       ],
       [
-        "Creative previews in this sheet",
-        "The exports are local files, not in Drive, so the Creative Map tab lists file names rather than thumbnails.",
-        "A Drive folder ID for the approved exports. Previews get dropped straight into the tab once it exists."
+        "Retargeting creative",
+        "RT-01 to RT-03 have no creative in this batch. All 24 concepts are built for a cold audience, and a retargeting ad showing the same image the person already scrolled past is the weak version of one. RT-03, aimed at people who abandoned the address form, has nothing that fits at all.",
+        "Sign-off to produce three warm-audience statics: the £4.95 broken down so it reads as postage rather than a price, a \"four hours\" time-cost frame, and a \"you were one field away\" form or address-label visual. Until then RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off."
+      ],
+      [
+        "The missing set 3",
+        "The exports run 1, 2, 4, 5 and 6. There is no set 3 in the batch and no source for one anywhere else.",
+        "Confirm whether set 3 exists and what it was. If it was the warm or retargeting set, it closes the gap above."
+      ],
+      [
+        "Video for Reels",
+        "The short-form blocks are written for Stories and Reels placements, but every export is a static. There is no video in the batch.",
+        "Confirm whether Reels video is in scope. If it is, the short-form copy stands as written and the assets need producing."
+      ],
+      [
+        "Creative folder sharing",
+        "The creative folder is link-shared as view-only. That is required rather than cosmetic: Google fetches the =IMAGE thumbnails on the Creative Map without the viewer's credentials, so a private file renders as a broken cell for everyone.",
+        "Confirm that is acceptable. It can be restricted at any time, at the cost of the previews in this sheet."
       ]
     ],
     "widths": [

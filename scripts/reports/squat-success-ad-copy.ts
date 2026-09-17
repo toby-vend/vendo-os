@@ -673,6 +673,7 @@ interface Variant {
   headline: string;
   description: string;
   cta: string;
+  creative: string;
 }
 
 const VARIANTS: Variant[] = [
@@ -687,6 +688,7 @@ That is why The Dental Freedom Blueprint is free. You cover the £4.95 stamp.
     headline: 'Why is the book free?',
     description: 'Free book, £4.95 postage',
     cta: 'Learn More',
+    creative: 'Story 9x16 of 2f Why Free, or any story cut',
   },
   {
     ref: 'SF-02',
@@ -699,6 +701,7 @@ There is a nine chapter alternative. It is free, you cover the £4.95 postage.
     headline: 'Ten years. No equity.',
     description: 'Free book, £4.95 postage',
     cta: 'Learn More',
+    creative: 'Story 9x16 of 6a, 6b, 6c or 6d',
   },
   {
     ref: 'SF-03',
@@ -711,6 +714,7 @@ There is a nine chapter alternative. It is free, you cover the £4.95 postage.
     headline: 'The book is free. The stamp isn\'t.',
     description: 'Not a PDF. A parcel.',
     cta: 'Learn More',
+    creative: 'Story 9x16 of 1b The Catch or 1c Printed And Posted',
   },
   {
     ref: 'SF-04',
@@ -723,6 +727,7 @@ There is another way to practise, and it is written down.
     headline: 'Six in ten. Br Dent J, 2025.',
     description: 'Free book, £4.95 postage',
     cta: 'Learn More',
+    creative: 'Story 9x16 of 2e The Stat 61%',
   },
   {
     ref: 'SF-05',
@@ -735,6 +740,7 @@ Free. You cover the postage.
     headline: 'Nine chapters. No filler.',
     description: 'Free book, £4.95 postage',
     cta: 'Learn More',
+    creative: 'Story 9x16 of 2c Table Of Contents or 1d What\'s Inside',
   },
   {
     ref: 'RT-01',
@@ -759,6 +765,7 @@ Read it and it isn't useful? Email hello@squatsuccess.co.uk and we refund the £
     headline: 'It really is just the postage',
     description: 'Refunded if it isn\'t useful',
     cta: 'Get Offer',
+    creative: 'NONE IN THIS BATCH. Interim: 1b The Catch. Needs its own creative.',
   },
   {
     ref: 'RT-02',
@@ -779,6 +786,7 @@ Free book. £4.95 postage. No subscription, ever. Postage refunded if it isn't u
     headline: 'Four hours, worst case',
     description: 'Free book, £4.95 postage',
     cta: 'Get Offer',
+    creative: 'NONE IN THIS BATCH. Interim: 1c Printed And Posted. Needs its own creative.',
   },
   {
     ref: 'RT-03',
@@ -799,6 +807,7 @@ If the book isn't useful when it lands, email hello@squatsuccess.co.uk and we re
     headline: 'You were one field away',
     description: 'Finish your order',
     cta: 'Get Offer',
+    creative: 'NONE IN THIS BATCH. No interim fits. Needs its own creative.',
   },
 ];
 
@@ -875,9 +884,24 @@ const CONFIRM: string[][] = [
     'If Bobby wants earnings or practice value figures added, they need substantiation and a typicality disclaimer before they go anywhere near an ad.',
   ],
   [
-    'Creative previews in this sheet',
-    'The exports are local files, not in Drive, so the Creative Map tab lists file names rather than thumbnails.',
-    'A Drive folder ID for the approved exports. Previews get dropped straight into the tab once it exists.',
+    'Retargeting creative',
+    'RT-01 to RT-03 have no creative in this batch. All 24 concepts are built for a cold audience, and a retargeting ad showing the same image the person already scrolled past is the weak version of one. RT-03, aimed at people who abandoned the address form, has nothing that fits at all.',
+    'Sign-off to produce three warm-audience statics: the £4.95 broken down so it reads as postage rather than a price, a "four hours" time-cost frame, and a "you were one field away" form or address-label visual. Until then RT-01 and RT-02 can run on 1b and 1c as an interim, and RT-03 should stay off.',
+  ],
+  [
+    'The missing set 3',
+    'The exports run 1, 2, 4, 5 and 6. There is no set 3 in the batch and no source for one anywhere else.',
+    'Confirm whether set 3 exists and what it was. If it was the warm or retargeting set, it closes the gap above.',
+  ],
+  [
+    'Video for Reels',
+    'The short-form blocks are written for Stories and Reels placements, but every export is a static. There is no video in the batch.',
+    'Confirm whether Reels video is in scope. If it is, the short-form copy stands as written and the assets need producing.',
+  ],
+  [
+    'Creative folder sharing',
+    'The creative folder is link-shared as view-only. That is required rather than cosmetic: Google fetches the =IMAGE thumbnails on the Creative Map without the viewer\'s credentials, so a private file renders as a broken cell for everyone.',
+    'Confirm that is acceptable. It can be restricted at any time, at the cost of the previews in this sheet.',
   ],
 ];
 
@@ -944,9 +968,9 @@ const payload = {
     frozenCols: 3,
   },
   variants: {
-    head: ['Ref', 'Use', 'Primary Text', 'Headline', 'Description', 'CTA Button'],
-    rows: VARIANTS.map((v) => [v.ref, v.use, v.primary, v.headline, v.description, v.cta]),
-    widths: [8, 44, 90, 32, 26, 13],
+    head: ['Ref', 'Use', 'Primary Text', 'Headline', 'Description', 'CTA Button', 'Creative to run it on'],
+    rows: VARIANTS.map((v) => [v.ref, v.use, v.primary, v.headline, v.description, v.cta, v.creative]),
+    widths: [8, 40, 84, 30, 24, 13, 44],
     frozenCols: 2,
   },
   confirm: {
