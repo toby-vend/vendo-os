@@ -11,6 +11,7 @@ B = {
     'grain_dark': '/_blob/57b1dd74897935b37c4eaf28dc52054d',
     'smile': '/_blob/ac6fc3d95e09da732e0848aa5fb8f1ab',
     'kev': '/_blob/9b3e632e9855cb4cb0c49649b8a65138',
+    'crooked': '/_blob/e331637b6ad4bb9c6b526ce01054e260',
 }
 FONTS = ('https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900'
          '&amp;family=Instrument+Serif:ital@0;1&amp;family=Caveat:wght@500;700'

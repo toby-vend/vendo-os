@@ -103,36 +103,56 @@ def note(text, left, top, size, rot, align='left', width=None):
 
 
 def bac08(f, w, h):
-    ph = v(f, 520, 700, 960)
+    # Source photo 1536x2752; teeth span x 300-1240, y 970-1220; crowded centrals ~x 620-960.
+    ph = v(f, 540, 720, 960)
+    k = v(f, 0.8, 0.92, 1.02)
+    cx, cy = 775, 1098
+    PW = w
+    mx = lambda sx: PW / 2 + (sx - cx) * k
+    my = lambda sy: ph / 2 + (sy - cy) * k
     ns = v(f, 40, 46, 52)
-    corner = lambda pos, bd: f'<div style="position: absolute; {pos} width: 44px; height: 44px; {bd}"></div>'
+    sh = 'text-shadow: 0 2px 12px rgba(10,10,10,0.95), 0 0 3px rgba(10,10,10,0.9);'
+    stroke = lambda d, sw=4.5: f'<path d="{d}" stroke="{GOLD}" stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
+    # ring around the overlapping front teeth
+    rcx, rcy, rx, ry = mx(790), my(1088), 205 * k, 128 * k
+    ring = stroke(f'M{rcx - rx * 0.1:.0f} {rcy - ry:.0f} C {rcx + rx * 0.7:.0f} {rcy - ry * 1.02:.0f}, {rcx + rx:.0f} {rcy - ry * 0.3:.0f}, {rcx + rx * 0.98:.0f} {rcy + ry * 0.2:.0f} '
+                  f'C {rcx + rx * 0.92:.0f} {rcy + ry * 0.95:.0f}, {rcx - rx * 0.4:.0f} {rcy + ry * 1.08:.0f}, {rcx - rx * 0.9:.0f} {rcy + ry * 0.5:.0f} '
+                  f'C {rcx - rx * 1.08:.0f} {rcy - ry * 0.2:.0f}, {rcx - rx * 0.6:.0f} {rcy - ry * 1.05:.0f}, {rcx + rx * 0.15:.0f} {rcy - ry * 1.1:.0f}', 5)
+    # gum-line bracket
+    gum = stroke(f'M{mx(400):.0f} {my(968):.0f} C {mx(520):.0f} {my(942):.0f}, {mx(640):.0f} {my(940):.0f}, {mx(700):.0f} {my(944):.0f}', 3.5)
+    top = v(f, 24, 30, 40)
+    # note 1 (top right) -> the overlap
+    n1x = mx(960)
+    n1 = (f'<div style="position: absolute; left: {n1x:.0f}px; top: {top}px; transform: rotate(-4deg); {HAND} font-weight: 700; font-size: {ns}px; '
+          f'line-height: 0.95; color: {GOLD}; white-space: nowrap; {sh}">can be harder<br>to clean between</div>')
+    a1 = stroke(f'M{n1x - 8:.0f} {top + ns * 1.9:.0f} C {n1x - 40:.0f} {top + ns * 2.4:.0f}, {mx(930):.0f} {my(930):.0f}, {mx(880):.0f} {rcy - ry + 4:.0f}', 3.5)
+    a1h = stroke(f'M{mx(880) - 8:.0f} {rcy - ry - 14:.0f} L {mx(880):.0f} {rcy - ry + 5:.0f} L {mx(880) + 17:.0f} {rcy - ry - 6:.0f}', 3.5)
+    # note 2 (top left) -> gum line
+    n2x = v(f, 40, 50, 56)
+    n2 = (f'<div style="position: absolute; left: {n2x}px; top: {top + 6}px; transform: rotate(3deg); {HAND} font-weight: 700; font-size: {ns}px; '
+          f'line-height: 0.95; color: {GOLD}; white-space: nowrap; {sh}">gums &amp; bite:<br>checked</div>')
+    g_end = (mx(470), my(950) - 8)
+    a2 = stroke(f'M{n2x + ns * 3.2:.0f} {top + ns * 2.1:.0f} C {n2x + ns * 4.4:.0f} {top + ns * 2.6:.0f}, {g_end[0] - 20:.0f} {g_end[1] - 30:.0f}, {g_end[0]:.0f} {g_end[1]:.0f}', 3.5)
+    a2h = stroke(f'M{g_end[0] - 16:.0f} {g_end[1] - 8:.0f} L {g_end[0]:.0f} {g_end[1]:.0f} L {g_end[0] + 2:.0f} {g_end[1] - 17:.0f}', 3.5)
+    # note 3 (under the teeth) with a tick
+    n3y = my(1262)
+    n3x = mx(560)
+    tickp = stroke(f'M{n3x - 50:.0f} {n3y + ns * 0.45:.0f} L {n3x - 36:.0f} {n3y + ns * 0.72:.0f} L {n3x - 12:.0f} {n3y + ns * 0.1:.0f}', 4.5)
+    n3 = (f'<div style="position: absolute; left: {n3x:.0f}px; top: {n3y:.0f}px; transform: rotate(-2deg); {HAND} font-weight: 700; font-size: {ns}px; '
+          f'line-height: 0.95; color: {GOLD}; white-space: nowrap; {sh}">plan + price before you commit</div>')
+    svg = (f'<svg width="{PW}" height="{ph}" viewBox="0 0 {PW} {ph}" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible; '
+           f'filter: drop-shadow(0 2px 6px rgba(10,10,10,0.8));">{ring}{gum}{a1}{a1h}{a2}{a2h}{tickp}</svg>')
+    iw, ih = 1536 * k, 2752 * k
+    img = (f'<img src="{B["crooked"]}" alt="" style="position: absolute; left: {mx(0):.0f}px; top: {my(0):.0f}px; width: {iw:.0f}px; height: {ih:.0f}px; '
+           f'filter: grayscale(1) contrast(1.12) brightness(0.9);">')
     g = f'3px solid {GOLD}'
+    corner = lambda pos, bd: f'<div style="position: absolute; {pos} width: 40px; height: 40px; {bd}"></div>'
     corners = (corner('left: 14px; top: 14px;', f'border-left: {g}; border-top: {g};') + corner('right: 14px; top: 14px;', f'border-right: {g}; border-top: {g};')
                + corner('left: 14px; bottom: 14px;', f'border-left: {g}; border-bottom: {g};') + corner('right: 14px; bottom: 14px;', f'border-right: {g}; border-bottom: {g};'))
-    marks = (
-        # ring round the front teeth
-        mark_svg('M42 50 C 49 45, 62 46, 66 53 C 69 61, 61 68, 52 68 C 42 68, 37 62, 39 55 C 40 52, 43 50, 47 49')
-        # arrow from ring to note 1 (upper right)
-        + mark_svg('M65 50 C 70 42, 74 37, 79 33', '')
-        + mark_svg('M75 32.5 L 79.5 32.8 L 78.5 37.3')
-        # bracket along the gum line + arrow to note 2 (left)
-        + mark_svg('M37 47 C 44 42.5, 58 42, 66 45.5')
-        + mark_svg('M37 46 C 30 40, 24 36, 18 34')
-        + mark_svg('M21.5 31.5 L 17.6 34 L 21 37.5')
-        # tick for note 3
-        + mark_svg('M18 82 L 21 86 L 27 78')
-    )
-    n1 = note('can be harder<br>to clean between', v(f, 64, 64, 60), v(f, 10, 14, 15), ns, -4)
-    n2 = note('gums &amp; bite:<br>checked', v(f, 4, 4, 4), v(f, 14, 17, 18), ns, 3)
-    n3 = note('plan + price before<br>you commit', v(f, 29, 29, 29), v(f, 76, 78, 79), ns, -2)
-    photo = (f'<div style="height: {ph}px; flex-shrink: 0; position: relative; overflow: hidden; margin: 0 -{PAD[f][1]}px; background: #1a1a1a;">'
-             f'<img src="{B["smile"]}" alt="" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; '
-             f'object-position: 57% 55%; transform: scale({v(f, 2.1, 2.0, 2.2)}); transform-origin: 57% 56%; filter: grayscale(1) contrast(1.12) brightness(0.9);">'
-             f'<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: radial-gradient(80% 70% at 50% 50%, rgba(10,10,10,0) 40%, rgba(10,10,10,0.55) 100%);"></div>'
-             + grain('light', 0.45, 'overlay') + corners
-             + f'<div style="position: absolute; left: 70px; top: 28px; {MONO} font-size: 17px; letter-spacing: 3px; color: {GOLD};">ASSESSMENT NOTES</div>'
-             + f'<div style="position: absolute; right: 70px; top: 28px; {MONO} font-size: 17px; letter-spacing: 3px; color: {GOLD};">PATIENT: YOU</div>'
-             + marks + n1 + n2 + n3 + '</div>')
+    photo = (f'<div style="height: {ph}px; flex-shrink: 0; position: relative; overflow: hidden; margin: 0 -{PAD[f][1]}px; background: #151515;">'
+             + img +
+             f'<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: radial-gradient(62% 48% at 50% 52%, rgba(10,10,10,0) 38%, rgba(10,10,10,0.62) 100%);"></div>'
+             + grain('light', 0.4, 'overlay') + corners + svg + n1 + n2 + n3 + '</div>')
     content = (f'<div style="{BODY} font-size: 17px; font-weight: 700; letter-spacing: 7px; text-transform: uppercase; color: {GOLD};">Why alignment matters</div>'
                + spacer(v(f, 16, 22, 28))
                + two_line_head('gold', 'It’s not just', 'about the photos.', v(f, 80, 92, 104), v(f, 88, 100, 114))

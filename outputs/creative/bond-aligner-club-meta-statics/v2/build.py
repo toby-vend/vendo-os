@@ -11,7 +11,7 @@ LOCAL = {
     B['lock_gold']: 'uploads/bac-lockup-gold.png', B['lock_black']: 'uploads/bac-lockup-black.png',
     B['mark_gold']: 'uploads/bac-mark-gold.png', B['mark_black']: 'uploads/bac-mark-black.png',
     B['lobby']: 'uploads/mayfair-lobby.jpg', B['grain_light']: 'uploads/grain-light.png',
-    B['grain_dark']: 'uploads/grain-dark.png', B['smile']: 'uploads/standin-smile.jpg', B['kev']: 'uploads/kev-patel.jpg',
+    B['grain_dark']: 'uploads/grain-dark.png', B['smile']: 'uploads/standin-smile.jpg', B['kev']: 'uploads/kev-patel.jpg', B['crooked']: 'uploads/crooked-smile.jpg',
 }
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 os.makedirs(os.path.join(HERE, 'project'), exist_ok=True)
