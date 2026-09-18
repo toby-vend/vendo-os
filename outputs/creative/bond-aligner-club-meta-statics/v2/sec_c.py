@@ -100,11 +100,42 @@ def bac14(f, w, h):
     hole = int(hw * 0.3)
     right = v(f, 90, 100, 0)
     left_story = (w - hw) // 2
-    top = v(f, 150, 170, 560)
+    top = v(f, 150, 170, 620)
     pos = f'right: {right}px;' if f != '9x16' else f'left: {left_story}px;'
-    knob_cx_off = hw // 2
-    rose = (f'<div style="position: absolute; {pos} top: {top - 95}px; width: {hw}px; height: 190px; display: flex; justify-content: center; pointer-events: none;">'
-            f'<div style="width: 170px; height: 170px; border-radius: 50%; background: {BRASS}; box-shadow: 0 16px 30px -10px rgba(10,10,10,0.5);"></div></div>')
+    # Lever door handle: the hanger hangs from the neck; rose shows through the hole, lever sits in front.
+    import math as _m
+    hl = (w - right - hw) if f != '9x16' else left_story
+    ny = 40 + 26
+    ncx = hl + hw / 2 - _m.sin(_m.radians(4)) * ny
+    ncy = top + _m.cos(_m.radians(4)) * ny
+    L = v(f, 240, 260, 290)
+    rr = int(hole * 0.6)
+    grad = ('<defs><radialGradient id="br{f}" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#FFF4DE"/><stop offset="0.45" stop-color="#D2B78C"/>'
+            '<stop offset="1" stop-color="#7E6B4C"/></radialGradient>'
+            '<linearGradient id="lv{f}" gradientUnits="userSpaceOnUse" x1="0" y1="{a}" x2="0" y2="{b}"><stop offset="0" stop-color="#FFF4DE"/>'
+            '<stop offset="0.35" stop-color="#D2B78C"/><stop offset="1" stop-color="#6F5E42"/></linearGradient></defs>').format(f=f, a=ncy - 20, b=ncy + 28)
+    svgopen = f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" aria-hidden="true" style="position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible;'
+    hy = 40 + hole / 2
+    hcx = hl + hw / 2 - _m.sin(_m.radians(4)) * hy
+    hcy = top + _m.cos(_m.radians(4)) * hy
+    pw_, pt, pb = 78, ncy - v(f, 190, 190, 130), ncy + 300
+    plate_grad = (f'<linearGradient id="pl{f}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8F7B5A"/><stop offset="0.3" stop-color="#FFF4DE"/>'
+                  f'<stop offset="0.55" stop-color="#D2B78C"/><stop offset="1" stop-color="#7E6B4C"/></linearGradient>')
+    plate = lambda gid: (f'<rect x="{ncx - pw_ / 2:.1f}" y="{pt:.1f}" width="{pw_}" height="{pb - pt:.1f}" rx="{pw_ / 2}" fill="url(#{gid})"/>'
+                         f'<rect x="{ncx - pw_ / 2 + 6:.1f}" y="{pt + 6:.1f}" width="{pw_ - 12}" height="{pb - pt - 12:.1f}" rx="{pw_ / 2 - 6}" fill="none" stroke="#6F5E42" stroke-opacity="0.35" stroke-width="1.5"/>')
+    rose = (svgopen + ' filter: drop-shadow(0 12px 16px rgba(10,10,10,0.35));">' + f'<defs>{plate_grad}</defs>' + plate(f'pl{f}') + '</svg>')
+    lever_d = f'M {ncx:.1f} {ncy:.1f} C {ncx + L * 0.45:.1f} {ncy:.1f}, {ncx + L * 0.78:.1f} {ncy + 3:.1f}, {ncx + L:.1f} {ncy + 16:.1f}'
+    hi_d = f'M {ncx + 30:.1f} {ncy - 8:.1f} C {ncx + L * 0.45:.1f} {ncy - 8:.1f}, {ncx + L * 0.75:.1f} {ncy - 5:.1f}, {ncx + L - 12:.1f} {ncy + 4:.1f}'
+    through = (svgopen + '">' + f'<defs><linearGradient id="pm{f}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8F7B5A"/><stop offset="0.3" stop-color="#FFF4DE"/>'
+               f'<stop offset="0.55" stop-color="#D2B78C"/><stop offset="1" stop-color="#7E6B4C"/></linearGradient>'
+               f'<clipPath id="hc{f}"><circle cx="{hcx:.1f}" cy="{hcy:.1f}" r="{hole / 2 - 1:.1f}"/></clipPath>'
+               f'<radialGradient id="hs{f}" cx="50%" cy="40%" r="55%"><stop offset="0.75" stop-color="#0A0A0A" stop-opacity="0"/><stop offset="1" stop-color="#0A0A0A" stop-opacity="0.35"/></radialGradient></defs>'
+               f'<g clip-path="url(#hc{f})">' + plate(f'pm{f}') + f'<circle cx="{hcx:.1f}" cy="{hcy:.1f}" r="{hole / 2:.1f}" fill="url(#hs{f})"/></g></svg>')
+    knob = through + (svgopen + ' filter: drop-shadow(0 16px 12px rgba(10,10,10,0.45)) drop-shadow(0 3px 3px rgba(10,10,10,0.3));">' + grad.replace('br' + f, 'bq' + f).replace('lv' + f, 'lw' + f)
+            + f'<path d="{lever_d}" stroke="url(#lw{f})" stroke-width="40" stroke-linecap="round" fill="none"/>'
+            + f'<path d="{hi_d}" stroke="#FFF4DE" stroke-opacity="0.75" stroke-width="4" stroke-linecap="round" fill="none"/>'
+            + f'<circle cx="{ncx:.1f}" cy="{ncy:.1f}" r="38" fill="url(#bq{f})"/><circle cx="{ncx:.1f}" cy="{ncy:.1f}" r="27" fill="url(#bq{f})" stroke="#6F5E42" stroke-opacity="0.5" stroke-width="1.5"/>'
+            + f'<circle cx="{ncx:.1f}" cy="{ncy:.1f}" r="38" fill="none" stroke="#6F5E42" stroke-opacity="0.6" stroke-width="1.5"/></svg>')
     hanger = (f'<div style="position: absolute; {pos} top: {top}px; width: {hw}px; height: {hh}px; transform: rotate(4deg); transform-origin: 50% 0; '
               f'background: {BG_GOLD}; border-radius: 28px; box-shadow: {SHADOW_DEEP}; overflow: hidden; display: flex; flex-direction: column; align-items: center; '
               f'padding: {hole + 90}px 34px 40px; box-sizing: border-box; text-align: center; color: {BLACK};">'
@@ -118,8 +149,6 @@ def bac14(f, w, h):
               f'<div style="position: relative; {SERIF} font-size: {v(f, 34, 38, 42)}px; line-height: 1.05;">Take your time.<br>We’ll be here.</div>'
               f'<div style="position: relative; width: 60px; height: 2px; background: {BLACK}; margin: 22px 0 16px;"></div>'
               f'<img src="{B["mark_black"]}" alt="" style="position: relative; height: 40px; width: auto; display: block;"></div>')
-    knob = (f'<div style="position: absolute; {pos} top: {top - 5}px; width: {hw}px; display: flex; justify-content: center; pointer-events: none;">'
-            f'<div style="width: 92px; height: 92px; border-radius: 50%; background: {BRASS}; box-shadow: 0 18px 26px -8px rgba(10,10,10,0.6), inset 0 -4px 8px rgba(10,10,10,0.25);"></div></div>')
     panels = (f'<div style="position: absolute; left: 50px; top: 50px; right: 50px; bottom: 50px; border: 2px solid rgba(10,10,10,0.07); '
               f'box-shadow: inset 0 0 0 26px rgba(255,255,255,0.18), inset 0 0 0 28px rgba(10,10,10,0.05);"></div>')
     lines = ['No hard sell.', 'No rush.', 'A clear plan and a clear price before you commit.']
