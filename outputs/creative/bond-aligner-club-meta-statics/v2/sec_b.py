@@ -89,59 +89,56 @@ def bac07(f, w, h):
     return frame(w, h, BG_GOLD, BLACK, '', content, grain('dark', 0.3, 'multiply') + grain('light', 0.3, 'overlay'), PAD[f])
 
 
-# ---------- BAC-08: arch diagram ----------
-def arch_svg(width):
-    teeth = []
-    n = 14
-    for i in range(n):
-        a = -82 + i * (164 / (n - 1))
-        rad = math.radians(a)
-        x = 250 + 185 * math.sin(rad)
-        y = 300 - 235 * math.cos(rad)
-        t = abs(a) / 82
-        tw = 30 + 22 * t
-        th = 44 + 14 * t
-        rot = a
-        crowd = i in (6, 7)
-        if crowd:
-            rot += -22 if i == 6 else 20
-            y += 14 if i == 6 else -6
-            x += 8 if i == 6 else -8
-        fill = GOLD if crowd else 'rgba(210,183,140,0.08)'
-        stroke = BLACK if crowd else GOLD
-        teeth.append(f'<rect x="{x - tw / 2:.1f}" y="{y - th / 2:.1f}" width="{tw:.1f}" height="{th:.1f}" rx="{tw * 0.42:.1f}" '
-                     f'transform="rotate({rot:.1f} {x:.1f} {y:.1f})" fill="{fill}" stroke="{stroke}" stroke-width="2.4"/>')
-    ideal = ' '.join(f'{250 + 185 * math.sin(math.radians(a)):.1f},{300 - 235 * math.cos(math.radians(a)):.1f}' for a in range(-86, 87, 4))
-    return (f'<svg width="{width}" height="{int(width * 0.62)}" viewBox="40 40 420 280" aria-hidden="true" style="display: block; overflow: visible;">'
-            f'<polyline points="{ideal}" fill="none" stroke="{GOLD}" stroke-width="1.6" stroke-dasharray="4 7" opacity="0.55"/>'
-            + ''.join(teeth) +
-            f'<path d="M258 70 C 300 40, 360 40, 420 44" stroke="{GOLD}" stroke-width="1.8" fill="none"/>'
-            f'<circle cx="258" cy="70" r="5" fill="{GOLD}"/>'
-            f'<path d="M196 232 H 232" stroke="{GOLD}" stroke-width="1.6" stroke-dasharray="4 7" opacity="0.8"/>'
-            f'<text x="240" y="236" style="font-family: Lato, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2.5px;" fill="{GOLD}" opacity="0.85">IDEAL ARCH</text>'
-            '</svg>')
+# ---------- BAC-08: the dentist's markup ----------
+def mark_svg(d, extra=''):
+    return (f'<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" '
+            f'style="position: absolute; left: 0; top: 0; overflow: visible; filter: drop-shadow(0 2px 6px rgba(10,10,10,0.7));">'
+            f'<path d="{d}" stroke="{GOLD}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" vector-effect="non-scaling-stroke"/>{extra}</svg>')
+
+
+def note(text, left, top, size, rot, align='left', width=None):
+    wcss = f'width: {width}px;' if width else 'white-space: nowrap;'
+    return (f'<div style="position: absolute; left: {left}%; top: {top}%; transform: rotate({rot}deg); {HAND} font-weight: 700; font-size: {size}px; '
+            f'line-height: 0.95; color: {GOLD}; text-align: {align}; {wcss} text-shadow: 0 2px 10px rgba(10,10,10,0.9), 0 0 2px rgba(10,10,10,0.8);">{text}</div>')
 
 
 def bac08(f, w, h):
-    aw = v(f, 560, 640, 700)
-    lw = v(f, 220, 250, 220)
-    cw_ = w - PAD[f][1] - PAD[f][3]
-    ml = max(0, int((cw_ - (aw * 0.93 + lw)) / 2))
-    diag = (f'<div style="position: relative; align-self: flex-start; margin-left: {ml}px; width: {aw}px; flex-shrink: 0;">{arch_svg(aw)}'
-            f'<div style="position: absolute; left: {int(aw * 0.93)}px; top: -{v(f, 34, 36, 40)}px; width: {lw}px;">'
-            f'<div style="{MONO} font-size: 18px; letter-spacing: 3px; color: {GOLD};">01</div>'
-            f'<div style="{BODY} font-size: {v(f, 23, 25, 28)}px; line-height: 1.3; color: {GOLD};">Crowded teeth can be harder to clean between.</div></div></div>')
-    pts = [('02', 'Your assessment looks at your whole dental health, not just your smile.'),
-           ('03', 'You’ll see what treatment involves, and what it costs, before you commit.')]
-    lst = ''.join(f'<div style="display: flex; gap: 22px; align-items: baseline; padding-top: {v(f, 14, 18, 24)}px; border-top: 1px solid rgba(210,183,140,0.35);">'
-                  f'<div style="{MONO} font-size: 18px; letter-spacing: 3px; color: {GOLD}; flex-shrink: 0;">{n}</div>'
-                  f'<div style="{BODY} font-size: {v(f, 25, 28, 32)}px; line-height: 1.3; color: {GOLD};">{t}</div></div>' for n, t in pts)
+    ph = v(f, 520, 700, 960)
+    ns = v(f, 40, 46, 52)
+    corner = lambda pos, bd: f'<div style="position: absolute; {pos} width: 44px; height: 44px; {bd}"></div>'
+    g = f'3px solid {GOLD}'
+    corners = (corner('left: 14px; top: 14px;', f'border-left: {g}; border-top: {g};') + corner('right: 14px; top: 14px;', f'border-right: {g}; border-top: {g};')
+               + corner('left: 14px; bottom: 14px;', f'border-left: {g}; border-bottom: {g};') + corner('right: 14px; bottom: 14px;', f'border-right: {g}; border-bottom: {g};'))
+    marks = (
+        # ring round the front teeth
+        mark_svg('M42 50 C 49 45, 62 46, 66 53 C 69 61, 61 68, 52 68 C 42 68, 37 62, 39 55 C 40 52, 43 50, 47 49')
+        # arrow from ring to note 1 (upper right)
+        + mark_svg('M65 50 C 70 42, 74 37, 79 33', '')
+        + mark_svg('M75 32.5 L 79.5 32.8 L 78.5 37.3')
+        # bracket along the gum line + arrow to note 2 (left)
+        + mark_svg('M37 47 C 44 42.5, 58 42, 66 45.5')
+        + mark_svg('M37 46 C 30 40, 24 36, 18 34')
+        + mark_svg('M21.5 31.5 L 17.6 34 L 21 37.5')
+        # tick for note 3
+        + mark_svg('M18 82 L 21 86 L 27 78')
+    )
+    n1 = note('can be harder<br>to clean between', v(f, 64, 64, 60), v(f, 10, 14, 15), ns, -4)
+    n2 = note('gums &amp; bite:<br>checked', v(f, 4, 4, 4), v(f, 14, 17, 18), ns, 3)
+    n3 = note('plan + price before<br>you commit', v(f, 29, 29, 29), v(f, 76, 78, 79), ns, -2)
+    photo = (f'<div style="height: {ph}px; flex-shrink: 0; position: relative; overflow: hidden; margin: 0 -{PAD[f][1]}px; background: #1a1a1a;">'
+             f'<img src="{B["smile"]}" alt="" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; '
+             f'object-position: 57% 55%; transform: scale({v(f, 2.1, 2.0, 2.2)}); transform-origin: 57% 56%; filter: grayscale(1) contrast(1.12) brightness(0.9);">'
+             f'<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: radial-gradient(80% 70% at 50% 50%, rgba(10,10,10,0) 40%, rgba(10,10,10,0.55) 100%);"></div>'
+             + grain('light', 0.45, 'overlay') + corners
+             + f'<div style="position: absolute; left: 70px; top: 28px; {MONO} font-size: 17px; letter-spacing: 3px; color: {GOLD};">ASSESSMENT NOTES</div>'
+             + f'<div style="position: absolute; right: 70px; top: 28px; {MONO} font-size: 17px; letter-spacing: 3px; color: {GOLD};">PATIENT: YOU</div>'
+             + marks + n1 + n2 + n3 + '</div>')
     content = (f'<div style="{BODY} font-size: 17px; font-weight: 700; letter-spacing: 7px; text-transform: uppercase; color: {GOLD};">Why alignment matters</div>'
-               + spacer(v(f, 18, 24, 30))
+               + spacer(v(f, 16, 22, 28))
                + two_line_head('gold', 'It’s not just', 'about the photos.', v(f, 80, 92, 104), v(f, 88, 100, 114))
-               + grow() + diag + grow()
-               + f'<div style="display: flex; flex-direction: column; gap: {v(f, 14, 18, 24)}px;">{lst}</div>'
-               + spacer(v(f, 30, 44, 56)) + footer('gold'))
+               + spacer(v(f, 18, 26, 30)) + grow() + photo + spacer(v(f, 24, 32, 40)) + grow()
+               + f'<div style="{BODY} font-size: {v(f, 26, 29, 33)}px; line-height: 1.3; color: {GOLD};">Your assessment looks at your whole dental health, not just your smile.</div>'
+               + spacer(v(f, 26, 40, 52)) + footer('gold'))
     return frame(w, h, BG_BLACK, GOLD, '', content, grain('light', 0.3, 'overlay'), PAD[f])
 
 
