@@ -230,60 +230,211 @@ P.P.S. The room is full of dentists at the same point you are, which is the part
     cta: 'Learn More',
   },
   {
-    ref: 'EV-04',
-    angle: 'Testimonial led',
+    ref: 'EV-04a',
+    angle: 'Testimonial: Dr Matt, the belief problem',
     stage: 'Cold / prospecting',
     hookType: 'Quoted result',
     primary: `"The biggest takeaway for me has been the belief that I can do it. That I can start a business and start a practice myself."
 
-That is Dr Matt, an associate dentist in Preston, who is now opening his own squat.
+That is Dr Matt, an associate dentist in Preston, now opening his own squat.
 
-He did not arrive with a site or a bank facility. He arrived with the same doubt most associates carry into the room, and left with a route.
+Read it again, because of what it does not say. It does not say he was short of information. Most associates who never open are not short of information either. They have read the threads, priced the equipment, half built the spreadsheet.
 
-Squat Success Live is back on 13 and 14 November 2026 in Birmingham.
+What stops them is quieter than that. It is the suspicion that people who open practices are a different kind of person.
+
+They are not. They are associates who sat in a room with people a year ahead of them and worked out the order to do things in.
 
 ${CTA}
+
+Squat Success Live is back on 13 and 14 November 2026 in Birmingham.
 
 🎟️ One ticket, both days, Friday and Saturday.
 🏗️ Day 1, The Blueprint. Location, niche, funding, feasibility, CQC, and the first 90 days after opening.
 📈 Day 2, Building the Business. Filling the diary, the team, the numbers, pricing, systems, second sites.
 🗣️ Live Q&A with Bobby and the Squat Success team across both days.
 
-More from previous rooms:
-
-"If anyone is looking into setting up their own dental practice, coming on to Bobby's course would be an amazing thing to do." Dr Rishi, setting up his own squat.
-
-"It definitely makes the journey smoother, having someone giving you all that information. Like a map to follow." A practice owner in Hertfordshire, opening her second site as a squat.
-
-"It's really nice to meet other dentists on the course and see how their journeys are going. Bobby gives direct advice because he's experienced it all, the pitfalls as well as the good points."
-
-${CTA}
-
 So if you are sick of:
-🚫 Advice from people who have never opened anything
-🚫 Being the only person you know who is seriously considering it
-🚫 Reading about it instead of planning it
+🚫 Knowing roughly what is involved and still not starting
+🚫 Assuming the dentists who open practices know something you do not
+🚫 Waiting to feel ready, which is not a thing that happens on its own
 
 And you want more.
-More certainty about the next step.
-More people around you who have taken it.
+More belief that the route is walkable.
+More people around you who have walked it.
+More of a decision and less of a daydream.
 
-Then take their word for it rather than ours.
+Then spend two days with the people who did it.
+${CTA}
 
 ${DETAILS}
 
 ${CTA}
 
-P.S. All three films are on the page. Dr Matt's runs three minutes.
-P.P.S. Every ticket covers both days, because the dentists who get the most out of it are the ones in the room for both.`,
+P.S. Dr Matt's full film runs three minutes and it is on the page, unedited.
+P.P.S. Bobby was an associate for ten years across NHS and private before he built Avenue Dental. The belief took him a while too.`,
     headline: 'Dr Matt is opening his own',
     altHeadlines: [
       '"The belief that I can do it"',
-      'Take their word, not ours',
-      'He came. He is opening.',
+      'He was an associate too',
+      'Not a different kind of person',
     ],
     description: 'Two days. One ticket.',
     cta: 'Learn More',
+  },
+  {
+    ref: 'EV-04b',
+    angle: 'Testimonial: Dr Rishi, the peer recommendation',
+    stage: 'Cold / prospecting',
+    hookType: 'Quoted result',
+    primary: `Ask a dentist who is mid build whether two days away from the chair is worth it.
+
+"If anyone is looking into setting up their own dental practice, coming on to Bobby's course would be an amazing thing to do."
+
+Dr Rishi, who is setting up his own squat right now. Nobody asked him to say it and he is not selling anything.
+
+That is the only kind of proof worth much in this profession. Dentists do not take advice from adverts. They take it from the person two chairs down who has already made the mistake.
+
+Squat Success Live is 13 and 14 November 2026 in Birmingham, and the room is full of that person.
+
+${CTA}
+
+🎟️ One ticket, both days, Friday and Saturday.
+🏗️ Day 1, The Blueprint. Location, niche, feasibility, funding, CQC, the first 90 days after opening.
+📈 Day 2, Building the Business. The diary, the team, the numbers, pricing, systems, the next stage.
+🤝 Guest experts on finance, marketing, recruitment and leadership, with direct access rather than panel theatre.
+
+So if you are sick of:
+🚫 Sales calls from people whose advice arrives with an invoice attached
+🚫 Opinions from dentists who opened in a completely different market
+🚫 Deciding something this size on your own
+
+And you want more.
+More honest answers about what it actually cost.
+More people to sense check the plan with.
+More reason to think it works, from someone doing it.
+
+Then go and ask them yourself.
+${CTA}
+
+Dr Bobby Bhandal built Avenue Dental from an empty unit in Leamington Spa after ten years as an associate, and still runs it. The advice comes from a practice that is trading, not a slide deck.
+
+${DETAILS}
+
+${CTA}
+
+P.S. Dr Rishi's film is on the page and runs about ninety seconds.
+P.P.S. Case studies come from dentists at every stage, including a few only a step or two ahead of you.`,
+    headline: 'Ask someone mid build',
+    altHeadlines: [
+      '"An amazing thing to do"',
+      'Dr Rishi is building his now',
+      'Not our word. His.',
+    ],
+    description: '13 and 14 Nov, Birmingham',
+    cta: 'Learn More',
+  },
+  {
+    ref: 'EV-04c',
+    angle: 'Testimonial: Hertfordshire owner, the map',
+    stage: 'Cold / prospecting',
+    hookType: 'Quoted result',
+    primary: `Nobody hands you the order these things are supposed to happen in.
+
+Site or funding first. When the CQC application actually goes in. Whether you hire before you open or after. How long the diary stays quiet and how much cash that quietly eats.
+
+"It definitely makes the journey smoother, having someone giving you all that information. Like a map to follow."
+
+That is a practice owner in Hertfordshire who came to a previous Squat Success event. She is now opening her second site as a squat.
+
+Worth sitting with, that. She has done it once already and still wanted the map.
+
+${CTA}
+
+Squat Success Live, 13 and 14 November 2026, Birmingham. One ticket, both days.
+
+🏗️ Day 1, The Blueprint. Location using a demand assessment framework, niche and USP, feasibility, funding, property, CQC, and how to plan the first 90 days so you do not haemorrhage cash waiting for patients.
+📈 Day 2, Building the Business. The Invisible Waiting List, recruiting an A-Team, the numbers, pricing, systems, second sites.
+
+So if you are sick of:
+🚫 Piecing the sequence together from forum threads and half remembered conversations
+🚫 Finding out a step existed only after you needed it
+🚫 Paying for advice one silo at a time
+
+And you want more.
+More sequence and less guesswork.
+More of the awkward parts covered, like funding and CQC.
+More of a plan you could hand somebody else.
+
+Then take the map.
+${CTA}
+
+${DETAILS}
+
+${CTA}
+
+P.S. You leave with workbooks and templates, so the map goes home with you rather than staying on a slide.
+P.P.S. Her full film is on the page and runs about two and a half minutes.`,
+    headline: 'Like a map to follow',
+    altHeadlines: [
+      'She came back for site two',
+      'What order does this go in?',
+      'The sequence, start to open',
+    ],
+    description: 'Two days. One ticket.',
+    cta: 'Learn More',
+  },
+  {
+    ref: 'EV-04d',
+    angle: 'Testimonial: the room and direct access to Bobby',
+    stage: 'Cold / prospecting',
+    hookType: 'Quoted result',
+    primary: `The most useful part of the two days is the part that is not on the agenda.
+
+"It's really nice to meet other dentists on the course and see how their journeys are going. Bobby's really great with answering the questions, you can go to him with anything. He gives direct advice because he's experienced it all, the pitfalls as well as the good points."
+
+A practice owner in Hertfordshire, at a previous Squat Success event.
+
+Two things in that. Other dentists at the same point as you, which is rarer than it sounds when you are the only person in your practice thinking about this. And a straight answer from someone who has had the same conversation with the same landlords, lenders and regulators.
+
+${CTA}
+
+Squat Success Live, 13 and 14 November 2026, Birmingham.
+
+🗣️ Live Q&A with Bobby and the Squat Success team across both days.
+🤝 Guest experts on finance, marketing, recruitment and leadership. Direct access, not panel theatre.
+👥 Networking with dentists walking the same path, at every stage of it.
+🎟️ One ticket covers Friday and Saturday.
+
+So if you are sick of:
+🚫 Queueing at the front of a stage for ninety seconds with a speaker
+🚫 Being the only person you know who is seriously considering this
+🚫 Generic answers to a question about your practice
+🚫 Events where the good conversation happens to somebody else
+
+And you want more.
+More straight answers, including the unflattering ones.
+More people to compare notes with afterwards.
+More of the pitfalls named before you walk into them.
+
+Then get in the room.
+${CTA}
+
+Spaces are intentionally limited so it stays small enough to ask the question that actually matters to your practice.
+
+${DETAILS}
+
+${CTA}
+
+P.S. Refreshments and lunch are both days, which is where most of those conversations happen.
+P.P.S. Bobby still runs Avenue Dental in Leamington Spa, so the answers are current.`,
+    headline: 'The bit not on the agenda',
+    altHeadlines: [
+      '"You can go to him with anything"',
+      'Direct access, not panel theatre',
+      'A room of dentists like you',
+    ],
+    description: '13 and 14 Nov, Birmingham',
+    cta: 'Sign Up',
   },
   {
     ref: 'EV-05',
@@ -428,7 +579,7 @@ More reason to believe year two looks different from year one.
 Then spend the Saturday on it.
 ${CTA}
 
-Hear from dentists who are right where you are, and a few steps ahead. "It definitely makes the journey smoother, having someone giving you all that information. Like a map to follow." A practice owner in Hertfordshire, now opening her second site as a squat.
+Hear from dentists who are right where you are, and a few steps ahead. "Having someone to lean on, someone that can support you along that journey, kind of break it down for you." Dr Laurie, a Squat Success member.
 
 ${DETAILS}
 
@@ -506,6 +657,16 @@ for (const b of BLOCKS) {
   if (/[—–]/.test(b.primary)) throw new Error(`${b.ref} primary text contains a dash we do not use`);
 }
 
+// Two blocks that open the same way are one block wearing two hats. The whole point
+// of splitting the testimonials was that a scroll never hits the same quote twice.
+const hooks = new Map<string, string>();
+for (const b of BLOCKS) {
+  const hook = b.primary.split('\n')[0].trim();
+  const clash = hooks.get(hook);
+  if (clash) throw new Error(`${b.ref} opens on the same line as ${clash}`);
+  hooks.set(hook, b.ref);
+}
+
 const blockMap = new Map(BLOCKS.map((b) => [b.ref, b]));
 
 // --- Video mapping -----------------------------------------------------------
@@ -532,22 +693,23 @@ const inv = JSON.parse(
 
 /** name -> [primary block, alternate block] */
 const MAPPING: Record<string, [string, string]> = {
-  // Testimonial snippets. Speaker and topic unconfirmed on every one of these, so
-  // the testimonial block is the only honest default.
-  'Squat Success Testimonial Snippet 1.mov': ['EV-04', 'EV-03'],
-  'Squat Success Testimonial Snippet 2.mov': ['EV-04', 'EV-03'],
-  'Squat Success Testimonial Snippet 3.mov': ['EV-04', 'EV-01'],
-  'Squat Success Testimonial Snippet 4.mov': ['EV-04', 'EV-03'],
-  'Squat Success Testimonial Snippet 5.mov': ['EV-04', 'EV-02'],
-  'Squat Success Testimonial Snippet 6.mov': ['EV-04', 'EV-01'],
-  'Squat Success Testimonial Comp 2 Snippet 1.mov': ['EV-04', 'EV-01'],
-  'Squat Success Testimonial Comp 2 Snippet 2.mov': ['EV-04', 'EV-03'],
-  'Squat Success Testimonial Comp 2 Snippet 3.mov': ['EV-04', 'EV-02'],
-  'Squat Success Testimonial Comp 2 Snippet 4.mov': ['EV-04', 'EV-07'],
-  'Squat Success Testimonial Comp 2 Snippet 5.mov': ['EV-04', 'EV-03'],
-  'Squat Success Testimonial Comp 2 Snippet 6.mov': ['EV-04', 'EV-08'],
-  'Squat Success Testimonial Comp 2 Snippet 7.mov': ['EV-04', 'EV-01'],
-  'Squat Success Testimonial Comp 2 Snippet 8.mov': ['EV-04', 'EV-07'],
+  // Testimonial snippets. Speaker and topic unconfirmed on every one of these, so a
+  // testimonial block is the only honest default. Rotated across all four voices so
+  // no two adjacent ad sets open on the same quote.
+  'Squat Success Testimonial Snippet 1.mov': ['EV-04a', 'EV-03'],
+  'Squat Success Testimonial Snippet 2.mov': ['EV-04b', 'EV-03'],
+  'Squat Success Testimonial Snippet 3.mov': ['EV-04c', 'EV-01'],
+  'Squat Success Testimonial Snippet 4.mov': ['EV-04d', 'EV-03'],
+  'Squat Success Testimonial Snippet 5.mov': ['EV-04b', 'EV-02'],
+  'Squat Success Testimonial Snippet 6.mov': ['EV-04d', 'EV-01'],
+  'Squat Success Testimonial Comp 2 Snippet 1.mov': ['EV-04c', 'EV-01'],
+  'Squat Success Testimonial Comp 2 Snippet 2.mov': ['EV-04a', 'EV-03'],
+  'Squat Success Testimonial Comp 2 Snippet 3.mov': ['EV-04b', 'EV-02'],
+  'Squat Success Testimonial Comp 2 Snippet 4.mov': ['EV-04c', 'EV-07'],
+  'Squat Success Testimonial Comp 2 Snippet 5.mov': ['EV-04a', 'EV-03'],
+  'Squat Success Testimonial Comp 2 Snippet 6.mov': ['EV-04b', 'EV-08'],
+  'Squat Success Testimonial Comp 2 Snippet 7.mov': ['EV-04d', 'EV-01'],
+  'Squat Success Testimonial Comp 2 Snippet 8.mov': ['EV-04d', 'EV-07'],
   // Bobby to camera. Cold pain-led is the safest default, curiosity the rotation.
   'Squat Success Bobby Car Snippet 1.mov': ['EV-03', 'EV-02'],
   'Squat Success Bobby Car Snippet 2.mov': ['EV-03', 'EV-02'],
@@ -559,15 +721,15 @@ const MAPPING: Record<string, [string, string]> = {
   // Podcast snippets. These are the only clips with a confirmed topic, so they are
   // the only ones mapped on substance rather than on a safe default.
   'SS podcast snippet 1 - Personal Brand.mov': ['EV-07', 'EV-06'],
-  'SS podcast snippet 2 - Why Matt Joined SS.mov': ['EV-04', 'EV-01'],
-  'SS podcast snippet 3 - Support From SS.mov': ['EV-04', 'EV-01'],
+  'SS podcast snippet 2 - Why Matt Joined SS.mov': ['EV-04a', 'EV-01'],
+  'SS podcast snippet 3 - Support From SS.mov': ['EV-04d', 'EV-01'],
   'SS podcast snippet 4 - Why Open a Squat.mov': ['EV-03', 'EV-02'],
   'SS podcast snippet 5 - Pros and Cons.mov': ['EV-02', 'EV-05'],
   'SS podcast snippet 6 - CareStack Promo.mov': ['', ''],
   'SS podcast snippet 7 - Same Team.mov': ['EV-06', 'EV-07'],
   'SS podcast snippet 8 - Recruitment.mov': ['EV-06', 'EV-07'],
   'SS podcast snippet 9 - Trusting Others.mov': ['EV-06', 'EV-07'],
-  'SS podcast snippet 10 - People & Support.mov': ['EV-04', 'EV-06'],
+  'SS podcast snippet 10 - People & Support.mov': ['EV-04c', 'EV-06'],
 };
 
 /** Extra note per clip, on top of whatever the inventory already flags. */
@@ -818,7 +980,8 @@ const TO_CONFIRM = [
   'Whether the two day ticket has a booking deadline or a genuine cap number. "Spaces are intentionally limited" is the landing page wording and is all the copy uses.',
   'Venue. The page says Birmingham and nothing more. A named venue and a start time would strengthen every block.',
   'Speakers. Guest experts are described by discipline (finance, marketing, recruitment, leadership) but not named anywhere.',
-  'Testimonial snippet contents. Speaker and topic are unconfirmed on all fourteen, so every one is on the testimonial block by default. Watch them before assigning to ad sets.',
+  'Testimonial snippet contents. Speaker and topic are unconfirmed on all fourteen, so they are spread across the four testimonial blocks on rotation rather than on evidence. Watch them and match each clip to the voice it actually supports.',
+  'Dr Laurie is described on the landing page as a Squat Success member, not as an event attendee, so EV-07 attributes him that way. If he has been to an event, the line can be strengthened.',
   'Bobby car snippet contents. Same problem. All seven are on a safe default block.',
   'Whether the ad headline clashes with anything spoken or captioned in the first two seconds of the clip. Same rule as the statics: the headline should not repeat the line already on the creative.',
 ];
@@ -831,8 +994,12 @@ const md = `# Squat Success Live — Meta ad copy (event)
 **Date written:** ${DATE}
 **Sheet:** [Event Ads (Nov)](https://docs.google.com/spreadsheets/d/${SPREADSHEET}/edit#gid=${sheetId})
 
-Eight copy blocks, run against the ${rows.length} short video snippets already approved on
+${BLOCKS.length} copy blocks, run against the ${rows.length} short video snippets already approved on
 Frame.io. One block per angle, not one per clip: swap the clip, leave working words alone.
+
+The four testimonial blocks (EV-04a to EV-04d) each lead on a different voice from the
+landing page and argue a different thing underneath, so a scroll never hits the same
+quote twice. No quote appears in more than one block.
 
 No ticket price and no deadline appear in any block, because neither is published.
 
@@ -882,10 +1049,13 @@ ${videos
 
 ## Testing
 
-- **Test variable:** angle, not wording. Eight blocks, one ad set each, same clips underneath.
-- **Recommended split:** start EV-01, EV-03 and EV-04 against the testimonial and Bobby car
-  snippets. They are the three broadest. EV-05 and EV-06 are agenda led and will do more work
-  on retargeting than cold.
+- **Test variable:** angle, not wording. ${BLOCKS.length} blocks, one ad set each, same clips underneath.
+- **Recommended split:** start EV-01 and EV-03 against the Bobby car snippets, and run the
+  four testimonial blocks as one proof-led ad set apiece against the snippet library. EV-05
+  and EV-06 are agenda led and will do more work on retargeting than cold.
+- **Testimonial blocks:** treat EV-04a to EV-04d as four separate angles, not four versions
+  of one. EV-04a sells belief, EV-04b sells peer endorsement, EV-04c sells sequence, EV-04d
+  sells the room. If budget is tight, run EV-04a and EV-04c first, they are the furthest apart.
 - **Persona blocks** EV-07 and EV-08 want their own ad sets. They speak to dentists who are
   already open or already committed, and will drag CPM if they run broad.
 - **Minimum duration:** 3 to 5 days per angle with enough budget to leave prospecting alone.
