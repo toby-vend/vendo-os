@@ -79,34 +79,30 @@
           <tr style="color:#EF4444"><td style="color:#EF4444">Aug 2026</td><td class="n" style="color:#EF4444">531,364</td><td class="n" style="color:#EF4444">656</td><td class="n" style="color:#EF4444">0.12%</td></tr>
         </tbody>
       </table>
-      <p class="note" style="margin-top:12px">August sessions are twelve times June's while revenue rose 25% and orders rose 20%. Sessions that do not buy, in that volume, are not customers.</p>
+      <p class="note" style="margin-top:12px">Sessions up 12&#215; since June. Orders up 20%.</p>
     </div>
     <div class="card" style="background:rgba(142,254,187,.09);border-color:rgba(142,254,187,.30)">
-      <p class="lbl" style="color:#8EFEBB">The clean conversion rate</p>
+      <p class="lbl" style="color:#8EFEBB">The real conversion rate</p>
       <p class="stat" style="font-size:44px">1.45%</p>
-      <p class="mut" style="margin:12px 0 0;font-size:15px;line-height:1.5">Averaged across the eleven months before the anomaly, ranging 1.05% to 2.08%. The 1.5% used in the original modelling was very close &#8212; <strong style="color:#fff">the model stands, and is now evidenced rather than assumed</strong>.</p>
+      <p class="mut" style="margin:10px 0 0;font-size:15px">Eleven clean months before the anomaly.</p>
     </div>
   </div>
   <div class="col" style="flex:1">
     <div class="card" style="border-color:rgba(239,68,68,.30)">
       <span class="pill p-stop">Critical &#183; confirmed</span>
-      <h3 style="margin-top:12px">92% of reported traffic is bot activity logged as direct</h3>
-      <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13.5px;background:#051412;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:14px 16px;color:#B9C7C0;line-height:1.75;margin:14px 0">
-        <span style="color:#6B7B74">last 30 days</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6B7B74">60&#8211;180 days ago, per 120</span><br>
-        direct&nbsp;&nbsp; <span style="color:#EF4444;font-weight:600">466,756</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; direct&nbsp;&nbsp;&nbsp; 76,851<br>
-        search&nbsp;&nbsp;&nbsp; 18,655&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; search&nbsp;&nbsp;&nbsp; 55,283<br>
-        social&nbsp;&nbsp;&nbsp;&nbsp; 3,409&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; social&nbsp;&nbsp;&nbsp; 18,214<br>
-        email&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 36&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; email&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 120<br>
-        paid&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; paid&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68
+      <h3 style="margin-top:12px">Bots, logged as direct traffic</h3>
+      <div style="display:flex;gap:28px;margin-top:16px">
+        <div><p class="lbl">Direct, last 30 days</p><p style="margin:0;font-size:40px;font-weight:800;color:#EF4444;letter-spacing:-.03em">466,756</p></div>
+        <div><p class="lbl">Normal month</p><p class="statw" style="font-size:40px">~19,000</p></div>
       </div>
-      <p class="mut" style="margin:0;font-size:15px;line-height:1.5">Direct sessions went from roughly 19,000 a month to 466,756 in thirty days &#8212; a 24-fold rise &#8212; while search, social and orders all stayed on trend. Traffic with no referrer, at that volume, with no corresponding revenue, is automated. The September mobile QA independently logged 429 rate-limit responses from a Microsoft Ads agent endpoint on ordinary page loads.</p>
+      <p class="mut" style="margin:14px 0 0;font-size:15px">Search, social and orders all stayed on trend.</p>
     </div>
     <div class="card">
-      <h3>Why it matters beyond the reporting</h3>
-      <ul class="mut" style="font-size:15px">
-        <li>Every conversion rate in Shopify Analytics is wrong by a factor of ten, so any decision taken on that number &#8212; ad budgets, channel comparisons, judging whether a change worked &#8212; is taken on corrupted data</li>
-        <li><strong style="color:#fff">It contaminates the signal fed back to Google and Meta for optimisation.</strong> This needs stopping before any new paid budget is set</li>
-        <li>It is real server load. The performance work attributed its missed page-speed gates partly to server response time, and half a million extra monthly sessions is a plausible contributor</li>
+      <h3>Why it matters</h3>
+      <ul class="mut" style="font-size:16px">
+        <li>Every Shopify conversion rate is wrong by ten times</li>
+        <li><strong style="color:#fff">Google and Meta are learning from fake visits</strong></li>
+        <li>It adds server load and slows the site</li>
       </ul>
     </div>
   </div>
