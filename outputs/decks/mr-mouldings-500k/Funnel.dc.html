@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#051412;font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#E8F2EC;-webkit-font-smoothing:antialiased}
+    a{color:#8EFEBB}a:hover{color:#C9FEDD}
+    .slide{position:relative;width:1600px;height:900px;overflow:hidden;background:#051412;padding:60px 88px 0;display:flex;flex-direction:column}
+    .grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:26px 26px;pointer-events:none}
+    .orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+    .hd{position:relative;z-index:1;flex:none}
+    .eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#8EFEBB;margin:0 0 16px}
+    h1.t{font-size:54px;line-height:1.06;letter-spacing:-.03em;font-weight:800;color:#fff;margin:0;max-width:26ch;text-wrap:balance}
+    .fl{font-family:'Instrument Serif',Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.01em}
+    .sf{font-size:19px;line-height:1.5;color:#B9C7C0;margin:16px 0 0;max-width:82ch}
+    .bd{position:relative;z-index:1;flex:1;display:flex;gap:40px;padding:32px 0 8px;min-height:0}
+    .col{display:flex;flex-direction:column;gap:20px;min-width:0}
+    .ft{position:relative;z-index:1;flex:none;height:62px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.06)}
+    .ft .l{display:flex;align-items:center;gap:11px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6B7B74;font-weight:700}
+    .ft .n{font-size:11px;color:#6B7B74;font-weight:700;letter-spacing:.08em}
+    .card{background:#09221F;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px 26px}
+    .lbl{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6B7B74;margin:0 0 10px}
+    .stat{font-size:42px;font-weight:800;letter-spacing:-.03em;color:#8EFEBB;line-height:1;margin:0}
+    .statw{font-size:42px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1;margin:0}
+    table{border-collapse:collapse;width:100%;font-size:15px}
+    th{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6B7B74;text-align:left;padding:0 16px 9px 0;border-bottom:1px solid rgba(255,255,255,.10);white-space:nowrap}
+    td{padding:9px 16px 9px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#E8F2EC;line-height:1.35}
+    th.n,td.n{text-align:right;padding-right:0;font-variant-numeric:tabular-nums}
+    tr:last-child td{border-bottom:0}
+    .hi td{color:#8EFEBB;font-weight:700}
+    .dim td{color:#6B7B74}
+    p{margin:0 0 14px;line-height:1.55;font-size:16px}
+    p:last-child{margin-bottom:0}
+    .mut{color:#B9C7C0}
+    .note{font-size:13px;color:#6B7B74;line-height:1.5;margin:0}
+    .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+    .p-go{background:rgba(142,254,187,.12);color:#8EFEBB}
+    .p-hold{background:rgba(245,214,116,.12);color:#F5D674}
+    .p-stop{background:rgba(239,68,68,.14);color:#EF4444}
+    h3{font-size:19px;font-weight:700;color:#fff;margin:0 0 8px;letter-spacing:-.01em}
+    ul{margin:0;padding-left:20px}
+    li{margin-bottom:9px;line-height:1.5;font-size:16px;color:#E8F2EC}
+    li:last-child{margin-bottom:0}
+    .kv{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .kv:last-child{border-bottom:0}
+    .kv .k{font-size:15px;color:#B9C7C0}
+    .kv .v{font-size:16px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+  </style>
+</helmet>
+<div class="slide">
+<div class="grid"></div>
+<div class="orb" style="width:620px;height:620px;top:-260px;right:-180px;background:rgba(142,254,187,.07)"></div>
+<div class="orb" style="width:520px;height:520px;bottom:-300px;left:-220px;background:rgba(255,255,255,.035)"></div>
+<div class="hd">
+<p class="eyebrow">06 &#183; The funnel, stage by stage</p>
+<h1 class="t">Why each fix <span class="fl">converts</span></h1>
+<p class="sf">These are trust mechanics at the decision moment, not persuasion. They remove reasons to doubt the number on the screen.</p>
+</div>
+<div class="bd" style="gap:20px">
+  <div class="col" style="flex:1">
+    <div class="card" style="padding:20px 22px">
+      <p class="lbl" style="color:#8EFEBB">Stage 1 &#183; Impression &#8594; click</p>
+      <h3 style="font-size:17px">The head fix and the snippet</h3>
+      <p class="mut" style="margin:0;font-size:14.5px;line-height:1.5">610,376 impressions are already served every month and 98.9% are thrown away. Restoring the head means Google reads the written title and description rather than auto-generating one, and honours the canonical so the clean collection page ranks instead of <span style="font-family:ui-monospace,monospace;font-size:13px">?page=2&amp;grid_list</span>. The rating guard also removes a one-star badge generated from a single window-board review.</p>
+    </div>
+    <div class="card" style="padding:20px 22px">
+      <p class="lbl" style="color:#8EFEBB">Stage 2 &#183; Click &#8594; engaged session</p>
+      <h3 style="font-size:17px">Seven videos, streaming 31.4 MB</h3>
+      <p class="mut" style="margin:0;font-size:14.5px;line-height:1.5">Testimonial videos autoplayed on every product page, streaming <strong style="color:#fff">31.4 MB in 38 seconds without the customer scrolling</strong>. They competed for bandwidth with the one thing the customer came for &#8212; the size and length options &#8212; which is why options took 45 seconds to become usable. A CLS of 0.362 also meant the buy box physically moved under the customer's thumb after load.</p>
+    </div>
+  </div>
+  <div class="col" style="flex:1">
+    <div class="card" style="padding:20px 22px;border-color:rgba(239,68,68,.30)">
+      <p class="lbl" style="color:#EF4444">Stage 3 &#183; Engaged &#8594; add to cart</p>
+      <h3 style="font-size:17px">The primary button did nothing</h3>
+      <p class="mut" style="margin:0;font-size:14.5px;line-height:1.5">Tapping Add to cart before choosing options produced <strong style="color:#fff">no request, no message, no scroll and no change of state</strong>. This is the worst state in any funnel: a customer at maximum intent presses the main button and the site does not acknowledge it. There is no recovery path because there is nothing to react to.</p>
+      <p class="mut" style="margin:12px 0 0;font-size:14.5px;line-height:1.5">Alongside it, all five recommendation cards showed <strong style="color:#fff">£6.68</strong> while the same product read "from £10.34" elsewhere on the page, and resolved to £24.65 once configured. Price is the anchor a customer forms before they configure; that gap reads as bait, not as a range.</p>
+    </div>
+    <div class="card" style="padding:20px 22px">
+      <p class="lbl" style="color:#8EFEBB">Stage 4 &#183; Add to cart &#8594; cart</p>
+      <h3 style="font-size:17px">The £0.00 drawer</h3>
+      <p class="mut" style="margin:0;font-size:14.5px;line-height:1.5">After a successful add, the drawer's first render showed a blank title, a <strong style="color:#fff">£0.00 subtotal and "Add £50.00 to reach the £50 minimum"</strong> &#8212; while the cart itself was correct. It stayed wrong for roughly six seconds, at exactly the moment the customer decides whether to continue or check out.</p>
+    </div>
+  </div>
+  <div class="col" style="flex:1">
+    <div class="card" style="padding:20px 22px;border-color:rgba(239,68,68,.30)">
+      <p class="lbl" style="color:#EF4444">Stage 5 &#183; Cart &#8594; checkout</p>
+      <h3 style="font-size:17px">The minimum-order trap</h3>
+      <p class="mut" style="margin:0;font-size:14.5px;line-height:1.5">A basket under £50 passed the whole funnel with the Checkout button enabled, then hit a red banner at checkout: <em>order amount is less than the required minimum of £50</em>. A total loss at the highest-intent point on the site, after the customer has already invested the configuration effort.</p>
+      <p class="mut" style="margin:12px 0 0;font-size:14.5px;line-height:1.5">22.2% of orders sit under £100, so a meaningful share of baskets approach this threshold. Gating it in the cart turns a dead end into an upsell prompt.</p>
+    </div>
+    <div class="card" style="padding:20px 22px;background:rgba(142,254,187,.09);border-color:rgba(142,254,187,.30)">
+      <h3 style="font-size:17px;color:#8EFEBB">Still upstream</h3>
+      <p class="mut" style="margin:0;font-size:14.5px;line-height:1.5">The configurator posts to the cart and receives <strong style="color:#fff">three rejections before succeeding</strong>, so tap-to-drawer measures 9.6 seconds with "Adding&#8230;" the only feedback. A watchdog message turns dead time into explained time, but only replacing the configurator removes the wait itself.</p>
+    </div>
+  </div>
+</div>
+<div class="ft">
+<div class="l"><svg width="17" height="17" viewBox="0 0 397 384" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M258.48 128L213.199 255.664H174.281L129 128H162.102L193.748 224.386L225.574 128H258.48Z" fill="#8EFEBB"></path><path d="M267.575 246.858C267.575 251.907 263.482 256 258.433 256C253.384 256 249.291 251.907 249.291 246.858C249.291 241.809 253.384 237.716 258.433 237.716C263.482 237.716 267.575 241.809 267.575 246.858Z" fill="#8EFEBB"></path></svg><span>MR Mouldings &#215; Vendo Digital</span></div>
+<div class="n">10</div>
+</div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<div class="bd">
+  <div class="col" style="flex:0 0 720px">
+    <p class="lbl">Measured before and after &#183; CRO audit and mobile QA programme</p>
+    <table style="font-size:14.5px">
+      <thead><tr><th>Metric</th><th class="n">Before</th><th class="n">After</th><th style="width:130px">Status</th></tr></thead>
+      <tbody>
+        <tr class="hi"><td>PDP page weight &#8212; 38s idle, no scrolling</td><td class="n">36.9 MB</td><td class="n">under 1.6 MB</td><td style="color:#F5D674">Merged, not live</td></tr>
+        <tr class="hi"><td>Time until size options usable on mobile</td><td class="n">45.0 s</td><td class="n">11.7 s</td><td style="color:#F5D674">Merged, not live</td></tr>
+        <tr class="hi"><td>Product page layout shift (CLS)</td><td class="n">0.362</td><td class="n">0.045</td><td style="color:#F5D674">Merged, not live</td></tr>
+        <tr><td>Largest contentful paint</td><td class="n">up to 8.0 s</td><td class="n">3.0 s</td><td style="color:#F5D674">Merged, not live</td></tr>
+        <tr><td>Critical accessibility violations</td><td class="n">32 nodes</td><td class="n">0</td><td style="color:#F5D674">Merged, not live</td></tr>
+        <tr><td>Contrast failures</td><td class="n">108 nodes</td><td class="n">0</td><td style="color:#F5D674">Merged, not live</td></tr>
+        <tr><td>Products wrongly stating "prices exclude VAT"</td><td class="n">635</td><td class="n">0</td><td style="color:#8EFEBB">Live</td></tr>
+        <tr><td>Configurable products with no from-price</td><td class="n">47</td><td class="n">0</td><td style="color:#8EFEBB">Live</td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:12px">Waves 0&#8211;4 were built, browser-tested and merged to <span style="font-family:ui-monospace,monospace">develop</span> from 5 September. <span style="font-family:ui-monospace,monospace">main</span> is untouched.</p>
+  </div>
+  <div class="col" style="flex:1">
+    <div class="card" style="background:rgba(245,214,116,.10);border-color:rgba(245,214,116,.35)">
+      <span class="pill p-hold">Decision required</span>
+      <h3 style="margin-top:12px;color:#F5D674">The release is the single highest-value action available</h3>
+      <p class="mut" style="margin:0;font-size:16px;line-height:1.55">That includes the head-tag fix. It was written on 6 September and is merged &#8212; the live site still carries the broken version because the release has not been approved. Every day it waits, 610,000 monthly impressions keep converting at 1.09%.</p>
+    </div>
+    <div class="card">
+      <h3>What is still outstanding</h3>
+      <ul class="mut" style="font-size:15px">
+        <li><strong style="color:#fff">Wave 5, the CRO wave, is now built</strong> and on a preview theme since 24 September: sticky checkout bar, price per metre on cards, trust strip under the hero. The full inventory is on the next slide</li>
+        <li><strong style="color:#fff">Performance gates still missed.</strong> Home LCP 6.9s against a 4s target; Lighthouse mobile 45&#8211;51 against a 70 gate. Partly third-party app load rather than theme code</li>
+        <li><strong style="color:#fff">The £6.68 in search results is only half solvable from the theme.</strong> Shopify injects its own product JSON-LD carrying the placeholder. The theme's structured data is corrected; full resolution needs the configurator replaced</li>
+      </ul>
+    </div>
+  </div>
+</div>

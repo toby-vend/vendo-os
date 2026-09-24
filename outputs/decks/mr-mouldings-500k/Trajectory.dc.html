@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#051412;font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#E8F2EC;-webkit-font-smoothing:antialiased}
+    a{color:#8EFEBB}a:hover{color:#C9FEDD}
+    .slide{position:relative;width:1600px;height:900px;overflow:hidden;background:#051412;padding:60px 88px 0;display:flex;flex-direction:column}
+    .grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:26px 26px;pointer-events:none}
+    .orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+    .hd{position:relative;z-index:1;flex:none}
+    .eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#8EFEBB;margin:0 0 16px}
+    h1.t{font-size:54px;line-height:1.06;letter-spacing:-.03em;font-weight:800;color:#fff;margin:0;max-width:26ch;text-wrap:balance}
+    .fl{font-family:'Instrument Serif',Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.01em}
+    .sf{font-size:19px;line-height:1.5;color:#B9C7C0;margin:16px 0 0;max-width:82ch}
+    .bd{position:relative;z-index:1;flex:1;display:flex;gap:40px;padding:32px 0 8px;min-height:0}
+    .col{display:flex;flex-direction:column;gap:20px;min-width:0}
+    .ft{position:relative;z-index:1;flex:none;height:62px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.06)}
+    .ft .l{display:flex;align-items:center;gap:11px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6B7B74;font-weight:700}
+    .ft .n{font-size:11px;color:#6B7B74;font-weight:700;letter-spacing:.08em}
+    .card{background:#09221F;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px 26px}
+    .lbl{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6B7B74;margin:0 0 10px}
+    .stat{font-size:42px;font-weight:800;letter-spacing:-.03em;color:#8EFEBB;line-height:1;margin:0}
+    .statw{font-size:42px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1;margin:0}
+    table{border-collapse:collapse;width:100%;font-size:15px}
+    th{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6B7B74;text-align:left;padding:0 16px 9px 0;border-bottom:1px solid rgba(255,255,255,.10);white-space:nowrap}
+    td{padding:9px 16px 9px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#E8F2EC;line-height:1.35}
+    th.n,td.n{text-align:right;padding-right:0;font-variant-numeric:tabular-nums}
+    tr:last-child td{border-bottom:0}
+    .hi td{color:#8EFEBB;font-weight:700}
+    .dim td{color:#6B7B74}
+    p{margin:0 0 14px;line-height:1.55;font-size:16px}
+    p:last-child{margin-bottom:0}
+    .mut{color:#B9C7C0}
+    .note{font-size:13px;color:#6B7B74;line-height:1.5;margin:0}
+    .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+    .p-go{background:rgba(142,254,187,.12);color:#8EFEBB}
+    .p-hold{background:rgba(245,214,116,.12);color:#F5D674}
+    .p-stop{background:rgba(239,68,68,.14);color:#EF4444}
+    h3{font-size:19px;font-weight:700;color:#fff;margin:0 0 8px;letter-spacing:-.01em}
+    ul{margin:0;padding-left:20px}
+    li{margin-bottom:9px;line-height:1.5;font-size:16px;color:#E8F2EC}
+    li:last-child{margin-bottom:0}
+    .kv{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .kv:last-child{border-bottom:0}
+    .kv .k{font-size:15px;color:#B9C7C0}
+    .kv .v{font-size:16px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+  </style>
+</helmet>
+<div class="slide">
+<div class="grid"></div>
+<div class="orb" style="width:620px;height:620px;top:-260px;right:-180px;background:rgba(142,254,187,.07)"></div>
+<div class="orb" style="width:520px;height:520px;bottom:-300px;left:-220px;background:rgba(255,255,255,.035)"></div>
+<div class="hd">
+<p class="eyebrow">02 &#183; The trajectory</p>
+<h1 class="t">£500k is roughly where the current trend <span class="fl">arrives</span></h1>
+<p class="sf">About fourteen months out on the last six months' growth rate &#8212; which lands almost exactly on the timeline in your brief.</p>
+</div>
+<div class="bd">
+  <div class="col" style="flex:0 0 640px">
+    <div>
+      <p class="lbl">When the trajectory reaches £500k a month</p>
+      <table>
+        <thead><tr><th>Growth assumption</th><th class="n">Rate</th><th class="n">Months</th></tr></thead>
+        <tbody>
+          <tr class="dim"><td>Last 12 months' actual rate</td><td class="n">301%</td><td class="n">4.8</td></tr>
+          <tr class="hi"><td>Last 6 months' actual rate</td><td class="n">62%</td><td class="n">14.0</td></tr>
+          <tr><td>Decelerating to 75%/yr</td><td class="n">75%</td><td class="n">12.0</td></tr>
+          <tr><td>Decelerating to 50%/yr</td><td class="n">50%</td><td class="n">16.5</td></tr>
+          <tr><td>Decelerating to 30%/yr</td><td class="n">30%</td><td class="n">25.6</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-top:12px">The 301% case includes the step-change off a small base and is almost certainly not sustainable. The 62% figure is the honest forward number &#8212; and it lands almost exactly on the timeline in your brief.</p>
+    </div>
+    <div class="card" style="background:rgba(142,254,187,.09);border-color:rgba(142,254,187,.30)">
+      <p style="margin:0;font-size:16px;line-height:1.55"><strong style="color:#8EFEBB">On the last six months' rate the business reaches £500,000 a month in about 14 months without doing anything new.</strong> <span class="mut">So every initiative in this deck should be judged on whether it beats a 62% baseline &#8212; not on whether it is exciting.</span></p>
+    </div>
+  </div>
+  <div class="col" style="flex:1">
+    <div class="card">
+      <p class="lbl" style="margin-bottom:16px">Monthly revenue from August 2026, by growth rate</p>
+      <svg viewBox="0 0 560 250" role="img" aria-label="Line chart projecting monthly revenue from £285,850 in August 2026; at 62% a year the £500k target is reached at month 14, at 30% a year not until month 26">
+        <line x1="44" y1="210" x2="548" y2="210" stroke="rgba(255,255,255,.10)" stroke-width="1"></line>
+        <line x1="44" y1="96" x2="548" y2="96" stroke="#fff" stroke-width="1.5" stroke-dasharray="5 4" opacity=".7"></line>
+        <text x="548" y="88" text-anchor="end" fill="#fff" font-family="Manrope,sans-serif" font-size="12" font-weight="700">£500k target</text>
+        <text x="36" y="214" text-anchor="end" fill="#6B7B74" font-family="Manrope,sans-serif" font-size="10">£0</text>
+        <text x="36" y="100" text-anchor="end" fill="#6B7B74" font-family="Manrope,sans-serif" font-size="10">£500k</text>
+        <text x="36" y="30" text-anchor="end" fill="#6B7B74" font-family="Manrope,sans-serif" font-size="10">£800k</text>
+        <polyline fill="none" stroke="#8EFEBB" stroke-width="2.5" stroke-linecap="round" points="44,145 72,140 100,134 128,128 156,121 184,114 212,106 240,97 268,87 296,76 324,64 352,50 380,35 408,18"></polyline>
+        <polyline fill="none" stroke="#F5D674" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6 4" points="44,145 72,143 100,141 128,138 156,136 184,133 212,130 240,127 268,124 296,121 324,117 352,113 380,109 408,105 436,101 464,96 492,91 520,86 548,80"></polyline>
+        <circle cx="44" cy="145" r="4" fill="#8EFEBB"></circle>
+        <text x="52" y="163" fill="#B9C7C0" font-family="Manrope,sans-serif" font-size="11" font-weight="600">£285,850</text>
+        <circle cx="296" cy="96" r="5" fill="#8EFEBB"></circle>
+        <text x="304" y="118" fill="#8EFEBB" font-family="Manrope,sans-serif" font-size="12" font-weight="800">62%/yr &#8212; month 14</text>
+        <circle cx="464" cy="96" r="5" fill="#F5D674"></circle>
+        <text x="456" y="118" text-anchor="end" fill="#F5D674" font-family="Manrope,sans-serif" font-size="12" font-weight="800">30%/yr &#8212; month 26</text>
+        <text x="44" y="238" fill="#6B7B74" font-family="Manrope,sans-serif" font-size="10.5" font-weight="600">AUG 2026</text>
+        <text x="548" y="238" text-anchor="end" fill="#6B7B74" font-family="Manrope,sans-serif" font-size="10.5" font-weight="600">MONTH 18+</text>
+      </svg>
+    </div>
+    <p class="note">The gap between those two lines is what this roadmap is actually for. Holding 62% is worth twelve months of time; letting it fall to 30% costs a year.</p>
+  </div>
+</div>
+<div class="ft">
+<div class="l"><svg width="17" height="17" viewBox="0 0 397 384" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M258.48 128L213.199 255.664H174.281L129 128H162.102L193.748 224.386L225.574 128H258.48Z" fill="#8EFEBB"></path><path d="M267.575 246.858C267.575 251.907 263.482 256 258.433 256C253.384 256 249.291 251.907 249.291 246.858C249.291 241.809 253.384 237.716 258.433 237.716C263.482 237.716 267.575 241.809 267.575 246.858Z" fill="#8EFEBB"></path></svg><span>MR Mouldings &#215; Vendo Digital</span></div>
+<div class="n">03</div>
+</div>
+</div>
+</x-dc>
+</body>
+</html>

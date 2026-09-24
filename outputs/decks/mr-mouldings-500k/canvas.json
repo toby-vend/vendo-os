@@ -1,0 +1,190 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Position.dc.html",
+      "x": 1740,
+      "y": 0,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Trajectory.dc.html",
+      "x": 3480,
+      "y": 0,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Gap.dc.html",
+      "x": 5220,
+      "y": 0,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Customers.dc.html",
+      "x": 0,
+      "y": 1100,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Analytics.dc.html",
+      "x": 1740,
+      "y": 1100,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Foundation.dc.html",
+      "x": 3480,
+      "y": 1100,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "SiteWork.dc.html",
+      "x": 5220,
+      "y": 1100,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "SiteValue.dc.html",
+      "x": 0,
+      "y": 2200,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Funnel.dc.html",
+      "x": 1740,
+      "y": 2200,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Checkout.dc.html",
+      "x": 3480,
+      "y": 2200,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Organic.dc.html",
+      "x": 5220,
+      "y": 2200,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "OrganicPrize.dc.html",
+      "x": 0,
+      "y": 3300,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Paid.dc.html",
+      "x": 1740,
+      "y": 3300,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "SocialNow.dc.html",
+      "x": 3480,
+      "y": 3300,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "SocialPlan.dc.html",
+      "x": 5220,
+      "y": 3300,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "SocialForecast.dc.html",
+      "x": 0,
+      "y": 4400,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Hardwood.dc.html",
+      "x": 1740,
+      "y": 4400,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Launch.dc.html",
+      "x": 3480,
+      "y": 4400,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Specification.dc.html",
+      "x": 5220,
+      "y": 4400,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Builders.dc.html",
+      "x": 0,
+      "y": 5500,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Flooring.dc.html",
+      "x": 1740,
+      "y": 5500,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Roadmap.dc.html",
+      "x": 3480,
+      "y": 5500,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Budget.dc.html",
+      "x": 5220,
+      "y": 5500,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Inputs.dc.html",
+      "x": 0,
+      "y": 6600,
+      "w": 1600,
+      "h": 900
+    },
+    {
+      "file": "Next.dc.html",
+      "x": 1740,
+      "y": 6600,
+      "w": 1600,
+      "h": 900
+    }
+  ],
+  "launch": {
+    "view": "focused",
+    "file": "Main.dc.html"
+  }
+}

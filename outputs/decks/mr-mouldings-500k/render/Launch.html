@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+</head>
+<body>
+
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#051412;font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#E8F2EC;-webkit-font-smoothing:antialiased}
+    a{color:#8EFEBB}a:hover{color:#C9FEDD}
+    .slide{position:relative;width:1600px;height:900px;overflow:hidden;background:#051412;padding:60px 88px 0;display:flex;flex-direction:column}
+    .grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:26px 26px;pointer-events:none}
+    .orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+    .hd{position:relative;z-index:1;flex:none}
+    .eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#8EFEBB;margin:0 0 16px}
+    h1.t{font-size:54px;line-height:1.06;letter-spacing:-.03em;font-weight:800;color:#fff;margin:0;max-width:26ch;text-wrap:balance}
+    .fl{font-family:'Instrument Serif',Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.01em}
+    .sf{font-size:19px;line-height:1.5;color:#B9C7C0;margin:16px 0 0;max-width:82ch}
+    .bd{position:relative;z-index:1;flex:1;display:flex;gap:40px;padding:32px 0 8px;min-height:0}
+    .col{display:flex;flex-direction:column;gap:20px;min-width:0}
+    .ft{position:relative;z-index:1;flex:none;height:62px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.06)}
+    .ft .l{display:flex;align-items:center;gap:11px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6B7B74;font-weight:700}
+    .ft .n{font-size:11px;color:#6B7B74;font-weight:700;letter-spacing:.08em}
+    .card{background:#09221F;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px 26px}
+    .lbl{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6B7B74;margin:0 0 10px}
+    .stat{font-size:42px;font-weight:800;letter-spacing:-.03em;color:#8EFEBB;line-height:1;margin:0}
+    .statw{font-size:42px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1;margin:0}
+    table{border-collapse:collapse;width:100%;font-size:15px}
+    th{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6B7B74;text-align:left;padding:0 16px 9px 0;border-bottom:1px solid rgba(255,255,255,.10);white-space:nowrap}
+    td{padding:9px 16px 9px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#E8F2EC;line-height:1.35}
+    th.n,td.n{text-align:right;padding-right:0;font-variant-numeric:tabular-nums}
+    tr:last-child td{border-bottom:0}
+    .hi td{color:#8EFEBB;font-weight:700}
+    .dim td{color:#6B7B74}
+    p{margin:0 0 14px;line-height:1.55;font-size:16px}
+    p:last-child{margin-bottom:0}
+    .mut{color:#B9C7C0}
+    .note{font-size:13px;color:#6B7B74;line-height:1.5;margin:0}
+    .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+    .p-go{background:rgba(142,254,187,.12);color:#8EFEBB}
+    .p-hold{background:rgba(245,214,116,.12);color:#F5D674}
+    .p-stop{background:rgba(239,68,68,.14);color:#EF4444}
+    h3{font-size:19px;font-weight:700;color:#fff;margin:0 0 8px;letter-spacing:-.01em}
+    ul{margin:0;padding-left:20px}
+    li{margin-bottom:9px;line-height:1.5;font-size:16px;color:#E8F2EC}
+    li:last-child{margin-bottom:0}
+    .kv{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .kv:last-child{border-bottom:0}
+    .kv .k{font-size:15px;color:#B9C7C0}
+    .kv .v{font-size:16px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+  </style>
+
+<div class="slide">
+<div class="grid"></div>
+<div class="orb" style="width:620px;height:620px;top:-260px;right:-180px;background:rgba(142,254,187,.07)"></div>
+<div class="orb" style="width:520px;height:520px;bottom:-300px;left:-220px;background:rgba(255,255,255,.035)"></div>
+<div class="hd">
+<p class="eyebrow">10 &#183; Launching the range</p>
+<h1 class="t">Release by period, not by product <span class="fl">type</span></h1>
+<p class="sf">Seventy-nine products in a 20 &#215; 4 matrix, all unpublished &#8212; which means every issue below can be fixed before anything goes live.</p>
+</div>
+<div class="bd">
+  <div class="col" style="flex:0 0 720px">
+    <div>
+      <p class="lbl">Release waves &#183; by period, not by product type</p>
+      <table style="font-size:14.5px">
+        <thead><tr><th style="width:56px">Wave</th><th>Period</th><th class="n" style="width:80px">Products</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td>1</td><td>Georgian</td><td class="n">16</td><td style="font-weight:400;color:#B9C7C0">Strongest existing period signal &#8212; £259,921/yr in MDF. Complete four-type set, and the smallest complete wave to prove the mechanics</td></tr>
+          <tr><td style="color:#8EFEBB;font-weight:700">2</td><td>Victorian</td><td class="n">15</td><td class="mut">£195,691/yr in MDF, and the period most associated with the high-end renovation buyer. Needs the Broughton panel mould finishing</td></tr>
+          <tr><td style="color:#8EFEBB;font-weight:700">3</td><td>Edwardian</td><td class="n">28</td><td class="mut">The largest block. Worth holding until the first two waves have proven which merchandising converts</td></tr>
+          <tr><td style="color:#8EFEBB;font-weight:700">4</td><td>Contemporary</td><td class="n">20</td><td class="mut">Different audience, and the only wave with real search volume behind it &#8212; "modern skirting boards" already earns 3,152 impressions a month. Give it its own campaign</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Why period, not product type</h3>
+      <p class="mut" style="margin:0;font-size:16px;line-height:1.55">The instinct is to release all the skirtings, then all the architraves. The product data argues against it. The first key benefit on every page reads <em>"pair with the matching skirting, panel mould and architrave"</em>, and the whole proposition of a 20 &#215; 4 matrix is that a room can be specified in one profile. <strong style="color:#8EFEBB">Release by type and every page cross-sells to three products that do not exist yet.</strong> Release by period and each drop is a complete, specifiable room set with its own editorial story, photography and audience.</p>
+    </div>
+  </div>
+  <div class="col" style="flex:1">
+    <div class="card" style="border-color:rgba(239,68,68,.30)">
+      <span class="pill p-stop">Blocking &#183; fix before publishing</span>
+      <h3 style="margin-top:12px">The range is named after a term nobody searches</h3>
+      <p class="mut" style="margin:0;font-size:15px;line-height:1.5">All 79 titles, URL handles and SEO titles contain "Tulip". None contain "hardwood" or "solid wood". Keep the profile names &#8212; <em>The Aysgarth</em>, <em>The Helmsley</em> are a genuine premium brand asset that works like a paint or tile range. Make the layer above them findable: the collection is <strong style="color:#fff">Solid Hardwood Skirting Boards</strong>, and each title carries the searchable noun with tulipwood as the named timber. <strong style="color:#8EFEBB">Handles matter most and are cheapest to change now</strong> &#8212; renaming after launch means redirects and lost equity.</p>
+    </div>
+    <div class="card" style="border-color:rgba(239,68,68,.30)">
+      <span class="pill p-stop">Blocking</span>
+      <h3 style="margin-top:12px">The priming and size options are inconsistent</h3>
+      <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;background:#051412;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:11px 13px;color:#B9C7C0;line-height:1.6;margin:10px 0">59 products: "Priming" &#8594; "Un-Primed"<br>20 products: "Primed"&nbsp;&nbsp;&#8594; "Not Primed"</div>
+      <p class="mut" style="margin:0;font-size:15px;line-height:1.5">Two option names and two words for the same thing. This fragments the storefront filter and splits the range across duplicate facets. Size has the same problem &#8212; <em>Thickness x Height</em> on 59 against <em>Thickness x Width</em> on 20.</p>
+    </div>
+    <div style="display:flex;gap:16px">
+      <div class="card" style="flex:1;padding:18px 20px">
+        <span class="pill p-hold">Check</span>
+        <p class="mut" style="margin:10px 0 0;font-size:14.5px;line-height:1.5">The <span style="font-family:ui-monospace,monospace;font-size:13px">from_price</span> metafield is empty on all 79. Native pricing should cover it, but collection cards read that metafield &#8212; check against a real product or they render with no price.</p>
+      </div>
+      <div class="card" style="flex:1;padding:18px 20px">
+        <span class="pill p-hold">Copy</span>
+        <p class="mut" style="margin:10px 0 0;font-size:14.5px;line-height:1.5">Every page compares tulip wood to <em>softwood</em>. This buyer is coming from an MDF catalogue and deciding between MDF and hardwood at twice the price. Answer that question instead.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ft">
+<div class="l"><svg width="17" height="17" viewBox="0 0 397 384" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M258.48 128L213.199 255.664H174.281L129 128H162.102L193.748 224.386L225.574 128H258.48Z" fill="#8EFEBB"></path><path d="M267.575 246.858C267.575 251.907 263.482 256 258.433 256C253.384 256 249.291 251.907 249.291 246.858C249.291 241.809 253.384 237.716 258.433 237.716C263.482 237.716 267.575 241.809 267.575 246.858Z" fill="#8EFEBB"></path></svg><span>MR Mouldings &#215; Vendo Digital</span></div>
+<div class="n">19</div>
+</div>
+</div>
+
+</body>
+</html>
