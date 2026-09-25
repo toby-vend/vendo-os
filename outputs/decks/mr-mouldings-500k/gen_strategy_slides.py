@@ -74,7 +74,7 @@ for name,role,side,line,buy,hold,hooks,proof in P:
 {card("What wins them", ul(hold,19), "padding:26px 26px")}
 {card("Hook angles", ul(hooks,19), f"padding:26px 26px;background:{G}")}
 </div>
-<div class="card" style="padding:20px 26px"><p style="margin:0;font-size:19px"><span class="lbl" style="margin-right:14px">Proof that converts</span><span style="color:#fff">{e(proof)}</span></p></div>
+<div class="card" style="padding:20px 26px"><p style="margin:0;font-size:19px"><span class="lbl">Proof that converts</span>&#160;&#160;&#160;&#160;<span style="color:#fff">{e(proof)}</span></p></div>
 </div>'''
     H[k]=(f'08 &#183; Creative &#183; Persona &#183; {side}',f'<span class="fl">{name}</span>, {e(role[0].lower()+role[1:]) if name not in ("Sophie",) else e(role[0].lower()+role[1:])}',e(line))
 
