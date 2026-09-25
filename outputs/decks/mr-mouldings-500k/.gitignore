@@ -3,3 +3,7 @@ export/
 __pycache__/
 editable/pages/
 editable/svg/
+editable/svg_new/
+editable/layout/
+editable/layout_new/
+editable/*.pptx

@@ -78,11 +78,11 @@ P=[
 for name,role,side,line,buy,stops,hooks,proof in P:
     k='P'+name
     S[k]=f'''<div class="bd" style="gap:22px">
-<div class="col" style="flex:0 0 400px;justify-content:center">
+<div class="col" style="flex:0 0 400px;justify-content:flex-start;padding-top:40px">
 <div>{pill(side)}</div>
 <div>{sub("In one line")}<p style="margin:0;font-size:24px;line-height:1.35;font-weight:700;color:#fff">{e(line)}</p></div>
 </div>
-<div class="col" style="flex:1;gap:14px;justify-content:center">
+<div class="col" style="flex:1;gap:14px;justify-content:flex-start;padding-top:40px">
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
 <div class="card" style="padding:20px 22px">{sub("What they buy")}{ul(buy,15)}</div>
 <div class="card" style="padding:20px 22px">{sub("What stops them")}{ul(stops,15)}</div>
@@ -133,7 +133,7 @@ S['FormatsByPersona']=BIG+'<div class="bd" style="align-items:center"><div class
 H['FormatsByPersona']=(EB,'Formats by <span class="fl">persona</span>','')
 
 FF=[('Green screen','Four focuses, each aimed at a different audience, with natural branding.','Every persona, by focus'),
- ('In-home content','Half day shoots in real homes, with local creators or developers.','Hannah, Jamie, Adam'),
+ ('In-home content','Half-day shoots in real homes, with local creators or developers.','Hannah, Jamie, Adam'),
  ('UGC','Creators filming in their own homes: first attempts, installs, finished rooms.','Jamie, Hannah, Sophie'),
  ('Instruction guides','Step-by-step measuring, ordering and fitting guides, as videos or carousels.','Jamie, Lee'),
  ('Lookbook stills','Product focused stills, styled like a lookbook, in finished rooms.','Hannah, Sophie, Priya'),

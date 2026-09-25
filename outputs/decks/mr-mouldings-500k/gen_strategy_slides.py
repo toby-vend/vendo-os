@@ -185,9 +185,9 @@ S['SocialOrganicNext']=f'''<div class="bd" style="flex-direction:column;justify-
 H['SocialOrganicNext']=('08 &#183; Organic social &#183; Next','Five <span class="fl">upgrades</span> to the plan','')
 
 S['SocialSeries']=BIG+'<div class="bd" style="flex-direction:column;justify-content:center;gap:18px"><div>'+table(['Series','Cadence','For','What it does'],[
- ['Period Properties','Fortnightly','Sophie, Priya, Marcus','Owns what only a manufacturer can do: matching the house'],
- ['New Products','Monthly','Marcus, Lee, Ray, Hannah','Gives the range a reason to be posted, keeps trade current'],
- ['Green Screen','Weekly','Jamie, Hannah, Sophie','High volume, low cost, answers real questions']],size=18,widths=['220px','150px','260px',None])+f'</div><div class="card" style="background:{G}"><p style="margin:0;font-size:17px"><strong style="color:#8EFEBB">All three come from one shoot day a quarter.</strong> <span class="mut">Green screen carries the weekly cadence in between.</span></p></div></div>'
+ ['Period properties','Fortnightly','Sophie, Priya, Marcus','Owns what only a manufacturer can do: matching the house'],
+ ['New products','Monthly','Marcus, Lee, Ray, Hannah','Gives the range a reason to be posted, keeps trade current'],
+ ['Green screen','Weekly','Jamie, Hannah, Sophie','High volume, low cost, answers real questions']],size=18,widths=['220px','150px','260px',None])+f'</div><div class="card" style="background:{G}"><p style="margin:0;font-size:17px"><strong style="color:#8EFEBB">All three come from one shoot day a quarter.</strong> <span class="mut">Green screen carries the weekly cadence in between.</span></p></div></div>'
 H['SocialSeries']=('08 &#183; Organic social &#183; Mini series','Three <span class="fl">series</span>, one shoot a quarter','')
 
 S['SocialPodcast']=f'''<div class="bd" style="flex-direction:column;justify-content:center;gap:18px">
@@ -213,9 +213,9 @@ S['SocialCreators']=BIG+f'''<div class="bd" style="align-items:center;gap:40px">
 H['SocialCreators']=('08 &#183; Organic social &#183; Creators','A creator programme with <span class="fl">1.27m</span> reach','From the current tracking sheet.')
 
 S['SocialQuarter']=BIG+'<div class="bd" style="align-items:center"><div class="col" style="flex:1">'+table(['Month','Mini series','Podcast','Creators'],[
- ['October','Period Properties ×2, New Products ×1, Green Screen weekly','Tulipwood, oak and softwood','Backlog delivered, two new briefed'],
- ['November','Period Properties ×2, New Products ×1, Green Screen weekly','Period properties','Three live, one large creator'],
- ['December','Period Properties ×2, New Products ×1, Green Screen weekly','Next shoot day recorded','Five live, Q1 pipeline built']],size=17,widths=['140px',None,'260px','300px'])+'</div></div>'
+ ['October','Period properties ×2, New products ×1, Green screen weekly','Tulipwood, oak and softwood','Backlog delivered, two new briefed'],
+ ['November','Period properties ×2, New products ×1, Green screen weekly','Period properties','Three live, one large creator'],
+ ['December','Period properties ×2, New products ×1, Green screen weekly','Next shoot day recorded','Five live, Q1 pipeline built']],size=17,widths=['140px',None,'260px','300px'])+'</div></div>'
 H['SocialQuarter']=('08 &#183; Organic social &#183; Q4','The quarter at a <span class="fl">glance</span>','')
 
 # Creative/persona/shoot slides are superseded by gen_creative_slides.py; only organic social is generated here.
