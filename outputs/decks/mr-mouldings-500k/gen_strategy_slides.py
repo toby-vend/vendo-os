@@ -218,11 +218,12 @@ S['SocialQuarter']=BIG+'<div class="bd" style="align-items:center"><div class="c
  ['December','Period Properties ×2, New Products ×1, Green Screen weekly','Next shoot day recorded','Five live, Q1 pipeline built']],size=17,widths=['140px',None,'260px','300px'])+'</div></div>'
 H['SocialQuarter']=('08 &#183; Organic social &#183; Q4','The quarter at a <span class="fl">glance</span>','')
 
-order=['Audience']+['P'+p[0] for p in P]+['Personas','Shoot','ShootPodcast','ShootGreen','ShootDay','ShootNeeds','SocialOrganicNow','SocialOrganicPerf','SocialOrganicWorks','SocialOrganicNext','SocialSeries','SocialPodcast','SocialPodcastBank','SocialCreators','SocialQuarter']
+# Creative/persona/shoot slides are superseded by gen_creative_slides.py; only organic social is generated here.
+order=['SocialOrganicNow','SocialOrganicPerf','SocialOrganicWorks','SocialOrganicNext','SocialSeries','SocialPodcast','SocialPodcastBank','SocialCreators','SocialQuarter']
 for k in order: open(f'bodies/{k}.html','w').write(S[k]+'\n')
 rows=[l.rstrip('\n').split('|') for l in open('manifest.txt') if l.strip()]
 rows=[r for r in rows if r[0] not in order]
-i=[r[0] for r in rows].index('SocialForecast')+1
+i=[r[0] for r in rows].index('PodcastFocuses')+1
 for k in reversed(order):
     eb,t,sf=H[k]; rows.insert(i,[k,'',eb,t,sf])
 for j,r in enumerate(rows): r[1]='%02d'%(j+2)
