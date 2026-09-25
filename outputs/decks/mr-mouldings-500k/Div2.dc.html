@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#051412;font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#E8F2EC;-webkit-font-smoothing:antialiased}
+    a{color:#8EFEBB}a:hover{color:#C9FEDD}
+    .slide{position:relative;width:1600px;height:900px;overflow:hidden;background:#051412;padding:60px 88px 0;display:flex;flex-direction:column}
+    .grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:26px 26px;pointer-events:none}
+    .orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+    .hd{position:relative;z-index:1;flex:none}
+    .eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#8EFEBB;margin:0 0 16px}
+    h1.t{font-size:54px;line-height:1.06;letter-spacing:-.03em;font-weight:800;color:#fff;margin:0;max-width:26ch;text-wrap:balance}
+    .fl{font-family:'Instrument Serif',Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.01em}
+    .sf{font-size:19px;line-height:1.5;color:#B9C7C0;margin:16px 0 0;max-width:82ch}
+    .bd{position:relative;z-index:1;flex:1;display:flex;gap:40px;padding:32px 0 8px;min-height:0}
+    .col{display:flex;flex-direction:column;gap:20px;min-width:0}
+    .ft{position:relative;z-index:1;flex:none;height:62px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.06)}
+    .ft .l{display:flex;align-items:center;gap:11px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6B7B74;font-weight:700}
+    .ft .n{font-size:11px;color:#6B7B74;font-weight:700;letter-spacing:.08em}
+    .card{background:#09221F;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px 26px}
+    .lbl{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6B7B74;margin:0 0 10px}
+    .stat{font-size:42px;font-weight:800;letter-spacing:-.03em;color:#8EFEBB;line-height:1;margin:0}
+    .statw{font-size:42px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1;margin:0}
+    table{border-collapse:collapse;width:100%;font-size:15px}
+    th{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6B7B74;text-align:left;padding:0 16px 9px 0;border-bottom:1px solid rgba(255,255,255,.10);white-space:nowrap}
+    td{padding:9px 16px 9px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#E8F2EC;line-height:1.35}
+    th.n,td.n{text-align:right;padding-right:0;font-variant-numeric:tabular-nums}
+    tr:last-child td{border-bottom:0}
+    .hi td{color:#8EFEBB;font-weight:700}
+    .dim td{color:#6B7B74}
+    p{margin:0 0 14px;line-height:1.55;font-size:16px}
+    p:last-child{margin-bottom:0}
+    .mut{color:#B9C7C0}
+    .note{font-size:13px;color:#6B7B74;line-height:1.5;margin:0}
+    .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:999px}
+    .p-go{background:rgba(142,254,187,.12);color:#8EFEBB}
+    .p-hold{background:rgba(245,214,116,.12);color:#F5D674}
+    .p-stop{background:rgba(239,68,68,.14);color:#EF4444}
+    h3{font-size:19px;font-weight:700;color:#fff;margin:0 0 8px;letter-spacing:-.01em}
+    ul{margin:0;padding-left:20px}
+    li{margin-bottom:9px;line-height:1.5;font-size:16px;color:#E8F2EC}
+    li:last-child{margin-bottom:0}
+    .kv{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .kv:last-child{border-bottom:0}
+    .kv .k{font-size:15px;color:#B9C7C0}
+    .kv .v{font-size:16px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+  </style>
+</helmet>
+<div class="slide">
+<div class="grid"></div>
+<div class="orb" style="width:620px;height:620px;top:-260px;right:-180px;background:rgba(142,254,187,.07)"></div>
+<div class="orb" style="width:520px;height:520px;bottom:-300px;left:-220px;background:rgba(255,255,255,.035)"></div>
+<div class="hd">
+<p class="eyebrow">Section 02</p>
+<h1 class="t">SEO</h1>
+</div>
+<div class="bd" style="align-items:center;gap:60px"><div class="col" style="flex:1"><p style="margin:0;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:150px;line-height:1;color:#8EFEBB">02</p></div>
+<div class="card" style="flex:0 0 560px;padding:30px 36px"><p class="lbl" style="color:#8EFEBB">In this section</p><p style="margin:12px 0 0;font-size:20px;color:#fff">Where organic stands</p><p style="margin:12px 0 0;font-size:20px;color:#fff">The ranking gap and page two</p><p style="margin:12px 0 0;font-size:20px;color:#fff">Solid hardwood and new categories</p><p style="margin:12px 0 0;font-size:20px;color:#fff">The next three months</p></div></div>
+<div class="ft">
+<div class="l"><svg width="17" height="17" viewBox="0 0 397 384" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M258.48 128L213.199 255.664H174.281L129 128H162.102L193.748 224.386L225.574 128H258.48Z" fill="#8EFEBB"></path><path d="M267.575 246.858C267.575 251.907 263.482 256 258.433 256C253.384 256 249.291 251.907 249.291 246.858C249.291 241.809 253.384 237.716 258.433 237.716C263.482 237.716 267.575 241.809 267.575 246.858Z" fill="#8EFEBB"></path></svg><span>MR Mouldings &#215; Vendo Digital</span></div>
+<div class="n">09</div>
+</div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -110,9 +110,10 @@ def add_text(slide, it):
         if it.get('paras') and it.get('bullet'): bulletise(p, it.get('indent', 20), rs[0].get('color') if rs and not rs[0].get('br') else None)
         fill_para(p, rs)
 
-def build(out_path):
+def build(out_path, layout_dir=None, svg_dir=None):
     prs = Presentation(); prs.slide_width = Emu(12192000); prs.slide_height = Emu(6858000)
-    for f in sorted(glob.glob(os.path.join(HERE, 'layout', '*.json'))):
+    layout_dir = layout_dir or os.path.join(HERE, 'layout'); svg_dir = svg_dir or os.path.join(HERE, 'svg')
+    for f in sorted(glob.glob(os.path.join(layout_dir, '*.json'))):
         d = json.load(open(f)); base = os.path.basename(f)[:-5]
         s = prs.slides.add_slide(prs.slide_layouts[6])
         bg = parse(d['bg'])
@@ -135,7 +136,7 @@ def build(out_path):
                 ln.line.color.rgb = c[0]; ln.line.width = Pt(max(it['lw'] * PT, 0.5))
                 set_alpha(ln.line._get_or_add_ln().find(qn('a:solidFill')), c[1])
             elif k == 'svg':
-                png = os.path.join(HERE, 'svg', f'{base}-svg{svg_i}.png'); svg_i += 1
+                png = os.path.join(svg_dir, f'{base}-svg{svg_i}.png'); svg_i += 1
                 if os.path.exists(png):
                     s.shapes.add_picture(png, E(it['x']), E(it['y']), E(it['w']), E(it['h']))
             elif k == 'text':
@@ -144,5 +145,9 @@ def build(out_path):
     return len(prs.slides)
 
 if __name__ == '__main__':
-    out = os.path.join(HERE, '..', 'export', 'MR Mouldings - Roadmap to 500k (editable).pptx')
-    print(build(out), 'slides ->', os.path.normpath(out))
+    import sys
+    if len(sys.argv) > 1:
+        print(build(sys.argv[1], sys.argv[2], sys.argv[3]), 'slides ->', sys.argv[1])
+    else:
+        out = os.path.join(HERE, '..', 'export', 'MR Mouldings - Roadmap to 500k (editable).pptx')
+        print(build(out), 'slides ->', os.path.normpath(out))
