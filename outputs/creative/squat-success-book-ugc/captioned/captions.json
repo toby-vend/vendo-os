@@ -1,0 +1,104 @@
+{
+ "src": "outputs/creative/squat-success-book-ugc",
+ "out": "outputs/creative/squat-success-book-ugc/captioned",
+ "items": [
+  {
+   "file": "01-santorini.jpg",
+   "text": "holiday reading but make it career planning"
+  },
+  {
+   "file": "02-bali.jpg",
+   "text": "pov: on holiday but still planning your own practice"
+  },
+  {
+   "file": "03-amalfi.jpg",
+   "text": "espresso, amalfi and finally working out how to own a practice"
+  },
+  {
+   "file": "04-maldives.jpg",
+   "text": "why did nobody teach us this at dental school",
+   "y": 1330
+  },
+  {
+   "file": "05-dubai.jpg",
+   "text": "swapped chasing UDAs for a sunbed and a plan",
+   "y": 1450
+  },
+  {
+   "file": "06-alps.jpg",
+   "text": "chalet coffee and big plans for next year"
+  },
+  {
+   "file": "07-tulum.jpg",
+   "text": "when your holiday read is actually a business plan"
+  },
+  {
+   "file": "08-mykonos.jpg",
+   "text": "every associate should read this at least once"
+  },
+  {
+   "file": "09-london.jpg",
+   "text": "dentists, read this before you sign another associate contract"
+  },
+  {
+   "file": "10-london-southbank.jpg",
+   "text": "lunch break reading that has me rethinking my career"
+  },
+  {
+   "file": "11-paris.jpg",
+   "text": "reading about the life i actually want"
+  },
+  {
+   "file": "12-lisbon.jpg",
+   "text": "the book i wish i'd read straight out of dental school"
+  },
+  {
+   "file": "13-amsterdam.jpg",
+   "text": "sunday reading: how to actually open your own practice"
+  },
+  {
+   "file": "14-copenhagen.jpg",
+   "text": "next holiday i'm booking as the practice owner"
+  },
+  {
+   "file": "15-rome.jpg",
+   "text": "got this for free and i'm genuinely hooked"
+  },
+  {
+   "file": "16-barcelona.jpg",
+   "text": "pov: the associate life finally got to you"
+  },
+  {
+   "file": "17-manchester.jpg",
+   "text": "grey manchester morning, strong coffee, big decisions"
+  },
+  {
+   "file": "18-edinburgh.jpg",
+   "text": "didn't expect a dental book to be my weekend read"
+  },
+  {
+   "file": "19-cotswolds.jpg",
+   "text": "pub garden, sunshine and planning my own practice"
+  },
+  {
+   "file": "20-brighton.jpg",
+   "text": "seaside reading but make it squat practice plans"
+  },
+  {
+   "file": "21-bath.jpg",
+   "text": "free book, genuinely worth the read"
+  },
+  {
+   "file": "22-york.jpg",
+   "text": "if you're an associate thinking about going it alone, read this"
+  },
+  {
+   "file": "23-cambridge.jpg",
+   "text": "the most useful thing i've read since uni"
+  },
+  {
+   "file": "24-liverpool.jpg",
+   "text": "nobody teaches you how to actually start a practice. this does"
+  }
+ ]
+}
