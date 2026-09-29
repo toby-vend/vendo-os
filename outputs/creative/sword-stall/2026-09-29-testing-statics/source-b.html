@@ -1,0 +1,308 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Sword Stall B-variations: loot crate / item unlocked / giant word / caution tape. Tokens from the Sword Stall design system. */
+:root{
+  --ss-black:#0e0e0e; --ss-surface-1:#262626; --ss-surface-2:#101010; --ss-white:#fafafa; --ss-cyan:#00ffff; --ss-yellow:#ffd71d; --ss-yellow-pure:#ffff00; --text-muted:#a3a3a3;
+  --font-heading-family:'Orbitron',sans-serif; --font-body-family:'Roboto',sans-serif;
+  --buttons-radius:6px; --vendobutton-radius:5px; --hazard-stripe:repeating-linear-gradient(-45deg,#ffd71d 0 28px,#121212 28px 56px);
+  --noise:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --spray:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='s'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.75'/></filter><rect width='100%' height='100%' filter='url(%23s)'/></svg>");
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;font-family:var(--font-body-family);color:var(--ss-white)}
+.ad{position:relative;width:1080px;height:1350px;overflow:hidden;background:var(--ss-black);isolation:isolate}
+body.solo .ad{display:none} body.solo .ad.on{display:block}
+body:not(.solo) .ad{margin:0 0 40px}
+.ad > *{position:absolute;z-index:2}
+.ad::after{content:"";position:absolute;inset:0;z-index:40;pointer-events:none;background:var(--noise);mix-blend-mode:overlay;opacity:.4}
+
+.logo{top:40px;left:44px;width:132px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
+.logo.r{left:auto;right:44px}
+.h{font-family:var(--font-heading-family);font-weight:900;text-transform:uppercase;line-height:1.02;letter-spacing:.01em}
+.h em{font-style:normal;color:var(--ss-yellow)}
+.sub{font-family:var(--font-body-family);font-weight:500;font-size:30px;line-height:1.35}
+.btn{font-family:var(--font-body-family);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:28px;background:var(--ss-cyan);color:#000;
+  border:1px solid var(--ss-cyan);border-radius:var(--buttons-radius);padding:18px 34px;box-shadow:0 0 30px rgba(0,255,255,.35);white-space:nowrap}
+.bar{left:0;right:0;bottom:0;height:118px;background:var(--ss-surface-2);display:flex;align-items:center;justify-content:space-between;padding:0 44px;z-index:6}
+.bar span{font-family:var(--font-body-family);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:22px;color:var(--text-muted);max-width:620px;line-height:1.3}
+.tape{left:0;right:0;height:23px;background:url(a/tape.webp) center/auto 100% repeat-x, var(--hazard-stripe);z-index:6}
+.tape.b{bottom:118px}
+.prod{filter:drop-shadow(0 0 1.5px rgba(0,255,255,.45)) drop-shadow(0 38px 36px rgba(0,0,0,.85)) drop-shadow(0 8px 10px rgba(0,0,0,.6))}
+
+/* ---------- LOOT CRATE ---------- */
+.crate{background:var(--ss-yellow)}
+.crate .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px;mix-blend-mode:multiply;opacity:.22;filter:grayscale(1) contrast(1.4)}
+.crate .vig{inset:0;z-index:0;background:radial-gradient(ellipse 80% 70% at 50% 50%,transparent 50%,rgba(120,80,0,.35) 100%)}
+.crate .h{color:#0b0b0b;-webkit-mask-image:var(--spray);mask-image:var(--spray);-webkit-mask-size:400px;mask-size:400px}
+.crate .sub{color:#141414;font-weight:700}
+.hard{filter:drop-shadow(14px 18px 0 rgba(0,0,0,.85)) drop-shadow(0 0 1px #000)}
+.tag{font-family:var(--font-heading-family);font-weight:900;font-size:40px;color:var(--ss-yellow);background:#0b0b0b;padding:12px 20px 10px;border-radius:var(--vendobutton-radius);box-shadow:8px 8px 0 rgba(0,0,0,.25)}
+.stamp{width:250px;height:250px;border-radius:50%;border:8px solid #0b0b0b;display:grid;place-items:center;text-align:center;transform:rotate(-12deg);
+  font-family:var(--font-heading-family);font-weight:900;color:#0b0b0b;-webkit-mask-image:var(--spray);mask-image:var(--spray);-webkit-mask-size:300px;mask-size:300px}
+
+/* ---------- ITEM UNLOCKED (HUD) ---------- */
+.hud{background:#040707}
+.hud .bg{inset:0;z-index:0;background:
+  repeating-linear-gradient(0deg,rgba(0,255,255,.05) 0 2px,transparent 2px 6px),
+  radial-gradient(ellipse 70% 50% at 50% 45%,rgba(0,255,255,.16),transparent 70%),
+  url(a/plate.jpg) center/auto 1500px;background-blend-mode:normal,normal,luminosity}
+.hud .bg::after{content:"";position:absolute;inset:0;background:rgba(4,7,7,.72)}
+.frame{border:2px solid rgba(0,255,255,.55);box-shadow:0 0 40px rgba(0,255,255,.18),inset 0 0 40px rgba(0,255,255,.08)}
+.corner{width:60px;height:60px;border-color:var(--ss-cyan);border-style:solid;filter:drop-shadow(0 0 8px var(--ss-cyan))}
+.kicker{font-family:var(--font-heading-family);font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--ss-cyan);font-size:28px;text-shadow:0 0 18px rgba(0,255,255,.8)}
+.rar{text-transform:uppercase;font-family:var(--font-heading-family);font-weight:900;letter-spacing:.2em;font-size:22px;color:#000;background:var(--ss-yellow);padding:8px 16px 6px;border-radius:4px}
+.stats{display:grid;grid-template-columns:auto 1fr;gap:16px 30px;font-family:var(--font-heading-family);font-size:30px;align-items:baseline}
+.stats dt{color:var(--text-muted);letter-spacing:.18em;font-weight:600;font-size:22px}
+.stats dd{color:var(--ss-white);font-weight:700}
+.stats dd.c{color:var(--ss-cyan)}
+
+/* ---------- GIANT WORD ---------- */
+.giant .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px, var(--ss-black)}
+.giant .bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 50%,rgba(14,14,14,.2),rgba(14,14,14,.9) 80%)}
+.word{font-family:var(--font-heading-family);font-weight:900;text-transform:uppercase;line-height:.85;color:transparent;-webkit-text-stroke:3px rgba(255,215,29,.9);white-space:nowrap;z-index:1}
+.word.fill{color:rgba(255,215,29,.08)}
+.sparks{mix-blend-mode:screen;z-index:3}
+
+/* ---------- CAUTION TAPE ---------- */
+.band{height:92px;left:-200px;right:-200px;background:var(--hazard-stripe);box-shadow:0 18px 30px rgba(0,0,0,.6);z-index:1;display:flex;align-items:center;justify-content:center;gap:60px;overflow:hidden}
+.band span{background:#0b0b0b;color:var(--ss-yellow);font-family:var(--font-heading-family);font-weight:900;font-size:34px;letter-spacing:.2em;padding:10px 28px 8px;white-space:nowrap}
+.dark .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px, var(--ss-black)}
+.dark .bg::after{content:"";position:absolute;inset:0;background:rgba(14,14,14,.55)}
+.price{font-family:var(--font-heading-family);font-weight:800;font-size:44px;line-height:1;color:var(--ss-white);
+  background:#000;border:1px solid var(--ss-cyan);border-radius:var(--vendobutton-radius);padding:14px 20px 12px;box-shadow:0 0 22px rgba(0,255,255,.25)}
+</style></head>
+<body>
+
+<!-- ============ FAMILY GIFTING ============ -->
+<!-- fg1b: LOOT CRATE -->
+<section class="ad crate" id="fg1b">
+  <div class="bg"></div><div class="vig"></div>
+  <div class="tape" style="top:0"></div>
+  <img class="logo" src="a/logo.png" alt="" style="top:52px">
+  <h1 class="h" style="left:44px;right:44px;top:210px;font-size:150px;line-height:.92">Stop<br>buying<br>socks.</h1>
+  <p class="sub" style="left:44px;right:600px;top:700px;font-size:34px">Get them the thing they'd never buy themselves.</p>
+  <img class="hard" src="a/heman_2.png" alt="" style="left:560px;top:260px;width:560px;transform:rotate(8deg)">
+  <img class="hard" src="a/rengoku_1.png" alt="" style="left:600px;top:720px;width:430px;transform:rotate(-4deg)">
+  <span class="tag" style="left:44px;top:900px">He-Man £225</span>
+  <span class="tag" style="left:44px;top:990px">Rengoku £49</span>
+  <span class="tag" style="left:44px;top:1080px;font-size:26px;padding:14px 20px;color:#fff">+ films, games, anime</span>
+  <div class="tape b"></div>
+  <div class="bar"><span>Gifts for the fan in the family</span><b class="btn">Shop gifts</b></div>
+</section>
+
+<!-- fg2b: GIANT WORD -->
+<section class="ad giant" id="fg2b">
+  <div class="bg"></div>
+  <div class="word" style="left:-40px;top:250px;font-size:250px;transform:rotate(-90deg) translate(-560px,-10px);transform-origin:left top">Andúril</div>
+  <div class="word fill" style="left:250px;top:250px;font-size:250px;transform:rotate(-90deg) translate(-760px,0);transform-origin:left top;-webkit-text-stroke:2px rgba(255,255,255,.25)">Andúril</div>
+  <img class="sparks" src="a/sparks-r.webp" alt="" style="right:0;top:420px;width:360px">
+  <img class="sparks" src="a/sparks-l.webp" alt="" style="left:260px;top:760px;width:300px">
+  <img class="prod" src="a/anduril_1.png" alt="" style="left:300px;top:200px;width:820px;transform:rotate(-8deg)">
+  <img class="logo r" src="a/logo.png" alt="">
+  <h1 class="h" style="left:360px;right:44px;top:900px;font-size:58px;text-shadow:0 4px 0 rgba(0,0,0,.6),0 10px 30px #000">The one they'd <em>never buy themselves.</em></h1>
+  <div style="left:360px;top:1110px;display:flex;align-items:center;gap:20px"><span class="price">£169</span><span style="font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);font-size:20px">Deluxe · plaque &amp; scabbard</span></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Lord of the Rings · Blunt display piece</span><b class="btn">Shop gifts</b></div>
+</section>
+
+<!-- fg3b: CAUTION TAPE -->
+<section class="ad dark" id="fg3b">
+  <div class="bg"></div>
+  <div class="band" style="top:430px;transform:rotate(-14deg)"><span>NO WRAPPING</span><span>NO GUESSING</span><span>NO WRAPPING</span></div>
+  <div class="band" style="top:800px;transform:rotate(11deg)"><span>NO GUESSING</span><span>NO DUPLICATES</span><span>NO GUESSING</span></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <h1 class="h" style="left:200px;right:44px;top:60px;font-size:70px;text-shadow:0 4px 0 rgba(0,0,0,.6)">No wrapping.<br><em>No guessing.</em></h1>
+  <div style="left:0;right:0;top:420px;height:500px;perspective:1400px;z-index:4">
+    <div class="gc" style="--r:-6deg"><span>£50</span></div>
+  </div>
+  <p class="sub" style="left:44px;right:44px;top:1040px;text-shadow:0 2px 12px #000">Sword Stall gift card. £10 to £200, straight to their inbox. They pick the piece.</p>
+  <div class="tape b"></div>
+  <div class="bar"><span>Redeemable on everything in store</span><b class="btn">Send one now</b></div>
+  <style>
+    .gc{position:absolute;left:50%;top:50%;width:640px;height:404px;margin:-202px 0 0 -320px;border-radius:20px;overflow:hidden;
+      transform:rotate(var(--r)) rotateX(10deg) rotateY(-8deg);
+      background:radial-gradient(circle at 25% 15%,rgba(255,255,255,.14),transparent 50%), url(a/plate.jpg) center/1000px auto, #111;
+      border:3px solid var(--ss-cyan);box-shadow:0 0 50px rgba(0,255,255,.4),0 50px 70px rgba(0,0,0,.85)}
+    .gc::before{content:"";position:absolute;left:30px;top:28px;width:150px;height:150px;background:url(a/logo.png) center/contain no-repeat}
+    .gc::after{content:"GIFT CARD";position:absolute;left:34px;bottom:30px;font-family:var(--font-heading-family);font-weight:700;letter-spacing:.2em;font-size:26px;color:var(--ss-cyan)}
+    .gc span{position:absolute;right:30px;bottom:18px;font-family:var(--font-heading-family);font-weight:900;font-size:92px;color:var(--ss-yellow);-webkit-text-stroke:1px #000;text-shadow:0 5px 0 rgba(0,0,0,.6)}
+  </style>
+</section>
+
+<!-- ============ FANDOM UGC ============ -->
+<!-- fu1b: ITEM UNLOCKED -->
+<section class="ad hud" id="fu1b">
+  <div class="bg"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="kicker" style="left:200px;top:70px">&gt; New item unlocked</div>
+  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:66px;text-shadow:0 0 30px rgba(0,255,255,.35)">Jin Sakai's <em>katana</em></h1>
+  <div class="frame" style="left:44px;right:44px;top:300px;height:560px;overflow:hidden">
+    <img src="a/jindisp_0.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 60%">
+    <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,255,.06) 0 2px,transparent 2px 6px)"></div>
+  </div>
+  <div class="corner" style="left:30px;top:286px;border-width:4px 0 0 4px"></div>
+  <div class="corner" style="right:30px;top:286px;border-width:4px 4px 0 0"></div>
+  <div class="corner" style="left:30px;top:814px;border-width:0 0 4px 4px"></div>
+  <div class="corner" style="right:30px;top:814px;border-width:0 4px 4px 0"></div>
+  <span class="rar" style="left:70px;top:326px">Legendary</span>
+  <dl class="stats" style="left:44px;right:44px;top:910px">
+    <dt>GAME</dt><dd>Ghost of Tsushima</dd>
+    <dt>TYPE</dt><dd>Display katana</dd>
+    <dt>COST</dt><dd class="c">£69</dd>
+  </dl>
+  <div class="tape b"></div>
+  <div class="bar"><span>You either recognise it or you don't</span><b class="btn">Equip it</b></div>
+</section>
+
+<!-- fu2b: LOOT CRATE -->
+<section class="ad crate" id="fu2b">
+  <div class="bg"></div><div class="vig"></div>
+  <div class="tape" style="top:0"></div>
+  <img class="logo" src="a/logo.png" alt="" style="top:52px">
+  <h1 class="h" style="left:200px;right:44px;top:66px;font-size:200px;line-height:.9">Under</h1>
+  <h1 class="h" style="left:44px;right:44px;top:250px;font-size:330px;line-height:.9">£50.</h1>
+  <img class="hard" src="a/rengoku_1.png" alt="" style="left:120px;top:470px;width:860px;transform:rotate(-6deg)">
+  <div class="stamp" style="right:60px;top:880px"><div><div style="font-size:24px;letter-spacing:.15em">ONLY</div><div style="font-size:72px;line-height:1">£49</div></div></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Demon Slayer · Rengoku Nichirin display katana</span><b class="btn">Shop now</b></div>
+</section>
+
+<!-- fu3b: ITEM UNLOCKED -->
+<section class="ad hud" id="fu3b">
+  <div class="bg"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="kicker" style="left:200px;top:70px">&gt; Achievement unlocked</div>
+  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:58px;text-shadow:0 0 30px rgba(0,255,255,.35)">You finished it. <em>Now frame it.</em></h1>
+  <div class="frame" style="left:44px;right:44px;top:330px;height:560px;background:radial-gradient(ellipse at 50% 55%,rgba(0,255,255,.14),transparent 70%)"></div>
+  <div class="corner" style="left:30px;top:316px;border-width:4px 0 0 4px"></div>
+  <div class="corner" style="right:30px;top:316px;border-width:4px 4px 0 0"></div>
+  <div class="corner" style="left:30px;top:844px;border-width:0 0 4px 4px"></div>
+  <div class="corner" style="right:30px;top:844px;border-width:0 4px 4px 0"></div>
+  <img class="prod" src="a/gow_0.png" alt="" style="left:120px;top:360px;width:840px;z-index:3">
+  <span class="rar" style="left:70px;top:356px;z-index:4">Legendary</span>
+  <dl class="stats" style="left:44px;right:44px;top:930px">
+    <dt>ITEM</dt><dd>Deluxe Ragnarok Chaos Blades</dd>
+    <dt>LENGTH</dt><dd>≈54 cm each</dd>
+    <dt>MOUNT</dt><dd>Wall plaque included</dd>
+    <dt>COST</dt><dd class="c">£185</dd>
+  </dl>
+  <div class="tape b"></div>
+  <div class="bar"><span>God of War</span><b class="btn">Claim it</b></div>
+</section>
+
+<!-- ============ PRODUCT FOCUS ============ -->
+<!-- pf1b: CAUTION TAPE -->
+<section class="ad dark" id="pf1b">
+  <div class="bg"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <h1 class="h" style="left:200px;right:44px;top:62px;font-size:70px;text-shadow:0 4px 0 rgba(0,0,0,.6)">The sword <em>reforged.</em></h1>
+  <div style="left:-60px;right:-60px;top:330px;height:560px;transform:rotate(-7deg);overflow:hidden;border-top:26px solid transparent;border-bottom:26px solid transparent;border-image:repeating-linear-gradient(-45deg,#ffd71d 0 22px,#121212 22px 44px) 26;box-shadow:0 30px 50px rgba(0,0,0,.7)">
+    <img src="a/superior_3.jpg" alt="" style="position:absolute;left:60px;right:60px;top:-60px;width:calc(100% - 120px);height:640px;object-fit:cover;object-position:40% 55%;transform:rotate(7deg) scale(1.1)">
+  </div>
+  <div style="left:44px;right:44px;top:980px;display:flex;justify-content:space-between;align-items:flex-end;gap:30px">
+    <div><div style="font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-size:22px">Lord of the Rings</div>
+    <div style="font-family:var(--font-heading-family);font-weight:600;font-size:42px;line-height:1.2;margin-top:6px">Superior Andúril</div>
+    <div class="sub" style="position:static;font-size:26px;color:#ddd;margin-top:6px">Engraved blade. Scabbard and plaque included.</div></div>
+    <span class="price" style="flex:none">£179</span>
+  </div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Blunt display piece, made for the wall</span><b class="btn">Shop now</b></div>
+</section>
+
+<!-- pf2b: CAUTION TAPE VS -->
+<section class="ad dark" id="pf2b">
+  <div class="bg"></div>
+  <img src="a/jindisp_0.jpg" alt="" style="left:0;top:0;width:1080px;height:1232px;object-fit:cover;object-position:30% 50%;clip-path:polygon(0 0,100% 0,0 100%);z-index:1">
+  <div style="left:0;top:0;width:1080px;height:1232px;clip-path:polygon(100% 0,100% 100%,0 100%);background:radial-gradient(ellipse at 70% 65%,#2e2e2e,#0e0e0e 70%);z-index:1"></div>
+  <img class="prod" src="a/jinforged_4.png" alt="" style="left:520px;top:520px;width:560px;z-index:2">
+  <div class="band" style="top:560px;transform:rotate(-48.8deg);height:70px;z-index:3"><span style="font-size:26px">DISPLAY</span><span style="font-size:26px">HAND FORGED</span><span style="font-size:26px">DISPLAY</span><span style="font-size:26px">HAND FORGED</span></div>
+  <div style="left:430px;top:505px;width:220px;height:220px;border-radius:50%;background:#000;border:4px solid var(--ss-cyan);box-shadow:0 0 40px rgba(0,255,255,.6);display:grid;place-items:center;z-index:4;font-family:var(--font-heading-family);font-weight:900;font-size:86px;color:var(--ss-cyan)">VS</div>
+  <img class="logo" src="a/logo.png" alt="" style="z-index:5;top:290px">
+  <div style="left:44px;top:60px;z-index:5"><div class="h" style="position:static;font-size:130px;text-shadow:0 6px 0 #000">£69</div><div style="font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ss-cyan);font-size:24px;margin-top:8px">Display katana</div></div>
+  <div style="right:44px;top:930px;text-align:right;z-index:5"><div class="h" style="position:static;font-size:130px;color:var(--ss-yellow);text-shadow:0 6px 0 #000">£195</div><div style="font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ss-yellow);font-size:24px;margin-top:8px">Hand forged · clay tempered</div></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Ghost of Tsushima · Neither is the wrong answer</span><b class="btn">Pick yours</b></div>
+</section>
+
+<!-- pf3b: GIANT WORD -->
+<section class="ad giant" id="pf3b">
+  <div class="bg"></div>
+  <div class="word" style="left:-30px;top:120px;font-size:330px">Pow</div>
+  <div class="word" style="left:-30px;top:420px;font-size:330px">er</div>
+  <div class="word fill" style="left:360px;top:700px;font-size:330px;-webkit-text-stroke:2px rgba(255,255,255,.2)">1985</div>
+  <div style="left:140px;top:180px;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,255,.28),transparent 62%);z-index:1"></div>
+  <img class="sparks" src="a/sparks-l.webp" alt="" style="left:0;top:700px;width:380px">
+  <img class="sparks" src="a/sparks-r.webp" alt="" style="right:0;top:200px;width:380px">
+  <img class="prod" src="a/heman_2.png" alt="" style="left:80px;top:130px;width:960px;z-index:3">
+  <img class="logo r" src="a/logo.png" alt="" style="z-index:5">
+  <h1 class="h" style="left:44px;right:44px;top:990px;font-size:60px;z-index:5;text-shadow:0 4px 0 #000,0 10px 30px #000">You wanted one <em>in 1985.</em></h1>
+  <span class="price" style="right:44px;top:1100px;z-index:5">£225</span>
+  <div style="left:44px;top:1122px;z-index:5;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-size:22px">Power Sword · 2026 film edition</div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Masters of the Universe · Blunt display piece</span><b class="btn">Shop now</b></div>
+</section>
+
+<!-- ============ ASSASSIN'S CREED ============ -->
+<!-- ac1b: ITEM UNLOCKED -->
+<section class="ad hud" id="ac1b">
+  <div class="bg"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="kicker" style="left:200px;top:70px">&gt; Synchronised</div>
+  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:62px;text-shadow:0 0 30px rgba(0,255,255,.35)">Kenway's <em>hidden blade</em></h1>
+  <div class="frame" style="left:44px;right:44px;top:330px;height:520px;background:radial-gradient(ellipse at 50% 55%,rgba(0,255,255,.16),transparent 70%)"></div>
+  <div class="corner" style="left:30px;top:316px;border-width:4px 0 0 4px"></div>
+  <div class="corner" style="right:30px;top:316px;border-width:4px 4px 0 0"></div>
+  <div class="corner" style="left:30px;top:804px;border-width:0 0 4px 4px"></div>
+  <div class="corner" style="right:30px;top:804px;border-width:0 4px 4px 0"></div>
+  <img class="prod" src="a/kenway_1.png" alt="" style="left:70px;top:360px;width:940px;z-index:3">
+  <span class="rar" style="left:70px;top:356px;z-index:4">Official</span>
+  <dl class="stats" style="left:44px;right:44px;top:900px">
+    <dt>GAME</dt><dd>AC IV Black Flag Resynced</dd>
+    <dt>SCALE</dt><dd>1:1 life size, wearable</dd>
+    <dt>BLADE</dt><dd>Spring-loaded, button release</dd>
+    <dt>COST</dt><dd class="c">£119</dd>
+  </dl>
+  <div class="tape b"></div>
+  <div class="bar"><span>Official UK stockist</span><b class="btn">Equip it</b></div>
+</section>
+
+<!-- ac2b: GIANT WORD -->
+<section class="ad giant" id="ac2b">
+  <div class="bg"></div>
+  <div class="word" style="left:-30px;top:150px;font-size:250px">Ken</div>
+  <div class="word" style="left:-30px;top:380px;font-size:250px">way</div>
+  <div style="left:180px;top:160px;width:860px;height:860px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,255,.35),transparent 62%);z-index:1"></div>
+  <img class="sparks" src="a/sparks-l.webp" alt="" style="left:0;top:660px;width:360px">
+  <img class="prod" src="a/statue_0.png" alt="" style="left:250px;top:140px;width:820px;z-index:3">
+  <img class="logo r" src="a/logo.png" alt="" style="z-index:5">
+  <h1 class="h" style="left:44px;right:44px;top:930px;font-size:92px;z-index:5;text-shadow:0 4px 0 #000,0 10px 30px #000">He <em>lights up.</em></h1>
+  <p class="sub" style="left:44px;right:300px;top:1045px;z-index:5;font-size:26px;text-shadow:0 2px 10px #000">Official Animus Edward Kenway 1:8 statue. LED Animus effect, USB-C powered.</p>
+  <span class="price" style="right:44px;top:1060px;z-index:5">£119</span>
+  <div class="tape b"></div>
+  <div class="bar"><span>Assassin's Creed IV Black Flag</span><b class="btn">Shop now</b></div>
+</section>
+
+<!-- ac3b: LOOT CRATE -->
+<section class="ad crate" id="ac3b">
+  <div class="bg"></div><div class="vig"></div>
+  <div class="tape" style="top:0"></div>
+  <img class="logo" src="a/logo.png" alt="" style="top:52px">
+  <h1 class="h" style="left:200px;right:44px;top:66px;font-size:112px;line-height:.95">The grail.<br>On layaway.</h1>
+  <img class="hard" src="a/prem_0.png" alt="" style="left:470px;top:330px;height:820px">
+  <div class="stamp" style="left:60px;top:400px;width:280px;height:280px"><div><div style="font-size:24px;letter-spacing:.15em">1:4 SCALE</div><div style="font-size:76px;line-height:1">£899</div></div></div>
+  <span class="tag" style="left:44px;top:760px;font-size:30px">No interest</span>
+  <span class="tag" style="left:44px;top:840px;font-size:30px">No credit checks</span>
+  <span class="tag" style="left:44px;top:920px;font-size:30px">Your pace</span>
+  <p class="sub" style="left:44px;right:600px;top:1010px;font-size:26px">Reserve Animus Edward Kenway with a deposit. It ships when it's yours.</p>
+  <div class="tape b"></div>
+  <div class="bar"><span>Assassin's Creed IV Black Flag · Premium statue</span><b class="btn">Reserve it</b></div>
+</section>
+
+<script>
+const id=location.hash.slice(1);
+if(id){document.body.classList.add('solo');document.getElementById(id)?.classList.add('on');}
+</script>
+</body></html>
