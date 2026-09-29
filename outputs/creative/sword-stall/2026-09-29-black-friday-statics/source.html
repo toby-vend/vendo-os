@@ -1,0 +1,249 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Sword Stall B-variations: loot crate / item unlocked / giant word / caution tape. Tokens from the Sword Stall design system. */
+:root{
+  --ss-black:#0e0e0e; --ss-surface-1:#262626; --ss-surface-2:#101010; --ss-white:#fafafa; --ss-cyan:#00ffff; --ss-yellow:#ffd71d; --ss-yellow-pure:#ffff00; --text-muted:#a3a3a3;
+  --font-heading-family:'Orbitron',sans-serif; --font-body-family:'Roboto',sans-serif;
+  --buttons-radius:6px; --vendobutton-radius:5px; --hazard-stripe:repeating-linear-gradient(-45deg,#ffd71d 0 28px,#121212 28px 56px);
+  --noise:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --spray:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='s'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.75'/></filter><rect width='100%' height='100%' filter='url(%23s)'/></svg>");
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;font-family:var(--font-body-family);color:var(--ss-white)}
+.ad{position:relative;width:1080px;height:1350px;overflow:hidden;background:var(--ss-black);isolation:isolate}
+body.solo .ad{display:none} body.solo .ad.on{display:block}
+body:not(.solo) .ad{margin:0 0 40px}
+.ad > *{position:absolute;z-index:2}
+.ad::after{content:"";position:absolute;inset:0;z-index:40;pointer-events:none;background:var(--noise);mix-blend-mode:overlay;opacity:.4}
+
+.logo{top:40px;left:44px;width:132px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
+.logo.r{left:auto;right:44px}
+.h{font-family:var(--font-heading-family);font-weight:900;text-transform:uppercase;line-height:1.02;letter-spacing:.01em}
+.h em{font-style:normal;color:var(--ss-yellow)}
+.sub{font-family:var(--font-body-family);font-weight:500;font-size:30px;line-height:1.35}
+.btn{font-family:var(--font-body-family);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:28px;background:var(--ss-cyan);color:#000;
+  border:1px solid var(--ss-cyan);border-radius:var(--buttons-radius);padding:18px 34px;box-shadow:0 0 30px rgba(0,255,255,.35);white-space:nowrap}
+.bar{left:0;right:0;bottom:0;height:118px;background:var(--ss-surface-2);display:flex;align-items:center;justify-content:space-between;padding:0 44px;z-index:6}
+.bar span{font-family:var(--font-body-family);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:22px;color:var(--text-muted);max-width:620px;line-height:1.3}
+.tape{left:0;right:0;height:23px;background:url(a/tape.webp) center/auto 100% repeat-x, var(--hazard-stripe);z-index:6}
+.tape.b{bottom:118px}
+.prod{filter:drop-shadow(0 0 1.5px rgba(0,255,255,.45)) drop-shadow(0 38px 36px rgba(0,0,0,.85)) drop-shadow(0 8px 10px rgba(0,0,0,.6))}
+
+/* ---------- LOOT CRATE ---------- */
+.crate{background:var(--ss-yellow)}
+.crate .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px;mix-blend-mode:multiply;opacity:.22;filter:grayscale(1) contrast(1.4)}
+.crate .vig{inset:0;z-index:0;background:radial-gradient(ellipse 80% 70% at 50% 50%,transparent 50%,rgba(120,80,0,.35) 100%)}
+.crate .h{color:#0b0b0b;-webkit-mask-image:var(--spray);mask-image:var(--spray);-webkit-mask-size:400px;mask-size:400px}
+.crate .sub{color:#141414;font-weight:700}
+.hard{filter:drop-shadow(14px 18px 0 rgba(0,0,0,.85)) drop-shadow(0 0 1px #000)}
+.tag{font-family:var(--font-heading-family);font-weight:900;font-size:40px;color:var(--ss-yellow);background:#0b0b0b;padding:12px 20px 10px;border-radius:var(--vendobutton-radius);box-shadow:8px 8px 0 rgba(0,0,0,.25)}
+.stamp{width:250px;height:250px;border-radius:50%;border:8px solid #0b0b0b;display:grid;place-items:center;text-align:center;transform:rotate(-12deg);
+  font-family:var(--font-heading-family);font-weight:900;color:#0b0b0b;-webkit-mask-image:var(--spray);mask-image:var(--spray);-webkit-mask-size:300px;mask-size:300px}
+
+/* ---------- ITEM UNLOCKED (HUD) ---------- */
+.hud{background:#040707}
+.hud .bg{inset:0;z-index:0;background:
+  repeating-linear-gradient(0deg,rgba(0,255,255,.05) 0 2px,transparent 2px 6px),
+  radial-gradient(ellipse 70% 50% at 50% 45%,rgba(0,255,255,.16),transparent 70%),
+  url(a/plate.jpg) center/auto 1500px;background-blend-mode:normal,normal,luminosity}
+.hud .bg::after{content:"";position:absolute;inset:0;background:rgba(4,7,7,.72)}
+.frame{border:2px solid rgba(0,255,255,.55);box-shadow:0 0 40px rgba(0,255,255,.18),inset 0 0 40px rgba(0,255,255,.08)}
+.corner{width:60px;height:60px;border-color:var(--ss-cyan);border-style:solid;filter:drop-shadow(0 0 8px var(--ss-cyan))}
+.kicker{font-family:var(--font-heading-family);font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--ss-cyan);font-size:28px;text-shadow:0 0 18px rgba(0,255,255,.8)}
+.rar{text-transform:uppercase;font-family:var(--font-heading-family);font-weight:900;letter-spacing:.2em;font-size:22px;color:#000;background:var(--ss-yellow);padding:8px 16px 6px;border-radius:4px}
+.stats{display:grid;grid-template-columns:auto 1fr;gap:16px 30px;font-family:var(--font-heading-family);font-size:30px;align-items:baseline}
+.stats dt{color:var(--text-muted);letter-spacing:.18em;font-weight:600;font-size:22px}
+.stats dd{color:var(--ss-white);font-weight:700}
+.stats dd.c{color:var(--ss-cyan)}
+
+/* ---------- GIANT WORD ---------- */
+.giant .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px, var(--ss-black)}
+.giant .bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 50%,rgba(14,14,14,.2),rgba(14,14,14,.9) 80%)}
+.word{font-family:var(--font-heading-family);font-weight:900;text-transform:uppercase;line-height:.85;color:transparent;-webkit-text-stroke:3px rgba(255,215,29,.9);white-space:nowrap;z-index:1}
+.word.fill{color:rgba(255,215,29,.08)}
+.sparks{mix-blend-mode:screen;z-index:3}
+
+/* ---------- CAUTION TAPE ---------- */
+.band{height:92px;left:-200px;right:-200px;background:var(--hazard-stripe);box-shadow:0 18px 30px rgba(0,0,0,.6);z-index:1;display:flex;align-items:center;justify-content:center;gap:60px;overflow:hidden}
+.band span{background:#0b0b0b;color:var(--ss-yellow);font-family:var(--font-heading-family);font-weight:900;font-size:34px;letter-spacing:.2em;padding:10px 28px 8px;white-space:nowrap}
+.dark .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px, var(--ss-black)}
+.dark .bg::after{content:"";position:absolute;inset:0;background:rgba(14,14,14,.55)}
+.price{font-family:var(--font-heading-family);font-weight:800;font-size:44px;line-height:1;color:var(--ss-white);
+  background:#000;border:1px solid var(--ss-cyan);border-radius:var(--vendobutton-radius);padding:14px 20px 12px;box-shadow:0 0 22px rgba(0,255,255,.25)}
+
+.loot{display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+.loot .nm{font-family:var(--font-heading-family);font-weight:700;font-size:34px;line-height:1.15;text-transform:uppercase;letter-spacing:.02em;margin-bottom:18px}
+.chips{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font-family:var(--font-heading-family);font-weight:700;font-size:21px;letter-spacing:.1em;text-transform:uppercase;color:var(--ss-cyan);
+  background:rgba(0,255,255,.08);border:2px solid rgba(0,255,255,.7);padding:12px 20px 10px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.cost{text-align:right;flex:none}
+.cost small{display:block;font-family:var(--font-heading-family);font-weight:700;font-size:20px;letter-spacing:.3em;color:var(--text-muted)}
+.cost b{display:block;font-family:var(--font-heading-family);font-weight:900;font-size:112px;line-height:.95;color:var(--ss-yellow);-webkit-text-stroke:1px #000;text-shadow:0 5px 0 #000,0 0 30px rgba(255,215,29,.35)}
+</style><style>
+/* Black Friday additions */
+.bfband{left:-200px;right:-200px;height:84px;background:#0b0b0b;display:flex;align-items:center;gap:50px;overflow:hidden;white-space:nowrap;z-index:1;box-shadow:0 18px 30px rgba(0,0,0,.6);border-top:6px solid var(--ss-yellow);border-bottom:6px solid var(--ss-yellow)}
+.bfband span{font-family:var(--font-heading-family);font-weight:900;font-size:40px;letter-spacing:.14em;color:var(--ss-yellow)}
+.bfband span.c{color:var(--ss-cyan)}
+.kick-y{text-transform:uppercase;font-family:var(--font-heading-family);font-weight:900;letter-spacing:.28em;font-size:26px;color:#000;background:var(--ss-yellow);padding:10px 18px 8px;display:inline-block}
+.slots{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.slot2{position:relative;height:270px;background:rgba(0,255,255,.05);border:2px solid rgba(0,255,255,.45);box-shadow:inset 0 0 24px rgba(0,255,255,.08);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.slot2 img{position:absolute;inset:14px 10px 40px;width:calc(100% - 20px);height:calc(100% - 54px);object-fit:contain;filter:drop-shadow(0 10px 12px rgba(0,0,0,.8))}
+.slot2 b{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-family:var(--font-heading-family);font-weight:700;font-size:15px;letter-spacing:.12em;color:var(--ss-white);text-transform:uppercase}
+.slot2.lock{display:grid;place-items:center;border-style:dashed}
+.slot2.lock span{font-family:var(--font-heading-family);font-weight:900;font-size:64px;color:rgba(0,255,255,.6)}
+.was{font-family:var(--font-heading-family);font-weight:700;font-size:40px;color:var(--text-muted);text-decoration:line-through;text-decoration-thickness:4px;text-decoration-color:#e12121}
+.deal{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #0b0b0b;padding:14px 0 10px}
+.deal b{font-family:var(--font-heading-family);font-weight:900;font-size:42px;color:#0b0b0b;text-transform:uppercase}
+.deal span{font-family:var(--font-heading-family);font-weight:900;font-size:34px;color:#0b0b0b;text-transform:uppercase;letter-spacing:.06em}
+</style></head><body>
+
+<!-- BF1: CAUTION TAPE - half price katanas -->
+<section class="ad dark" id="bf1">
+  <div class="bg"></div>
+  <div class="band" style="top:370px;transform:rotate(-9deg)"><span>BLACK FRIDAY</span><span>HALF PRICE</span><span>BLACK FRIDAY</span><span>HALF PRICE</span></div>
+  <div class="band" style="top:930px;transform:rotate(7deg)"><span>HALF PRICE</span><span>TRIPLE SETS TOO</span><span>HALF PRICE</span><span>TRIPLE SETS TOO</span></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <h1 class="h" style="left:200px;right:44px;top:58px;font-size:66px;text-shadow:0 4px 0 #000">Every display katana. <em>Half price.</em></h1>
+  <img class="prod" src="a/bf_redtri_0.png" alt="" style="left:40px;top:500px;width:1000px;transform:rotate(-4deg);z-index:3">
+  <img class="prod" src="a/bf_whitetri_0.png" alt="" style="left:40px;top:710px;width:1000px;transform:rotate(3deg);z-index:3">
+  <div style="left:44px;top:1060px;z-index:4"><span class="kick-y">½ price · triple sets included</span></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday · Display katanas</span><b class="btn">Shop katanas</b></div>
+</section>
+
+<!-- BF2: GIANT WORD - Deadpool vs Wolverine -->
+<section class="ad giant" id="bf2">
+  <div class="bg"></div>
+  <div style="inset:0;background:radial-gradient(ellipse 60% 50% at 55% 45%,rgba(200,20,20,.45),transparent 70%);z-index:1"></div>
+  <div class="word" style="left:-20px;top:110px;font-size:420px;-webkit-text-stroke-color:rgba(255,215,29,.85)">£50</div>
+  <img class="sparks" src="a/sparks-l.webp" alt="" style="left:0;top:560px;width:360px">
+  <img class="sparks" src="a/sparks-r.webp" alt="" style="right:0;top:280px;width:360px">
+  <img class="prod" src="a/bf_dpw_0.png" alt="" style="left:230px;top:200px;width:720px;z-index:3">
+  <img class="logo r" src="a/logo.png" alt="" style="z-index:5">
+  <div style="left:44px;top:900px;z-index:5"><span class="kick-y">Black Friday · half price</span></div>
+  <h1 class="h" style="left:44px;right:44px;top:960px;font-size:74px;z-index:5;text-shadow:0 4px 0 #000,0 10px 30px #000">Maximum effort. <em>Minimum price.</em></h1>
+  <div class="tape b"></div>
+  <div class="bar"><span>Dual display katanas + harness · £50</span><b class="btn">Grab the pair</b></div>
+</section>
+
+<!-- BF3: LOOT CRATE - top sellers £99 -->
+<section class="ad crate" id="bf3">
+  <div class="bg"></div><div class="vig"></div>
+  <div class="tape" style="top:0"></div>
+  <img class="logo" src="a/logo.png" alt="" style="top:52px">
+  <h1 class="h" style="left:200px;right:44px;top:64px;font-size:84px;line-height:.95">Top sellers.</h1>
+  <h1 class="h" style="left:200px;right:44px;top:150px;font-size:230px;line-height:.9">£99.</h1>
+  <img class="hard" src="a/bf_and118_0.png" alt="" style="left:520px;top:300px;height:760px;transform:rotate(4deg)">
+  <img class="hard" src="a/bf_brave_0.png" alt="" style="left:260px;top:420px;width:560px">
+  <img class="hard" src="a/omens_0.png" alt="" style="left:20px;top:560px;width:520px;transform:rotate(-6deg)">
+  <img class="hard" src="a/bf_snow_0.png" alt="" style="left:520px;top:780px;width:520px;transform:rotate(-8deg)">
+  <span class="tag" style="left:44px;top:1000px;font-size:24px">Master Sword · Claymore · Longclaw</span>
+  <span class="tag" style="left:44px;top:1080px;font-size:24px">Sword of Omens · Andúril 118 cm</span>
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday · Top 10 sellers</span><b class="btn">Shop £99 swords</b></div>
+</section>
+
+<!-- BF4: ITEM UNLOCKED - LOTR £99 -->
+<section class="ad hud" id="bf4">
+  <div class="bg"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="kicker" style="left:200px;top:70px">&gt; Loot drop · Black Friday</div>
+  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:62px;text-shadow:0 0 30px rgba(0,255,255,.35)">Choose your <em>fellowship.</em></h1>
+  <div class="slots" style="left:44px;right:44px;top:330px">
+    <div class="slot2"><img src="a/bf_witch_0.png" alt=""><b>Witch-king</b></div>
+    <div class="slot2"><img src="a/bf_wraith_0.png" alt=""><b>Ringwraith</b></div>
+    <div class="slot2"><img src="a/bf_eowyn_0.png" alt=""><b>Éowyn</b></div>
+    <div class="slot2"><img src="a/bf_glam_0.png" alt=""><b>Glamdring</b></div>
+    <div class="slot2"><img src="a/bf_boromir_0.png" alt=""><b>Boromir</b></div>
+    <div class="slot2"><img src="a/bf_legolas_0.png" alt=""><b>Legolas</b></div>
+    <div class="slot2"><img src="a/bf_theoden_0.png" alt=""><b>Théoden</b></div>
+    <div class="slot2"><img src="a/bf_theodred_0.png" alt=""><b>Théodred</b></div>
+    <div class="slot2"><img src="a/bf_isildur_0.png" alt=""><b>Isildur</b></div>
+    <div class="slot2 lock"><span>+1</span><b>Galadriel</b></div>
+  </div>
+  <div class="loot" style="left:44px;right:44px;top:940px"><div><div class="chips"><span class="chip">10 swords</span><span class="chip">One price</span></div></div><div class="cost"><small>EACH</small><b>£99</b></div></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>If you know, you know</span><b class="btn">Pick yours</b></div>
+</section>
+
+<!-- BF5: GIANT WORD - Cap shield -->
+<section class="ad giant" id="bf5">
+  <div class="bg"></div>
+  <div class="word" style="left:-20px;top:90px;font-size:300px">£100</div>
+  <div class="word" style="left:-20px;top:350px;font-size:300px">Off</div>
+  <div style="left:250px;top:250px;width:760px;height:760px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,255,.3),transparent 62%);z-index:1"></div>
+  <img class="sparks" src="a/sparks-l.webp" alt="" style="left:0;top:700px;width:360px">
+  <img class="prod" src="a/bf_capcrop.png" alt="" style="left:330px;top:300px;width:640px;clip-path:circle(46% at 50% 54%);transform:rotate(-8deg);z-index:3">
+  <img class="logo r" src="a/logo.png" alt="" style="z-index:5">
+  <h1 class="h" style="left:44px;right:44px;top:870px;font-size:80px;z-index:5;text-shadow:0 4px 0 #000,0 10px 30px #000">You could do this <em>all day.</em></h1>
+  <div style="left:44px;top:1090px;display:flex;align-items:center;gap:22px;z-index:5"><span class="was">£249</span><span class="price">£149</span><span style="font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);font-size:22px">Deluxe shield</span></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday · £100 off</span><b class="btn">Claim the shield</b></div>
+</section>
+
+<!-- BF6: CAUTION TAPE - flintlocks £39 -->
+<section class="ad dark" id="bf6">
+  <div class="bg"></div>
+  <div style="inset:0;background:radial-gradient(ellipse 60% 45% at 50% 55%,rgba(255,140,0,.18),transparent 70%);z-index:1"></div>
+  <div class="bfband" style="top:420px;transform:rotate(-8deg)"><span>BLACK FRIDAY</span><span class="c">£39</span><span>BLACK FRIDAY</span><span class="c">£39</span><span>BLACK FRIDAY</span></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <h1 class="h" style="left:200px;right:44px;top:58px;font-size:72px;text-shadow:0 4px 0 #000">Raise the <em>black flag.</em></h1>
+  <img class="prod" src="a/bf_dhb_0.png" alt="" style="left:30px;top:560px;width:900px;transform:rotate(-12deg);z-index:3">
+  <img class="prod" src="a/bf_dhg_2.png" alt="" style="left:150px;top:640px;width:900px;transform:scaleX(-1) rotate(-12deg);z-index:4">
+  <img class="sparks" src="a/sparks-r.webp" alt="" style="right:0;top:520px;width:340px">
+  <div style="left:44px;right:44px;top:990px;display:flex;justify-content:space-between;align-items:flex-end;z-index:5">
+    <div><div style="font-family:var(--font-heading-family);font-weight:700;font-size:34px;text-transform:uppercase">Pirate flintlocks</div><div style="font-size:24px;color:#ddd;margin-top:6px">18th-century replicas. Non-firing.</div></div>
+    <div class="cost"><small>NOW</small><b>£39</b></div>
+  </div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday · Brass &amp; gunmetal</span><b class="btn">Shop now</b></div>
+</section>
+
+<!-- BF7: ITEM UNLOCKED - OoT Master Sword £49 -->
+<section class="ad hud" id="bf7">
+  <div class="bg"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="kicker" style="left:200px;top:70px">&gt; Item get!</div>
+  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:52px;text-shadow:0 0 30px rgba(0,255,255,.35)">It's dangerous to go alone. <em>Take this.</em></h1>
+  <div class="frame" style="left:44px;right:44px;top:330px;height:540px;background:radial-gradient(ellipse at 50% 55%,rgba(0,255,255,.16),transparent 70%)"></div>
+  <div class="corner" style="left:30px;top:316px;border-width:4px 0 0 4px"></div>
+  <div class="corner" style="right:30px;top:316px;border-width:4px 4px 0 0"></div>
+  <div class="corner" style="left:30px;top:824px;border-width:0 0 4px 4px"></div>
+  <div class="corner" style="right:30px;top:824px;border-width:0 4px 4px 0"></div>
+  <img class="prod" src="a/bf_oot_3.png" alt="" style="left:230px;top:350px;height:500px;z-index:3">
+  <span class="rar" style="left:70px;top:356px;z-index:4">Legendary</span>
+  <div class="loot" style="left:44px;right:44px;top:920px"><div><div class="chips"><span class="chip">Black Friday</span><span class="chip">Display piece</span></div></div><div class="cost"><small>COST</small><b>£49</b></div></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>If you know, you know</span><b class="btn">Equip it</b></div>
+</section>
+
+<!-- BF8: LOOT CRATE - round-up -->
+<section class="ad crate" id="bf8">
+  <div class="bg"></div><div class="vig"></div>
+  <div class="tape" style="top:0"></div>
+  <img class="logo" src="a/logo.png" alt="" style="top:52px">
+  <h1 class="h" style="left:200px;right:44px;top:62px;font-size:78px;line-height:.98">Black Friday loot drop.</h1>
+  <div style="left:44px;right:44px;top:360px">
+    <div class="deal"><b>Display katanas</b><span>Half price</span></div>
+    <div class="deal"><b>Deadpool vs Wolverine</b><span>£50</span></div>
+    <div class="deal"><b>Top 10 sellers</b><span>£99</span></div>
+    <div class="deal"><b>LOTR swords</b><span>£99</span></div>
+    <div class="deal"><b>Deluxe Cap shield</b><span>£100 off</span></div>
+    <div class="deal"><b>Pirate flintlocks</b><span>£39</span></div>
+    <div class="deal"><b>OoT Master Sword</b><span>£49</span></div>
+  </div>
+  <img class="hard" src="a/bf_capcrop.png" alt="" style="left:60px;top:930px;height:240px;clip-path:circle(46% at 50% 54%);transform:rotate(-10deg)">
+  <img class="hard" src="a/bf_dpw_0.png" alt="" style="left:360px;top:920px;height:260px">
+  <img class="hard" src="a/bf_dhb_0.png" alt="" style="left:620px;top:990px;width:420px;transform:rotate(-12deg)">
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday at The Sword Stall</span><b class="btn">Shop the drop</b></div>
+</section>
+
+<script>
+const id=location.hash.slice(1);
+if(id){document.body.classList.add('solo');document.getElementById(id)?.classList.add('on');}
+</script>
+</body></html>
