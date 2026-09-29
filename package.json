@@ -11,6 +11,7 @@
     "db:init": "tsx scripts/utils/db.ts --init",
     "brief:data": "tsx scripts/functions/generate-daily-brief.ts",
     "xero:auth": "tsx scripts/auth/xero-auth.ts",
+    "tss-shopify:auth": "tsx scripts/auth/tss-shopify-auth.ts",
     "sync:xero": "tsx scripts/sync/sync-xero.ts",
     "sync:xero:backfill": "tsx scripts/sync/sync-xero.ts --backfill",
     "sync:ghl": "tsx scripts/sync/sync-ghl.ts",
