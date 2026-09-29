@@ -73,6 +73,15 @@ body:not(.solo) .ad{margin:0 0 40px}
 .dark .bg::after{content:"";position:absolute;inset:0;background:rgba(14,14,14,.55)}
 .price{font-family:var(--font-heading-family);font-weight:800;font-size:44px;line-height:1;color:var(--ss-white);
   background:#000;border:1px solid var(--ss-cyan);border-radius:var(--vendobutton-radius);padding:14px 20px 12px;box-shadow:0 0 22px rgba(0,255,255,.25)}
+
+.loot{display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+.loot .nm{font-family:var(--font-heading-family);font-weight:700;font-size:34px;line-height:1.15;text-transform:uppercase;letter-spacing:.02em;margin-bottom:18px}
+.chips{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font-family:var(--font-heading-family);font-weight:700;font-size:21px;letter-spacing:.1em;text-transform:uppercase;color:var(--ss-cyan);
+  background:rgba(0,255,255,.08);border:2px solid rgba(0,255,255,.7);padding:12px 20px 10px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.cost{text-align:right;flex:none}
+.cost small{display:block;font-family:var(--font-heading-family);font-weight:700;font-size:20px;letter-spacing:.3em;color:var(--text-muted)}
+.cost b{display:block;font-family:var(--font-heading-family);font-weight:900;font-size:112px;line-height:.95;color:var(--ss-yellow);-webkit-text-stroke:1px #000;text-shadow:0 5px 0 #000,0 0 30px rgba(255,215,29,.35)}
 </style></head>
 <body>
 
@@ -138,7 +147,7 @@ body:not(.solo) .ad{margin:0 0 40px}
   <div class="bg"></div>
   <img class="logo" src="a/logo.png" alt="">
   <div class="kicker" style="left:200px;top:70px">&gt; New item unlocked</div>
-  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:66px;text-shadow:0 0 30px rgba(0,255,255,.35)">Jin Sakai's <em>katana</em></h1>
+  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:66px;text-shadow:0 0 30px rgba(0,255,255,.35)">If you know, <em>you know.</em></h1>
   <div class="frame" style="left:44px;right:44px;top:300px;height:560px;overflow:hidden">
     <img src="a/jindisp_0.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 60%">
     <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,255,255,.06) 0 2px,transparent 2px 6px)"></div>
@@ -148,11 +157,7 @@ body:not(.solo) .ad{margin:0 0 40px}
   <div class="corner" style="left:30px;top:814px;border-width:0 0 4px 4px"></div>
   <div class="corner" style="right:30px;top:814px;border-width:0 4px 4px 0"></div>
   <span class="rar" style="left:70px;top:326px">Legendary</span>
-  <dl class="stats" style="left:44px;right:44px;top:910px">
-    <dt>GAME</dt><dd>Ghost of Tsushima</dd>
-    <dt>TYPE</dt><dd>Display katana</dd>
-    <dt>COST</dt><dd class="c">£69</dd>
-  </dl>
+  <div class="loot" style="left:44px;right:44px;top:960px"><div><div class="chips"><span class="chip">Display katana</span></div></div><div class="cost"><small>COST</small><b>£69</b></div></div>
   <div class="tape b"></div>
   <div class="bar"><span>You either recognise it or you don't</span><b class="btn">Equip it</b></div>
 </section>
@@ -183,14 +188,9 @@ body:not(.solo) .ad{margin:0 0 40px}
   <div class="corner" style="right:30px;top:844px;border-width:0 4px 4px 0"></div>
   <img class="prod" src="a/gow_0.png" alt="" style="left:120px;top:360px;width:840px;z-index:3">
   <span class="rar" style="left:70px;top:356px;z-index:4">Legendary</span>
-  <dl class="stats" style="left:44px;right:44px;top:930px">
-    <dt>ITEM</dt><dd>Deluxe Ragnarok Chaos Blades</dd>
-    <dt>LENGTH</dt><dd>≈54 cm each</dd>
-    <dt>MOUNT</dt><dd>Wall plaque included</dd>
-    <dt>COST</dt><dd class="c">£185</dd>
-  </dl>
+  <div class="loot" style="left:44px;right:44px;top:950px"><div><div class="chips"><span class="chip">Pair of blades</span><span class="chip">≈54 cm each</span><span class="chip">Wall plaque included</span></div></div><div class="cost"><small>COST</small><b>£185</b></div></div>
   <div class="tape b"></div>
-  <div class="bar"><span>God of War</span><b class="btn">Claim it</b></div>
+  <div class="bar"><span>If you know, you know</span><b class="btn">Claim it</b></div>
 </section>
 
 <!-- ============ PRODUCT FOCUS ============ -->
@@ -251,7 +251,7 @@ body:not(.solo) .ad{margin:0 0 40px}
   <div class="bg"></div>
   <img class="logo" src="a/logo.png" alt="">
   <div class="kicker" style="left:200px;top:70px">&gt; Synchronised</div>
-  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:62px;text-shadow:0 0 30px rgba(0,255,255,.35)">Kenway's <em>hidden blade</em></h1>
+  <h1 class="h" style="left:200px;right:44px;top:118px;font-size:62px;text-shadow:0 0 30px rgba(0,255,255,.35)">You know <em>whose this is.</em></h1>
   <div class="frame" style="left:44px;right:44px;top:330px;height:520px;background:radial-gradient(ellipse at 50% 55%,rgba(0,255,255,.16),transparent 70%)"></div>
   <div class="corner" style="left:30px;top:316px;border-width:4px 0 0 4px"></div>
   <div class="corner" style="right:30px;top:316px;border-width:4px 4px 0 0"></div>
@@ -259,12 +259,7 @@ body:not(.solo) .ad{margin:0 0 40px}
   <div class="corner" style="right:30px;top:804px;border-width:0 4px 4px 0"></div>
   <img class="prod" src="a/kenway_1.png" alt="" style="left:70px;top:360px;width:940px;z-index:3">
   <span class="rar" style="left:70px;top:356px;z-index:4">Official</span>
-  <dl class="stats" style="left:44px;right:44px;top:900px">
-    <dt>GAME</dt><dd>AC IV Black Flag Resynced</dd>
-    <dt>SCALE</dt><dd>1:1 life size, wearable</dd>
-    <dt>BLADE</dt><dd>Spring-loaded, button release</dd>
-    <dt>COST</dt><dd class="c">£119</dd>
-  </dl>
+  <div class="loot" style="left:44px;right:44px;top:920px"><div><div class="chips"><span class="chip">1:1 life size</span><span class="chip">Wearable</span><span class="chip">Spring-loaded</span></div></div><div class="cost"><small>COST</small><b>£119</b></div></div>
   <div class="tape b"></div>
   <div class="bar"><span>Official UK stockist</span><b class="btn">Equip it</b></div>
 </section>
