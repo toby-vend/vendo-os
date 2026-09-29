@@ -1,0 +1,258 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Sword Stall B-variations: loot crate / item unlocked / giant word / caution tape. Tokens from the Sword Stall design system. */
+:root{
+  --ss-black:#0e0e0e; --ss-surface-1:#262626; --ss-surface-2:#101010; --ss-white:#fafafa; --ss-cyan:#00ffff; --ss-yellow:#ffd71d; --ss-yellow-pure:#ffff00; --text-muted:#a3a3a3;
+  --font-heading-family:'Orbitron',sans-serif; --font-body-family:'Roboto',sans-serif;
+  --buttons-radius:6px; --vendobutton-radius:5px; --hazard-stripe:repeating-linear-gradient(-45deg,#ffd71d 0 28px,#121212 28px 56px);
+  --noise:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --spray:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='s'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.75'/></filter><rect width='100%' height='100%' filter='url(%23s)'/></svg>");
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;font-family:var(--font-body-family);color:var(--ss-white)}
+.ad{position:relative;width:1080px;height:1350px;overflow:hidden;background:var(--ss-black);isolation:isolate}
+body.solo .ad{display:none} body.solo .ad.on{display:block}
+body:not(.solo) .ad{margin:0 0 40px}
+.ad > *{position:absolute;z-index:2}
+.ad::after{content:"";position:absolute;inset:0;z-index:40;pointer-events:none;background:var(--noise);mix-blend-mode:overlay;opacity:.4}
+
+.logo{top:40px;left:44px;width:132px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
+.logo.r{left:auto;right:44px}
+.h{font-family:var(--font-heading-family);font-weight:900;text-transform:uppercase;line-height:1.02;letter-spacing:.01em}
+.h em{font-style:normal;color:var(--ss-yellow)}
+.sub{font-family:var(--font-body-family);font-weight:500;font-size:30px;line-height:1.35}
+.btn{font-family:var(--font-body-family);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:28px;background:var(--ss-cyan);color:#000;
+  border:1px solid var(--ss-cyan);border-radius:var(--buttons-radius);padding:18px 34px;box-shadow:0 0 30px rgba(0,255,255,.35);white-space:nowrap}
+.bar{left:0;right:0;bottom:0;height:118px;background:var(--ss-surface-2);display:flex;align-items:center;justify-content:space-between;padding:0 44px;z-index:6}
+.bar span{font-family:var(--font-body-family);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:22px;color:var(--text-muted);max-width:620px;line-height:1.3}
+.tape{left:0;right:0;height:23px;background:url(a/tape.webp) center/auto 100% repeat-x, var(--hazard-stripe);z-index:6}
+.tape.b{bottom:118px}
+.prod{filter:drop-shadow(0 0 1.5px rgba(0,255,255,.45)) drop-shadow(0 38px 36px rgba(0,0,0,.85)) drop-shadow(0 8px 10px rgba(0,0,0,.6))}
+
+/* ---------- LOOT CRATE ---------- */
+.crate{background:var(--ss-yellow)}
+.crate .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px;mix-blend-mode:multiply;opacity:.22;filter:grayscale(1) contrast(1.4)}
+.crate .vig{inset:0;z-index:0;background:radial-gradient(ellipse 80% 70% at 50% 50%,transparent 50%,rgba(120,80,0,.35) 100%)}
+.crate .h{color:#0b0b0b;-webkit-mask-image:var(--spray);mask-image:var(--spray);-webkit-mask-size:400px;mask-size:400px}
+.crate .sub{color:#141414;font-weight:700}
+.hard{filter:drop-shadow(14px 18px 0 rgba(0,0,0,.85)) drop-shadow(0 0 1px #000)}
+.tag{font-family:var(--font-heading-family);font-weight:900;font-size:40px;color:var(--ss-yellow);background:#0b0b0b;padding:12px 20px 10px;border-radius:var(--vendobutton-radius);box-shadow:8px 8px 0 rgba(0,0,0,.25)}
+.stamp{width:250px;height:250px;border-radius:50%;border:8px solid #0b0b0b;display:grid;place-items:center;text-align:center;transform:rotate(-12deg);
+  font-family:var(--font-heading-family);font-weight:900;color:#0b0b0b;-webkit-mask-image:var(--spray);mask-image:var(--spray);-webkit-mask-size:300px;mask-size:300px}
+
+/* ---------- ITEM UNLOCKED (HUD) ---------- */
+.hud{background:#040707}
+.hud .bg{inset:0;z-index:0;background:
+  repeating-linear-gradient(0deg,rgba(0,255,255,.05) 0 2px,transparent 2px 6px),
+  radial-gradient(ellipse 70% 50% at 50% 45%,rgba(0,255,255,.16),transparent 70%),
+  url(a/plate.jpg) center/auto 1500px;background-blend-mode:normal,normal,luminosity}
+.hud .bg::after{content:"";position:absolute;inset:0;background:rgba(4,7,7,.72)}
+.frame{border:2px solid rgba(0,255,255,.55);box-shadow:0 0 40px rgba(0,255,255,.18),inset 0 0 40px rgba(0,255,255,.08)}
+.corner{width:60px;height:60px;border-color:var(--ss-cyan);border-style:solid;filter:drop-shadow(0 0 8px var(--ss-cyan))}
+.kicker{font-family:var(--font-heading-family);font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--ss-cyan);font-size:28px;text-shadow:0 0 18px rgba(0,255,255,.8)}
+.rar{text-transform:uppercase;font-family:var(--font-heading-family);font-weight:900;letter-spacing:.2em;font-size:22px;color:#000;background:var(--ss-yellow);padding:8px 16px 6px;border-radius:4px}
+.stats{display:grid;grid-template-columns:auto 1fr;gap:16px 30px;font-family:var(--font-heading-family);font-size:30px;align-items:baseline}
+.stats dt{color:var(--text-muted);letter-spacing:.18em;font-weight:600;font-size:22px}
+.stats dd{color:var(--ss-white);font-weight:700}
+.stats dd.c{color:var(--ss-cyan)}
+
+/* ---------- GIANT WORD ---------- */
+.giant .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px, var(--ss-black)}
+.giant .bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 50%,rgba(14,14,14,.2),rgba(14,14,14,.9) 80%)}
+.word{font-family:var(--font-heading-family);font-weight:900;text-transform:uppercase;line-height:.85;color:transparent;-webkit-text-stroke:3px rgba(255,215,29,.9);white-space:nowrap;z-index:1}
+.word.fill{color:rgba(255,215,29,.08)}
+.sparks{mix-blend-mode:screen;z-index:3}
+
+/* ---------- CAUTION TAPE ---------- */
+.band{height:92px;left:-200px;right:-200px;background:var(--hazard-stripe);box-shadow:0 18px 30px rgba(0,0,0,.6);z-index:1;display:flex;align-items:center;justify-content:center;gap:60px;overflow:hidden}
+.band span{background:#0b0b0b;color:var(--ss-yellow);font-family:var(--font-heading-family);font-weight:900;font-size:34px;letter-spacing:.2em;padding:10px 28px 8px;white-space:nowrap}
+.dark .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px, var(--ss-black)}
+.dark .bg::after{content:"";position:absolute;inset:0;background:rgba(14,14,14,.55)}
+.price{font-family:var(--font-heading-family);font-weight:800;font-size:44px;line-height:1;color:var(--ss-white);
+  background:#000;border:1px solid var(--ss-cyan);border-radius:var(--vendobutton-radius);padding:14px 20px 12px;box-shadow:0 0 22px rgba(0,255,255,.25)}
+
+.loot{display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+.loot .nm{font-family:var(--font-heading-family);font-weight:700;font-size:34px;line-height:1.15;text-transform:uppercase;letter-spacing:.02em;margin-bottom:18px}
+.chips{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font-family:var(--font-heading-family);font-weight:700;font-size:21px;letter-spacing:.1em;text-transform:uppercase;color:var(--ss-cyan);
+  background:rgba(0,255,255,.08);border:2px solid rgba(0,255,255,.7);padding:12px 20px 10px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.cost{text-align:right;flex:none}
+.cost small{display:block;font-family:var(--font-heading-family);font-weight:700;font-size:20px;letter-spacing:.3em;color:var(--text-muted)}
+.cost b{display:block;font-family:var(--font-heading-family);font-weight:900;font-size:112px;line-height:.95;color:var(--ss-yellow);-webkit-text-stroke:1px #000;text-shadow:0 5px 0 #000,0 0 30px rgba(255,215,29,.35)}
+</style><style>
+/* Black Friday v2: slash / boss fight / swing tag / blackout */
+.void{background:#050505}
+.void .bg{inset:0;z-index:0;background:url(a/plate.jpg) center/auto 1500px;opacity:.18;filter:grayscale(1)}
+.void .bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 45%,transparent,#050505 80%)}
+.bfk{font-family:var(--font-heading-family);font-weight:900;letter-spacing:.35em;font-size:24px;color:var(--ss-yellow);text-transform:uppercase}
+.bfk b{color:#000;background:var(--ss-yellow);padding:6px 12px 4px;margin-right:12px;letter-spacing:.2em}
+
+/* slash */
+.sl{font-family:var(--font-heading-family);font-weight:900;text-transform:uppercase;line-height:1;white-space:nowrap;color:var(--ss-white)}
+.sl.top{clip-path:polygon(0 0,100% 0,100% 38%,0 62%)}
+.sl.bot{clip-path:polygon(0 62%,100% 38%,100% 100%,0 100%);transform:translate(26px,22px)}
+.cut{height:6px;background:linear-gradient(90deg,transparent,#fff 20%,var(--ss-cyan) 50%,#fff 80%,transparent);box-shadow:0 0 24px var(--ss-cyan),0 0 60px rgba(0,255,255,.6);z-index:4}
+
+/* boss */
+.bossname{font-family:var(--font-heading-family);font-weight:700;font-size:26px;letter-spacing:.2em;color:var(--ss-white);text-transform:uppercase;text-shadow:0 2px 0 #000}
+.hp{height:46px;background:#1a0505;border:3px solid #d9d9d9;box-shadow:0 0 0 3px #000,0 10px 30px rgba(0,0,0,.7);overflow:hidden}
+.hp i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(180deg,#ff5a4a,#c81414 60%,#8a0b0b)}
+.hp s{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(-45deg,#ffd71d 0 10px,#e0a800 10px 20px);opacity:.9}
+.dmg{font-family:var(--font-heading-family);font-weight:900;color:var(--ss-yellow);-webkit-text-stroke:3px #000;paint-order:stroke fill;text-shadow:0 8px 0 #000,0 0 40px rgba(255,215,29,.5)}
+.crit{font-family:var(--font-heading-family);font-weight:900;font-size:40px;letter-spacing:.12em;color:#fff;background:#e12121;padding:8px 18px 6px;transform:rotate(-6deg);box-shadow:0 10px 20px rgba(0,0,0,.6)}
+
+/* swing tag */
+.swing{width:340px;height:470px;background:
+   radial-gradient(circle at 50% 44px,#050505 0 17px,transparent 18px),
+   linear-gradient(180deg,#141414,#0b0b0b);
+  clip-path:polygon(24% 0,76% 0,100% 16%,100% 100%,0 100%,0 16%);
+  box-shadow:0 30px 50px rgba(0,0,0,.8);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 24px 34px;z-index:5;
+  border:0;filter:drop-shadow(0 0 1px rgba(255,215,29,.8)) drop-shadow(0 30px 30px rgba(0,0,0,.8))}
+.swing .t1{font-family:var(--font-heading-family);font-weight:900;font-size:22px;letter-spacing:.3em;color:var(--ss-yellow)}
+.swing .t2{font-family:var(--font-heading-family);font-weight:900;font-size:150px;line-height:1;color:var(--ss-white);margin:10px 0 6px}
+.swing .t3{font-family:var(--font-body-family);font-weight:700;font-size:20px;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;text-align:center}
+.swing .rim{position:absolute;left:12px;right:12px;top:12px;bottom:12px;border:2px dashed rgba(255,215,29,.5);clip-path:inherit}
+
+/* blackout */
+.beam{background:conic-gradient(from 180deg at 50% 0%,transparent 160deg,rgba(255,255,240,.13) 172deg,rgba(255,255,240,.2) 180deg,rgba(255,255,240,.13) 188deg,transparent 200deg);z-index:1;filter:blur(2px)}
+.pool{background:radial-gradient(ellipse at center,rgba(255,255,235,.28),transparent 65%);z-index:1}
+.ghost{font-family:var(--font-heading-family);font-weight:900;color:rgba(255,255,255,.05);white-space:nowrap;line-height:.85;z-index:1}
+.tile3{position:relative;background:radial-gradient(ellipse 70% 60% at 50% 30%,rgba(255,255,235,.14),transparent 70%),#0b0b0b;border:1px solid #232323;overflow:hidden}
+.tile3 img{position:absolute;left:14px;right:14px;top:14px;width:calc(100% - 28px);height:62%;object-fit:contain;filter:drop-shadow(0 16px 14px rgba(0,0,0,.9))}
+.tile3 .n{position:absolute;left:16px;right:16px;bottom:62px;font-family:var(--font-heading-family);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.06em;line-height:1.15}
+.tile3 .p{position:absolute;left:16px;bottom:14px;font-family:var(--font-heading-family);font-weight:900;font-size:40px;color:var(--ss-yellow);line-height:1}
+.was{font-family:var(--font-heading-family);font-weight:700;font-size:40px;color:var(--text-muted);text-decoration:line-through;text-decoration-thickness:4px;text-decoration-color:#e12121}</style></head><body>
+
+<!-- V1 SLASH: half price katanas -->
+<section class="ad void" id="v1">
+  <div class="bg"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="bfk" style="left:200px;top:96px"><b>Black Friday</b>Display katanas</div>
+  <div class="sl top" style="left:44px;top:260px;font-size:280px">Half</div>
+  <div class="sl bot" style="left:44px;top:260px;font-size:280px;color:#cfcfcf">Half</div>
+  <div class="cut" style="left:-40px;right:-40px;top:452px;transform:rotate(-11.5deg)"></div>
+  <img class="sparks" src="a/sparks-r.webp" alt="" style="right:-20px;top:260px;width:300px;z-index:5">
+  <img class="sparks" src="a/sparks-l.webp" alt="" style="left:-20px;top:420px;width:300px;z-index:5">
+  <img class="prod" src="a/jinforged_4.png" alt="" style="left:470px;top:470px;width:760px;transform:rotate(-8deg);z-index:3">
+  <h1 class="h" style="left:44px;top:870px;font-size:190px;color:var(--ss-yellow);-webkit-text-stroke:2px #000;text-shadow:0 8px 0 #000">Price.</h1>
+  <p class="sub" style="left:44px;right:44px;top:1090px;font-weight:700;color:#e8e8e8">Every display katana. Triple sets included.</p>
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday at The Sword Stall</span><b class="btn">Shop katanas</b></div>
+</section>
+
+<!-- V2 SLASH: OoT Master Sword -->
+<section class="ad void" id="v2">
+  <div class="bg"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="bfk" style="left:200px;top:96px;font-size:20px;letter-spacing:.18em"><b>Black Friday</b>The blade of evil's bane</div>
+  <div class="sl top" style="left:60px;top:230px;font-size:300px;color:#6b6b6b">£80</div>
+  <div class="sl bot" style="left:60px;top:230px;font-size:300px;color:#4a4a4a">£80</div>
+  <div class="cut" style="left:-40px;right:-40px;top:410px;transform:rotate(-13deg)"></div>
+  <img class="prod" src="a/bf_oot_3.png" alt="" style="left:450px;top:230px;height:800px;z-index:3">
+  <div style="left:44px;top:640px;z-index:5"><div class="bfk" style="position:static;color:var(--text-muted);letter-spacing:.3em">Now</div><div class="h" style="position:static;font-size:260px;color:var(--ss-yellow);-webkit-text-stroke:2px #000;text-shadow:0 10px 0 #000,0 0 60px rgba(255,215,29,.35);line-height:.95">£49</div></div>
+  <p class="sub" style="left:44px;right:640px;top:990px;font-weight:700;color:#e8e8e8;z-index:5">One slash off the price. You know the one.</p>
+  <div class="tape b"></div>
+  <div class="bar"><span>If you know, you know</span><b class="btn">Equip it</b></div>
+</section>
+
+<!-- V3 BOSS: Cap shield -->
+<section class="ad void" id="v3">
+  <div class="bg"></div>
+  <div style="left:140px;top:260px;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(255,40,40,.28),transparent 62%);z-index:1"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="bossname" style="left:200px;top:70px">Boss · The Deluxe Shield</div>
+  <div class="hp" style="left:200px;right:44px;top:116px"><i style="width:60%"></i><s style="left:60%;width:40%"></s></div>
+  <div class="bossname" style="left:200px;top:176px;font-size:20px;color:var(--text-muted)">HP £249 → <span style="color:var(--ss-yellow)">£149</span></div>
+  <img class="prod" src="a/bf_capcrop.png" alt="" style="left:230px;top:290px;width:620px;clip-path:circle(46% at 50% 54%);transform:rotate(-12deg);z-index:3">
+  <div class="dmg" style="right:40px;top:300px;font-size:150px;z-index:5;transform:rotate(6deg)">−£100</div>
+  <span class="crit" style="left:44px;top:330px;z-index:5">Critical hit!</span>
+  <h1 class="h" style="left:44px;right:44px;top:930px;font-size:78px;text-shadow:0 5px 0 #000">Black Friday <em>hits hard.</em></h1>
+  <div style="left:44px;top:1100px;display:flex;align-items:center;gap:20px"><span class="was">£249</span><span class="price">£149</span></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Deluxe shield · £100 off</span><b class="btn">Finish him off</b></div>
+</section>
+
+<!-- V4 BOSS: Deadpool vs Wolverine -->
+<section class="ad void" id="v4">
+  <div class="bg"></div>
+  <div style="left:120px;top:240px;width:840px;height:840px;border-radius:50%;background:radial-gradient(circle,rgba(210,20,20,.35),transparent 62%);z-index:1"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <div class="bossname" style="left:200px;top:70px">Boss · The dual katana set</div>
+  <div class="hp" style="left:200px;right:44px;top:116px"><i style="width:50%"></i><s style="left:50%;width:50%"></s></div>
+  <div class="bossname" style="left:200px;top:176px;font-size:20px;color:var(--text-muted)">Two blades · one harness</div>
+  <img class="prod" src="a/bf_dpw_0.png" alt="" style="left:250px;top:250px;width:660px;z-index:3">
+  <div class="dmg" style="left:30px;top:560px;font-size:180px;z-index:5;transform:rotate(-8deg)">−50%</div>
+  <span class="crit" style="right:60px;top:300px;z-index:5;transform:rotate(7deg)">Double KO</span>
+  <h1 class="h" style="left:44px;right:44px;top:930px;font-size:74px;text-shadow:0 5px 0 #000">Two blades. <em>Half the damage.</em></h1>
+  <div class="cost" style="right:44px;top:1060px;text-align:right"></div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday · now £50</span><b class="btn">Grab the pair</b></div>
+</section>
+
+<!-- V5 SWING TAG: LOTR £99 -->
+<section class="ad void" id="v5">
+  <div class="bg"></div>
+  <div class="pool" style="left:0;right:0;top:250px;height:800px"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <h1 class="h" style="left:200px;right:44px;top:62px;font-size:70px;text-shadow:0 5px 0 #000">One price to <em>rule them all.</em></h1>
+  <img class="prod" src="a/bf_witch_0.png" alt="" style="left:-40px;top:220px;width:790px;z-index:3">
+  <svg style="left:0;top:0;width:1080px;height:1350px;z-index:4" viewBox="0 0 1080 1350"><path d="M560 400 C 640 460, 690 520, 720 590" fill="none" stroke="#d8c7a0" stroke-width="4"/></svg>
+  <div class="swing" style="left:560px;top:560px;transform:rotate(-9deg);transform-origin:50% 44px"><span class="rim"></span><div class="t1">BLACK FRIDAY</div><div class="t2">£99</div><div class="t3">Each · 10 swords</div></div>
+  <p class="sub" style="left:44px;right:44px;top:1115px;font-size:26px;font-weight:700;color:#e8e8e8">Witch-king, Éowyn, Glamdring, Boromir and six more.</p>
+  <div class="tape b"></div>
+  <div class="bar"><span>If you know, you know</span><b class="btn">Pick yours</b></div>
+</section>
+
+<!-- V6 SWING TAG: flintlocks £39 -->
+<section class="ad void" id="v6">
+  <div class="bg"></div>
+  <div class="pool" style="left:0;right:0;top:200px;height:800px"></div>
+  <img class="logo" src="a/logo.png" alt="">
+  <h1 class="h" style="left:200px;right:44px;top:62px;font-size:84px;text-shadow:0 5px 0 #000">Yo ho. <em>£39.</em></h1>
+  <img class="prod" src="a/bf_dhg_2.png" alt="" style="left:40px;top:330px;width:1000px;transform:rotate(-6deg);z-index:3">
+  <svg style="left:0;top:0;width:1080px;height:1350px;z-index:4" viewBox="0 0 1080 1350"><path d="M470 560 C 480 610, 470 650, 470 690" fill="none" stroke="#d8c7a0" stroke-width="4"/></svg>
+  <div class="swing" style="left:300px;top:660px;transform:rotate(7deg);transform-origin:50% 44px"><span class="rim"></span><div class="t1">BLACK FRIDAY</div><div class="t2">£39</div><div class="t3">Pirate flintlocks</div></div>
+  <p class="sub" style="left:690px;right:44px;top:780px;font-weight:700;color:#e8e8e8;font-size:28px">18th-century replicas. Brass or gunmetal. Non-firing.</p>
+  <div class="tape b"></div>
+  <div class="bar"><span>Raise the black flag</span><b class="btn">Shop now</b></div>
+</section>
+
+<!-- V7 BLACKOUT: top sellers -->
+<section class="ad" id="v7" style="background:#030303">
+  <div class="ghost" style="left:-30px;top:640px;font-size:520px">£99</div>
+  <div class="beam" style="left:-200px;right:-200px;top:0;height:1350px"></div>
+  <div class="pool" style="left:190px;top:960px;width:700px;height:200px"></div>
+  <img class="prod" src="a/bf_and118_0.png" alt="" style="left:400px;top:170px;height:900px;z-index:3;filter:drop-shadow(0 0 1px rgba(255,255,255,.4)) drop-shadow(0 30px 30px #000)">
+  <img class="logo" src="a/logo.png" alt="" style="z-index:5">
+  <h1 class="h" style="left:44px;right:44px;top:230px;font-size:80px;z-index:5;text-shadow:0 5px 0 #000,0 0 30px #000">Lights out.<br><em>Prices down.</em></h1>
+  <div style="left:44px;top:1000px;z-index:5"><div class="bfk">Top 10 sellers</div><div class="h" style="position:static;font-size:130px;color:var(--ss-yellow);-webkit-text-stroke:2px #000;text-shadow:0 8px 0 #000">£99</div></div>
+  <p class="sub" style="left:600px;right:44px;top:1040px;font-size:22px;font-weight:700;color:#bbb;z-index:5;text-align:right">Andúril 118 cm · Master Sword · Claymore · Longclaw · Sword of Omens</p>
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday at The Sword Stall</span><b class="btn">Shop £99 swords</b></div>
+</section>
+
+<!-- V8 BLACKOUT: the armoury round-up -->
+<section class="ad" id="v8" style="background:#030303">
+  <img class="logo" src="a/logo.png" alt="" style="z-index:5">
+  <div style="left:44px;right:44px;top:200px;bottom:160px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:14px">
+    <div style="grid-column:span 2;display:flex;flex-direction:column;justify-content:center"><div class="bfk">Black Friday</div><div class="h" style="position:static;font-size:92px;line-height:.95;margin-top:10px">The <em>armoury</em> is open.</div></div>
+    <div class="tile3"><img src="a/bf_redtri_0.png" alt=""><div class="n">Display katanas</div><div class="p">½ price</div></div>
+    <div class="tile3"><img src="a/bf_dpw_0.png" alt=""><div class="n">Deadpool vs Wolverine</div><div class="p">£50</div></div>
+    <div class="tile3"><img src="a/bf_and118_0.png" alt=""><div class="n">Top 10 sellers</div><div class="p">£99</div></div>
+    <div class="tile3"><img src="a/bf_witch_0.png" alt=""><div class="n">LOTR swords</div><div class="p">£99</div></div>
+    <div class="tile3"><img src="a/bf_capcrop.png" alt="" style="clip-path:circle(46% at 50% 54%)"><div class="n">Deluxe shield</div><div class="p">£149</div></div>
+    <div class="tile3"><img src="a/bf_dhb_0.png" alt=""><div class="n">Pirate flintlocks</div><div class="p">£39</div></div>
+    <div class="tile3"><img src="a/bf_oot_3.png" alt=""><div class="n">Master Sword</div><div class="p">£49</div></div>
+  </div>
+  <div class="tape b"></div>
+  <div class="bar"><span>Black Friday at The Sword Stall</span><b class="btn">Enter the armoury</b></div>
+</section>
+
+<script>
+const id=location.hash.slice(1);
+if(id){document.body.classList.add('solo');document.getElementById(id)?.classList.add('on');}
+</script>
+</body></html>
