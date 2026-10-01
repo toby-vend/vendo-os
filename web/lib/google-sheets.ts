@@ -97,10 +97,11 @@ export async function readGrid(
   accessToken: string,
   spreadsheetId: string,
   range: string,
+  valueRenderOption: 'FORMATTED_VALUE' | 'UNFORMATTED_VALUE' = 'FORMATTED_VALUE',
 ): Promise<string[][]> {
   const url =
     `${BASE_URL}/${spreadsheetId}/values/${encodeURIComponent(range)}` +
-    `?majorDimension=ROWS&valueRenderOption=FORMATTED_VALUE`;
+    `?majorDimension=ROWS&valueRenderOption=${valueRenderOption}`;
   const resp = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!resp.ok) {
     const body = await resp.text();
@@ -136,6 +137,63 @@ export async function batchUpdateValues(
   }
   const data = (await resp.json()) as { totalUpdatedCells?: number };
   return data.totalUpdatedCells ?? 0;
+}
+
+/** Structural edits (formats, conditional formats, dimensions) in one atomic call. */
+export async function batchUpdateSpreadsheet(
+  accessToken: string,
+  spreadsheetId: string,
+  requests: unknown[],
+): Promise<void> {
+  if (requests.length === 0) return;
+  const resp = await fetch(`${BASE_URL}/${spreadsheetId}:batchUpdate`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ requests }),
+  });
+  if (!resp.ok) {
+    const body = await resp.text();
+    throw new Error(`Sheets batchUpdate failed (${resp.status}): ${body.slice(0, 300)}`);
+  }
+}
+
+export interface GridRange {
+  sheetId: number;
+  startRowIndex?: number;
+  endRowIndex?: number;
+  startColumnIndex?: number;
+  endColumnIndex?: number;
+}
+
+export interface ConditionalFormatRule {
+  ranges: GridRange[];
+  [key: string]: unknown;
+}
+
+/** A tab's conditional format rules, in priority order (index = position). */
+export async function getConditionalFormats(
+  accessToken: string,
+  spreadsheetId: string,
+  sheetId: number,
+): Promise<ConditionalFormatRule[]> {
+  const url =
+    `${BASE_URL}/${spreadsheetId}` +
+    `?fields=sheets(properties.sheetId,conditionalFormats)`;
+  const resp = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!resp.ok) {
+    const body = await resp.text();
+    throw new Error(`Sheets conditional formats failed (${resp.status}): ${body.slice(0, 300)}`);
+  }
+  const data = (await resp.json()) as {
+    sheets?: Array<{
+      properties?: { sheetId?: number };
+      conditionalFormats?: ConditionalFormatRule[];
+    }>;
+  };
+  return data.sheets?.find((s) => s.properties?.sheetId === sheetId)?.conditionalFormats ?? [];
 }
 
 /** 0-based column index → A1 letters (0 → A, 26 → AA). */

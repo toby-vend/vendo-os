@@ -129,6 +129,7 @@
     "creative:sheet": "tsx scripts/creative/generate-figma-sheet.ts",
     "sheets:auth": "tsx scripts/auth/google-sheets-auth.ts",
     "sheet:deliverables": "node --env-file=.env.local --import tsx/esm scripts/reports/deliverables-hours-sheet.ts",
+    "sheet:ad-spend": "node --env-file=.env.local --import tsx/esm scripts/reports/ad-spend-sheet.ts",
     "report:veltuff:portal": "tsx scripts/reports/build-veltuff-portal.ts"
   },
   "dependencies": {

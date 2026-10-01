@@ -45,6 +45,7 @@ import { runCapacityDigest } from '../../lib/jobs/capacity-digest.js';
 import { runSalesPipelineDigest } from '../../lib/jobs/sales-pipeline-digest.js';
 import { runCaseStudyDetection } from '../../lib/jobs/case-study-detection.js';
 import { runDeliverablesHoursSheet } from '../../lib/jobs/deliverables-hours-sheet.js';
+import { runAdSpendSheet } from '../../lib/jobs/ad-spend-sheet.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '../../..');
@@ -366,13 +367,21 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
    * Idempotent: overwrites the same two cells per row on every run, so the
    * figure simply grows through the month. Aborts without writing if the
    * month's column pair can't be positively identified on the tab.
+   *
+   * Also runs the Meta ad spend job for the Paid Social Clients tab of the
+   * same spreadsheet (folded in here — the project is at the Vercel cron
+   * cap). That job is a no-op outside the first days of the month. The two
+   * run independently: one failing never stops the other.
    */
   app.get('/deliverables-hours-sheet', async (_request, reply) => {
+    let hours: Record<string, unknown>;
+    let adSpend: Record<string, unknown>;
+    let failed = false;
+
     try {
       const result = await runDeliverablesHoursSheet();
-      return reply.send({
+      hours = {
         ok: true,
-        message: 'Deliverables hours sheet updated',
         month: result.month,
         tab: result.tab,
         rows: result.planned.length,
@@ -384,14 +393,45 @@ export const cronRoutes: FastifyPluginAsync = async (app) => {
         unmatchedRows: result.unmatchedRows,
         unmatchedClients: result.unmatchedClients,
         durationMs: result.durationMs,
-      });
+      };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.error('[cron/deliverables-hours-sheet] Failed:', msg);
-      return reply
-        .code(500)
-        .send({ ok: false, message: 'Deliverables hours sheet failed', error: msg });
+      console.error('[cron/deliverables-hours-sheet] Hours failed:', msg);
+      hours = { ok: false, error: msg };
+      failed = true;
     }
+
+    try {
+      const result = await runAdSpendSheet();
+      adSpend = {
+        ok: true,
+        tab: result.tab,
+        months: result.months.map((m) => ({
+          month: m.month,
+          column: m.column,
+          created: m.created,
+          rows: m.rows.length,
+          unconvertible: m.unconvertible,
+        })),
+        skipped: result.skipped,
+        cellsWritten: result.cellsWritten,
+        unmatchedRows: result.unmatchedRows,
+        unmatchedAccounts: result.unmatchedAccounts,
+        durationMs: result.durationMs,
+      };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[cron/deliverables-hours-sheet] Ad spend failed:', msg);
+      adSpend = { ok: false, error: msg };
+      failed = true;
+    }
+
+    return reply.code(failed ? 500 : 200).send({
+      ok: !failed,
+      message: failed ? 'Deliverables sheet partly failed' : 'Deliverables sheet updated',
+      hours,
+      adSpend,
+    });
   });
 
   /**
