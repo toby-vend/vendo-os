@@ -1,0 +1,296 @@
+<title>Sword Stall Black Friday 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: one centred column; a key-dates strip, a phase ribbon, then a true 7-day calendar grid for the sale fortnight. */
+:root {
+  --bg: #051412; --surface: #09221F; --raised: #0E2C28; --line: rgba(255,255,255,.08);
+  --fg: #E8F2EC; --fg-2: #B9C7C0; --muted: #8FA199; --accent: #8EFEBB; --accent-soft: rgba(142,254,187,.12);
+  --peak: #F5D674; --peak-soft: rgba(245,214,116,.14); --logo: #FFFFFF;
+  --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #F3F7F5; --surface: #FFFFFF; --raised: #E7EFEB; --line: rgba(5,20,18,.10);
+  --fg: #051412; --fg-2: #2E4440; --muted: #5C6E68; --accent: #0E7C38; --accent-soft: rgba(14,124,56,.10);
+  --peak: #8A6400; --peak-soft: rgba(196,150,20,.14); --logo: #051412; color-scheme: light; } }
+:root[data-theme="light"] {
+  --bg: #F3F7F5; --surface: #FFFFFF; --raised: #E7EFEB; --line: rgba(5,20,18,.10);
+  --fg: #051412; --fg-2: #2E4440; --muted: #5C6E68; --accent: #0E7C38; --accent-soft: rgba(14,124,56,.10);
+  --peak: #8A6400; --peak-soft: rgba(196,150,20,.14); --logo: #051412; color-scheme: light; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 72px; display: grid; gap: 56px; }
+h1, h2, h3 { margin: 0; color: var(--fg); text-wrap: balance; letter-spacing: -0.02em; }
+h1 { font-size: clamp(2.1rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.02; }
+h2 { font-size: 1.55rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
+em.f { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--accent); letter-spacing: 0; }
+p { margin: 0; }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.sec { display: grid; gap: 20px; }
+.sec-head { display: grid; gap: 6px; }
+.sec-head p { color: var(--fg-2); max-width: 68ch; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* header */
+header { display: grid; gap: 22px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.logo svg { height: 30px; width: auto; display: block; }
+.logo path { fill: var(--logo); }
+.logo path.dot { fill: var(--accent); }
+.draft { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; }
+.lede { color: var(--fg-2); font-size: 1.05rem; max-width: 62ch; }
+
+/* key dates */
+.dates { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.date { background: var(--surface); padding: 18px 18px 20px; display: grid; gap: 4px; align-content: start; }
+.date .d { font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+.date .d small { font-size: .9rem; font-weight: 600; color: var(--muted); letter-spacing: 0; margin-left: 4px; }
+.date .l { font-weight: 700; }
+.date .s { color: var(--muted); font-size: 13px; }
+.date.peak { background: var(--peak-soft); }
+.date.peak .d { color: var(--peak); }
+
+/* phases */
+.phases { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 12px; }
+.phase { border-top: 3px solid var(--line); padding-top: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.phase.on { border-top-color: var(--accent); }
+.phase.pk { border-top-color: var(--peak); }
+.phase .when { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.phase ul { margin: 0; padding-left: 16px; color: var(--fg-2); font-size: 13.5px; display: grid; gap: 4px; }
+
+/* calendar */
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.k { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .08em; border-radius: 4px; padding: 1px 5px; background: var(--raised); color: var(--fg-2); }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; }
+.dow { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-left: 4px; }
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; min-height: 170px; min-width: 0; }
+.day .dn { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.day .dn b { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+.day .dn i { font-style: normal; font-size: 10.5px; color: var(--muted); }
+.day .tag { font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.day .deal { font-weight: 700; font-size: 13.5px; line-height: 1.3; }
+.day .lines { display: grid; gap: 5px; font-size: 12.5px; color: var(--fg-2); line-height: 1.35; }
+.day .lines div { display: grid; grid-template-columns: auto 1fr; gap: 6px; align-items: start; }
+.day.sale { border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.day.peak { background: var(--peak-soft); border-color: color-mix(in srgb, var(--peak) 55%, transparent); }
+.day.peak .tag { color: var(--peak); }
+.day.quiet { background: transparent; }
+.dn .mo { display: none; }
+
+/* tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--fg-2); }
+tr:last-child td { border-bottom: 0; }
+td.p { font-weight: 800; color: var(--fg); white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.n { color: var(--fg); font-weight: 600; }
+.chip { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.chip.w { background: var(--peak-soft); color: var(--peak); }
+
+/* channel cards */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card ul { margin: 0; padding-left: 18px; color: var(--fg-2); font-size: 14px; display: grid; gap: 6px; }
+.card .who { font-size: 12px; color: var(--muted); }
+
+/* budget */
+.ramp { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; align-items: end; }
+.bar { display: grid; gap: 8px; }
+.bar .col { background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 10px 10px 4px 4px; display: flex; align-items: flex-start; justify-content: center; padding-top: 10px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.bar.pk .col { background: var(--peak-soft); border-color: color-mix(in srgb, var(--peak) 45%, transparent); color: var(--peak); }
+.bar .cap { font-size: 12.5px; color: var(--fg-2); line-height: 1.35; }
+.bar .cap b { color: var(--fg); display: block; }
+.foot { font-size: 12.5px; color: var(--muted); }
+
+/* confirm list */
+.confirm { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0 28px; margin: 0; padding: 0; list-style: none; counter-reset: c; }
+.confirm li { border-top: 1px solid var(--line); padding: 12px 0; display: grid; grid-template-columns: 28px 1fr; gap: 8px; color: var(--fg-2); counter-increment: c; }
+.confirm li::before { content: counter(c); font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.confirm b { color: var(--fg); }
+
+@media (max-width: 900px) {
+  .dates { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .dates .date:last-child { grid-column: span 2; }
+  .phases, .ramp { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .cal { grid-template-columns: 1fr; }
+  .dow, .day.quiet { display: none; }
+  .day { min-height: 0; }
+  .dn .mo { display: inline; }
+  .grid2, .confirm { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) { .phases, .ramp { grid-template-columns: 1fr; } .bar .col { height: 44px !important; } }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="top">
+    <div class="logo" aria-label="Vendo"><svg viewBox="120 120 625 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+<g>
+<path d="M359.697 219.269H289.483C289.967 225.577 291.99 230.389 295.559 233.723C299.12 237.057 303.509 238.724 308.71 238.724C316.449 238.724 321.83 235.452 324.86 228.902H357.878C356.183 235.57 353.13 241.572 348.717 246.901C344.305 252.238 338.768 256.417 332.115 259.446C325.461 262.474 318.019 263.992 309.795 263.992C299.878 263.992 291.045 261.871 283.306 257.63C275.567 253.389 269.515 247.332 265.165 239.451C260.807 231.571 258.636 222.36 258.636 211.819C258.636 201.278 260.784 192.068 265.079 184.187C269.374 176.307 275.387 170.25 283.134 166.009C290.873 161.767 299.768 159.646 309.803 159.646C319.838 159.646 328.311 161.712 335.933 165.829C343.555 169.953 349.514 175.83 353.801 183.467C358.096 191.105 360.244 200.011 360.244 210.192C360.244 213.103 360.064 216.131 359.697 219.285V219.269ZM328.491 201.998C328.491 196.669 326.679 192.428 323.048 189.274C319.417 186.12 314.879 184.547 309.436 184.547C303.993 184.547 299.846 186.065 296.285 189.094C292.716 192.122 290.506 196.426 289.663 202.006H328.491V201.998Z"></path>
+<path d="M459.4 171.541C466.475 179.242 470.013 189.814 470.013 203.266V262.537H439.166V207.445C439.166 200.66 437.409 195.386 433.902 191.629C430.396 187.873 425.679 185.995 419.752 185.995C413.824 185.995 409.107 187.873 405.601 191.629C402.087 195.386 400.337 200.66 400.337 207.445V262.537H369.311V161.086H400.337V174.539C403.477 170.054 407.709 166.51 413.035 163.904C418.354 161.298 424.343 159.991 430.997 159.991C442.852 159.991 452.317 163.841 459.392 171.534L459.4 171.541Z"></path>
+<path d="M484.071 184.18C487.999 176.299 493.357 170.242 500.127 166.001C506.898 161.759 514.458 159.639 522.806 159.639C529.459 159.639 535.535 161.032 541.041 163.817C546.546 166.611 550.865 170.36 554.012 175.086V128H585.039V262.544H554.012V247.997C551.107 252.849 546.968 256.722 541.587 259.633C536.207 262.544 529.944 264 522.806 264C514.458 264 506.898 261.848 500.127 257.544C493.349 253.24 487.999 247.12 484.071 239.177C480.143 231.242 478.175 222.055 478.175 211.632C478.175 201.208 480.143 192.06 484.071 184.18ZM547.577 193.453C543.282 188.969 538.05 186.723 531.88 186.723C525.711 186.723 520.479 188.937 516.183 193.359C511.888 197.788 509.741 203.876 509.741 211.632C509.741 219.387 511.888 225.537 516.183 230.084C520.479 234.631 525.711 236.9 531.88 236.9C538.05 236.9 543.282 234.654 547.577 230.17C551.872 225.686 554.02 219.567 554.02 211.804C554.02 204.041 551.872 197.929 547.577 193.437V193.453Z"></path>
+<path d="M619.599 257.63C611.673 253.389 605.449 247.332 600.912 239.451C596.374 231.571 594.11 222.36 594.11 211.819C594.11 201.278 596.405 192.216 601.005 184.273C605.597 176.338 611.891 170.242 619.873 166.001C627.854 161.759 636.803 159.639 646.729 159.639C656.655 159.639 665.597 161.759 673.578 166.001C681.559 170.242 687.846 176.338 692.445 184.273C697.037 192.216 699.341 201.396 699.341 211.819C699.341 222.243 697.014 231.43 692.359 239.365C687.705 247.308 681.348 253.396 673.305 257.638C665.261 261.879 656.28 264 646.362 264C636.444 264 627.518 261.879 619.599 257.638V257.63ZM661.512 230.546C665.683 226.179 667.768 219.942 667.768 211.819C667.768 203.696 665.745 197.459 661.692 193.093C657.639 188.726 652.649 186.551 646.721 186.551C640.794 186.551 635.655 188.703 631.665 193.007C627.674 197.311 625.675 203.587 625.675 211.827C625.675 220.067 627.643 226.187 631.571 230.554C635.499 234.92 640.427 237.096 646.362 237.096C652.297 237.096 657.342 234.912 661.512 230.554V230.546Z"></path>
+<path class="dot" d="M730 246.493C730 253.764 724.118 259.659 716.861 259.659C709.605 259.659 703.723 253.764 703.723 246.493C703.723 239.221 709.605 233.327 716.861 233.327C724.118 233.327 730 239.221 730 246.493Z"></path>
+<path d="M259.183 134.91L214.006 262.544H175.177L130 134.91H163.026L194.599 231.274L226.352 134.91H259.183Z"></path>
+</g>
+</svg></div>
+    <span class="draft">Draft for discussion · 1 October 2026</span>
+  </div>
+  <div class="eyebrow">The Sword Stall · Black Friday 2026</div>
+  <h1>Twelve days of deals, <em class="f">planned</em> to the day.</h1>
+  <p class="lede">A working calendar for Black Friday: when each deal leads, what runs on Meta and Google, which creative is ready, and the decisions we need from you to lock it in.</p>
+</header>
+
+<section class="sec" aria-label="Key dates">
+  <div class="dates">
+    <div class="date"><div class="d num">19<small>Thu Nov</small></div><div class="l">Early access</div><div class="s">Subscribers and past buyers get first pick</div></div>
+    <div class="date"><div class="d num">20<small>Fri Nov</small></div><div class="l">Sale goes public</div><div class="s">All deals live on site and ads</div></div>
+    <div class="date peak"><div class="d num">27<small>Fri Nov</small></div><div class="l">Black Friday</div><div class="s">Biggest spend day</div></div>
+    <div class="date peak"><div class="d num">30<small>Mon Nov</small></div><div class="l">Cyber Monday</div><div class="s">Last chance, deals end midnight</div></div>
+    <div class="date"><div class="d num">1<small>Tue Dec</small></div><div class="l">Christmas push</div><div class="s">Gifting, vouchers, order-by dates</div></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <div class="eyebrow">The run-up</div>
+    <h2>Five phases from now to Christmas</h2>
+  </div>
+  <div class="phases">
+    <div class="phase on"><div class="when">1–31 OCT</div><h3>Lock and build</h3><ul><li>Deals, stock and margins signed off</li><li>Black Friday video edits cut from the shoot</li><li>Halloween runs as planned</li></ul></div>
+    <div class="phase on"><div class="when">2–15 NOV</div><h3>Warm up</h3><ul><li>Hero videos build a bigger warm audience</li><li>Early-access sign-up on site</li><li>All sale ads built and approved in drafts</li></ul></div>
+    <div class="phase on"><div class="when">16–19 NOV</div><h3>Tease and early access</h3><ul><li>"It's coming" to warm audiences</li><li>Early access opens Thursday</li></ul></div>
+    <div class="phase pk"><div class="when">20–30 NOV</div><h3>Sale fortnight</h3><ul><li>One deal leads each day</li><li>Budget follows what sells</li><li>Black Friday and Cyber Monday at full spend</li></ul></div>
+    <div class="phase on"><div class="when">1–23 DEC</div><h3>Christmas</h3><ul><li>Gift-buyer videos and vouchers</li><li>Order-by dates, then voucher-only</li></ul></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <div class="eyebrow">Day by day</div>
+    <h2>The sale fortnight</h2>
+    <p>Every deal is live for the whole sale. Each day one deal leads the ads, the homepage and the email, so there is always a fresh reason to come back.</p>
+  </div>
+  <div class="legend">
+    <span><span class="k">META</span> Facebook and Instagram ads</span>
+    <span><span class="k">GOOG</span> Google Search and Shopping</span>
+    <span><span class="k">SITE</span> Homepage and banners</span>
+    <span><span class="k">CRM</span> Email and SMS (your team)</span>
+  </div>
+  <div class="cal">
+    <div class="dow">Mon</div><div class="dow">Tue</div><div class="dow">Wed</div><div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div><div class="dow">Sun</div>
+
+    <div class="day"><div class="dn"><b class="num">16 <span class="mo">Nov</span></b><i>Mon</i></div><div class="tag">Tease</div><div class="deal">"Black Friday is coming"</div><div class="lines"><div><span class="k">META</span>Teaser to past visitors and video viewers</div><div><span class="k">SITE</span>Early-access sign-up banner</div></div></div>
+    <div class="day"><div class="dn"><b class="num">17 <span class="mo">Nov</span></b><i>Tue</i></div><div class="tag">Tease</div><div class="deal">Sneak peek: katanas</div><div class="lines"><div><span class="k">CRM</span>"Get in early" sign-up push</div></div></div>
+    <div class="day"><div class="dn"><b class="num">18 <span class="mo">Nov</span></b><i>Wed</i></div><div class="tag">Tease</div><div class="deal">Sneak peek: £99 swords</div><div class="lines"><div><span class="k">GOOG</span>Merchant promotions approved and scheduled</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">19 <span class="mo">Nov</span></b><i>Thu</i></div><div class="tag">Early access</div><div class="deal">All deals, members first</div><div class="lines"><div><span class="k">CRM</span>Early-access email and SMS</div><div><span class="k">META</span>Warm audiences only</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">20 <span class="mo">Nov</span></b><i>Fri</i></div><div class="tag">Launch</div><div class="deal">The full line-up</div><div class="lines"><div><span class="k">META</span>Black Friday campaign live, round-up static leads</div><div><span class="k">GOOG</span>Promotions and sale ad copy live</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">21 <span class="mo">Nov</span></b><i>Sat</i></div><div class="tag">Spotlight</div><div class="deal">Display katanas half price</div><div class="lines"><div><span class="k">SITE</span>Katana hero banner</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">22 <span class="mo">Nov</span></b><i>Sun</i></div><div class="tag">Spotlight</div><div class="deal">Deadpool vs Wolverine set, £50</div><div class="lines"><div><span class="k">META</span>Fandom ads lead</div></div></div>
+
+    <div class="day sale"><div class="dn"><b class="num">23 <span class="mo">Nov</span></b><i>Mon</i></div><div class="tag">Spotlight</div><div class="deal">Lord of the Rings swords, £99</div><div class="lines"><div><span class="k">CRM</span>LOTR email</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">24 <span class="mo">Nov</span></b><i>Tue</i></div><div class="tag">Spotlight</div><div class="deal">Top sellers, £99</div><div class="lines"><div><span class="k">META</span>Master Sword, Braveheart, Longclaw, Omens, Anduril</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">25 <span class="mo">Nov</span></b><i>Wed</i></div><div class="tag">Spotlight</div><div class="deal">Captain America shield, £149</div><div class="lines"><div><span class="k">CRM</span>Shield email</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">26 <span class="mo">Nov</span></b><i>Thu</i></div><div class="tag">Spotlight</div><div class="deal">Gifts under £50</div><div class="lines"><div><span class="k">META</span>Pirate pistol £39, Ocarina Master Sword £49</div><div><span class="k">ALL</span>Budgets raised overnight for Friday</div></div></div>
+    <div class="day peak"><div class="dn"><b class="num">27 <span class="mo">Nov</span></b><i>Fri</i></div><div class="tag">Black Friday</div><div class="deal">Everything, full spend</div><div class="lines"><div><span class="k">META</span>Best performers from the week lead</div><div><span class="k">CRM</span>Morning and evening send</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">28 <span class="mo">Nov</span></b><i>Sat</i></div><div class="tag">Weekend</div><div class="deal">Bestsellers of the week</div><div class="lines"><div><span class="k">META</span>Budget follows sales</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">29 <span class="mo">Nov</span></b><i>Sun</i></div><div class="tag">Weekend</div><div class="deal">"Still in stock" round-up</div><div class="lines"><div><span class="k">SITE</span>Countdown to Monday</div></div></div>
+
+    <div class="day peak"><div class="dn"><b class="num">30 <span class="mo">Nov</span></b><i>Mon</i></div><div class="tag">Cyber Monday</div><div class="deal">Last chance, ends midnight</div><div class="lines"><div><span class="k">META</span>"Ends tonight" to warm audiences</div><div><span class="k">CRM</span>Final reminder</div></div></div>
+    <div class="day"><div class="dn"><b class="num">1 <span class="mo">Dec</span></b><i>Tue</i></div><div class="tag">Christmas</div><div class="deal">Gifting and vouchers</div><div class="lines"><div><span class="k">META</span>Sale ads end automatically</div><div><span class="k">GOOG</span>Back to full price copy</div></div></div>
+    <div class="day quiet"></div><div class="day quiet"></div><div class="day quiet"></div><div class="day quiet"></div><div class="day quiet"></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <div class="eyebrow">The line-up</div>
+    <h2>Every deal has creative ready to go</h2>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Deal</th><th>Price</th><th>Leads on</th><th>Static</th><th>Video</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Display katanas, including triple sets</td><td class="p">Half price</td><td>Sat 21</td><td><span class="chip">Ready</span></td><td>Jin Sakai footage from the shoot</td></tr>
+      <tr><td class="n">Deadpool vs Wolverine dual set</td><td class="p">£50</td><td>Sun 22</td><td><span class="chip">Ready</span></td><td>Static only</td></tr>
+      <tr><td class="n">Lord of the Rings swords (10 lines)</td><td class="p">£99</td><td>Mon 23</td><td><span class="chip">Ready</span></td><td>Static only</td></tr>
+      <tr><td class="n">Top sellers: Deluxe Master Sword, Braveheart, Longclaw, Sword of Omens, Anduril 118cm</td><td class="p">£99</td><td>Tue 24</td><td><span class="chip">Ready</span></td><td>Black Friday hook + Anduril and Master Sword videos</td></tr>
+      <tr><td class="n">Deluxe Captain America shield</td><td class="p">£149</td><td>Wed 25</td><td><span class="chip">Ready</span></td><td>Static only</td></tr>
+      <tr><td class="n">Pirate flintlock pistol (Black Flag)</td><td class="p">£39</td><td>Thu 26</td><td><span class="chip">Ready</span></td><td>Static only</td></tr>
+      <tr><td class="n">Ocarina of Time Master Sword</td><td class="p">£49</td><td>Thu 26</td><td><span class="chip">Ready</span></td><td>"Recognised Instantly" video with sale price</td></tr>
+    </tbody>
+  </table></div>
+  <p class="foot">Video: the four Black Friday hooks from the 8 September shoot cut onto existing bodies, with sale prices on screen.</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <div class="eyebrow">How each channel runs it</div>
+    <h2>One plan across ads, site and inbox</h2>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Meta</h3><ul>
+      <li>A dedicated Black Friday campaign, scheduled 19–30 Nov, so sale ads switch off on their own</li>
+      <li>Two audiences: new customers, and people who already know you</li>
+      <li>Evergreen Scaling campaign keeps running; testing pauses for the fortnight</li>
+      <li>Every ad built and approved before 16 Nov</li>
+    </ul></div>
+    <div class="card"><h3>Google</h3><ul>
+      <li>Sale prices flow into Shopping automatically from the site</li>
+      <li>Merchant Center promotions submitted early November</li>
+      <li>Search ads carry the deals as headlines and promotion assets</li>
+      <li>Budgets lifted on the peak days</li>
+    </ul></div>
+    <div class="card"><h3>Website</h3><ul>
+      <li>One Black Friday collection page all ads point to</li>
+      <li>Homepage banner swaps to the day's spotlight deal</li>
+      <li>Early-access sign-up, then a countdown to Cyber Monday</li>
+    </ul></div>
+    <div class="card"><h3>Email and SMS</h3><p class="who">Your team. We'll match ad timings to your sends.</p><ul>
+      <li>Early-access list built 2–18 Nov</li>
+      <li>One send per spotlight deal, two on Black Friday</li>
+      <li>Final reminder on Cyber Monday</li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <div class="eyebrow">Proposed Meta spend</div>
+    <h2>Spend rises only while sales hold above 4x</h2>
+    <p>Each step up is checked daily against Shopify sales, not platform figures. If return drops below your 4x line, we pull back the same day.</p>
+  </div>
+  <div class="ramp">
+    <div class="bar"><div class="col num" style="height:80px">£275</div><div class="cap"><b>Base</b>Now to 15 Nov</div></div>
+    <div class="bar"><div class="col num" style="height:96px">£325</div><div class="cap"><b>Tease</b>16–19 Nov</div></div>
+    <div class="bar"><div class="col num" style="height:118px">£400</div><div class="cap"><b>Sale week</b>20–26 Nov</div></div>
+    <div class="bar pk"><div class="col num" style="height:160px">£550</div><div class="cap"><b>Peak days</b>27 Nov, 30 Nov</div></div>
+    <div class="bar"><div class="col num" style="height:118px">£400</div><div class="cap"><b>Weekend</b>28–29 Nov</div></div>
+  </div>
+  <p class="foot">Daily figures, proposed for discussion. Base reflects the current Scaling + Testing plan.</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <div class="eyebrow">To lock it in</div>
+    <h2>What we need from you</h2>
+  </div>
+  <ol class="confirm">
+    <li><span><b>Sale dates.</b> Happy with early access on 19 Nov and a 30 Nov finish?</span></li>
+    <li><span><b>Margin at deal price.</b> Quick check on the £39 pistol and £149 shield.</span></li>
+    <li><span><b>Stock depth.</b> Units on each deal line, so we know what can carry spend.</span></li>
+    <li><span><b>How discounts show.</b> Sale prices on the products, or codes at checkout?</span></li>
+    <li><span><b>Christmas order-by dates.</b> Last dates for DPD and DX, for the December ads.</span></li>
+    <li><span><b>Email and SMS dates.</b> Your send plan, so ads land on the same days.</span></li>
+  </ol>
+</section>
+
+</div>
