@@ -85,7 +85,7 @@ header { display: grid; gap: 22px; }
 
 /* tables */
 .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 420px; }
 th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
 td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--fg-2); }
 tr:last-child td { border-bottom: 0; }
@@ -147,7 +147,7 @@ td.n { color: var(--fg); font-weight: 600; }
   </div>
   <div class="eyebrow">The Sword Stall · Black Friday 2026</div>
   <h1>Twelve days of deals, <em class="f">planned</em> to the day.</h1>
-  <p class="lede">A working calendar for Black Friday: when each deal leads, what runs on Meta and Google, which creative is ready, and the decisions we need from you to lock it in.</p>
+  <p class="lede">A working calendar for Black Friday: when each deal leads, what runs on Meta and Google, and the decisions we need from you to lock it in.</p>
 </header>
 
 <section class="sec" aria-label="Key dates">
@@ -193,7 +193,7 @@ td.n { color: var(--fg); font-weight: 600; }
     <div class="day"><div class="dn"><b class="num">17 <span class="mo">Nov</span></b><i>Tue</i></div><div class="tag">Tease</div><div class="deal">Sneak peek: katanas</div><div class="lines"><div><span class="k">CRM</span>"Get in early" sign-up push</div></div></div>
     <div class="day"><div class="dn"><b class="num">18 <span class="mo">Nov</span></b><i>Wed</i></div><div class="tag">Tease</div><div class="deal">Sneak peek: £99 swords</div><div class="lines"><div><span class="k">GOOG</span>Merchant promotions approved and scheduled</div></div></div>
     <div class="day sale"><div class="dn"><b class="num">19 <span class="mo">Nov</span></b><i>Thu</i></div><div class="tag">Early access</div><div class="deal">All deals, members first</div><div class="lines"><div><span class="k">CRM</span>Early-access email and SMS</div><div><span class="k">META</span>Warm audiences only</div></div></div>
-    <div class="day sale"><div class="dn"><b class="num">20 <span class="mo">Nov</span></b><i>Fri</i></div><div class="tag">Launch</div><div class="deal">The full line-up</div><div class="lines"><div><span class="k">META</span>Black Friday campaign live, round-up static leads</div><div><span class="k">GOOG</span>Promotions and sale ad copy live</div></div></div>
+    <div class="day sale"><div class="dn"><b class="num">20 <span class="mo">Nov</span></b><i>Fri</i></div><div class="tag">Launch</div><div class="deal">The full line-up</div><div class="lines"><div><span class="k">META</span>Black Friday campaign live, full line-up leads</div><div><span class="k">GOOG</span>Promotions and sale ad copy live</div></div></div>
     <div class="day sale"><div class="dn"><b class="num">21 <span class="mo">Nov</span></b><i>Sat</i></div><div class="tag">Spotlight</div><div class="deal">Display katanas half price</div><div class="lines"><div><span class="k">SITE</span>Katana hero banner</div></div></div>
     <div class="day sale"><div class="dn"><b class="num">22 <span class="mo">Nov</span></b><i>Sun</i></div><div class="tag">Spotlight</div><div class="deal">Deadpool vs Wolverine set, £50</div><div class="lines"><div><span class="k">META</span>Fandom ads lead</div></div></div>
 
@@ -214,21 +214,20 @@ td.n { color: var(--fg); font-weight: 600; }
 <section class="sec">
   <div class="sec-head">
     <div class="eyebrow">The line-up</div>
-    <h2>Every deal has creative ready to go</h2>
+    <h2>Seven deals, seven spotlights</h2>
   </div>
   <div class="tbl"><table>
-    <thead><tr><th>Deal</th><th>Price</th><th>Leads on</th><th>Static</th><th>Video</th></tr></thead>
+    <thead><tr><th>Deal</th><th>Price</th><th>Leads on</th></tr></thead>
     <tbody>
-      <tr><td class="n">Display katanas, including triple sets</td><td class="p">Half price</td><td>Sat 21</td><td><span class="chip">Ready</span></td><td>Jin Sakai footage from the shoot</td></tr>
-      <tr><td class="n">Deadpool vs Wolverine dual set</td><td class="p">£50</td><td>Sun 22</td><td><span class="chip">Ready</span></td><td>Static only</td></tr>
-      <tr><td class="n">Lord of the Rings swords (10 lines)</td><td class="p">£99</td><td>Mon 23</td><td><span class="chip">Ready</span></td><td>Static only</td></tr>
-      <tr><td class="n">Top sellers: Deluxe Master Sword, Braveheart, Longclaw, Sword of Omens, Anduril 118cm</td><td class="p">£99</td><td>Tue 24</td><td><span class="chip">Ready</span></td><td>Black Friday hook + Anduril and Master Sword videos</td></tr>
-      <tr><td class="n">Deluxe Captain America shield</td><td class="p">£149</td><td>Wed 25</td><td><span class="chip">Ready</span></td><td>Static only</td></tr>
-      <tr><td class="n">Pirate flintlock pistol (Black Flag)</td><td class="p">£39</td><td>Thu 26</td><td><span class="chip">Ready</span></td><td>Static only</td></tr>
-      <tr><td class="n">Ocarina of Time Master Sword</td><td class="p">£49</td><td>Thu 26</td><td><span class="chip">Ready</span></td><td>"Recognised Instantly" video with sale price</td></tr>
+      <tr><td class="n">Display katanas, including triple sets</td><td class="p">Half price</td><td>Sat 21</td></tr>
+      <tr><td class="n">Deadpool vs Wolverine dual set</td><td class="p">£50</td><td>Sun 22</td></tr>
+      <tr><td class="n">Lord of the Rings swords (10 lines)</td><td class="p">£99</td><td>Mon 23</td></tr>
+      <tr><td class="n">Top sellers: Deluxe Master Sword, Braveheart, Longclaw, Sword of Omens, Anduril 118cm</td><td class="p">£99</td><td>Tue 24</td></tr>
+      <tr><td class="n">Deluxe Captain America shield</td><td class="p">£149</td><td>Wed 25</td></tr>
+      <tr><td class="n">Pirate flintlock pistol (Black Flag)</td><td class="p">£39</td><td>Thu 26</td></tr>
+      <tr><td class="n">Ocarina of Time Master Sword</td><td class="p">£49</td><td>Thu 26</td></tr>
     </tbody>
   </table></div>
-  <p class="foot">Video: the four Black Friday hooks from the 8 September shoot cut onto existing bodies, with sale prices on screen.</p>
 </section>
 
 <section class="sec">
