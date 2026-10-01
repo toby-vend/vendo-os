@@ -1,7 +1,7 @@
 /**
  * Tests for the pure logic of the ad spend sheet job: header-date parsing,
- * layout detection, which months a given day writes, account → row
- * matching, and conditional-format widening.
+ * layout detection, which months can be written, amount parsing, account →
+ * row matching, and conditional-format widening.
  *
  * Run:
  *   node --test --import tsx/esm web/lib/jobs/ad-spend-sheet.test.ts
@@ -15,11 +15,12 @@ import {
   monthToSerial,
   nextMonth,
   findSpendLayout,
-  planMonths,
+  findMissingMonths,
+  checkWritableMonth,
+  parseAmount,
   cleanAccountName,
   matchAccounts,
   extendConditionalFormats,
-  type MetaAccount,
 } from './ad-spend-sheet.js';
 
 /**
@@ -100,36 +101,42 @@ describe('findSpendLayout', () => {
   });
 });
 
-describe('planMonths', () => {
+describe('findMissingMonths', () => {
   const layout = () => findSpendLayout(sampleGrid());
 
-  it('backfills every missing completed month, never the current one', () => {
-    const p = planMonths(layout(), new Date('2026-11-14T18:00:00Z'), 5);
-    assert.deepEqual(p.months, ['2026-09', '2026-10']);
+  it('lists every missing completed month, never the current one', () => {
+    assert.deepEqual(findMissingMonths(layout(), new Date('2026-11-14T09:00:00Z')), ['2026-09', '2026-10']);
+    assert.deepEqual(findMissingMonths(layout(), new Date('2026-10-01T09:00:00Z')), ['2026-09']);
+    assert.deepEqual(findMissingMonths(layout(), new Date('2026-09-20T09:00:00Z')), []);
+  });
+});
+
+describe('checkWritableMonth', () => {
+  const layout = () => findSpendLayout(sampleGrid());
+  const now = new Date('2026-11-10T09:00:00Z');
+
+  it('accepts an existing column or the next new one', () => {
+    checkWritableMonth(layout(), '2026-03', now);
+    checkWritableMonth(layout(), '2026-09', now);
   });
 
-  it('adds last month on the 1st', () => {
-    const p = planMonths(layout(), new Date('2026-10-01T18:00:00Z'), 5);
-    assert.deepEqual(p.months, ['2026-09']);
+  it('refuses the current month and gaps', () => {
+    assert.throws(() => checkWritableMonth(layout(), '2026-11', now), /not a completed month/);
+    assert.throws(() => checkWritableMonth(layout(), '2026-10', now), /backfill/);
+    assert.throws(() => checkWritableMonth(layout(), '2025-06', now), /backfill/);
+  });
+});
+
+describe('parseAmount', () => {
+  it('reads each currency Ads Reporting shows', () => {
+    assert.deepEqual(parseAmount('£9,253.78'), { currency: 'GBP', amount: 9253.78 });
+    assert.deepEqual(parseAmount('€15,988.61'), { currency: 'EUR', amount: 15988.61 });
+    assert.deepEqual(parseAmount('kr.67,230.28'), { currency: 'DKK', amount: 67230.28 });
+    assert.deepEqual(parseAmount('$2,202.21'), { currency: 'USD', amount: 2202.21 });
   });
 
-  it('restates last month inside the close window', () => {
-    const p = planMonths(layout(), new Date('2026-09-03T18:00:00Z'), 5);
-    assert.deepEqual(p.months, ['2026-08']);
-  });
-
-  it('does nothing after the close window once the column exists', () => {
-    const p = planMonths(layout(), new Date('2026-09-20T18:00:00Z'), 5);
-    assert.deepEqual(p.months, []);
-    assert.match(p.skipped ?? '', /close window/);
-  });
-
-  it('accepts an explicit existing or next month only', () => {
-    const now = new Date('2026-10-10T18:00:00Z');
-    assert.deepEqual(planMonths(layout(), now, 5, '2026-03').months, ['2026-03']);
-    assert.deepEqual(planMonths(layout(), now, 5, '2026-09').months, ['2026-09']);
-    assert.throws(() => planMonths(layout(), now, 5, '2026-10'), /not a completed month/);
-    assert.throws(() => planMonths(layout(), now, 5, '2025-06'), /no column/);
+  it('refuses an unknown currency', () => {
+    assert.throws(() => parseAmount('¥1,000'), /Unknown currency/);
   });
 });
 
@@ -140,57 +147,41 @@ describe('cleanAccountName', () => {
     assert.equal(cleanAccountName('Thornley Park Dental 1.0'), 'Thornley Park Dental');
     assert.equal(cleanAccountName('Sone Marketing Ad Account'), 'Sone Marketing');
     assert.equal(cleanAccountName('MK Smiles ad Account'), 'MK Smiles');
+    assert.equal(cleanAccountName('Compound Meta Ads'), 'Compound');
   });
 });
 
 describe('matchAccounts', () => {
   const rows = findSpendLayout(sampleGrid()).accountRows.map((r) => r.account);
-  const acc = (account_id: string, name: string, currency = 'GBP'): MetaAccount => ({
-    account_id, name, currency,
-  });
 
   it('routes group accounts by rule, before any name match', () => {
     const m = matchAccounts(
       [
-        acc('3614267825545279', 'RDG - Artane Dental & Implant Clinic', 'EUR'),
-        acc('578359420830356', 'RDG - Sundrive Dental', 'EUR'),
-        acc('3023686887933343', 'MK Smiles ad Account'),
-        acc('144068806258342', 'Oxford House Dental Practice'),
+        'Ravensdale Dental Group - Dentistry.ie (Old Artane)',
+        'RDG - Balbriggan Dental Clinic',
+        'Kana Health Group Ad Account',
+        'MK Smiles ad Account',
       ],
       rows,
     );
-    assert.equal(m.get('3614267825545279'), 'Ravensdale Dental Group - Dentistry.ie');
-    assert.equal(m.get('578359420830356'), 'Ravensdale Dental Group - Dentistry.ie');
-    assert.equal(m.get('3023686887933343'), 'Kana Health');
-    assert.equal(m.get('144068806258342'), 'Kana Health');
+    assert.equal(m.get('Ravensdale Dental Group - Dentistry.ie (Old Artane)'), 'Ravensdale Dental Group - Dentistry.ie');
+    assert.equal(m.get('RDG - Balbriggan Dental Clinic'), 'Ravensdale Dental Group - Dentistry.ie');
+    assert.equal(m.get('Kana Health Group Ad Account'), 'Kana Health');
+    assert.equal(m.get('MK Smiles ad Account'), 'Kana Health');
   });
 
   it('name-matches single accounts', () => {
-    const m = matchAccounts(
-      [
-        acc('1691845820984786', 'Bright Orthodontics - UK'),
-        acc('496760751455236', 'VELTUFF® UK', 'DKK'),
-        acc('1634566744569294', 'Studio Glide Pilates'),
-      ],
-      rows,
-    );
-    assert.equal(m.get('1691845820984786'), 'Bright Orthodontics');
-    assert.equal(m.get('496760751455236'), 'Veltuff');
-    assert.equal(m.get('1634566744569294'), 'Studio Glide');
+    const m = matchAccounts(['Bright Orthodontics - UK', 'VELTUFF® UK', 'Studio Glide Pilates'], rows);
+    assert.equal(m.get('Bright Orthodontics - UK'), 'Bright Orthodontics');
+    assert.equal(m.get('VELTUFF® UK'), 'Veltuff');
+    assert.equal(m.get('Studio Glide Pilates'), 'Studio Glide');
   });
 
   it('leaves our own and unrelated accounts unmatched', () => {
-    const m = matchAccounts(
-      [
-        acc('1915275659298894', 'Vendo Digital '),
-        acc('7031046903619259', 'The Solar Co'),
-        acc('937285261228681', 'One Dental'),
-      ],
-      rows,
-    );
-    assert.equal(m.get('1915275659298894'), null);
-    assert.equal(m.get('7031046903619259'), null);
-    assert.equal(m.get('937285261228681'), null);
+    const m = matchAccounts(['Vendo Digital', 'Boho Bell Tent', 'Pearl Dental'], rows);
+    assert.equal(m.get('Vendo Digital'), null);
+    assert.equal(m.get('Boho Bell Tent'), null);
+    assert.equal(m.get('Pearl Dental'), null);
   });
 });
 

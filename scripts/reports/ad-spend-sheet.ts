@@ -1,21 +1,30 @@
 /**
- * Manual runner for the Meta ad spend → Paid Social Clients sheet job.
+ * Writes one month of Meta ad spend into the Paid Social Clients tab.
+ * Driven by the /ad-spend-sheet command, which reads the spend from Ads
+ * Reporting in Chrome and saves it to data/ad-spend/YYYY-MM.json.
  *
- *   npm run sheet:ad-spend -- --dry-run
- *   npm run sheet:ad-spend -- --month 2026-09
- *   npm run sheet:ad-spend
+ *   npm run sheet:ad-spend -- --missing
+ *   npm run sheet:ad-spend -- --input data/ad-spend/2026-09.json --dry-run
+ *   npm run sheet:ad-spend -- --input data/ad-spend/2026-09.json
  *
- * --dry-run prints every intended cell (and which ad accounts fed it)
- * without touching the sheet. Always worth running first.
+ * --missing prints the completed months that still need a column (oldest
+ * first, one per line) and exits.
+ *
+ * Input file shape — amounts exactly as Ads Reporting shows them:
+ *   { "month": "2026-09", "accounts": [["MR Mouldings", "£9,253.78"], ...] }
  */
 import { config } from 'dotenv';
 config({ path: '.env.local', override: true });
 
 import { existsSync, readFileSync } from 'fs';
-import { runAdSpendSheet } from '../../web/lib/jobs/ad-spend-sheet.js';
+import {
+  runAdSpendSheet,
+  listMissingMonths,
+  parseAmount,
+} from '../../web/lib/jobs/ad-spend-sheet.js';
 
 // Same local fallback as sheet:deliverables — the token file written by
-// `npm run sheets:auth`. On Vercel the env var is the only source.
+// `npm run sheets:auth`.
 const TOKEN_PATH = '.secrets/google-sheets-tokens.json';
 if (!process.env.GOOGLE_SHEETS_REFRESH_TOKEN && existsSync(TOKEN_PATH)) {
   const saved = JSON.parse(readFileSync(TOKEN_PATH, 'utf-8')) as { refresh_token?: string };
@@ -23,33 +32,51 @@ if (!process.env.GOOGLE_SHEETS_REFRESH_TOKEN && existsSync(TOKEN_PATH)) {
 }
 
 const args = process.argv.slice(2);
-const dryRun = args.includes('--dry-run');
-const monthIdx = args.indexOf('--month');
-const month = monthIdx >= 0 ? args[monthIdx + 1] : undefined;
 
-const result = await runAdSpendSheet({ dryRun, month });
+if (args.includes('--missing')) {
+  for (const m of await listMissingMonths()) console.log(m);
+  process.exit(0);
+}
+
+const inputIdx = args.indexOf('--input');
+if (inputIdx < 0 || !args[inputIdx + 1]) {
+  console.error('Usage: --missing | --input <file.json> [--dry-run]');
+  process.exit(1);
+}
+const raw = JSON.parse(readFileSync(args[inputIdx + 1], 'utf-8')) as {
+  month: string;
+  accounts: Array<[string, string]>;
+};
+
+const result = await runAdSpendSheet(
+  {
+    month: raw.month,
+    accounts: raw.accounts.map(([name, amount]) => ({ name, ...parseAmount(amount) })),
+  },
+  { dryRun: args.includes('--dry-run') },
+);
 
 console.log('');
-console.log(`Tab:   ${result.tab}`);
-console.log(`Mode:  ${result.dryRun ? 'DRY RUN — nothing written' : 'LIVE'}`);
+console.log(`Tab:    ${result.tab}`);
+console.log(`Month:  ${result.month} → column ${result.column}${result.created ? ' (new column)' : ' (restated)'}`);
+console.log(`Mode:   ${result.dryRun ? 'DRY RUN — nothing written' : 'LIVE'}`);
+console.log(
+  `Rates:  ${Object.entries(result.rates)
+    .filter(([c]) => c !== 'GBP')
+    .map(([c, r]) => `1 ${c} = £${r.toFixed(4)}`)
+    .join(', ') || 'GBP only'}`,
+);
+console.log('');
 
-if (result.skipped) console.log(`\nNothing to do: ${result.skipped}`);
-
-for (const ms of result.months) {
-  console.log('');
-  console.log(`${ms.month} → column ${ms.column}${ms.created ? ' (new column)' : ' (restated)'}`);
-  const width = Math.max(...ms.rows.map((r) => r.account.length), 12);
-  for (const r of ms.rows) {
-    console.log(
-      `  ${r.account.padEnd(width)}  ${String(r.row).padStart(3)}  £${r.gbp.toFixed(2).padStart(10)}` +
-        (r.sources.length ? `  ← ${r.sources.join(' + ')}` : ''),
-    );
-  }
-  for (const u of ms.unconvertible) console.log(`  SKIPPED (currency): ${u}`);
+const width = Math.max(...result.rows.map((r) => r.account.length), 12);
+for (const r of result.rows) {
+  console.log(
+    `${r.account.padEnd(width)}  ${String(r.row).padStart(3)}  £${r.gbp.toFixed(2).padStart(10)}  ← ${r.sources.join(' + ')}`,
+  );
 }
 
 if (result.unmatchedRows.length > 0) {
-  console.log('\nSheet rows with no ad account (left untouched):');
+  console.log('\nSheet rows with no ad account spend (left untouched):');
   for (const r of result.unmatchedRows) console.log(`  - ${r}`);
 }
 if (result.unmatchedAccounts.length > 0) {

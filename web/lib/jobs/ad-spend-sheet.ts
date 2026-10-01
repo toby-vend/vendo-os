@@ -1,31 +1,33 @@
 /**
  * Meta ad spend → Google Sheet — the "Paid Social Clients" tab of the
- * deliverables tracker. Runs on the 1st of the month, alongside the hours job.
+ * deliverables tracker.
+ *
+ * Spend is read in Chrome from the Ads Reporting business view (all 58 ad
+ * accounts in the Vendo Digital business, one row per account, "Amount spent"
+ * in each account's own currency) by the /ad-spend-sheet command, saved as a
+ * SpendInput JSON file, and written here. The Meta API token has been dead
+ * since April 2026, and Toby chose the Ads Reporting view as the source.
  *
  * Each client row gets one cell per month holding that month's total Meta
  * spend, in GBP. The tab's month headers are real dates (format "mmmm yy"),
  * one column per month, running left to right.
  *
- * What a run does:
- *   1. Any completed month newer than the last month column is added as a new
- *      column (backfilling every gap, not just last month), formatted to
- *      match, with the over/on-budget conditional formatting extended to it.
- *   2. During the month-end close window (days 1–5 by default) last month's
- *      column is restated, so spend Meta posts late still lands.
- *   3. Otherwise nothing is fetched or written.
- * The current, incomplete month is never written.
+ * Writing a month:
+ *   - If it is the month after the last column, a new column is added,
+ *     formatted to match, with the over/on-budget conditional formatting
+ *     extended to cover it.
+ *   - If its column already exists, it is restated (spend Meta posts late).
+ *   - Anything else — the current month, a gap — is refused.
+ * `missingMonths` lists the completed months that still need a column, so
+ * the command can backfill them one at a time in order.
  *
  * Spend is converted to GBP at the month's average ECB rate (Frankfurter) —
  * Dentistry.ie bills in EUR, Veltuff in DKK, Iconic Dent in USD (Toby,
  * 2026-10-01: "convert all to GBP").
  *
- * Ad accounts are matched to rows by name. Multi-account groups (Dentistry.ie,
- * Kana Health) are listed explicitly in GROUP_RULES and summed. Anything with
- * spend that matches no row is reported, never guessed at.
- *
- * Auth: META_ACCESS_TOKEN must be a token that can see every client ad
- * account — a Business Manager system user token with ads_read, assigned to
- * each account. /me/adaccounts is used so a personal token works too.
+ * Ad accounts are matched to rows by name. Multi-account clients are listed
+ * in GROUP_RULES and summed. Anything with spend that matches no row is
+ * reported, never guessed at.
  */
 import { consoleLog } from '../monitors/base.js';
 import {
@@ -44,7 +46,6 @@ import { normaliseClient, resolveClient, previousMonth } from './deliverables-ho
 
 const LOG_SOURCE = 'ad-spend-sheet';
 
-const META_BASE = 'https://graph.facebook.com/v21.0';
 const FX_BASE = 'https://api.frankfurter.dev/v1';
 
 /** The "Paid Social Clients" tab. Override with AD_SPEND_SHEET_GID. */
@@ -62,43 +63,35 @@ const SPEND_FORMAT = { type: 'CURRENCY', pattern: '[$£-809]#,##0.00' };
  * Clients whose spend is split across several ad accounts. Checked before
  * name matching, so these accounts never fall through to a fuzzy match.
  */
-export const GROUP_RULES: Array<{
-  row: string;
-  match: (account: MetaAccount) => boolean;
-}> = [
-  // Ravensdale Dental Group runs one EUR account per practice, all "RDG - …".
-  { row: 'Ravensdale Dental Group - Dentistry.ie', match: (a) => /^RDG\b/i.test(a.name.trim()) },
+export const GROUP_RULES: Array<{ row: string; match: RegExp }> = [
+  // Ravensdale Dental Group: the main account plus per-practice "RDG - …" ones.
+  { row: 'Ravensdale Dental Group - Dentistry.ie', match: /^(Ravensdale Dental Group\b|RDG\b)/i },
   // Kana Health: group account plus the five practices (OH/MK/WH/WS/EB).
   {
     row: 'Kana Health',
-    match: (a) =>
-      [
-        '974870937223229', // Kana Health Group Ad Account
-        '144068806258342', // Oxford House Dental Practice
-        '3023686887933343', // MK Smiles
-        '495585565982099', // Wilson House
-        '841095773785601', // Woburn Sands
-        '130564456676139', // Edward Byrnes
-      ].includes(a.account_id),
+    match: /^(Kana Health|Oxford House|MK Smiles|Wilson House|Woburn Sands|Edward Byrnes)\b/i,
   },
 ];
 
 /** Ad accounts that are never client spend. */
-const EXCLUDED_ACCOUNT_IDS = new Set([
-  '1915275659298894', // Vendo Digital — our own advertising
-  '231562525', // Toby Raeburn — personal account
-]);
+const EXCLUDED_ACCOUNTS = [/^Vendo Digital\b/i, /^Toby Raeburn\b/i];
 
-export interface MetaAccount {
-  account_id: string;
+/** One ad account's spend as read from Ads Reporting. */
+export interface AccountSpend {
   name: string;
+  /** ISO code, e.g. GBP / EUR / DKK / USD. */
   currency: string;
+  amount: number;
+}
+
+export interface SpendInput {
+  /** YYYY-MM */
+  month: string;
+  accounts: AccountSpend[];
 }
 
 export interface AdSpendSheetOptions {
-  /** Restate (or add, if it is the next one) a single month, as YYYY-MM. */
-  month?: string;
-  /** Compute and report the writes without sending them. */
+  /** Report what would be written without touching the sheet. */
   dryRun?: boolean;
 }
 
@@ -110,26 +103,19 @@ export interface RowSpend {
   sources: string[];
 }
 
-export interface MonthSpend {
+export interface AdSpendSheetResult {
+  tab: string;
   month: string;
   column: string;
   created: boolean;
-  rows: RowSpend[];
-  /** Rows skipped because an account's currency could not be converted. */
-  unconvertible: string[];
-}
-
-export interface AdSpendSheetResult {
-  tab: string;
   dryRun: boolean;
-  /** Empty when there was nothing to do. */
-  months: MonthSpend[];
-  /** Why nothing ran, when nothing ran. */
-  skipped: string | null;
+  rows: RowSpend[];
   /** Sheet rows with no matching ad account (left untouched). */
   unmatchedRows: string[];
-  /** Ad accounts with spend in the period that match no sheet row. */
+  /** Ad accounts with spend that match no sheet row. */
   unmatchedAccounts: string[];
+  /** Exchange rates used, e.g. { EUR: 0.8594 }. */
+  rates: Record<string, number>;
   cellsWritten: number;
   durationMs: number;
 }
@@ -156,6 +142,36 @@ export function nextMonth(month: string): string {
 export function monthEnd(month: string): string {
   const [y, m] = month.split('-').map(Number);
   return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+}
+
+function currentMonth(now: Date): string {
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+// --- Amount parsing ---
+
+/**
+ * Parse an Ads Reporting "Amount spent" cell ("£9,253.78", "€764.32",
+ * "kr.67,230.28", "$2,202.21") into currency + amount.
+ *
+ * "kr." is DKK — Veltuff is the only krone account. "$" is USD — Iconic Dent.
+ */
+export function parseAmount(text: string): { currency: string; amount: number } {
+  const t = text.trim();
+  const prefixes: Array<[RegExp, string]> = [
+    [/^£/, 'GBP'],
+    [/^€/, 'EUR'],
+    [/^kr\.?/i, 'DKK'],
+    [/^(US)?\$/, 'USD'],
+  ];
+  for (const [re, currency] of prefixes) {
+    if (re.test(t)) {
+      const amount = Number(t.replace(re, '').replace(/,/g, '').trim());
+      if (!Number.isFinite(amount)) throw new Error(`Unreadable amount "${text}"`);
+      return { currency, amount };
+    }
+  }
+  throw new Error(`Unknown currency in amount "${text}"`);
 }
 
 // --- Sheet layout ---
@@ -238,51 +254,35 @@ export function findSpendLayout(grid: string[][]): SpendLayout {
   };
 }
 
-/**
- * Which months to write on a given day.
- *
- * Every completed month after the last column is created. If no column is
- * missing, last month is restated inside the close window.
- */
-export function planMonths(
-  layout: SpendLayout,
-  now: Date,
-  closeDays: number,
-  explicitMonth?: string,
-): { months: string[]; skipped: string | null } {
-  const current = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
-  const lastComplete = previousMonth(current);
+/** Completed months newer than the last column, oldest first. */
+export function findMissingMonths(layout: SpendLayout, now: Date): string[] {
+  const lastComplete = previousMonth(currentMonth(now));
+  const out: string[] = [];
+  for (let m = nextMonth(layout.lastMonth); m <= lastComplete; m = nextMonth(m)) out.push(m);
+  return out;
+}
 
-  if (explicitMonth) {
-    if (explicitMonth > lastComplete) {
-      throw new Error(`${explicitMonth} is not a completed month yet`);
-    }
-    if (layout.monthCols.has(explicitMonth) || explicitMonth === nextMonth(layout.lastMonth)) {
-      return { months: [explicitMonth], skipped: null };
-    }
+/** Whether `month` can be written: an existing column, or the next new one. */
+export function checkWritableMonth(layout: SpendLayout, month: string, now: Date): void {
+  if (month > previousMonth(currentMonth(now))) {
+    throw new Error(`${month} is not a completed month yet`);
+  }
+  if (!layout.monthCols.has(month) && month !== nextMonth(layout.lastMonth)) {
     throw new Error(
-      `${explicitMonth} has no column and is not the next one after ${layout.lastMonth}`,
+      `${month} has no column and is not the next one after ${layout.lastMonth} — ` +
+        `backfill the months in between first`,
     );
   }
-
-  const missing: string[] = [];
-  for (let m = nextMonth(layout.lastMonth); m <= lastComplete; m = nextMonth(m)) missing.push(m);
-  if (missing.length > 0) return { months: missing, skipped: null };
-
-  if (now.getUTCDate() <= closeDays) return { months: [lastComplete], skipped: null };
-  return {
-    months: [],
-    skipped: `${lastComplete} is already on the sheet and day ${now.getUTCDate()} is past the ${closeDays}-day close window`,
-  };
 }
 
 // --- Account matching ---
 
-/** Strip ad-account noise ("Ad Account", "- UK", "1.0", ®) before name matching. */
+/** Strip ad-account noise ("Ad Account", "Meta Ads", "- UK", "1.0", ®). */
 export function cleanAccountName(name: string): string {
   return name
     .replace(/[®™]/g, '')
     .replace(/\bad\s*acc(ount)?\b/gi, ' ')
+    .replace(/\bmeta\s+ads\b/gi, ' ')
     .replace(/\b\d+\.\d+\b/g, ' ')
     .replace(/(^|[\s-])uk\b/gi, ' ')
     .replace(/[\s-]+$/g, '')
@@ -291,92 +291,35 @@ export function cleanAccountName(name: string): string {
 }
 
 /**
- * Resolve each ad account to a sheet row name, or null.
- * Group rules first, then name matching against the rows on the tab.
+ * Resolve each ad account name to a sheet row name, or null.
+ * Exclusions, then group rules, then name matching against the tab's rows.
  */
 export function matchAccounts(
-  accounts: MetaAccount[],
+  accountNames: string[],
   rowNames: string[],
 ): Map<string, string | null> {
   const rowsByNorm = new Map<string, string>();
   for (const name of rowNames) rowsByNorm.set(normaliseClient(name), name);
 
   const out = new Map<string, string | null>();
-  for (const a of accounts) {
-    if (EXCLUDED_ACCOUNT_IDS.has(a.account_id)) {
-      out.set(a.account_id, null);
+  for (const raw of accountNames) {
+    const name = raw.trim();
+    if (EXCLUDED_ACCOUNTS.some((re) => re.test(name))) {
+      out.set(raw, null);
       continue;
     }
-    const group = GROUP_RULES.find((g) => g.match(a));
+    const group = GROUP_RULES.find((g) => g.match.test(name));
     if (group) {
-      out.set(a.account_id, rowNames.includes(group.row) ? group.row : null);
+      out.set(raw, rowNames.includes(group.row) ? group.row : null);
       continue;
     }
-    out.set(a.account_id, resolveClient(cleanAccountName(a.name), rowsByNorm));
+    out.set(raw, resolveClient(cleanAccountName(name), rowsByNorm));
   }
   return out;
 }
 
-// --- Meta ---
-
-async function metaGet<T>(url: string, token: string): Promise<T> {
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (resp.status === 429 || resp.status >= 500) {
-      await new Promise((r) => setTimeout(r, 2 ** attempt * 2000));
-      continue;
-    }
-    const body = await resp.text();
-    if (!resp.ok) {
-      if (body.includes('"code":190')) {
-        throw new Error(
-          'Meta rejected META_ACCESS_TOKEN (OAuth 190) — reissue the Business Manager system user token',
-        );
-      }
-      throw new Error(`Meta API ${resp.status}: ${body.slice(0, 300)}`);
-    }
-    return JSON.parse(body) as T;
-  }
-  throw new Error(`Meta API kept failing after retries: ${url.split('?')[0]}`);
-}
-
-async function listMetaAccounts(token: string): Promise<MetaAccount[]> {
-  const out: MetaAccount[] = [];
-  let url: string | undefined =
-    `${META_BASE}/me/adaccounts?fields=account_id,name,currency&limit=200`;
-  while (url) {
-    const page: { data: MetaAccount[]; paging?: { next?: string } } = await metaGet(url, token);
-    out.push(...page.data);
-    url = page.paging?.next;
-  }
-  return out;
-}
-
-/** Spend per month, in the account's own currency, for an inclusive month range. */
-async function fetchMonthlySpend(
-  token: string,
-  accountId: string,
-  fromMonth: string,
-  toMonth: string,
-): Promise<Map<string, number>> {
-  const timeRange = JSON.stringify({ since: `${fromMonth}-01`, until: monthEnd(toMonth) });
-  let url: string | undefined =
-    `${META_BASE}/act_${accountId}/insights?level=account&fields=spend` +
-    `&time_increment=monthly&time_range=${encodeURIComponent(timeRange)}&limit=100`;
-
-  const out = new Map<string, number>();
-  while (url) {
-    const page: {
-      data: Array<{ date_start: string; spend?: string }>;
-      paging?: { next?: string };
-    } = await metaGet(url, token);
-    for (const row of page.data) {
-      const month = row.date_start.slice(0, 7);
-      out.set(month, (out.get(month) ?? 0) + Number(row.spend ?? 0));
-    }
-    url = page.paging?.next;
-  }
-  return out;
+export function isExcludedAccount(name: string): boolean {
+  return EXCLUDED_ACCOUNTS.some((re) => re.test(name.trim()));
 }
 
 // --- FX ---
@@ -397,225 +340,194 @@ async function averageRateToGbp(currency: string, month: string): Promise<number
 
 // --- Main ---
 
+interface SheetContext {
+  token: string;
+  spreadsheetId: string;
+  gid: number;
+  title: string;
+  columnCount: number;
+  quoted: string;
+  grid: string[][];
+  layout: SpendLayout;
+}
+
+async function loadSheet(): Promise<SheetContext> {
+  const spreadsheetId = process.env.DELIVERABLES_SHEET_ID?.trim();
+  if (!spreadsheetId) throw new Error('DELIVERABLES_SHEET_ID must be set');
+  const gid = Number(process.env.AD_SPEND_SHEET_GID?.trim() || DEFAULT_TAB_GID);
+
+  const token = await mintSheetsAccessToken();
+  const tab = (await listSheets(token, spreadsheetId)).find((s) => s.sheetId === gid);
+  if (!tab) throw new Error(`No tab with gid ${gid} in the deliverables spreadsheet`);
+  const quoted = quoteSheetName(tab.title);
+  const grid = await readGrid(token, spreadsheetId, `${quoted}!A1:CZ200`, 'UNFORMATTED_VALUE');
+  return {
+    token,
+    spreadsheetId,
+    gid,
+    title: tab.title,
+    columnCount: tab.columnCount,
+    quoted,
+    grid,
+    layout: findSpendLayout(grid),
+  };
+}
+
+/** Completed months that still need a column, oldest first. */
+export async function listMissingMonths(): Promise<string[]> {
+  const ctx = await loadSheet();
+  return findMissingMonths(ctx.layout, new Date());
+}
+
 export async function runAdSpendSheet(
+  input: SpendInput,
   options: AdSpendSheetOptions = {},
 ): Promise<AdSpendSheetResult> {
   const start = Date.now();
   const dryRun = options.dryRun ?? false;
+  const { month } = input;
+  if (!/^\d{4}-\d{2}$/.test(month)) throw new Error(`Bad month "${month}", expected YYYY-MM`);
 
-  const spreadsheetId = process.env.DELIVERABLES_SHEET_ID?.trim();
-  if (!spreadsheetId) throw new Error('DELIVERABLES_SHEET_ID must be set');
-  const gid = Number(process.env.AD_SPEND_SHEET_GID?.trim() || DEFAULT_TAB_GID);
-  const closeDays = Number(process.env.DELIVERABLES_SHEET_CLOSE_DAYS?.trim() || '5');
+  const ctx = await loadSheet();
+  const { layout, grid, quoted } = ctx;
+  checkWritableMonth(layout, month, new Date());
 
-  // --- Sheet ---
-  const sheetsToken = await mintSheetsAccessToken();
-  const tabs = await listSheets(sheetsToken, spreadsheetId);
-  const tab = tabs.find((s) => s.sheetId === gid);
-  if (!tab) throw new Error(`No tab with gid ${gid} in the deliverables spreadsheet`);
-  const quoted = quoteSheetName(tab.title);
-
-  const grid = await readGrid(sheetsToken, spreadsheetId, `${quoted}!A1:CZ200`, 'UNFORMATTED_VALUE');
-  const layout = findSpendLayout(grid);
-  const plan = planMonths(layout, new Date(), closeDays, options.month);
-
-  const result: AdSpendSheetResult = {
-    tab: tab.title,
-    dryRun,
-    months: [],
-    skipped: plan.skipped,
-    unmatchedRows: [],
-    unmatchedAccounts: [],
-    cellsWritten: 0,
-    durationMs: 0,
-  };
-  if (plan.months.length === 0) {
-    consoleLog(LOG_SOURCE, `Nothing to do: ${plan.skipped}`);
-    result.durationMs = Date.now() - start;
-    return result;
-  }
-
-  // Column for each month: existing, or the next free one after the last.
-  const newMonths = plan.months.filter((m) => !layout.monthCols.has(m));
-  const colFor = new Map(layout.monthCols);
-  newMonths.forEach((m, i) => colFor.set(m, layout.lastMonthCol + 1 + i));
+  const created = !layout.monthCols.has(month);
+  const col = created ? layout.lastMonthCol + 1 : layout.monthCols.get(month)!;
 
   // A new column must be genuinely empty — never write over something
   // someone typed to the right of the months.
-  for (const m of newMonths) {
-    const c = colFor.get(m)!;
+  if (created) {
     const used = [layout.headerRow, ...layout.accountRows.map((r) => r.row)].find(
-      (r) => (grid[r]?.[c] ?? '').trim() !== '',
+      (r) => (grid[r]?.[col] ?? '').trim() !== '',
     );
     if (used !== undefined) {
       throw new Error(
-        `Column ${columnLetter(c)} (for ${m}) is not empty at row ${used + 1} — aborting`,
+        `Column ${columnLetter(col)} (for ${month}) is not empty at row ${used + 1} — aborting`,
       );
     }
   }
 
-  // --- Meta ---
-  const metaToken = process.env.META_ACCESS_TOKEN?.trim();
-  if (!metaToken) throw new Error('META_ACCESS_TOKEN must be set');
-
-  const accounts = await listMetaAccounts(metaToken);
+  // --- Match + convert ---
   const rowNames = layout.accountRows.map((r) => r.account);
-  const matches = matchAccounts(accounts, rowNames);
+  const matches = matchAccounts(input.accounts.map((a) => a.name), rowNames);
 
-  const fromMonth = plan.months[0];
-  const toMonth = plan.months[plan.months.length - 1];
-  consoleLog(LOG_SOURCE, `Fetching spend ${fromMonth} → ${toMonth} for ${accounts.length} accounts`);
-
-  const spendByAccount = new Map<string, Map<string, number>>();
-  // Small concurrency — ~50 accounts, one call each.
-  const queue = accounts.filter((a) => !EXCLUDED_ACCOUNT_IDS.has(a.account_id));
-  await Promise.all(
-    Array.from({ length: 5 }, async () => {
-      for (let a = queue.shift(); a; a = queue.shift()) {
-        spendByAccount.set(a.account_id, await fetchMonthlySpend(metaToken, a.account_id, fromMonth, toMonth));
-      }
-    }),
-  );
-
-  const rateCache = new Map<string, number | Error>();
-  async function rate(currency: string, month: string): Promise<number | Error> {
-    const key = `${currency}:${month}`;
-    if (!rateCache.has(key)) {
-      rateCache.set(key, await averageRateToGbp(currency, month).catch((e: Error) => e));
-    }
-    return rateCache.get(key)!;
+  const rates: Record<string, number> = {};
+  for (const cur of new Set(input.accounts.map((a) => a.currency))) {
+    rates[cur] = await averageRateToGbp(cur, month);
   }
 
-  const unmatchedAccounts = new Set<string>();
-  const matchedRows = new Set<string>();
-  for (const a of accounts) {
-    const row = matches.get(a.account_id);
-    if (row) {
-      matchedRows.add(row);
+  const byRow = new Map<string, { gbp: number; sources: string[] }>();
+  const unmatchedAccounts: string[] = [];
+  for (const a of input.accounts) {
+    const row = matches.get(a.name);
+    if (!row) {
+      if (a.amount > 0 && !isExcludedAccount(a.name)) {
+        unmatchedAccounts.push(`${a.name.trim()} (${a.currency} ${a.amount.toFixed(2)})`);
+      }
       continue;
     }
-    if (EXCLUDED_ACCOUNT_IDS.has(a.account_id)) continue;
-    const total = [...(spendByAccount.get(a.account_id)?.values() ?? [])].reduce((s, v) => s + v, 0);
-    if (total > 0) unmatchedAccounts.add(`${a.name.trim()} (act_${a.account_id}, ${a.currency})`);
+    const acc = byRow.get(row) ?? { gbp: 0, sources: [] };
+    acc.gbp += a.amount * rates[a.currency];
+    acc.sources.push(`${a.name.trim()} (${a.currency} ${a.amount.toFixed(2)})`);
+    byRow.set(row, acc);
   }
 
-  for (const m of plan.months) {
-    const rows: RowSpend[] = [];
-    const unconvertible: string[] = [];
-    for (const { row, account } of layout.accountRows) {
-      if (!matchedRows.has(account)) continue;
-      let gbp = 0;
-      const sources: string[] = [];
-      let failed: string | null = null;
-      for (const a of accounts) {
-        if (matches.get(a.account_id) !== account) continue;
-        const spend = spendByAccount.get(a.account_id)?.get(m) ?? 0;
-        if (spend === 0) continue;
-        const r = await rate(a.currency, m);
-        if (r instanceof Error) {
-          failed = `${account}: ${r.message}`;
-          break;
-        }
-        gbp += spend * r;
-        sources.push(`${a.name.trim()} (${a.currency} ${spend.toFixed(2)})`);
-      }
-      if (failed) unconvertible.push(failed);
-      else rows.push({ account, row: row + 1, gbp: Math.round(gbp * 100) / 100, sources });
+  const rows: RowSpend[] = [];
+  const unmatchedRows: string[] = [];
+  for (const { row, account } of layout.accountRows) {
+    const spend = byRow.get(account);
+    if (!spend) {
+      unmatchedRows.push(account);
+      continue;
     }
-    result.months.push({
-      month: m,
-      column: columnLetter(colFor.get(m)!),
-      created: newMonths.includes(m),
-      rows,
-      unconvertible,
+    rows.push({
+      account,
+      row: row + 1,
+      gbp: Math.round(spend.gbp * 100) / 100,
+      sources: spend.sources,
     });
   }
 
-  result.unmatchedRows = rowNames.filter((n) => !matchedRows.has(n));
-  result.unmatchedAccounts = [...unmatchedAccounts];
-
   // --- Write ---
+  let cellsWritten = 0;
   if (!dryRun) {
-    if (newMonths.length > 0) {
-      await addMonthColumns(sheetsToken, spreadsheetId, gid, tab.columnCount, layout, newMonths.length);
+    if (created) await addMonthColumn(ctx, col);
+    const letter = columnLetter(col);
+    const writes: CellWrite[] = rows.map((r) => ({
+      range: `${quoted}!${letter}${r.row}`,
+      value: r.gbp,
+    }));
+    if (created) {
+      writes.push({ range: `${quoted}!${letter}${layout.headerRow + 1}`, value: monthToSerial(month) });
     }
-    const writes: CellWrite[] = [];
-    for (const ms of result.months) {
-      if (ms.created) {
-        writes.push({
-          range: `${quoted}!${ms.column}${layout.headerRow + 1}`,
-          value: monthToSerial(ms.month),
-        });
-      }
-      for (const r of ms.rows) writes.push({ range: `${quoted}!${ms.column}${r.row}`, value: r.gbp });
-    }
-    result.cellsWritten = await batchUpdateValues(sheetsToken, spreadsheetId, writes);
+    cellsWritten = await batchUpdateValues(ctx.token, ctx.spreadsheetId, writes);
   }
 
   consoleLog(
     LOG_SOURCE,
-    `${dryRun ? '[dry run] ' : ''}${plan.months.join(', ')}: ${result.cellsWritten} cells written, ` +
-      `${result.unmatchedRows.length} unmatched rows, ${result.unmatchedAccounts.length} unmatched accounts`,
+    `${dryRun ? '[dry run] ' : ''}${month} → ${columnLetter(col)}: ${rows.length} rows, ` +
+      `${cellsWritten} cells written, ${unmatchedRows.length} unmatched rows, ` +
+      `${unmatchedAccounts.length} unmatched accounts`,
   );
-  result.durationMs = Date.now() - start;
-  return result;
+
+  return {
+    tab: ctx.title,
+    month,
+    column: columnLetter(col),
+    created,
+    dryRun,
+    rows,
+    unmatchedRows,
+    unmatchedAccounts,
+    rates,
+    cellsWritten,
+    durationMs: Date.now() - start,
+  };
 }
 
 /**
- * Format `count` new columns after the last month to match it, and widen the
- * tab's conditional format rules (over/on budget, header fill) to cover them.
+ * Format the new column to match the month columns, and widen the tab's
+ * conditional format rules (over/on budget, header fill) to cover it.
  */
-async function addMonthColumns(
-  token: string,
-  spreadsheetId: string,
-  sheetId: number,
-  columnCount: number,
-  layout: SpendLayout,
-  count: number,
-): Promise<void> {
-  const firstNew = layout.lastMonthCol + 1;
-  const endNew = firstNew + count; // exclusive
+async function addMonthColumn(ctx: SheetContext, col: number): Promise<void> {
+  const { layout, gid: sheetId } = ctx;
   const lastRow = Math.max(...layout.accountRows.map((r) => r.row)) + 1; // exclusive
 
   const requests: unknown[] = [];
-  if (endNew > columnCount) {
+  if (col + 1 > ctx.columnCount) {
     requests.push({
-      appendDimension: { sheetId, dimension: 'COLUMNS', length: endNew - columnCount },
+      appendDimension: { sheetId, dimension: 'COLUMNS', length: col + 1 - ctx.columnCount },
     });
   }
+  const cellRange = (startRow: number, endRow: number) => ({
+    sheetId,
+    startRowIndex: startRow,
+    endRowIndex: endRow,
+    startColumnIndex: col,
+    endColumnIndex: col + 1,
+  });
   requests.push(
     {
       repeatCell: {
-        range: {
-          sheetId,
-          startRowIndex: layout.headerRow,
-          endRowIndex: layout.headerRow + 1,
-          startColumnIndex: firstNew,
-          endColumnIndex: endNew,
-        },
+        range: cellRange(layout.headerRow, layout.headerRow + 1),
         cell: { userEnteredFormat: { numberFormat: HEADER_FORMAT } },
         fields: 'userEnteredFormat.numberFormat',
       },
     },
     {
       repeatCell: {
-        range: {
-          sheetId,
-          startRowIndex: layout.headerRow + 1,
-          endRowIndex: lastRow,
-          startColumnIndex: firstNew,
-          endColumnIndex: endNew,
-        },
+        range: cellRange(layout.headerRow + 1, lastRow),
         cell: { userEnteredFormat: { numberFormat: SPEND_FORMAT } },
         fields: 'userEnteredFormat.numberFormat',
       },
     },
   );
 
-  const rules = await getConditionalFormats(token, spreadsheetId, sheetId);
-  requests.push(...extendConditionalFormats(rules, sheetId, layout, endNew));
+  const rules = await getConditionalFormats(ctx.token, ctx.spreadsheetId, sheetId);
+  requests.push(...extendConditionalFormats(rules, sheetId, layout, col + 1));
 
-  await batchUpdateSpreadsheet(token, spreadsheetId, requests);
+  await batchUpdateSpreadsheet(ctx.token, ctx.spreadsheetId, requests);
 }
 
 /**
