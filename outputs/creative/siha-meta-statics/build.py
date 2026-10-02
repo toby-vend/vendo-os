@@ -63,12 +63,41 @@ body {{ background: #2a2a2a; font-family: Metropolis, sans-serif; display: flex;
 """
 
 
-def sframe(x, y, w, h, img, pos="center"):
-    """Photo cropped inside the S shape: two stacked blocks sharing one image."""
-    bg = f"background-image:url(assets/photos/{img});background-size:{w}px {h}px;"
+def photo_aspect(img):
+    """Width / height of a photo in assets/photos, read from the JPEG header."""
+    import struct
+    data = (A / "photos" / img).read_bytes()
+    i = 2
+    while i < len(data):
+        if data[i] != 0xFF:
+            i += 1
+            continue
+        marker = data[i + 1]
+        seg_len = struct.unpack(">H", data[i + 2:i + 4])[0]
+        if marker in (0xC0, 0xC1, 0xC2):
+            h, w = struct.unpack(">HH", data[i + 5:i + 9])
+            return w / h
+        i += 2 + seg_len
+    raise ValueError(f"no size found in {img}")
+
+
+def sframe(x, y, w, h, img, fx=0.5, fy=0.35):
+    """Photo cropped inside the S shape: two stacked blocks sharing one image.
+
+    The photo is scaled to cover the whole S (never stretched); fx/fy set the
+    focal point (0 to 1) used when cropping the overflow.
+    """
+    a = photo_aspect(img)
+    if w / h > a:   # frame wider than photo: fit width, crop height
+        bw, bh = w, w / a
+    else:           # frame taller than photo: fit height, crop width
+        bw, bh = h * a, h
+    ox = -(bw - w) * fx
+    oy = -(bh - h) * fy
+    bg = f"background-image:url(assets/photos/{img});background-size:{bw:.0f}px {bh:.0f}px;"
     return (f'<div class="sframe" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px">'
-            f'<div class="t" style="{bg}background-position:0 0"></div>'
-            f'<div class="b" style="{bg}background-position:0 -{h//2}px"></div></div>')
+            f'<div class="t" style="{bg}background-position:{ox:.0f}px {oy:.0f}px"></div>'
+            f'<div class="b" style="{bg}background-position:{ox:.0f}px {oy - h / 2:.0f}px"></div></div>')
 
 
 def page(title, boards):
@@ -109,7 +138,7 @@ def josh_1x1():
     b.append(f"""
 <div class="ab s1" id="J2" data-name="Josh | Static | Accommodation | 1x1" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 75% 35%,#efe7df 0%,{C['be']} 45%,#d4c5b7 100%)"></div>
-  {sframe(615, 110, 400, 860, 'hannan.jpg')}
+  {sframe(560, 110, 450, 812, 'hannan.jpg', fx=0.55, fy=0.2)}
   <div class="abs hl" style="left:80px;top:150px;font-size:66px;color:{C['bo']}">You rarely<br>show your<br>teeth when<br>you <b>smile.</b></div>
   <div class="abs body" style="left:80px;top:470px;width:440px;color:{C['od']}">One small fix. One appointment. Still your teeth.</div>
   <div class="abs body" style="left:80px;top:620px;width:440px;font-size:24px;color:{C['ol']}">Bonding from £250 a tooth, usually done in a single 1 to 2 hour visit.</div>
@@ -182,7 +211,7 @@ def josh_9x16():
     b.append(f"""
 <div class="ab s9" id="J2s" data-name="Josh | Static | Accommodation | 9x16" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 60% 30%,#efe7df 0%,{C['be']} 45%,#d4c5b7 100%)"></div>
-  {sframe(330, 230, 420, 820, 'hannan.jpg')}
+  {sframe(310, 230, 460, 830, 'hannan.jpg', fx=0.55, fy=0.2)}
   <div class="abs hl" style="left:90px;top:1100px;font-size:84px;color:{C['bo']}">You rarely show<br>your teeth when<br>you <b>smile.</b></div>
   <div class="abs body" style="left:90px;top:1400px;width:880px;font-size:34px;color:{C['od']}">One small fix. One appointment. Still your teeth. Bonding from £250 a tooth.</div>
   <div class="abs" style="left:90px;top:1540px;width:190px;color:{C['ol']}">{LOGO}</div>
