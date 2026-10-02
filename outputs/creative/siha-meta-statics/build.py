@@ -879,6 +879,155 @@ def claire_9x16():
     return page("Siha | Claire | 9x16", b)
 
 
+
+# ---------------------------------------------------------------- SMILE MAKEOVER (align, whiten, bond)
+def timeline(x, y, w, scale=1.0, dark=False):
+    steps_ = [("1", "Align", "Usually six to nine months"), ("2", "Whiten", "14 nights at home"), ("3", "Bond", "One appointment")]
+    rows = []
+    gap = int(150 * scale)
+    for i, (n, t, d) in enumerate(steps_):
+        rows.append(f'<div style="position:absolute;left:0;top:{i*gap}px;width:{w}px;display:flex;align-items:center;gap:{int(28*scale)}px">'
+                    f'<div style="width:{int(74*scale)}px;height:{int(74*scale)}px;flex:none;border-radius:50%;background:{C["bo"]};color:{C["wh"]};'
+                    f'display:flex;align-items:center;justify-content:center;font-size:{int(30*scale)}px;font-weight:500;box-shadow:0 {int(10*scale)}px {int(20*scale)}px rgba(20,33,26,.25)">{n}</div>'
+                    f'<div style="flex:1;padding:{int(24*scale)}px {int(30*scale)}px;background:#fbf9f6;border-radius:{int(16*scale)}px;'
+                    f'box-shadow:0 {int(18*scale)}px {int(36*scale)}px rgba(20,33,26,.18),0 {int(3*scale)}px {int(8*scale)}px rgba(20,33,26,.1);display:flex;justify-content:space-between;align-items:baseline">'
+                    f'<span style="font-size:{int(38*scale)}px;font-weight:600;color:{C["od"]}">{t}</span>'
+                    f'<span style="font-size:{int(22*scale)}px;color:{C["br"]}">{d}</span></div></div>')
+    line = (f'<div style="position:absolute;left:{int(36*scale)}px;top:{int(40*scale)}px;width:3px;height:{2*gap}px;background:{C["bo"]};opacity:.5"></div>')
+    return f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;height:{3*gap}px">{line}{"".join(rows)}</div>'
+
+
+def compare_cards(x, y, scale=1.0):
+    card = lambda title, big, sub, bg, fg, sfg, rot, dx, dy: (
+        f'<div style="position:absolute;left:{dx}px;top:{dy}px;width:{int(400*scale)}px;padding:{int(36*scale)}px {int(38*scale)}px;background:{bg};border-radius:{int(14*scale)}px;'
+        f'transform:rotate({rot}deg);box-shadow:0 {int(26*scale)}px {int(50*scale)}px rgba(20,33,26,.25),0 {int(4*scale)}px {int(10*scale)}px rgba(20,33,26,.14)">'
+        f'<div class="eyebrow" style="font-size:{int(16*scale)}px;color:{sfg};margin-bottom:{int(12*scale)}px">{title}</div>'
+        f'<div class="price" style="font-size:{int(84*scale)}px;color:{fg}">{big}</div>'
+        f'<div style="font-size:{int(22*scale)}px;line-height:1.35;color:{sfg};margin-top:{int(14*scale)}px">{sub}</div></div>')
+    return (f'<div class="abs" style="left:{x}px;top:{y}px;width:{int(860*scale)}px;height:{int(360*scale)}px">'
+            + card("Ten veneers", "£9,950", "Ten healthy teeth filed down, for good.", "#f3eee9", C["br"], C["br"], -2.2, 0, int(20*scale))
+            + card("Bonding, per tooth", "£250", "Added to your own teeth. Usually two to four.", C["od"], C["nu"], C["be"], 1.6, int(440*scale), 0)
+            + '</div>')
+
+
+def smile_1x1():
+    b = []
+    b.append(f"""
+<div class="ab s1" id="S1" data-name="Smile makeover | Static | Hated them | 1x1" style="background:{C['od']}">
+  <div class="cover" style="left:430px;background-image:url(assets/photos/lounge-plants.jpg);background-size:cover;background-position:12% 50%"></div>
+  <div class="cover" style="background:linear-gradient(90deg,{C['od']} 0%,{C['od']} 42%,rgba(20,33,26,.65) 60%,rgba(20,33,26,.05) 100%)"></div>
+  <div class="abs hl" style="left:80px;top:120px;font-size:56px;color:{C['nu']}">You&rsquo;ve hated<br>your teeth for<br>as long as you<br>can <b>remember.</b></div>
+  <div class="abs body" style="left:80px;top:470px;width:470px;font-size:34px;font-weight:500;color:{C['be']}">Align. Whiten. Bond.</div>
+  <div class="abs body" style="left:80px;top:540px;width:460px;font-size:25px;color:{C['be']}">Your own teeth, finally the way you wanted them.</div>
+  <div class="abs" style="left:80px;top:680px">{proof(C['be'],20)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="S2" data-name="Smile makeover | Static | Three steps | 1x1" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 30% 20%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
+  <div class="abs hl" style="left:80px;top:100px;font-size:84px;color:{C['od']}">Align. Whiten.<br><b>Bond.</b></div>
+  <div class="abs body" style="left:80px;top:310px;width:860px;font-size:26px;color:{C['ol']}">A smile makeover without veneers, in the order that makes it look natural.</div>
+  {timeline(80, 420, 920)}
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="S3" data-name="Smile makeover | Static | Never too old | 1x1" style="background:{C['od']}">
+  <div class="cover" style="background-image:url(assets/photos/lounge.jpg);background-size:cover;background-position:20% 60%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.9) 0%,rgba(20,33,26,.6) 30%,rgba(20,33,26,.3) 55%,rgba(20,33,26,.9) 100%)"></div>
+  <div class="abs hl" style="left:80px;top:100px;font-size:72px;color:{C['nu']}">Too old to fix<br>your smile?<br><b>You&rsquo;re not.</b></div>
+  <div class="abs body" style="left:80px;top:800px;width:860px;font-size:28px;color:{C['nu']}">Plenty of people start in their forties, fifties and sixties.</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="S4" data-name="Smile makeover | Static | See it first | 1x1" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(circle at 25% 15%,#f4efea 0%,{C['nu']} 50%,#ddd2c8 100%)"></div>
+  <div class="abs" style="left:80px;top:80px;width:920px;height:480px;border-radius:30px;overflow:hidden;box-shadow:0 24px 50px rgba(20,33,26,.18)">
+    <div class="cover" style="background-image:url(assets/photos/concierge-patient-discussing-case.jpg);background-size:cover;background-position:50% 45%"></div>
+  </div>
+  <div class="abs hl" style="left:80px;top:610px;font-size:66px;color:{C['od']}">See your new smile<br><b>before you start.</b></div>
+  <div class="abs body" style="left:80px;top:775px;width:860px;font-size:26px;color:{C['ol']}">A 3D scan shows your predicted result before you commit to anything.</div>
+  <div class="abs" style="left:80px;top:978px"><span class="cta dark" style="height:56px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="abs" style="left:800px;top:968px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="S5" data-name="Smile makeover | Static | Not ten veneers | 1x1" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 50% 55%,#f3ece4 0%,{C['be']} 45%,#cfbfae 100%)"></div>
+  <div class="abs hl" style="left:80px;top:100px;font-size:64px;color:{C['od']}">You probably don&rsquo;t<br>need <b>ten veneers.</b></div>
+  {compare_cards(110, 340)}
+  <div class="abs body" style="left:80px;top:770px;width:880px;font-size:26px;color:{C['ol']}">Align, whiten, then bond the two to four teeth that still need it.</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Smile makeover | 1x1", b)
+
+
+def smile_9x16():
+    b = []
+    b.append(f"""
+<div class="ab s9" id="S1s" data-name="Smile makeover | Static | Hated them | 9x16" style="background:{C['od']}">
+  <div class="cover" style="height:1050px;background-image:url(assets/photos/lounge-plants.jpg);background-size:cover;background-position:40% 50%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.1) 0%,rgba(20,33,26,.45) 35%,rgba(20,33,26,.92) 52%,{C['od']} 60%)"></div>
+  <div class="abs hl" style="left:90px;top:930px;font-size:76px;color:{C['nu']}">You&rsquo;ve hated your<br>teeth for as long as<br>you can <b>remember.</b></div>
+  <div class="abs body" style="left:90px;top:1200px;width:880px;font-size:40px;font-weight:500;color:{C['be']}">Align. Whiten. Bond.</div>
+  <div class="abs body" style="left:90px;top:1270px;width:880px;font-size:30px;color:{C['be']}">Your own teeth, finally the way you wanted them.</div>
+  <div class="abs" style="left:90px;top:1360px">{proof(C['be'],22)}</div>
+  <div class="abs" style="left:90px;top:1440px"><span class="cta light">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="S2s" data-name="Smile makeover | Static | Three steps | 9x16" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 30% 20%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
+  <div class="abs hl" style="left:90px;top:320px;font-size:108px;color:{C['od']}">Align.<br>Whiten.<br><b>Bond.</b></div>
+  <div class="abs body" style="left:90px;top:700px;width:880px;font-size:32px;color:{C['ol']}">A smile makeover without veneers, in the order that makes it look natural.</div>
+  {timeline(90, 860, 900, scale=1.08)}
+  <div class="abs" style="left:90px;top:1440px"><span class="cta dark">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="S3s" data-name="Smile makeover | Static | Never too old | 9x16" style="background:{C['od']}">
+  <div class="cover" style="background-image:url(assets/photos/lounge.jpg);background-size:cover;background-position:30% 55%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.9) 0%,rgba(20,33,26,.55) 28%,rgba(20,33,26,.25) 50%,rgba(20,33,26,.92) 80%)"></div>
+  <div class="abs hl" style="left:90px;top:300px;font-size:96px;color:{C['nu']}">Too old to fix<br>your smile?<br><b>You&rsquo;re not.</b></div>
+  <div class="abs body" style="left:90px;top:1320px;width:880px;font-size:36px;color:{C['nu']}">Plenty of people start in their forties, fifties and sixties.</div>
+  <div class="abs" style="left:90px;top:1450px"><span class="cta light">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1464px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="S4s" data-name="Smile makeover | Static | See it first | 9x16" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(circle at 25% 20%,#f4efea 0%,{C['nu']} 50%,#ddd2c8 100%)"></div>
+  <div class="abs" style="left:90px;top:270px;width:900px;height:740px;border-radius:30px;overflow:hidden;box-shadow:0 24px 50px rgba(20,33,26,.18)">
+    <div class="cover" style="background-image:url(assets/photos/concierge-patient-discussing-case.jpg);background-size:cover;background-position:45% 45%"></div>
+  </div>
+  <div class="abs hl" style="left:90px;top:1070px;font-size:86px;color:{C['od']}">See your new<br>smile <b>before<br>you start.</b></div>
+  <div class="abs body" style="left:90px;top:1350px;width:880px;font-size:32px;color:{C['ol']}">A 3D scan shows your predicted result before you commit.</div>
+  <div class="abs" style="left:90px;top:1450px"><span class="cta dark">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1464px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="S5s" data-name="Smile makeover | Static | Not ten veneers | 9x16" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 50% 50%,#f3ece4 0%,{C['be']} 45%,#cfbfae 100%)"></div>
+  <div class="abs hl" style="left:90px;top:320px;font-size:90px;color:{C['od']}">You probably<br>don&rsquo;t need<br><b>ten veneers.</b></div>
+  {compare_cards(100, 720, scale=1.02)}
+  <div class="abs body" style="left:90px;top:1120px;width:880px;font-size:34px;color:{C['ol']}">Align, whiten, then bond the two to four teeth that still need it.</div>
+  <div class="abs" style="left:90px;top:1440px"><span class="cta dark">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Smile makeover | 9x16", b)
+
+
 if __name__ == "__main__":
     (ROOT / "josh-1x1.html").write_text(josh_1x1())
     (ROOT / "josh-9x16.html").write_text(josh_9x16())
@@ -890,4 +1039,6 @@ if __name__ == "__main__":
     (ROOT / "niamh-9x16.html").write_text(niamh_9x16())
     (ROOT / "claire-1x1.html").write_text(claire_1x1())
     (ROOT / "claire-9x16.html").write_text(claire_9x16())
+    (ROOT / "smile-1x1.html").write_text(smile_1x1())
+    (ROOT / "smile-9x16.html").write_text(smile_9x16())
     print("built")

@@ -114,3 +114,20 @@ Siha facts used for Niamh (siha.dental/nervous-patients): agreed signals to paus
 [10] https://www.mumsnet.com/talk/_chat/5077938-fluorosis-feeling-terrible
 
 Siha facts used for Claire: ICON removes white and brown spots without drilling or injections, in a single 60 to 90 minute appointment, results visible straight away, can be repeated; treats post-braces white spots, fluorosis, early decay, trauma discolouration (ICON page). £395 for up to two teeth, £100 per extra tooth (fees page). Whitening first is recommended so the resin matches the brighter shade (ICON page). Enlighten: 14 nights at home, custom trays, VITA B1 shade guarantee (whitening page). The video-call angle is from the persona bank (Claire), not a forum quote.
+
+## Customer language for the smile makeover (Michelle)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Long-term | "I've hated my teeth my whole life." | [12] | Hook (S1) |
+| Moment | "Now I think what the hell, I'm fixing it." | [12] | Urgency / identity |
+| Accommodation | "I would never ever smile without my hand in front of my mouth or smile for photos." | [12] | Problem |
+| Accommodation | "I was always the one with the awkward smile in photos, trying to hide my teeth" | [11] | Problem |
+| Age objection | "Im 60 and on tray 28 ish of my aligners...you are never too old" | [11] | Objection (S3) |
+| Combined treatment | "finished now just waiting on some bonding and teeth whitening" / "Mine also included composite bonding." | [11] [12] | Mechanism (S2) |
+| After | "Worth every single penny. I can get my photo taken now without even thinking" | [11] | Identity |
+
+[11] https://www.mumsnet.com/talk/style_and_beauty/5067013-has-anyone-had-invisalign-as-an-adult
+[12] https://www.mumsnet.com/talk/am_i_being_unreasonable/4609543-to-ask-if-you-found-invisalign-worth-it
+
+Siha facts used: aligners digitally planned with iTero 3D scanning, predicted result shown before starting, typical treatment 6 to 18 months (aligner page); Hannan's typical makeover is whitening, six to nine months of aligners and two to four teeth of bonding rather than ten veneers, and all aligner cases are designed by an orthodontist (onboarding call); veneers £995 per tooth, bonding from £250 (fees page); Enlighten 14 nights with VITA B1 guarantee (whitening page).
