@@ -49,3 +49,7 @@ data/creative-pipeline-runs/
 data/maylands/videos/*
 !data/maylands/videos/README.md
 !data/maylands/videos/manifest.json
+
+# Siha statics: client photography + renders stay local
+outputs/creative/siha-meta-statics/assets/photos/
+outputs/creative/siha-meta-statics/renders/
