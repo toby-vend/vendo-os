@@ -192,29 +192,27 @@ def page(title, boards):
 # ------------------------------------------------------------------ 1:1
 def od_1x1():
     b = []
-    # OD1 complex case, same price
+    # OD1 complex case, same price: woman fitting aligners, text on the right
     b.append(f"""
-<div class="ab s1" id="OD1" data-name="{name('Open Day', 'None', 'Complex case same price', '1x1')}" style="background:{C['deep']}">
-  {photo(560, 0, 520, 1080, 'sign-top.jpg', fx=0.3, fy=0.3, extra='opacity:.55')}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(90deg,{C['deep']} 0%,{C['deep']} 48%,rgba(6,68,75,.55) 75%,rgba(6,68,75,.35) 100%)"></div>
-  <div class="cover" data-name="Overlay (locked)" style="background:radial-gradient(circle at 20% 15%,rgba(20,177,191,.28),transparent 55%)"></div>
-  <div class="abs" style="left:72px;top:72px">{date_pill(C['gold'], C['wh'])}</div>
-  <div class="abs hl" style="left:72px;top:178px;font-size:64px;color:{C['wh']}">Crowded. Crooked.<br>Complicated.</div>
-  <div class="abs hl" style="left:72px;top:330px;font-size:64px;color:{C['gold']}">One fixed price.</div>
-  <div class="abs body" style="left:72px;top:440px;width:460px;font-size:27px;color:#d6e6e7">32Co clear aligners for <b style="color:#fff">£3,495</b>, however complex your case. A comprehensive case is usually £3,995.</div>
-  {price_list(548, 400, 470, 0.88)}
-  <div class="abs" style="left:72px;top:735px">{proof('#d6e6e7')}</div>
-  <div class="abs" style="left:72px;top:840px">{cta('teal')}</div>
-  <div class="abs" style="left:790px;top:965px;width:220px">{logo(220, mono=True)}</div>
+<div class="ab s1" id="OD1" data-name="{name('Open Day', 'Stock', 'Complex case same price', '1x1')}" style="background:{C['deep']}">
+  {photo(0, 0, 640, 1080, 'ls-aligner-mirror.jpg', fx=0.24, fy=0.4)}
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(90deg,rgba(6,68,75,0) 44%,rgba(6,68,75,.8) 52%,{C['deep']} 57%)"></div>
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(6,68,75,0) 72%,rgba(6,68,75,.85) 100%)"></div>
+  <div class="abs" style="left:560px;top:72px"><span class="pill" style="background:{C['gold']};color:#fff;height:48px;font-size:19px">Open Day &middot; Sat 7 November</span></div>
+  <div class="abs hl" style="left:560px;top:160px;font-size:58px;color:{C['wh']}">Crowded.<br>Crooked.<br>Complicated.</div>
+  <div class="abs hl" style="left:560px;top:352px;font-size:58px;color:{C['gold']}">One fixed price.</div>
+  <div class="abs body" style="left:560px;top:440px;width:450px;font-size:23px;color:#d6e6e7">32Co clear aligners for <b style="color:#fff">£3,495</b>, however complex your case. Usually £3,995.</div>
+  {price_list(560, 570, 450, 0.82)}
+  <div class="abs" style="left:560px;top:930px">{cta('teal', 0.8)}</div>
+  <div class="abs" style="left:60px;top:1000px">{proof('#fff', 19)}</div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
-    # OD2 closed-lip photos (native video still)
+    # OD2 closed-lip photos: self-conscious laugh
     b.append(f"""
-<div class="ab s1" id="OD2" data-name="{name('Open Day', 'Dr Syed', 'Closed-lip photos', '1x1')}" style="background:{C['ink']}">
-  {photo(0, 0, 1080, 1080, 'syed-talk-clean.jpg', fx=0.5, fy=0.05, zoom=1.08)}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(30,43,45,0) 62%,rgba(30,43,45,.55) 100%)"></div>
-  {note_card(56, 40, 600, 'Still smiling with your lips closed in every photo?', scale=0.86, rot=-1.2)}
-  <div class="abs" style="left:90px;top:815px;width:900px;text-align:center;font-weight:600;font-size:34px;line-height:1.3;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)">No more hiding, no more closed-lip photos.</div>
+<div class="ab s1" id="OD2" data-name="{name('Open Day', 'Stock', 'Closed-lip photos', '1x1')}" style="background:{C['ink']}">
+  {photo(0, 0, 1080, 1080, 'ls-hiding-smile.jpg', fx=0.52, fy=0.4)}
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(30,43,45,.25) 0%,rgba(30,43,45,0) 30%,rgba(30,43,45,0) 70%,rgba(30,43,45,.5) 100%)"></div>
+  {note_card(56, 48, 620, 'Still smiling with your lips closed in every photo?', scale=0.88, rot=-1.2)}
   <div class="abs" style="left:0;top:960px;width:1080px;height:120px;background:{C['deep']};display:flex;align-items:center;justify-content:space-between;padding:0 48px">
     <div><div class="eyebrow" style="font-size:20px;color:{C['gold']}">Clear Aligner Open Day</div>
     <div class="jo" style="font-size:30px;font-weight:700;color:#fff;margin-top:4px">Sat 7 November &middot; Fixed £3,495</div></div>
@@ -222,48 +220,43 @@ def od_1x1():
   </div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
-    # OD3 receipt
+    # OD3 receipt: mirror smile on the right, receipt across the seam
     b.append(f"""
-<div class="ab s1" id="OD3" data-name="{name('Open Day', 'None', 'Package receipt', '1x1')}" style="background:{C['mist']}">
-  {photo(0, 0, 1080, 1080, 'reception-top.jpg', fx=0.5, fy=0.25, extra='filter:blur(6px);transform:scale(1.04)')}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(90deg,rgba(228,239,240,.97) 0%,rgba(228,239,240,.93) 45%,rgba(228,239,240,.6) 100%)"></div>
-  <div class="abs eyebrow" style="left:72px;top:84px;width:380px;color:{C['teal']}">Clear Aligner<br>Open Day</div>
-  <div class="abs hl" style="left:72px;top:170px;font-size:118px;color:{C['deep']}">Save<br><span style="color:{C['bright']}">£1,509</span></div>
-  <div class="abs body" style="left:72px;top:420px;width:380px;font-size:28px;color:{C['ink']}">Everything a straighter smile needs, in one fixed price.</div>
-  <div class="abs" style="left:72px;top:600px"><span class="pill" style="background:{C['deep']};color:#fff">Sat 7 November</span></div>
-  <div class="abs body" style="left:72px;top:672px;width:380px;font-size:22px;color:#4a5d60">Oxford House, Fenny Stratford, Milton Keynes</div>
-  {receipt(476, 64, 540, 0.86)}
-  <div class="abs" style="left:72px;top:840px">{cta('teal')}</div>
-  <div class="abs" style="left:72px;top:960px;width:230px">{logo(230)}</div>
-  <div class="abs" style="left:650px;top:990px">{proof(C['ink'], 20)}</div>
+<div class="ab s1" id="OD3" data-name="{name('Open Day', 'Stock', 'Package receipt', '1x1')}" style="background:{C['mist']}">
+  {photo(500, 0, 580, 1080, 'ls-mirror-smile.jpg', fx=0.78, fy=0.3)}
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(90deg,{C['mist']} 0%,{C['mist']} 44%,rgba(228,239,240,0) 60%)"></div>
+  <div class="abs eyebrow" style="left:72px;top:76px;color:{C['teal']}">Clear Aligner Open Day</div>
+  <div class="abs hl" style="left:72px;top:120px;font-size:112px;color:{C['deep']}">Save<br><span style="color:{C['bright']}">£1,509</span></div>
+  {receipt(330, 365, 560, 0.74, rot=-1.2)}
+  <div class="abs" style="left:72px;top:390px;width:230px"><span class="pill" style="background:{C['deep']};color:#fff;height:48px;font-size:19px">Sat 7 Nov</span></div>
+  <div class="abs" style="left:72px;top:915px">{cta('teal', 0.85)}</div>
+  <div class="abs" style="left:72px;top:1005px;width:190px">{logo(190)}</div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
-    # OD4 won't my teeth move back
+    # OD4 won't my teeth move back: hands holding aligners
     b.append(f"""
-<div class="ab s1" id="OD4" data-name="{name('Open Day', 'None', 'Teeth move back', '1x1')}" style="background:{C['ink']}">
-  {photo(0, 0, 1080, 1080, 'surgery-top.jpg', fx=0.5, fy=0.2, extra='opacity:.45')}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(6,68,75,.92) 0%,rgba(6,68,75,.82) 40%,{C['deep']} 75%)"></div>
-  <div class="abs hl" style="left:72px;top:92px;width:900px;font-size:78px;color:{C['wh']}">&ldquo;Won&rsquo;t my teeth just <span style="color:{C['gold']}">move back?</span>&rdquo;</div>
-  {answer_card(90, 340, 860, 0.98)}
-  <div class="abs" style="left:72px;top:820px">{date_pill(C['gold'], C['wh'], 0.9)}</div>
-  <div class="abs" style="left:72px;top:925px">{cta('teal', 0.85)}</div>
-  <div class="abs" style="left:800px;top:960px;width:210px">{logo(210, mono=True)}</div>
+<div class="ab s1" id="OD4" data-name="{name('Open Day', 'Stock', 'Teeth move back', '1x1')}" style="background:{C['deep']}">
+  <div class="abs hl" style="left:72px;top:64px;width:940px;font-size:62px;color:{C['wh']}">&ldquo;Won&rsquo;t my teeth just <span style="color:{C['gold']}">move back?</span>&rdquo;</div>
+  {photo(72, 230, 936, 420, 'ls-aligner-hands.jpg', fx=0.5, fy=0.35, radius=20)}
+  {answer_card(110, 560, 860, 0.82, rot=-1.3)}
+  <div class="abs" style="left:72px;top:930px">{cta('teal', 0.85)}</div>
+  <div class="abs" style="left:560px;top:944px">{date_pill(C['gold'], C['wh'], 0.72)}</div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
-    # OD5 one Saturday
+    # OD5 put it off: friends laughing, no age limit
     b.append(f"""
-<div class="ab s1" id="OD5" data-name="{name('Open Day', 'Dr Syed', 'Put it off', '1x1')}" style="background:{C['deep']}">
-  {photo(470, 0, 610, 1080, 'syed-look-clean.jpg', fx=0.62, fy=0.0)}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(90deg,{C['deep']} 0%,{C['deep']} 44%,rgba(6,68,75,.55) 58%,rgba(6,68,75,0) 72%)"></div>
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(6,68,75,0) 70%,rgba(6,68,75,.85) 100%)"></div>
-  {calendar(72, 80, 210, 0.85, -3)}
-  <div class="abs hl" style="left:72px;top:420px;font-size:78px;color:{C['wh']}">Put it off<br><span style="color:{C['gold']}">long<br>enough?</span></div>
-  <div class="abs" style="left:72px;top:720px;width:470px">
-    <div class="jo" style="font-size:29px;font-weight:700;color:#fff;line-height:1.2">Clear Aligner Open Day with Dr Syed Hussain</div>
-    <div style="font-size:22px;color:#d6e6e7;margin-top:10px">Fixed £3,495 &middot; Save £1,509<br>Limited appointments</div>
+<div class="ab s1" id="OD5" data-name="{name('Open Day', 'Stock', 'Put it off', '1x1')}" style="background:{C['deep']}">
+  {photo(470, 0, 610, 1080, 'ls-friends-laughing.jpg', fx=0.5, fy=0.25)}
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(90deg,{C['deep']} 0%,{C['deep']} 44%,rgba(6,68,75,.5) 54%,rgba(6,68,75,0) 66%)"></div>
+  {calendar(72, 70, 210, 0.85, -3)}
+  <div class="abs hl" style="left:72px;top:410px;font-size:76px;color:{C['wh']}">Put it off<br><span style="color:{C['gold']}">long<br>enough?</span></div>
+  {avatar(72, 735, 84)}
+  <div class="abs" style="left:176px;top:738px;width:360px">
+    <div class="jo" style="font-size:26px;font-weight:700;color:#fff;line-height:1.2">Open Day with Dr Syed Hussain</div>
+    <div style="font-size:20px;color:#d6e6e7;margin-top:6px">Fixed £3,495 &middot; Save £1,509</div>
   </div>
+  <div class="abs" style="left:72px;top:860px;font-size:20px;color:#d6e6e7">Limited appointments</div>
   <div class="abs" style="left:72px;top:935px">{cta('teal', 0.85)}</div>
-  <div class="abs" style="left:800px;top:975px;width:210px">{logo(210, mono=True)}</div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
     return page("Oxford House | Open Day | 1x1", b)
@@ -273,60 +266,58 @@ def od_1x1():
 def od_9x16():
     b = []
     b.append(f"""
-<div class="ab s9" id="OD1s" data-name="{name('Open Day', 'None', 'Complex case same price', '9x16')}" style="background:{C['deep']}">
-  {photo(0, 0, 1080, 760, 'sign-top.jpg', fx=0.5, fy=0.5, extra='opacity:.6')}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(6,68,75,.2) 0%,rgba(6,68,75,.75) 28%,{C['deep']} 42%)"></div>
-  <div class="abs" style="left:80px;top:290px">{date_pill(C['gold'], C['wh'])}</div>
-  <div class="abs hl" style="left:80px;top:390px;font-size:84px;color:{C['wh']}">Crowded. Crooked.<br>Complicated.<br><span style="color:{C['gold']}">One fixed price.</span></div>
-  <div class="abs body" style="left:80px;top:690px;width:900px;font-size:31px;color:#d6e6e7">32Co clear aligners for <b style="color:#fff">£3,495</b>, however complex your case. A comprehensive case is usually £3,995.</div>
-  {price_list(110, 880, 860, 1.25)}
+<div class="ab s9" id="OD1s" data-name="{name('Open Day', 'Stock', 'Complex case same price', '9x16')}" style="background:{C['deep']}">
+  {photo(0, 0, 1080, 1000, 'ls-aligner-mirror.jpg', fx=0.12, fy=0.4)}
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(6,68,75,0) 30%,rgba(6,68,75,.8) 46%,{C['deep']} 54%)"></div>
+  {price_list(560, 300, 450, 0.82)}
+  <div class="abs" style="left:80px;top:820px">{date_pill(C['gold'], C['wh'])}</div>
+  <div class="abs hl" style="left:80px;top:910px;font-size:84px;color:{C['wh']}">Crowded. Crooked.<br>Complicated.<br><span style="color:{C['gold']}">One fixed price.</span></div>
+  <div class="abs body" style="left:80px;top:1215px;width:900px;font-size:31px;color:#d6e6e7">32Co clear aligners for <b style="color:#fff">£3,495</b>, however complex your case. A comprehensive case is usually £3,995.</div>
   <div class="abs" style="left:80px;top:1400px">{cta('teal')}</div>
   <div class="abs" style="left:80px;top:1505px">{proof('#d6e6e7')}</div>
   <div class="abs" style="left:780px;top:1490px;width:220px">{logo(220, mono=True)}</div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
     b.append(f"""
-<div class="ab s9" id="OD2s" data-name="{name('Open Day', 'Dr Syed', 'Closed-lip photos', '9x16')}" style="background:{C['ink']}">
-  {photo(0, 0, 1080, 1920, 'syed-talk-clean.jpg', fx=0.5, fy=0.5)}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(30,43,45,0) 55%,rgba(30,43,45,.6) 80%,rgba(30,43,45,.85) 100%)"></div>
-  {note_card(80, 880, 860, 'Still smiling with your lips closed in every photo?', scale=0.98, rot=-1.4)}
-  <div class="abs" style="left:60px;top:1300px;width:960px;height:110px;padding:0 30px 0 40px;background:{C['deep']};border-radius:16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 26px 60px rgba(0,0,0,.4)">
-    <div><div class="eyebrow" style="font-size:18px;color:{C['gold']}">Open Day &middot; Sat 7 Nov</div>
-    <div class="jo" style="font-size:30px;font-weight:700;color:#fff;margin-top:4px">Fixed £3,495</div></div>
-    {cta('teal', 0.8)}
+<div class="ab s9" id="OD2s" data-name="{name('Open Day', 'Stock', 'Closed-lip photos', '9x16')}" style="background:{C['ink']}">
+  {photo(0, 0, 1080, 1920, 'ls-hiding-smile.jpg', fx=0.55, fy=0.5)}
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(30,43,45,0) 55%,rgba(30,43,45,.55) 80%,rgba(30,43,45,.8) 100%)"></div>
+  {note_card(70, 280, 860, 'Still smiling with your lips closed in every photo?', scale=1.0, rot=-1.4)}
+  <div class="abs" style="left:60px;top:1330px;width:960px;padding:36px 44px;background:{C['deep']};border-radius:18px;box-shadow:0 26px 60px rgba(0,0,0,.4)">
+    <div class="eyebrow" style="font-size:22px;color:{C['gold']}">Clear Aligner Open Day &middot; Sat 7 November</div>
+    <div class="jo" style="font-size:40px;font-weight:700;color:#fff;margin:10px 0 24px">Fixed £3,495, however complex your case</div>
+    {cta('teal', 0.9)}
   </div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
     b.append(f"""
-<div class="ab s9" id="OD3s" data-name="{name('Open Day', 'None', 'Package receipt', '9x16')}" style="background:{C['mist']}">
-  {photo(0, 0, 1080, 1920, 'reception-top.jpg', fx=0.5, fy=0.3, extra='filter:blur(7px);transform:scale(1.04)')}
-  <div class="cover" data-name="Overlay (locked)" style="background:rgba(228,239,240,.9)"></div>
-  <div class="abs eyebrow" style="left:80px;top:290px;color:{C['teal']}">Clear Aligner Open Day &middot; Sat 7 November</div>
-  <div class="abs hl" style="left:80px;top:345px;font-size:150px;color:{C['deep']}">Save <span style="color:{C['bright']}">£1,509</span></div>
-  <div class="abs body" style="left:80px;top:520px;width:880px;font-size:32px;color:{C['ink']}">Everything a straighter smile needs, in one fixed price.</div>
-  {receipt(110, 630, 860, 1.06, rot=-1.1)}
-  <div class="abs" style="left:80px;top:1470px">{cta('teal')}</div>
-  <div class="abs" style="left:770px;top:1478px;width:230px">{logo(230)}</div>
+<div class="ab s9" id="OD3s" data-name="{name('Open Day', 'Stock', 'Package receipt', '9x16')}" style="background:{C['mist']}">
+  {photo(0, 0, 1080, 980, 'ls-mirror-smile.jpg', fx=0.7, fy=0.3)}
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(228,239,240,0) 35%,rgba(228,239,240,.9) 48%,{C['mist']} 54%)"></div>
+  <div class="abs" style="left:80px;top:280px"><span class="pill" style="background:{C['deep']};color:#fff">Clear Aligner Open Day &middot; Sat 7 Nov</span></div>
+  {receipt(140, 520, 800, 0.95, rot=-1.1)}
+  <div class="abs hl" style="left:80px;top:1250px;font-size:120px;color:{C['deep']}">Save <span style="color:{C['bright']}">£1,509</span></div>
+  <div class="abs" style="left:80px;top:1440px">{cta('teal')}</div>
+  <div class="abs" style="left:770px;top:1450px;width:230px">{logo(230)}</div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
     b.append(f"""
-<div class="ab s9" id="OD4s" data-name="{name('Open Day', 'None', 'Teeth move back', '9x16')}" style="background:{C['ink']}">
-  {photo(0, 0, 1080, 1920, 'surgery-top.jpg', fx=0.5, fy=0.3, extra='opacity:.45')}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(6,68,75,.9) 0%,rgba(6,68,75,.82) 40%,{C['deep']} 70%)"></div>
-  <div class="abs hl" style="left:80px;top:300px;width:920px;font-size:96px;color:{C['wh']}">&ldquo;Won&rsquo;t my teeth just <span style="color:{C['gold']}">move back?</span>&rdquo;</div>
-  {answer_card(90, 720, 900, 1.12)}
-  <div class="abs" style="left:80px;top:1300px">{date_pill(C['gold'], C['wh'])}</div>
+<div class="ab s9" id="OD4s" data-name="{name('Open Day', 'Stock', 'Teeth move back', '9x16')}" style="background:{C['deep']}">
+  <div class="abs hl" style="left:80px;top:290px;width:920px;font-size:92px;color:{C['wh']}">&ldquo;Won&rsquo;t my teeth just <span style="color:{C['gold']}">move back?</span>&rdquo;</div>
+  {photo(80, 620, 920, 520, 'ls-aligner-hands.jpg', fx=0.5, fy=0.35, radius=24)}
+  {answer_card(100, 1020, 880, 0.92, rot=-1.3)}
   <div class="abs" style="left:80px;top:1400px">{cta('teal')}</div>
-  <div class="abs" style="left:780px;top:1500px;width:220px">{logo(220, mono=True)}</div>
+  <div class="abs" style="left:80px;top:1505px">{date_pill(C['gold'], C['wh'], 0.85)}</div>
   <div class="grain" data-name="Grain (locked)"></div>
 </div>""")
     b.append(f"""
-<div class="ab s9" id="OD5s" data-name="{name('Open Day', 'Dr Syed', 'Put it off', '9x16')}" style="background:{C['deep']}">
-  {photo(0, 0, 1080, 1150, 'syed-look-clean.jpg', fx=0.75, fy=0.55, zoom=1.22)}
-  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(6,68,75,0) 35%,rgba(6,68,75,.75) 52%,{C['deep']} 60%)"></div>
-  {calendar(700, 300, 300, 1.15, 3)}
+<div class="ab s9" id="OD5s" data-name="{name('Open Day', 'Stock', 'Put it off', '9x16')}" style="background:{C['deep']}">
+  {photo(0, 0, 1080, 1150, 'ls-friends-laughing.jpg', fx=0.5, fy=0.2)}
+  <div class="cover" data-name="Overlay (locked)" style="background:linear-gradient(180deg,rgba(6,68,75,0) 40%,rgba(6,68,75,.75) 54%,{C['deep']} 61%)"></div>
+  {calendar(720, 290, 280, 1.08, 3)}
   <div class="abs hl" style="left:80px;top:1000px;font-size:104px;color:{C['wh']}">Put it off<br><span style="color:{C['gold']}">long enough?</span></div>
-  <div class="abs" style="left:80px;top:1270px;width:920px">
+  {avatar(80, 1270, 110)}
+  <div class="abs" style="left:215px;top:1280px;width:800px">
     <div class="jo" style="font-size:34px;font-weight:700;color:#fff">Clear Aligner Open Day with Dr Syed Hussain</div>
     <div style="font-size:25px;color:#d6e6e7;margin-top:6px">Fixed £3,495 &middot; Save £1,509 &middot; Limited appointments</div>
   </div>

@@ -39,7 +39,7 @@ Know the price before you make the decision.
 **Awareness:** problem aware. **Sophistication:** 5 (identity). **Angle:** the smile you've learned to do instead.
 Research: "you can really see how hard I was trying to smile without showing my teeth on pics" and "I hate my teeth and rarely smile in pictures" (Mumsnet [1]). Dr Syed: "No more hiding, no more closed-lip photos."
 
-**On image:** (Dr Syed, video still) Still smiling with your lips closed in every photo? / "No more hiding, no more closed-lip photos." Dr Syed Hussain / Clear Aligner Open Day · Saturday 7 November / Book your free consultation
+**On image:** (lifestyle: woman laughing self-consciously, hand to her face) Still smiling with your lips closed in every photo? / Clear Aligner Open Day · Saturday 7 November · Fixed £3,495 / Book your free consultation
 
 **Headline:** No more closed-lip photos
 
@@ -123,7 +123,7 @@ Straight teeth that stay straight.
 **Awareness:** product aware. **Sophistication:** 5 (identity). **Angle:** you've put it off long enough, and this is a real date.
 Research: "I was offered a brace as a child but refused" and "Will it look stupid for someone so old?" (Mumsnet [1]); "should have had a brace as a teenager but I refused..so regret it now!" (Mumsnet [3]). Dr Syed: "It's never too late to get the smile you've always wanted."
 
-**On image:** (Dr Syed with a patient) Put it off long enough? / Saturday 7 November (date card) / Clear Aligner Open Day with Dr Syed Hussain / Fixed £3,495 · Save £1,509 / Limited appointments / Book your free consultation
+**On image:** (lifestyle: three women in their 50s and 60s laughing outdoors, small Dr Syed headshot) Put it off long enough? / Saturday 7 November (date card) / Clear Aligner Open Day with Dr Syed Hussain / Fixed £3,495 · Save £1,509 / Limited appointments / Book your free consultation
 
 **Headline:** Saturday 7 November. Limited appointments.
 
@@ -151,9 +151,8 @@ The smile you've always wanted doesn't have an age limit.
 1. **Package wording.** The landing page lists whitening, retainers and hygiene as part of the package. Dr Syed's script says they're added "if you start your treatment with us". The ads say "start treatment and we'll add/include". Confirm that's right, and that the landing page matches.
 2. **"However complex your case".** The page says "eligible 32Co clear aligner treatment... regardless of case complexity". Confirm who isn't eligible (e.g. cases needing fixed braces or referral) so the ads don't over-promise. The copy always pairs it with "if aligners are right for you" / the consultation.
 3. **"No pressure and no obligation"** is Dr Syed's own line from the open day video. Confirm the practice is happy for it to run in ads.
-4. **Patient in the photo** with Dr Syed (OD5, from the landing page): confirm the patient has consented to appearing in paid ads.
+4. **Imagery is licensed stock** (Freepik via Magnific, premium licence), apart from the small Dr Syed headshot from the landing page. No stock person is presented as an Oxford House patient.
 5. **Review count.** 956 on 2 Oct 2026 (the landing page says 950+). Refresh before launch if it changes much.
-6. **Video stills.** OD2 uses a still from the open day video, which only exists at 720p with burned-in captions. It's cropped above the captions. If the raw footage is available, swap in a clean frame.
-7. **What happens after the form.** The page only says the form "requests" an appointment, so the ads don't promise a call-back time. Given the 11-hour average first response flagged on the 1 Oct call, the open day leads need fast follow-up.
-8. **No before-and-afters.** The landing page's before-and-after image isn't an aligner case and carries another dentist's watermark. Leave it off the ads, and consider removing it from the page.
-9. **No finance figures.** None are used (FCA wording).
+6. **What happens after the form.** The page only says the form "requests" an appointment, so the ads don't promise a call-back time. Given the 11-hour average first response flagged on the 1 Oct call, the open day leads need fast follow-up.
+7. **No before-and-afters.** The landing page's before-and-after image isn't an aligner case and carries another dentist's watermark. Leave it off the ads, and consider removing it from the page.
+8. **No finance figures.** None are used (FCA wording).
