@@ -81,7 +81,7 @@ def photo_aspect(img):
     raise ValueError(f"no size found in {img}")
 
 
-def sframe(x, y, w, h, img, fx=0.5, fy=0.35):
+def sframe(x, y, w, h, img, fx=0.5, fy=0.35, zoom=1.0):
     """Photo cropped inside the S shape: two stacked blocks sharing one image.
 
     The photo is scaled to cover the whole S (never stretched); fx/fy set the
@@ -92,6 +92,7 @@ def sframe(x, y, w, h, img, fx=0.5, fy=0.35):
         bw, bh = w, w / a
     else:           # frame taller than photo: fit height, crop width
         bw, bh = h * a, h
+    bw, bh = bw * zoom, bh * zoom
     ox = -(bw - w) * fx
     oy = -(bh - h) * fy
     bg = f"background-image:url(assets/photos/{img});background-size:{bw:.0f}px {bh:.0f}px;"
@@ -260,7 +261,179 @@ def josh_9x16():
     return page("Siha | Josh | 9x16", b)
 
 
+
+# ---------------------------------------------------------------- HANNAH (trend follower)
+def shade_tabs(x, y, scale=1.0):
+    """A row of shade-guide tabs (tooth shades, tints of the brand neutrals) with real shadows."""
+    shades = ["#f6f2ea", "#f1eadf", "#ebe1d2", "#e4d7c4", "#dccbb3", "#d2bf a4".replace(" ", "")]
+    tabs = []
+    w, h, gap = int(92 * scale), int(190 * scale), int(26 * scale)
+    for i, c in enumerate(shades):
+        sel = i == 2
+        ring = ""
+        if sel:  # drawn as a bordered element (Figma capture drops CSS outlines)
+            o = int(10 * scale)
+            tabs.append(f'<div style="position:absolute;left:{i*(w+gap)-o}px;top:{-int(18*scale)-o}px;width:{w+2*o}px;height:{h+2*o}px;'
+                        f'border:{max(2,int(3*scale))}px solid {C["bo"]};border-radius:{(w+2*o)//2}px {(w+2*o)//2}px {int(20*scale)}px {int(20*scale)}px;box-sizing:border-box"></div>')
+        tabs.append(f'<div style="position:absolute;left:{i*(w+gap)}px;top:{-int(18*scale) if sel else 0}px;width:{w}px;height:{h}px;'
+                    f'border-radius:{w//2}px {w//2}px {int(14*scale)}px {int(14*scale)}px;'
+                    f'background:linear-gradient(180deg,#fffdf9 0%,{c} 38%,{c} 100%);'
+                    f'box-shadow:0 {int(18*scale)}px {int(30*scale)}px rgba(20,33,26,.22),0 {int(3*scale)}px {int(6*scale)}px rgba(20,33,26,.18),inset 0 -{int(10*scale)}px {int(18*scale)}px rgba(135,118,99,.18);{ring}"></div>')
+    label = (f'<div class="small" style="position:absolute;left:{2*(w+gap)}px;top:{h+int(28*scale)}px;width:{w}px;text-align:center;'
+             f'font-size:{int(20*scale)}px;color:{C["bo"]};font-weight:600;letter-spacing:.12em">YOURS</div>')
+    return f'<div style="position:absolute;left:{x}px;top:{y}px;width:{6*(w+gap)}px;height:{h+60}px">{"".join(tabs)}{label}</div>'
+
+
+def vocab(rows, color_k, color_v, size=26, gap=22):
+    out = []
+    for k, v in rows:
+        out.append(f'<div style="display:flex;gap:22px;align-items:baseline;margin-bottom:{gap}px">'
+                   f'<div style="width:190px;flex:none;font-weight:600;font-size:{size}px;color:{color_k}">{k}</div>'
+                   f'<div style="font-size:{size}px;line-height:1.35;color:{color_v}">{v}</div></div>')
+    return "".join(out)
+
+
+VOCAB = [("Aligners", "Move your teeth. Nothing removed."),
+         ("Whitening", "Lifts the shade. Nothing removed."),
+         ("Bonding", "Adds to the tooth. Nothing removed."),
+         ("Veneers", "Cover the tooth. Some enamel removed, for good.")]
+
+
+def steps(color_n, color_t, size=40, gap=34, circle=64):
+    items = [("1", "Straighten"), ("2", "Whiten"), ("3", "Bond, only where it&rsquo;s needed")]
+    out = []
+    for n, t in items:
+        out.append(f'<div style="display:flex;align-items:center;gap:26px;margin-bottom:{gap}px">'
+                   f'<div style="width:{circle}px;height:{circle}px;flex:none;border:2px solid {color_n};border-radius:50%;display:flex;align-items:center;justify-content:center;'
+                   f'font-size:{int(circle*0.42)}px;font-weight:500;color:{color_n}">{n}</div>'
+                   f'<div style="font-size:{size}px;font-weight:300;color:{color_t}">{t}</div></div>')
+    return "".join(out)
+
+
+def hannah_1x1():
+    b = []
+    b.append(f"""
+<div class="ab s1" id="H1" data-name="Hannah | Static | Same teeth | 1x1" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 72% 32%,#f1e9e1 0%,{C['be']} 48%,#d4c5b7 100%)"></div>
+  <div class="abs" style="left:575px;top:150px;width:430px;height:750px;border-radius:30px;background:#fff;overflow:hidden;box-shadow:0 26px 54px rgba(20,33,26,.16)">
+    <div class="cover" style="background-image:url(assets/photos/patient-smile.jpg);background-size:contain;background-repeat:no-repeat;background-position:50% 100%"></div></div>
+  <div class="abs hl" style="left:80px;top:140px;font-size:58px;color:{C['bo']}">The same<br>teeth.<br>Just <b>whiter</b><br><b>and repaired.</b></div>
+  <div class="abs body" style="left:80px;top:500px;width:450px;font-size:27px;color:{C['od']}">Not a set of veneers. Not one big white strip. Yours, done carefully.</div>
+  <div class="abs" style="left:80px;top:700px">{proof(C['br'],20)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="H2" data-name="Hannah | Static | Photo you dont want | 1x1" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(circle at 25% 15%,#f4efea 0%,{C['nu']} 50%,#ddd2c8 100%)"></div>
+  <div class="abs" style="left:80px;top:80px;width:920px;height:440px;border-radius:30px;overflow:hidden;box-shadow:0 24px 50px rgba(20,33,26,.18)">
+    <div class="cover" style="background-image:url(assets/photos/concierge-patient.jpg);background-position:50% 30%"></div>
+  </div>
+  <div class="abs hl" style="left:80px;top:575px;font-size:70px;color:{C['od']}">Bring a photo of<br>what you <b>don&rsquo;t</b> want.</div>
+  <div class="abs body" style="left:80px;top:745px;width:860px;font-size:27px;color:{C['ol']}">Most people bring the smile they want. Show us the one you&rsquo;re scared of, and we&rsquo;ll show you how we avoid it.</div>
+  <div class="abs" style="left:80px;top:978px"><span class="cta dark" style="height:56px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="abs" style="left:800px;top:968px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="H3" data-name="Hannah | Static | Move dont file | 1x1" style="background:{C['od']}">
+  <div class="cover" style="left:430px;background-image:url(assets/photos/lounge-plants.jpg);background-position:40% 50%"></div>
+  <div class="cover" style="background:linear-gradient(90deg,{C['od']} 0%,{C['od']} 42%,rgba(20,33,26,.7) 60%,rgba(20,33,26,.15) 100%)"></div>
+  <div class="abs hl" style="left:80px;top:110px;font-size:66px;color:{C['nu']}">We&rsquo;d rather<br><b>move</b> your<br>teeth than<br>file them.</div>
+  <div class="abs" style="left:80px;top:480px">{steps(C['be'], C['nu'], size=36, gap=30, circle=60)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="H4" data-name="Hannah | Static | Natural is a shade | 1x1" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 50% 40%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
+  <div class="cover" style="top:520px;height:240px;background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,.55),transparent 70%)"></div>
+  {shade_tabs(118, 380)}
+  <div class="abs hl" style="left:80px;top:110px;font-size:82px;color:{C['od']}">Not one big<br><b>white strip.</b></div>
+  <div class="abs body" style="left:80px;top:745px;width:860px;font-size:32px;color:{C['bo']};font-weight:500">Natural is a shade. You choose it.</div>
+  <div class="abs body" style="left:80px;top:800px;width:860px;font-size:24px;color:{C['ol']}">Shade, shape and length matched to your face, so it still looks like you.</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="H5" data-name="Hannah | Static | Dont need the names | 1x1" style="background:{C['od']}">
+  <div class="cover" style="height:330px;background-image:url(assets/photos/concierge-2.jpg);background-position:50% 30%"></div>
+  <div class="cover" style="top:120px;height:230px;background:linear-gradient(180deg,rgba(20,33,26,0) 0%,{C['od']} 100%)"></div>
+  <div class="abs hl" style="left:80px;top:340px;font-size:52px;color:{C['nu']}">Don&rsquo;t know what to ask for?<br><b>That&rsquo;s fine.</b></div>
+  <div class="abs" style="left:80px;top:520px;width:920px">{vocab(VOCAB, C['be'], C['nu'], size=26, gap=20)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Hannah | 1x1", b)
+
+
+def hannah_9x16():
+    b = []
+    b.append(f"""
+<div class="ab s9" id="H1s" data-name="Hannah | Static | Same teeth | 9x16" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 55% 28%,#f1e9e1 0%,{C['be']} 45%,#d4c5b7 100%)"></div>
+  <div class="abs" style="left:250px;top:250px;width:580px;height:760px;border-radius:30px;background:#fff;overflow:hidden;box-shadow:0 26px 54px rgba(20,33,26,.16)">
+    <div class="cover" style="background-image:url(assets/photos/patient-smile.jpg);background-size:contain;background-repeat:no-repeat;background-position:50% 100%"></div></div>
+  <div class="abs hl" style="left:90px;top:1050px;font-size:80px;color:{C['bo']}">The same teeth.<br>Just <b>whiter and<br>repaired.</b></div>
+  <div class="abs body" style="left:90px;top:1310px;width:880px;font-size:32px;color:{C['od']}">Not a set of veneers. Not one big white strip. Yours, done carefully.</div>
+  <div class="abs" style="left:90px;top:1415px">{proof(C['br'],22)}</div>
+  <div class="abs" style="left:90px;top:1468px"><span class="cta dark" style="height:64px;font-size:18px;padding:0 34px">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1474px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="H2s" data-name="Hannah | Static | Photo you dont want | 9x16" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(circle at 25% 20%,#f4efea 0%,{C['nu']} 50%,#ddd2c8 100%)"></div>
+  <div class="abs" style="left:90px;top:270px;width:900px;height:720px;border-radius:30px;overflow:hidden;box-shadow:0 24px 50px rgba(20,33,26,.18)">
+    <div class="cover" style="background-image:url(assets/photos/concierge-patient.jpg);background-position:40% 30%"></div>
+  </div>
+  <div class="abs hl" style="left:90px;top:1060px;font-size:90px;color:{C['od']}">Bring a photo<br>of what you<br><b>don&rsquo;t</b> want.</div>
+  <div class="abs body" style="left:90px;top:1360px;width:880px;font-size:32px;color:{C['ol']}">Most people bring the smile they want. Show us the one you&rsquo;re scared of, and we&rsquo;ll show you how we avoid it.</div>
+  <div class="abs" style="left:90px;top:1510px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1515px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="H3s" data-name="Hannah | Static | Move dont file | 9x16" style="background:{C['od']}">
+  <div class="cover" style="height:1000px;background-image:url(assets/photos/lounge-plants.jpg);background-position:42% 50%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.25) 0%,rgba(20,33,26,.55) 30%,{C['od']} 50%)"></div>
+  <div class="abs hl" style="left:90px;top:760px;font-size:84px;color:{C['nu']}">We&rsquo;d rather <b>move</b><br>your teeth than<br>file them.</div>
+  <div class="abs" style="left:90px;top:1100px">{steps(C['be'], C['nu'], size=42, gap=34, circle=70)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta light">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1474px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="H4s" data-name="Hannah | Static | Natural is a shade | 9x16" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 50% 45%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
+  <div class="abs hl" style="left:90px;top:330px;font-size:100px;color:{C['od']}">Not one big<br><b>white strip.</b></div>
+  {shade_tabs(130, 760, 1.05)}
+  <div class="abs body" style="left:90px;top:1180px;width:880px;font-size:40px;color:{C['bo']};font-weight:500">Natural is a shade. You choose it.</div>
+  <div class="abs body" style="left:90px;top:1250px;width:880px;font-size:30px;color:{C['ol']}">Shade, shape and length matched to your face, so it still looks like you.</div>
+  <div class="abs" style="left:90px;top:1420px"><span class="cta dark">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1434px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="H5s" data-name="Hannah | Static | Dont need the names | 9x16" style="background:{C['od']}">
+  <div class="cover" style="height:720px;background-image:url(assets/photos/concierge-2.jpg);background-position:30% 30%"></div>
+  <div class="cover" style="top:360px;height:380px;background:linear-gradient(180deg,rgba(20,33,26,0) 0%,{C['od']} 100%)"></div>
+  <div class="abs hl" style="left:90px;top:720px;font-size:80px;color:{C['nu']}">Don&rsquo;t know<br>what to ask for?<br><b>That&rsquo;s fine.</b></div>
+  <div class="abs" style="left:90px;top:1030px;width:900px">{vocab(VOCAB, C['be'], C['nu'], size=30, gap=26)}</div>
+  <div class="abs" style="left:90px;top:1440px"><span class="cta light">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Hannah | 9x16", b)
+
+
 if __name__ == "__main__":
     (ROOT / "josh-1x1.html").write_text(josh_1x1())
     (ROOT / "josh-9x16.html").write_text(josh_9x16())
+    (ROOT / "hannah-1x1.html").write_text(hannah_1x1())
+    (ROOT / "hannah-9x16.html").write_text(hannah_9x16())
     print("built")

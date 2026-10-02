@@ -55,3 +55,19 @@ Mumsnet quotes are third-party research for language only. They are never presen
 
 - Sophistication: stage 3 to 4. Local competitors sell bonding on discount (Envy Smile via Wowcher), before-and-afters and "transform your smile" claims. Bigger claims won't cut through, so the creatives lead with mechanism (add, don't drill), honest specifics and identity (still your teeth).
 - Gaps for research next: Siha call recordings and post-treatment survey ("the moment"), and permission to quote named reviewers.
+
+## Customer language for Hannah (fear of the fake result)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| The promise, in her words | "I would like the same teeth, but whiter and repaired where needed." | [4] | Promise / hook |
+| Accommodation | "I hate smiling with my teeth." | [4] | Problem |
+| The word / language gap | "I'm a bit lost with where to go and what options are good, and what are bad." | [4] | Hook (H5) |
+| The fear (the look) | "it looks like one big white strip", "fluorescent piano key gnashers", "the gum shield ones look A LOT like false teeth and really ages people" | [5] | Problem / objection |
+| The admired alternative | "a nice smile that's benefited from good orthodontics & whitening" | [5] | Mechanism (order of treatment) |
+| Irreversibility | "They don't realise what they have lost by hacking away at their own teeth" | [5] | Mechanism contrast |
+
+[4] https://www.mumsnet.com/talk/am_i_being_unreasonable/5078633-to-ask-for-options-if-i-dont-want-turkey-teeth
+[5] https://www.mumsnet.com/talk/am_i_being_unreasonable/5553370-turkey-teeth-are-the-new-norm
+
+Siha facts used for Hannah: aligner cases designed by an orthodontist (Hannan, onboarding call); 3D scan preview of the predicted result before committing (Siha Google post, 2 Oct 2026); bonding doesn't whiten afterwards, so whiten first (Mumsnet [3], consistent with Siha's FAQ "Can I have my composite-bonded teeth whitened?").
