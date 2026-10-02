@@ -101,3 +101,16 @@ Siha facts used for Mark: £89 new patient check-up covering teeth, gums, jaw jo
 [8] https://www.mumsnet.com/talk/feeling_depressed/730793-Dental-phobia-I-HAVE-to-go-and-am-getting-anxious
 
 Siha facts used for Niamh (siha.dental/nervous-patients): agreed signals to pause whenever you need; treatment stopped immediately if you're uncomfortable; every step explained before you're in the chair; before the appointment you're told what the room looks like, who will treat you, what pain relief and how it works, how long it takes, and that you can stop at any moment; "we go at your pace, always"; "no harsh clinical smells, no intimidating equipment on display... more like a calm retreat than a surgery". 20 Google reviews mention the welcoming atmosphere. Siha's site doesn't advertise sedation, so none is claimed.
+
+## Customer language for Claire (camera-conscious; ICON and whitening)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Accommodation | "closed mouth smile" / "I do smile for the photos which I hate doing" | [9] | Hook (C1) |
+| Others notice | "she gets disappointed with the pictures because I'm not smiling 'properly'" | [9] | Problem |
+| The word | "streaking and white spots on his adult front teeth" | [10] | Hook (C4) |
+
+[9] https://www.mumsnet.com/talk/am_i_being_unreasonable/4614667-to-not-want-to-show-my-teeth-in-photos
+[10] https://www.mumsnet.com/talk/_chat/5077938-fluorosis-feeling-terrible
+
+Siha facts used for Claire: ICON removes white and brown spots without drilling or injections, in a single 60 to 90 minute appointment, results visible straight away, can be repeated; treats post-braces white spots, fluorosis, early decay, trauma discolouration (ICON page). £395 for up to two teeth, £100 per extra tooth (fees page). Whitening first is recommended so the resin matches the brighter shade (ICON page). Enlighten: 14 nights at home, custom trays, VITA B1 shade guarantee (whitening page). The video-call angle is from the persona bank (Claire), not a forum quote.

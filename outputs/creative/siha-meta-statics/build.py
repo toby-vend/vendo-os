@@ -263,7 +263,7 @@ def josh_9x16():
 
 
 # ---------------------------------------------------------------- HANNAH (trend follower)
-def shade_tabs(x, y, scale=1.0):
+def shade_tabs(x, y, scale=1.0, label="YOURS"):
     """A row of shade-guide tabs (tooth shades, tints of the brand neutrals) with real shadows."""
     shades = ["#f6f2ea", "#f1eadf", "#ebe1d2", "#e4d7c4", "#dccbb3", "#d2bf a4".replace(" ", "")]
     tabs = []
@@ -280,7 +280,7 @@ def shade_tabs(x, y, scale=1.0):
                     f'background:linear-gradient(180deg,#fffdf9 0%,{c} 38%,{c} 100%);'
                     f'box-shadow:0 {int(18*scale)}px {int(30*scale)}px rgba(20,33,26,.22),0 {int(3*scale)}px {int(6*scale)}px rgba(20,33,26,.18),inset 0 -{int(10*scale)}px {int(18*scale)}px rgba(135,118,99,.18);{ring}"></div>')
     label = (f'<div class="small" style="position:absolute;left:{2*(w+gap)}px;top:{h+int(28*scale)}px;width:{w}px;text-align:center;'
-             f'font-size:{int(20*scale)}px;color:{C["bo"]};font-weight:600;letter-spacing:.12em">YOURS</div>')
+             f'font-size:{int(20*scale)}px;color:{C["bo"]};font-weight:600;letter-spacing:.12em">{label}</div>')
     return f'<div style="position:absolute;left:{x}px;top:{y}px;width:{6*(w+gap)}px;height:{h+60}px">{"".join(tabs)}{label}</div>'
 
 
@@ -736,6 +736,149 @@ def niamh_9x16():
     return page("Siha | Niamh | 9x16", b)
 
 
+
+# ---------------------------------------------------------------- CLAIRE (camera-conscious, ICON)
+def video_call(x, y, w, scale=1.0):
+    h = int(w * 0.66)
+    tile_w, tile_h = (w - int(54 * scale)) // 2, (h - int(110 * scale)) // 2
+    def tile(label, initials, you=False):
+        ring = f"border:{max(2,int(3*scale))}px solid {C['bo']};" if you else "border:1px solid rgba(225,213,202,.12);"
+        person = (f'<svg viewBox="0 0 100 100" width="{int(tile_h*0.62)}" height="{int(tile_h*0.62)}" style="display:block">'
+                  f'<circle cx="50" cy="36" r="18" fill="{C["gl"]}"/><path d="M14 96c4-22 19-33 36-33s32 11 36 33z" fill="{C["gl"]}"/></svg>') if you else \
+                 (f'<div style="width:{int(tile_h*0.42)}px;height:{int(tile_h*0.42)}px;border-radius:50%;background:{C["ol"]};color:{C["be"]};'
+                  f'display:flex;align-items:center;justify-content:center;font-size:{int(tile_h*0.15)}px;font-weight:500">{initials}</div>')
+        return (f'<div style="position:relative;width:{tile_w}px;height:{tile_h}px;border-radius:{int(12*scale)}px;box-sizing:border-box;'
+                f'background:{"#24342b" if you else "#1b2a22"};{ring}display:flex;align-items:center;justify-content:center">{person}'
+                f'<div style="position:absolute;left:{int(12*scale)}px;bottom:{int(10*scale)}px;font-size:{int(15*scale)}px;font-weight:500;color:{C["be"]}">{label}</div></div>')
+    tiles = tile("You", "", True) + tile("Weekly review", "WR") + tile("Sam", "S") + tile("Priya", "P")
+    dot = lambda c: f'<span style="width:{int(40*scale)}px;height:{int(40*scale)}px;border-radius:50%;background:{c};display:inline-block"></span>'
+    bar = (f'<div style="display:flex;gap:{int(14*scale)}px;justify-content:center;margin-top:{int(16*scale)}px">'
+           f'{dot("#33463b")}{dot("#33463b")}{dot(C["bo"])}</div>')
+    return (f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;padding:{int(18*scale)}px;box-sizing:border-box;border-radius:{int(18*scale)}px;'
+            f'background:#101a14;box-shadow:0 {int(40*scale)}px {int(80*scale)}px rgba(0,0,0,.45),0 {int(6*scale)}px {int(14*scale)}px rgba(0,0,0,.3)">'
+            f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:{int(18*scale)}px">{tiles}</div>{bar}</div>')
+
+
+def claire_1x1():
+    b = []
+    b.append(f"""
+<div class="ab s1" id="C1" data-name="Claire | Static | Mouth closed | 1x1" style="background:{C['od']}">
+  <div class="cover" style="background-image:url(assets/photos/face-photo.jpg);background-size:200%;background-position:34% 88%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.2) 0%,rgba(20,33,26,.4) 40%,rgba(20,33,26,.9) 62%,{C['od']} 78%)"></div>
+  <div class="abs hl" style="left:80px;top:560px;font-size:62px;color:{C['nu']}">You smile with your<br><b>mouth closed</b> in<br>every photo.</div>
+  <div class="abs body" style="left:80px;top:790px;width:860px;font-size:26px;color:{C['be']}">Those marks can go in one appointment. No needles, no drilling.</div>
+  <div class="abs" style="left:80px;top:860px">{proof(C['be'],20)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="C2" data-name="Claire | Static | Video calls | 1x1" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 60% 60%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
+  <div class="abs hl" style="left:80px;top:90px;font-size:54px;color:{C['od']}">You&rsquo;ve watched your own<br>smile on <b>every call</b> this week.</div>
+  {video_call(170, 300, 740)}
+  <div class="abs body" style="left:80px;top:840px;width:900px;font-size:26px;color:{C['ol']}">White spots and marks, gone in one 90-minute appointment.</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="C3" data-name="Claire | Static | One appointment | 1x1" style="background:{C['od']}">
+  <div class="cover" style="left:460px;background-image:url(assets/photos/lounge-desk-1.jpg);background-position:58% 50%"></div>
+  <div class="cover" style="background:linear-gradient(90deg,{C['od']} 0%,{C['od']} 42%,rgba(20,33,26,.6) 62%,rgba(20,33,26,.1) 100%)"></div>
+  <div class="abs hl" style="left:80px;top:120px;font-size:72px;color:{C['nu']}">One<br>appointment.<br><b>90 minutes.</b><br>No needles.</div>
+  <div class="abs body" style="left:80px;top:560px;width:480px;font-size:27px;color:{C['be']}">ICON white spot treatment. No drilling, nothing healthy removed.</div>
+  <div class="abs" style="left:80px;top:690px;color:{C['nu']}"><span class="small" style="font-size:20px;letter-spacing:.14em;color:{C['be']}">FROM</span> <span class="price" style="font-size:72px">£395</span></div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="C4" data-name="Claire | Static | Braces white spots | 1x1" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 75% 30%,#f1e9e1 0%,{C['be']} 48%,#d2c2b2 100%)"></div>
+  {sframe(620, 110, 390, 704, 'drinks-station.jpg', fx=0.5, fy=0.3)}
+  <div class="abs hl" style="left:80px;top:130px;font-size:60px;color:{C['bo']}">Those<br>white spots<br>from your<br><b>braces?</b></div>
+  <div class="abs body" style="left:80px;top:470px;width:480px;font-size:30px;font-weight:500;color:{C['od']}">They can fade in one visit. No drilling.</div>
+  <div class="abs body" style="left:80px;top:580px;width:470px;font-size:23px;color:{C['ol']}">ICON fills the marked enamel with resin, so the spot blends into the tooth. From £395.</div>
+  <div class="abs" style="left:80px;top:720px">{proof(C['br'],20)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="C5" data-name="Claire | Static | Whiten first | 1x1" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 50% 42%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
+  <div class="abs hl" style="left:80px;top:100px;font-size:78px;color:{C['od']}">Whiten first.<br><b>Then the spots.</b></div>
+  {shade_tabs(118, 400, label="B1")}
+  <div class="abs body" style="left:80px;top:745px;width:860px;font-size:30px;color:{C['bo']};font-weight:500">The order is what makes it blend.</div>
+  <div class="abs body" style="left:80px;top:800px;width:880px;font-size:23px;color:{C['ol']}">Enlighten whitening with a VITA B1 shade guarantee, then ICON for the marks, matched to your new shade.</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:620px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Claire | 1x1", b)
+
+
+def claire_9x16():
+    b = []
+    b.append(f"""
+<div class="ab s9" id="C1s" data-name="Claire | Static | Mouth closed | 9x16" style="background:{C['od']}">
+  <div class="cover" style="height:1150px;background-image:url(assets/photos/face-photo.jpg);background-size:auto 150%;background-position:44% 38%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.15) 0%,rgba(20,33,26,.4) 35%,rgba(20,33,26,.92) 54%,{C['od']} 64%)"></div>
+  <div class="abs hl" style="left:90px;top:1000px;font-size:80px;color:{C['nu']}">You smile with<br>your <b>mouth closed</b><br>in every photo.</div>
+  <div class="abs body" style="left:90px;top:1290px;width:880px;font-size:32px;color:{C['be']}">Those marks can go in one appointment. No needles, no drilling.</div>
+  <div class="abs" style="left:90px;top:1395px">{proof(C['be'],22)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta light">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1474px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="C2s" data-name="Claire | Static | Video calls | 9x16" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 50% 50%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
+  <div class="abs hl" style="left:90px;top:300px;font-size:76px;color:{C['od']}">You&rsquo;ve watched<br>your own smile on<br><b>every call</b> this week.</div>
+  {video_call(90, 640, 900, scale=1.15)}
+  <div class="abs body" style="left:90px;top:1300px;width:880px;font-size:34px;color:{C['ol']}">White spots and marks, gone in one 90-minute appointment.</div>
+  <div class="abs" style="left:90px;top:1440px"><span class="cta dark">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="C3s" data-name="Claire | Static | One appointment | 9x16" style="background:{C['od']}">
+  <div class="cover" style="height:900px;background-image:url(assets/photos/lounge-desk-1.jpg);background-position:55% 50%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.25) 0%,rgba(20,33,26,.5) 30%,{C['od']} 47%)"></div>
+  <div class="abs hl" style="left:90px;top:720px;font-size:92px;color:{C['nu']}">One appointment.<br><b>90 minutes.</b><br>No needles.</div>
+  <div class="abs body" style="left:90px;top:1050px;width:880px;font-size:34px;color:{C['be']}">ICON white spot treatment. No drilling, nothing healthy removed.</div>
+  <div class="abs" style="left:90px;top:1190px;color:{C['nu']}"><span class="small" style="font-size:24px;letter-spacing:.14em;color:{C['be']}">FROM</span> <span class="price" style="font-size:110px">£395</span></div>
+  <div class="abs" style="left:90px;top:1440px"><span class="cta light">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="C4s" data-name="Claire | Static | Braces white spots | 9x16" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 55% 25%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
+  {sframe(360, 230, 360, 650, 'drinks-station.jpg', fx=0.5, fy=0.3)}
+  <div class="abs hl" style="left:90px;top:940px;font-size:80px;color:{C['bo']}">Those white spots<br>from your <b>braces?</b></div>
+  <div class="abs body" style="left:90px;top:1140px;width:880px;font-size:36px;font-weight:500;color:{C['od']}">They can fade in one visit. No drilling.</div>
+  <div class="abs body" style="left:90px;top:1210px;width:880px;font-size:29px;color:{C['ol']}">ICON fills the marked enamel with resin, so the spot blends into the tooth. From £395.</div>
+  <div class="abs" style="left:90px;top:1360px">{proof(C['br'],22)}</div>
+  <div class="abs" style="left:90px;top:1440px"><span class="cta dark">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="C5s" data-name="Claire | Static | Whiten first | 9x16" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 50% 45%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
+  <div class="abs hl" style="left:90px;top:320px;font-size:96px;color:{C['od']}">Whiten first.<br><b>Then the spots.</b></div>
+  {shade_tabs(130, 720, 1.05, label="B1")}
+  <div class="abs body" style="left:90px;top:1130px;width:880px;font-size:40px;color:{C['bo']};font-weight:500">The order is what makes it blend.</div>
+  <div class="abs body" style="left:90px;top:1200px;width:880px;font-size:29px;color:{C['ol']}">Enlighten whitening with a VITA B1 shade guarantee, then ICON for the marks, matched to your new shade.</div>
+  <div class="abs" style="left:90px;top:1440px"><span class="cta dark">{CTA_FREE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Claire | 9x16", b)
+
+
 if __name__ == "__main__":
     (ROOT / "josh-1x1.html").write_text(josh_1x1())
     (ROOT / "josh-9x16.html").write_text(josh_9x16())
@@ -745,4 +888,6 @@ if __name__ == "__main__":
     (ROOT / "mark-9x16.html").write_text(mark_9x16())
     (ROOT / "niamh-1x1.html").write_text(niamh_1x1())
     (ROOT / "niamh-9x16.html").write_text(niamh_9x16())
+    (ROOT / "claire-1x1.html").write_text(claire_1x1())
+    (ROOT / "claire-9x16.html").write_text(claire_9x16())
     print("built")
