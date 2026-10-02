@@ -87,3 +87,17 @@ Siha facts used for Hannah: aligner cases designed by an orthodontist (Hannan, o
 [7] https://www.mumsnet.com/talk/general_health/4842849-scared-of-the-dentist
 
 Siha facts used for Mark: £89 new patient check-up covering teeth, gums, jaw joints, oral cancer screening, small X-rays, 3D scans, photographs and cosmetic goals (Hannan, onboarding call); first step is a call with the patient concierge, and the plan lists essential, recommended and elective options with transparent pricing (siha.dental new patient page); "Many of our patients have avoided the dentist for years... We've never once judged anyone for it" (nervous patients page); 30 Google reviews mention kind staff (Google review topics); Tue to 7pm and Sat 9 to 5 (site hours).
+
+## Customer language for Niamh (anxious, needs control)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Accommodation | "I had two long appointments in the diary for January which I cancelled" | [8] | Hook (N3) |
+| Accommodation | "all i have to do is lay down in the chair and hang on to my ring" | [8] | Problem |
+| Need for predictability | "it was uncomfortable, but only lasted 15 seconds (I was counting)" | [8] | Mechanism (N2) |
+| The fear | "Just the thought of sitting in that chair makes me feel sick." / "Even hearing drills etc on the TV or radio make me feel sick." | [8] | Problem (N2, N4) |
+| Dismissed before | "she was awful and said 'well if you looked after them properly it wouldn't hurt'" | [8] | Objection (N1) |
+
+[8] https://www.mumsnet.com/talk/feeling_depressed/730793-Dental-phobia-I-HAVE-to-go-and-am-getting-anxious
+
+Siha facts used for Niamh (siha.dental/nervous-patients): agreed signals to pause whenever you need; treatment stopped immediately if you're uncomfortable; every step explained before you're in the chair; before the appointment you're told what the room looks like, who will treat you, what pain relief and how it works, how long it takes, and that you can stop at any moment; "we go at your pace, always"; "no harsh clinical smells, no intimidating equipment on display... more like a calm retreat than a surgery". 20 Google reviews mention the welcoming atmosphere. Siha's site doesn't advertise sedation, so none is claimed.

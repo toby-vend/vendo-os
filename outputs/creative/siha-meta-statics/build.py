@@ -596,6 +596,146 @@ def mark_9x16():
     return page("Siha | Mark | 9x16", b)
 
 
+
+# ---------------------------------------------------------------- NIAMH (anxious, needs control)
+CTA_ONLINE = "Book online"
+
+
+def bullets(items, color_dot, color_t, size=26, gap=14):
+    return "".join(
+        f'<div style="display:flex;align-items:center;gap:18px;margin-bottom:{gap}px">'
+        f'<span style="width:9px;height:9px;flex:none;border-radius:50%;background:{color_dot}"></span>'
+        f'<span style="font-size:{size}px;line-height:1.3;color:{color_t}">{t}</span></div>' for t in items)
+
+
+def control_cards(x, y, w, scale=1.0):
+    items = ["A pause signal, agreed before we start", "Every step explained first", "Book online, no phone call needed"]
+    out = []
+    for i, t in enumerate(items):
+        out.append(f'<div style="position:absolute;left:{int(i*26*scale)}px;top:{int(i*150*scale)}px;width:{w}px;padding:{int(30*scale)}px {int(36*scale)}px;'
+                   f'background:#fbf9f6;border-radius:{int(18*scale)}px;display:flex;align-items:center;gap:{int(24*scale)}px;'
+                   f'box-shadow:0 {int(22*scale)}px {int(44*scale)}px rgba(20,33,26,.2),0 {int(4*scale)}px {int(10*scale)}px rgba(20,33,26,.12)">'
+                   f'<div style="width:{int(56*scale)}px;height:{int(56*scale)}px;flex:none;border-radius:50%;background:{C["ol"]};color:{C["be"]};display:flex;align-items:center;justify-content:center;font-size:{int(24*scale)}px;font-weight:500">{i+1}</div>'
+                   f'<div style="font-size:{int(28*scale)}px;font-weight:500;color:{C["od"]};line-height:1.25">{t}</div></div>')
+    return f'<div class="abs" style="left:{x}px;top:{y}px;width:{w+60}px;height:{int(460*scale)}px">{"".join(out)}</div>'
+
+
+def niamh_1x1():
+    b = []
+    b.append(f"""
+<div class="ab s1" id="N1" data-name="Niamh | Static | Stop signal | 1x1" style="background:{C['od']}">
+  <div class="cover" style="background-image:url(assets/photos/hygiene-suite.jpg);background-position:35% 50%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.25) 0%,rgba(20,33,26,.45) 35%,rgba(20,33,26,.88) 58%,{C['od']} 75%)"></div>
+  <div class="abs hl" style="left:80px;top:520px;font-size:74px;color:{C['nu']}">Raise your hand.<br><b>We stop.</b> Every time.</div>
+  <div class="abs body" style="left:80px;top:720px;width:820px;font-size:28px;color:{C['be']}">We agree a pause signal before anything starts. No explanation needed.</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:790px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_ONLINE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="N2" data-name="Niamh | Static | No surprises | 1x1" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(circle at 78% 30%,#f4efea 0%,{C['nu']} 48%,#ddd2c8 100%)"></div>
+  {sframe(620, 110, 390, 704, 'suite-one-consultation-space.jpg', fx=0.45, fy=0.5)}
+  <div class="abs hl" style="left:80px;top:120px;font-size:50px;color:{C['od']}">You&rsquo;ll know<br>what happens<br><b>before it<br>happens.</b></div>
+  <div class="abs" style="left:80px;top:420px;width:500px">{bullets(["What the room looks like", "Who you&rsquo;ll see", "What pain relief we use, and how", "How long it takes", "That you can stop at any moment"], C['bo'], C['ol'], size=25, gap=14)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:790px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_ONLINE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="N3" data-name="Niamh | Static | Booked it cancelled it | 1x1" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 25% 20%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
+  <div class="abs" style="left:540px;top:80px;width:460px;height:820px;border-radius:30px;overflow:hidden;box-shadow:0 26px 54px rgba(20,33,26,.18)">
+    <div class="cover" style="background-image:url(assets/photos/concierge.jpg);background-position:42% 40%"></div>
+  </div>
+  <div class="abs hl" style="left:80px;top:130px;font-size:58px;color:{C['od']}">Booked it.<br><span style="text-decoration:line-through;text-decoration-thickness:4px;text-decoration-color:{C['bo']}">Cancelled it.</span><br><b>Booked it<br>again.</b></div>
+  <div class="abs body" style="left:80px;top:500px;width:420px;font-size:30px;font-weight:500;color:{C['bo']}">Start with a conversation, not the chair.</div>
+  <div class="abs body" style="left:80px;top:610px;width:420px;font-size:23px;color:{C['ol']}">Your first contact is our patient concierge. Tell us what would help.</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:80px;top:770px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_ONLINE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="N4" data-name="Niamh | Static | No clinical smell | 1x1" style="background:{C['od']}">
+  <div class="cover" style="background-image:url(assets/photos/lounge.jpg);background-position:55% 50%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.85) 0%,rgba(20,33,26,.55) 28%,rgba(20,33,26,.2) 55%,rgba(20,33,26,.85) 100%)"></div>
+  <div class="abs hl" style="left:80px;top:90px;font-size:62px;color:{C['nu']}">No harsh clinical smell.<br><b>No equipment on display.</b></div>
+  <div class="abs body" style="left:80px;top:830px;width:800px;font-size:28px;color:{C['nu']}">A practice designed, on purpose, not to feel like one.</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:790px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_ONLINE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="N5" data-name="Niamh | Static | You set the pace | 1x1" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 60% 55%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
+  <div class="abs" style="left:700px;top:30px;width:330px;color:{C['bo']}">{LINE_S}</div>
+  <div class="abs hl" style="left:80px;top:110px;font-size:90px;color:{C['od']}">You set<br>the <b>pace.</b></div>
+  {control_cards(100, 440, 760)}
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:790px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_ONLINE}</span></div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Niamh | 1x1", b)
+
+
+def niamh_9x16():
+    b = []
+    b.append(f"""
+<div class="ab s9" id="N1s" data-name="Niamh | Static | Stop signal | 9x16" style="background:{C['od']}">
+  <div class="cover" style="height:1150px;background-image:url(assets/photos/hygiene-suite.jpg);background-position:30% 50%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.2) 0%,rgba(20,33,26,.45) 35%,rgba(20,33,26,.9) 52%,{C['od']} 62%)"></div>
+  <div class="abs hl" style="left:90px;top:960px;font-size:92px;color:{C['nu']}">Raise your hand.<br><b>We stop.</b><br>Every time.</div>
+  <div class="abs body" style="left:90px;top:1290px;width:880px;font-size:34px;color:{C['be']}">We agree a pause signal before anything starts. No explanation needed.</div>
+  <div class="abs" style="left:90px;top:1450px"><span class="cta light">{CTA_ONLINE}</span></div>
+  <div class="abs" style="left:780px;top:1464px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="N2s" data-name="Niamh | Static | No surprises | 9x16" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(circle at 55% 25%,#f4efea 0%,{C['nu']} 45%,#ddd2c8 100%)"></div>
+  {sframe(360, 230, 360, 650, 'suite-one-consultation-space.jpg', fx=0.45, fy=0.5)}
+  <div class="abs hl" style="left:90px;top:930px;font-size:70px;color:{C['od']}">You&rsquo;ll know what<br>happens <b>before<br>it happens.</b></div>
+  <div class="abs" style="left:90px;top:1160px;width:880px">{bullets(["What the room looks like", "Who you&rsquo;ll see", "What pain relief we use, and how", "How long it takes", "That you can stop at any moment"], C['bo'], C['ol'], size=29, gap=10)}</div>
+  <div class="abs" style="left:90px;top:1440px"><span class="cta dark">{CTA_ONLINE}</span></div>
+  <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="N3s" data-name="Niamh | Static | Booked it cancelled it | 9x16" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 30% 20%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
+  <div class="abs" style="left:90px;top:260px;width:900px;height:640px;border-radius:30px;overflow:hidden;box-shadow:0 26px 54px rgba(20,33,26,.18)">
+    <div class="cover" style="background-image:url(assets/photos/concierge.jpg);background-position:45% 40%"></div>
+  </div>
+  <div class="abs hl" style="left:90px;top:960px;font-size:82px;color:{C['od']}">Booked it.<br><span style="text-decoration:line-through;text-decoration-thickness:5px;text-decoration-color:{C['bo']}">Cancelled it.</span><br><b>Booked it again.</b></div>
+  <div class="abs body" style="left:90px;top:1250px;width:880px;font-size:36px;font-weight:500;color:{C['bo']}">Start with a conversation, not the chair.</div>
+  <div class="abs body" style="left:90px;top:1320px;width:880px;font-size:28px;color:{C['ol']}">Your first contact is our patient concierge. Tell us what would help.</div>
+  <div class="abs" style="left:90px;top:1450px"><span class="cta dark">{CTA_ONLINE}</span></div>
+  <div class="abs" style="left:780px;top:1464px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="N4s" data-name="Niamh | Static | No clinical smell | 9x16" style="background:{C['od']}">
+  <div class="cover" style="background-image:url(assets/photos/lounge.jpg);background-position:55% 50%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.88) 0%,rgba(20,33,26,.55) 26%,rgba(20,33,26,.15) 50%,rgba(20,33,26,.9) 82%)"></div>
+  <div class="abs hl" style="left:90px;top:300px;font-size:80px;color:{C['nu']}">No harsh<br>clinical smell.<br><b>No equipment<br>on display.</b></div>
+  <div class="abs body" style="left:90px;top:1300px;width:880px;font-size:36px;color:{C['nu']}">A practice designed, on purpose, not to feel like one.</div>
+  <div class="abs" style="left:90px;top:1450px"><span class="cta light">{CTA_ONLINE}</span></div>
+  <div class="abs" style="left:780px;top:1464px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="N5s" data-name="Niamh | Static | You set the pace | 9x16" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(ellipse at 50% 55%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
+  <div class="abs" style="left:640px;top:230px;width:380px;color:{C['bo']}">{LINE_S}</div>
+  <div class="abs hl" style="left:90px;top:330px;font-size:120px;color:{C['od']}">You set<br>the <b>pace.</b></div>
+  {control_cards(100, 760, 820, scale=1.1)}
+  <div class="abs" style="left:90px;top:1450px"><span class="cta dark">{CTA_ONLINE}</span></div>
+  <div class="abs" style="left:780px;top:1464px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Niamh | 9x16", b)
+
+
 if __name__ == "__main__":
     (ROOT / "josh-1x1.html").write_text(josh_1x1())
     (ROOT / "josh-9x16.html").write_text(josh_9x16())
@@ -603,4 +743,6 @@ if __name__ == "__main__":
     (ROOT / "hannah-9x16.html").write_text(hannah_9x16())
     (ROOT / "mark-1x1.html").write_text(mark_1x1())
     (ROOT / "mark-9x16.html").write_text(mark_9x16())
+    (ROOT / "niamh-1x1.html").write_text(niamh_1x1())
+    (ROOT / "niamh-9x16.html").write_text(niamh_9x16())
     print("built")
