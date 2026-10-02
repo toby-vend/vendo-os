@@ -431,9 +431,176 @@ def hannah_9x16():
     return page("Siha | Hannah | 9x16", b)
 
 
+
+# ---------------------------------------------------------------- MARK (lapsed patient)
+CTA_CHECK = "Book your check-up"
+TICK = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg>'
+
+
+def numbered(items, color_n, color_t, size=30, gap=26, circle=52):
+    out = []
+    for i, t in enumerate(items, 1):
+        out.append(f'<div style="display:flex;align-items:center;gap:22px;margin-bottom:{gap}px">'
+                   f'<div style="width:{circle}px;height:{circle}px;flex:none;border:2px solid {color_n};border-radius:50%;display:flex;align-items:center;justify-content:center;'
+                   f'font-size:{int(circle*0.42)}px;font-weight:500;color:{color_n}">{i}</div>'
+                   f'<div style="font-size:{size}px;font-weight:400;line-height:1.3;color:{color_t}">{t}</div></div>')
+    return "".join(out)
+
+
+def plan_card(x, y, w, scale=1.0, rot=-1.4):
+    rows = [("Needs doing now", "Essential"), ("Can wait", "Recommended"), ("Your choice", "Optional")]
+    r = []
+    for i, (a, b_) in enumerate(rows):
+        border = f"border-top:1px solid #ddd3c8;" if i else ""
+        r.append(f'<div style="display:flex;justify-content:space-between;align-items:center;padding:{int(22*scale)}px 0;{border}">'
+                 f'<span style="font-size:{int(28*scale)}px;font-weight:500;color:{C["od"]}">{a}</span>'
+                 f'<span style="font-size:{int(20*scale)}px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:{C["bo"]}">{b_}</span></div>')
+    return (f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;padding:{int(40*scale)}px {int(48*scale)}px;background:#f3eee9;border-radius:6px;'
+            f'transform:rotate({rot}deg);box-shadow:0 30px 60px rgba(0,0,0,.35),0 6px 14px rgba(0,0,0,.22)">'
+            f'<div class="eyebrow" style="font-size:{int(18*scale)}px;color:{C["br"]};margin-bottom:{int(10*scale)}px">Your plan, in order</div>'
+            f'{"".join(r)}'
+            f'<div style="font-size:{int(20*scale)}px;color:{C["br"]};margin-top:{int(10*scale)}px">A price for each, before anything starts.</div></div>')
+
+
+CHECK_ITEMS = ["Teeth and gums", "Jaw joints", "Oral cancer screening", "Small X-rays", "3D scan and photos", "A plan with prices"]
+
+
+def receipt(x, y, w, scale=1.0, rot=1.2):
+    items = "".join(
+        f'<div style="display:flex;align-items:center;gap:{int(16*scale)}px;padding:{int(12*scale)}px 0;color:{C["od"]}">'
+        f'<span style="color:{C["bo"]};display:flex">{TICK.format(s=int(26*scale))}</span>'
+        f'<span style="font-size:{int(27*scale)}px">{t}</span></div>' for t in CHECK_ITEMS)
+    return (f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;padding:{int(38*scale)}px {int(44*scale)}px;background:#fbf9f6;border-radius:8px;'
+            f'transform:rotate({rot}deg);box-shadow:0 34px 64px rgba(20,33,26,.22),0 6px 14px rgba(20,33,26,.14)">'
+            f'<div class="eyebrow" style="font-size:{int(17*scale)}px;color:{C["br"]};margin-bottom:{int(12*scale)}px">Your new patient check-up</div>'
+            f'{items}</div>')
+
+
+def mark_1x1():
+    b = []
+    b.append(f"""
+<div class="ab s1" id="M1" data-name="Mark | Static | No telling off | 1x1" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(circle at 75% 30%,#f4efea 0%,{C['nu']} 48%,#ddd2c8 100%)"></div>
+  {sframe(620, 110, 390, 704, 'hannan-2.jpg', fx=0.5, fy=0.15)}
+  <div class="abs hl" style="left:80px;top:120px;font-size:52px;color:{C['od']}">You think<br>we&rsquo;ll tell you<br>off for leaving<br>it so <b>long.</b></div>
+  <div class="abs body" style="left:80px;top:440px;width:470px;font-size:38px;font-weight:600;color:{C['bo']}">We won&rsquo;t.</div>
+  <div class="abs body" style="left:80px;top:510px;width:470px;font-size:25px;color:{C['ol']}">Plenty of our patients have stayed away for years. We&rsquo;ve never judged anyone for it.</div>
+  <div class="abs" style="left:80px;top:690px">{proof(C['br'],20)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:700px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_CHECK}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="M2" data-name="Mark | Static | What happens | 1x1" style="background:{C['od']}">
+  <div class="cover" style="height:400px;background-image:url(assets/photos/patient-concierge.jpg);background-position:50% 60%"></div>
+  <div class="cover" style="top:160px;height:260px;background:linear-gradient(180deg,rgba(20,33,26,0) 0%,{C['od']} 100%)"></div>
+  <div class="abs hl" style="left:80px;top:360px;font-size:52px;color:{C['nu']}">If it&rsquo;s been years, here&rsquo;s<br>exactly <b>what happens.</b></div>
+  <div class="abs" style="left:80px;top:520px">{numbered(["A quick call with our patient concierge", "A full check-up, with X-rays and a 3D scan", "Your plan, in order, with prices", "You decide what happens next"], C['be'], C['nu'], size=26, gap=18, circle=46)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:700px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_CHECK}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="M3" data-name="Mark | Static | Not one big bill | 1x1" style="background:{C['od']}">
+  <div class="cover" style="background-image:url(assets/photos/hygienist-action.jpg);background-position:30% 40%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.9) 0%,rgba(20,33,26,.55) 30%,rgba(20,33,26,.35) 50%,rgba(20,33,26,.85) 100%)"></div>
+  <div class="abs hl" style="left:80px;top:90px;font-size:68px;color:{C['nu']}">Worried it&rsquo;ll be<br>one <b>huge bill?</b></div>
+  {plan_card(330, 420, 650)}
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:700px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_CHECK}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="M4" data-name="Mark | Static | The twinge | 1x1" style="background:{C['od']}">
+  <div class="cover" style="left:520px;background-image:url(assets/photos/lounge-seating-2.jpg);background-position:50% 55%"></div>
+  <div class="cover" style="background:linear-gradient(90deg,{C['od']} 0%,{C['od']} 45%,rgba(20,33,26,.55) 65%,rgba(20,33,26,.1) 100%)"></div>
+  <div class="abs hl" style="left:80px;top:130px;font-size:70px;color:{C['nu']}">That twinge<br>hasn&rsquo;t gone<br>away, has it?</div>
+  <div class="abs body" style="left:80px;top:470px;width:480px;font-size:28px;color:{C['be']}">Small problems are quicker to sort early.</div>
+  <div class="abs body" style="left:80px;top:580px;width:480px;font-size:24px;color:{C['be']}">Check-up <b style="color:{C['nu']}">£89</b>. Tuesday evenings and Saturdays available.</div>
+  <div class="abs" style="left:80px;top:700px">{proof(C['be'],20)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="abs" style="left:700px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_CHECK}</span></div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s1" id="M5" data-name="Mark | Static | 89 check-up | 1x1" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 25% 25%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
+  <div class="abs price" style="left:70px;top:120px;font-size:200px;color:{C['bo']}">£89</div>
+  <div class="abs hl" style="left:80px;top:320px;font-size:44px;color:{C['od']}">Everything<br><b>checked.</b></div>
+  <div class="abs body" style="left:80px;top:470px;width:380px;font-size:25px;color:{C['ol']}">Then a plan in order, with a price for each. Nothing happens unless you decide it should.</div>
+  {receipt(530, 130, 450)}
+  <div class="abs" style="left:80px;top:720px">{proof(C['br'],20)}</div>
+  <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs" style="left:700px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_CHECK}</span></div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Mark | 1x1", b)
+
+
+def mark_9x16():
+    b = []
+    b.append(f"""
+<div class="ab s9" id="M1s" data-name="Mark | Static | No telling off | 9x16" style="background:{C['nu']}">
+  <div class="cover" style="background:radial-gradient(circle at 55% 28%,#f4efea 0%,{C['nu']} 45%,#ddd2c8 100%)"></div>
+  {sframe(330, 240, 420, 758, 'hannan-2.jpg', fx=0.5, fy=0.15)}
+  <div class="abs hl" style="left:90px;top:1050px;font-size:72px;color:{C['od']}">You think we&rsquo;ll tell<br>you off for leaving<br>it so <b>long.</b></div>
+  <div class="abs body" style="left:90px;top:1300px;width:880px;font-size:44px;font-weight:600;color:{C['bo']}">We won&rsquo;t.</div>
+  <div class="abs body" style="left:90px;top:1370px;width:880px;font-size:30px;color:{C['ol']}">Plenty of our patients have stayed away for years. We&rsquo;ve never judged anyone for it.</div>
+  <div class="abs" style="left:90px;top:1478px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_CHECK}</span></div>
+  <div class="abs" style="left:780px;top:1484px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="M2s" data-name="Mark | Static | What happens | 9x16" style="background:{C['od']}">
+  <div class="cover" style="height:820px;background-image:url(assets/photos/patient-concierge.jpg);background-position:45% 60%"></div>
+  <div class="cover" style="top:420px;height:420px;background:linear-gradient(180deg,rgba(20,33,26,0) 0%,{C['od']} 100%)"></div>
+  <div class="abs hl" style="left:90px;top:770px;font-size:74px;color:{C['nu']}">If it&rsquo;s been years,<br>here&rsquo;s exactly<br><b>what happens.</b></div>
+  <div class="abs" style="left:90px;top:1060px">{numbered(["A quick call with our patient concierge", "A full check-up, with X-rays and a 3D scan", "Your plan, in order, with prices", "You decide what happens next"], C['be'], C['nu'], size=31, gap=22, circle=54)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta light">{CTA_CHECK}</span></div>
+  <div class="abs" style="left:780px;top:1474px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="M3s" data-name="Mark | Static | Not one big bill | 9x16" style="background:{C['od']}">
+  <div class="cover" style="background-image:url(assets/photos/hygienist-action.jpg);background-position:35% 40%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.92) 0%,rgba(20,33,26,.5) 25%,rgba(20,33,26,.4) 45%,rgba(20,33,26,.9) 75%)"></div>
+  <div class="abs hl" style="left:90px;top:300px;font-size:90px;color:{C['nu']}">Worried it&rsquo;ll<br>be one<br><b>huge bill?</b></div>
+  {plan_card(110, 900, 860, scale=1.12)}
+  <div class="abs" style="left:90px;top:1460px"><span class="cta light">{CTA_CHECK}</span></div>
+  <div class="abs" style="left:780px;top:1474px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="M4s" data-name="Mark | Static | The twinge | 9x16" style="background:{C['od']}">
+  <div class="cover" style="height:1050px;background-image:url(assets/photos/lounge-seating-2.jpg);background-position:50% 50%"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.2) 0%,rgba(20,33,26,.55) 35%,{C['od']} 55%)"></div>
+  <div class="abs hl" style="left:90px;top:820px;font-size:90px;color:{C['nu']}">That twinge<br>hasn&rsquo;t gone away,<br>has it?</div>
+  <div class="abs body" style="left:90px;top:1150px;width:880px;font-size:34px;color:{C['be']}">Small problems are quicker to sort early. Check-up <b style="color:{C['nu']}">£89</b>. Tuesday evenings and Saturdays available.</div>
+  <div class="abs" style="left:90px;top:1330px">{proof(C['be'],24)}</div>
+  <div class="abs" style="left:90px;top:1420px"><span class="cta light">{CTA_CHECK}</span></div>
+  <div class="abs" style="left:780px;top:1434px;width:200px;color:{C['be']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    b.append(f"""
+<div class="ab s9" id="M5s" data-name="Mark | Static | 89 check-up | 9x16" style="background:{C['be']}">
+  <div class="cover" style="background:radial-gradient(circle at 30% 25%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
+  <div class="abs price" style="left:80px;top:280px;font-size:300px;color:{C['bo']}">£89</div>
+  <div class="abs hl" style="left:90px;top:570px;font-size:60px;color:{C['od']}">Everything <b>checked.</b></div>
+  {receipt(140, 700, 800, scale=1.15)}
+  <div class="abs body" style="left:90px;top:1330px;width:880px;font-size:30px;color:{C['ol']}">Then a plan in order, with a price for each.</div>
+  <div class="abs" style="left:90px;top:1400px">{proof(C['br'],22)}</div>
+  <div class="abs" style="left:90px;top:1470px"><span class="cta dark" style="height:64px;font-size:18px;padding:0 34px">{CTA_CHECK}</span></div>
+  <div class="abs" style="left:780px;top:1476px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="grain"></div>
+</div>""")
+    return page("Siha | Mark | 9x16", b)
+
+
 if __name__ == "__main__":
     (ROOT / "josh-1x1.html").write_text(josh_1x1())
     (ROOT / "josh-9x16.html").write_text(josh_9x16())
     (ROOT / "hannah-1x1.html").write_text(hannah_1x1())
     (ROOT / "hannah-9x16.html").write_text(hannah_9x16())
+    (ROOT / "mark-1x1.html").write_text(mark_1x1())
+    (ROOT / "mark-9x16.html").write_text(mark_9x16())
     print("built")

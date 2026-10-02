@@ -71,3 +71,19 @@ Mumsnet quotes are third-party research for language only. They are never presen
 [5] https://www.mumsnet.com/talk/am_i_being_unreasonable/5553370-turkey-teeth-are-the-new-norm
 
 Siha facts used for Hannah: aligner cases designed by an orthodontist (Hannan, onboarding call); 3D scan preview of the predicted result before committing (Siha Google post, 2 Oct 2026); bonding doesn't whiten afterwards, so whiten first (Mumsnet [3], consistent with Siha's FAQ "Can I have my composite-bonded teeth whitened?").
+
+## Customer language for Mark (lapsed five years or more)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Fear of the reaction | "I thought I was going to be shouted for leaving it so long" | [7] | Hook / problem (M1) |
+| Fear of the reaction | "I'm scared of what he'll say or do" | [7] | Problem |
+| Nearly didn't book | "The cost is a fear too because I'm sure there's lots too do" | [7] | Objection (M3) |
+| The moment | "I have started getting tooth ache in one of my bottom teeth" / "a bit of tooth broke off one day and I went" | [6] | Hook (M4), urgency |
+| Accommodation | "I have been gargling salt water as I know that helps" / "I bite down on garlic which always seemed to work" | [6] [7] | Problem |
+| After | "as unbelievable as this sounds, it actually it wasn't that bad" / "She didn't tell me off for not going earlier" | [7] | Promise / proof of the experience (not Siha-specific) |
+
+[6] https://www.mumsnet.com/talk/general_health/1638113-havent-been-to-the-dentist-for-8-years-and-terrified
+[7] https://www.mumsnet.com/talk/general_health/4842849-scared-of-the-dentist
+
+Siha facts used for Mark: £89 new patient check-up covering teeth, gums, jaw joints, oral cancer screening, small X-rays, 3D scans, photographs and cosmetic goals (Hannan, onboarding call); first step is a call with the patient concierge, and the plan lists essential, recommended and elective options with transparent pricing (siha.dental new patient page); "Many of our patients have avoided the dentist for years... We've never once judged anyone for it" (nervous patients page); 30 Google reviews mention kind staff (Google review topics); Tue to 7pm and Sat 9 to 5 (site hours).
