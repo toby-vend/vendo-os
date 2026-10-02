@@ -53,3 +53,7 @@ data/maylands/videos/*
 # Siha statics: client photography + renders stay local
 outputs/creative/siha-meta-statics/assets/photos/
 outputs/creative/siha-meta-statics/renders/
+
+# Oxford House statics: client photography + renders stay local
+outputs/creative/oxford-house-meta-statics/assets/photos/
+outputs/creative/oxford-house-meta-statics/renders/
