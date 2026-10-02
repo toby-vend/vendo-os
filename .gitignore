@@ -57,3 +57,5 @@ outputs/creative/siha-meta-statics/renders/
 # Oxford House statics: client photography + renders stay local
 outputs/creative/oxford-house-meta-statics/assets/photos/
 outputs/creative/oxford-house-meta-statics/renders/
+outputs/creative/oxford-house-meta-statics/__pycache__/
+outputs/creative/oxford-house-meta-statics/assets/.claude-flow/
