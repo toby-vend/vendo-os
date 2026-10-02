@@ -78,6 +78,14 @@ def page(title, boards):
 
 # ---------------------------------------------------------------- JOSH (bonding first timer)
 CTA_FREE = "Book a free consultation"
+STAR = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>'
+
+
+def proof(color, size=22):
+    stars = "".join(STAR.format(s=size) for _ in range(5))
+    return (f'<div style="display:flex;align-items:center;gap:14px;color:{color}">'
+            f'<span style="display:flex;gap:3px">{stars}</span>'
+            f'<span class="small" style="font-size:{size}px">5.0 from 156 Google reviews</span></div>')
 
 
 def josh_1x1():
@@ -91,28 +99,31 @@ def josh_1x1():
   <div class="abs" style="left:80px;top:96px;color:{C['be']}" ><div class="eyebrow">One appointment, from</div></div>
   <div class="abs price" style="left:70px;top:150px;font-size:330px;color:{C['nu']}">£250</div>
   <div class="abs hl" style="left:80px;top:445px;font-size:72px;color:{C['nu']}">a <b>tooth.</b></div>
-  <div class="abs body" style="left:80px;top:570px;width:520px;color:{C['be']}">Chipped edge, small gap, one tooth that never quite matched. Composite bonding fixes it in a single visit.</div>
-  <div class="abs" style="left:80px;top:800px"><span class="cta light">{CTA_FREE}</span></div>
+  <div class="abs body" style="left:80px;top:565px;width:540px;font-size:28px;color:{C['be']}">Veneers here are £995 a tooth. Bonding adds to the tooth you have, so nothing healthy is filed down.</div>
+  <div class="abs" style="left:80px;top:745px">{proof(C['be'])}</div>
+  <div class="abs" style="left:80px;top:810px"><span class="cta light">{CTA_FREE}</span></div>
   <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
   <div class="grain"></div>
 </div>""")
     # J2 one appointment, straight edges, done
     b.append(f"""
-<div class="ab s1" id="J2" data-name="Josh | Static | One appointment | 1x1" style="background:{C['be']}">
+<div class="ab s1" id="J2" data-name="Josh | Static | Accommodation | 1x1" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 75% 35%,#efe7df 0%,{C['be']} 45%,#d4c5b7 100%)"></div>
   {sframe(615, 110, 400, 860, 'hannan.jpg')}
-  <div class="abs hl" style="left:80px;top:150px;font-size:70px;color:{C['bo']}">One<br>appointment.<br><b>Straight</b><br>edges.<br>Done.</div>
-  <div class="abs body" style="left:80px;top:610px;width:430px;color:{C['od']}">Most bonding is finished in one 1 to 2 hour visit. No temporaries, no second trip.</div>
+  <div class="abs hl" style="left:80px;top:150px;font-size:66px;color:{C['bo']}">You rarely<br>show your<br>teeth when<br>you <b>smile.</b></div>
+  <div class="abs body" style="left:80px;top:470px;width:440px;color:{C['od']}">One small fix. One appointment. Still your teeth.</div>
+  <div class="abs body" style="left:80px;top:620px;width:440px;font-size:24px;color:{C['ol']}">Bonding from £250 a tooth, usually done in a single 1 to 2 hour visit.</div>
   <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
   <div class="abs" style="left:620px;top:990px"><span class="cta dark" style="height:56px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
   <div class="grain"></div>
 </div>""")
     # J3 honest lifespan
     b.append(f"""
-<div class="ab s1" id="J3" data-name="Josh | Static | Honest lifespan | 1x1" style="background:{C['od']}">
-  <div class="cover" style="height:560px;background-image:url(assets/photos/consultation-space-in-suite-1.jpg);background-position:50% 55%"></div>
-  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.92) 0%,rgba(20,33,26,.75) 30%,rgba(20,33,26,.8) 40%,{C['od']} 56%)"></div>
-  <div class="abs hl" style="left:80px;top:90px;font-size:76px;color:{C['nu']}">How long does<br>it <b>last?</b></div>
+<div class="ab s1" id="J3" data-name="Josh | Static | Chips easily | 1x1" style="background:{C['od']}">
+  <div class="cover" style="top:250px;height:480px;background-image:url(assets/photos/consultation-space-in-suite-1.jpg);background-position:50% 75%"></div>
+  <div class="cover" style="top:250px;height:260px;background:linear-gradient(180deg,{C['od']} 0%,rgba(20,33,26,0) 100%)"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.97) 0%,rgba(20,33,26,.9) 30%,rgba(20,33,26,.85) 40%,{C['od']} 56%)"></div>
+  <div class="abs hl" style="left:80px;top:100px;font-size:84px;color:{C['nu']}">&ldquo;It chips<br><b>easily.</b>&rdquo;</div>
   <div class="abs" style="left:80px;top:390px;width:760px;padding:52px 56px;background:#f3eee9;border-radius:6px;transform:rotate(-1.6deg);box-shadow:0 30px 60px rgba(0,0,0,.45),0 6px 14px rgba(0,0,0,.3)">
     <div class="eyebrow" style="color:{C['bo']};font-size:18px;margin-bottom:22px">The honest answer</div>
     <div class="body" style="font-size:30px;color:{C['od']}">5 to 7 years with normal care. Coffee and red wine can stain it over time. We check it at every visit and touch it up when it needs it.</div>
@@ -124,11 +135,11 @@ def josh_1x1():
 </div>""")
     # J4 we add, we don't drill
     b.append(f"""
-<div class="ab s1" id="J4" data-name="Josh | Static | No drilling | 1x1" style="background:{C['od']}">
+<div class="ab s1" id="J4" data-name="Josh | Static | No filing down | 1x1" style="background:{C['od']}">
   <div class="cover" style="background-image:url(assets/photos/face-photo.jpg);background-position:62% 40%"></div>
   <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,0) 30%,rgba(20,33,26,.78) 56%,{C['od']} 74%)"></div>
-  <div class="abs hl" style="left:80px;top:560px;font-size:64px;color:{C['nu']}">We <b>add</b> to your teeth.<br>We don't drill them.</div>
-  <div class="abs body" style="left:80px;top:720px;width:820px;color:{C['be']}">Tooth-coloured resin, shaped onto the teeth you already have. Nothing filed down, nothing permanent.</div>
+  <div class="abs hl" style="left:80px;top:560px;font-size:64px;color:{C['nu']}">Healthy teeth don't<br>need <b>filing down.</b></div>
+  <div class="abs body" style="left:80px;top:720px;width:820px;color:{C['be']}">Bonding adds tooth-coloured resin to the teeth you already have. Nothing healthy is drilled away.</div>
   <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
   <div class="abs" style="left:620px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
   <div class="grain"></div>
@@ -142,7 +153,8 @@ def josh_1x1():
   </div>
   <div class="abs" style="left:640px;top:40px;width:330px;color:{C['bo']}">{LINE_S}</div>
   <div class="abs hl" style="left:80px;top:630px;font-size:84px;color:{C['od']}">You might only<br>need <b>two.</b></div>
-  <div class="abs body" style="left:80px;top:820px;width:600px;color:{C['ol']}">We usually bond two to four teeth, not ten. Subtle, natural, still your smile. From £250 a tooth.</div>
+  <div class="abs body" style="left:80px;top:815px;width:620px;color:{C['ol']}">We usually bond two to four teeth, not ten. From £250 a tooth.</div>
+  <div class="abs" style="left:80px;top:925px">{proof(C['br'],20)}</div>
   <div class="abs" style="left:800px;top:968px;width:200px;color:{C['ol']}">{LOGO}</div>
   <div class="abs" style="left:80px;top:978px"><span class="cta dark" style="height:56px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
   <div class="grain"></div>
@@ -161,26 +173,28 @@ def josh_9x16():
   <div class="abs eyebrow" style="left:90px;top:640px;color:{C['be']}">One appointment, from</div>
   <div class="abs price" style="left:78px;top:700px;font-size:360px;color:{C['nu']}">£250</div>
   <div class="abs hl" style="left:90px;top:1020px;font-size:80px;color:{C['nu']}">a <b>tooth.</b></div>
-  <div class="abs body" style="left:90px;top:1150px;width:860px;font-size:34px;color:{C['be']}">Chipped edge, small gap, one tooth that never quite matched. Composite bonding fixes it in a single visit.</div>
-  <div class="abs" style="left:90px;top:1360px"><span class="cta light">{CTA_FREE}</span></div>
+  <div class="abs body" style="left:90px;top:1150px;width:860px;font-size:34px;color:{C['be']}">Veneers here are £995 a tooth. Bonding adds to the tooth you have, so nothing healthy is filed down.</div>
+  <div class="abs" style="left:90px;top:1300px">{proof(C['be'],24)}</div>
+  <div class="abs" style="left:90px;top:1370px"><span class="cta light">{CTA_FREE}</span></div>
   <div class="abs" style="left:90px;top:1480px;width:200px;color:{C['be']}">{LOGO}</div>
   <div class="grain"></div>
 </div>""")
     b.append(f"""
-<div class="ab s9" id="J2s" data-name="Josh | Static | One appointment | 9x16" style="background:{C['be']}">
+<div class="ab s9" id="J2s" data-name="Josh | Static | Accommodation | 9x16" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 60% 30%,#efe7df 0%,{C['be']} 45%,#d4c5b7 100%)"></div>
   {sframe(330, 230, 420, 820, 'hannan.jpg')}
-  <div class="abs hl" style="left:90px;top:1100px;font-size:84px;color:{C['bo']}">One appointment.<br><b>Straight</b> edges.<br>Done.</div>
-  <div class="abs body" style="left:90px;top:1420px;width:880px;font-size:34px;color:{C['od']}">Most bonding is finished in one 1 to 2 hour visit. No temporaries, no second trip.</div>
+  <div class="abs hl" style="left:90px;top:1100px;font-size:84px;color:{C['bo']}">You rarely show<br>your teeth when<br>you <b>smile.</b></div>
+  <div class="abs body" style="left:90px;top:1400px;width:880px;font-size:34px;color:{C['od']}">One small fix. One appointment. Still your teeth. Bonding from £250 a tooth.</div>
   <div class="abs" style="left:90px;top:1540px;width:190px;color:{C['ol']}">{LOGO}</div>
   <div class="abs" style="left:560px;top:1548px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
   <div class="grain"></div>
 </div>""")
     b.append(f"""
-<div class="ab s9" id="J3s" data-name="Josh | Static | Honest lifespan | 9x16" style="background:{C['od']}">
-  <div class="cover" style="height:900px;background-image:url(assets/photos/consultation-space-in-suite-1.jpg);background-position:50% 55%"></div>
-  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.85) 0%,rgba(20,33,26,.8) 30%,{C['od']} 48%)"></div>
-  <div class="abs hl" style="left:90px;top:330px;font-size:96px;color:{C['nu']}">How long<br>does it <b>last?</b></div>
+<div class="ab s9" id="J3s" data-name="Josh | Static | Chips easily | 9x16" style="background:{C['od']}">
+  <div class="cover" style="top:560px;height:640px;background-image:url(assets/photos/consultation-space-in-suite-1.jpg);background-position:50% 75%"></div>
+  <div class="cover" style="top:560px;height:320px;background:linear-gradient(180deg,{C['od']} 0%,rgba(20,33,26,0) 100%)"></div>
+  <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.95) 0%,rgba(20,33,26,.88) 30%,{C['od']} 48%)"></div>
+  <div class="abs hl" style="left:90px;top:330px;font-size:104px;color:{C['nu']}">&ldquo;It chips<br><b>easily.</b>&rdquo;</div>
   <div class="abs" style="left:90px;top:720px;width:900px;padding:64px 64px;background:#f3eee9;border-radius:6px;transform:rotate(-1.6deg);box-shadow:0 34px 70px rgba(0,0,0,.45),0 6px 14px rgba(0,0,0,.3)">
     <div class="eyebrow" style="color:{C['bo']};font-size:20px;margin-bottom:26px">The honest answer</div>
     <div class="body" style="font-size:36px;color:{C['od']}">5 to 7 years with normal care. Coffee and red wine can stain it over time. We check it at every visit and touch it up when it needs it.</div>
@@ -191,11 +205,11 @@ def josh_9x16():
   <div class="grain"></div>
 </div>""")
     b.append(f"""
-<div class="ab s9" id="J4s" data-name="Josh | Static | No drilling | 9x16" style="background:{C['od']}">
+<div class="ab s9" id="J4s" data-name="Josh | Static | No filing down | 9x16" style="background:{C['od']}">
   <div class="cover" style="height:1250px;background-image:url(assets/photos/face-photo.jpg);background-position:58% 40%"></div>
   <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,0) 35%,rgba(20,33,26,.8) 56%,{C['od']} 66%)"></div>
-  <div class="abs hl" style="left:90px;top:1000px;font-size:92px;color:{C['nu']}">We <b>add</b> to<br>your teeth.<br>We don't<br>drill them.</div>
-  <div class="abs body" style="left:90px;top:1400px;width:880px;font-size:34px;color:{C['be']}">Tooth-coloured resin, shaped onto the teeth you already have. Nothing filed down, nothing permanent.</div>
+  <div class="abs hl" style="left:90px;top:1000px;font-size:92px;color:{C['nu']}">Healthy teeth<br>don't need<br><b>filing down.</b></div>
+  <div class="abs body" style="left:90px;top:1330px;width:880px;font-size:34px;color:{C['be']}">Bonding adds tooth-coloured resin to the teeth you already have. Nothing healthy is drilled away.</div>
   <div class="abs" style="left:90px;top:1540px;width:190px;color:{C['be']}">{LOGO}</div>
   <div class="abs" style="left:560px;top:1548px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
   <div class="grain"></div>
@@ -208,9 +222,10 @@ def josh_9x16():
   </div>
   <div class="abs" style="left:600px;top:200px;width:420px;color:{C['bo']}">{LINE_S}</div>
   <div class="abs hl" style="left:90px;top:1100px;font-size:100px;color:{C['od']}">You might<br>only need <b>two.</b></div>
-  <div class="abs body" style="left:90px;top:1330px;width:880px;font-size:34px;color:{C['ol']}">We usually bond two to four teeth, not ten. Subtle, natural, still your smile. From £250 a tooth.</div>
-  <div class="abs" style="left:90px;top:1460px"><span class="cta dark">{CTA_FREE}</span></div>
-  <div class="abs" style="left:780px;top:1474px;width:200px;color:{C['ol']}">{LOGO}</div>
+  <div class="abs body" style="left:90px;top:1320px;width:880px;font-size:34px;color:{C['ol']}">We usually bond two to four teeth, not ten. From £250 a tooth.</div>
+  <div class="abs" style="left:90px;top:1510px"><span class="cta dark">{CTA_FREE}</span></div>
+  <div class="abs" style="left:90px;top:1445px">{proof(C['br'],22)}</div>
+  <div class="abs" style="left:780px;top:1524px;width:200px;color:{C['ol']}">{LOGO}</div>
   <div class="grain"></div>
 </div>""")
     return page("Siha | Josh | 9x16", b)
