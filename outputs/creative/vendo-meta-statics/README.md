@@ -54,3 +54,8 @@ assets/photos/site/ (gitignored) — raw images pulled from the website Figma fi
 - Source: Claude Design canvas "Vendo Paid Social Statics" (https://claude.ai/artifact/GkFDNPvUgLk32Wqw5B8D29).
 - Brought in 29 artboards as editable layers (A3, A4, B1, B4, C2, W1–W4, tweet carousels T1–T3) to page "Vendo Paid Social Statics (from canvas)" (21:2) in kluNBf7ZYkvdpet56Oqsiu. Skipped at Toby's request: A1, A2, B2, B3, C1, C3, C4.
 - Pipeline: artboard .dc.html read via Artifact tool → canvas-harness/{statics,carousels}.html (x-dc/helmet stripped, /_blob ids → local assets) → generate_figma_design capture → auto layout stripped, artboards lifted and named, grain/overlay layers locked.
+
+## Native notes, logo wall, canvas statics rebrand (2026-10-03)
+- 8 organic note ads (Magnific Nano Banana Pro, 4:5 2k, 3 variants each; picks finished with ffmpeg crop 1080x1350, sat 0.92, grain) on page 21:2 row "Native notes". Raws/finals: outputs/creative/vendo-paid-social-statics/2026-10-03-sign-notes/. Rejected: N6 variant 1 ("YOECK" typo). Toby: no AI people in scrubs — objects only.
+- B4 logo wall: 9 dental client logos (Kana, Dentistry.ie, Bright Orthodontics, Avenue, Rothley Lodge, Zen House, Lakewood, Thornley Park, Smile for Life) cut from the website Figma client strip (782:9009 main component exports blank; used instance 810:51623 export + luminance→alpha). Non-dental logos excluded; One Dental not in the strip.
+- A3, B1, B4, W1–W4 rebuilt natively in the v5 refresh style (flat #051412, Manrope SemiBold + one serif word, eyebrow, tick offer, uppercase pill CTA, logo footer). A4, C2 and the T1–T3 carousels untouched (Toby: don't edit carousels).
