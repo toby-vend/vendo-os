@@ -103,7 +103,7 @@ def t_photo_hero(size, name, photo, pos, label, head, sub, foot_left, fs1=118, f
     fs = fs9 if s9 else fs1
     return board(size, name, f'''
 <div class="ph" style="inset:0"><img src="{PH}{photo}" style="object-position:{pos}"></div>
-{grad("linear-gradient(180deg," + ("rgba(11,11,11,.8) 0%,rgba(11,11,11,.55) 17%,rgba(11,11,11,0) 30%" if s9 else "rgba(11,11,11,.72) 0%,rgba(11,11,11,0) 22%") + ",rgba(11,11,11,0) 38%,rgba(11,11,11,.9) 82%)")}
+{grad("linear-gradient(180deg," + ("rgba(11,11,11,.8) 0%,rgba(11,11,11,.55) 17%,rgba(11,11,11,0) 30%" if s9 else "rgba(11,11,11,.72) 0%,rgba(11,11,11,0) 22%") + ",rgba(11,11,11,0) 30%,rgba(11,11,11,.72) 55%,rgba(11,11,11,.92) 85%)")}
 <div class="abs" style="left:64px;top:{top}px">{svg('lockup-gold', 210 if s9 else 170)}</div>
 <div class="abs" style="left:64px;right:64px;bottom:{(1920 if s9 else 1080) - base + 110}px">
   <div class="lab gold">{label}</div>
@@ -123,9 +123,9 @@ def t_split(size, name, photo, pos, label, head, sub, fs1=88, fs9=112):
     base = 1580 if s9 else 1016
     return board(size, name, f'''
 {ph(photo, 0, 0, 1080, split, pos)}
-<div class="abs" style="left:64px;top:{270 if s9 else 54}px">{svg('lockup-gold', 200 if s9 else 160)}</div>
-{grad("linear-gradient(180deg," + ("rgba(11,11,11,.8) 0%,rgba(11,11,11,.55) 17%,rgba(11,11,11,0) 30%" if s9 else "rgba(11,11,11,.6) 0%,rgba(11,11,11,0) 30%") + ")")}
+{grad("linear-gradient(180deg," + ("rgba(11,11,11,.8) 0%,rgba(11,11,11,.55) 17%,rgba(11,11,11,0) 30%" if s9 else "rgba(11,11,11,.78) 0%,rgba(11,11,11,.3) 16%,rgba(11,11,11,0) 30%") + ")")}
 <div class="abs" style="left:0;right:0;top:{split}px;bottom:0;background:{WHITE}"></div>
+<div class="abs" style="right:64px;top:{split + 46}px">{svg('lockup-black', 170 if s9 else 130)}</div>
 <div class="abs" style="left:64px;right:64px;top:{split + 56}px;color:{BLACK}">
   <div class="lab deep">{label}</div>
   <div class="d" style="font-size:{fs}px;margin-top:18px">{head}</div>
@@ -209,6 +209,30 @@ def t_pillars(size, name, photo, pos, head, sub, rows):
 </div>''')
 
 
+def t_list(size, name, photo, pos, label, head, ticks, foot, fs1=84, fs9=110):
+    """White board: headline, gold-tick inclusions list, photo column (1:1) or strip (9:16)."""
+    s9 = size == 's9'
+    tick = f'<span style="flex:none;width:{44 if s9 else 38}px;height:{44 if s9 else 38}px;border-radius:50%;background:{GOLD};color:{BLACK};display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:{24 if s9 else 21}px">✓</span>'
+    tl = ''.join(f'<div style="display:flex;align-items:center;gap:20px;padding:{16 if s9 else 11}px 0;border-top:1px solid rgba(11,11,11,.12);font-size:{34 if s9 else 27}px;font-weight:600">{tick}{t}</div>' for t in ticks)
+    base = 1580 if s9 else 1016
+    if s9:
+        lay = f'''{ph(photo, 0, 0, 1080, 640, pos)}
+{grad("linear-gradient(180deg,rgba(11,11,11,.8) 0%,rgba(11,11,11,.55) 17%,rgba(11,11,11,0) 30%)")}
+<div class="abs" style="left:64px;top:270px">{svg('lockup-gold', 200)}</div>
+<div class="abs" style="left:0;right:0;top:640px;bottom:0;background:{WHITE}"></div>
+<div class="abs" style="left:64px;right:64px;top:690px"><div class="lab deep">{label}</div>
+<div class="d" style="font-size:{fs9}px;margin-top:16px">{head}</div><div style="margin-top:30px">{tl}</div></div>'''
+    else:
+        lay = f'''{ph(photo, 690, 0, 390, 1080, pos)}
+<div class="abs" style="left:64px;top:56px">{svg('lockup-black', 150)}</div>
+<div class="abs" style="left:64px;width:590px;top:190px"><div class="lab deep">{label}</div>
+<div class="d" style="font-size:{fs1}px;margin-top:14px">{head}</div><div style="margin-top:24px">{tl}</div></div>'''
+    return board(size, name, lay + f'''
+<div class="abs" style="left:64px;{'right:64px' if s9 else 'width:590px'};top:{base - 76}px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+  <span class="small" style="font-size:{20 if s9 else 17}px;color:rgba(11,11,11,.7)">{foot}</span><span class="pill" style="background:{BLACK};color:{WHITE}{'' if s9 else ';height:66px;padding:0 30px;font-size:22px'}">Book a consultation</span>
+</div>''', bg=WHITE, color=BLACK)
+
+
 # ------------------------------------------------------------------ personas
 
 def professional(size):
@@ -230,7 +254,25 @@ def professional(size):
     ]
 
 
-PERSONAS = {'professional': (professional, 'copy-professional.md', 'The Aspirational Professional')}
+def amy(size):
+    n = lambda c, d: f'{c} | Static | {d}'
+    return [
+        t_split(size, n('A1 Price you are quoted', 'No talent | Reception'), 'clinic-mayfair.jpg', '50% 50%',
+                'Affordable', 'One price.<br>Agreed before<br>you start.', 'Refinements your clinician decides you need are part of your plan.'),
+        t_photo_hero(size, n('A2 Not by post', 'Clinician + patient | Consultation'), 'kit-consult-male.jpg', '55% 40%',
+                     'Quality', 'The real<br>Invisalign.<br>Planned<br>in person.', 'By Bond Dental clinicians, not by post.', rating()),
+        t_price(size, n('A3 Why quotes vary', 'Patients | Price ladder'), 'kit-two-smiles.jpg', '62% 40%',
+                'Affordable', 'Quotes vary.<br>Ours don\'t.'),
+        t_list(size, n('A4 What is included', 'Patient | Inclusions list'), 'site-invisalign-smile.jpg', '52% 40%',
+               'Quality', 'What\'s in<br>the price.', ['Dental health assessment', '3D scan and plan simulation', 'Genuine Invisalign aligners', 'Starter aligner kit', 'One set of retainers'],
+               'From £995 · 0% finance available'),
+        t_badge(size, n('A5 Then you decide', 'No talent | Surgery'), 'kit-surgery-b.jpg', '50% 50%',
+                'Premium', 'Your plan.<br>Your price.<br>Then you<br>decide.', 'See it all before you commit.'),
+    ]
+
+
+PERSONAS = {'professional': (professional, 'copy-professional.md', 'The Aspirational Professional'),
+            'amy': (amy, 'copy-amy.md', 'Amy, the aligner researcher')}
 
 
 def build(key):
