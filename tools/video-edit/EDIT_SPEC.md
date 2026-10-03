@@ -8,7 +8,7 @@
   "duration": 50.5,              // from base.json
   "fps": 25,                     // from base.json
   "focus": [540, 820],           // x,y of the speaker's face: punch-ins zoom around this point
-  "card_top": 200,               // top of the card band (must clear the top of the head)
+  "card_top": 200,               // top of the card band: at least 180 (platform top bar) and clear of the head
   "caption_top": 1300,           // captions sit on the chest, clear of face and the bottom app UI (> 1600)
   "captions": true,
   "sfx": true,                   // ticks, fill, snap, chime are added automatically from the events below

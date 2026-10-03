@@ -33,7 +33,7 @@ You must leave behind: `output.mp4`, `edit.json`, `notes.md` (and `revision.json
 1. **Analyse.** `python3 tools/video-edit/prep.py analyse <source> <job>`. Read `transcript.json`, `silences.json` and look at `frames.jpg`.
 2. **Choose the trim.** Cut off-take chat before the real take and anything after the last line. Check the first word is not clipped: compare against `silences.json`; if in doubt, cut 3 s around the start with ffmpeg and re-transcribe that window. Leave mid-clip pauses alone in v01 (jump cuts are a later feature).
 3. **Build the base.** `python3 tools/video-edit/prep.py base <source> <job> --in A --out B [--crop-x 0..1 for landscape sources]`. Confirm `base.json` shows about −14 LUFS and a true peak at or below −1.5.
-4. **Find the safe zones.** Snapshot one frame (`ffmpeg -ss 10 -i public/input-video.mp4 -frames:v 1`) and look at it. Set `focus` to the face, `card_top` so cards end above the hairline, `caption_top` on the chest. Nothing on the face, nothing below 1600 px, text inside the middle 80% of the width.
+4. **Find the safe zones.** Snapshot one frame (`ffmpeg -ss 10 -i public/input-video.mp4 -frames:v 1`) and look at it. Set `focus` to the face, `card_top` so cards end above the hairline, `caption_top` on the chest. Nothing on the face, nothing above 180 px (Instagram/TikTok account name and top bar), nothing below 1600 px (captions, buttons), text inside the middle 80% of the width.
 5. **Plan `edit.json`.** Recipe for 30–60 s (scale proportionally):
    - 2–3 full-screen `screens`, plain text, never in the first 4 s. At most one `kinetic`, the rest `statement`.
    - 2–4 `cards`, each a different type where it fits (location for a place, checklist when they list things, bar for time or effort, title otherwise).

@@ -3,6 +3,7 @@
  * (Phase 2 of plans/2026-10-03-frameio-ai-video-edits.md).
  *
  *   npm run video:revise -- --job ~/video-edits/<job> [--upload]
+ *   npm run video:revise -- --job ~/video-edits/<job> --deliver-only   (deliver a revision already made in a dry run)
  *
  * 1. reads delivery.json (what was delivered last) and pulls the open review comments from that version
  * 2. keeps the delivered files as output-vNN.mp4 / edit-vNN.json / notes-vNN.md
@@ -35,6 +36,17 @@ async function main() {
   const base = JSON.parse(readFileSync(join(job, 'base.json'), 'utf8')) as { fps: number };
   const v = delivery.version;
   const tag = (n: number) => `v${String(n).padStart(2, '0')}`;
+
+  // --deliver-only: the revision was already made and checked (dry run); just deliver it.
+  if (process.argv.includes('--deliver-only')) {
+    const out = join(job, 'output.mp4');
+    const revision = JSON.parse(readFileSync(join(job, 'revision.json'), 'utf8')) as RevisionItem[];
+    const summary = readFileSync(join(job, `summary-${tag(v + 1)}.md`), 'utf8');
+    const seconds = Number((await import('child_process')).execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', out]).toString().trim());
+    const fileName = nextName(delivery.name, seconds, tag(v + 1));
+    await deliver(io, job, delivery, out, fileName, revision, summary);
+    return;
+  }
 
   // 1. open review comments on the delivered version (skip the AI's own notes comments)
   const comments = (await io.listComments(delivery.fileId))
@@ -79,10 +91,7 @@ async function main() {
   const missing = comments.filter((c) => !revision.some((r) => r.id === c.id));
   if (missing.length) throw new Error(`revision.json does not cover comment(s): ${missing.map((m) => m.id).join(', ')}`);
   const seconds = finaliseOutput(out);
-  const fileName = delivery.name
-    .replace(/\|\s*\d+s\s*\|/, `| ${lengthLabel(seconds)} |`)
-    .replace(/\|\s*v\d{2,}\s*\|/, `| ${tag(v + 1)} |`)
-    .replace(/\|\s*(Final|Client Review)\.mp4$/i, '| Internal.mp4');
+  const fileName = nextName(delivery.name, seconds, tag(v + 1));
   console.log(`[video-revise] output ${seconds.toFixed(1)}s → "${fileName}"`);
   const summary = [
     `AI revision (${tag(v + 1)}, Internal). Your notes on ${tag(v)}:`,
@@ -100,10 +109,25 @@ async function main() {
     return;
   }
 
-  // 5. deliver: upload next to the delivered version, stack it, tick comments, post the summary
+  await deliver(io, job, delivery, out, fileName, revision, summary);
+}
+
+/** SOP name for the next version: new length, next version number, status back to Internal. */
+function nextName(name: string, seconds: number, version: string): string {
+  return name
+    .replace(/\|\s*\d+s\s*\|/, `| ${lengthLabel(seconds)} |`)
+    .replace(/\|\s*v\d{2,}\s*\|/, `| ${version} |`)
+    .replace(/\|\s*(Final|Client Review)\.mp4$/i, '| Internal.mp4');
+}
+
+/** Upload next to the delivered version, stack it, tick handled comments, post the summary, record the delivery. */
+async function deliver(
+  io: typeof import('../web/lib/frameio/media-io.js'), job: string, delivery: Delivery, out: string,
+  fileName: string, revision: RevisionItem[], summary: string,
+): Promise<void> {
+  const v = delivery.version;
   const delivered = await io.getAsset(delivery.stackId ?? delivery.fileId);
-  let folderId = delivery.folderId ?? delivered.parent_id!;
-  if (delivered.type === 'version_stack') folderId = delivered.parent_id!;
+  const folderId = delivered.type === 'version_stack' ? delivered.parent_id! : (delivery.folderId ?? delivered.parent_id!);
   const file = await io.uploadLocalFile(out, folderId, fileName);
   const stack = await io.stackNewVersion(delivery.stackId ?? delivery.fileId, file.id);
   for (const r of revision) if (r.done) await io.setCommentCompleted(r.id);
@@ -113,7 +137,7 @@ async function main() {
     history: [...(delivery.history ?? [{ version: v, fileId: delivery.fileId }]), { version: v + 1, fileId: file.id }],
   };
   writeFileSync(join(job, 'delivery.json'), JSON.stringify(next, null, 2));
-  console.log(`[video-revise] delivered ${tag(v + 1)} on the stack ${stack.view_url}`);
+  console.log(`[video-revise] delivered "${fileName}" on the stack ${stack.view_url}`);
 }
 
 main().catch((err) => {
