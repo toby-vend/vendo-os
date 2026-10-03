@@ -37,3 +37,10 @@ assets/photos/site/ (gitignored) — raw images pulled from the website Figma fi
 - 14–18: vendodigital.co.uk media library + website Figma. Instagram is all captioned reels, skipped.
 - Drive (e.g. "Vendo phots" 1iPvHMlMkX8J-6_Z4gf_o9eojFAnPI9rx, sonemarketing shoot folders) not searched visually: token and Chrome routes were blocked by the permission classifier.
 - Next: 1.91:1 (1200x628) version of both refreshed sets once images are picked.
+
+## Image options round 2 (2026-10-03)
+- Toby approved only 01, 04, 05, 11 from round 1; no One Dental imagery ever (memory: feedback_vendo_ad_imagery_approved).
+- Page "Image options v2" (13:2): approved 4 + new 20–42 (32 removed: dentist looked like One Dental's owner).
+- New sources: Frame.io raws via read-only ffmpeg seeking (scratch script fio-stills.mts → assets/photos/candidates/fio): Vendo/Website Banners/RAWS, Vendo/25th Feb Content Day/Raws/B-roll, Zen House/13TH AUGUST/RAWS/B roll; full YouTube downloads via newer yt-dlp in a scratch venv (Zen House AhgnKmhxHZY, Avenue, St Clears).
+- Skipped: Vendo Testimonial Compilation (vertical, includes One Dental), St Clears/Avenue patient testimonials (patients + captions), Kana shorts (burned captions).
+- A handful of Frame.io grabs failed on a Turso timeout; rerun was blocked, so those clips weren't reviewed.
