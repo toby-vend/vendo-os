@@ -3,7 +3,8 @@
  * revisions: scripts/video-edit-revise.ts).
  */
 import { spawn, execFileSync } from 'child_process';
-import { readFileSync, renameSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'fs';
+import { homedir } from 'os';
 import { join } from 'path';
 
 export function arg(name: string): string | undefined {
@@ -102,4 +103,47 @@ export function lengthLabel(seconds: number): string {
 export function clock(seconds: number): string {
   const s = Math.max(0, Math.round(seconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+/** The editor this Mac belongs to: ~/.vendo-video-worker.json (set by video:worker:install), else git's Vendo email. */
+export function thisMacEditor(): string | null {
+  const file = join(homedir(), '.vendo-video-worker.json');
+  if (existsSync(file)) {
+    const email = (JSON.parse(readFileSync(file, 'utf8')) as { email?: string }).email;
+    if (email) return email.toLowerCase();
+  }
+  try {
+    const git = execFileSync('git', ['config', 'user.email']).toString().trim().toLowerCase();
+    return /@vendodigital\.co\.uk$/.test(git) ? git : null;
+  } catch { return null; }
+}
+
+/**
+ * Record a delivery made from the command line in the job queue, so the video can later be revised from
+ * Frame.io (right-click > Actions > AI Revision). The worker records its own jobs, so this is skipped when
+ * the worker launched the script (VIDEO_JOB_ID is set). Never fails the delivery.
+ */
+export async function recordCliDelivery(opts: {
+  kind: 'first_cut' | 'revision'; jobDir: string; previousFileId?: string; sourceFileId: string;
+  delivery: { fileId: string; stackId?: string; view_url?: string; name: string }; params?: unknown;
+}): Promise<void> {
+  if (process.env.VIDEO_JOB_ID) return;
+  try {
+    const editor = thisMacEditor();
+    if (!editor) { console.log('[video-edit] not recorded for Frame.io revisions: no Vendo email for this Mac (run video:worker:install)'); return; }
+    const store = await import('../../web/lib/video-jobs/store.js');
+    const chain = opts.kind === 'revision' && opts.previousFileId ? await store.findJobByDelivered(opts.previousFileId) : null;
+    const job = await store.queueJob({
+      kind: chain ? 'revision' : 'first_cut', chainId: chain?.chain_id ?? null, interactionId: `cli-${opts.delivery.fileId}`,
+      requestedBy: { userId: null, email: editor, name: 'command line' }, workerEmail: editor,
+      sourceFileId: opts.sourceFileId, projectId: null, params: opts.params ?? {}, jobDir: opts.jobDir,
+    });
+    await store.heartbeatJob(job.id);
+    await store.finishJob(job.id, {
+      jobDir: opts.jobDir, fileId: opts.delivery.fileId, stackId: opts.delivery.stackId ?? null,
+      viewUrl: opts.delivery.view_url ?? null, message: `Command-line delivery "${opts.delivery.name}"`,
+    });
+  } catch (err) {
+    console.log(`[video-edit] not recorded for Frame.io revisions: ${(err as Error).message}`);
+  }
 }

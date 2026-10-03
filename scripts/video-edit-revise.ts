@@ -19,7 +19,7 @@ config({ path: '.env.local' });
 
 import { copyFileSync, existsSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
-import { arg, clock, finaliseOutput, lengthLabel, runGuarded, sessionRules } from './lib/video-edit.js';
+import { arg, clock, finaliseOutput, lengthLabel, recordCliDelivery, runGuarded, sessionRules } from './lib/video-edit.js';
 
 interface Delivery { fileId: string; folderId?: string; stackId?: string; name: string; version: number; history?: Array<{ version: number; fileId: string }> }
 interface RevisionItem { id: string; done: boolean; what: string }
@@ -137,6 +137,7 @@ async function deliver(
     history: [...(delivery.history ?? [{ version: v, fileId: delivery.fileId }]), { version: v + 1, fileId: file.id }],
   };
   writeFileSync(join(job, 'delivery.json'), JSON.stringify(next, null, 2));
+  await recordCliDelivery({ kind: 'revision', jobDir: job, previousFileId: delivery.fileId, sourceFileId: delivery.fileId, delivery: { fileId: file.id, stackId: stack.id, view_url: stack.view_url, name: fileName } });
   console.log(`[video-revise] delivered "${fileName}" on the stack ${stack.view_url}`);
 }
 

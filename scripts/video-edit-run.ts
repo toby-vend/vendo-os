@@ -25,7 +25,7 @@ config({ path: '.env.local' });
 import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { extname, join, resolve } from 'path';
-import { arg, finaliseOutput, lengthLabel, runGuarded, sessionRules } from './lib/video-edit.js';
+import { arg, finaliseOutput, lengthLabel, recordCliDelivery, runGuarded, sessionRules } from './lib/video-edit.js';
 
 async function main() {
   const source = arg('--source');
@@ -109,6 +109,7 @@ async function main() {
   const body = `AI first cut (v01, Internal).${nameNote ? ` ${nameNote}` : ''} Notes for review:\n\n${readFileSync(notesPath, 'utf8').trim()}`;
   await io.createComment(file.id, body.slice(0, 9000));
   writeFileSync(join(job, 'delivery.json'), JSON.stringify({ fileId: file.id, folderId: destFolder, name: fileName, view_url: file.view_url, version: 1, history: [{ version: 1, fileId: file.id }] }, null, 2));
+  await recordCliDelivery({ kind: 'first_cut', jobDir: job, sourceFileId: asset.id, delivery: { fileId: file.id, name: fileName, view_url: file.view_url }, params: { section, concept: name, brand, notes } });
   console.log(`[video-edit] uploaded ${file.view_url}`);
 }
 
