@@ -14,7 +14,7 @@ Research: MR fire rated collection: "Our Fire Rated range is manufactured from E
 Concept name: **Ray Fire Rated | Euroclass B range**
 Talent: Graphic (spec sheet)
 
-**On image:** Fire Rated MDF · Euroclass B / Skirting. Architrave. Panel mould. Dado. Picture rail. Cornice. / Machined in our Epsom workshop. / Shop fire rated
+**On image:** Fire rated MDF · Euroclass B / Euroclass B, in every moulding. / Skirting, architrave, panel mould, dado, picture rail and cornice, from one range. / Shop fire rated
 
 **Headline:** Euroclass B, in every moulding.
 
@@ -39,7 +39,7 @@ Research: MR fire rated collection lists Victorian, Regency and Bolection FR dad
 Concept name: **Ray Fire Rated | Period profiles**
 Talent: Room photo (period hallway)
 
-**On image:** The communal hallway doesn't have to look like a hospital corridor. / Victorian, Regency and Bolection profiles in Euroclass B fire rated MDF. / Shop fire rated
+**On image:** Same profiles. Fire rated. / Product hotspots: Double Astragal FR MDF Dado Rail from £30.00 · Sunningdale FR MDF Panel Mould from £30.00 · Big Bolection FR MDF Skirting Board from £19.14
 
 **Headline:** Period profiles. Fire rated.
 
@@ -66,7 +66,7 @@ Research: MR FAQ: FR MDF "is normally specified for escape routes, communal area
 Concept name: **Ray Fire Rated | Where it's needed**
 Talent: Graphic
 
-**On image:** Where does fire rated trim actually go? / Escape routes. Communal areas in flats and HMOs. Anywhere Building Control asks for it. / A standard domestic room doesn't need it. / Shop fire rated
+**On image:** Where fire rated trim goes / Fire rated where it counts. / Escape routes. Communal areas in flats and HMOs. Anywhere Building Control asks. A standard domestic room doesn't need it. / Shop fire rated
 
 **Headline:** Fire rated where it counts.
 
@@ -93,7 +93,7 @@ Research: creative plan hook: "Specifying fire rated trim across forty units."; 
 Concept name: **Ray Fire Rated | Multi-unit**
 Talent: Graphic
 
-**On image:** Forty units. One spec. / Euroclass B skirting and architrave in the same profile across every flat, direct from the workshop that machines it. / Ask about a trade account
+**On image:** Forty units. One spec. / Euroclass B skirting and architrave in the same profile, flat after flat.
 
 **Headline:** One profile across the whole building.
 
@@ -118,7 +118,7 @@ Research: "I've been asked to provide both an FD30 fire door certificate and pro
 Concept name: **Ray Fire Rated | Paperwork**
 Talent: Graphic (document card)
 
-**On image:** Ask for the paperwork before you order. / Every fire rated product is marked Euroclass B. Ask us for the documents you need for sign-off and we'll tell you what we can supply. / Call 01372 740777
+**On image:** Before you order / Ask for the paperwork first. / Every fire rated product is marked Euroclass B. Tell us what your sign-off needs and we'll tell you what we can supply. / Call 01372 740777
 
 **Headline:** Know what you're signing off.
 
@@ -146,4 +146,5 @@ No surprises at sign-off.
 - **Period FR profiles (R2):** taken from the fire rated collection page listing (Victorian, Regency, Bolection, Sunningdale and others). Confirm availability and lead time.
 - **Trade account (R4):** no terms published. See copy-lee.md.
 - **Thin research:** no contractor voice found online. A short call with two of MR's fire rated trade customers would sharpen this persona.
+- **R2 hotspots:** the photo shows the standard MDF versions of these profiles; the cards name their fire rated equivalents ("Same profiles. Fire rated."). Prices are the from-prices on each product page, 3 Oct 2026. Recheck before launch. Avoid Torus FR and Regency FR architrave in any price-led ad: their pages show £6.68 and £4.34 from-prices that look like placeholder variants.
 - **Proof:** facts only by decision.
