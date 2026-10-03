@@ -2,7 +2,10 @@
  * Run one AI video edit end to end (Phase 2 of plans/2026-10-03-frameio-ai-video-edits.md).
  *
  *   npm run video:edit -- --source <frame.io asset url|id> --dest <frame.io folder url|id> \
- *       --name "Organic | Vox Pops Episode" [--brand vendo] [--notes "…"] [--job <existing job dir>] [--upload]
+ *       --name "Organic | Vox Pops Episode" [--brand vendo] [--notes "…"] [--inputs <folder>] [--job <existing job dir>] [--upload]
+ *
+ * --inputs: a folder of extra material for the edit (B-roll clips, a client logo) plus an optional README.md
+ * saying what each file is; copied into the job as inputs/.
  *
  * 1. downloads the original from Frame.io into ~/video-edits/<job>/source.<ext>
  * 2. writes brief.json and runs a headless Claude Code session with the vendo-video-edit skill
@@ -15,7 +18,7 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { extname, join, resolve } from 'path';
 import { arg, finaliseOutput, lengthLabel, runGuarded, sessionRules } from './lib/video-edit.js';
@@ -49,12 +52,21 @@ async function main() {
     console.log(`[video-edit] downloaded "${dl.name}" (${(dl.bytes / 1e6).toFixed(0)} MB)`);
   }
 
+  // extra material (B-roll, logos) for the edit
+  const inputsArg = arg('--inputs');
+  if (inputsArg) {
+    const from = resolve(inputsArg.replace(/^~/, homedir()));
+    if (!existsSync(from)) throw new Error(`--inputs folder not found: ${from}`);
+    cpSync(from, join(job, 'inputs'), { recursive: true });
+    console.log(`[video-edit] copied inputs from ${from}`);
+  }
+
   // 2. brief + headless edit
-  const brief = { mode: 'first_cut', source: srcPath, brand, concept: name, ratio: '9x16', notes, frameio: { asset: asset.id, file: fileId, dest: io.idFrom(dest) } };
+  const brief = { mode: 'first_cut', source: srcPath, brand, concept: name, ratio: '9x16', notes, inputs: existsSync(join(job, 'inputs')) ? 'inputs/ (see inputs/README.md if present)' : null, frameio: { asset: asset.id, file: fileId, dest: io.idFrom(dest) } };
   writeFileSync(join(job, 'brief.json'), JSON.stringify(brief, null, 2));
   const prompt = [
     `Make the first cut for the job in this folder (${job}), following the Vendo video edit instructions in your system prompt.`,
-    'Read brief.json first.', sessionRules(repo),
+    'Read brief.json first.', existsSync(join(job, 'inputs')) ? 'Extra material for this edit (B-roll, logos) is in inputs/; use what fits, and read inputs/README.md if there is one.' : '', sessionRules(repo),
     'Finish with output.mp4, edit.json and notes.md in this folder.',
   ].join(' ');
   await runGuarded(prompt, repo, job, 'claude.log');

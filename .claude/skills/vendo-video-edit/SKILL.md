@@ -34,16 +34,17 @@ You must leave behind: `output.mp4`, `edit.json`, `notes.md` (and `revision.json
 2. **Choose the trim.** Cut off-take chat before the real take and anything after the last line. Check the first word is not clipped: compare against `silences.json`; if in doubt, cut 3 s around the start with ffmpeg and re-transcribe that window. Leave mid-clip pauses alone in v01 (jump cuts are a later feature).
 3. **Build the base.** `python3 tools/video-edit/prep.py base <source> <job> --in A --out B [--crop-x 0..1 for landscape sources]`. Confirm `base.json` shows about −14 LUFS and a true peak at or below −1.5.
 4. **Find the safe zones.** Snapshot one frame (`ffmpeg -ss 10 -i public/input-video.mp4 -frames:v 1`) and look at it. Set `focus` to the face, `card_top` so cards end above the hairline, `caption_top` on the chest. Nothing on the face, nothing above 180 px (Instagram/TikTok account name and top bar), nothing below 1600 px (captions, buttons), text inside the middle 80% of the width.
-5. **Plan `edit.json`.** Recipe for 30–60 s (scale proportionally):
+5. **Use any inputs.** If the brief lists `inputs/`, read its README and use B-roll where the speaker talks about that subject (`prep.py broll`, see EDIT_SPEC.md) and a client logo in the ad frame.
+6. **Plan `edit.json`.** Recipe for 30–60 s (scale proportionally):
    - 2–3 full-screen `screens`, plain text, never in the first 4 s. At most one `kinetic`, the rest `statement`.
    - 2–4 `cards`, each a different type where it fits (location for a place, checklist when they list things, bar for time or effort, title otherwise).
    - Camera: 2–3 `punch` on emphatic lines, 1–2 slow `push`, at most one `reframe`, and only when the speaker talks about ads or creative.
    - An `end` card over blurred footage with the brand logo, built from the speaker's last line.
    - Keep any one stretch of plain footage under about 6 s.
    - Every event lands on the word it illustrates (use `words.json`).
-6. **Compose and check.** `python3 tools/video-edit/compose.py <job>`, then `npx hyperframes lint <job>/public`, then `npx hyperframes snapshot <job>/public --at <one time per event> --no-end --describe false` and **look at the contact sheet**. Fix overlaps, cropped text or cards touching the head, then recompose. Never omit `--describe false`: it would send client frames to a third-party vision model.
-7. **Render.** `PRODUCER_BROWSER_GPU_MODE=hardware npx hyperframes render <job>/public -o <job>/output.mp4 --fps <fps>`. Check duration with ffprobe.
-8. **Write `notes.md`** for the reviewer (short, plain English): trim points; every on-screen line with its timestamp; anything that is a claim, number, price or offer, flagged for QA; anything you were unsure of.
+7. **Compose and check.** `python3 tools/video-edit/compose.py <job>`, then `npx hyperframes lint <job>/public`, then `npx hyperframes snapshot <job>/public --at <one time per event> --no-end --describe false` and **look at the contact sheet**. Fix overlaps, cropped text or cards touching the head, then recompose. Never omit `--describe false`: it would send client frames to a third-party vision model.
+8. **Render.** `PRODUCER_BROWSER_GPU_MODE=hardware npx hyperframes render <job>/public -o <job>/output.mp4 --fps <fps>`. Check duration with ffprobe.
+9. **Write `notes.md`** for the reviewer (short, plain English): trim points; every on-screen line with its timestamp; anything that is a claim, number, price or offer, flagged for QA; anything you were unsure of.
 
 ## Revise (mode `apply_comments`)
 
