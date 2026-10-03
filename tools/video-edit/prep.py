@@ -23,7 +23,10 @@ import subprocess
 from pathlib import Path
 
 GRADE = "curves=all='0/0 0.22/0.20 0.78/0.80 1/0.97',eq=saturation=1.05:contrast=1.03,unsharp=5:5:0.35"
-AUDIO = "highpass=f=80,afftdn=nr=8:nf=-42,acompressor=threshold=-20dB:ratio=2.5:attack=10:release=150:makeup=2,loudnorm=I=-14:TP=-1.5:LRA=9"
+CLEAN = "highpass=f=80,afftdn=nr=8:nf=-42,acompressor=threshold=-20dB:ratio=2.5:attack=10:release=150:makeup=2"
+TARGET_LUFS = -14.0
+# Sample-peak ceiling of −3 dBFS (4x oversampled) leaves room for inter-sample and AAC overs under −1.5 dBTP.
+LIMIT = "aresample=192000,alimiter=limit=0.708:attack=1:release=60:level=false,aresample=48000"
 
 
 def run(cmd, capture=False):
@@ -87,7 +90,19 @@ def base(src, job, t_in, t_out, crop_x, fps):
         crop = "crop=1080:1920:0:(ih-1920)/2"
     vf = f"{scale},{crop},{GRADE},fps={fps}"
     fade_out = max(0, dur - 0.25)
-    af = f"{AUDIO},afade=t=in:d=0.08,afade=t=out:st={fade_out}:d=0.25"
+    # Measure, then apply a fixed gain to the target and a peak limiter. Single-pass loudnorm runs in
+    # dynamic mode and undershoots on short clips; linear loudnorm falls back to dynamic when the gain
+    # would push peaks past TP.
+    # The limiter shaves loudness off, so re-measure the whole chain and top the gain up until it lands.
+    gain = 0.0
+    for _ in range(4):
+        af = f"{CLEAN},volume={gain:.2f}dB,{LIMIT},afade=t=in:d=0.08,afade=t=out:st={fade_out}:d=0.25"
+        m = run(["ffmpeg", "-hide_banner", "-ss", str(t_in), "-to", str(t_out), "-i", str(src), "-vn",
+                 "-af", f"{af},ebur128", "-f", "null", "-"], capture=True)
+        miss = TARGET_LUFS - float(re.findall(r"I:\s+(-?[\d.]+) LUFS", m)[-1])
+        if abs(miss) < 0.2:
+            break
+        gain += miss
     pub = job / "public"
     pub.mkdir(parents=True, exist_ok=True)
     out = pub / "input-video.mp4"
