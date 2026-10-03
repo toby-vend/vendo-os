@@ -7,7 +7,7 @@ description: Edit a raw talking-head clip into a finished 9:16 social video usin
 
 You are the editor. A job folder holds everything; tools do the mechanical work; you make the editorial calls and check your own output. The approved reference is Max's vox pop episode (3 Oct 2026); `tools/video-edit/examples/max-vox-pops.edit.json` is that edit as a plan.
 
-Tools live in `tools/video-edit/` (run from the Vendo-OS repo root):
+Tools live in `tools/video-edit/` (when run by `npm run video:edit` you work inside the job folder and the runner gives you their absolute paths):
 - `prep.py analyse` / `prep.py base`: footage clean-up (see the file header)
 - `compose.py <job>`: builds the composition from `edit.json` (schema: `tools/video-edit/EDIT_SPEC.md`, read it first)
 - `npx hyperframes lint|snapshot|render`: validate, look, render
@@ -56,3 +56,4 @@ Comments arrive with `at` in seconds on the delivered cut. For each one, change 
 - Full-screen moments are plain text: no boxes, strips, rules, page numbers or magazine chrome. Transitions are soft (fade or blur).
 - Brand: Vendo content uses `brand: "vendo"`; client content uses that client's brand pack. If the pack doesn't exist, stop and say so in `notes.md`.
 - Never mark anything Final. Never upload. The runner handles Frame.io.
+- Never edit, create or commit files in the Vendo-OS repo, even to fix a tool. Work around problems inside the job folder and report them under "Tool issues" in `notes.md`; a person decides whether the tool changes.

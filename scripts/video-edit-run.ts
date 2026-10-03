@@ -25,15 +25,22 @@ function arg(name: string): string | undefined {
   return i > -1 ? process.argv[i + 1] : undefined;
 }
 
-function runClaude(prompt: string, cwd: string, jobDir: string, logFile: string): Promise<void> {
+/**
+ * Run the edit as a headless Claude Code session working INSIDE the job folder. The skill is passed as an
+ * appended system prompt (rather than loaded from the repo) so the session never needs the repo as its
+ * working directory; git is blocked, and main() checks the repo is untouched afterwards.
+ */
+function runClaude(prompt: string, jobDir: string, skill: string, logFile: string): Promise<void> {
   return new Promise((resolvePromise, reject) => {
     const args = [
       '-p', prompt,
-      '--add-dir', jobDir,
-      '--allowedTools', 'Bash', 'Read', 'Write', 'Edit', 'Glob', 'Grep', 'Skill',
+      '--append-system-prompt', skill,
+      '--allowedTools', 'Bash', 'Read', 'Write', 'Edit', 'Glob', 'Grep',
+      '--disallowedTools', 'Bash(git:*)', 'Bash(gh:*)',
       '--permission-mode', 'acceptEdits',
       '--output-format', 'text',
     ];
+    const cwd = jobDir;
     // .env.local carries an ANTHROPIC_API_KEY for the web app; it would override the machine's Claude Code
     // login (and the Vendo-OS key is known to 401), so the edit session runs on the local login instead.
     const env = { ...process.env };
@@ -49,6 +56,12 @@ function runClaude(prompt: string, cwd: string, jobDir: string, logFile: string)
       code === 0 ? resolvePromise() : reject(new Error(`claude exited with ${code} (log: ${logFile})`));
     });
   });
+}
+
+/** HEAD plus the working-tree state of the edit tooling, to detect an edit session touching the repo. */
+function repoState(repo: string): string {
+  const git = (...a: string[]) => execFileSync('git', ['-C', repo, ...a]).toString();
+  return git('rev-parse', 'HEAD') + git('status', '--porcelain', '--', 'tools', '.claude/skills', 'scripts/video-edit-run.ts', 'web/lib/frameio');
 }
 
 async function main() {
@@ -83,12 +96,22 @@ async function main() {
   // 2. brief + headless edit
   const brief = { mode: 'first_cut', source: srcPath, brand, concept: name, ratio: '9x16', notes, frameio: { asset: asset.id, file: fileId, dest: io.idFrom(dest) } };
   writeFileSync(join(job, 'brief.json'), JSON.stringify(brief, null, 2));
+  const skill = readFileSync(join(repo, '.claude/skills/vendo-video-edit/SKILL.md'), 'utf8')
+    .replace(/^---[\s\S]*?---\n/, '')
+    .replaceAll('tools/video-edit/', `${repo}/tools/video-edit/`);
   const prompt = [
-    `Use the vendo-video-edit skill (.claude/skills/vendo-video-edit/SKILL.md) to make the first cut for the job in ${job}.`,
-    `Read ${job}/brief.json first. Work only inside that job folder and tools/video-edit/.`,
-    `Finish with ${job}/output.mp4, ${job}/edit.json and ${job}/notes.md. Do not upload anything.`,
+    `Make the first cut for the job in this folder (${job}), following the Vendo video edit instructions in your system prompt.`,
+    `Read brief.json first. The tools are in ${repo}/tools/video-edit/ (run them with python3 and their absolute paths).`,
+    'Write files only inside this job folder. Never edit, create or commit anything in the Vendo-OS repo, even to fix a tool:',
+    'if a tool misbehaves, work around it inside the job folder and describe it under "Tool issues" in notes.md.',
+    'Finish with output.mp4, edit.json and notes.md in this folder. Do not upload anything.',
   ].join(' ');
-  await runClaude(prompt, repo, job, join(job, 'claude.log'));
+  const before = repoState(repo);
+  await runClaude(prompt, job, skill, join(job, 'claude.log'));
+  const after = repoState(repo);
+  if (before !== after) {
+    throw new Error(`The edit session changed the Vendo-OS repo (HEAD or tools/skill files). Review with git before delivering anything from ${job}.`);
+  }
 
   // 3. verify
   const out = join(job, 'output.mp4');
