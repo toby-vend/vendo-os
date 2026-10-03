@@ -38,7 +38,9 @@ const idOf = (v: unknown): string | null => (v && typeof v === 'object' ? str((v
 /** Tolerant of both nested ({resource: {id}}) and flat ({resource_id}) shapes. */
 export function parseActionPayload(body: unknown): ActionPayload {
   const b = (body && typeof body === 'object' ? body : {}) as Obj;
-  const resource = (b.resource && typeof b.resource === 'object' ? b.resource : {}) as Obj;
+  // Frame.io sends `resources: [{id, type}]` (actions can run on several assets); older shapes use `resource`.
+  const first = Array.isArray(b.resources) ? b.resources[0] : b.resource;
+  const resource = (first && typeof first === 'object' ? first : {}) as Obj;
   const rawData = b.data && typeof b.data === 'object' ? (b.data as Obj) : null;
   const data = rawData
     ? Object.fromEntries(Object.entries(rawData).map(([k, v]) => [k, v == null ? '' : String(v).trim()]))
@@ -82,9 +84,10 @@ export function firstCutForm(values: Record<string, string> = {}, problem?: stri
 
 /** Check the form answers. Returns the job params, or a plain-English problem to show back. The AI names the video later. */
 export function validateFirstCut(data: Record<string, string>): { ok: true; params: FirstCutParams } | { ok: false; problem: string } {
-  const section = data.section === 'Organic' ? 'Organic' : data.section === 'Social Ads' ? 'Social Ads' : null;
+  const section = data.section === 'Organic' ? 'Organic' : data.section === 'Social Ads' || !data.section ? 'Social Ads' : null;
   if (!section) return { ok: false, problem: 'choose Social Ad or Organic.' };
-  const brand = data.brand ?? '';
+  // Frame.io leaves an untouched select out of the answers, so no brand means the default (first) one.
+  const brand = data.brand || BRAND_PACKS[0].value;
   if (!BRAND_PACKS.some((b) => b.value === brand)) return { ok: false, problem: 'choose a brand from the list.' };
   return { ok: true, params: { section, treatment: null, concept: null, brand, notes: (data.notes ?? '').slice(0, 2000) } };
 }
