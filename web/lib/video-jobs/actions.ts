@@ -65,7 +65,30 @@ export interface ActionForm extends ActionMessage {
 
 export const message = (title: string, description: string): ActionMessage => ({ title, description });
 
-export function firstCutForm(values: Record<string, string> = {}, problem?: string): ActionForm {
+const TEAM_ROLES = new Set(['owner', 'admin', 'member']);
+const TEAM_DOMAINS = ['vendodigital.co.uk', 'vendo.co.uk'];
+
+/**
+ * Who may start AI edits: a member of our Frame.io account with a Vendo email. Deliberately separate from
+ * the comment-alert classification in frameio/users.ts, which can be forced to treat everyone as external.
+ */
+export function isTeamMember(role: string | null, email: string | null): boolean {
+  const domain = email?.split('@')[1]?.toLowerCase() ?? '';
+  return !!role && TEAM_ROLES.has(role) && TEAM_DOMAINS.includes(domain);
+}
+
+/** "Run on" choices: Macs with the AI edit app installed. The clicker's own Mac first when it has one. */
+export function macOptions(workerEmails: string[], clickerEmail: string | null): Array<{ name: string; value: string }> {
+  const label = (e: string) => {
+    const who = e.split('@')[0];
+    return `${who.charAt(0).toUpperCase()}${who.slice(1)}'s Mac`;
+  };
+  const mine = clickerEmail?.toLowerCase();
+  const sorted = [...new Set(workerEmails.map((e) => e.toLowerCase()))].sort((a, b) => (a === mine ? -1 : b === mine ? 1 : a.localeCompare(b)));
+  return sorted.map((e) => ({ name: label(e), value: e }));
+}
+
+export function firstCutForm(values: Record<string, string> = {}, problem?: string, macs: Array<{ name: string; value: string }> = []): ActionForm {
   return {
     title: 'AI First Cut',
     description: problem
@@ -77,6 +100,9 @@ export function firstCutForm(values: Record<string, string> = {}, problem?: stri
         options: [{ name: 'Social Ad', value: 'Social Ads' }, { name: 'Organic', value: 'Organic' }],
       },
       { type: 'select', label: 'Brand', name: 'brand', value: values.brand || BRAND_PACKS[0].value, options: BRAND_PACKS },
+      ...(macs.length > 1
+        ? [{ type: 'select' as const, label: 'Run on', name: 'worker', value: values.worker || macs[0].value, options: macs }]
+        : []),
       { type: 'textarea', label: 'Notes for the AI (optional)', name: 'notes', value: values.notes ?? '' },
     ],
   };

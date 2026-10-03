@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { destinationPath, firstCutForm, nameFromTitle, parseActionPayload, pipelineName, validateFirstCut } from './actions.js';
+import { destinationPath, firstCutForm, isTeamMember, macOptions, nameFromTitle, parseActionPayload, pipelineName, validateFirstCut } from './actions.js';
 
 describe('parseActionPayload', () => {
   it('reads the real Frame.io shape (resources list, flat account_id)', () => {
@@ -83,5 +83,25 @@ describe('firstCutForm', () => {
     assert.match(f.description, /choose a brand/);
     assert.deepEqual(f.fields.map((x) => x.name), ['section', 'brand', 'notes']);
     assert.equal(f.fields[0].value, 'Organic');
+  });
+});
+
+describe('isTeamMember', () => {
+  it('needs an account role and a Vendo email', () => {
+    assert.equal(isTeamMember('owner', 'creative@vendodigital.co.uk'), true);
+    assert.equal(isTeamMember('member', 'faith@vendodigital.co.uk'), true);
+    assert.equal(isTeamMember(null, 'someone@vendodigital.co.uk'), false);
+    assert.equal(isTeamMember('member', 'client@gmail.com'), false);
+  });
+});
+
+describe('macOptions', () => {
+  it("lists installed Macs with the clicker's own first", () => {
+    const m = macOptions(['toby@vendodigital.co.uk', 'faith@vendodigital.co.uk'], 'faith@vendodigital.co.uk');
+    assert.deepEqual(m, [{ name: "Faith's Mac", value: 'faith@vendodigital.co.uk' }, { name: "Toby's Mac", value: 'toby@vendodigital.co.uk' }]);
+  });
+  it('shows the Run on choice only when there is more than one Mac', () => {
+    assert.ok(!firstCutForm({}, undefined, [{ name: "Toby's Mac", value: 't' }]).fields.some((f) => f.name === 'worker'));
+    assert.ok(firstCutForm({}, undefined, [{ name: 'A', value: 'a' }, { name: 'B', value: 'b' }]).fields.some((f) => f.name === 'worker'));
   });
 });

@@ -222,6 +222,14 @@ export async function touchWorker(email: string, host: string): Promise<void> {
   });
 }
 
+/** Editors whose Mac has checked in within the last 60 days (has the AI edit app installed). */
+export async function listWorkers(): Promise<string[]> {
+  await ensureVideoJobsSchema();
+  const cutoff = new Date(Date.now() - 60 * 86_400_000).toISOString();
+  const res = await db.execute({ sql: 'SELECT email FROM video_workers WHERE last_seen_at > ? ORDER BY last_seen_at DESC', args: [cutoff] });
+  return res.rows.map((r) => String(r.email));
+}
+
 /** When this person's Mac last checked in, or null if it never has. */
 export async function workerLastSeen(email: string): Promise<string | null> {
   await ensureVideoJobsSchema();
