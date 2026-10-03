@@ -60,10 +60,10 @@ def photo(x, y, w, h, img, fx=0.5, fy=0.5, zoom=1.0, extra=""):
 STAR = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>'
 
 
-def proof(color, size=20, text="4.6 from 11,700+ product reviews"):
-    stars = "".join(STAR.format(s=size) for _ in range(5))
+def proof(color, size=20, text="Made in our Epsom workshop since 2003 · 150+ profiles"):
+    """Facts strip. No star ratings: the on-site review count can't be verified (see research.md)."""
     return (f'<div style="display:flex;align-items:center;gap:12px;color:{color}">'
-            f'<span style="display:flex;gap:2px;color:{C["star"]}">{stars}</span>'
+            f'<span style="width:{size * 1.6:.0f}px;height:2px;background:{C["teal"]}"></span>'
             f'<span class="sans" style="font-size:{size}px;font-weight:500">{text}</span></div>')
 
 
@@ -320,10 +320,10 @@ graphic = sec("05 Graphic elements", f"""
   <div class="abs" style="left:70px;top:40px;color:{C['teal']}">{PROFILE.format(cls="", style="width:100px;height:330px", sw=3)}</div>
   <div class="abs" style="left:220px;top:40px;color:{C['slate']}">{PROFILE.format(cls="", style="width:70px;height:240px", sw=3)}</div>
   <div class="abs mono" style="left:310px;top:250px;color:{C['muted']}">Ogee 2 &nbsp;·&nbsp; 18 × 145mm</div>
-  <div class="abs" style="left:310px;top:290px">{proof(C['ink'], 15, "4.6 · 11,700+ reviews")}</div>
+  <div class="abs" style="left:310px;top:290px">{proof(C['ink'], 15, "Since 2003 · Epsom")}</div>
   <div class="abs h3" style="left:32px;top:424px">03 &nbsp;The profile line</div>
   <div class="abs small" style="left:32px;top:462px;width:470px">A single-weight line drawing of the moulding's cross-section, labelled like a spec sheet.
-  Shows the exact shape the customer is matching. Pair with the review strip for proof.</div>
+  Shows the exact shape the customer is matching. Pair with the facts strip for proof.</div>
 </div>
 """)
 
@@ -367,7 +367,7 @@ principles = [
     ("Lead with the match", "68% of surveyed customers chose us for the exact profile and size. Say that first."),
     ("Name the profile", "Torus, Ogee 2, Edwardian. Specific beats generic every time."),
     ("Talk like the trade", "Plain, practical, confident. Mitres, lengths, finishes. No hype."),
-    ("Show the proof", "Since 2003, our own workshop, 11,700+ reviews. Facts, not adjectives."),
+    ("Show the proof", "Since 2003, our own Epsom workshop, 150+ profiles. Facts, not adjectives. Never quote a rating or review count that isn't verified."),
 ]
 pp = "".join(
     f'<div class="abs" style="left:120px;top:{430 + i * 132}px;width:820px;border-top:1px solid {C["hair"]};padding-top:18px;display:flex;gap:30px">'
@@ -394,7 +394,7 @@ feed = f"""
   <div class="abs" style="inset:0;background:linear-gradient(180deg, rgba(47,79,79,0) 40%, rgba(47,79,79,.92) 100%)"></div>
   <div class="abs" style="left:20px;top:20px;width:500px;height:500px;border:1.5px solid rgba(255,255,255,.8)"></div>
   <div class="abs" style="left:44px;top:44px">{logo("white", style="width:70px;height:auto")}</div>
-  <div class="abs serif" style="left:44px;bottom:116px;width:440px;color:#fff;font-size:38px;font-weight:600;line-height:1.08">Your 1890s skirting, matched exactly.</div>
+  <div class="abs serif" style="left:44px;bottom:116px;width:440px;color:#fff;font-size:38px;font-weight:600;line-height:1.08">The profile nobody else stocks, matched.</div>
   <div class="abs sans" style="left:44px;bottom:80px;color:{C['on_slate']};font-size:15px">Send us a photo. We'll match the profile.</div>
   <div class="abs" style="left:44px;bottom:40px">{proof('#fff', 13)}</div>
 </div>
@@ -439,9 +439,12 @@ apps = sec("08 Example applications", f"""
 """)
 
 SECTIONS = [cover, logo_sec, colour, typo, graphic, photography, tone, apps]
+import sys
+if len(sys.argv) > 1:  # e.g. python3 guideline.py 5 7 8 -> guideline-fix.html with just those sections
+    SECTIONS = [SECTIONS[int(i) - 1] for i in sys.argv[1:]]
 
 html = (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><title>MR Mouldings Brand Guidelines</title>"
         f"<style>{CSS}</style><script src='https://mcp.figma.com/mcp/html-to-design/capture.js' async></script>"
         f"</head><body>{''.join(SECTIONS)}</body></html>")
-(ROOT / "guideline.html").write_text(html)
+(ROOT / ("guideline-fix.html" if len(sys.argv) > 1 else "guideline.html")).write_text(html)
 print("wrote guideline.html")
