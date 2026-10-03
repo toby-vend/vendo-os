@@ -24,6 +24,7 @@
     "sync:asana:discover": "tsx scripts/sync/sync-asana.ts --discover",
     "sync:frameio": "tsx scripts/sync/sync-frameio.ts",
     "audit:frameio": "tsx scripts/audit-frameio-folders.ts",
+    "frameio:io": "tsx scripts/frameio-io.ts",
     "sync:portal": "tsx scripts/sync/push-clients-to-portal.ts",
     "sync:onboarding": "tsx scripts/sync/pull-onboarding-from-portal.ts",
     "dev": "tsx watch web/start.ts",

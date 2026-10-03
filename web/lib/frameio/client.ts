@@ -53,6 +53,35 @@ async function getJson<T>(path: string): Promise<T | null> {
   return ((json as { data?: T }).data ?? (json as T)) ?? null;
 }
 
+/**
+ * POST / PATCH / DELETE with a JSON body. Unwraps `{ data }` like getJson.
+ * Used by the AI-edit pipeline (uploads, version stacks, comments).
+ */
+export async function sendJson<T>(method: 'POST' | 'PATCH' | 'DELETE', path: string, body?: unknown): Promise<T | null> {
+  const token = await getValidAccessToken();
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (res.status === 204) return null;
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new FrameioApiError(res.status, `${BASE_URL}${path}`, text);
+  }
+  const json = (await res.json()) as { data?: T } | T;
+  return ((json as { data?: T }).data ?? (json as T)) ?? null;
+}
+
+/** Exported read helper for modules that need endpoints not wrapped below. */
+export function getResource<T>(path: string): Promise<T | null> {
+  return getJson<T>(path);
+}
+
 // --- Domain types (only the fields we use) ---
 // Confirmed against live V4 responses on 2026-05-08.
 
@@ -221,7 +250,7 @@ export interface FrameioFolderChild {
  * Generic paginator over a `{ data: T[], links: { next? } }` envelope.
  * Mirrors listAccountUsers' next-link normalisation.
  */
-async function listAll<T>(initialPath: string): Promise<T[]> {
+export async function listAll<T>(initialPath: string): Promise<T[]> {
   const all: T[] = [];
   let path: string | null = initialPath;
   for (let i = 0; i < 100 && path; i += 1) {
