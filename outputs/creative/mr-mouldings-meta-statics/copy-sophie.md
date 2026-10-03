@@ -92,17 +92,17 @@ Respect the house, and the profile it was built with.
 
 ---
 
-## S4 | The bay window
-**Awareness:** problem aware. **Sophistication:** 3 (mechanism). **Angle:** flexible mouldings for the curve that usually defeats a match.
+## S4 | Curves and bays
+**Awareness:** problem aware. **Sophistication:** 3 (mechanism). **Angle:** flexible mouldings for the curved wall or bay that usually defeats a match.
 Research: MR site: flexible mouldings bend around bay windows and curved walls "without steaming or kerfing"; Audience Report: bay windows are near universal in Victorian and Edwardian terraces.
-Concept name: **Sophie Flexible | The bay window**
+Concept name: **Sophie Flexible | Curves and bays**
 
-**On image:** The bay is where the skirting usually gives up. / Our flexible mouldings bend to the curve. No steaming. No kerfing. / Skirting, architrave, dado, picture rail and cornice / Shop flexible
+**On image:** Curves are where the skirting usually gives up. / Our flexible mouldings bend to the wall. No steaming. No kerfing. / Skirting, architrave, dado, picture rail and cornice / Shop flexible
 
-**Headline:** Skirting that follows the bay.
+**Headline:** Mouldings that follow the curve.
 
 **Primary text:**
-Straight walls are easy. Then you reach the bay.
+Straight walls are easy. Then you reach the bay window, or the curved wall at the foot of the stairs.
 
 Rigid skirting won't follow the curve, so it gets cut into short facets, or steamed, or kerfed and filled until it nearly looks right.
 
@@ -110,7 +110,7 @@ There's a better way round it.
 
 Our flexible mouldings bend to the curve. You fix from the centre of the curve outwards with adhesive and hold it until it grabs. No steaming. No kerfing. No scrapped lengths.
 
-They come in the same period profiles as our standard range, across skirting, architrave, dado rail, picture rail and cornice, so the bay matches the straight runs either side of it.
+They come in the same period profiles as our standard range, across skirting, architrave, dado rail, picture rail and cornice, so the curve matches the straight runs either side of it.
 
 Made and supplied from our Epsom workshop since 2003. There's a fitting guide on our blog.
 

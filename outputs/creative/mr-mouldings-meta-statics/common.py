@@ -99,15 +99,13 @@ def profile(kind, height_px, stroke, sw=3, depth_px=None):
             f'stroke-linejoin="round" preserveAspectRatio="none"><path d="{d}" vector-effect="non-scaling-stroke"/></svg>')
 
 
-STAR = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>'
-
-PROOF_TEXT = "4.6 from 11,700+ product reviews"
+PROOF_TEXT = "Made in our Epsom workshop since 2003"
 
 
 def proof(color, size=22, text=PROOF_TEXT):
-    stars = "".join(STAR.format(s=size) for _ in range(5))
+    """Facts strip. No star ratings or review counts (on-site reviews unverifiable, Toby 3 Oct 2026)."""
     return (f'<div style="display:flex;align-items:center;gap:12px;color:{color}">'
-            f'<span style="display:flex;gap:3px;color:{C["star"]}">{stars}</span>'
+            f'<span style="width:{size * 1.6:.0f}px;height:2px;background:{C["teal_light"]}"></span>'
             f'<span class="sans" style="font-size:{size}px;font-weight:500;letter-spacing:.01em">{text}</span></div>')
 
 
