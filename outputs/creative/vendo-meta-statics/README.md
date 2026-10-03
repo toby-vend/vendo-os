@@ -44,3 +44,8 @@ assets/photos/site/ (gitignored) — raw images pulled from the website Figma fi
 - New sources: Frame.io raws via read-only ffmpeg seeking (scratch script fio-stills.mts → assets/photos/candidates/fio): Vendo/Website Banners/RAWS, Vendo/25th Feb Content Day/Raws/B-roll, Zen House/13TH AUGUST/RAWS/B roll; full YouTube downloads via newer yt-dlp in a scratch venv (Zen House AhgnKmhxHZY, Avenue, St Clears).
 - Skipped: Vendo Testimonial Compilation (vertical, includes One Dental), St Clears/Avenue patient testimonials (patients + captions), Kana shorts (burned captions).
 - A handful of Frame.io grabs failed on a Turso timeout; rerun was blocked, so those clips weren't reviewed.
+
+## Final images + 1.91:1 (2026-10-03)
+- Practice-style: Check Up 31, Consistent Flow 27, Scale 21, Cosmetic 05, Gappy 28, Competitors 30 (focus-point CROP fills per size).
+- ROI: Which Ads Pay → 22, CRM Connected → 01 (row was mislabelled "Which Ads Pay"; renamed), PMS Integration → 33. 42 tried for Which Ads Pay but reads as backs of heads at ad crops.
+- New size: 1200x628 "1.91x1" frame per concept at x=3540 on both pages (photo left 560px, text right). Serif phrase forced onto one line where it split (Scale Practice, Patient Outcomes).
