@@ -30,3 +30,10 @@ assets/photos/site/ (gitignored) — raw images pulled from the website Figma fi
 - Source page "Practice-style ads (v2)" 6:2 in rXwHXr7UQ6ldReKxDSZtBv. Rebuilt on page "Practice-style (v5 · brand refresh)" (6:2) in kluNBf7ZYkvdpet56Oqsiu.
 - 6 concepts × 3 sizes; copy unchanged, v2's per-size photos used with FILL. Photos in assets/photos/practice/ (gitignored, named by Figma hash).
 - Open: three eyebrows don't match their headline (Scale Practice = "Full-arch implants", Gappy Diary = "Composite bonding", Losing To Competitors = "Second opinions"); Cosmetic 9x16 photo has a blurred foreground blob at the top (from v2's crop).
+
+## Replacement image options (2026-10-03)
+- Page "Image options (pick replacements)" in kluNBf7ZYkvdpet56Oqsiu: 17 numbered candidates.
+- 01–13: stills from Vendo's public case-study videos (Sherwood Park 2rSZqfRMO9A, Avenue Dental 6O052zS9EG0, One Dental GtrdCsbmP6g, St Clears SygaKyeb8DI). yt-dlp 2026.07.04 gets 403 after ~10MB, so only the first ~minute of each was usable; Kana (61sDxTd4MuI) has burned-in subtitles, skipped.
+- 14–18: vendodigital.co.uk media library + website Figma. Instagram is all captioned reels, skipped.
+- Drive (e.g. "Vendo phots" 1iPvHMlMkX8J-6_Z4gf_o9eojFAnPI9rx, sonemarketing shoot folders) not searched visually: token and Chrome routes were blocked by the permission classifier.
+- Next: 1.91:1 (1200x628) version of both refreshed sets once images are picked.
