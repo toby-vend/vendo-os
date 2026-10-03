@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import { destinationPath, firstCutForm, nameFromTitle, parseActionPayload, pipelineName, validateFirstCut } from './actions.js';
 
 describe('parseActionPayload', () => {
+  it('reads the real Frame.io shape (resources list, flat account_id)', () => {
+    const p = parseActionPayload({
+      account_id: 'a1', action_id: 'x', interaction_id: 'i1', project: { id: 'p1' },
+      resources: [{ id: 'f1', type: 'file' }], type: 'vendo.ai.first_cut', user: { id: 'u1' }, workspace: { id: 'w1' },
+      data: { section: 'Social Ads' },
+    });
+    assert.equal(p.resourceId, 'f1');
+    assert.equal(p.resourceType, 'file');
+    assert.equal(p.accountId, 'a1');
+    assert.deepEqual(p.data, { section: 'Social Ads' });
+  });
+
   it('reads the nested shape', () => {
     const p = parseActionPayload({
       type: 'vendo.ai.first_cut', interaction_id: 'i1', resource: { id: 'f1', type: 'file' },
@@ -30,8 +42,13 @@ describe('validateFirstCut', () => {
     assert.ok(r.ok);
     if (r.ok) assert.deepEqual(r.params, { section: 'Social Ads', treatment: null, concept: null, brand: 'vendo', notes: 'keep it short' });
   });
-  it('rejects a missing type or unknown brand', () => {
-    assert.equal(validateFirstCut({ brand: 'vendo' }).ok, false);
+  it('uses the default type and brand when Frame.io leaves untouched selects out', () => {
+    const r = validateFirstCut({ notes: '' });
+    assert.ok(r.ok);
+    if (r.ok) { assert.equal(r.params.section, 'Social Ads'); assert.equal(r.params.brand, 'vendo'); }
+  });
+  it('rejects an unknown type or brand', () => {
+    assert.equal(validateFirstCut({ section: 'Video', brand: 'vendo' }).ok, false);
     assert.equal(validateFirstCut({ section: 'Organic', brand: 'nope' }).ok, false);
   });
 });
