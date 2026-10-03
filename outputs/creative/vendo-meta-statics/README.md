@@ -17,3 +17,11 @@ Brand guideline (Figma): https://www.figma.com/design/0QzU2TgMyBsrKIT1B5LNSQ —
 
 ## Photos
 assets/photos/site/ (gitignored) — raw images pulled from the website Figma file. Excluded: stock and Higgsfield/AI images.
+
+## Measuring ROI statics — v5 brand refresh (2026-10-03)
+- Source: "Vendo – Dental Practice Static Ads" (rXwHXr7UQ6ldReKxDSZtBv), page "Measuring ROI ads (v3)" 37:7. Read-only for our account, so the refresh lives in a new file:
+  https://www.figma.com/design/kluNBf7ZYkvdpet56Oqsiu (Vendo Digital folder)
+- 12 concepts × 1x1 / 4x5 / 9x16. Copy and photo crops unchanged from v3; 9x16 photo extended to 1040px so the logo ends above y=1580.
+- Restyle: Manrope SemiBold sentence-case headline with one Instrument Serif Italic mint phrase, mint-dot eyebrow, tick + offer, mint pill CTA, official SVG logo, hairline rule.
+- Names follow "<Concept> | Static | <Talent> | Brand refresh | <size> | 261003". Talent is a placeholder (Stage/Team/Client/Event/Podcast) until Toby confirms who is in each photo.
+- Photos: assets/photos/roi/ (gitignored). Figma image hash = SHA-1 of the file bytes, useful for mapping downloads back to frames.
