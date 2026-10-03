@@ -88,14 +88,14 @@ PROFILES = {
 }
 
 
-def profile(kind, height_px, stroke, sw=3, depth_px=None):
+def profile(kind, height_px, stroke, sw=3, depth_px=None, fill="none"):
     """A profile drawn at a given pixel height (the top detail keeps its shape; the run is stretched)."""
     path, _ = PROFILES[kind]
     H = 420
     d = path.format(H=H - 4)
     w = depth_px or 120 * height_px / H
     return (f'<svg viewBox="0 0 120 {H}" style="display:block;width:{w:.0f}px;height:{height_px}px;overflow:visible" '
-            f'fill="none" stroke="{stroke}" stroke-width="{sw}" vector-effect="non-scaling-stroke" '
+            f'fill="{fill}" stroke="{stroke}" stroke-width="{sw}" vector-effect="non-scaling-stroke" '
             f'stroke-linejoin="round" preserveAspectRatio="none"><path d="{d}" vector-effect="non-scaling-stroke"/></svg>')
 
 

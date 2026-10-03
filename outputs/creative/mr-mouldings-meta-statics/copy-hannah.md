@@ -43,7 +43,7 @@ Research: thread title "How to make a new build less new build'ey" (Mumsnet, Gar
 Concept name: **Hannah New Build | Less new build-ey**
 Talent: Room photo
 
-**On image:** How do you make a new build feel less new build-ey? / Taller skirting. Architrave that matches. A dado rail or panel mould on one wall. / Shop the look
+**On image:** How do you make a new build feel less new build-ey? / Taller skirting. Architrave that matches. A dado rail or panel mould on one wall. / Shop skirting
 
 **Headline:** Three upgrades. One weekend.
 
@@ -62,7 +62,7 @@ None of it means moving a wall or calling a builder. It's mouldings, adhesive an
 
 We make skirting, architrave, dado rails and panel moulds in matching profiles, over 150 of them, in our Epsom workshop. Choose primed or unprimed on each product.
 
-Shop the look and start with the room you use most.
+Shop skirting and start with the room you use most.
 
 Make it the house on the street that doesn't look like the rest.
 
@@ -155,6 +155,6 @@ Give it character that belongs to it.
 - **Heights:** "95mm to 145mm suits most modern rooms" is from the FAQ. Fine to use as guidance, not as a rule.
 - **Panel mould profile count:** "over a dozen profiles" is based on the panel moulding collections (ogee, astragal, ovolo, Hampton, Sunningdale, Victorian, Regency, stepped and more). Confirm the number Adam is comfortable with, or cut to "a range of profiles".
 - **Fitting claims:** H4 uses the FAQ fixing method word for word in substance. Add the cable and pipe check line to any landing page that carries fitting advice (Audience Report, compliance section).
-- **"Shop the look" destination:** the Shop by Look feature was an action from the 25 Sep call. If it isn't live, point H2 at skirting.
+- **Shop the look:** H2 points at skirting. Switch to Shop by Look (25 Sep action) once it is live.
 - **Photography:** Hannah needs a modern room. The client photo set is mostly period homes; the guest bedroom and the panelled bedroom shots are the closest. A real new-build room shoot (or a customer photo with consent) would lift this set.
 - **Proof:** facts only by decision.
