@@ -1,0 +1,31 @@
+{
+  "brand": "vendo",
+  "duration": 50.5,
+  "fps": 25,
+  "focus": [540, 820],
+  "cards": [
+    { "type": "location", "start": 9.5, "end": 12.3, "kicker": "On the streets of", "text": "Leamington Spa", "type_at": 10.3 },
+    { "type": "checklist", "start": 12.4, "end": 21.1, "kicker": "What the vox pops captured",
+      "items": [ { "text": "Real experiences", "at": 12.9 }, { "text": "A variety of people", "at": 15.3 }, { "text": "Why they don't enjoy the dentist", "at": 19.4 } ] },
+    { "type": "bar", "start": 33.1, "end": 38.2, "kicker": "Time to produce", "title_html": "A <em>long</em> time to produce", "fill_at": 33.6, "fill_dur": 1.8 }
+  ],
+  "screens": [
+    { "style": "kinetic", "start": 4.7, "end": 6.95, "beats": [
+        { "lines": [ { "text": "Incredibly", "at": 4.8 }, { "text": "well.", "at": 5.2 } ], "exit_at": 5.8 },
+        { "lines": [ { "text": "The", "at": 6.0, "size": 84 }, { "text": "vox pops.", "at": 6.2, "size": 136, "accent": true } ] } ] },
+    { "style": "statement", "start": 25.45, "end": 30.1, "lines": [
+        { "text": "Meta's", "at": 26.6, "size": 150 }, { "text": "Andromeda", "at": 27.05, "size": 176, "accent": true },
+        { "text": "+ creative variety.", "at": 28.95, "size": 96, "dur": 0.6 } ] },
+    { "style": "statement", "start": 38.3, "end": 41.05, "lines": [
+        { "text": "To see the", "at": 38.55, "size": 140 }, { "text": "impact.", "at": 39.15, "size": 210, "accent": true, "dur": 0.8 } ] }
+  ],
+  "camera": [
+    { "type": "punch", "at": 7.4, "scale": 1.13, "out": 8.8 },
+    { "type": "push", "at": 17.6, "scale": 1.08, "dur": 0.6 },
+    { "type": "reframe", "at": 21.6, "until": 26.2, "headline_html": "Performs as ad <em>creative.</em>", "headline_at": 22.9 },
+    { "type": "punch", "at": 31.3, "scale": 1.12, "out": 33.1 },
+    { "type": "push", "at": 41.6, "scale": 1.07, "dur": 2.4 }
+  ],
+  "end": { "at": 44.2, "lines": [ { "text": "Regularly", "at": 44.3, "size": 150 }, { "text": "innovating.", "at": 45.25, "size": 180, "accent": true } ],
+           "sub": { "text": "New ideas, again and again", "at": 47.5 }, "logo_at": 48.6 }
+}

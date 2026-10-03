@@ -1,0 +1,133 @@
+# Siha Dental: Meta static research bank
+
+Built 2 Oct 2026 to the "How To Write Meta Ads That Scale" method (data/playbooks/yt-doc/how-to-write-meta-ads-that-scale-copywriting-masterclass). Rule from the method: retrieve and quote real sources, never invent. Every line in the ads traces back to this file or to Siha's own site, Client Bio or onboarding call.
+
+## Proof we can use (verified 2 Oct 2026)
+
+| Proof | Rung | Source |
+|---|---|---|
+| 5.0 stars from 156 Google reviews | 3: volume | Google Maps listing, Siha Dental, Shepherd's Bush |
+| 12 Google reviews mention composite bonding; 30 mention kind staff; 20 mention welcoming atmosphere | 3 | Google Maps review topics |
+| "I had teeth alignment treatment as well as edge bonding done here, and I'm over the moon with the results." Aria KS | 4: named testimony | Google review, ~1 month ago |
+| "My initial consultation with Dr. Hannan was very thorough and informative, answered all my questions." Krystyna Sookramanien | 4 | Google review, ~2 months ago |
+| "As a nervous patient, I was slightly apprehensive however Hannan and his lovely team have really put me at ease" Rahul Amin | 4 | siha.dental bonding and nervous pages |
+| Multi-award winning; award wall on site | 2: third party (design, not clinical) | siha.dental |
+
+Named reviews need the reviewer's permission before they appear in an ad. Until then, the creatives use volume proof (5.0, 156 reviews) only.
+
+## Offer facts (Siha's own numbers)
+
+- Composite bonding: £250 per tooth (edge), £295 per tooth (full surface). Veneers: £995 per tooth. Source: siha.dental/adult-treatment-costs.
+- One appointment of 1 to 2 hours for most patients, no temporaries. Source: bonding page.
+- No drilling or permanent alteration. Source: bonding page.
+- Lasts 5 to 7 years with proper care; checked at regular visits and touched up if needed. Source: bonding page.
+- 12-month warranty (repairs outside it cost £150). Source: fees page.
+- Cosmetic, ICON, whitening, aligner and implant consultations are complimentary. Source: fees page.
+- Hannan's approach: conservative, natural finishes, usually two to four teeth of bonding rather than ten veneers. Source: onboarding call, 2 Oct 2026.
+- New patient check-up £89. Source: onboarding call + fees page.
+
+## Customer language for bonding (Josh, Hannah)
+
+Sources: Mumsnet threads [1] Composite bonding to improve smile, [2] AIBU: crave composite bonding before buying a home, [3] Has anyone had composite work on their teeth?
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Accommodation | "I rarely show my teeth when I smile" | [1] | Problem / hook |
+| Accommodation | "even when I do you can only really see the two front teeth" | [1] | Problem |
+| The word | "chipped front tooth", "spaces in my teeth", "a bit uneven on the lengths", "one front tooth was slightly longer than the other", "much shorter" | [1] [3] | Hook |
+| Failed / rejected solution | "I just don't want to have to do veneers either because of the cost" | [1] | Objection, price anchor |
+| Failed / rejected solution | "veneers require you to file down healthy teeth" | [2] | Mechanism contrast |
+| Failed / rejected solution | "a friend has veneers and she now looks like a horse" | [2] | Fear of the fake look |
+| Nearly didn't buy | "Composite only lasts a couple of years. It chips easily." | [2] | Objection, risk reversal |
+| Nearly didn't buy | "You will need to avoid red wine, tea and coffee" | [2] | Honest lifespan |
+| Nearly didn't buy | "decided against it as if you ever get your teeth whitened, the composite bonding won't whiten" | [3] | Order of treatment (whiten first) |
+| After | "Only people who knew me prior to 18 know I've had it done" | [2] | Identity: nobody can tell |
+| After | "you can't tell where his teeth end and the composite begins" | [3] | Identity / promise |
+| Moment | "nearing the end of invisalign treatment" | [3] | Aligners then bonding (Hannah) |
+
+[1] https://www.mumsnet.com/talk/style_and_beauty/3330664-Composite-bonding-to-improve-smile-D
+[2] https://www.mumsnet.com/talk/am_i_being_unreasonable/4701655-to-crave-composite-bonding-treatment-before-i-purchase-a-home
+[3] https://www.mumsnet.com/talk/_chat/4551278-has-anyone-had-composite-work-on-their-teeth
+
+Mumsnet quotes are third-party research for language only. They are never presented as Siha patients.
+
+## Market position
+
+- Sophistication: stage 3 to 4. Local competitors sell bonding on discount (Envy Smile via Wowcher), before-and-afters and "transform your smile" claims. Bigger claims won't cut through, so the creatives lead with mechanism (add, don't drill), honest specifics and identity (still your teeth).
+- Gaps for research next: Siha call recordings and post-treatment survey ("the moment"), and permission to quote named reviewers.
+
+## Customer language for Hannah (fear of the fake result)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| The promise, in her words | "I would like the same teeth, but whiter and repaired where needed." | [4] | Promise / hook |
+| Accommodation | "I hate smiling with my teeth." | [4] | Problem |
+| The word / language gap | "I'm a bit lost with where to go and what options are good, and what are bad." | [4] | Hook (H5) |
+| The fear (the look) | "it looks like one big white strip", "fluorescent piano key gnashers", "the gum shield ones look A LOT like false teeth and really ages people" | [5] | Problem / objection |
+| The admired alternative | "a nice smile that's benefited from good orthodontics & whitening" | [5] | Mechanism (order of treatment) |
+| Irreversibility | "They don't realise what they have lost by hacking away at their own teeth" | [5] | Mechanism contrast |
+
+[4] https://www.mumsnet.com/talk/am_i_being_unreasonable/5078633-to-ask-for-options-if-i-dont-want-turkey-teeth
+[5] https://www.mumsnet.com/talk/am_i_being_unreasonable/5553370-turkey-teeth-are-the-new-norm
+
+Siha facts used for Hannah: aligner cases designed by an orthodontist (Hannan, onboarding call); 3D scan preview of the predicted result before committing (Siha Google post, 2 Oct 2026); bonding doesn't whiten afterwards, so whiten first (Mumsnet [3], consistent with Siha's FAQ "Can I have my composite-bonded teeth whitened?").
+
+## Customer language for Mark (lapsed five years or more)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Fear of the reaction | "I thought I was going to be shouted for leaving it so long" | [7] | Hook / problem (M1) |
+| Fear of the reaction | "I'm scared of what he'll say or do" | [7] | Problem |
+| Nearly didn't book | "The cost is a fear too because I'm sure there's lots too do" | [7] | Objection (M3) |
+| The moment | "I have started getting tooth ache in one of my bottom teeth" / "a bit of tooth broke off one day and I went" | [6] | Hook (M4), urgency |
+| Accommodation | "I have been gargling salt water as I know that helps" / "I bite down on garlic which always seemed to work" | [6] [7] | Problem |
+| After | "as unbelievable as this sounds, it actually it wasn't that bad" / "She didn't tell me off for not going earlier" | [7] | Promise / proof of the experience (not Siha-specific) |
+
+[6] https://www.mumsnet.com/talk/general_health/1638113-havent-been-to-the-dentist-for-8-years-and-terrified
+[7] https://www.mumsnet.com/talk/general_health/4842849-scared-of-the-dentist
+
+Siha facts used for Mark: £89 new patient check-up covering teeth, gums, jaw joints, oral cancer screening, small X-rays, 3D scans, photographs and cosmetic goals (Hannan, onboarding call); first step is a call with the patient concierge, and the plan lists essential, recommended and elective options with transparent pricing (siha.dental new patient page); "Many of our patients have avoided the dentist for years... We've never once judged anyone for it" (nervous patients page); 30 Google reviews mention kind staff (Google review topics); Tue to 7pm and Sat 9 to 5 (site hours).
+
+## Customer language for Niamh (anxious, needs control)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Accommodation | "I had two long appointments in the diary for January which I cancelled" | [8] | Hook (N3) |
+| Accommodation | "all i have to do is lay down in the chair and hang on to my ring" | [8] | Problem |
+| Need for predictability | "it was uncomfortable, but only lasted 15 seconds (I was counting)" | [8] | Mechanism (N2) |
+| The fear | "Just the thought of sitting in that chair makes me feel sick." / "Even hearing drills etc on the TV or radio make me feel sick." | [8] | Problem (N2, N4) |
+| Dismissed before | "she was awful and said 'well if you looked after them properly it wouldn't hurt'" | [8] | Objection (N1) |
+
+[8] https://www.mumsnet.com/talk/feeling_depressed/730793-Dental-phobia-I-HAVE-to-go-and-am-getting-anxious
+
+Siha facts used for Niamh (siha.dental/nervous-patients): agreed signals to pause whenever you need; treatment stopped immediately if you're uncomfortable; every step explained before you're in the chair; before the appointment you're told what the room looks like, who will treat you, what pain relief and how it works, how long it takes, and that you can stop at any moment; "we go at your pace, always"; "no harsh clinical smells, no intimidating equipment on display... more like a calm retreat than a surgery". 20 Google reviews mention the welcoming atmosphere. Siha's site doesn't advertise sedation, so none is claimed.
+
+## Customer language for Claire (camera-conscious; ICON and whitening)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Accommodation | "closed mouth smile" / "I do smile for the photos which I hate doing" | [9] | Hook (C1) |
+| Others notice | "she gets disappointed with the pictures because I'm not smiling 'properly'" | [9] | Problem |
+| The word | "streaking and white spots on his adult front teeth" | [10] | Hook (C4) |
+
+[9] https://www.mumsnet.com/talk/am_i_being_unreasonable/4614667-to-not-want-to-show-my-teeth-in-photos
+[10] https://www.mumsnet.com/talk/_chat/5077938-fluorosis-feeling-terrible
+
+Siha facts used for Claire: ICON removes white and brown spots without drilling or injections, in a single 60 to 90 minute appointment, results visible straight away, can be repeated; treats post-braces white spots, fluorosis, early decay, trauma discolouration (ICON page). £395 for up to two teeth, £100 per extra tooth (fees page). Whitening first is recommended so the resin matches the brighter shade (ICON page). Enlighten: 14 nights at home, custom trays, VITA B1 shade guarantee (whitening page). The video-call angle is from the persona bank (Claire), not a forum quote.
+
+## Customer language for the smile makeover (Michelle)
+
+| Find (method) | Verbatim | Source | Beat it feeds |
+|---|---|---|---|
+| Long-term | "I've hated my teeth my whole life." | [12] | Hook (S1) |
+| Moment | "Now I think what the hell, I'm fixing it." | [12] | Urgency / identity |
+| Accommodation | "I would never ever smile without my hand in front of my mouth or smile for photos." | [12] | Problem |
+| Accommodation | "I was always the one with the awkward smile in photos, trying to hide my teeth" | [11] | Problem |
+| Age objection | "Im 60 and on tray 28 ish of my aligners...you are never too old" | [11] | Objection (S3) |
+| Combined treatment | "finished now just waiting on some bonding and teeth whitening" / "Mine also included composite bonding." | [11] [12] | Mechanism (S2) |
+| After | "Worth every single penny. I can get my photo taken now without even thinking" | [11] | Identity |
+
+[11] https://www.mumsnet.com/talk/style_and_beauty/5067013-has-anyone-had-invisalign-as-an-adult
+[12] https://www.mumsnet.com/talk/am_i_being_unreasonable/4609543-to-ask-if-you-found-invisalign-worth-it
+
+Siha facts used: aligners digitally planned with iTero 3D scanning, predicted result shown before starting, typical treatment 6 to 18 months (aligner page); Hannan's typical makeover is whitening, six to nine months of aligners and two to four teeth of bonding rather than ten veneers, and all aligner cases are designed by an orthodontist (onboarding call); veneers £995 per tooth, bonding from £250 (fees page); Enlighten 14 nights with VITA B1 guarantee (whitening page).
