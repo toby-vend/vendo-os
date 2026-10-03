@@ -173,7 +173,16 @@ export async function ancestorFolders(asset: { parent_id: string | null }, accou
   const chain: Array<{ id: string; name: string }> = [];
   let next = asset.parent_id;
   for (let i = 0; next && i < 20; i += 1) {
-    const f = await getFolder(next, accountId);
+    let f: { id: string; name: string; parent_id: string | null };
+    try {
+      f = await getFolder(next, accountId);
+    } catch (err) {
+      // A version of a stack has the stack as its parent (422 "not a folder"): step over the stack.
+      if ((err as { status?: number }).status !== 422) throw err;
+      const stack = await getResource<{ parent_id: string | null }>(`/accounts/${accountId}/version_stacks/${next}`);
+      next = stack?.parent_id ?? null;
+      continue;
+    }
     chain.push({ id: f.id, name: f.name });
     next = f.parent_id;
   }

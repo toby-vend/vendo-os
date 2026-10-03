@@ -1,10 +1,11 @@
 import crypto from 'crypto';
 import type { FastifyPluginAsync } from 'fastify';
 import { db } from '../lib/queries/base.js';
-import { ACCOUNT_ID } from '../lib/frameio/media-io.js';
+import { ACCOUNT_ID, ancestorFolders, getAsset } from '../lib/frameio/media-io.js';
+import { pickShootFolder } from '../lib/video-jobs/destination.js';
 import { resolveUser } from '../lib/frameio/users.js';
 import {
-  ACTION_EVENTS, firstCutForm, isTeamMember, macOptions, message, parseActionPayload, validateFirstCut,
+  ACTION_EVENTS, firstCutForm, isTeamMember, looksLikeExport, macOptions, message, parseActionPayload, validateFirstCut,
   type ActionMessage, type ActionPayload,
 } from '../lib/video-jobs/actions.js';
 import {
@@ -52,7 +53,18 @@ async function firstCut(p: ActionPayload): Promise<unknown> {
   if (!user) return message('AI First Cut', 'Only Vendo team members can start AI edits.');
   // Logins can be shared (the team uses creative@ in Frame.io), so the person picks which Mac runs it.
   const macs = macOptions(await listWorkers(), user.email);
-  if (!p.data) return firstCutForm({}, undefined, macs);
+  if (!p.data) {
+    // Catch the two common mistakes now, not 20 minutes later on the Mac.
+    const asset = await getAsset(p.resourceId!);
+    const name = asset.head_version?.name ?? asset.name;
+    if (looksLikeExport(name)) {
+      return message('AI First Cut', `"${name}" is already an edited export. Right-click the raw clip in the shoot's Raw Footage folder instead (to change this video, use AI Revision).`);
+    }
+    if (!pickShootFolder(await ancestorFolders(asset))) {
+      return message('AI First Cut', 'This clip isn\'t in a shoot folder. Move it into <shoot folder> › Raw Footage first, so the AI knows where to file the video.');
+    }
+    return firstCutForm({}, undefined, macs);
+  }
   const check = validateFirstCut(p.data);
   if (!check.ok) return firstCutForm(p.data, check.problem, macs);
 

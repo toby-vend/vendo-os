@@ -54,7 +54,8 @@ export function parseActionPayload(body: unknown): ActionPayload {
     accountId: idOf(b.account) ?? str(b.account_id),
     workspaceId: idOf(b.workspace) ?? str(b.workspace_id),
     projectId: idOf(b.project) ?? str(b.project_id),
-    data: data && Object.keys(data).length ? data : null,
+    // A submitted form with every field left at its default arrives as `data: {}`: that is still an answer.
+    data,
   };
 }
 
@@ -136,6 +137,11 @@ export function nameFromTitle(section: FirstCutParams['section'], title: { treat
   const check = checkConceptName(concept);
   const problems = [...(clean(title.treatment) ? [] : ['the AI gave no treatment']), ...check.problems];
   return { treatment, concept: concept || 'Unnamed | Unnamed | Unnamed', problems };
+}
+
+/** True for a file already named as an SOP export ("… | 9x16 | 60s | v02 | Internal"), i.e. not raw footage. */
+export function looksLikeExport(fileName: string): boolean {
+  return /\|\s*v\d{2,}\s*\|\s*(Working|Internal|Client Review|Final)\b/i.test(fileName);
 }
 
 /** Name passed to the upload (the runner adds ratio, length, version and status). */

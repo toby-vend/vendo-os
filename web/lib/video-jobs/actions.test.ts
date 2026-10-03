@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { destinationPath, firstCutForm, isTeamMember, macOptions, nameFromTitle, parseActionPayload, pipelineName, validateFirstCut } from './actions.js';
+import { destinationPath, firstCutForm, isTeamMember, looksLikeExport, macOptions, nameFromTitle, parseActionPayload, pipelineName, validateFirstCut } from './actions.js';
 
 describe('parseActionPayload', () => {
   it('reads the real Frame.io shape (resources list, flat account_id)', () => {
@@ -27,12 +27,15 @@ describe('parseActionPayload', () => {
     assert.deepEqual(p.data, { concept: 'X' });
   });
 
-  it('reads the flat shape and treats empty data as no answers yet', () => {
-    const p = parseActionPayload({ event: 'vendo.ai.revision', resource_id: 'f2', user_id: 'u2', account_id: 'a2', data: {} });
+  it('reads the flat shape; no data means the form has not been shown yet', () => {
+    const p = parseActionPayload({ event: 'vendo.ai.revision', resource_id: 'f2', user_id: 'u2', account_id: 'a2' });
     assert.equal(p.event, 'vendo.ai.revision');
     assert.equal(p.resourceId, 'f2');
     assert.equal(p.accountId, 'a2');
     assert.equal(p.data, null);
+  });
+  it('treats an empty answer set as a submitted form (all defaults)', () => {
+    assert.deepEqual(parseActionPayload({ type: 'vendo.ai.first_cut', data: {} }).data, {});
   });
 });
 
@@ -103,5 +106,13 @@ describe('macOptions', () => {
   it('shows the Run on choice only when there is more than one Mac', () => {
     assert.ok(!firstCutForm({}, undefined, [{ name: "Toby's Mac", value: 't' }]).fields.some((f) => f.name === 'worker'));
     assert.ok(firstCutForm({}, undefined, [{ name: 'A', value: 'a' }, { name: 'B', value: 'b' }]).fields.some((f) => f.name === 'worker'));
+  });
+});
+
+describe('looksLikeExport', () => {
+  it('spots finished exports but not raw clips', () => {
+    assert.equal(looksLikeExport('Professional | Smile Caught Up | From £995 | 9x16 | 60s | v02 | Internal.mp4'), true);
+    assert.equal(looksLikeExport('Helen and Joe Podcast Snippet 22.mov'), false);
+    assert.equal(looksLikeExport('C0042.MP4'), false);
   });
 });
