@@ -4,7 +4,7 @@ Look and layout follow Bond Dental's own Brand Kit (July 2026): photo-led editor
 huge heavy uppercase headlines, black and white panels. Type is Inter (as bonddental.co.uk),
 set heavy and tight for headlines in place of the kit's Agrandir Heavy. Palette and content
 come from the Bond Aligner Club pitch deck v4 (Drive folder 1i_7qHvKPPUYcDb1WoJ7cPUddj6jTtVQ2).
-Logos are Chaz's official vectors. Photos are the landing page's own (assets/photos, gitignored).
+Logos are Chaz's official vectors. Photos come from Bond Dental's own shoot (extracted from the brand kit), bonddental.co.uk and the landing page (assets/photos, gitignored). Every image is used once.
 
 Usage: python3 build_guideline.py  ->  guideline.html (and guideline-capture.html for Figma)
 """
@@ -69,7 +69,7 @@ def img(src, x, y, w, h, pos='50% 50%', r=8):
 
 def cover():
     return page('', f"""
-<img class="full" src="assets/photos/gs-clinic-marylebone.jpg" style="object-position:50% 60%">
+<img class="full" src="assets/photos/gs-kit-surgery-c.jpg" style="object-position:50% 50%">
 <div class="abs" style="inset:0;background:rgba(11,11,11,.78)"></div>
 <div class="abs" style="left:0;right:0;top:330px;display:flex;flex-direction:column;align-items:center">
   {svg('lockup-gold', 620)}
@@ -90,7 +90,7 @@ def intro():
     <p>Same clinicians. Same clinics. Clearer pricing.</p>
   </div>
 </div>
-{img('bac-step-2b.webp', 620, 30, 1270, 1020, '50% 30%', 10)}
+{img('crop-patient-cream.jpg', 620, 30, 1270, 1020, '50% 50%', 10)}
 <div class="abs" style="left:620px;top:30px;width:1270px;height:1020px;border-radius:10px;background:linear-gradient(180deg,rgba(11,11,11,0) 40%,rgba(11,11,11,.75) 100%)"></div>
 <div class="abs display" style="left:672px;top:500px;font-size:168px;color:{WHITE}">Quality.<br>Premium.<br>Affordable.</div>
 <div class="abs h3" style="left:676px;top:955px;font-size:34px;color:{GOLD}">Your values aligned with ours.</div>
@@ -159,8 +159,8 @@ def colour():
     <div class="body" style="font-size:17px;margin-top:4px;color:rgba(11,11,11,.7)">{r}</div></div>
 </div>""" for i, (n, hx, r, extra) in enumerate(sw))
     return page('', f"""
-{img('bac-step-1.webp', 50, 60, 520, 560, '42% 50%')}
-{img('bac-kev-cutout.webp', 600, 60, 520, 560, '50% 16%')}
+{img('kit-consult-ipad.jpg', 50, 60, 520, 560, '50% 50%')}
+{img('site-kev.png', 600, 60, 520, 560, '50% 20%')}
 <div class="abs label gold" style="left:50px;top:640px;font-size:13px">(01)</div>
 <div class="abs label gold" style="left:600px;top:640px;font-size:13px">(02)</div>
 <div class="abs display" style="left:40px;top:700px;font-size:250px">Colour</div>
@@ -192,22 +192,22 @@ def type_():
 
 def photography():
     return page('', f"""
-{img('bac-step-3.webp', 0, 0, 760, 1080, '50% 40%', 0)}
-{img('gs-clinic-marylebone.jpg', 780, 0, 1140, 520, '50% 60%', 0)}
-{img('clinic-mayfair.webp', 780, 540, 560, 540, '50% 50%', 0)}
-{img('bac-film-poster.jpg', 1360, 540, 560, 540, '50% 40%', 0)}
+{img('kit-patient-check.jpg', 0, 0, 760, 1080, '50% 40%', 0)}
+{img('kit-surgery-b.jpg', 780, 0, 1140, 520, '50% 55%', 0)}
+{img('kit-consult-male.jpg', 780, 540, 560, 540, '55% 50%', 0)}
+{img('site-invisalign-smile.jpg', 1360, 540, 560, 540, '62% 40%', 0)}
 <div class="abs" style="left:0;top:0;width:760px;height:1080px;background:linear-gradient(180deg,rgba(11,11,11,0) 40%,rgba(11,11,11,.7) 100%)"></div>
 <div class="abs display" style="left:48px;bottom:250px;font-size:150px">Photo-<br>graphy</div>
 <div class="abs card" style="left:48px;bottom:48px;width:664px;padding:26px 30px;display:flex;gap:30px">
-  <div style="flex:1"><div class="label deep" style="font-size:13px">Do</div><div class="body" style="font-size:16px;margin-top:6px">Real people, natural light, candid close-crop smiles. Real Bond clinics and the club kit.</div></div>
-  <div style="flex:1"><div class="label deep" style="font-size:13px">Don't</div><div class="body" style="font-size:16px;margin-top:6px">Glossy stock smiles. Before-and-afters without a consented case.</div></div>
+  <div style="flex:1"><div class="label deep" style="font-size:13px">Do</div><div class="body" style="font-size:16px;margin-top:6px">Real Bond patients and clinicians in real Bond clinics. Natural light, premium interiors, genuine smiles.</div></div>
+  <div style="flex:1"><div class="label deep" style="font-size:13px">Don't</div><div class="body" style="font-size:16px;margin-top:6px">Video stills, phone grabs or low-resolution images. Before-and-afters without a consented case.</div></div>
 </div>
 """)
 
 
 def voice():
     return page('', f"""
-<img class="abs" src="assets/photos/gs-bac-step-1.jpg" style="left:0;top:0;width:1240px;height:1080px;object-fit:cover;object-position:40% 50%">
+<img class="abs" src="assets/photos/gs-kit-surgery-a.jpg" style="left:0;top:0;width:1240px;height:1080px;object-fit:cover;object-position:45% 50%">
 <div class="abs" style="left:0;top:0;width:1240px;height:1080px;background:rgba(11,11,11,.5)"></div>
 <div class="abs display" style="left:48px;top:330px;font-size:165px">Brand voice</div>
 <div class="abs" style="left:48px;top:560px;width:560px">
@@ -229,8 +229,7 @@ def voice():
   </ul>
 </div>
 <div class="abs" style="left:1240px;top:0;width:680px;height:1080px;background:{WHITE}"></div>
-{img('bac-story-poster-v3e.webp', 1400, 110, 360, 420, '50% 22%')}
-{img('bac-step-2b.webp', 1400, 550, 360, 420, '55% 30%')}
+{img('bac-kev-cutout.webp', 1390, 110, 380, 860, '50% 20%')}
 """)
 
 
@@ -249,7 +248,7 @@ def pillars():
   <ul class="b body" style="font-size:16px;margin-top:12px;color:rgba(11,11,11,.7)">{''.join(f'<li>{x}</li>' for x in pts)}</ul>
 </div>""" for t, d, pts in cols)
     return page('', f"""
-<img class="full" src="assets/photos/clinic-mayfair.webp" style="object-position:50% 50%">
+<img class="full" src="assets/photos/kit-reception.jpg" style="object-position:50% 50%">
 <div class="abs" style="inset:0;background:linear-gradient(90deg,rgba(11,11,11,.6) 0%,rgba(11,11,11,0) 65%)"></div>
 <div class="abs display" style="left:70px;top:90px;font-size:190px">Three<br>pillars</div>
 <div class="abs h3" style="left:74px;top:425px;font-size:34px;color:{WHITE}">Your values aligned with ours.</div>
@@ -267,10 +266,10 @@ def audience_primary():
         ('Who they are', ['Women 25 to 44, strongest at 25 to 34', 'Working professionals in London', 'Live on their phone: selfies, socials, trends']),
         ('What they value', ['The real Invisalign, not a lookalike', 'A premium clinic they can trust', 'A clear price they can plan around']),
         ('What holds them back', ['Not knowing who to trust', 'Worry that cheaper means a worse result', 'Not knowing which option is right']),
-        ('How we speak to them', ['Relatable, everyday, UGC-style imagery', 'Aspirational but never out of reach', 'Lead with a pillar, name Invisalign']),
+        ('How we speak to them', ['Real people in real Bond clinics', 'Aspirational but never out of reach', 'Lead with a pillar, name Invisalign']),
     ]
     return page('', f"""
-<img class="full" src="assets/photos/bac-step-3.webp" style="object-position:50% 28%">
+<img class="full" src="assets/photos/kit-patient-relax.jpg" style="object-position:70% 40%">
 <div class="abs" style="inset:0;background:linear-gradient(90deg,rgba(11,11,11,.65) 0%,rgba(11,11,11,0) 60%)"></div>
 <div class="abs display" style="left:70px;top:90px;font-size:190px">Target<br>audience</div>
 <div class="abs card" style="left:70px;right:70px;bottom:60px;padding:32px 40px">
@@ -290,7 +289,7 @@ def audience_secondary():
   <div class="h3" style="font-size:24px">{title}</div>
   <div style="display:flex;gap:30px;margin-top:18px">{audience_card(cols)}</div></div>"""
     return page('', f"""
-<img class="abs" src="assets/photos/bac-hero-girl-selfie.webp" style="right:0;top:0;height:780px;width:974px;object-fit:cover;object-position:50% 30%">
+<img class="abs" src="assets/photos/kit-two-smiles.jpg" style="right:0;top:0;height:780px;width:1100px;object-fit:cover;object-position:70% 40%">
 <div class="abs display" style="left:70px;top:90px;font-size:150px">Secondary<br>audiences</div>
 <div class="abs" style="left:70px;right:70px;bottom:60px;display:flex;gap:24px">
   {block('The "Not Bad Enough" Improver', a)}
@@ -348,7 +347,7 @@ def pricing():
   <ul class="b body" style="margin-top:12px;columns:2;column-gap:40px">{pl}</ul>
   <div class="body" style="margin-top:26px;font-size:15px;color:rgba(11,11,11,.55)">Monthly figures are left off until they're checked against the lender's illustration.</div>
 </div>
-{img('bac-step-1.webp', 1240, 70, 610, 940, '30% 50%', 10)}
+{img('clinic-mayfair.webp', 1240, 70, 610, 940, '62% 50%', 10)}
 """)
 
 
@@ -405,8 +404,8 @@ def applications():
 
 def close():
     return page('', f"""
-<img class="full" src="assets/photos/gs-clinic-mayfair.jpg" style="object-position:50% 50%">
-<div class="abs" style="inset:0;background:rgba(11,11,11,.66)"></div>
+<img class="full" src="assets/photos/gs-clinic-kings-cross.jpg" style="object-position:50% 50%">
+<div class="abs" style="inset:0;background:rgba(11,11,11,.76)"></div>
 <div class="abs display" style="left:0;right:0;top:250px;text-align:center;font-size:210px">Quality.<br>Premium.<br>Affordable.</div>
 <div class="abs h3" style="left:0;right:0;top:850px;text-align:center;font-size:40px;color:{GOLD}">Your values aligned with ours.</div>
 <div class="foot label" style="color:{WHITE}"><span>www.bonddental.co.uk</span><span>by Bond Dental London</span></div>
@@ -414,7 +413,7 @@ def close():
 
 
 def main():
-    pages = [cover(), intro(), logo(), colour(), type_(), photography(), voice(), pillars(), audience_primary(), audience_secondary(), targeting(), pricing(), live(), applications(), close()]
+    pages = [cover(), intro(), logo(), colour(), type_(), photography(), voice(), pillars(), audience_primary(), audience_secondary(), targeting(), pricing(), close()]
     head = f'<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><title>Bond Aligner Club Brand Guidelines</title><style>{CSS}</style>'
     body = f'</head><body>{"".join(pages)}</body></html>'
     (HERE / 'guideline.html').write_text(head + body)
