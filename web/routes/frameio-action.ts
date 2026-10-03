@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { FastifyPluginAsync } from 'fastify';
+import { db } from '../lib/queries/base.js';
 import { ACCOUNT_ID } from '../lib/frameio/media-io.js';
 import { resolveUser } from '../lib/frameio/users.js';
 import {
@@ -91,6 +92,24 @@ async function revision(p: ActionPayload): Promise<ActionMessage> {
   );
 }
 
+/**
+ * Keep every call in frameio_events (status 'action_log', never processed) so we can see what Frame.io
+ * sent and how we answered, including calls rejected before any work. Never blocks the reply on failure.
+ */
+async function logCall(request: { body?: unknown; headers: Record<string, unknown>; url: string } & { rawBody?: string }, outcome: string): Promise<void> {
+  try {
+    const headers: Record<string, string> = {};
+    for (const [k, v] of Object.entries(request.headers)) if (k !== 'authorization' && v != null) headers[k] = String(v);
+    const body = request.body as { interaction_id?: string; type?: string } | undefined;
+    await db.execute({
+      sql: `INSERT INTO frameio_events (event_id, event_type, payload, headers, received_at, processing_status, processing_error)
+            VALUES (?, 'custom_action', ?, ?, ?, 'action_log', ?)`,
+      args: [null, request.rawBody ?? JSON.stringify(request.body ?? {}), JSON.stringify(headers), new Date().toISOString(),
+        `${body?.type ?? '?'}: ${outcome}`.slice(0, 500)],
+    });
+  } catch { /* logging must never break the action */ }
+}
+
 export const frameioActionRoutes: FastifyPluginAsync = async (app) => {
   // Keep the raw body for the signature check.
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body: string, done) => {
@@ -100,9 +119,10 @@ export const frameioActionRoutes: FastifyPluginAsync = async (app) => {
 
   app.post('/action', async (request, reply) => {
     const expected = process.env.FRAMEIO_WEBHOOK_TOKEN;
+    const req = request as unknown as Parameters<typeof logCall>[0];
     if (!expected) return reply.code(500).send({ error: 'Action endpoint not configured' });
     const presented = (request.query as Record<string, string | undefined>)?.token ?? '';
-    if (!tokenOk(presented, expected)) return reply.code(403).send({ error: 'Invalid token' });
+    if (!tokenOk(presented, expected)) { await logCall(req, 'rejected: bad or missing token'); return reply.code(403).send({ error: 'Invalid token' }); }
 
     // Each action has its own signing secret; accept a request signed by any of ours.
     const secrets = (process.env.FRAMEIO_ACTION_SECRETS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
@@ -110,18 +130,21 @@ export const frameioActionRoutes: FastifyPluginAsync = async (app) => {
       const rawBody = (request as { rawBody?: string }).rawBody ?? '';
       const headers = request.headers as Record<string, string | undefined>;
       const verdicts = secrets.map((secret) => verifyFrameioSignature({ secret, rawBody, headers }));
-      if (!verdicts.includes('ok')) return reply.code(401).send({ error: `Signature ${verdicts[0]}` });
+      if (!verdicts.includes('ok')) { await logCall(req, `rejected: signature ${verdicts[0]}`); return reply.code(401).send({ error: `Signature ${verdicts[0]}` }); }
     }
 
     const p = parseActionPayload(request.body);
     request.log.info({ event: p.event, resourceType: p.resourceType, hasData: !!p.data, keys: Object.keys((request.body ?? {}) as object) }, 'Frame.io action');
+    let answer: unknown;
     try {
-      if (p.event === ACTION_EVENTS.first_cut) return reply.send(await firstCut(p));
-      if (p.event === ACTION_EVENTS.revision) return reply.send(await revision(p));
-      return reply.send(message('Vendo', `Unknown action "${p.event}".`));
+      if (p.event === ACTION_EVENTS.first_cut) answer = await firstCut(p);
+      else if (p.event === ACTION_EVENTS.revision) answer = await revision(p);
+      else answer = message('Vendo', `Unknown action "${p.event}".`);
     } catch (err) {
       request.log.error({ err }, 'Frame.io action failed');
-      return reply.send(message('Something went wrong', `${(err as Error).message.slice(0, 200)}. Try again, or tell the Lead Video Editor.`));
+      answer = message('Something went wrong', `${(err as Error).message.slice(0, 200)}. Try again, or tell the Lead Video Editor.`);
     }
+    await logCall(req, `answered: ${(answer as { title?: string }).title ?? ''}${(answer as { fields?: unknown }).fields ? ' (form)' : ''}`);
+    return reply.send(answer);
   });
 };
