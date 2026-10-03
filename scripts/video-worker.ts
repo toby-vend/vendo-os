@@ -34,11 +34,11 @@ function workerEmail(): string {
 const log = (msg: string) => console.log(`${new Date().toISOString().slice(0, 19).replace('T', ' ')} ${msg}`);
 
 /** Run one of the npm video scripts, keeping the Mac awake, logging to the job folder, heartbeating meanwhile. */
-function runScript(script: string, args: string[], logFile: string, onBeat: () => Promise<void>): Promise<void> {
+function runScript(script: string, args: string[], logFile: string, onBeat: () => Promise<void>, jobId: number): Promise<void> {
   return new Promise((resolvePromise, reject) => {
     const out = createWriteStream(logFile, { flags: 'a' });
     // caffeinate -i keeps the Mac from idle-sleeping while the edit runs (closing the lid still stops it).
-    const child = spawn('caffeinate', ['-i', 'npx', 'tsx', script, ...args], { cwd: repo, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn('caffeinate', ['-i', 'npx', 'tsx', script, ...args], { cwd: repo, env: { ...process.env, VIDEO_JOB_ID: String(jobId) }, stdio: ['ignore', 'pipe', 'pipe'] });
     let tail = '';
     const keep = (d: Buffer) => { out.write(d); tail = (tail + d.toString()).slice(-4000); };
     child.stdout.on('data', keep);
@@ -80,7 +80,7 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
       await runScript('scripts/video-edit-run.ts', [
         '--source', job.source_file_id, '--dest', shoot, '--auto-name', '--section', params.section, '--brand', params.brand,
         '--notes', params.notes, '--job', dir, '--upload',
-      ], join(dir, 'worker.log'), () => beat());
+      ], join(dir, 'worker.log'), () => beat(), job.id);
       const d = readDelivery(dir);
       if (!d) throw new Error('the edit finished but nothing was delivered');
       await store.finishJob(job.id, { jobDir: dir, fileId: d.fileId, stackId: d.stackId ?? null, viewUrl: d.view_url ?? null, message: `Delivered "${d.name}"` });
@@ -100,7 +100,7 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
     if (!dir || !existsSync(join(dir, 'delivery.json'))) throw new Error("this Mac doesn't have the job folder for that video (it was made on another Mac, or deleted)");
     const before = readDelivery(dir)!;
     await beat('Applying comments');
-    await runScript('scripts/video-edit-revise.ts', ['--job', dir, '--upload'], join(dir, 'worker.log'), () => beat());
+    await runScript('scripts/video-edit-revise.ts', ['--job', dir, '--upload'], join(dir, 'worker.log'), () => beat(), job.id);
     const after = readDelivery(dir)!;
     if (after.version === before.version) {
       await io.createComment(before.fileId, 'AI Revision: there were no open comments to apply, so nothing changed.').catch(() => {});
