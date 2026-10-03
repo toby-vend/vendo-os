@@ -12,6 +12,7 @@ import {
   findJobByDelivered, latestDoneInChain, listWorkers, openJobInChain, queueJob, workerLastSeen,
 } from '../lib/video-jobs/store.js';
 import { verifyFrameioSignature } from './frameio-webhook.js';
+import { getFileStatus, LOCKED } from '../lib/video-jobs/gates.js';
 
 /**
  * Frame.io custom actions: "AI First Cut" and "AI Revision" in the right-click menu
@@ -95,6 +96,11 @@ async function revision(p: ActionPayload): Promise<ActionMessage> {
   const user = await requester(p);
   if (!user) return message('AI Revision', 'Only Vendo team members can start AI edits.');
   const latest = (await latestDoneInChain(delivered.chain_id)) ?? delivered;
+  // After Gate 2 the AI must not change the video (latest version, whichever one was clicked).
+  const status = await getFileStatus(latest.result_file_id!).catch(() => null);
+  if (status && LOCKED.has(status)) {
+    return message('AI Revision', `The latest version is ${status}, so the AI won't change it. To make changes, set its Status back to In Progress first.`);
+  }
   const job = await queueJob({
     kind: 'revision', chainId: delivered.chain_id, interactionId: p.interactionId,
     requestedBy: { userId: user.userId, email: user.email, name: user.name },
