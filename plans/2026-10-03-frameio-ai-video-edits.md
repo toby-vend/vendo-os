@@ -12,7 +12,7 @@ The edit itself is the approved v3 recipe from Max's vox pop episode (`~/motion-
 
 ## Decisions (confirmed 3 Oct 2026)
 
-- **Worker:** an always-on office Mac runs the edits (Chrome + ffmpeg + Whisper + HyperFrames + Claude Code). Vercel only queues jobs.
+- **Worker (updated 3 Oct 2026):** for now each person runs edits on their own MacBook (Toby testing, then the editor). Each Mac needs Chrome, ffmpeg, Node 22, Claude Code signed in, a Vendo-OS clone and `.env.local`. Later, Vendo OS gets a shared queue so several people can start and track edits; the office-Mac worker idea is parked until then.
 - **Trigger:** both. Frame.io right-click custom actions as the main route; a Vendo OS page as the backup and status view.
 - **Naming and filing:** the existing SOP, *Video Editor Asset Naming, Filing & Version Control (Frame.io → Meta Ads Manager)* v1.2.
 
@@ -57,7 +57,7 @@ The edit itself is the approved v3 recipe from Max's vox pop episode (`~/motion-
 
 ## Open questions
 
-1. Which office Mac, and who looks after it if it goes offline?
+1. ~~Which office Mac~~ Answered 3 Oct 2026: own MacBooks for now; shared Vendo OS queue later.
 2. Vendo's own organic content (e.g. Max's vox pop episode): the SOP only covers paid social. Where does it go? Proposed: `Vendo > [shoot date] | Paid Ads & Organic Content > Organic > [Title]`, named `Organic | [Title] | 9x16 | 50s | v01 | Internal.mp4`.
 3. Who gets the Slack ping: the person who started the job, the Creative Strategist, or a channel such as #frame-io-feedback?
 4. Cost: each edit is a Claude Code session plus a few minutes of machine time. Measure real usage per edit during the Phase 5 pilot before rolling out.
