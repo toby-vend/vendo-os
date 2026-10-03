@@ -58,10 +58,15 @@ function runClaude(prompt: string, jobDir: string, skill: string, logFile: strin
   });
 }
 
-/** HEAD plus the working-tree state of the edit tooling, to detect an edit session touching the repo. */
+/**
+ * Fingerprint of the edit pipeline's own files: the last commit touching them plus their working-tree state.
+ * Scoped to these paths only, so other sessions committing unrelated work (or hooks touching other skills)
+ * while an edit runs don't trip the guard.
+ */
+const GUARDED = ['tools/video-edit', '.claude/skills/vendo-video-edit', 'scripts/video-edit-run.ts', 'web/lib/frameio'];
 function repoState(repo: string): string {
   const git = (...a: string[]) => execFileSync('git', ['-C', repo, ...a]).toString();
-  return git('rev-parse', 'HEAD') + git('status', '--porcelain', '--', 'tools', '.claude/skills', 'scripts/video-edit-run.ts', 'web/lib/frameio');
+  return git('log', '-1', '--format=%H', '--', ...GUARDED) + git('status', '--porcelain', '--untracked-files=all', '--', ...GUARDED);
 }
 
 async function main() {
