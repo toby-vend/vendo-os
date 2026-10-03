@@ -4,7 +4,7 @@ from common import C, logo, photo, frame, panel_line, profile, proof, cta, board
 TILES = "img-3400a.jpg"                                   # clean doorway, tall skirting, tiles
 DOORWAY = "square-strips-wall-panel-kits-ogee-architrave.jpg"  # painted architrave, dado, colour
 PANEL = "img-3381-karen.jpg"                              # panel moulding close-up, shadow line
-DOOR = "img-3399a-karen.jpg"                              # plain door, skirting, architrave
+BEDROOM = "stock/stock-bedroom-panelled-green.jpg"        # licensed Freepik stock: panelled bedroom wall, green bed
 CORNER = "first-img-6851-karen.jpg"               # tall skirting wrapping an external corner
 BOOT = "chamfered-2-skirting-board.jpg"                   # modern boot room, chamfered skirting
 
@@ -32,8 +32,8 @@ def compare(x, y, scale=1.0):
 
 # ------------------------------------------------------------------ 1:1
 def h1_1():
-    inner = editorial_inner(DOOR, "&ldquo;Builders like to put in<br>the smallest ones.&rdquo;", "A taller profile is the quickest way to make a<br>room look finished. 95mm to 145mm suits<br>most modern rooms.",
-                            x=80, y=190, w=760, size=48, fx=0.5, fy=0.4, sub_size=24, dark=True)
+    inner = with_soft(editorial_inner(BEDROOM, "&ldquo;Builders like to put in<br>the smallest ones.&rdquo;", "A taller profile is the quickest way to make a<br>room look finished. 95mm to 145mm suits<br>most modern rooms.",
+                            x=80, y=170, w=760, size=48, fx=0.5, fy=0.3, sub_size=24, dark=True), soft(400, 290, 720, 320, light=True, strong=True))
     return board("1x1", "Hannah Taller Skirting | Static | Room photo | Smallest ones", "#333", inner)
 
 
@@ -68,8 +68,8 @@ def h5_1():
 
 
 def h1_9():
-    inner = editorial_inner(DOOR, "&ldquo;Builders like to<br>put in the smallest<br>ones.&rdquo;", "A taller profile is the quickest way to make a<br>room look finished. 95mm to 145mm suits<br>most modern rooms.",
-                            x=90, y=360, w=860, size=64, fx=0.5, fy=0.4, size_px=(1080, 1920), sub_size=29, dark=True)
+    inner = with_soft(editorial_inner(BEDROOM, "&ldquo;Builders like to<br>put in the smallest<br>ones.&rdquo;", "A taller profile is the quickest way to make a<br>room look finished. 95mm to 145mm suits<br>most modern rooms.",
+                            x=90, y=380, w=860, size=60, fx=0.4, fy=0.0, size_px=(1080, 1920), sub_size=28, dark=True), soft(480, 520, 760, 330, light=True))
     return board("9x16", "Hannah Taller Skirting | Static | Room photo | Smallest ones", "#333", inner)
 
 

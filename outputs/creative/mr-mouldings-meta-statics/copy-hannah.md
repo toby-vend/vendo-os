@@ -152,6 +152,7 @@ Give it character that belongs to it.
 ---
 
 ## Notes (check with the client before launch)
+- **Stock imagery (H1):** licensed Freepik premium stock via Magnific (3 Oct 2026), not MR's own photography. Finished, styled rooms so the viewer pictures the room they could have. Swap for a real MR customer room if Adam can supply one that matches the line.
 - **Heights:** "95mm to 145mm suits most modern rooms" is from the FAQ. Fine to use as guidance, not as a rule.
 - **Panel mould profile count:** "over a dozen profiles" is based on the panel moulding collections (ogee, astragal, ovolo, Hampton, Sunningdale, Victorian, Regency, stepped and more). Confirm the number Adam is comfortable with, or cut to "a range of profiles".
 - **Fitting claims:** H4 uses the FAQ fixing method word for word in substance. Add the cable and pipe check line to any landing page that carries fitting advice (Audience Report, compliance section).

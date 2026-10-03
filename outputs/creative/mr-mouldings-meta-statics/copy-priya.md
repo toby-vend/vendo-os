@@ -148,6 +148,7 @@ A room reads as one piece when every moulding comes from the same hand.
 ---
 
 ## Notes (check with the client before launch)
+- **Stock imagery (P1):** licensed Freepik premium stock via Magnific (3 Oct 2026), not MR's own photography. Finished, styled rooms so the viewer pictures the room they could have. Swap for a real MR customer room if Adam can supply one that matches the line.
 - **Tooling fee and 14 days:** from the bespoke skirting page and FAQ. Confirm both still apply across all moulding types (P1, P3).
 - **"Builders, joiners, architects and homeowners":** the FAQ says builders, joiners and architects. Homeowners are clearly customers too. Fine, but Adam may want interior designers named; we have no confirmed designer clients to cite.
 - **Quote before anything is made:** see the payment-order conflict in research.md.

@@ -1,7 +1,7 @@
 """Priya (interior designer) statics: 5 concepts x 1:1 and 9:16. Copy: copy-priya.md."""
 from common import C, logo, photo, frame, panel_line, profile, proof, cta, board, page, write, editorial_inner, soft, with_soft
 
-ARCHITRAVE = "img-6793-karen.jpg"          # doorway architrave, wallpaper
+PERIOD = "stock/stock-living-period-grey.jpg"  # licensed Freepik stock: period sitting room, ornate original mouldings
 DOORWAY = "edwardian-panel-mould-small-bolection-skirting-architrave-block-rosette.jpg"  # view through to next room
 MUSIC = "music-room-1-karen.jpg"           # designed room, through to dining
 CRANES = "img-6881-karen.jpg"              # dark panelled cloakroom, crane wallpaper
@@ -28,8 +28,8 @@ def steps(x, y, w, color, num_color, size=24, gap=26):
 
 # ------------------------------------------------------------------ 1:1
 def p1_1():
-    inner = with_soft(editorial_inner(ARCHITRAVE, "Matched from<br>one offcut.", "We scan the profile, grind cutters to it<br>and machine your lengths, in MDF or timber.",
-                            x=80, y=170, w=600, size=58, fx=0.3, fy=0.5, sub_size=24, dark=True), soft(330, 260, 620, 330, light=True))
+    inner = with_soft(editorial_inner(PERIOD, "Matched from<br>one offcut.", "We scan the profile, grind cutters to it<br>and machine your lengths, in MDF or timber.",
+                            x=80, y=170, w=600, size=58, fx=0.3, fy=0.5, sub_size=24, dark=True), soft(330, 270, 640, 360, light=True, strong=True))
     return board("1x1", "Priya Made to Match | Static | Room photo | One offcut", "#333", inner)
 
 
@@ -77,8 +77,8 @@ def p5_1():
 
 # ------------------------------------------------------------------ 9:16
 def p1_9():
-    inner = with_soft(editorial_inner(ARCHITRAVE, "Matched from<br>one offcut.", "We scan the profile, grind cutters to it<br>and machine your lengths, in MDF or timber.",
-                            x=90, y=400, w=800, size=74, fx=0.3, fy=0.5, size_px=(1080, 1920), sub_size=30, dark=True), soft(420, 540, 760, 400, light=True))
+    inner = with_soft(editorial_inner(PERIOD, "Matched from<br>one offcut.", "We scan the profile, grind cutters to it<br>and machine your lengths, in MDF or timber.",
+                            x=90, y=400, w=800, size=74, fx=0.3, fy=0.5, size_px=(1080, 1920), sub_size=30, dark=True), soft(440, 560, 780, 440, light=True, strong=True))
     return board("9x16", "Priya Made to Match | Static | Room photo | One offcut", "#333", inner)
 
 

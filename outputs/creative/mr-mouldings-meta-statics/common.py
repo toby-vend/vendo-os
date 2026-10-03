@@ -206,10 +206,11 @@ def hotspot(x, y, card_x, card_y, thumb, title, price):
             f'<div class="sans" style="font-size:15px;color:{C["muted"]};margin-top:4px">From {price}</div></div></div>')
 
 
-def soft(cx, cy, rx, ry, light=False):
-    """Soft, edgeless shadow (or light glow) behind editorial text, as MR's Instagram posts do. Not a box."""
+def soft(cx, cy, rx, ry, light=False, strong=False):
+    """Soft, edgeless shadow (or light glow) behind editorial text, as MR's Instagram posts do. Not a box.
+    `strong` for busy, bright stock rooms where the text sits over detailed mouldings."""
     c = "245,243,235" if light else "15,35,40"
-    a1, a2 = (.88, .55) if light else (.62, .35)
+    a1, a2 = ((.95, .82) if strong else (.88, .55)) if light else (.62, .35)
     return (f'<div class="fill" data-name="Soft {"glow" if light else "shadow"}" style="background:radial-gradient(ellipse {rx}px {ry}px at {cx}px {cy}px, '
             f'rgba({c},{a1}) 0%, rgba({c},{a2}) 45%, rgba({c},0) 100%)"></div>')
 

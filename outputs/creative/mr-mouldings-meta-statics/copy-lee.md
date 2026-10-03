@@ -148,6 +148,7 @@ Find a supplier once, and stop shopping around for every job.
 ---
 
 ## Notes (check with the client before launch)
+- **Stock imagery (L3, L5):** licensed Freepik premium stock via Magnific (3 Oct 2026), not MR's own photography. Finished, styled rooms so the viewer pictures the room they could have. Swap for a real MR customer room if Adam can supply one that matches the line.
 - **Trade account terms:** the FAQ invites trade account enquiries but lists no terms (discount, credit). L5 says nothing about pricing. Confirm what the trade account offers before scaling L5; a stated benefit would lift it.
 - **Floor plan service (L1):** from the FAQ. Confirm turnaround and that the team can handle volume from paid traffic.
 - **Lead time:** ads use the site's 5–7 working days. Adam said on 25 Sep that stock orders now ship in 2–3 days; update the copy if the site is changed.
