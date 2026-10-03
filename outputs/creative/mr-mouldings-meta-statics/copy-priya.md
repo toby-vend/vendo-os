@@ -70,7 +70,7 @@ Research: "Welcome to the expensive world of " bespoke"" (Period Property forum,
 Concept name: **Priya Made to Match | Bespoke pricing**
 Talent: Graphic
 
-**On image:** Bespoke, without the bespoke premium. / Matched mouldings cost the same per length as our standard range, plus a tooling fee if new cutters are needed. / Up to 14 days in production. Quote first. / Start a bespoke enquiry
+**On image:** Bespoke, at standard prices. / Matched profiles cost the same per length as our standard range. Up to 14 days to make.
 
 **Headline:** Standard prices. Your profile.
 

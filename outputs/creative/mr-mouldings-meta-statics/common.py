@@ -167,3 +167,39 @@ def board(size, name, bg, inner):
 def write(fname, html):
     (ROOT / fname).write_text(html)
     return fname
+
+
+# ------------------------------------------------------------------ MR Instagram editorial style
+TEXT_SHADOW = "text-shadow:0 2px 26px rgba(0,0,0,.38), 0 1px 3px rgba(0,0,0,.25)"
+
+
+def editorial_inner(img, line, sub, x, y, w, size, fx=0.5, fy=0.5, sub_w=None, sub_gap=26, size_px=(1080, 1080),
+                    sub_size=28, lines=None):
+    """Full-bleed room photo, one white Bitter line in the wall space, smaller Bitter subline, small white logo.
+    `lines` = rendered line count of `line` (for placing the subline)."""
+    W, H = size_px
+    n = lines or (line.count("<br>") + 1)
+    sub_top = y + int(size * 1.08 * n) + sub_gap
+    return (f'{photo(0, 0, W, H, img, fx=fx, fy=fy)}'
+            f'<div class="abs" style="left:56px;top:{52 if H == 1080 else 250}px">{logo("white", 104)}</div>'
+            f'<div class="abs serif" style="left:{x}px;top:{y}px;width:{w}px;color:#fff;font-size:{size}px;font-weight:500;'
+            f'line-height:1.08;letter-spacing:-.01em;{TEXT_SHADOW}">{line}</div>'
+            f'<div class="abs serif" style="left:{x}px;top:{sub_top}px;width:{sub_w or w}px;color:#fff;font-size:{sub_size}px;'
+            f'font-weight:400;line-height:1.3;{TEXT_SHADOW}">{sub}</div>')
+
+
+def hotspot(x, y, card_x, card_y, thumb, title, price):
+    """Product hotspot like MR's live ads: dot on the moulding, hairline to a white card (250 x 84)."""
+    import math
+    cx, cy = card_x + (0 if card_x > x else 250), card_y + 42
+    length = math.hypot(cx - x, cy - y)
+    angle = math.degrees(math.atan2(cy - y, cx - x))
+    return (f'<div class="abs" style="left:{x}px;top:{y}px;width:{length:.0f}px;height:2px;background:rgba(255,255,255,.9);'
+            f'transform-origin:0 50%;transform:rotate({angle:.1f}deg)"></div>'
+            f'<div class="abs" style="left:{x - 11}px;top:{y - 11}px;width:22px;height:22px;border-radius:50%;background:#fff;'
+            f'box-shadow:0 0 0 6px rgba(255,255,255,.35)"></div>'
+            f'<div class="abs" style="left:{card_x}px;top:{card_y}px;width:250px;height:84px;background:#fff;border-radius:3px;'
+            f'display:flex;align-items:center;gap:12px;padding:10px;box-shadow:0 6px 18px rgba(0,0,0,.18)">'
+            f'<div style="width:64px;height:64px;flex:none;background:#f3f3f3 url(assets/photos/products/{thumb}) center/contain no-repeat"></div>'
+            f'<div><div class="sans" style="font-size:16px;font-weight:600;line-height:1.2;color:{C["ink"]}">{title}</div>'
+            f'<div class="sans" style="font-size:15px;color:{C["muted"]};margin-top:4px">From {price}</div></div></div>')

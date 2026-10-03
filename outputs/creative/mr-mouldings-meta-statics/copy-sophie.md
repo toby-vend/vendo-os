@@ -125,7 +125,7 @@ A curve is part of the house. The skirting should follow it.
 Research: "In terms of having an exact match made, don't go there unles you have deep pockets." (DIYnot); "expect a £200 setup charge for a set of cutters" (DIYnot, Notch7); MR bespoke page: "Material costs are the same as our standard range, plus the tooling fee if applicable."
 Concept name: **Sophie Made to Match | Price myth**
 
-**On image:** "Don't get it matched unless you have deep pockets." / Our matched mouldings cost the same as our standard range per length, plus a one-off tooling fee if new cutters are needed. / You see the quote before anything is made. / Send us a photo
+**On image:** Matched doesn't mean expensive. / Same price per length as our standard range.
 
 **Headline:** See the price before you commit.
 

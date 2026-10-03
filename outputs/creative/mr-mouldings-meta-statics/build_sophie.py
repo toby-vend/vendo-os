@@ -1,5 +1,5 @@
 """Sophie (period restorer) statics: 5 concepts x 1:1 and 9:16. Copy: copy-sophie.md."""
-from common import C, logo, photo, frame, panel_line, profile, proof, cta, board, page, write
+from common import C, logo, photo, frame, panel_line, profile, proof, cta, board, page, write, editorial_inner
 
 HALL_BLUE = "astragal-dado-blue-hallway.jpg"
 STAIR = "hampton-dado-regency-skirting-board-1.jpg"
@@ -74,21 +74,25 @@ def s4_1():
     return board("1x1", "Sophie Flexible | Static | Room photo | Curves and bays", C["slate"], inner)
 
 
+def spec_rows(x, y, w, rows, size=24, label_w=170):
+    """Ruled spec list, like a joinery spec sheet: label left, value right."""
+    out = ""
+    for i, (label, value) in enumerate(rows):
+        out += (f'<div style="display:flex;gap:24px;padding:{size * .8:.0f}px 0;border-top:1px solid {C["hair"]}">'
+                f'<span class="eyebrow" style="width:{label_w}px;flex:none;color:{C["teal"]};font-size:{size * .62:.0f}px;padding-top:{size * .22:.0f}px">{label}</span>'
+                f'<span class="body" style="font-size:{size}px;line-height:1.35;color:{C["ink"]}">{value}</span></div>')
+    return f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;border-bottom:1px solid {C["hair"]}">{out}</div>'
+
+
+S5_ROWS = [("Per length", "The same as our standard range."),
+           ("Tooling", "A one-off fee, only if new cutters are needed."),
+           ("Quote", "Before anything is made.")]
+
+
 def s5_1():
-    inner = f"""
-{photo(0, 0, 1080, 1080, TEAL_HALL, fx=0.5, fy=0.35)}
-{fade('180deg', [(.9, 0), (.72, 32), (.6, 55), (.92, 100)])}
-<div class="abs hl" style="left:80px;top:96px;width:920px;color:#fff;font-size:56px">&ldquo;Don't get it matched unless you have deep pockets.&rdquo;</div>
-<div class="card shadow" style="left:80px;top:380px;width:740px;padding:52px 56px;background:{C['stone']};transform:rotate(-1.4deg)">
-  <div class="eyebrow" style="color:{C['teal']};font-size:17px">How our pricing actually works</div>
-  <div class="serif" style="font-size:36px;font-weight:600;line-height:1.2;color:{C['slate']};margin-top:22px">Same price per length as our standard range.</div>
-  <div class="body" style="font-size:25px;color:{C['ink_soft']};margin-top:16px">Plus a one-off tooling fee if new cutters are needed.</div>
-  <div style="height:1px;background:{C['hair']};margin:28px 0 22px"></div>
-  <div class="body" style="font-size:23px;color:{C['ink']};font-weight:500">You see the quote before anything is made.</div>
-</div>
-<div class="abs" style="left:80px;top:945px">{cta('Send us a photo', 'teal', (64, 19, 34))}</div>
-<div class="abs" style="left:880px;top:940px">{logo('white', 110)}</div>"""
-    return board("1x1", "Sophie Made to Match | Static | Room photo | Price myth", C["slate"], inner)
+    inner = editorial_inner(TEAL_HALL, "Matched doesn't<br>mean expensive.", "Same price per length as<br>our standard range.",
+                            x=80, y=200, w=560, size=58, fx=0.4, fy=0.5)
+    return board("1x1", "Sophie Made to Match | Static | Room photo | Price myth", "#333", inner)
 
 
 # ------------------------------------------------------------------ 9:16 (safe zone: top 250, bottom 340 clear of key copy)
@@ -144,20 +148,9 @@ def s4_9():
 
 
 def s5_9():
-    inner = f"""
-{photo(0, 0, 1080, 1920, TEAL_HALL, fx=0.5, fy=0.4)}
-{fade('180deg', [(.92, 0), (.7, 30), (.6, 55), (.94, 100)])}
-<div class="abs hl" style="left:90px;top:300px;width:900px;color:#fff;font-size:68px">&ldquo;Don't get it matched unless you have deep pockets.&rdquo;</div>
-<div class="card shadow" style="left:90px;top:700px;width:900px;padding:64px 64px;background:{C['stone']};transform:rotate(-1.4deg)">
-  <div class="eyebrow" style="color:{C['teal']};font-size:19px">How our pricing actually works</div>
-  <div class="serif" style="font-size:44px;font-weight:600;line-height:1.2;color:{C['slate']};margin-top:26px">Same price per length as our standard range.</div>
-  <div class="body" style="font-size:30px;color:{C['ink_soft']};margin-top:18px">Plus a one-off tooling fee if new cutters are needed.</div>
-  <div style="height:1px;background:{C['hair']};margin:32px 0 26px"></div>
-  <div class="body" style="font-size:28px;color:{C['ink']};font-weight:500">You see the quote before anything is made.</div>
-</div>
-<div class="abs" style="left:90px;top:1478px">{cta('Send us a photo', 'teal')}</div>
-<div class="abs" style="left:820px;top:1462px">{logo('white', 110)}</div>"""
-    return board("9x16", "Sophie Made to Match | Static | Room photo | Price myth", C["slate"], inner)
+    inner = editorial_inner(TEAL_HALL, "Matched<br>doesn't mean<br>expensive.", "Same price per length as<br>our standard range.",
+                            x=90, y=760, w=460, size=64, fx=0.42, fy=0.5, size_px=(1080, 1920), sub_size=32, lines=3)
+    return board("9x16", "Sophie Made to Match | Static | Room photo | Price myth", "#333", inner)
 
 
 if __name__ == "__main__":
