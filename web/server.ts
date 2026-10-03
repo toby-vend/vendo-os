@@ -48,6 +48,7 @@ import { driveWebhookRoutes } from './routes/drive-webhook.js';
 import { slackInteractRoutes } from './routes/slack-interact.js';
 import { fathomWebhookRoutes } from './routes/fathom-webhook.js';
 import { frameioWebhookRoutes } from './routes/frameio-webhook.js';
+import { frameioActionRoutes } from './routes/frameio-action.js';
 import { boxlyWebhookRoutes } from './routes/boxly-webhook.js';
 import { squatFunnelRoutes } from './routes/squat-funnel.js';
 import { frameioOAuthRoutes } from './routes/frameio-oauth.js';
@@ -150,7 +151,7 @@ app.addHook('onRequest', async (request, reply) => {
   const path = request.url.split('?')[0];
 
   // Public routes (no session required)
-  if (path.startsWith('/assets/') || path === '/login' || path === '/auth/google/login' || path === '/auth/google/callback' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook' || path === '/api/frameio/webhook' || path === '/api/boxly/webhook' || path === '/api/slack/interact' || path.startsWith('/api/squat/')) return;
+  if (path.startsWith('/assets/') || path === '/login' || path === '/auth/google/login' || path === '/auth/google/callback' || (path.startsWith('/onboard') && !path.startsWith('/onboarding')) || path === '/api/drive/webhook' || path === '/api/fathom/webhook' || path === '/api/frameio/webhook' || path === '/api/frameio/action' || path === '/api/boxly/webhook' || path === '/api/slack/interact' || path.startsWith('/api/squat/')) return;
 
   // Cron routes — validate Vercel cron secret
   if (path.startsWith('/api/cron/')) {
@@ -409,6 +410,7 @@ app.register(driveWebhookRoutes, { prefix: '/api/drive' });
 app.register(slackInteractRoutes, { prefix: '/api/slack' });
 app.register(fathomWebhookRoutes, { prefix: '/api/fathom' });
 app.register(frameioWebhookRoutes, { prefix: '/api/frameio' });
+app.register(frameioActionRoutes, { prefix: '/api/frameio' });
 app.register(frameioOAuthRoutes, { prefix: '/api/frameio' });
 app.register(boxlyWebhookRoutes, { prefix: '/api/boxly' });
 app.register(squatFunnelRoutes, { prefix: '/api/squat' });

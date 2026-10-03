@@ -134,7 +134,7 @@ function timingSafeEqualString(a: string, b: string): boolean {
  */
 const FRAMEIO_REPLAY_TOLERANCE_SECONDS = 5 * 60;
 
-function verifyFrameioSignature(opts: {
+export function verifyFrameioSignature(opts: {
   secret: string;
   rawBody: string;
   headers: Record<string, string | undefined>;
