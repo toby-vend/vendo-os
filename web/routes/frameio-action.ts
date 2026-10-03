@@ -4,7 +4,7 @@ import { db } from '../lib/queries/base.js';
 import { ACCOUNT_ID } from '../lib/frameio/media-io.js';
 import { resolveUser } from '../lib/frameio/users.js';
 import {
-  ACTION_EVENTS, destinationPath, firstCutForm, message, parseActionPayload, pipelineName, validateFirstCut,
+  ACTION_EVENTS, firstCutForm, message, parseActionPayload, validateFirstCut,
   type ActionMessage, type ActionPayload,
 } from '../lib/video-jobs/actions.js';
 import {
@@ -59,9 +59,10 @@ async function firstCut(p: ActionPayload): Promise<unknown> {
     requestedBy: { userId: user.userId, email: user.email, name: user.name },
     workerEmail: user.email!, sourceFileId: p.resourceId!, projectId: p.projectId, params: check.params,
   });
+  const where = check.params.section === 'Organic' ? 'Organic' : 'Social Ads › Treatments';
   return message(
     'AI First Cut queued',
-    `"${pipelineName(check.params)}" will land in ${destinationPath(check.params).join(' › ')} as v01 Internal, ` +
+    `The AI will cut it, name it from what's said and file v01 Internal under ${where} in this shoot, ` +
       `usually 15 to 25 minutes after your Mac picks it up (job ${job.id}).${await macStatus(user.email!, 'Your')}`,
   );
 }

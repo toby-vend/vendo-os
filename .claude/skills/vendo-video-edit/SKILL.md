@@ -21,6 +21,7 @@ Tools live in `tools/video-edit/` (when run by `npm run video:edit` you work ins
   "source": "/abs/path/raw.mp4",
   "brand": "vendo",
   "concept": "Organic | Vox Pops Episode",
+  "section": "Social Ads",
   "ratio": "9x16",
   "notes": "optional editor notes from whoever started the job",
   "comments": [ { "id": "…", "text": "move the card up", "at": 12.4 } ] }
@@ -45,6 +46,10 @@ You must leave behind: `output.mp4`, `edit.json`, `notes.md` (and `revision.json
 7. **Compose and check.** `python3 tools/video-edit/compose.py <job>`, then `npx hyperframes lint <job>/public`, then `npx hyperframes snapshot <job>/public --at <one time per event> --no-end --describe false` and **look at the contact sheet**. Fix overlaps, cropped text or cards touching the head, then recompose. Never omit `--describe false`: it would send client frames to a third-party vision model.
 8. **Render.** `PRODUCER_BROWSER_GPU_MODE=hardware npx hyperframes render <job>/public -o <job>/output.mp4 --fps <fps>`. Check duration with ffprobe.
 9. **Write `notes.md`** for the reviewer (short, plain English): trim points; every on-screen line with its timestamp; anything that is a claim, number, price or offer, flagged for QA; anything you were unsure of.
+10. **Name the video** (only when `brief.concept` is null). Write `title.json` from what the speaker actually says, following the editor SOP naming. A person checks it at review, so name what the video is, not what would sound good.
+    - `section` "Social Ads": `{ "treatment": "Invisalign", "concept": "Persona | Angle | Offer" }`. Treatment: the service the clip is about, Title Case (`General` if it isn't about one). Persona: who it speaks to, Title Case words, no ages, no hyphens or camelCase (e.g. `Busy Professionals`). Angle: the main message in 2–4 words, Title Case (e.g. `Fast Results`). Offer: the offer or call to action said in the clip (e.g. `Free Consultation`); `No Offer` if none is said. Exactly three parts joined by ` | `.
+    - `section` "Organic": `{ "title": "Vox Pops Episode" }`, a short Title Case title, no ` | `.
+    - With no concept, on-screen text uses only the speaker's own words (never the name you chose).
 
 ## Revise (mode `apply_comments`)
 

@@ -67,22 +67,18 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
   log(`job ${job.id}: ${job.kind} for ${job.requested_by_name ?? job.requested_by_email}`);
 
   if (job.kind === 'first_cut') {
-    const { destinationPath, pipelineName } = await import('../web/lib/video-jobs/actions.js');
     const { pickShootFolder } = await import('../web/lib/video-jobs/destination.js');
     const params = JSON.parse(job.params) as import('../web/lib/video-jobs/store.js').FirstCutParams;
-    const name = pipelineName(params);
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
-    const dir = join(homedir(), 'video-edits', `${slug}-job${job.id}`);
+    const dir = join(homedir(), 'video-edits', `${params.section === 'Organic' ? 'organic' : 'social'}-job${job.id}`);
     mkdirSync(dir, { recursive: true });
     try {
-      await beat('Finding the concept folder');
+      await beat('Finding the shoot folder');
       const source = await io.getAsset(job.source_file_id);
       const shoot = pickShootFolder(await io.ancestorFolders(source));
       if (!shoot) throw new Error('the clip is not inside a shoot folder (expected <shoot> / Raw Footage / …)');
-      const dest = await io.ensureFolderPath(shoot, destinationPath(params));
       await beat('Editing');
       await runScript('scripts/video-edit-run.ts', [
-        '--source', job.source_file_id, '--dest', dest, '--name', name, '--brand', params.brand,
+        '--source', job.source_file_id, '--dest', shoot, '--auto-name', '--section', params.section, '--brand', params.brand,
         '--notes', params.notes, '--job', dir, '--upload',
       ], join(dir, 'worker.log'), () => beat());
       const d = readDelivery(dir);

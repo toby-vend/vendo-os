@@ -1,4 +1,4 @@
-import { checkConceptName } from '../frameio/folder-audit.js';
+import { checkConceptName, normalisePipes } from '../frameio/folder-audit.js';
 import type { FirstCutParams } from './store.js';
 
 /**
@@ -68,57 +68,53 @@ export function firstCutForm(values: Record<string, string> = {}, problem?: stri
     title: 'AI First Cut',
     description: problem
       ? `Please fix: ${problem}`
-      : 'The AI cuts this clip and puts v01 (Internal) in the right concept folder for you to review.',
+      : 'The AI cuts this clip, names it from what is said and files v01 (Internal) in the right folder. The Creative Strategist checks the name at review.',
     fields: [
       {
         type: 'select', label: 'Type', name: 'section', value: values.section || 'Social Ads',
         options: [{ name: 'Social Ad', value: 'Social Ads' }, { name: 'Organic', value: 'Organic' }],
       },
-      { type: 'text', label: 'Treatment (Social Ads only, e.g. Invisalign)', name: 'treatment', value: values.treatment ?? '' },
-      { type: 'text', label: 'Video name: Persona | Angle | Offer (Organic: a title)', name: 'concept', value: values.concept ?? '' },
       { type: 'select', label: 'Brand', name: 'brand', value: values.brand || BRAND_PACKS[0].value, options: BRAND_PACKS },
       { type: 'textarea', label: 'Notes for the AI (optional)', name: 'notes', value: values.notes ?? '' },
     ],
   };
 }
 
-const titleCase = (s: string) => /^[A-Z0-9]/.test(s.trim());
-
-/** Check the form answers. Returns the job params, or a plain-English problem to show back. */
+/** Check the form answers. Returns the job params, or a plain-English problem to show back. The AI names the video later. */
 export function validateFirstCut(data: Record<string, string>): { ok: true; params: FirstCutParams } | { ok: false; problem: string } {
   const section = data.section === 'Organic' ? 'Organic' : data.section === 'Social Ads' ? 'Social Ads' : null;
   if (!section) return { ok: false, problem: 'choose Social Ad or Organic.' };
-  const concept = (data.concept ?? '').replace(/\s+/g, ' ').trim();
-  if (!concept) return { ok: false, problem: 'add the video name.' };
-  if (/\|\s*(9x16|4x5|1x1|16x9|v\d+|Internal|Client Review|Final)\b/i.test(concept)) {
-    return { ok: false, problem: 'the video name is only the concept part; ratio, length, version and status are added for you.' };
-  }
   const brand = data.brand ?? '';
   if (!BRAND_PACKS.some((b) => b.value === brand)) return { ok: false, problem: 'choose a brand from the list.' };
-  const notes = (data.notes ?? '').slice(0, 2000);
-
-  if (section === 'Organic') {
-    if (concept.includes('|')) return { ok: false, problem: 'an Organic video name is just a title, without " | ".' };
-    if (!titleCase(concept)) return { ok: false, problem: 'start the title with a capital letter.' };
-    return { ok: true, params: { section, treatment: null, concept, brand, notes } };
-  }
-
-  const treatment = (data.treatment ?? '').replace(/\s+/g, ' ').trim();
-  if (!treatment) return { ok: false, problem: 'add the treatment (the folder under Social Ads > Treatments).' };
-  if (!titleCase(treatment)) return { ok: false, problem: 'start the treatment with a capital letter.' };
-  const check = checkConceptName(concept);
-  if (!check.ok) {
-    return { ok: false, problem: `video name ${check.problems.join('; ')}${check.suggestion ? ` (try "${check.suggestion}")` : ''}.` };
-  }
-  return { ok: true, params: { section, treatment, concept, brand, notes } };
+  return { ok: true, params: { section, treatment: null, concept: null, brand, notes: (data.notes ?? '').slice(0, 2000) } };
 }
 
-/** Name passed to the edit pipeline (it adds ratio, length, version and status). */
-export function pipelineName(p: FirstCutParams): string {
-  return p.section === 'Organic' ? `Organic | ${p.concept}` : p.concept;
+/**
+ * The name the AI chose (title.json in the job folder), checked against the SOP. Social Ads need a treatment
+ * and "Persona | Angle | Offer"; Organic needs a title. Problems are returned, not thrown: a 15-minute edit
+ * isn't thrown away over a name, the Creative Strategist fixes it at review.
+ */
+export function nameFromTitle(section: FirstCutParams['section'], title: { treatment?: string; concept?: string; title?: string }): {
+  treatment: string | null; concept: string; problems: string[];
+} {
+  const clean = (v?: string) => (v ?? '').replace(/\s+/g, ' ').trim();
+  if (section === 'Organic') {
+    const t = clean(title.title ?? title.concept).replace(/\|/g, '-');
+    return { treatment: null, concept: t || 'Untitled', problems: t ? [] : ['the AI gave no title'] };
+  }
+  const treatment = clean(title.treatment) || 'General';
+  const concept = normalisePipes(clean(title.concept));
+  const check = checkConceptName(concept);
+  const problems = [...(clean(title.treatment) ? [] : ['the AI gave no treatment']), ...check.problems];
+  return { treatment, concept: concept || 'Unnamed | Unnamed | Unnamed', problems };
+}
+
+/** Name passed to the upload (the runner adds ratio, length, version and status). */
+export function pipelineName(section: FirstCutParams['section'], concept: string): string {
+  return section === 'Organic' ? `Organic | ${concept}` : concept;
 }
 
 /** Where v01 lands, relative to the shoot folder. */
-export function destinationPath(p: FirstCutParams): string[] {
-  return p.section === 'Organic' ? ['Organic', p.concept] : ['Social Ads', 'Treatments', p.treatment!, p.concept];
+export function destinationPath(section: FirstCutParams['section'], treatment: string | null, concept: string): string[] {
+  return section === 'Organic' ? ['Organic', concept] : ['Social Ads', 'Treatments', treatment ?? 'General', concept];
 }
