@@ -1,0 +1,32 @@
+{
+  "name": "Vendo Digital",
+  "fonts": [
+    { "family": "Manrope", "file": "Manrope-var.woff2", "weight": "200 800" },
+    { "family": "Instrument Serif", "file": "InstrumentSerif-400.woff2", "weight": "400" },
+    { "family": "Instrument Serif", "file": "InstrumentSerif-400-italic.woff2", "weight": "400", "style": "italic" }
+  ],
+  "body": { "family": "Manrope", "weight": 800 },
+  "flourish": { "family": "Instrument Serif", "style": "italic", "weight": 400, "scale": 1.2, "transform": "none", "letter_spacing": "0" },
+  "kinetic": { "family": "Manrope", "weight": 800, "transform": "uppercase", "letter_spacing": "-0.03em" },
+  "statement": { "family": "Instrument Serif", "weight": 400, "transform": "none", "letter_spacing": "-0.01em", "accent_style": "italic" },
+  "colors": {
+    "bg": "#051412",
+    "bg_gradient": "radial-gradient(120% 80% at 30% 35%, #0B2621 0%, #051412 60%, #030D0B 100%)",
+    "card": "rgba(9, 34, 31, 0.94)",
+    "card_border": "rgba(255,255,255,0.10)",
+    "raised": "#0E2C28",
+    "accent": "#8EFEBB",
+    "on_accent": "#051412",
+    "text": "#FFFFFF",
+    "muted": "#ABABAB",
+    "soft": "#B9C7C0"
+  },
+  "card_radius": 20,
+  "kicker": { "weight": 700, "letter_spacing": "0.16em", "color": "muted" },
+  "mark": "logo/mark.svg",
+  "logo": "logo/logo.svg",
+  "logo_width": 380,
+  "grain": { "footage": 0.06, "screens": 0.16 },
+  "motion": "Smooth rises, no bounce (brand rule).",
+  "source": ".claude/skills/vendo-brand (tokens + official logo files)"
+}
