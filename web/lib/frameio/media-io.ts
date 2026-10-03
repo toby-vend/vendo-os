@@ -14,6 +14,7 @@
  *  GET   /accounts/{a}/files/{id}/status                   (upload_complete)
  *  POST  /accounts/{a}/folders/{folder}/version_stacks     { file_ids: [oldest … newest] } (2–10 files)
  *  PATCH /accounts/{a}/files/{id}/move                     { parent_id: version_stack_id }
+ *  POST  /accounts/{a}/folders/{folder}/folders            { name }
  *  GET   /accounts/{a}/files/{id}/comments
  *  POST  /accounts/{a}/files/{id}/comments                 { text, timestamp? }
  *  PATCH /accounts/{a}/comments/{id}                       { completed }
@@ -49,7 +50,13 @@ export interface AssetInfo {
 
 /** Resolve an id that may be a file or a version stack; for stacks the head (newest) version is returned too. */
 export async function getAsset(id: string, accountId = ACCOUNT_ID): Promise<AssetInfo> {
-  const file = await getResource<AssetInfo>(`/accounts/${accountId}/files/${id}`);
+  // A version stack id on the files endpoint returns 422 "is not a file" (not 404), so fall through on both.
+  let file: AssetInfo | null = null;
+  try {
+    file = await getResource<AssetInfo>(`/accounts/${accountId}/files/${id}`);
+  } catch (err) {
+    if ((err as { status?: number }).status !== 422) throw err;
+  }
   if (file) return file;
   const stack = await getResource<AssetInfo>(`/accounts/${accountId}/version_stacks/${id}`);
   if (stack) return { ...stack, type: 'version_stack' };
@@ -152,6 +159,13 @@ export async function stackNewVersion(existingId: string, newFileId: string, acc
   });
   if (!stack) throw new Error('Frame.io did not return the new version stack');
   return { ...stack, type: 'version_stack' };
+}
+
+/** Create a subfolder (e.g. a missing concept folder). Returns the new folder. */
+export async function createFolder(parentFolderId: string, name: string, accountId = ACCOUNT_ID): Promise<AssetInfo> {
+  const folder = await sendJson<AssetInfo>('POST', `/accounts/${accountId}/folders/${parentFolderId}/folders`, { data: { name } });
+  if (!folder) throw new Error(`Frame.io did not return the new folder "${name}"`);
+  return folder;
 }
 
 /** All comments on a file, oldest first. Timestamps are frame numbers (null for general comments). */

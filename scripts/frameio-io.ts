@@ -10,6 +10,8 @@
  *   npm run frameio:io -- upload   <local file> <folder url|id> "<name>" [--stack-on <asset url|id>] --yes
  *   npm run frameio:io -- comment  <asset url|id> "<text>" [--at <seconds> --fps <fps>] --yes
  *   npm run frameio:io -- complete <comment id> --yes
+ *   npm run frameio:io -- stack    <existing asset url|id> <new file url|id> --yes
+ *   npm run frameio:io -- mkdir    <parent folder url|id> "<name>" --yes
  */
 import { config } from 'dotenv';
 config({ path: '.env.local' });
@@ -22,7 +24,7 @@ async function main() {
     return i > -1 ? rest[i + 1] : undefined;
   };
   const positional = rest.filter((a, i) => !a.startsWith('--') && !(i > 0 && rest[i - 1].startsWith('--') && rest[i - 1] !== '--yes'));
-  const writes = ['upload', 'comment', 'complete'];
+  const writes = ['upload', 'comment', 'complete', 'mkdir', 'stack'];
   if (writes.includes(cmd) && !rest.includes('--yes')) {
     throw new Error(`"${cmd}" writes to Frame.io. Re-run with --yes once you're sure of the target.`);
   }
@@ -77,8 +79,18 @@ async function main() {
       console.log('marked complete');
       break;
     }
+    case 'stack': {
+      const stack = await io.stackNewVersion(io.idFrom(positional[0]), io.idFrom(positional[1]));
+      console.log(`stacked onto "${stack.name}" (${stack.id}) ${stack.view_url}`);
+      break;
+    }
+    case 'mkdir': {
+      const folder = await io.createFolder(io.idFrom(positional[0]), positional[1]);
+      console.log(`created folder "${folder.name}" (${folder.id}) ${folder.view_url}`);
+      break;
+    }
     default:
-      throw new Error('Usage: inspect | download | comments | upload | comment | complete (see the header of scripts/frameio-io.ts)');
+      throw new Error('Usage: inspect | download | comments | upload | comment | complete | mkdir | stack (see the header of scripts/frameio-io.ts)');
   }
 }
 
