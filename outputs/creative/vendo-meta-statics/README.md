@@ -49,3 +49,8 @@ assets/photos/site/ (gitignored) — raw images pulled from the website Figma fi
 - Practice-style: Check Up 31, Consistent Flow 27, Scale 21, Cosmetic 05, Gappy 28, Competitors 30 (focus-point CROP fills per size).
 - ROI: Which Ads Pay → 22, CRM Connected → 01 (row was mislabelled "Which Ads Pay"; renamed), PMS Integration → 33. 42 tried for Which Ads Pay but reads as backs of heads at ad crops.
 - New size: 1200x628 "1.91x1" frame per concept at x=3540 on both pages (photo left 560px, text right). Serif phrase forced onto one line where it split (Scale Practice, Patient Outcomes).
+
+## Canvas ads brought into Figma (2026-10-03)
+- Source: Claude Design canvas "Vendo Paid Social Statics" (https://claude.ai/artifact/GkFDNPvUgLk32Wqw5B8D29).
+- Brought in 29 artboards as editable layers (A3, A4, B1, B4, C2, W1–W4, tweet carousels T1–T3) to page "Vendo Paid Social Statics (from canvas)" (21:2) in kluNBf7ZYkvdpet56Oqsiu. Skipped at Toby's request: A1, A2, B2, B3, C1, C3, C4.
+- Pipeline: artboard .dc.html read via Artifact tool → canvas-harness/{statics,carousels}.html (x-dc/helmet stripped, /_blob ids → local assets) → generate_figma_design capture → auto layout stripped, artboards lifted and named, grain/overlay layers locked.
