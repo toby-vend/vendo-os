@@ -25,3 +25,8 @@ assets/photos/site/ (gitignored) — raw images pulled from the website Figma fi
 - Restyle: Manrope SemiBold sentence-case headline with one Instrument Serif Italic mint phrase, mint-dot eyebrow, tick + offer, mint pill CTA, official SVG logo, hairline rule.
 - Names follow "<Concept> | Static | <Talent> | Brand refresh | <size> | 261003". Talent is a placeholder (Stage/Team/Client/Event/Podcast) until Toby confirms who is in each photo.
 - Photos: assets/photos/roi/ (gitignored). Figma image hash = SHA-1 of the file bytes, useful for mapping downloads back to frames.
+
+## Practice-style statics — v5 brand refresh (2026-10-03)
+- Source page "Practice-style ads (v2)" 6:2 in rXwHXr7UQ6ldReKxDSZtBv. Rebuilt on page "Practice-style (v5 · brand refresh)" (6:2) in kluNBf7ZYkvdpet56Oqsiu.
+- 6 concepts × 3 sizes; copy unchanged, v2's per-size photos used with FILL. Photos in assets/photos/practice/ (gitignored, named by Figma hash).
+- Open: three eyebrows don't match their headline (Scale Practice = "Full-arch implants", Gappy Diary = "Composite bonding", Losing To Competitors = "Second opinions"); Cosmetic 9x16 photo has a blurred foreground blob at the top (from v2's crop).
