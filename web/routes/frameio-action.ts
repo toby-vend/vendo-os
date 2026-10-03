@@ -18,8 +18,8 @@ import { verifyFrameioSignature } from './frameio-webhook.js';
  * Frame.io must get an answer within a few seconds, so this only validates and queues: the edit itself
  * runs on the editor's MacBook (scripts/video-worker.ts), which claims the job from `video_jobs`.
  *
- * Auth: the same URL token as the webhook (FRAMEIO_WEBHOOK_TOKEN). If FRAMEIO_ACTION_SECRET is set, the
- * v0 HMAC signature is also required.
+ * Auth: the same URL token as the webhook (FRAMEIO_WEBHOOK_TOKEN). If FRAMEIO_ACTION_SECRETS (comma-separated,
+ * one per action) is set, a valid v0 HMAC signature from one of them is also required.
  */
 
 const WORKER_STALE_MS = 10 * 60_000;
@@ -104,12 +104,13 @@ export const frameioActionRoutes: FastifyPluginAsync = async (app) => {
     const presented = (request.query as Record<string, string | undefined>)?.token ?? '';
     if (!tokenOk(presented, expected)) return reply.code(403).send({ error: 'Invalid token' });
 
-    const secret = process.env.FRAMEIO_ACTION_SECRET;
-    if (secret) {
-      const verdict = verifyFrameioSignature({
-        secret, rawBody: (request as { rawBody?: string }).rawBody ?? '', headers: request.headers as Record<string, string | undefined>,
-      });
-      if (verdict !== 'ok') return reply.code(401).send({ error: `Signature ${verdict}` });
+    // Each action has its own signing secret; accept a request signed by any of ours.
+    const secrets = (process.env.FRAMEIO_ACTION_SECRETS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+    if (secrets.length) {
+      const rawBody = (request as { rawBody?: string }).rawBody ?? '';
+      const headers = request.headers as Record<string, string | undefined>;
+      const verdicts = secrets.map((secret) => verifyFrameioSignature({ secret, rawBody, headers }));
+      if (!verdicts.includes('ok')) return reply.code(401).send({ error: `Signature ${verdicts[0]}` });
     }
 
     const p = parseActionPayload(request.body);

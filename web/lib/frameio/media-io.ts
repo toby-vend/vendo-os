@@ -161,6 +161,36 @@ export async function stackNewVersion(existingId: string, newFileId: string, acc
   return { ...stack, type: 'version_stack' };
 }
 
+/** A folder's name and parent (parent_id is null at the project root). */
+export async function getFolder(id: string, accountId = ACCOUNT_ID): Promise<{ id: string; name: string; parent_id: string | null }> {
+  const folder = await getResource<{ id: string; name: string; parent_id: string | null }>(`/accounts/${accountId}/folders/${id}`);
+  if (!folder) throw new Error(`Frame.io folder ${id} not found`);
+  return folder;
+}
+
+/** Folders from the asset's parent up to the project root, nearest first. */
+export async function ancestorFolders(asset: { parent_id: string | null }, accountId = ACCOUNT_ID): Promise<Array<{ id: string; name: string }>> {
+  const chain: Array<{ id: string; name: string }> = [];
+  let next = asset.parent_id;
+  for (let i = 0; next && i < 20; i += 1) {
+    const f = await getFolder(next, accountId);
+    chain.push({ id: f.id, name: f.name });
+    next = f.parent_id;
+  }
+  return chain;
+}
+
+/** Walk (and create where missing) a folder path under a parent, matching names case-insensitively. Returns the last folder id. */
+export async function ensureFolderPath(parentId: string, names: string[], accountId = ACCOUNT_ID): Promise<string> {
+  let current = parentId;
+  for (const name of names) {
+    const children = await listAll<{ id: string; name: string; type: string }>(`/accounts/${accountId}/folders/${current}/children?page_size=100`);
+    const found = children.find((c) => c.type === 'folder' && c.name.trim().toLowerCase() === name.trim().toLowerCase());
+    current = found ? found.id : (await createFolder(current, name, accountId)).id;
+  }
+  return current;
+}
+
 /** Create a subfolder (e.g. a missing concept folder). Returns the new folder. */
 export async function createFolder(parentFolderId: string, name: string, accountId = ACCOUNT_ID): Promise<AssetInfo> {
   const folder = await sendJson<AssetInfo>('POST', `/accounts/${accountId}/folders/${parentFolderId}/folders`, { data: { name } });
