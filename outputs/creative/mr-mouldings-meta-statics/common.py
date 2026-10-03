@@ -204,3 +204,16 @@ def hotspot(x, y, card_x, card_y, thumb, title, price):
             f'<div style="width:64px;height:64px;flex:none;background:#f3f3f3 url(assets/photos/products/{thumb}) center/contain no-repeat"></div>'
             f'<div><div class="sans" style="font-size:16px;font-weight:600;line-height:1.2;color:{C["ink"]}">{title}</div>'
             f'<div class="sans" style="font-size:15px;color:{C["muted"]};margin-top:4px">From {price}</div></div></div>')
+
+
+def soft(cx, cy, rx, ry, light=False):
+    """Soft, edgeless shadow (or light glow) behind editorial text, as MR's Instagram posts do. Not a box."""
+    c = "245,243,235" if light else "15,35,40"
+    a1, a2 = (.88, .55) if light else (.62, .35)
+    return (f'<div class="fill" data-name="Soft {"glow" if light else "shadow"}" style="background:radial-gradient(ellipse {rx}px {ry}px at {cx}px {cy}px, '
+            f'rgba({c},{a1}) 0%, rgba({c},{a2}) 45%, rgba({c},0) 100%)"></div>')
+
+
+def with_soft(inner, glow):
+    """Insert a soft shadow/glow just above the photo (before the logo)."""
+    return inner.replace('<div class="abs" style="left:56px', glow + '<div class="abs" style="left:56px', 1)

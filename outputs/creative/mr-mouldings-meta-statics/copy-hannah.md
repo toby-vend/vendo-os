@@ -14,7 +14,7 @@ Research: "Builders like to put in the smallest ones to save money." and "I don'
 Concept name: **Hannah Taller Skirting | Smallest ones**
 Talent: Graphic (profile drawings)
 
-**On image:** "Builders like to put in the smallest ones to save money." / A taller profile is the quickest way to make a room look finished. / 95mm to 145mm suits most modern rooms. / Shop skirting
+**On image:** "Builders like to put in the smallest ones." / A taller profile is the quickest way to make a room look finished. 95mm to 145mm suits most modern rooms.
 
 **Headline:** The upgrade most rooms are missing.
 
@@ -43,7 +43,7 @@ Research: thread title "How to make a new build less new build'ey" (Mumsnet, Gar
 Concept name: **Hannah New Build | Less new build-ey**
 Talent: Room photo
 
-**On image:** How do you make a new build feel less new build-ey? / Taller skirting. Architrave that matches. A dado rail or panel mould on one wall. / Shop skirting
+**On image:** How do you make a new build feel less new build-ey? / Taller skirting. Matching architrave. One panelled wall.
 
 **Headline:** Three upgrades. One weekend.
 
@@ -101,7 +101,7 @@ Research: "by Christ if I had known how difficult it was to saw two boards so th
 Concept name: **Hannah Taller Skirting | Not a builder job**
 Talent: Room photo
 
-**On image:** "I'd never get the corners right." / Grab adhesive on masonry walls. Adhesive and pins on stud walls. The corners take practice, so we tell you to order 10% extra. / Shop skirting
+**On image:** "I'd never get the corners right." / Grab adhesive on masonry. Adhesive and pins on stud walls. Order 10% extra for the corners. (Photo: tall skirting wrapping an external corner.)
 
 **Headline:** Mostly glue, filler and paint.
 
@@ -130,7 +130,7 @@ Research: "Georgian panelling in a 1980's Barrett house looks tacky and will dat
 Concept name: **Hannah New Build | Not Bridgerton**
 Talent: Room photo
 
-**On image:** Character doesn't have to mean Victorian. / Modern profiles, chamfered, bullnose, square edge, at a proper height. / Built for the house you've got. / Shop modern skirting
+**On image:** Character doesn't have to mean Victorian. / Chamfered, bullnose and square edge profiles, at a proper height.
 
 **Headline:** Character, not costume.
 

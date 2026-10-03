@@ -41,7 +41,7 @@ The house already has the profile. It just needs someone to make it again.
 Research: "Half of my hall has original skirting, the other half an awful bodge job." (DIYnot, Spike73); "I generally replace the smallest room/area and use what I've removed for the rest of the house." (DIYnot, cdbe); "it always bugged me." (Period Property forum, wobs).
 Concept name: **Sophie Made to Match | Half the hall**
 
-**On image:** Half the hall is original. / The other half is the bit you notice every time you walk in. / We match the original from an offcut or a photo. / Send us a photo
+**On image:** Half the hall is original. / The other half is the bit you notice. We match the original from an offcut or a photo.
 
 **Headline:** One run that matches the rest.
 
@@ -69,7 +69,7 @@ Put it back the way the house was built.
 Research: "the flogging tree and cat o' nine tails await any that suggest MDF" (Period Property forum, MikeG); "Many people plump for crappy MDF when replacing skirting because it doesn't warp when acclimatising to the house." (Period Property forum, Lacan07); creative plan: "Worries MDF is a compromise in a period house."
 Concept name: **Sophie Made to Match | MDF objection**
 
-**On image:** "Isn't MDF wrong for a period house?" / Once it's painted, the profile is what people see. MDF holds a crisp profile, has no knots to bleed through the paint, and stays put in a house that moves. / Prefer timber? We match in timber too. / Send us a photo
+**On image:** Isn't MDF wrong for a period house? / Painted, the profile is what people see. Prefer timber? We match in timber too.
 
 **Headline:** Painted, nobody can tell. Unpainted, choose timber.
 

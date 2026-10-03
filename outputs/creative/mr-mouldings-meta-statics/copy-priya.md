@@ -14,7 +14,7 @@ Research: "I gave them an accurate drawing of the moulding x-section and they ma
 Concept name: **Priya Made to Match | One offcut**
 Talent: Graphic (process)
 
-**On image:** Matched from one offcut. / 1 Scan the profile. 2 CNC-cut a template. 3 Grind cutters to it. 4 Machine your lengths. / MDF or timber. A few metres or a whole house. / Start a bespoke enquiry
+**On image:** Matched from one offcut. / We scan the profile, grind cutters to it and machine your lengths, in MDF or timber.
 
 **Headline:** Specify the original. We'll make it.
 

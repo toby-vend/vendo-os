@@ -5,6 +5,7 @@ HALL_BLUE = "astragal-dado-blue-hallway.jpg"
 STAIR = "hampton-dado-regency-skirting-board-1.jpg"
 PANEL = "double-astragal-dado-sunningdale-panel-mould.jpg"
 CURVE = "flexi-bolection-dado-astragal-panel-mould-hallway.jpg"
+CORNER = "first-img-6851-karen.jpg"
 TEAL_HALL = "flexi-astragal-panel-mould-blue-door-way.jpg"
 
 SLATE_FADE = "rgba(47,79,79,{a})"
@@ -35,31 +36,15 @@ def s1_1():
 
 
 def s2_1():
-    inner = f"""
-{photo(0, 0, 560, 1080, STAIR, fx=0.35, fy=0.5)}
-{panel_line(36, 36, 488, 1008)}
-<div class="abs" style="left:620px;top:80px">{logo('colour', 120)}</div>
-<div class="abs hl" style="left:620px;top:290px;width:400px;color:{C['slate']};font-size:68px">Half the hall is original.</div>
-<div class="abs body" style="left:620px;top:530px;width:390px;color:{C['ink_soft']};font-size:28px">The other half is the bit you notice every time you walk in.</div>
-<div class="abs" style="left:620px;top:690px;width:60px;height:4px;background:{C['teal']}"></div>
-<div class="abs body" style="left:620px;top:720px;width:390px;color:{C['ink']};font-size:26px;font-weight:500">We match the original from an offcut or a photo.</div>
-<div class="abs" style="left:620px;top:900px">{cta('Send us a photo', 'teal', (66, 19, 34))}</div>"""
-    return board("1x1", "Sophie Made to Match | Static | Room photo | Half the hall", C["stone"], inner)
+    inner = editorial_inner(STAIR, "Half the hall<br>is original.", "The other half is the bit you notice.<br>We match the original from an offcut<br>or a photo.",
+                            x=300, y=290, w=440, size=56, fx=0.5, fy=0.3)
+    return board("1x1", "Sophie Made to Match | Static | Room photo | Half the hall", "#333", inner)
 
 
 def s3_1():
-    inner = f"""
-<div class="fill" style="background:radial-gradient(circle at 80% 20%, #fbfaf5 0%, {C['stone']} 45%, #e9e5d8 100%)"></div>
-<div class="abs" style="left:80px;top:70px">{quote_mark(C['teal'], 150)}</div>
-<div class="abs hl" style="left:80px;top:150px;width:920px;color:{C['slate']};font-size:62px">Isn't MDF wrong for a period house?</div>
-<div class="card shadow" style="left:80px;top:340px;width:430px;height:430px;overflow:hidden">{photo(0, 0, 430, 430, PANEL, fx=0.3, fy=0.55)}</div>
-{frame(56, 316, 478, 478, C['teal'], t=5)}
-<div class="abs" style="left:590px;top:350px;color:{C['slate']}">{profile('ogee', 300, C['slate'], 3)}</div>
-<div class="abs mono" style="left:700px;top:600px;width:300px;color:{C['muted']}">Profile machined from MDF. Painted, it reads as the original.</div>
-<div class="abs body" style="left:80px;top:830px;width:920px;color:{C['ink']};font-size:25px">Once it's painted, the profile is what people see. MDF holds a crisp profile, has no knots to bleed through the paint, and stays put in a house that moves. <b>Prefer timber? We match in timber too.</b></div>
-<div class="abs" style="left:80px;top:966px">{cta('Send us a photo', 'teal', (60, 18, 30))}</div>
-<div class="abs" style="left:860px;top:972px">{logo('colour', 90)}</div>"""
-    return board("1x1", "Sophie Made to Match | Static | Room photo | MDF objection", C["stone"], inner)
+    inner = editorial_inner(PANEL, "Isn't MDF wrong for<br>a period house?", "Painted, the profile is what people see.<br>Prefer timber? We match in timber too.",
+                            x=250, y=70, w=600, size=46, fx=0.5, fy=0.5, sub_size=24, dark=True)
+    return board("1x1", "Sophie Made to Match | Static | Room photo | MDF objection", "#333", inner)
 
 
 def s4_1():
@@ -109,30 +94,15 @@ def s1_9():
 
 
 def s2_9():
-    inner = f"""
-{photo(0, 0, 1080, 1040, STAIR, fx=0.4, fy=0.45)}
-{panel_line(40, 270, 1000, 730)}
-<div class="abs hl" style="left:90px;top:1100px;width:900px;color:{C['slate']};font-size:84px">Half the hall is original.</div>
-<div class="abs body" style="left:90px;top:1220px;width:880px;color:{C['ink_soft']};font-size:33px">The other half is the bit you notice every time you walk in.</div>
-<div class="abs" style="left:90px;top:1330px;width:60px;height:4px;background:{C['teal']}"></div>
-<div class="abs body" style="left:90px;top:1360px;width:880px;color:{C['ink']};font-size:31px;font-weight:500">We match the original from an offcut or a photo.</div>
-<div class="abs" style="left:90px;top:1470px">{cta('Send us a photo', 'teal')}</div>
-<div class="abs" style="left:820px;top:1452px">{logo('colour', 110)}</div>"""
-    return board("9x16", "Sophie Made to Match | Static | Room photo | Half the hall", C["stone"], inner)
+    inner = editorial_inner(STAIR, "Half the hall<br>is original.", "The other half is the bit you notice.<br>We match the original from an offcut<br>or a photo.",
+                            x=400, y=560, w=600, size=70, fx=0.5, fy=0.3, size_px=(1080, 1920), sub_size=32)
+    return board("9x16", "Sophie Made to Match | Static | Room photo | Half the hall", "#333", inner)
 
 
 def s3_9():
-    inner = f"""
-<div class="fill" style="background:radial-gradient(circle at 80% 20%, #fbfaf5 0%, {C['stone']} 45%, #e9e5d8 100%)"></div>
-<div class="abs" style="left:90px;top:270px">{quote_mark(C['teal'], 160)}</div>
-<div class="abs hl" style="left:90px;top:360px;width:900px;color:{C['slate']};font-size:76px">Isn't MDF wrong for a period house?</div>
-<div class="card shadow" style="left:90px;top:620px;width:560px;height:560px;overflow:hidden">{photo(0, 0, 560, 560, PANEL, fx=0.3, fy=0.55)}</div>
-{frame(64, 594, 612, 612, C['teal'], t=6)}
-<div class="abs" style="left:740px;top:650px;color:{C['slate']}">{profile('ogee', 400, C['slate'], 3)}</div>
-<div class="abs body" style="left:90px;top:1250px;width:900px;color:{C['ink']};font-size:30px">Once it's painted, the profile is what people see. MDF holds a crisp profile, has no knots to bleed through the paint, and stays put in a house that moves. <b>Prefer timber? We match in timber too.</b></div>
-<div class="abs" style="left:90px;top:1480px">{cta('Send us a photo', 'teal')}</div>
-<div class="abs" style="left:820px;top:1462px">{logo('colour', 110)}</div>"""
-    return board("9x16", "Sophie Made to Match | Static | Room photo | MDF objection", C["stone"], inner)
+    inner = editorial_inner(PANEL, "Isn't MDF wrong<br>for a period house?", "Painted, the profile is what people see.<br>Prefer timber? We match in timber too.",
+                            x=90, y=330, w=760, size=62, fx=0.5, fy=0.5, size_px=(1080, 1920), sub_size=30, dark=True)
+    return board("9x16", "Sophie Made to Match | Static | Room photo | MDF objection", "#333", inner)
 
 
 def s4_9():

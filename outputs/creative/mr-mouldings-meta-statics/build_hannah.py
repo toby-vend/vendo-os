@@ -1,10 +1,11 @@
 """Hannah (new-build upgrader) statics: 5 concepts x 1:1 and 9:16. Copy: copy-hannah.md."""
-from common import C, logo, photo, frame, panel_line, profile, proof, cta, board, page, write
+from common import C, logo, photo, frame, panel_line, profile, proof, cta, board, page, write, editorial_inner, soft, with_soft
 
 TILES = "img-3400a.jpg"                                   # clean doorway, tall skirting, tiles
 DOORWAY = "square-strips-wall-panel-kits-ogee-architrave.jpg"  # painted architrave, dado, colour
 PANEL = "img-3381-karen.jpg"                              # panel moulding close-up, shadow line
 DOOR = "img-3399a-karen.jpg"                              # plain door, skirting, architrave
+CORNER = "first-img-6851-karen.jpg"               # tall skirting wrapping an external corner
 BOOT = "chamfered-2-skirting-board.jpg"                   # modern boot room, chamfered skirting
 
 SLATE_FADE = "rgba(47,79,79,{a})"
@@ -31,32 +32,15 @@ def compare(x, y, scale=1.0):
 
 # ------------------------------------------------------------------ 1:1
 def h1_1():
-    inner = f"""
-{STONE_BG}
-<div class="abs serif" style="left:80px;top:80px;width:920px;color:{C['slate']};font-size:44px;font-style:italic;line-height:1.2">&ldquo;Builders like to put in the smallest ones to save money.&rdquo;</div>
-<div class="card shadow" style="left:80px;top:300px;width:470px;height:560px;overflow:hidden">{photo(0, 0, 470, 560, TILES, fx=0.5, fy=0.7)}</div>
-{compare(650, 330, 1.15)}
-<div class="abs hl" style="left:620px;top:770px;width:400px;color:{C['slate']};font-size:30px;line-height:1.15">A taller profile makes a room look finished.</div>
-<div class="abs body" style="left:80px;top:905px;width:600px;color:{C['ink_soft']};font-size:23px">95mm to 145mm suits most modern rooms.</div>
-<div class="abs" style="left:80px;top:960px">{cta('Shop skirting', 'teal', (62, 18, 32))}</div>
-<div class="abs" style="left:880px;top:952px">{logo('colour', 110)}</div>"""
-    return board("1x1", "Hannah Taller Skirting | Static | Graphic | Smallest ones", C["stone"], inner)
+    inner = editorial_inner(DOOR, "&ldquo;Builders like to put in<br>the smallest ones.&rdquo;", "A taller profile is the quickest way to make a<br>room look finished. 95mm to 145mm suits<br>most modern rooms.",
+                            x=80, y=190, w=760, size=48, fx=0.5, fy=0.4, sub_size=24, dark=True)
+    return board("1x1", "Hannah Taller Skirting | Static | Room photo | Smallest ones", "#333", inner)
 
 
 def h2_1():
-    inner = f"""
-{photo(0, 0, 1080, 1080, DOORWAY, fx=0.5, fy=0.45)}
-{fade('180deg', [(.92, 0), (.75, 26), (0, 46), (0, 62), (.9, 100)])}
-<div class="abs" style="left:80px;top:70px">{logo('white', 110)}</div>
-<div class="abs hl" style="left:80px;top:205px;width:900px;color:#fff;font-size:58px">How do you make a new build feel less new build-ey?</div>
-<div class="abs" style="left:80px;top:770px;width:920px;display:flex;gap:16px">
-  <span class="cta" style="background:rgba(245,243,235,.94);color:{C['slate']};height:58px;font-size:17px;padding:0 24px">Taller skirting</span>
-  <span class="cta" style="background:rgba(245,243,235,.94);color:{C['slate']};height:58px;font-size:17px;padding:0 24px">Matching architrave</span>
-  <span class="cta" style="background:rgba(245,243,235,.94);color:{C['slate']};height:58px;font-size:17px;padding:0 24px">One panelled wall</span>
-</div>
-<div class="abs" style="left:80px;top:950px">{cta('Shop skirting', 'teal', (62, 18, 32))}</div>
-<div class="abs" style="left:560px;top:972px">{proof(C['on_slate'], 18, 'Over 150 profiles, made in Epsom')}</div>"""
-    return board("1x1", "Hannah New Build | Static | Room photo | Less new build-ey", C["slate"], inner)
+    inner = with_soft(editorial_inner(DOORWAY, "How do you make a new build<br>feel less new build-ey?", "Taller skirting. Matching architrave.<br>One panelled wall.",
+                            x=80, y=170, w=880, size=54, fx=0.5, fy=0.45, sub_size=28), soft(380, 260, 720, 330))
+    return board("1x1", "Hannah New Build | Static | Room photo | Less new build-ey", "#333", inner)
 
 
 def h3_1():
@@ -72,60 +56,27 @@ def h3_1():
 
 
 def h4_1():
-    inner = f"""
-{photo(0, 0, 1080, 1080, DOOR, fx=0.5, fy=0.55)}
-{fade('180deg', [(.6, 0), (0, 30), (0, 100)])}
-<div class="abs hl" style="left:80px;top:90px;width:900px;color:#fff;font-size:60px;text-shadow:0 2px 20px rgba(0,0,0,.3)">&ldquo;I'd never get the corners right.&rdquo;</div>
-<div class="card shadow" style="left:80px;top:470px;width:600px;padding:44px 48px;background:{C['stone']}">
-  <div class="eyebrow" style="color:{C['teal']};font-size:16px">The honest version</div>
-  <div class="body" style="font-size:24px;color:{C['ink']};margin-top:18px"><b>Masonry walls:</b> grab adhesive.<br><b>Stud walls:</b> adhesive and pins.</div>
-  <div class="body" style="font-size:22px;color:{C['ink_soft']};margin-top:16px">The corners take practice, so we tell everyone to order 10% extra.</div>
-</div>
-<div class="abs" style="left:80px;top:955px">{cta('Shop skirting', 'teal', (62, 18, 32))}</div>
-<div class="abs" style="left:880px;top:940px">{logo('white', 110)}</div>"""
-    return board("1x1", "Hannah Taller Skirting | Static | Room photo | Not a builder job", C["slate"], inner)
+    inner = editorial_inner(CORNER, "&ldquo;I'd never get the<br>corners right.&rdquo;", "Grab adhesive on masonry. Adhesive and pins<br>on stud walls. Order 10% extra for the corners.",
+                            x=60, y=580, w=640, size=54, fx=0.2, fy=0.7, sub_size=24)
+    return board("1x1", "Hannah Taller Skirting | Static | Room photo | Not a builder job", "#333", inner)
 
 
 def h5_1():
-    inner = f"""
-{STONE_BG}
-{photo(460, 0, 620, 1080, BOOT, fx=0.45, fy=0.5)}
-{frame(500, 60, 540, 960, C['stone'], t=6)}
-<div class="abs" style="left:70px;top:80px">{logo('colour', 110)}</div>
-<div class="abs hl" style="left:70px;top:260px;width:360px;color:{C['slate']};font-size:56px">Character doesn't have to mean <i>Victorian.</i></div>
-<div class="abs body" style="left:70px;top:590px;width:350px;color:{C['ink_soft']};font-size:24px">Chamfered, bullnose and square edge profiles, at a proper height.</div>
-<div class="abs body" style="left:70px;top:740px;width:350px;color:{C['ink']};font-size:24px;font-weight:600">Built for the house you've got.</div>
-<div class="abs" style="left:70px;top:955px">{cta('Shop modern skirting', 'teal', (60, 16, 26))}</div>"""
-    return board("1x1", "Hannah New Build | Static | Room photo | Not Bridgerton", C["stone"], inner)
+    inner = editorial_inner(BOOT, "Character<br>doesn't have<br>to mean<br><i>Victorian.</i>", "Chamfered, bullnose<br>and square edge<br>profiles, at a<br>proper height.",
+                            x=56, y=300, w=300, size=42, fx=0.0, fy=0.4, sub_size=21, dark=True)
+    return board("1x1", "Hannah New Build | Static | Room photo | Not Bridgerton", "#333", inner)
 
 
-# ------------------------------------------------------------------ 9:16
 def h1_9():
-    inner = f"""
-{STONE_BG}
-<div class="abs serif" style="left:90px;top:290px;width:900px;color:{C['slate']};font-size:52px;font-style:italic;line-height:1.2">&ldquo;Builders like to put in the smallest ones to save money.&rdquo;</div>
-<div class="card shadow" style="left:90px;top:560px;width:900px;height:520px;overflow:hidden">{photo(0, 0, 900, 520, TILES, fx=0.5, fy=0.75)}</div>
-{compare(150, 1110, 0.95)}
-<div class="abs hl" style="left:560px;top:1170px;width:440px;color:{C['slate']};font-size:42px;line-height:1.12">A taller profile makes a room look finished.</div>
-<div class="abs body" style="left:560px;top:1370px;width:440px;color:{C['ink_soft']};font-size:26px">95mm to 145mm suits most modern rooms.</div>
-<div class="abs" style="left:90px;top:1480px">{cta('Shop skirting', 'teal')}</div>
-<div class="abs" style="left:820px;top:1462px">{logo('colour', 110)}</div>"""
-    return board("9x16", "Hannah Taller Skirting | Static | Graphic | Smallest ones", C["stone"], inner)
+    inner = editorial_inner(DOOR, "&ldquo;Builders like to<br>put in the smallest<br>ones.&rdquo;", "A taller profile is the quickest way to make a<br>room look finished. 95mm to 145mm suits<br>most modern rooms.",
+                            x=90, y=360, w=860, size=64, fx=0.5, fy=0.4, size_px=(1080, 1920), sub_size=29, dark=True)
+    return board("9x16", "Hannah Taller Skirting | Static | Room photo | Smallest ones", "#333", inner)
 
 
 def h2_9():
-    inner = f"""
-{photo(0, 0, 1080, 1920, DOORWAY, fx=0.5, fy=0.45)}
-{fade('180deg', [(.94, 0), (.8, 28), (0, 44), (0, 62), (.92, 100)])}
-<div class="abs hl" style="left:90px;top:300px;width:900px;color:#fff;font-size:64px">How do you make a new build feel less new build-ey?</div>
-<div class="abs" style="left:90px;top:1260px;width:900px;display:flex;flex-direction:column;gap:14px;align-items:flex-start">
-  <span class="cta" style="background:rgba(245,243,235,.94);color:{C['slate']};height:62px;font-size:19px;padding:0 28px">Taller skirting</span>
-  <span class="cta" style="background:rgba(245,243,235,.94);color:{C['slate']};height:62px;font-size:19px;padding:0 28px">Matching architrave</span>
-  <span class="cta" style="background:rgba(245,243,235,.94);color:{C['slate']};height:62px;font-size:19px;padding:0 28px">One panelled wall</span>
-</div>
-<div class="abs" style="left:90px;top:1500px">{cta('Shop skirting', 'teal')}</div>
-<div class="abs" style="left:820px;top:1484px">{logo('white', 110)}</div>"""
-    return board("9x16", "Hannah New Build | Static | Room photo | Less new build-ey", C["slate"], inner)
+    inner = with_soft(editorial_inner(DOORWAY, "How do you make<br>a new build feel less<br>new build-ey?", "Taller skirting. Matching architrave.<br>One panelled wall.",
+                            x=90, y=400, w=900, size=66, fx=0.5, fy=0.45, size_px=(1080, 1920), sub_size=32), soft(420, 560, 760, 420))
+    return board("9x16", "Hannah New Build | Static | Room photo | Less new build-ey", "#333", inner)
 
 
 def h3_9():
@@ -141,30 +92,15 @@ def h3_9():
 
 
 def h4_9():
-    inner = f"""
-{photo(0, 0, 1080, 1920, DOOR, fx=0.5, fy=0.5)}
-{fade('180deg', [(.65, 0), (0, 26), (0, 100)])}
-<div class="abs hl" style="left:90px;top:290px;width:900px;color:#fff;font-size:72px;text-shadow:0 2px 20px rgba(0,0,0,.3)">&ldquo;I'd never get the corners right.&rdquo;</div>
-<div class="card shadow" style="left:90px;top:1000px;width:900px;padding:56px 60px;background:{C['stone']}">
-  <div class="eyebrow" style="color:{C['teal']};font-size:18px">The honest version</div>
-  <div class="body" style="font-size:31px;color:{C['ink']};margin-top:22px"><b>Masonry walls:</b> grab adhesive.<br><b>Stud walls:</b> adhesive and pins.</div>
-  <div class="body" style="font-size:28px;color:{C['ink_soft']};margin-top:18px">The corners take practice, so we tell everyone to order 10% extra.</div>
-</div>
-<div class="abs" style="left:90px;top:1490px">{cta('Shop skirting', 'teal')}</div>
-<div class="abs" style="left:820px;top:1472px">{logo('white', 110)}</div>"""
-    return board("9x16", "Hannah Taller Skirting | Static | Room photo | Not a builder job", C["slate"], inner)
+    inner = editorial_inner(CORNER, "&ldquo;I'd never get<br>the corners right.&rdquo;", "Grab adhesive on masonry. Adhesive and<br>pins on stud walls. Order 10% extra<br>for the corners.",
+                            x=70, y=900, w=560, size=64, fx=0.15, fy=0.6, size_px=(1080, 1920), sub_size=29)
+    return board("9x16", "Hannah Taller Skirting | Static | Room photo | Not a builder job", "#333", inner)
 
 
 def h5_9():
-    inner = f"""
-{STONE_BG}
-{photo(0, 0, 1080, 1100, BOOT, fx=0.45, fy=0.45)}
-{frame(60, 260, 960, 780, C['stone'], t=6)}
-<div class="abs hl" style="left:90px;top:1150px;width:900px;color:{C['slate']};font-size:72px">Character doesn't have to mean <i>Victorian.</i></div>
-<div class="abs body" style="left:90px;top:1330px;width:880px;color:{C['ink_soft']};font-size:30px">Chamfered, bullnose and square edge profiles, at a proper height. <b style="color:{C['ink']}">Built for the house you've got.</b></div>
-<div class="abs" style="left:90px;top:1480px">{cta('Shop modern skirting', 'teal')}</div>
-<div class="abs" style="left:840px;top:1462px">{logo('colour', 100)}</div>"""
-    return board("9x16", "Hannah New Build | Static | Room photo | Not Bridgerton", C["stone"], inner)
+    inner = editorial_inner(BOOT, "Character<br>doesn't have<br>to mean<br><i>Victorian.</i>", "Chamfered, bullnose<br>and square edge<br>profiles, at a<br>proper height.",
+                            x=56, y=600, w=300, size=48, fx=0.0, fy=0.4, size_px=(1080, 1920), sub_size=23, dark=True)
+    return board("9x16", "Hannah New Build | Static | Room photo | Not Bridgerton", "#333", inner)
 
 
 if __name__ == "__main__":

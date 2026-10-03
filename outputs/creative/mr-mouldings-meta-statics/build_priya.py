@@ -1,5 +1,5 @@
 """Priya (interior designer) statics: 5 concepts x 1:1 and 9:16. Copy: copy-priya.md."""
-from common import C, logo, photo, frame, panel_line, profile, proof, cta, board, page, write, editorial_inner
+from common import C, logo, photo, frame, panel_line, profile, proof, cta, board, page, write, editorial_inner, soft, with_soft
 
 ARCHITRAVE = "img-6793-karen.jpg"          # doorway architrave, wallpaper
 DOORWAY = "edwardian-panel-mould-small-bolection-skirting-architrave-block-rosette.jpg"  # view through to next room
@@ -28,15 +28,9 @@ def steps(x, y, w, color, num_color, size=24, gap=26):
 
 # ------------------------------------------------------------------ 1:1
 def p1_1():
-    inner = f"""
-{photo(540, 0, 540, 1080, ARCHITRAVE, fx=0.3, fy=0.5)}
-{frame(580, 60, 460, 960, C['stone'], t=5)}
-<div class="abs" style="left:70px;top:70px">{logo('colour-white', 110)}</div>
-<div class="abs hl" style="left:70px;top:230px;width:430px;color:#fff;font-size:60px">Matched from one offcut.</div>
-{steps(70, 440, 430, '#fff', C['teal_light'], 24, 22)}
-<div class="abs body" style="left:70px;top:790px;width:430px;color:{C['on_slate']};font-size:22px">MDF or timber. A few metres or a whole house.</div>
-<div class="abs" style="left:70px;top:955px">{cta('Start a bespoke enquiry', 'teal', (60, 16, 26))}</div>"""
-    return board("1x1", "Priya Made to Match | Static | Graphic | One offcut", C["slate"], inner)
+    inner = with_soft(editorial_inner(ARCHITRAVE, "Matched from<br>one offcut.", "We scan the profile, grind cutters to it<br>and machine your lengths, in MDF or timber.",
+                            x=80, y=170, w=600, size=58, fx=0.3, fy=0.5, sub_size=24, dark=True), soft(330, 260, 620, 330, light=True))
+    return board("1x1", "Priya Made to Match | Static | Room photo | One offcut", "#333", inner)
 
 
 def p2_1():
@@ -83,16 +77,9 @@ def p5_1():
 
 # ------------------------------------------------------------------ 9:16
 def p1_9():
-    inner = f"""
-{photo(0, 0, 1080, 900, ARCHITRAVE, fx=0.3, fy=0.45)}
-{frame(60, 260, 960, 600, C['stone'], t=6)}
-<div class="fill" style="top:900px;background:{C['slate']}"></div>
-<div class="abs hl" style="left:90px;top:960px;width:900px;color:#fff;font-size:70px">Matched from one offcut.</div>
-{steps(90, 1070, 880, '#fff', C['teal_light'], 28, 14)}
-<div class="abs body" style="left:90px;top:1400px;width:880px;color:{C['on_slate']};font-size:26px">MDF or timber. A few metres or a whole house.</div>
-<div class="abs" style="left:90px;top:1478px">{cta('Start a bespoke enquiry', 'teal')}</div>
-<div class="abs" style="left:840px;top:1462px">{logo('colour-white', 100)}</div>"""
-    return board("9x16", "Priya Made to Match | Static | Graphic | One offcut", C["slate"], inner)
+    inner = with_soft(editorial_inner(ARCHITRAVE, "Matched from<br>one offcut.", "We scan the profile, grind cutters to it<br>and machine your lengths, in MDF or timber.",
+                            x=90, y=400, w=800, size=74, fx=0.3, fy=0.5, size_px=(1080, 1920), sub_size=30, dark=True), soft(420, 540, 760, 400, light=True))
+    return board("9x16", "Priya Made to Match | Static | Room photo | One offcut", "#333", inner)
 
 
 def p2_9():
