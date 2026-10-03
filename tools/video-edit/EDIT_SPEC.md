@@ -26,7 +26,11 @@
 | `title` | `start, end, kicker, title_html, title_at, size?` (70) | one strong phrase |
 | `location` | `start, end, kicker, text, type_at` | a place: types itself out next to a pin |
 | `checklist` | `start, end, kicker, items: [{text, at}]` | a list the speaker counts through; each tick lands on its word |
-| `bar` | `start, end, kicker, title_html, fill_at, fill_dur?, fill_to?` | time, effort, progress |
+| `bar` | `start, end, kicker, title_html, fill_at, fill_dur?, fill_to?` | progress towards something measurable |
+| `clock` | `start, end, kicker, title_html, spin_at, spin_dur?` (2.2), `hours?` (24), `unit?` ("hours"), `size?` (60) | time passing: clock hands fast-forward and a counter runs 0 → hours |
+| `question` | `start, end, kicker, text, from?` ("Patient"), `type_at`, `stagger?` (0.035) | a question someone asks: message bubble that types itself |
+
+Any card can take `"y": <px>` to override `card_top`, e.g. to sit below the head instead of over it. Keep it above `caption_top` minus the card height.
 
 `title_html` may contain one `<em>word</em>`: the brand's flourish style (Vendo: Instrument Serif italic in mint). One flourish per card.
 
@@ -54,9 +58,21 @@ Kinetic = uppercase sans, lines slam in (accent line pops in the accent colour w
 | `reset` | `at, dur?` | back to 1 (hard by default) |
 | `reframe` | `at, until, headline_html, headline_at, frame: {name, cta}` | footage shrinks into a phone-style ad frame with a headline above |
 
+`frame` options: `name` (page name shown), `logo` (path in the job folder, e.g. `inputs/avenue-dental-logo.png`, shown in the avatar), `cta` (button text), `cta_overlay: true` (button floats over the bottom of the video instead of sitting under it).
+
 A reframe should end under a full-screen `screen` (so the reset is hidden); otherwise it eases back over 0.7 s.
 
-## end (blurred footage + closing line + logo)
+## broll (cutaways that cover the speaker; his audio carries on)
+
+```json
+"broll": [ { "src": "broll-2.mp4", "start": 8.8, "end": 10.36 }, { "src": "broll-3.mp4", "start": 10.36, "end": 12.24 } ]
+```
+
+Make each clip first with `prep.py broll <clip> <job> --name broll-2 [--speed 0.5]` (writes `public/broll-2.mp4`, graded like the base, silent). `src` is relative to `public/`. 50 fps sources slow to 0.5x cleanly. Cards and captions still show on top.
+
+## end (closing line + logo)
+
+Default style blurs the footage behind the text. `"style": "fade_black"` fades the footage fully to black instead (`"fade"`: seconds, default 0.9); start it on the speaker's last word.
 
 ```json
 { "at": 44.2,

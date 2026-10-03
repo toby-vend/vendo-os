@@ -26,6 +26,7 @@
     "audit:frameio": "tsx scripts/audit-frameio-folders.ts",
     "frameio:io": "tsx scripts/frameio-io.ts",
     "video:edit": "tsx scripts/video-edit-run.ts",
+    "video:revise": "tsx scripts/video-edit-revise.ts",
     "sync:portal": "tsx scripts/sync/push-clients-to-portal.ts",
     "sync:onboarding": "tsx scripts/sync/pull-onboarding-from-portal.ts",
     "dev": "tsx watch web/start.ts",

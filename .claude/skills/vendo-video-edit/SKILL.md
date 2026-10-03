@@ -47,7 +47,13 @@ You must leave behind: `output.mp4`, `edit.json`, `notes.md` (and `revision.json
 
 ## Revise (mode `apply_comments`)
 
-Comments arrive with `at` in seconds on the delivered cut. For each one, change `edit.json` (or the trim / `prep.py base`) to do what it asks, recompose, re-check, re-render. Write `revision.json`: `[{ "id", "done": true|false, "what": "one line" }]`. If a comment is unclear or impossible, `done: false` with the reason; never guess at taste calls you can't see.
+`brief.json` lists `comments` (`id`, `text`, `at` = seconds on the delivered cut, kept as `output-vNN.mp4`). Material a comment asks for (B-roll clips, logos) is in `inputs/` with a README.
+
+1. Read every comment and the current `edit.json`. Look at the delivered cut at each comment's time (`ffmpeg -ss <at> -i output-vNN.mp4 -frames:v 1`) so you see what they saw.
+2. Change only what the comments ask for; everything else stays exactly as delivered. Use the features in EDIT_SPEC.md: `y` to move a card, `screens` for full-screen text, `clock` and `question` cards, `broll` (make clips with `prep.py broll`), `frame.logo` / `frame.cta_overlay` in a reframe, `end.style: "fade_black"`.
+3. Caption sync complaints: re-check the word timings in that stretch against `silences.json` and, if needed, re-transcribe that window with `--model medium.en`, then correct `words.json`.
+4. Compose, check the contact sheet at every changed moment, render, then update `notes.md`.
+5. Write `revision.json`: `[{ "id", "done": true|false, "what": "one plain sentence" }]` covering every comment id. If a comment needs something the tools can't do or material you don't have, `done: false` and say exactly what's missing. Never guess at taste calls you can't see.
 
 ## Hard rules
 

@@ -8,6 +8,9 @@ Footage prep for a talking-head edit (the "polish" half of the v3 recipe).
       silences.json    pauses from ffmpeg silencedetect, to sanity-check Whisper drift
       frames.jpg       8-frame strip for judging face position / crop
 
+  python3 tools/video-edit/prep.py broll <clip> <job_dir> --name broll-1 [--speed 0.5] [--in A --out B] [--crop-x 0.5]
+      public/broll-1.mp4  cutaway at 1080x1920, same grade as the base, silent, optionally slowed down
+
   python3 tools/video-edit/prep.py base <source> <job_dir> --in 5.8 --out 56.3 [--crop-x 0.5] [--fps 25]
       public/input-video.mp4  trimmed, 9:16 1080x1920, graded, dense keyframes,
                               audio high-passed + light denoise + gentle compression, −14 LUFS / −1.5 dBTP
@@ -123,18 +126,41 @@ def base(src, job, t_in, t_out, crop_x, fps):
     print(json.dumps(summary, indent=2))
 
 
+def broll(src, job, name, speed, crop_x, fps, t_in, t_out):
+    """Cutaway clip -> public/<name>.mp4: 9:16 1080x1920, same grade as the base, silent, optionally slowed (0.5 = half speed)."""
+    info = probe(src)
+    base_json = job / "base.json"
+    fps = fps or (json.loads(base_json.read_text())["fps"] if base_json.exists() else pick_fps(info["fps"]))
+    if info["width"] / info["height"] > 1080 / 1920:
+        geo = f"scale=-2:1920:flags=lanczos,crop=1080:1920:(iw-1080)*{crop_x}:0"
+    else:
+        geo = "scale=1080:-2:flags=lanczos,crop=1080:1920:0:(ih-1920)/2"
+    vf = f"setpts=PTS/{speed},{geo},{GRADE},fps={fps}"
+    out = job / "public" / f"{name}.mp4"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    trim = (["-ss", str(t_in)] if t_in else []) + (["-to", str(t_out)] if t_out < 1e8 else [])
+    run(["ffmpeg", "-y", "-loglevel", "error", *trim, "-i", str(src), "-vf", vf, "-an", "-c:v", "libx264", "-crf", "17",
+         "-preset", "medium", "-g", str(fps), "-keyint_min", str(fps), "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(out)])
+    final = probe(out)
+    print(json.dumps({"broll": f"{name}.mp4", "duration": final["duration"], "speed": speed, "fps": fps}, indent=2))
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["analyse", "base"])
+    ap.add_argument("mode", choices=["analyse", "base", "broll"])
     ap.add_argument("source")
     ap.add_argument("job")
     ap.add_argument("--in", dest="t_in", type=float, default=0.0)
     ap.add_argument("--out", dest="t_out", type=float, default=1e9)
     ap.add_argument("--crop-x", type=float, default=0.5)
     ap.add_argument("--fps", type=int, default=0)
+    ap.add_argument("--name", default="broll-1", help="broll: output name inside public/")
+    ap.add_argument("--speed", type=float, default=1.0, help="broll: playback speed (0.5 = half speed)")
     a = ap.parse_args()
     src, job = Path(a.source).resolve(), Path(a.job).resolve()
     if a.mode == "analyse":
         analyse(src, job)
+    elif a.mode == "broll":
+        broll(src, job, a.name, a.speed, a.crop_x, a.fps, a.t_in, a.t_out)
     else:
         base(src, job, a.t_in, a.t_out, a.crop_x, a.fps)

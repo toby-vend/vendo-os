@@ -117,9 +117,35 @@ def main(job):
             fill_at, fill_dur = card.get("fill_at", card["start"] + 0.5), card.get("fill_dur", 1.8)
             js.append(f'tl.fromTo("#{cid}-bar", {{ scaleX: 0 }}, {{ scaleX: {card.get("fill_to", 1)}, duration: {fill_dur}, ease: "power1.inOut" }}, {q(fill_at)});')
             sfx.append(("fill", fill_at, 1.4, 0.28))
+        elif kind == "clock":
+            # A clock fast-forwarding: minute hand spins once per hour, hour hand 30deg per hour, counter ticks up.
+            hours = card.get("hours", 24)
+            spin_at, spin_dur = card.get("spin_at", card["start"] + 0.5), card.get("spin_dur", 2.2)
+            ticks = "".join(f'<line x1="60" y1="8" x2="60" y2="{18 if k % 3 == 0 else 14}" stroke="{C["muted"]}" stroke-width="{4 if k % 3 == 0 else 2}" '
+                            f'stroke-linecap="round" transform="rotate({k * 30} 60 60)"/>' for k in range(12))
+            face = (f'<svg class="clockface" width="150" height="150" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="{C["raised"]}" stroke="{C["accent"]}" stroke-width="3"/>{ticks}'
+                    f'<line id="{cid}-hr" x1="60" y1="60" x2="60" y2="32" stroke="{C["text"]}" stroke-width="6" stroke-linecap="round"/>'
+                    f'<line id="{cid}-mn" x1="60" y1="60" x2="60" y2="16" stroke="{C["accent"]}" stroke-width="4" stroke-linecap="round"/>'
+                    f'<circle cx="60" cy="60" r="5" fill="{C["accent"]}"/></svg>')
+            body = (f'<div class="clockrow">{face}<div><div class="title" style="font-size:{card.get("size", 60)}px;margin-top:0">{card["title_html"]}</div>'
+                    f'<div class="clockcount"><span id="{cid}-n">0</span> {esc(card.get("unit", "hours"))}</div></div></div>')
+            js.append(f'tl.fromTo("#{cid}-mn", {{ rotation: 0, svgOrigin: "60 60" }}, {{ rotation: {360 * hours}, svgOrigin: "60 60", duration: {spin_dur}, ease: "power2.inOut" }}, {q(spin_at)});')
+            js.append(f'tl.fromTo("#{cid}-hr", {{ rotation: 0, svgOrigin: "60 60" }}, {{ rotation: {30 * hours}, svgOrigin: "60 60", duration: {spin_dur}, ease: "power2.inOut" }}, {q(spin_at)});')
+            js.append(f'(function () {{ const o = {{ v: 0 }}, el = document.querySelector("#{cid}-n"); '
+                      f'tl.fromTo(o, {{ v: 0 }}, {{ v: {hours}, duration: {spin_dur}, ease: "power2.inOut", onUpdate: function () {{ if (el) el.textContent = String(Math.round(o.v)); }} }}, {q(spin_at)}); }})();')
+            sfx.append(("fill", spin_at, 1.4, 0.28))
+        elif kind == "question":
+            # A patient's question as a message bubble that types itself out.
+            chars = "".join(f'<span class="ch">{esc(c) if c != " " else "&nbsp;"}</span>' for c in card["text"])
+            who = esc(card.get("from", "Patient"))
+            body = (f'<div class="msg"><div class="msg-who">{who}</div><div class="bubble" id="{cid}-b"><span id="{cid}-typed">{chars}</span></div></div>')
+            at = card.get("type_at", card["start"] + 0.3)
+            js.append(f'tl.fromTo("#{cid}-b", {{ opacity: 0, scale: 0.9, y: 10 }}, {{ opacity: 1, scale: 1, y: 0, duration: 0.35, ease: E }}, {q(at - 0.15)});')
+            js.append(f'tl.fromTo("#{cid}-typed .ch", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.01, stagger: {card.get("stagger", 0.035)}, ease: "none" }}, {q(at)});')
         else:
             raise SystemExit(f"unknown card type: {kind}")
-        html_parts.append(f'<div class="vcard" id="{cid}">{kicker}{body}</div>')
+        style = f' style="top:{int(card["y"])}px"' if "y" in card else ""
+        html_parts.append(f'<div class="vcard" id="{cid}"{style}>{kicker}{body}</div>')
         js.append(f'card("#{cid}", {q(card["start"])}, {q(card["end"])});')
 
     # ---------------- full-screen text ----------------
@@ -187,18 +213,35 @@ def main(job):
             cam({"scale": 1}, ev["at"], ev.get("dur", 0.04), "none" if ev.get("dur", 0.04) < 0.1 else "power3.inOut")
         elif kind == "reframe":
             cap_off.append((q(ev["at"]) - 0.05, q(ev["until"])))
-            cam({"scale": 0.52, "y": 150, "borderRadius": 70}, ev["at"], 0.8, "power3.inOut")
+            S, DY = 0.52, 150
+            cam({"scale": S, "y": DY, "borderRadius": 70}, ev["at"], 0.8, "power3.inOut")
+            # Where the shrunk footage lands (scale around the focus point, then shifted down by DY).
+            bx, by = FX - FX * S, FY - FY * S + DY
+            bw, bh = W * S, H * S
             fr = ev.get("frame", {})
-            reframe_html = (f'<div id="adframe"><div class="hd"><div class="av"></div><div><div class="nm">{esc(fr.get("name", "Your practice"))}</div>'
-                            f'<div class="sp">Sponsored</div></div></div><div class="ft"><span>{esc(fr.get("cta", "Learn more"))}</span><span>&rsaquo;</span></div></div>'
-                            f'<div id="rf-h">{ev.get("headline_html", "")}</div>')
+            overlay = fr.get("cta_overlay", False)
+            avatar = '<div class="av"></div>'
+            if fr.get("logo"):
+                src = job / fr["logo"]
+                shutil.copy2(src, job / "public/assets" / f"frame-logo{src.suffix}")
+                avatar = f'<div class="av av-logo"><img src="assets/frame-logo{src.suffix}" alt="" /></div>'
+            cta = f'<span>{esc(fr.get("cta", "Learn more"))}</span><span>&rsaquo;</span>'
+            fy0, fh = by - 82, bh + 82 + (24 if overlay else 90)
+            reframe_html = (f'<div id="adframe" style="left:{bx - 12:.0f}px;top:{fy0:.0f}px;width:{bw + 24:.0f}px;height:{fh:.0f}px">'
+                            f'<div class="hd">{avatar}<div><div class="nm">{esc(fr.get("name", "Your practice"))}</div><div class="sp">Sponsored</div></div></div>'
+                            + ("" if overlay else f'<div class="ft">{cta}</div>') + '</div>'
+                            + (f'<div id="rf-cta" class="ft" style="left:{bx + 24:.0f}px;top:{by + bh - 86:.0f}px;width:{bw - 48:.0f}px">{cta}</div>' if overlay else "")
+                            + f'<div id="rf-h">{ev.get("headline_html", "")}</div>')
+            parts = ["#adframe", "#rf-h"] + (["#rf-cta"] if overlay else [])
             js.append(f'tl.fromTo("#adframe", {{ opacity: 0, scale: 0.96 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: E }}, {q(ev["at"] + 0.4)});')
+            if overlay:
+                js.append(f'tl.fromTo("#rf-cta", {{ opacity: 0, y: 24 }}, {{ opacity: 1, y: 0, duration: 0.45, ease: E }}, {q(ev["at"] + 0.9)});')
             js.append(f'tl.fromTo("#rf-h", {{ opacity: 0, y: 30 }}, {{ opacity: 1, y: 0, duration: 0.5, ease: E }}, {q(ev.get("headline_at", ev["at"] + 1.3))});')
             if covered(ev["until"]):
-                js.append(f'tl.set(["#adframe", "#rf-h"], {{ opacity: 0 }}, {q(ev["until"])});')
+                js.append(f'tl.set({json.dumps(parts)}, {{ opacity: 0 }}, {q(ev["until"])});')
                 cam({"scale": 1, "y": 0, "borderRadius": 0}, ev["until"], 0.04, "none")
             else:
-                js.append(f'tl.to(["#adframe", "#rf-h"], {{ opacity: 0, duration: 0.3 }}, {q(ev["until"])});')
+                js.append(f'tl.to({json.dumps(parts)}, {{ opacity: 0, duration: 0.3 }}, {q(ev["until"])});')
                 cam({"scale": 1, "y": 0, "borderRadius": 0}, ev["until"], 0.7, "power3.inOut")
         else:
             raise SystemExit(f"unknown camera event: {kind}")
@@ -210,8 +253,13 @@ def main(job):
         cap_off.append((q(e["at"]), DUR))
         frm = dict(state)
         frm["filter"] = "blur(0px) brightness(1)"
-        to = dict(state, scale=round(state["scale"] + 0.05, 3), filter="blur(18px) brightness(0.38)")
-        js.append(f'vw({json.dumps(frm)}, {json.dumps(to)}, {q(e["at"])}, 0.9, "power3.inOut");')
+        if e.get("style") == "fade_black":
+            # Footage fades fully to black as the speaker finishes; the closing line and logo sit on black.
+            to = dict(state, filter="blur(0px) brightness(0)")
+            js.append(f'vw({json.dumps(frm)}, {json.dumps(to)}, {q(e["at"])}, {e.get("fade", 0.9)}, "power2.inOut");')
+        else:
+            to = dict(state, scale=round(state["scale"] + 0.05, 3), filter="blur(18px) brightness(0.38)")
+            js.append(f'vw({json.dumps(frm)}, {json.dumps(to)}, {q(e["at"])}, 0.9, "power3.inOut");')
         lines = []
         for k, line in enumerate(e["lines"]):
             cls = "ser it" if line.get("accent") else "ser"
@@ -225,6 +273,17 @@ def main(job):
             js.append(f'tl.fromTo("#end-logo", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.55, ease: E }}, {q(e["logo_at"])});')
             sfx.append(("chime", e["logo_at"], 0.95, 0.35))
         end_html = f'<div id="endtx">{"".join(lines)}</div>'
+
+    # ---------------- B-roll cutaways (cover the speaker; his audio carries on) ----------------
+    # Each clip is pre-rendered by `prep.py broll` into public/ at 1080x1920, graded, silent.
+    broll_html = []
+    for n, b in enumerate(spec.get("broll", []), 1):
+        bid = f"br{n}"
+        start, end = q(b["start"]), q(b["end"])
+        broll_html.append(f'<div class="broll" id="{bid}"><video id="{bid}-v" src="{esc(b["src"])}" muted playsinline '
+                          f'data-start="{start}" data-duration="{round(end - start, 4)}" data-track-index="{2 + (n % 2)}"></video></div>')
+        js.append(f'tl.fromTo("#{bid}", {{ opacity: 0 }}, {{ opacity: 1, duration: {b.get("fade", 0.12)}, ease: "none" }}, {start});')
+        js.append(f'tl.fromTo("#{bid}", {{ opacity: 1 }}, {{ opacity: 0, duration: {b.get("fade", 0.12)}, ease: "none", immediateRender: false }}, {round(end - b.get("fade", 0.12), 4)});')
 
     # ---------------- captions ----------------
     cap_html, cap_js = [], []
@@ -277,6 +336,21 @@ def main(job):
   #adframe .sp {{ font-size: 18px; font-weight: 600; color: {C["muted"]}; }}
   #adframe .ft {{ position: absolute; left: 26px; right: 26px; bottom: 22px; display: flex; justify-content: space-between; align-items: center;
     font-size: 24px; font-weight: 800; color: {C["on_accent"]}; background: {C["accent"]}; border-radius: 12px; padding: 12px 20px; }}
+  #adframe .av-logo {{ background: #FFFFFF; border: 2px solid {C["accent"]}; display: flex; align-items: center; justify-content: center; overflow: hidden; }}
+  #adframe .av-logo img {{ width: 80%; height: 80%; object-fit: contain; }}
+  #rf-cta {{ position: absolute; z-index: 3; opacity: 0; display: flex; justify-content: space-between; align-items: center;
+    font-size: 26px; font-weight: 800; color: {C["on_accent"]}; background: {C["accent"]}; border-radius: 14px; padding: 16px 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35); }}
+  .broll {{ position: absolute; inset: 0; z-index: 1; opacity: 0; overflow: hidden; }}
+  .broll video {{ width: 100%; height: 100%; object-fit: cover; display: block; }}
+  .clockrow {{ display: flex; align-items: center; gap: 30px; margin-top: 18px; }}
+  .clockface {{ flex: none; }}
+  .clockcount {{ margin-top: 12px; font-size: 34px; font-weight: 800; color: {C["accent"]}; font-variant-numeric: tabular-nums; }}
+  .msg {{ margin-top: 18px; }}
+  .msg-who {{ font-size: 20px; font-weight: 700; color: {C["muted"]}; margin: 0 0 10px 6px; }}
+  .bubble {{ display: inline-block; max-width: 100%; padding: 22px 30px; border-radius: 30px 30px 30px 8px; background: {C["accent"]};
+    color: {C["on_accent"]}; font-size: 46px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; }}
+  .bubble .ch {{ display: inline-block; }}
   #rf-h {{ position: absolute; left: 90px; right: 90px; top: 250px; text-align: center; z-index: 3; opacity: 0;
     font-size: 78px; font-weight: {B["weight"]}; letter-spacing: -0.03em; color: {C["text"]}; }}
   .vcard {{ position: absolute; left: 140px; width: 800px; top: {CARD_TOP}px; padding: 28px 38px 30px; z-index: 3; opacity: 0;
@@ -317,6 +391,7 @@ def main(job):
   <div class="grain" style="opacity:0.14"></div>
   {reframe_html}
   <div id="vw"><video id="base" src="input-video.mp4" playsinline data-has-audio="true" data-start="0" data-duration="{DUR}" data-track-index="1"></video></div>
+  {''.join(broll_html)}
   {''.join(html_parts)}
   <div id="caps">{''.join(cap_html)}</div>
   {end_html}
