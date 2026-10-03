@@ -14,7 +14,7 @@ Research: "the guys in my timber yard are really helpful and friendly and can wo
 Concept name: **Lee Whole House | Floor plan**
 Talent: Graphic (plan + order card)
 
-**On image:** Send us the floor plan. / We'll work out the lengths of skirting, architrave and rails, so you can price the job. / Send a floor plan
+**On image:** Send us the floor plan. / We'll work out every length of skirting, architrave and rail, so you can price the job.
 
 **Headline:** We do the take-off.
 
@@ -41,7 +41,7 @@ Research: creative plan: "Splitting an order across two suppliers to get everyth
 Concept name: **Lee Whole House | One order**
 Talent: Room photo
 
-**On image:** One order. Every moulding in the house. / Skirting, architrave, window boards, door linings, dado, picture rail, plinth blocks. / Direct from the workshop that makes it. / Shop the range
+**On image:** One order. Every moulding in the house. / Product hotspots: Victorian MDF Dado Rail from £17.70 · Astragal MDF Panel Mould from £9.00 · Big Bolection MDF Skirting Board from £12.68
 
 **Headline:** Direct from the manufacturer.
 
@@ -70,7 +70,7 @@ Research: "the trouble is finding softwood skirtings that aren't corkscrewed or 
 Concept name: **Lee Whole House | Straight lengths**
 Talent: Product close-up
 
-**On image:** "Every length was cupped." / MDF stays straight: no knots, no grain, no twist once it's in a heated house. / Lengths up to 4.2m, so fewer joins on long runs. / Shop MDF skirting
+**On image:** Straight lengths. Fewer joins. / MDF that won't cup or twist, in lengths up to 4.2m.
 
 **Headline:** Straight lengths, fewer joins.
 
@@ -99,7 +99,7 @@ Research: "I need 220mm skirts to match the originals and this cuts down the opt
 Concept name: **Lee Made to Match | Can't buy it**
 Talent: Room photo
 
-**On image:** The client wants the old skirting kept. Half of it's missing. / We match it from an offcut or a photo, in MDF or timber, by the metre you need. / Send us a photo
+**On image:** Half of it's missing. / We match the original from an offcut or a photo, so you don't redo the house.
 
 **Headline:** Match it. Don't redo the house.
 
@@ -128,14 +128,14 @@ Research: FAQ: "A large part of our work is with builders, joiners and architect
 Concept name: **Lee Trade | Trade account**
 Talent: Workshop / product
 
-**On image:** Built for the trade. / Over 150 profiles from our own workshop, made-to-match for renovation work, and a team that knows the product. / Ask about a trade account
+**On image:** Built for the trade. / 150+ profiles from our own workshop. Ask about a trade account.
 
 **Headline:** A moulding supplier for builders.
 
 **Primary text:**
 Most moulding websites are built for one-off homeowners. Small orders, stock profiles, and nobody to call when the job needs something different.
 
-We were built the other way round. A large part of our work is with builders, joiners and architects, and has been since 2003.
+We work the other way round. We've machined mouldings in Epsom since 2003, and a large part of our work is with builders, joiners and architects.
 
 That means over 150 profiles machined in our own Epsom workshop. Matching architrave, window boards, door linings and rails. Made-to-match for the renovation where the old profile has to stay. And a team on 01372 740777 who know what a 22mm board does at an architrave.
 
@@ -153,4 +153,5 @@ Find a supplier once, and stop shopping around for every job.
 - **Lead time:** ads use the site's 5–7 working days. Adam said on 25 Sep that stock orders now ship in 2–3 days; update the copy if the site is changed.
 - **Primer:** several genuine reviews say primed boards arrive rough. None of these ads claim a ready-to-paint finish. Worth raising with Adam, because Lee is the persona who'll notice.
 - **Delivery cost** is the top genuine complaint. No ad mentions it. A trade delivery rate or free-delivery threshold would turn it into a selling point.
+- **Hotspot prices (L2):** lowest variant price from the live catalogue on 3 Oct 2026. Recheck before launch.
 - **Proof:** facts only by decision.

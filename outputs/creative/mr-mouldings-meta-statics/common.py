@@ -174,18 +174,19 @@ TEXT_SHADOW = "text-shadow:0 2px 26px rgba(0,0,0,.38), 0 1px 3px rgba(0,0,0,.25)
 
 
 def editorial_inner(img, line, sub, x, y, w, size, fx=0.5, fy=0.5, sub_w=None, sub_gap=26, size_px=(1080, 1080),
-                    sub_size=28, lines=None):
+                    sub_size=28, lines=None, dark=False):
     """Full-bleed room photo, one white Bitter line in the wall space, smaller Bitter subline, small white logo.
     `lines` = rendered line count of `line` (for placing the subline)."""
     W, H = size_px
     n = lines or (line.count("<br>") + 1)
+    col, shadow, lg = (C["slate"], "", "colour") if dark else ("#fff", TEXT_SHADOW, "white")
     sub_top = y + int(size * 1.08 * n) + sub_gap
     return (f'{photo(0, 0, W, H, img, fx=fx, fy=fy)}'
-            f'<div class="abs" style="left:56px;top:{52 if H == 1080 else 250}px">{logo("white", 104)}</div>'
-            f'<div class="abs serif" style="left:{x}px;top:{y}px;width:{w}px;color:#fff;font-size:{size}px;font-weight:500;'
-            f'line-height:1.08;letter-spacing:-.01em;{TEXT_SHADOW}">{line}</div>'
-            f'<div class="abs serif" style="left:{x}px;top:{sub_top}px;width:{sub_w or w}px;color:#fff;font-size:{sub_size}px;'
-            f'font-weight:400;line-height:1.3;{TEXT_SHADOW}">{sub}</div>')
+            f'<div class="abs" style="left:56px;top:{52 if H == 1080 else 250}px">{logo(lg, 104)}</div>'
+            f'<div class="abs serif" style="left:{x}px;top:{y}px;width:{w}px;color:{col};font-size:{size}px;font-weight:500;'
+            f'line-height:1.08;letter-spacing:-.01em;{shadow}">{line}</div>'
+            f'<div class="abs serif" style="left:{x}px;top:{sub_top}px;width:{sub_w or w}px;color:{col};font-size:{sub_size}px;'
+            f'font-weight:400;line-height:1.3;{shadow}">{sub}</div>')
 
 
 def hotspot(x, y, card_x, card_y, thumb, title, price):
