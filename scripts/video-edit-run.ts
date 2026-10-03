@@ -2,7 +2,7 @@
  * Run one AI video edit end to end (Phase 2 of plans/2026-10-03-frameio-ai-video-edits.md).
  *
  *   npm run video:edit -- --source <frame.io asset url|id> --dest <frame.io folder url|id> \
- *       --name "Organic | Vox Pops Episode" [--brand vendo] [--notes "…"] [--upload]
+ *       --name "Organic | Vox Pops Episode" [--brand vendo] [--notes "…"] [--job <existing job dir>] [--upload]
  *
  * 1. downloads the original from Frame.io into ~/video-edits/<job>/source.<ext>
  * 2. writes brief.json and runs a headless Claude Code session with the vendo-video-edit skill
@@ -16,7 +16,7 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 import { spawn, execFileSync } from 'child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { extname, join, resolve } from 'path';
 
@@ -34,7 +34,12 @@ function runClaude(prompt: string, cwd: string, jobDir: string, logFile: string)
       '--permission-mode', 'acceptEdits',
       '--output-format', 'text',
     ];
-    const child = spawn('claude', args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
+    // .env.local carries an ANTHROPIC_API_KEY for the web app; it would override the machine's Claude Code
+    // login (and the Vendo-OS key is known to 401), so the edit session runs on the local login instead.
+    const env = { ...process.env };
+    delete env.ANTHROPIC_API_KEY;
+    delete env.ANTHROPIC_AUTH_TOKEN;
+    const child = spawn('claude', args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
     let log = '';
     child.stdout.on('data', (d) => { log += d; process.stdout.write(d); });
     child.stderr.on('data', (d) => { log += d; process.stderr.write(d); });
@@ -60,16 +65,20 @@ async function main() {
   const repo = resolve('.');
   const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
-  const job = join(homedir(), 'video-edits', `${slug}-${stamp}`);
+  const job = arg('--job') ? resolve(arg('--job')!) : join(homedir(), 'video-edits', `${slug}-${stamp}`);
   mkdirSync(job, { recursive: true });
   console.log(`[video-edit] job ${job}`);
 
-  // 1. download the original
+  // 1. download the original (skipped when --job points at a folder that already has it)
   const asset = await io.getAsset(io.idFrom(source));
   const fileId = io.playableFileId(asset);
   const srcPath = join(job, `source${extname(asset.head_version?.name ?? asset.name) || '.mp4'}`);
-  const dl = await io.downloadOriginal(fileId, srcPath);
-  console.log(`[video-edit] downloaded "${dl.name}" (${(dl.bytes / 1e6).toFixed(0)} MB)`);
+  if (existsSync(srcPath) && asset.file_size && statSync(srcPath).size === (asset.head_version?.file_size ?? asset.file_size)) {
+    console.log('[video-edit] original already downloaded');
+  } else {
+    const dl = await io.downloadOriginal(fileId, srcPath);
+    console.log(`[video-edit] downloaded "${dl.name}" (${(dl.bytes / 1e6).toFixed(0)} MB)`);
+  }
 
   // 2. brief + headless edit
   const brief = { mode: 'first_cut', source: srcPath, brand, concept: name, ratio: '9x16', notes, frameio: { asset: asset.id, file: fileId, dest: io.idFrom(dest) } };
@@ -85,6 +94,11 @@ async function main() {
   const out = join(job, 'output.mp4');
   const notesPath = join(job, 'notes.md');
   if (!existsSync(out) || !existsSync(notesPath)) throw new Error(`Edit did not produce output.mp4 and notes.md in ${job}`);
+  // SFX are mixed on top of the levelled voice, which can nudge the peak past -1.5 dBTP; a final limiter
+  // pass (video stream copied, untouched) keeps every delivery inside the platform loudness spec.
+  const limited = join(job, 'output.limited.mp4');
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', out, '-c:v', 'copy', '-af', 'alimiter=limit=0.84:level=false', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', limited]);
+  renameSync(limited, out);
   const seconds = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', out]).toString().trim());
   if (!(seconds > 3)) throw new Error(`output.mp4 looks wrong (${seconds}s)`);
   const length = Math.max(5, Math.round(seconds / 5) * 5);
