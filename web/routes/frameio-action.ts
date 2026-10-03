@@ -4,11 +4,11 @@ import { db } from '../lib/queries/base.js';
 import { ACCOUNT_ID } from '../lib/frameio/media-io.js';
 import { resolveUser } from '../lib/frameio/users.js';
 import {
-  ACTION_EVENTS, firstCutForm, message, parseActionPayload, validateFirstCut,
+  ACTION_EVENTS, firstCutForm, isTeamMember, macOptions, message, parseActionPayload, validateFirstCut,
   type ActionMessage, type ActionPayload,
 } from '../lib/video-jobs/actions.js';
 import {
-  findJobByDelivered, latestDoneInChain, openJobInChain, queueJob, workerLastSeen,
+  findJobByDelivered, latestDoneInChain, listWorkers, openJobInChain, queueJob, workerLastSeen,
 } from '../lib/video-jobs/store.js';
 import { verifyFrameioSignature } from './frameio-webhook.js';
 
@@ -33,14 +33,14 @@ function tokenOk(presented: string, expected: string): boolean {
 async function requester(p: ActionPayload) {
   if (!p.userId) return null;
   const user = await resolveUser({ accountId: p.accountId ?? ACCOUNT_ID, userId: p.userId });
-  return user?.email && !user.isExternal ? user : null;
+  return user?.email && isTeamMember(user.role, user.email) ? user : null;
 }
 
 /** A line about whether the Mac that will run the job is switched on. */
-async function macStatus(email: string, whose: string): Promise<string> {
+async function macStatus(email: string, mac: string): Promise<string> {
   const seen = await workerLastSeen(email);
-  if (!seen) return ` ${whose} Mac doesn't have the AI edit app set up yet (see the AI Edits SOP); the job starts as soon as it is.`;
-  if (Date.now() - new Date(seen).getTime() > WORKER_STALE_MS) return ` ${whose} Mac is offline at the moment; the job starts when it's back on.`;
+  if (!seen) return ` ${mac} doesn't have the AI edit app set up yet (see the AI Edits SOP); the job starts as soon as it is.`;
+  if (Date.now() - new Date(seen).getTime() > WORKER_STALE_MS) return ` ${mac} is offline at the moment; the job starts when it's back on.`;
   return '';
 }
 
@@ -48,22 +48,26 @@ async function firstCut(p: ActionPayload): Promise<unknown> {
   if (p.resourceType && !['file', 'version_stack'].includes(p.resourceType)) {
     return message('AI First Cut', 'Right-click the raw video clip (in Raw Footage), not a folder.');
   }
-  if (!p.data) return firstCutForm();
-  const check = validateFirstCut(p.data);
-  if (!check.ok) return firstCutForm(p.data, check.problem);
-
   const user = await requester(p);
   if (!user) return message('AI First Cut', 'Only Vendo team members can start AI edits.');
+  // Logins can be shared (the team uses creative@ in Frame.io), so the person picks which Mac runs it.
+  const macs = macOptions(await listWorkers(), user.email);
+  if (!p.data) return firstCutForm({}, undefined, macs);
+  const check = validateFirstCut(p.data);
+  if (!check.ok) return firstCutForm(p.data, check.problem, macs);
+
+  const workerEmail = macs.find((m) => m.value === p.data!.worker)?.value ?? macs[0]?.value ?? user.email!.toLowerCase();
   const job = await queueJob({
     kind: 'first_cut', interactionId: p.interactionId,
     requestedBy: { userId: user.userId, email: user.email, name: user.name },
-    workerEmail: user.email!, sourceFileId: p.resourceId!, projectId: p.projectId, params: check.params,
+    workerEmail, sourceFileId: p.resourceId!, projectId: p.projectId, params: check.params,
   });
+  const mac = workerEmail === user.email!.toLowerCase() ? 'Your Mac' : macs.find((m) => m.value === workerEmail)?.name ?? `${workerEmail}'s Mac`;
   const where = check.params.section === 'Organic' ? 'Organic' : 'Social Ads › Treatments';
   return message(
     'AI First Cut queued',
     `The AI will cut it, name it from what's said and file v01 Internal under ${where} in this shoot, ` +
-      `usually 15 to 25 minutes after your Mac picks it up (job ${job.id}).${await macStatus(user.email!, 'Your')}`,
+      `usually 15 to 25 minutes after the Mac picks it up (job ${job.id}).${await macStatus(workerEmail, mac)}`,
   );
 }
 
@@ -85,11 +89,11 @@ async function revision(p: ActionPayload): Promise<ActionMessage> {
     workerEmail: latest.worker_email, sourceFileId: latest.result_file_id!, projectId: p.projectId,
     params: {}, jobDir: latest.job_dir,
   });
-  const whose = latest.worker_email === user.email?.toLowerCase() ? 'Your' : `${latest.worker_email}'s`;
+  const mac = latest.worker_email === user.email?.toLowerCase() ? 'Your Mac' : `${latest.worker_email}'s Mac`;
   return message(
     'AI Revision queued',
     `The AI will apply the open comments on the latest version and stack the next one on top (job ${job.id}). ` +
-      `It runs on the Mac that made the first cut.${await macStatus(latest.worker_email, whose)}`,
+      `It runs on the Mac that made the first cut.${await macStatus(latest.worker_email, mac)}`,
   );
 }
 
