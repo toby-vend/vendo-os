@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { destinationPath, firstCutForm, parseActionPayload, pipelineName, validateFirstCut } from './actions.js';
+import { destinationPath, firstCutForm, nameFromTitle, parseActionPayload, pipelineName, validateFirstCut } from './actions.js';
 
 describe('parseActionPayload', () => {
   it('reads the nested shape', () => {
@@ -25,56 +25,46 @@ describe('parseActionPayload', () => {
 });
 
 describe('validateFirstCut', () => {
-  const good = { section: 'Social Ads', treatment: 'Invisalign', concept: 'Busy Professionals | Fast Results | Free Consultation', brand: 'vendo', notes: '' };
-
-  it('accepts a correct Social Ad', () => {
-    const r = validateFirstCut(good);
+  it('only needs a type and brand; the AI names the video later', () => {
+    const r = validateFirstCut({ section: 'Social Ads', brand: 'vendo', notes: 'keep it short' });
     assert.ok(r.ok);
-    if (r.ok) {
-      assert.equal(pipelineName(r.params), good.concept);
-      assert.deepEqual(destinationPath(r.params), ['Social Ads', 'Treatments', 'Invisalign', good.concept]);
-    }
+    if (r.ok) assert.deepEqual(r.params, { section: 'Social Ads', treatment: null, concept: null, brand: 'vendo', notes: 'keep it short' });
   });
-
-  it('needs a treatment for Social Ads', () => {
-    const r = validateFirstCut({ ...good, treatment: '' });
-    assert.equal(r.ok, false);
+  it('rejects a missing type or unknown brand', () => {
+    assert.equal(validateFirstCut({ brand: 'vendo' }).ok, false);
+    assert.equal(validateFirstCut({ section: 'Organic', brand: 'nope' }).ok, false);
   });
+});
 
-  it('rejects a concept that is not Persona | Angle | Offer', () => {
-    const r = validateFirstCut({ ...good, concept: 'Busy Professionals | Fast Results' });
-    assert.equal(r.ok, false);
-    if (!r.ok) assert.match(r.problem, /three parts/);
+describe('nameFromTitle', () => {
+  it('accepts a correct Social Ad name and builds its folder path', () => {
+    const n = nameFromTitle('Social Ads', { treatment: 'Invisalign', concept: 'Busy Professionals | Fast Results | Free Consultation' });
+    assert.deepEqual(n.problems, []);
+    assert.equal(pipelineName('Social Ads', n.concept), n.concept);
+    assert.deepEqual(destinationPath('Social Ads', n.treatment, n.concept), ['Social Ads', 'Treatments', 'Invisalign', n.concept]);
   });
-
-  it('rejects names that already carry ratio, version or status', () => {
-    const r = validateFirstCut({ ...good, concept: `${good.concept} | 9x16` });
-    assert.equal(r.ok, false);
-    if (!r.ok) assert.match(r.problem, /added for you/);
+  it('tidies pipes and flags a name that breaks the SOP instead of failing the edit', () => {
+    const n = nameFromTitle('Social Ads', { treatment: '', concept: 'Busy Professionals|Fast Results' });
+    assert.equal(n.treatment, 'General');
+    assert.equal(n.concept, 'Busy Professionals | Fast Results');
+    assert.ok(n.problems.some((p) => /treatment/.test(p)));
+    assert.ok(n.problems.some((p) => /three parts/.test(p)));
   });
-
-  it('rejects an unknown brand', () => {
-    assert.equal(validateFirstCut({ ...good, brand: 'nope' }).ok, false);
+  it('uses the title for Organic and files it under Organic', () => {
+    const n = nameFromTitle('Organic', { title: 'Vox Pops Episode' });
+    assert.equal(pipelineName('Organic', n.concept), 'Organic | Vox Pops Episode');
+    assert.deepEqual(destinationPath('Organic', n.treatment, n.concept), ['Organic', 'Vox Pops Episode']);
   });
-
-  it('accepts an Organic title and routes it to Organic', () => {
-    const r = validateFirstCut({ section: 'Organic', treatment: '', concept: 'Vox Pops Episode', brand: 'vendo', notes: 'hi' });
-    assert.ok(r.ok);
-    if (r.ok) {
-      assert.equal(pipelineName(r.params), 'Organic | Vox Pops Episode');
-      assert.deepEqual(destinationPath(r.params), ['Organic', 'Vox Pops Episode']);
-    }
-  });
-
-  it('rejects an Organic title with pipes', () => {
-    assert.equal(validateFirstCut({ section: 'Organic', concept: 'A | B', brand: 'vendo' }).ok, false);
+  it('never returns an empty name', () => {
+    assert.equal(nameFromTitle('Organic', {}).concept, 'Untitled');
   });
 });
 
 describe('firstCutForm', () => {
-  it('keeps the answers and shows the problem when re-shown', () => {
-    const f = firstCutForm({ concept: 'Abc' }, 'add the treatment.');
-    assert.match(f.description, /add the treatment/);
-    assert.equal(f.fields.find((x) => x.name === 'concept')?.value, 'Abc');
+  it('asks only for type, brand and notes, and shows the problem when re-shown', () => {
+    const f = firstCutForm({ section: 'Organic' }, 'choose a brand from the list.');
+    assert.match(f.description, /choose a brand/);
+    assert.deepEqual(f.fields.map((x) => x.name), ['section', 'brand', 'notes']);
+    assert.equal(f.fields[0].value, 'Organic');
   });
 });

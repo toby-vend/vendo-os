@@ -16,8 +16,9 @@ export type JobStatus = 'queued' | 'running' | 'done' | 'failed';
 
 export interface FirstCutParams {
   section: 'Social Ads' | 'Organic';
+  /** Set by the AI after the first pass (title.json), not by the person starting the job. */
   treatment: string | null;
-  concept: string;
+  concept: string | null;
   brand: string;
   notes: string;
 }
