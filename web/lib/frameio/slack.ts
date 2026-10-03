@@ -116,3 +116,15 @@ export async function postCommentAlert(input: CommentAlertInput): Promise<{ post
     return { posted: false, reason: (err as Error).message };
   }
 }
+
+/** A plain message to the same Slack channel (used by the AI edit gates). */
+export async function postSlackText(text: string): Promise<{ posted: boolean; reason?: string }> {
+  const webhook = process.env[WEBHOOK_ENV];
+  if (!webhook) return { posted: false, reason: `${WEBHOOK_ENV} not configured` };
+  try {
+    const res = await fetch(webhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+    return res.ok ? { posted: true } : { posted: false, reason: `slack_${res.status}` };
+  } catch (err) {
+    return { posted: false, reason: (err as Error).message };
+  }
+}

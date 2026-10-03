@@ -3,6 +3,7 @@ import { getComment, getFile, FrameioApiError } from './client.js';
 import { resolveProject } from './projects.js';
 import { resolveUser } from './users.js';
 import { postCommentAlert } from './slack.js';
+import { handleShareEvent, handleStatusEvent } from '../video-jobs/gates.js';
 
 /**
  * Frame.io event processor.
@@ -16,6 +17,8 @@ import { postCommentAlert } from './slack.js';
  *   file.upload.completed        → ensure review row exists
  *   comment.created              → append to creative_reviews.feedback
  *   comment.completed            → mark feedback as resolved
+ *   metadata.value.updated       → AI edit gates (Status on AI-made videos), see video-jobs/gates.ts
+ *   share.created                → alert if an AI video is shared before both gates
  *   <anything else>              → mark processed with no side-effect
  *
  * Each row is treated atomically: side-effects + status update happen in
@@ -162,6 +165,13 @@ interface OneOutcome {
 async function processOne(row: PendingEventRow): Promise<OneOutcome> {
   if (!row.account_id || !row.project_id) {
     return { status: 'skipped', kind: 'no_account_or_project' };
+  }
+
+  // AI edit gates (Status changes, share links) apply to AI-made videos in any project, mapped to a client or not.
+  if (row.event_type === 'metadata.value.updated' || row.event_type === 'share.created') {
+    const payload = JSON.parse(row.payload);
+    const gate = row.event_type === 'share.created' ? await handleShareEvent(payload) : await handleStatusEvent(payload);
+    if (gate) return { status: 'processed', kind: gate };
   }
 
   const project = await resolveProject({ accountId: row.account_id, projectId: row.project_id });

@@ -60,6 +60,17 @@ interface Delivery { fileId: string; stackId?: string; view_url?: string; name: 
 const readDelivery = (dir: string): Delivery | null =>
   existsSync(join(dir, 'delivery.json')) ? (JSON.parse(readFileSync(join(dir, 'delivery.json'), 'utf8')) as Delivery) : null;
 
+/** Every new AI version starts at In Progress: the editor works on it before Gate 1. Never fails the job. */
+async function markInProgress(fileId: string): Promise<void> {
+  try {
+    const io = await import('../web/lib/frameio/media-io.js');
+    const { setFileStatus, STATUS } = await import('../web/lib/video-jobs/gates.js');
+    await setFileStatus((await io.getAsset(fileId)).project_id, fileId, STATUS.inProgress);
+  } catch (err) {
+    log(`could not set Status to In Progress: ${(err as Error).message}`);
+  }
+}
+
 async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): Promise<void> {
   const store = await import('../web/lib/video-jobs/store.js');
   const io = await import('../web/lib/frameio/media-io.js');
@@ -84,6 +95,7 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
       const d = readDelivery(dir);
       if (!d) throw new Error('the edit finished but nothing was delivered');
       await store.finishJob(job.id, { jobDir: dir, fileId: d.fileId, stackId: d.stackId ?? null, viewUrl: d.view_url ?? null, message: `Delivered "${d.name}"` });
+      await markInProgress(d.fileId);
       log(`job ${job.id}: delivered ${d.name}`);
     } catch (err) {
       const reason = (err as Error).message;
@@ -109,6 +121,7 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
       return;
     }
     await store.finishJob(job.id, { jobDir: dir, fileId: after.fileId, stackId: after.stackId ?? null, viewUrl: after.view_url ?? null, message: `Delivered "${after.name}"` });
+    await markInProgress(after.fileId);
     log(`job ${job.id}: delivered ${after.name}`);
   } catch (err) {
     const reason = (err as Error).message;
