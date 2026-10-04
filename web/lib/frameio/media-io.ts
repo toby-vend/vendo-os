@@ -117,15 +117,24 @@ export async function uploadLocalFile(localPath: string, folderId: string, name:
       const buf = Buffer.alloc(part.size);
       const read = readSync(fd, buf, 0, part.size, offset);
       offset += read;
+      // A dropped connection either throws ("fetch failed") or hangs, so each part gets a timeout and is
+      // retried on network errors as well as HTTP errors (editors' laptops drop Wi-Fi mid-upload).
       for (let attempt = 1; ; attempt += 1) {
-        const res = await fetch(part.url, {
-          method: 'PUT',
-          headers: { 'Content-Type': contentType, 'x-amz-acl': 'private' },
-          body: buf.subarray(0, read),
-        });
-        if (res.ok) break;
-        if (attempt >= 3) throw new Error(`Upload part ${i + 1}/${created.upload_urls.length} failed: HTTP ${res.status}`);
-        await new Promise((r) => setTimeout(r, 3000 * attempt));
+        let problem: string;
+        try {
+          const res = await fetch(part.url, {
+            method: 'PUT',
+            headers: { 'Content-Type': contentType, 'x-amz-acl': 'private' },
+            body: buf.subarray(0, read),
+            signal: AbortSignal.timeout(300_000),
+          });
+          if (res.ok) break;
+          problem = `HTTP ${res.status}`;
+        } catch (err) {
+          problem = (err as Error).message;
+        }
+        if (attempt >= 6) throw new Error(`Upload part ${i + 1}/${created.upload_urls.length} failed: ${problem}`);
+        await new Promise((r) => setTimeout(r, 5000 * attempt));
       }
     }
     if (offset !== fileSize) throw new Error(`Uploaded ${offset} of ${fileSize} bytes`);

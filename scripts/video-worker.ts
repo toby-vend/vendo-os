@@ -183,7 +183,24 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
     const before = readDelivery(dir)!;
     await notify(`AI Revision started: "${videoName(before.name)}" ${tag(before.version)} to ${tag(before.version + 1)}. Usually ready in 5 to 15 minutes. Job ${job.id}, ${macName()}.`);
     await beat('Applying comments');
-    await runScript('scripts/video-edit-revise.ts', ['--job', dir, '--upload'], join(dir, 'worker.log'), () => beat(), job.id);
+    try {
+      await runScript('scripts/video-edit-revise.ts', ['--job', dir, '--upload'], join(dir, 'worker.log'), () => beat(), job.id);
+    } catch (err) {
+      // The edit is the slow part; if it finished and only the upload failed (Wi-Fi dropped), deliver what was
+      // made instead of redoing it.
+      const made = join(dir, `summary-${tag(before.version + 1)}.md`);
+      if (!existsSync(made) || readDelivery(dir)!.version !== before.version) throw err;
+      for (let attempt = 1; ; attempt += 1) {
+        try {
+          log(`job ${job.id}: upload failed (${(err as Error).message}); delivering the finished edit, attempt ${attempt}`);
+          await new Promise((r) => setTimeout(r, 30_000 * attempt));
+          await runScript('scripts/video-edit-revise.ts', ['--job', dir, '--deliver-only'], join(dir, 'worker.log'), () => beat(), job.id);
+          break;
+        } catch (again) {
+          if (attempt >= 3) throw again;
+        }
+      }
+    }
     const after = readDelivery(dir)!;
     if (after.version === before.version) {
       await io.createComment(before.fileId, 'AI Revision: there were no open comments to apply, so nothing changed.').catch(() => {});
