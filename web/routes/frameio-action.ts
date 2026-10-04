@@ -174,7 +174,8 @@ export const frameioActionRoutes: FastifyPluginAsync = async (app) => {
     if (!tokenOk(presented, expected)) { await logCall(req, 'rejected: bad or missing token'); return reply.code(403).send({ error: 'Invalid token' }); }
 
     // Each action has its own signing secret; accept a request signed by any of ours.
-    const secrets = (process.env.FRAMEIO_ACTION_SECRETS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+    // FRAMEIO_ACTION_SECRETS_2 holds secrets for actions added later (env vars are added, never edited).
+    const secrets = [process.env.FRAMEIO_ACTION_SECRETS, process.env.FRAMEIO_ACTION_SECRETS_2].join(',').split(',').map((s) => s.trim()).filter(Boolean);
     if (secrets.length) {
       const rawBody = (request as { rawBody?: string }).rawBody ?? '';
       const headers = request.headers as Record<string, string | undefined>;
