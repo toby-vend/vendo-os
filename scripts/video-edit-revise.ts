@@ -50,7 +50,9 @@ async function main() {
 
   // 1. open review comments on the delivered version (skip the AI's own notes comments)
   const comments = (await io.listComments(delivery.fileId))
-    .filter((c) => !c.completed_at && !/^AI (first cut|revision)/.test(c.text.trim()))
+    // Skip Vendo OS's own comments: AI notes and summaries, hand-built summaries ("v04 (Internal). ..."),
+    // job errors and the status-gate messages. Only people's change requests are applied.
+    .filter((c) => !c.completed_at && !/^(AI (first cut|revision|First Cut|Revision)|v\d{2,} \(Internal\)|Gate \d|Gate skipped|Internally Approved, but|Client approved\.)/i.test(c.text.trim()))
     .map((c) => ({ id: c.id, text: c.text.trim(), at: typeof c.timestamp === 'number' ? Math.round((c.timestamp / base.fps) * 100) / 100 : null }));
   if (!comments.length) {
     console.log(`[video-revise] no open comments on ${tag(v)}; nothing to do`);
@@ -79,7 +81,9 @@ async function main() {
     `Read brief.json first: comments[].at is seconds on the delivered cut (${tag(v)}, kept as output-${tag(v)}.mp4).`,
     brief.inputs ? 'Material the comments ask for (clips, logos) is in inputs/; read inputs/README.md.' : '',
     sessionRules(repo),
-    `Finish with a new output.mp4, the updated edit.json and notes.md, and revision.json covering every comment id.`,
+    brief.custom_build
+      ? `This is a hand-built project (brief.custom_build = ${brief.custom_build}): follow "Hand-built projects" in the Revise section. Finish with a new output.mp4, the updated build script and notes.md, and revision.json covering every comment id.`
+      : `Finish with a new output.mp4, the updated edit.json and notes.md, and revision.json covering every comment id.`,
   ].join(' ');
   await runGuarded(prompt, repo, job, `claude-${tag(v + 1)}.log`);
 

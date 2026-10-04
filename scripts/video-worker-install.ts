@@ -16,8 +16,14 @@ const LABEL = 'uk.co.vendodigital.video-worker';
 const plistPath = join(homedir(), 'Library', 'LaunchAgents', `${LABEL}.plist`);
 const domain = `gui/${userInfo().uid}`;
 
+function loaded(): boolean {
+  try { execFileSync('launchctl', ['print', `${domain}/${LABEL}`], { stdio: 'ignore' }); return true; } catch { return false; }
+}
+
+/** Remove the running agent and wait for macOS to finish (bootout returns before the service is gone). */
 function unload() {
   try { execFileSync('launchctl', ['bootout', `${domain}/${LABEL}`], { stdio: 'ignore' }); } catch { /* not loaded */ }
+  for (let i = 0; i < 20 && loaded(); i += 1) execFileSync('sleep', ['0.5']);
 }
 
 function main() {
@@ -40,7 +46,10 @@ function main() {
   mkdirSync(join(homedir(), 'Library', 'LaunchAgents'), { recursive: true });
   writeFileSync(join(homedir(), '.vendo-video-worker.json'), JSON.stringify({ email }, null, 2));
 
-  // A login shell so Homebrew's node/ffmpeg and the claude CLI are on PATH, as in Terminal.
+  // A login item doesn't load the Terminal's shell config, so the claude CLI (~/.local/bin) and Homebrew tools
+  // wouldn't be found: give the agent the PATH this install was run with, plus the usual install locations.
+  const path = [...new Set([...(process.env.PATH ?? '').split(':'), join(homedir(), '.local', 'bin'), '/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', '/bin', '/usr/sbin', '/sbin'])]
+    .filter(Boolean).join(':');
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const plist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -52,6 +61,8 @@ function main() {
     <string>/bin/zsh</string><string>-lc</string>
     <string>cd ${esc(JSON.stringify(repo))} &amp;&amp; exec npm run --silent video:worker</string>
   </array>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>${esc(path)}</string></dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>ThrottleInterval</key><integer>60</integer>
@@ -62,7 +73,12 @@ function main() {
 `;
   writeFileSync(plistPath, plist);
   unload();
-  execFileSync('launchctl', ['bootstrap', domain, plistPath]);
+  for (let attempt = 1; ; attempt += 1) {
+    try { execFileSync('launchctl', ['bootstrap', domain, plistPath], { stdio: 'pipe' }); break; } catch (err) {
+      if (attempt >= 5) throw err;
+      execFileSync('sleep', ['1']);
+    }
+  }
   console.log(`AI edit worker installed for ${email}. It starts at login; log: ${join(logs, 'worker.log')}`);
 }
 
