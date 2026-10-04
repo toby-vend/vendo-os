@@ -12,6 +12,7 @@ import type { FirstCutParams } from './store.js';
 export const ACTION_EVENTS = {
   first_cut: 'vendo.ai.first_cut',
   revision: 'vendo.ai.revision',
+  export: 'vendo.ai.export',
 } as const;
 
 /** Brand packs available in tools/video-edit/brands/. Add a client here when their pack is set up. */

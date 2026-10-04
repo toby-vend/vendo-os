@@ -36,6 +36,7 @@ async function main() {
   const wanted = [
     { name: 'AI First Cut', event: ACTION_EVENTS.first_cut, description: 'Make an AI first cut of this raw clip (v01 Internal)' },
     { name: 'AI Revision', event: ACTION_EVENTS.revision, description: 'Apply the open comments on this AI video as the next version' },
+    { name: 'Export for Editing', event: ACTION_EVENTS.export, description: 'Layers for Premiere Pro or CapCut: picture, graphics, captions and a timeline' },
   ];
   const secretsFile = join(homedir(), '.vendo', 'frameio-action-secrets.json');
   mkdirSync(join(homedir(), '.vendo'), { recursive: true });

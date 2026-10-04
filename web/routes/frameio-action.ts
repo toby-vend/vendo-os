@@ -115,6 +115,32 @@ async function revision(p: ActionPayload): Promise<ActionMessage> {
   );
 }
 
+/** Export for Editing: layers of the latest AI version for Premiere Pro / CapCut, uploaded as an Edit Pack folder. */
+async function exportForEditing(p: ActionPayload): Promise<ActionMessage> {
+  if (!p.resourceId) return message('Export for Editing', 'Right-click the AI-made video you want to tweak by hand.');
+  const delivered = await findJobByDelivered(p.resourceId);
+  if (!delivered?.chain_id) {
+    return message('Export for Editing', "This video wasn't made by the AI, so there are no layers to export. Edit the file itself instead.");
+  }
+  const open = await openJobInChain(delivered.chain_id);
+  if (open) return message('Export for Editing', `The AI is still working on this video (job ${open.id}). Export once that version lands.`);
+  const user = await requester(p);
+  if (!user) return message('Export for Editing', 'Only Vendo team members can export edits.');
+  const latest = (await latestDoneInChain(delivered.chain_id)) ?? delivered;
+  const job = await queueJob({
+    kind: 'export', chainId: delivered.chain_id, interactionId: p.interactionId,
+    requestedBy: { userId: user.userId, email: user.email, name: user.name },
+    workerEmail: latest.worker_email, sourceFileId: latest.result_file_id!, projectId: p.projectId,
+    params: {}, jobDir: latest.job_dir,
+  });
+  const mac = latest.worker_email === user.email?.toLowerCase() ? 'Your Mac' : `${latest.worker_email}'s Mac`;
+  return message(
+    'Export for Editing queued',
+    `An "Edit Pack" folder for the latest version will appear next to the video in about 5 minutes (job ${job.id}): ` +
+      `picture, graphics, captions and a Premiere timeline. Read its README for Premiere and CapCut.${await macStatus(latest.worker_email, mac)}`,
+  );
+}
+
 /**
  * Keep every call in frameio_events (status 'action_log', never processed) so we can see what Frame.io
  * sent and how we answered, including calls rejected before any work. Never blocks the reply on failure.
@@ -162,6 +188,7 @@ export const frameioActionRoutes: FastifyPluginAsync = async (app) => {
     try {
       if (p.event === ACTION_EVENTS.first_cut) answer = await firstCut(p);
       else if (p.event === ACTION_EVENTS.revision) answer = await revision(p);
+      else if (p.event === ACTION_EVENTS.export) answer = await exportForEditing(p);
       else answer = message('Vendo', `Unknown action "${p.event}".`);
     } catch (err) {
       request.log.error({ err }, 'Frame.io action failed');
