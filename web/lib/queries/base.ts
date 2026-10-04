@@ -5,9 +5,31 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Use Turso in production, local SQLite file in dev
-const client: Client = createClient({
+const raw: Client = createClient({
   url: process.env.TURSO_DATABASE_URL || `file:${resolve(__dirname, '../../../data/vendo.db')}`,
   authToken: process.env.TURSO_AUTH_TOKEN,
+});
+
+// A connection left idle (e.g. during a 20-minute upload on an editor's laptop) or a Wi-Fi blip can fail the next
+// request before it is sent (EPIPE, DNS lookup). Those are retried once; errors after a request may have reached
+// the database are not, so a write is never applied twice.
+const BEFORE_SEND = /EPIPE|ENOTFOUND|EAI_AGAIN|ECONNREFUSED/;
+const client: Client = new Proxy(raw, {
+  get(target, prop, receiver) {
+    if (prop === 'execute') {
+      return async (...args: Parameters<Client['execute']>) => {
+        try {
+          return await target.execute(...args);
+        } catch (err) {
+          if (!BEFORE_SEND.test(String((err as Error)?.message ?? err))) throw err;
+          await new Promise((r) => setTimeout(r, 1000));
+          return target.execute(...args);
+        }
+      };
+    }
+    const value = Reflect.get(target, prop, receiver);
+    return typeof value === 'function' ? value.bind(target) : value;
+  },
 });
 
 export { client as db };
