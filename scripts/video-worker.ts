@@ -91,6 +91,20 @@ async function markInProgress(fileId: string): Promise<void> {
   }
 }
 
+/** Slack, same channel as the Frame.io alerts. Never fails the job. */
+async function notify(text: string): Promise<void> {
+  try {
+    const { postSlackText } = await import('../web/lib/frameio/slack.js');
+    await postSlackText(text);
+  } catch (err) {
+    log(`Slack message not sent: ${(err as Error).message}`);
+  }
+}
+/** "Organic | Vox Pops Episode (AI) | 9x16 | 50s | v05 | Internal.mp4" -> "Organic | Vox Pops Episode (AI)" */
+const videoName = (fileName: string) => fileName.replace(/\.mp4$/i, '').replace(/\s*\|\s*(9x16|4x5|1x1|16x9)\b.*$/, '');
+const tag = (n: number) => `v${String(n).padStart(2, '0')}`;
+const macName = () => { const who = workerEmail().split('@')[0]; return `${who.charAt(0).toUpperCase()}${who.slice(1)}'s Mac`; };
+
 async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): Promise<void> {
   const store = await import('../web/lib/video-jobs/store.js');
   const io = await import('../web/lib/frameio/media-io.js');
@@ -105,6 +119,7 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
     try {
       await beat('Finding the shoot folder');
       const source = await io.getAsset(job.source_file_id);
+      await notify(`AI First Cut started: "${source.name}" (${params.section === 'Organic' ? 'Organic' : 'Social Ad'}), v01. Usually ready in 15 to 25 minutes. Job ${job.id}, ${macName()}.`);
       const shoot = pickShootFolder(await io.ancestorFolders(source));
       if (!shoot) throw new Error('the clip is not inside a shoot folder (expected <shoot> / Raw Footage / …)');
       await beat('Editing');
@@ -116,11 +131,13 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
       if (!d) throw new Error('the edit finished but nothing was delivered');
       await store.finishJob(job.id, { jobDir: dir, fileId: d.fileId, stackId: d.stackId ?? null, viewUrl: d.view_url ?? null, message: `Delivered "${d.name}"` });
       await markInProgress(d.fileId);
+      await notify(`AI First Cut ready: "${videoName(d.name)}" ${tag(d.version)}. ${d.view_url ?? ''}`.trim());
       log(`job ${job.id}: delivered ${d.name}`);
     } catch (err) {
       const reason = (err as Error).message;
       await store.failJob(job.id, reason, dir);
       await io.createComment(job.source_file_id, `AI First Cut (job ${job.id}) didn't finish: ${reason}. Try again, or send the job number to the Lead Video Editor.`).catch(() => {});
+      await notify(`AI First Cut failed (job ${job.id}): ${reason}`);
       log(`job ${job.id}: failed: ${reason}`);
     }
     return;
@@ -133,6 +150,7 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
       const d = readDelivery(dir)!;
       const version = `v${String(d.version).padStart(2, '0')}`;
       const out = join(dir, `export-${version}`);
+      await notify(`Export for Editing started: "${videoName(d.name)}" ${version}. Usually ready in about 5 minutes. Job ${job.id}, ${macName()}.`);
       await beat('Rendering layers');
       await runPython(['tools/video-edit/export_layers.py', dir, '--out', out], join(dir, 'worker.log'), () => beat());
       await beat('Uploading');
@@ -145,11 +163,13 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
       for (const f of readdirSync(join(out, 'extras'))) await io.uploadLocalFile(join(out, 'extras', f), extrasId, f);
       await io.createComment(d.fileId, `Edit Pack ${version} is ready in the "Edit Pack ${version}" folder next to this video: picture, graphics (transparent), captions and a Premiere timeline. The README says how to open it in Premiere Pro or CapCut. After hand edits the AI can't revise this video any more.`).catch(() => {});
       await store.finishJob(job.id, { jobDir: dir, fileId: d.fileId, stackId: null, viewUrl: null, message: `Exported Edit Pack ${version}` });
+      await notify(`Edit Pack ready: "${videoName(d.name)}" ${version}, in the "Edit Pack ${version}" folder next to the video. ${d.view_url ?? ''}`.trim());
       log(`job ${job.id}: exported Edit Pack ${version}`);
     } catch (err) {
       const reason = (err as Error).message;
       await store.failJob(job.id, reason, dir);
       await io.createComment(job.source_file_id, `Export for Editing (job ${job.id}) didn't finish: ${reason}.`).catch(() => {});
+      await notify(`Export for Editing failed (job ${job.id}): ${reason}`);
       log(`job ${job.id}: failed: ${reason}`);
     }
     return;
@@ -160,22 +180,26 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
   try {
     if (!dir || !existsSync(join(dir, 'delivery.json'))) throw new Error("this Mac doesn't have the job folder for that video (it was made on another Mac, or deleted)");
     const before = readDelivery(dir)!;
+    await notify(`AI Revision started: "${videoName(before.name)}" ${tag(before.version)} to ${tag(before.version + 1)}. Usually ready in 5 to 15 minutes. Job ${job.id}, ${macName()}.`);
     await beat('Applying comments');
     await runScript('scripts/video-edit-revise.ts', ['--job', dir, '--upload'], join(dir, 'worker.log'), () => beat(), job.id);
     const after = readDelivery(dir)!;
     if (after.version === before.version) {
       await io.createComment(before.fileId, 'AI Revision: there were no open comments to apply, so nothing changed.').catch(() => {});
       await store.finishJob(job.id, { jobDir: dir, fileId: before.fileId, stackId: before.stackId ?? null, viewUrl: before.view_url ?? null, message: 'No open comments' });
+      await notify(`AI Revision: "${videoName(before.name)}" ${tag(before.version)} had no open comments, so nothing changed.`);
       log(`job ${job.id}: no open comments`);
       return;
     }
     await store.finishJob(job.id, { jobDir: dir, fileId: after.fileId, stackId: after.stackId ?? null, viewUrl: after.view_url ?? null, message: `Delivered "${after.name}"` });
     await markInProgress(after.fileId);
+    await notify(`AI Revision ready: "${videoName(after.name)}" ${tag(after.version)}. ${after.view_url ?? ''}`.trim());
     log(`job ${job.id}: delivered ${after.name}`);
   } catch (err) {
     const reason = (err as Error).message;
     await store.failJob(job.id, reason, dir);
     await io.createComment(job.source_file_id, `AI Revision (job ${job.id}) didn't finish: ${reason}. Your comments are still open.`).catch(() => {});
+    await notify(`AI Revision failed (job ${job.id}): ${reason}. The comments are still open.`);
     log(`job ${job.id}: failed: ${reason}`);
   }
 }
