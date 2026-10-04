@@ -20,7 +20,7 @@
  *  PATCH /accounts/{a}/comments/{id}                       { completed }
  * There is no public endpoint for threaded replies, so revision notes are posted as one summary comment.
  */
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { openSync, readSync, closeSync, statSync } from 'fs';
 import { getResource, listAll, sendJson, type FrameioComment } from './client.js';
 
@@ -117,22 +117,14 @@ export async function uploadLocalFile(localPath: string, folderId: string, name:
       const buf = Buffer.alloc(part.size);
       const read = readSync(fd, buf, 0, part.size, offset);
       offset += read;
-      // A dropped connection either throws ("fetch failed") or hangs, so each part gets a timeout and is
-      // retried on network errors as well as HTTP errors (editors' laptops drop Wi-Fi mid-upload).
+      // Parts go up with curl, like downloads: Node's fetch can stall on these PUTs, and a dropped connection
+      // either throws or hangs. An attempt is abandoned only when it stalls (under 2 KB/s for a minute), so a slow
+      // but working connection still finishes; network errors are retried (editors' laptops drop Wi-Fi).
       for (let attempt = 1; ; attempt += 1) {
-        let problem: string;
-        try {
-          const res = await fetch(part.url, {
-            method: 'PUT',
-            headers: { 'Content-Type': contentType, 'x-amz-acl': 'private' },
-            body: buf.subarray(0, read),
-            signal: AbortSignal.timeout(300_000),
-          });
-          if (res.ok) break;
-          problem = `HTTP ${res.status}`;
-        } catch (err) {
-          problem = (err as Error).message;
-        }
+        const res = spawnSync('curl', ['-sS', '-f', '-X', 'PUT', '--speed-limit', '2000', '--speed-time', '60', '-H', `Content-Type: ${contentType}`,
+          '-H', 'x-amz-acl: private', '--data-binary', '@-', part.url], { input: buf.subarray(0, read), maxBuffer: 1 << 20 });
+        if (res.status === 0) break;
+        const problem = (res.stderr?.toString() || `curl exit ${res.status}`).trim().slice(0, 200);
         if (attempt >= 6) throw new Error(`Upload part ${i + 1}/${created.upload_urls.length} failed: ${problem}`);
         await new Promise((r) => setTimeout(r, 5000 * attempt));
       }
