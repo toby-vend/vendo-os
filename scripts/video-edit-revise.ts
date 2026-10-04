@@ -50,7 +50,9 @@ async function main() {
 
   // 1. open review comments on the delivered version (skip the AI's own notes comments)
   const comments = (await io.listComments(delivery.fileId))
-    .filter((c) => !c.completed_at && !/^AI (first cut|revision)/.test(c.text.trim()))
+    // Skip Vendo OS's own comments: AI notes and summaries, hand-built summaries ("v04 (Internal). ..."),
+    // job errors and the status-gate messages. Only people's change requests are applied.
+    .filter((c) => !c.completed_at && !/^(AI (first cut|revision|First Cut|Revision)|v\d{2,} \(Internal\)|Gate \d|Gate skipped|Internally Approved, but|Client approved\.)/i.test(c.text.trim()))
     .map((c) => ({ id: c.id, text: c.text.trim(), at: typeof c.timestamp === 'number' ? Math.round((c.timestamp / base.fps) * 100) / 100 : null }));
   if (!comments.length) {
     console.log(`[video-revise] no open comments on ${tag(v)}; nothing to do`);
