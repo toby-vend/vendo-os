@@ -222,6 +222,35 @@ export async function touchWorker(email: string, host: string): Promise<void> {
   });
 }
 
+/**
+ * Slack messages from the Macs (edit started / ready / failed). Queued here and posted by the Frame.io
+ * processor cron on Vercel, so they use the same Slack connection and channel as the gate messages,
+ * whatever each editor's .env.local holds.
+ */
+export async function queueSlack(text: string): Promise<void> {
+  await ensureVideoJobsSchema();
+  await db.execute(`CREATE TABLE IF NOT EXISTS video_slack_outbox (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL, created_at TEXT NOT NULL, sent_at TEXT, error TEXT)`);
+  await db.execute({ sql: 'INSERT INTO video_slack_outbox (text, created_at) VALUES (?, ?)', args: [text.slice(0, 3000), now()] });
+}
+
+/** Post queued Slack messages, oldest first. Returns how many were sent. */
+export async function drainSlackOutbox(post: (text: string) => Promise<{ posted: boolean; reason?: string }>): Promise<number> {
+  await ensureVideoJobsSchema();
+  await db.execute(`CREATE TABLE IF NOT EXISTS video_slack_outbox (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL, created_at TEXT NOT NULL, sent_at TEXT, error TEXT)`);
+  const rows = await db.execute('SELECT id, text FROM video_slack_outbox WHERE sent_at IS NULL ORDER BY id LIMIT 20');
+  let sent = 0;
+  for (const r of rows.rows) {
+    const res = await post(String(r.text));
+    if (res.posted) {
+      await db.execute({ sql: 'UPDATE video_slack_outbox SET sent_at = ? WHERE id = ?', args: [now(), Number(r.id)] });
+      sent += 1;
+    } else {
+      await db.execute({ sql: 'UPDATE video_slack_outbox SET error = ? WHERE id = ?', args: [res.reason ?? 'not posted', Number(r.id)] });
+    }
+  }
+  return sent;
+}
+
 /** Editors whose Mac has checked in within the last 60 days (has the AI edit app installed). */
 export async function listWorkers(): Promise<string[]> {
   await ensureVideoJobsSchema();

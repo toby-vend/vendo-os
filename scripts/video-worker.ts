@@ -91,13 +91,14 @@ async function markInProgress(fileId: string): Promise<void> {
   }
 }
 
-/** Slack, same channel as the Frame.io alerts. Never fails the job. */
+/** Slack: queued in Vendo OS and posted by Vercel within a minute, to the same channel as the gate messages. Never fails the job. */
 async function notify(text: string): Promise<void> {
   try {
-    const { postSlackText } = await import('../web/lib/frameio/slack.js');
-    await postSlackText(text);
+    const { queueSlack } = await import('../web/lib/video-jobs/store.js');
+    await queueSlack(text);
+    log(`slack: ${text.slice(0, 120)}`);
   } catch (err) {
-    log(`Slack message not sent: ${(err as Error).message}`);
+    log(`Slack message not queued: ${(err as Error).message}`);
   }
 }
 /** "Organic | Vox Pops Episode (AI) | 9x16 | 50s | v05 | Internal.mp4" -> "Organic | Vox Pops Episode (AI)" */

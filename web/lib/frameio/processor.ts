@@ -2,7 +2,8 @@ import { db } from '../queries/base.js';
 import { getComment, getFile, FrameioApiError } from './client.js';
 import { resolveProject } from './projects.js';
 import { resolveUser } from './users.js';
-import { postCommentAlert } from './slack.js';
+import { postCommentAlert, postSlackText } from './slack.js';
+import { drainSlackOutbox } from '../video-jobs/store.js';
 import { handleShareEvent, handleStatusEvent } from '../video-jobs/gates.js';
 
 /**
@@ -100,6 +101,9 @@ export interface ProcessRunResult {
 export async function processFrameioEvents(): Promise<ProcessRunResult> {
   const start = Date.now();
   await ensureCreativeReviewSchema();
+
+  // AI edit Slack messages queued by the editors' Macs (started / ready / failed).
+  try { await drainSlackOutbox(postSlackText); } catch (err) { console.error('[frameio] slack outbox:', (err as Error).message); }
 
   // Pick a batch. We don't hold a transaction across the API calls, so we
   // first claim the rows by flipping their status to 'processing'.
