@@ -11,7 +11,7 @@ import { db } from '../queries/base.js';
  * the same Mac (the job folder with the source footage and edit plan lives there).
  */
 
-export type JobKind = 'first_cut' | 'revision';
+export type JobKind = 'first_cut' | 'revision' | 'export';
 export type JobStatus = 'queued' | 'running' | 'done' | 'failed';
 
 export interface FirstCutParams {
@@ -133,16 +133,16 @@ export async function getJob(id: number): Promise<VideoJob | null> {
 export async function findJobByDelivered(fileOrStackId: string): Promise<VideoJob | null> {
   await ensureVideoJobsSchema();
   const res = await db.execute({
-    sql: `SELECT * FROM video_jobs WHERE status = 'done' AND (result_file_id = ? OR result_stack_id = ?) ORDER BY id DESC LIMIT 1`,
+    sql: `SELECT * FROM video_jobs WHERE status = 'done' AND kind != 'export' AND (result_file_id = ? OR result_stack_id = ?) ORDER BY id DESC LIMIT 1`,
     args: [fileOrStackId, fileOrStackId],
   });
   return (res.rows[0] as unknown as VideoJob) ?? null;
 }
 
-/** Latest delivered job in a chain (where the next revision starts from). */
+/** Latest delivered version in a chain (where the next revision or export starts from). Exports deliver no version. */
 export async function latestDoneInChain(chainId: number): Promise<VideoJob | null> {
   const res = await db.execute({
-    sql: `SELECT * FROM video_jobs WHERE chain_id = ? AND status = 'done' ORDER BY id DESC LIMIT 1`,
+    sql: `SELECT * FROM video_jobs WHERE chain_id = ? AND status = 'done' AND kind != 'export' ORDER BY id DESC LIMIT 1`,
     args: [chainId],
   });
   return (res.rows[0] as unknown as VideoJob) ?? null;

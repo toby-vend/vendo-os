@@ -56,6 +56,26 @@ function runScript(script: string, args: string[], logFile: string, onBeat: () =
   });
 }
 
+/** Run one of the Python tools (export_layers.py) the same way: logged, heartbeating, Mac kept awake. */
+function runPython(args: string[], logFile: string, onBeat: () => Promise<void>): Promise<void> {
+  return new Promise((resolvePromise, reject) => {
+    const out = createWriteStream(logFile, { flags: 'a' });
+    const child = spawn('caffeinate', ['-i', 'python3', ...args], { cwd: repo, env: { ...process.env, PRODUCER_BROWSER_GPU_MODE: 'hardware' }, stdio: ['ignore', 'pipe', 'pipe'] });
+    let tail = '';
+    const keep = (d: Buffer) => { out.write(d); tail = (tail + d.toString()).slice(-2000); };
+    child.stdout.on('data', keep);
+    child.stderr.on('data', keep);
+    const beat = setInterval(() => { onBeat().catch(() => {}); }, HEARTBEAT_MS);
+    child.on('error', (err) => { clearInterval(beat); out.end(); reject(err); });
+    child.on('close', (code) => {
+      clearInterval(beat);
+      out.end();
+      if (code === 0) resolvePromise();
+      else reject(new Error(tail.trim().split('\n').pop() || `exited with ${code}`));
+    });
+  });
+}
+
 interface Delivery { fileId: string; stackId?: string; view_url?: string; name: string; version: number }
 const readDelivery = (dir: string): Delivery | null =>
   existsSync(join(dir, 'delivery.json')) ? (JSON.parse(readFileSync(join(dir, 'delivery.json'), 'utf8')) as Delivery) : null;
@@ -101,6 +121,35 @@ async function runJob(job: import('../web/lib/video-jobs/store.js').VideoJob): P
       const reason = (err as Error).message;
       await store.failJob(job.id, reason, dir);
       await io.createComment(job.source_file_id, `AI First Cut (job ${job.id}) didn't finish: ${reason}. Try again, or send the job number to the Lead Video Editor.`).catch(() => {});
+      log(`job ${job.id}: failed: ${reason}`);
+    }
+    return;
+  }
+
+  if (job.kind === 'export') {
+    const dir = job.job_dir;
+    try {
+      if (!dir || !existsSync(join(dir, 'delivery.json'))) throw new Error("this Mac doesn't have the job folder for that video");
+      const d = readDelivery(dir)!;
+      const version = `v${String(d.version).padStart(2, '0')}`;
+      const out = join(dir, `export-${version}`);
+      await beat('Rendering layers');
+      await runPython(['tools/video-edit/export_layers.py', dir, '--out', out], join(dir, 'worker.log'), () => beat());
+      await beat('Uploading');
+      const folderId = (d as Delivery & { folderId?: string }).folderId;
+      if (!folderId) throw new Error('delivery.json has no folder to upload next to');
+      const packId = await io.ensureFolderPath(folderId, [`Edit Pack ${version}`]);
+      const extrasId = await io.ensureFolderPath(packId, ['extras']);
+      const { readdirSync } = await import('fs');
+      for (const f of readdirSync(out)) if (f !== 'extras') await io.uploadLocalFile(join(out, f), packId, f);
+      for (const f of readdirSync(join(out, 'extras'))) await io.uploadLocalFile(join(out, 'extras', f), extrasId, f);
+      await io.createComment(d.fileId, `Edit Pack ${version} is ready in the "Edit Pack ${version}" folder next to this video: picture, graphics (transparent), captions and a Premiere timeline. The README says how to open it in Premiere Pro or CapCut. After hand edits the AI can't revise this video any more.`).catch(() => {});
+      await store.finishJob(job.id, { jobDir: dir, fileId: d.fileId, stackId: null, viewUrl: null, message: `Exported Edit Pack ${version}` });
+      log(`job ${job.id}: exported Edit Pack ${version}`);
+    } catch (err) {
+      const reason = (err as Error).message;
+      await store.failJob(job.id, reason, dir);
+      await io.createComment(job.source_file_id, `Export for Editing (job ${job.id}) didn't finish: ${reason}.`).catch(() => {});
       log(`job ${job.id}: failed: ${reason}`);
     }
     return;
