@@ -61,6 +61,15 @@ You must leave behind: `output.mp4`, `edit.json`, `notes.md` (and `revision.json
 4. Compose, check the contact sheet at every changed moment, render, then update `notes.md`.
 5. Write `revision.json`: `[{ "id", "done": true|false, "what": "one plain sentence" }]` covering every comment id. If a comment needs something the tools can't do or material you don't have, `done: false` and say exactly what's missing. Never guess at taste calls you can't see.
 
+### Hand-built projects (`brief.custom_build`)
+
+Some videos were built by hand as a HyperFrames project with their own build script instead of `edit.json` + `compose.py` (`brief.custom_build`, e.g. `build.py`, which writes `public/index.html`). For these:
+
+1. Copy the build script to `<name>-vNN.py` first (the version being revised), so a person can roll back.
+2. Read the build script: its comments describe each version's changes, and its constants (B-roll list, caption windows, card timings) are what you change. `public/broll/` holds the B-roll clips already prepared; `work/transcript.json` has the word timings.
+3. Apply the comments in the build script only, add a comment line describing this version, run `python3 <build script>`, then lint and snapshot as usual (`--describe false`).
+4. Render with the command in `brief.render` to `output.mp4` in the job folder, then write `notes.md` and `revision.json` as above.
+
 ## Hard rules
 
 - On-screen text uses the speaker's own words or the locked concept string. Never invent offers, prices, statistics, claims or client results.
