@@ -70,7 +70,7 @@ How Vendo runs Meta creative as a system: how Andromeda distributes ads, how to 
 
 This talk's reasoning: if a *proven* buyer persona isn't buying, the problem is the message (angle) or the offer, not the persona; changing persona just points bad ads at different people. Offers in ecommerce hit a wall quickly (after a few bundle and value-add variations, only deep discounting is left, which eats margin and trains discount reliance).
 
-**Vendo working rule (adaptation, not from either talk):** dental and plant hire stay **offer first** (services; the practice's consultation offer, finance terms and open-day incentives move easily). Ecommerce accounts with known buyers go **angle first**; use persona first only when building out a new account or product with no buyer history.
+**Vendo standard: test angle first in every vertical (dental, ecommerce, plant hire), then hook, format, body and CTA, as set out in the Vendo Copywriter SOP.** The source's offer-first and persona-first orders are the presenter's views, not Vendo practice.
 
 ## 4. Hooks: grading, types and the bridge
 
@@ -198,7 +198,7 @@ This talk's reasoning: if a *proven* buyer persona isn't buying, the problem is 
 | Attribution | 7-day click or incremental | **7-day click only**; incremental as a comparison column |
 | Dental lead event | — | View Content (health-data rules), compared within one objective |
 | Winning ad set | Don't add ads or switch ads off | Same; new shoot = new ad set |
-| Testing order | Angle → offer → persona → format | Dental/plant hire offer first; ecommerce angle first once buyers are known |
+| Testing order | Angle → offer → persona → format | Angle first in every vertical, then hook, format, body, CTA (Copywriter SOP) |
 | Hooks | 15 hooks + 2 bodies beats the reverse; grade on 5 criteria | Same; 3–6 hooks per body on every shoot |
 | Product reveal | As late as possible; protect the bridge | Same |
 | Before/afters | "Sneak them past the algorithm" | Only where Meta policy and ASA/CAP + GDC allow; real patients, consent |

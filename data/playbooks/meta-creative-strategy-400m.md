@@ -8,11 +8,11 @@ How Vendo builds, tests and resources Meta creative, adapted from a Blue Sense D
 
 ## How to apply this at Vendo
 
-- **Dental lead gen (our core vertical, roughly half of revenue).** Private UK dental practices are services, so the video's "test the offer first" rule applies: consultation offers, finance, open days, price-led packages for high-ticket treatments (Invisalign, implants, composite bonding). Persona and angle give breadth once an offer works. These are long-consideration purchases, so cold ads need room to educate.
+- **Dental lead gen (our core vertical, roughly half of revenue).** Test angle first (Vendo standard, see section 4). Consultation offers, finance, open days and price-led packages for high-ticket treatments (Invisalign, implants, composite bonding) are the offer levers to work within each angle. These are long-consideration purchases, so cold ads need room to educate.
 - **Vendo standard: lead events.** Meta's health-data rules block sending lead events back for private healthcare, so View Content (VC) is the optimisation event and lead proxy on dental website campaigns. This is a compliance constraint, not a learning-phase tactic. Instant-form leads are cheaper than VC leads, so **never compare cost per lead across objectives**. Compare within the same objective only.
 - **Vendo standard: attribution.** The video recommends 7-day click + 1-day engaged view. **Vendo builds every campaign on 7-day click only** (no engaged-view, no view-through). Read the video's ROAS/CPA advice through that setting.
-- **Ecommerce (the Shopify brands, e.g. Veltuff, Sword Stall, MR Mouldings).** The full framework applies with the ecommerce testing order (persona → offer → angle → format) and a separate existing-customer campaign. **Vendo standard:** judge results on Shopify revenue, not pixel-attributed ROAS, where the two disagree. Veltuff reports in DKK; never mix its figures with GBP accounts.
-- **Plant hire (lead gen, B2B-leaning).** Treat as services: offer first (availability, delivery radius, operator included, account terms), then persona (site manager, small builder, homeowner doing a one-off job). Audiences are small and local, so expect the video's small-market frequency ceiling sooner and run fewer live concepts.
+- **Ecommerce (the Shopify brands, e.g. Veltuff, Sword Stall, MR Mouldings).** The full framework applies, with angle-first testing (Vendo standard, see section 4) and a separate existing-customer campaign. **Vendo standard:** judge results on Shopify revenue, not pixel-attributed ROAS, where the two disagree. Veltuff reports in DKK; never mix its figures with GBP accounts.
+- **Plant hire (lead gen, B2B-leaning).** Test angle first (Vendo standard, see section 4). Offer levers: availability, delivery radius, operator included, account terms. Personas: site manager, small builder, homeowner doing a one-off job. Audiences are small and local, so expect the video's small-market frequency ceiling sooner and run fewer live concepts.
 - **Media spend is client pass-through.** Clients pay Meta directly, so any "move a share of media budget into production" advice is the client's money and the client's decision.
 - **When results stall, look at the start of the process, not the end.** Idea → concept → format → editing. High frequency is a concept problem; the editor is not the fix.
 
@@ -50,7 +50,11 @@ How Vendo builds, tests and resources Meta creative, adapted from a Blue Sense D
 - **Vendo adaptation (dental):** personas come from the treatment problem, not the demographic. "Denture wearer whose plate slips when eating out" and "adult who hides their smile in photos" are different personas for different offers (implants vs aligners). Transformation content (before-and-afters, patient stories) must follow GDC and ASA/CAP rules.
 - **Vendo adaptation (copy):** this matches Vendo's existing PAS (problem–agitate–solve) rule for statics: amplify the persona's pain deeply before the solution.
 
-## 4. Test the offer first outside ecommerce
+## 4. Testing order
+
+**Vendo standard: test angle first in every vertical (dental, ecommerce, plant hire), then hook, format, body and CTA, as set out in the Vendo Copywriter SOP.** The source's offer-first and persona-first orders are the presenter's views, not Vendo practice.
+
+What the source says:
 
 [9:42](https://youtu.be/aFRMC2gNbLM?t=582)
 
@@ -170,7 +174,7 @@ Metrics in order of reliability:
 | Check | Video says | Vendo standard |
 | --- | --- | --- |
 | Concept | Persona × angle × offer; change one, reach new people | Same |
-| Testing order | Ecom: persona first. Services: offer first | Dental = services (offer first); Shopify brands = ecom |
+| Testing order | Ecom: persona first. Services: offer first | Angle first in every vertical, then hook, format, body, CTA (Copywriter SOP) |
 | Ad set structure | One concept per ad set, 10+ ads | Same; fewer live concepts on small budgets |
 | Hooks | 3–5 per body; no persona callouts | Same; location + pain callouts are fine for dental |
 | First metric | Amount spent | Same |

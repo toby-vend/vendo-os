@@ -7,7 +7,7 @@ How Vendo plans Klaviyo email and SMS for Black Friday / Cyber Monday (BFCM) and
 ## How to apply this at Vendo
 
 - **Ecommerce clients where Vendo runs Klaviyo.** Full framework applies. Start the September/October prep (list health, deliverability, VIP list) before any offer is agreed. Check which channels Vendo actually manages for each client before planning.
-- **Ecommerce clients where Vendo runs ads but not email (check per client, e.g. Sword Stall, Veltuff, MR Mouldings).** Use Parts 2–4 to line paid social and search up with the client's offer windows and email/SMS moments: the same offer, the same dates, the same deadline messages.
+- **Ecommerce clients where Vendo runs ads but not email (check per client).** Use Parts 2–4 to line paid social and search up with the client's offer windows and email/SMS moments: the same offer, the same dates, the same deadline messages.
 - **Client-specific rules override this playbook.** Send caps, banned content, brand voice and approval lead times in a client's brief win over the cadence advice here. The "elevated/aggressive" cadence below is a proposal to put to the client's approver, never a default.
 - **Dental clients.** Limited relevance. Private practices rarely run BFCM-style discounting, and any treatment promotion must meet GDC and ASA healthcare advertising rules. The useful parts are list hygiene, consent, the Q1 retention thinking (recall and treatment follow-up) and, at most, a seasonal event or open-day push using the same tease → launch → last-chance structure.
 - **Plant hire clients.** Not applicable beyond general list-hygiene and consent rules.
