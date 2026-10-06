@@ -360,7 +360,9 @@ def final(m):
     return sec("Final CTA", inner + foot, m, bg=C['od'])
 
 
-BODY = [awards, why_choose, stories, pricing, membership, reviews, cta_form, familiar, checkup, how, services, why_siha, quote, gallery, faq, final]
+from team import team
+
+BODY = [awards, why_choose, stories, pricing, membership, reviews, cta_form, familiar, checkup, how, services, why_siha, quote, team, gallery, faq, final]
 
 
 # ---------------------------------------------------------------- thank-you page (LP process SOP: confirms the submission + option to book online)

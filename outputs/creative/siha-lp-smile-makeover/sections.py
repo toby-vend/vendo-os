@@ -214,7 +214,9 @@ def final(m):
     return sec("Final CTA", inner + foot, m, bg=C['od'])
 
 
-BODY = [awards, why_choose, stories, pricing, before_after, reviews, cta_form, familiar, treatment, how, blocks, why_siha, dentist, gallery, faq, final]
+from team import team
+
+BODY = [awards, why_choose, stories, pricing, before_after, reviews, cta_form, familiar, treatment, how, blocks, why_siha, dentist, team, gallery, faq, final]
 
 
 # ---------------------------------------------------------------- thank-you page
