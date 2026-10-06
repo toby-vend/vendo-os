@@ -10,7 +10,7 @@ with the fixes agreed with Toby on 6 Oct 2026:
 - before-and-afters: carousel of Option A cards built from Siha's Drive treatment folders
 """
 import common
-from common import sec, head, grid, photo, mark, cta_row, awards, why_choose, reviews, gallery, faq, why_siha
+from common import sec, head, grid, photo, mark, cta_row, swipe, mob_cta, awards, why_choose, reviews, gallery, faq, why_siha
 from build import C, LOGO, TICK_SVG, CTA, PHONE, stars, tick, form_card, nav_d, nav_m
 
 # ---------------------------------------------------------------- patient stories (real Google reviews on the draft page)
@@ -53,7 +53,7 @@ def pricing(m):
       <div class="body" style="flex:none;font-size:14px;color:{C['ol']}">Professional whitening is priced at your consultation.</div></div>'''
     inner = (head("Pricing", "Transparent pricing. No surprises.",
                   "Your makeover is built from whichever of these your smile needs, often more than one. The full plan is priced and agreed upfront, before any treatment begins.", m)
-             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20 if m else 24)}</div>' + finance + cta_row(m))
+             + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20 if m else 24))}</div>' + finance + cta_row(m))
     return sec("Pricing", inner, m)
 
 
@@ -89,6 +89,8 @@ def before_after(m):
 
 # ---------------------------------------------------------------- CTA #2 with form
 def cta_form(m):
+    if m:
+        return mob_cta("See your new smile before you commit")
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head("Smile makeover consultation", "See your new smile before you commit", "We scan your teeth, design the result with you and give you a full itemised plan. The consultation is free, with no obligation.", m, width=520)}
       <div style="display:grid;gap:12px;margin-top:28px">{tick("3D digital scan")}{tick("Your smile designed with you")}{tick("A full, itemised plan")}{tick("0% finance available")}</div>
@@ -114,7 +116,7 @@ def familiar(m):
              'A smile makeover fixes all of the above with <b style="font-weight:600">one joined-up plan</b>: straightening, whitening, bonding and veneers sequenced properly, so every step builds towards the final result.</p>')
     inner = (head("Sound familiar?", "It’s never just one thing about your smile",
                   "Most people who ask us about a smile makeover don’t have a single problem. It’s a chip here, some staining there, one tooth slightly out of line. Small things that add up every time you look in the mirror.", m, center=not m, width=820)
-             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20)}</div>' + close)
+             + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20))}</div>' + close)
     return sec("Sound familiar", inner, m)
 
 
@@ -166,7 +168,7 @@ def blocks(m):
       {mark(C['bo'], 22)}<div class="h3" style="margin-top:18px">{t}</div><p class="body" style="margin-top:8px;color:{C['ol']};font-size:15px">{d}</p></div>''' for t, d in BLOCKS]
     return sec("Building blocks", head("The building blocks", "What can your makeover include?",
                                        "Every plan is different. Yours is built from whichever of these your smile actually needs.", m)
-               + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20 if m else 24)}</div>', m)
+               + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20 if m else 24))}</div>', m)
 
 
 # ---------------------------------------------------------------- why siha (no "specialist" wording, no superlatives)

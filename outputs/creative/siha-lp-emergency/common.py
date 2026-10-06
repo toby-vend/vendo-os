@@ -32,6 +32,24 @@ def grid(items, cols, gap=24):
     return f'<div style="display:grid;grid-template-columns:repeat({cols},1fr);gap:{gap}px">{"".join(items)}</div>'
 
 
+def swipe(items, w=290, gap=14, dark=False):
+    """Mobile: horizontal swipe row with dots instead of a tall stack (cards keep their own styling)."""
+    cells = "".join(f'<div style="flex:none;width:{w}px;display:flex">{i}</div>' for i in items)
+    dots = "".join(f'<span style="width:{18 if k == 0 else 6}px;height:6px;border-radius:3px;background:{(C["be"] if dark else C["od"]) if k == 0 else ("rgba(225,213,202,.3)" if dark else "rgba(20,33,26,.2)")}"></span>' for k in range(len(items)))
+    return (f'<div data-name="Swipe row" style="overflow:hidden;margin-right:-20px"><div style="display:flex;gap:{gap}px;align-items:stretch">{cells}</div></div>'
+            f'<div data-name="Dots" style="display:flex;gap:6px;justify-content:center;margin-top:20px">{dots}</div>')
+
+
+def mob_cta(title):
+    """Mobile replacement for the mid-page form: one button back to the hero form, plus tap-to-call."""
+    inner = (f'<div class="label" style="color:{C["bo"]}">Book now</div>'
+             f'<h2 class="h1" style="margin-top:12px;font-size:30px">{title}</h2>'
+             f'<p class="body" style="margin-top:12px;color:{C["ol"]}">It takes under a minute. We’ll call you back to confirm.</p>'
+             f'<div style="display:grid;gap:12px;margin-top:24px"><span class="btn primary" style="height:56px">{CTA}</span>'
+             f'<span class="btn outline" style="height:56px">Call {PHONE}</span></div>')
+    return sec("Book now (mobile: button to hero form)", inner, True, pad_m=(48, 20))
+
+
 def photo(img, h, radius=30, pos="50% 50%"):
     return (f'<div data-name="Photo" style="height:{h}px;border-radius:{radius}px;'
             f'background:url(assets/photos/{img}) {pos}/cover no-repeat"></div>')
@@ -52,13 +70,29 @@ def mark(color, size=22):
 
 # ---------------------------------------------------------------- awards strip (Siha Drive: Awards PNGs), trust signals by the hero
 AWARDS = ["brand-design-2025.png", "patient-care-2025.png", "da25-team-london.png", "practice-of-year-2025.png", "best-new-practice-2024.png"]
+# Plain-text captions so the award reads even where the logo's own gold lettering is faint (mobile cards)
+AWARD_CAPTIONS = [("Winner", "Practice brand &amp; design", "Private Dentistry Awards 2025"),
+                  ("Winner", "Patient care", "Private Dentistry Awards 2025"),
+                  ("Winner", "Team of the year, London", "Dentistry Awards 2025"),
+                  ("Highly commended", "Practice of the year", "Private Dentistry Awards 2025"),
+                  ("Highly commended", "New practice", "Private Dentistry Awards 2024")]
 
 
 def awards(m):
-    logos = "".join(f'<img data-name="Award" src="assets/awards/{a}" style="height:{52 if m else 84}px;width:auto">' for a in AWARDS)
-    inner = (f'<div style="display:flex;{"flex-direction:column;gap:20px" if m else "align-items:center;gap:56px"}">'
+    if m:
+        cards = [f'''<div class="card" data-name="Award" style="width:100%;background:{C['wh']};border-radius:24px;padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center">
+          <div style="height:96px;width:100%;display:flex;align-items:center;justify-content:center"><img src="assets/awards/{a}" style="max-height:96px;max-width:170px;width:auto;height:auto"></div>
+          <div class="label" style="margin-top:14px;font-size:12px;color:{C['bo']}">{w}</div>
+          <div class="h3" style="margin-top:6px;font-size:17px">{t}</div>
+          <div class="body" style="margin-top:4px;font-size:13px;color:{C['br']}">{e}</div></div>''' for a, (w, t, e) in zip(AWARDS, AWARD_CAPTIONS)]
+        inner = (f'<div class="label" style="color:{C["bo"]}">Award-winning care</div>'
+                 f'<h2 class="h1" style="margin-top:10px;font-size:26px">Recognised by the industry</h2>'
+                 f'<div style="margin-top:24px">{swipe(cards, w=230)}</div>')
+        return sec("Awards", inner, m, bg=C['be'], pad_m=(48, 20))
+    logos = "".join(f'<img data-name="Award" src="assets/awards/{a}" style="height:84px;width:auto;flex:none">' for a in AWARDS)
+    inner = (f'<div style="display:flex;align-items:center;gap:56px">'
              f'<div class="label" style="flex:none;color:{C["br"]}">Award-winning care</div>'
-             f'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:{"16px 24px" if m else "48px"}">{logos}</div></div>')
+             f'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:48px">{logos}</div></div>')
     return sec("Awards", inner, m, bg=C['wh'], pad=(40, 80), pad_m=(32, 20))
 
 
@@ -71,6 +105,8 @@ WHY = ["Carefully-curated treatment based on your individual needs",
 
 
 def why_choose(m):
+    if m:
+        return ""  # mobile: folded into the hero trust line
     items = [f'<div style="display:flex;gap:16px;align-items:flex-start">{mark(C["bo"], 18)}'
              f'<span class="body" style="color:{C["be"]};font-size:{15 if m else 16}px">{t}</span></div>' for t in WHY]
     inner = (f'<div class="label" style="color:{C["bo"]};{"" if m else "text-align:center;"}margin-bottom:{24 if m else 40}px">Why patients choose us</div>'
@@ -96,7 +132,7 @@ def stories(m):
     </div>''' for t, q, n in STORIES]
     inner = (head("Patient stories", "Real patients. Real results.",
                   "Every smile is different. These are a few of the people who trusted us with theirs.", m)
-             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20 if m else 24)}</div>')
+             + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20 if m else 24))}</div>')
     return sec("Patient stories", inner, m)
 
 
@@ -150,7 +186,7 @@ def membership(m):
           <div style="display:grid;gap:12px">{feat_html}</div></div>''')
     inner = (head("Siha Dental &amp; Facial Membership", "A smarter way to care for your smile",
                   "A monthly plan that builds your routine care in: check-ups, Airflow® hygiene appointments and X-rays, with member benefits like treatment savings, Siha Dental &amp; Facial Wallet credit and priority booking, depending on your tier.", m)
-             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 4, 20)}</div>'
+             + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 4, 20))}</div>'
              + f'<p class="body" style="margin-top:28px;font-size:13px;color:{C["br"]};max-width:900px">Siha Dental &amp; Facial Membership is not dental insurance and does not cover all treatments. It is designed to support routine preventative care, and additional treatment may incur separate costs. T&amp;Cs apply. Ask the team about joining at your visit.</p>')
     return sec("Membership", inner, m)
 
@@ -170,11 +206,13 @@ def reviews(m):
       <div>{stars(5, 18)}<div class="body" style="color:{C['be']};font-size:14px;margin-top:4px">Based on 157 Google reviews</div></div></div>'''
     top = (f'<div style="display:flex;{"flex-direction:column" if m else "justify-content:space-between;align-items:flex-end"}">'
            f'{head("Patient reviews", "What our patients say", "5.0 stars from 150+ verified Google reviews.", m, dark=True, width=620)}{score}</div>')
-    return sec("Reviews", top + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20)}</div>', m, bg=C['od'])
+    return sec("Reviews", top + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20))}</div>', m, bg=C['od'])
 
 
 # ---------------------------------------------------------------- CTA #2 with form (LP framework: repeat the CTA with a simple form)
 def cta_form(m):
+    if m:
+        return mob_cta("Don’t wait in pain")
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head("New patient check-up", "Ready when you are", "Same-week appointments, evenings and weekends. £89 for a full exam and 3D scan, with no hidden extras.", m, width=520)}
       <div style="display:grid;gap:12px;margin-top:28px">{tick("Full exam + 3D scan")}{tick("Oral cancer screening")}{tick("A clear, costed plan")}{tick("0% finance available")}</div>
@@ -200,7 +238,7 @@ def familiar(m):
              'A Siha Dental &amp; Facial check-up is a <b style="font-weight:600">full assessment with honest advice</b>: no lectures, no judgement, and no pressure to have anything done.</p>')
     inner = (head("Sound familiar?", "It’s been a while and that’s okay",
                   "Most new patients come to us after months, sometimes years, of meaning to book. Whatever brought you here, you’re in the right place.", m, center=not m)
-             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20)}</div>' + close)
+             + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20))}</div>' + close)
     return sec("Sound familiar", inner, m)
 
 
@@ -252,7 +290,7 @@ def services(m):
       {photo(img, 200, 0, pos)}<div style="padding:28px"><div class="h3">{t}</div><p class="body" style="margin-top:8px;color:{C['ol']};font-size:15px">{d}</p></div></div>''' for t, d, img, pos in SERVICES]
     return sec("Services", head("Our services", "Everything your mouth needs, under one roof",
                                 "Whatever your check-up uncovers, you won’t need to be referred somewhere else.", m)
-               + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20 if m else 24)}</div>', m)
+               + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20 if m else 24))}</div>', m)
 
 
 # ---------------------------------------------------------------- 11 why siha
@@ -269,7 +307,7 @@ def why_siha(m):
       {mark(C['bo'], 20)}<div class="h3" style="margin-top:16px;color:{C['nu']}">{t}</div><p class="body" style="margin-top:8px;color:{C['be']};font-size:15px">{d}</p></div>''' for t, d in WHY_SIHA]
     # Design QA 9.2: no unverifiable superlatives ("the most trusted name") in healthcare copy
     return sec("Why Siha", head("Why Siha Dental &amp; Facial", "Why patients trust us with their smiles", None, m, dark=True)
-               + f'<div style="margin-top:{24 if m else 48}px">{grid(cards, 1 if m else 3, 0 if m else 48)}</div>' + cta_row(m, dark=True), m, bg=C['od'])
+               + f'<div style="margin-top:{24 if m else 48}px">{(swipe(cards, dark=True) if m else grid(cards, 3, 48))}</div>' + cta_row(m, dark=True), m, bg=C['od'])
 
 
 # ---------------------------------------------------------------- 12 meet your dentist (LP checklist: clinician bio; facts from siha.dental/our-team)

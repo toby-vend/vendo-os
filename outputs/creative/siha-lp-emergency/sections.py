@@ -9,7 +9,7 @@ with these fixes (6 Oct 2026):
 - other-clinic template testimonials replaced with real Google reviews; no unverifiable superlatives
 """
 import common
-from common import sec, head, grid, photo, mark, cta_row, awards, why_choose, reviews, gallery, faq, why_siha
+from common import sec, head, grid, photo, mark, cta_row, swipe, mob_cta, awards, why_choose, reviews, gallery, faq, why_siha
 from build import C, LOGO, TICK_SVG, CTA, PHONE, stars, tick, form_card, nav_d, nav_m
 
 # ---------------------------------------------------------------- patient stories (real Google reviews on the draft page)
@@ -56,6 +56,8 @@ def pricing(m):
 
 # ---------------------------------------------------------------- CTA #2 with form
 def cta_form(m):
+    if m:
+        return mob_cta("Don’t wait in pain")
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head("Emergency appointment", "Don’t wait in pain", "Same-day appointments are often available, and we aim to see you within 24 hours. Send your details and we’ll call you back.", m, width=520)}
       <div style="display:grid;gap:12px;margin-top:28px">{tick("Pain relief comes first")}{tick("New &amp; existing patients")}{tick("Open Saturdays and late on Tuesdays")}{tick("Every cost agreed before treatment")}</div>
@@ -81,7 +83,7 @@ def familiar(m):
              'An emergency appointment at Siha Dental &amp; Facial means <b style="font-weight:600">pain relief first, clear options second</b>, and nothing done without your agreement.</p>')
     inner = (head("Sound familiar?", "If something feels wrong, don’t wait",
                   "Dental emergencies rarely get better on their own. These are the problems we see, and treat, every day at our practice.", m, center=not m)
-             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20)}</div>' + close)
+             + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20))}</div>' + close)
     return sec("Sound familiar", inner, m)
 
 
@@ -133,7 +135,7 @@ def treat(m):
       {mark(C['bo'], 22)}<div class="h3" style="margin-top:18px">{t}</div><p class="body" style="margin-top:8px;color:{C['ol']};font-size:15px">{d}</p></div>''' for t, d in TREAT]
     return sec("What we treat", head("What we treat", "Same-day help, whatever the problem",
                                      "Our practice is equipped to diagnose and treat emergencies on the spot, with no referrals and no bouncing between practices.", m)
-               + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20 if m else 24)}</div>', m)
+               + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20 if m else 24))}</div>', m)
 
 
 # ---------------------------------------------------------------- why siha

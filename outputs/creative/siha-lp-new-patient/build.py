@@ -34,7 +34,7 @@ CSS = f"""
 body {{ background: #2a2a2a; font-family: Metropolis, sans-serif; padding: 80px; color: {C['od']}; }}
 .page {{ background: {C['nu']}; overflow: hidden; }}
 .d {{ width: 1440px; }}
-.m {{ width: 390px; }}
+.m {{ width: 390px; padding-bottom: 84px; }}
 .logo, .icon {{ display: block; height: auto; }}
 /* guideline type scale */
 .display {{ font-weight: 400; font-size: 56px; line-height: 1.1; letter-spacing: .04em; text-transform: uppercase; }}
@@ -102,7 +102,7 @@ def form_card(width, pad=40, offer=False, title="Book your first visit"):
   <div class="label" style="color:{C['bo']}">New patient check-up</div>
   <div class="h2" style="margin-top:10px">{title}</div>
   <div class="body" style="margin-top:6px;color:{C['br']}">Same-week appointments, evenings and weekends available.</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">{fields}</div>
+  <div style="display:grid;grid-template-columns:{"1fr" if width < 400 else "1fr 1fr"};gap:16px;margin-top:24px">{fields}</div>
   <span class="btn {'offer' if offer else 'primary'}" style="width:100%;margin-top:26px;height:56px">{CTA}</span>
   <div class="body" style="margin-top:14px;font-size:14px;text-align:center;color:{C['br']}">Your check-up is £89, with no hidden extras.</div>
   <div class="body" style="margin-top:6px;font-size:12px;text-align:center;color:{C['br']}">By submitting, you agree to our <u>privacy policy</u>.</div>
@@ -145,27 +145,28 @@ def hero_d():
 
 def nav_m():
     return f"""
-<div data-name="Sticky header (stays on scroll)" style="height:72px;padding:0 16px 0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,33,26,.1);background:{C['nu']};box-shadow:0 6px 16px rgba(20,33,26,.06)">
+<div data-name="Sticky header (stays on scroll; Call lives in the bottom bar)" style="height:72px;padding:0 16px 0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,33,26,.1);background:{C['nu']};box-shadow:0 6px 16px rgba(20,33,26,.06)">
   <div style="width:116px;color:{C['ol']}">{LOGO}</div>
   <div style="display:flex;gap:8px;align-items:center">
-    <span data-name="Call" style="width:42px;height:42px;border-radius:50%;border:1.5px solid {C['od']};display:flex;align-items:center;justify-content:center;color:{C['od']}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></span>
     <span class="btn primary" style="height:42px;padding:0 18px;font-size:11px">{CTA}</span></div>
 </div>"""
 
 
 def hero_m():
-    frame, cut = s_hero(260, 440, 240)
+    frame, cut = s_hero(230, 360, 210)
     return f"""
 <section data-name="Hero" style="position:relative;padding:40px 20px 48px">
   <div class="label" style="color:{C['bo']}">New patients welcome · Shepherd’s Bush, W12</div>
   <h1 class="display" style="margin-top:16px;font-size:36px">New patient check-up <b>£89</b></h1>
   <p class="h2" style="margin-top:12px;font-size:22px;font-weight:300">A dentist you can actually stick with.</p>
   <p class="body" style="margin-top:12px;color:{C['ol']}">Thorough check-ups, honest advice and treatment that’s genuinely right for you. New patients welcome at our Shepherd’s Bush practice.</p>
-  <div style="display:grid;gap:12px;margin-top:24px">{tick("Full exam + 3D scan", 15)}{tick("Same-week appointments", 15)}{tick("0% finance available", 15)}{tick("Evening &amp; weekend slots", 15)}</div>
-  <div data-name="S-frame" style="position:relative;width:260px;height:440px;margin:40px auto 0">{frame}{cut}</div>
+  <div style="display:grid;gap:10px;margin-top:20px">{tick("Full exam + 3D scan", 15)}{tick("Same-week appointments", 15)}</div>
+  <div data-name="Hero buttons" style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:22px"><span class="btn primary" style="height:54px">{CTA}</span><span class="btn outline" style="height:54px;padding:0 22px">Call</span></div>
+  <div data-name="Trust line" style="display:flex;align-items:center;gap:10px;margin-top:18px">{stars(5, 14)}<span class="body" style="font-size:13px;white-space:nowrap;color:{C['ol']}">5.0 from 157 Google reviews</span></div>
+  <div data-name="S-frame" style="position:relative;width:230px;height:360px;margin:96px auto 0">{frame}{cut}</div>
   <div style="margin-top:-60px;position:relative">{form_card(350, 24, offer=True)}</div>
   <div style="display:flex;justify-content:space-between;margin-top:32px">
-    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:11px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("3", "2025 awards")])}
+    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:12px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("3", "2025 awards")])}
   </div>
 </section>"""
 
@@ -174,11 +175,18 @@ SECTIONS_D = [nav_d, hero_d]
 SECTIONS_M = [nav_m, hero_m]
 
 
+# Mobile sticky bottom bar: fixed to the bottom of the viewport on every scroll position (shown at the first
+# screen's fold, 844px, in the design). The page gets matching bottom padding so the footer isn't hidden.
+BOTTOM_BAR = (f'<div data-name="Sticky bottom bar (fixed to viewport bottom)" style="position:absolute;left:0;top:760px;width:390px;height:84px;'
+              f'padding:12px 16px;background:{C["nu"]};box-shadow:0 -8px 24px rgba(20,33,26,.12);display:grid;grid-template-columns:auto 1fr;gap:10px;z-index:5">'
+              f'<span class="btn outline" style="height:56px;padding:0 20px">Call</span><span class="btn primary" style="height:56px">{CTA}</span></div>')
+
+
 def page(title, cls, sections):
     body = "".join(s() for s in sections)
     return (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><title>{title}</title><style>{CSS}</style>"
             f"<script src='https://mcp.figma.com/mcp/html-to-design/capture.js' async></script></head>"
-            f"<body><div class='page {cls}' data-name='{title}'>{body}</div></body></html>")
+            f"<body><div class='page {cls}' data-name='{title}' style='position:relative'>{body}{BOTTOM_BAR if cls == 'm' else ''}</div></body></html>")
 
 
 if __name__ == "__main__":

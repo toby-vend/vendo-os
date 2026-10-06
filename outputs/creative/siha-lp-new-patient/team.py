@@ -25,7 +25,7 @@ def team(m):
     cards = "".join(f'''<div data-name="Team member" style="flex:none;width:{card_w}px">
       <div data-name="Photo" style="height:{img_h}px;border-radius:24px;background:url(assets/team/{pid}.jpg) 50% 18%/cover no-repeat"></div>
       <div class="h3" style="margin-top:16px">{name}</div>
-      <div class="label" style="margin-top:6px;font-size:11px;color:{C['br']}">{role}</div></div>''' for pid, name, role in TEAM)
+      <div class="label" style="margin-top:6px;font-size:{13 if m else 11}px;color:{C['br']}">{role}</div></div>''' for pid, name, role in TEAM)
     arrows = (f'<div data-name="Carousel arrows" style="display:flex;gap:12px">'
               f'<span style="width:52px;height:52px;border-radius:50%;border:1.5px solid rgba(20,33,26,.25);color:{C["br"]};display:flex;align-items:center;justify-content:center">{ARROW.format(d=LEFT)}</span>'
               f'<span style="width:52px;height:52px;border-radius:50%;background:{C["od"]};color:{C["nu"]};display:flex;align-items:center;justify-content:center">{ARROW.format(d=RIGHT)}</span></div>')
@@ -33,7 +33,7 @@ def team(m):
             f'<div style="max-width:780px"><div class="label" style="color:{C["bo"]}">Meet the team</div>'
             f'<h2 class="h1" style="margin-top:14px;font-size:{32 if m else 44}px">The people who’ll look after you</h2>'
             f'<p class="body" style="margin-top:16px;font-size:{16 if m else 18}px;color:{C["ol"]}">Dentists, specialists, hygienists and the faces who greet you at the door.</p></div>'
-            f'{arrows}</div>')
+            f'{"" if m else arrows}</div>')
     track = (f'<div data-name="Carousel" style="margin-top:{32 if m else 48}px;overflow:hidden;margin-right:-{20 if m else 80}px">'
              f'<div data-name="Track" style="display:flex;gap:{gap}px">{cards}</div></div>')
     bar = (f'<div data-name="Progress" style="margin-top:{28 if m else 40}px;height:2px;background:rgba(20,33,26,.12);border-radius:2px">'
