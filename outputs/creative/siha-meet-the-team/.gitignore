@@ -1,0 +1,7 @@
+src/
+assets/photos/
+renders/
+*-prev.jpg
+contact.jpg
+assets/cutouts/
+.claude-flow/
