@@ -21,7 +21,11 @@ CASES = [("cb04", "Composite bonding + whitening", "Composite Bonding / Case 4")
          ("cb21", "Whitening + composite bonding", "Composite Bonding / Case 21"),
          ("wh04", "Whitening", "Whitening + Airflow / Case 4"),
          ("cb26", "Whitening + composite bonding", "Composite Bonding / Case 26"),
-         ("cb01", "Composite bonding + whitening", "Composite Bonding / Case 1")]
+         ("cb01", "Composite bonding + whitening", "Composite Bonding / Case 1"),
+         ("al01", "Clear aligners", "Aligners / Case 1"),
+         ("al04", "Clear aligners", "Aligners / Case 4"),
+         ("al05", "Clear aligners", "Aligners / Case 5"),
+         ("al06", "Clear aligners", "Aligners / Case 6")]
 
 
 def logo():
@@ -45,7 +49,7 @@ ICON = icon()
 CSS = f"""
 @font-face {{ font-family: Metropolis; src: url(../siha-lp-smile-makeover/assets/fonts/Metropolis-SemiBold.otf); font-weight: 600; }}
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-body {{ background: #2a2a2a; font-family: Metropolis, sans-serif; padding: 80px; display: flex; flex-wrap: wrap; gap: 80px; width: {80 * 2 + 1080 * 5 + 80 * 4}px; }}
+body {{ background: #2a2a2a; font-family: Metropolis, sans-serif; padding: 80px; display: flex; flex-wrap: wrap; gap: 80px; width: {80 * 2 + 1080 * 5 + 80 * 4}px; align-content: flex-start; }}
 .card {{ position: relative; width: 1080px; height: 1350px; overflow: hidden; flex: none; }}
 .ph {{ position: absolute; background-size: cover; background-position: 50% 50%; background-repeat: no-repeat; }}
 .tag {{ position: absolute; font-weight: 600; font-size: 20px; letter-spacing: .2em; text-transform: uppercase; }}

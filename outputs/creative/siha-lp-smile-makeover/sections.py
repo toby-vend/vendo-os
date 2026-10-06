@@ -7,7 +7,7 @@ with the fixes agreed with Toby on 6 Oct 2026:
   whitening left unpriced because Siha's prices are marked limited-time)
 - no "minimum 6 teeth", no Bond Dental carry-over (4 locations, other clinics, Vendo Whitening, £0 deposit line)
 - no "specialist" wording for non-specialists, no unverifiable superlatives, no finance monthly figures
-- before-and-afters from Siha's published smile gallery
+- before-and-afters: carousel of Option A cards built from Siha's Drive treatment folders
 """
 import common
 from common import sec, head, grid, photo, mark, cta_row, awards, why_choose, reviews, gallery, faq, why_siha
@@ -57,22 +57,34 @@ def pricing(m):
     return sec("Pricing", inner, m)
 
 
-# ---------------------------------------------------------------- before & after (Siha's published smile gallery)
-CASES = [("p15", "Smile makeover / Whitening"), ("p14", "Smile makeover / Whitening"),
-         ("p9", "Invisalign / Composite bonding"), ("p11", "Veneers")]
+# ---------------------------------------------------------------- before & after carousel
+# Cards built in ../siha-ba-cards (guideline layout: before / Dark Olive line + S logo / after), chosen by Toby 6 Oct 2026.
+# Photos from Siha's Drive treatment folders; exported to assets/ba-cards/ (gitignored).
+BA = [("cb04", "Composite bonding + whitening"), ("al04", "Clear aligners"), ("cv02", "Ceramic veneers"),
+      ("al01", "Clear aligners"), ("cb06", "Composite bonding"), ("al02", "Clear aligners"),
+      ("cb17", "Whitening + composite bonding"), ("al06", "Clear aligners"), ("cb08", "Composite bonding"),
+      ("cb21", "Whitening + composite bonding"), ("al05", "Clear aligners"), ("wh04", "Whitening"),
+      ("cb26", "Whitening + composite bonding"), ("cb01", "Composite bonding + whitening")]
+ARROW = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{d}"/></svg>'
 
 
 def before_after(m):
-    def half(img, label):
-        return (f'<div style="position:relative;height:{150 if m else 190}px;background:url(assets/ba/{img}.jpg) 50% 50%/cover">'
-                f'<span class="label" style="position:absolute;left:12px;top:12px;background:rgba(20,33,26,.75);color:{C["nu"]};padding:6px 10px;border-radius:999px;font-size:11px">{label}</span></div>')
-    cards = [f'''<div class="card" data-name="Case" style="background:{C['wh']};overflow:hidden">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">{half(c + '-before', 'Before')}{half(c + '-after', 'After')}</div>
-      <div style="padding:18px 24px" class="h3">{t}</div></div>''' for c, t in CASES]
-    inner = (head("Results", "Before &amp; after", "Real Siha Dental &amp; Facial patients, with every plan built from the treatments their smile actually needed.", m)
-             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 2, 20 if m else 24)}</div>'
-             + f'<p class="body" style="margin-top:24px;font-size:13px;color:{C["br"]}">Individual results vary. All images are of actual Siha Dental &amp; Facial patients, with consent.</p>')
-    return sec("Before and after", inner, m, bg=C['be'])
+    w = 260 if m else 300
+    cards = "".join(f'''<div data-name="Case" style="flex:none;width:{w}px">
+      <div data-name="Before and after" style="width:{w}px;height:{int(w * 1.25)}px;border-radius:24px;background:url(assets/ba-cards/{k}.jpg) 50% 50%/cover no-repeat"></div>
+      <div class="label" style="margin-top:14px;font-size:11px;color:{C['br']}">{t}</div></div>''' for k, t in BA)
+    arrows = (f'<div data-name="Carousel arrows" style="display:flex;gap:12px">'
+              f'<span style="width:52px;height:52px;border-radius:50%;border:1.5px solid rgba(20,33,26,.25);color:{C["br"]};display:flex;align-items:center;justify-content:center">{ARROW.format(d="M15 18l-6-6 6-6")}</span>'
+              f'<span style="width:52px;height:52px;border-radius:50%;background:{C["od"]};color:{C["nu"]};display:flex;align-items:center;justify-content:center">{ARROW.format(d="M9 18l6-6-6-6")}</span></div>')
+    top = (f'<div style="display:flex;{"flex-direction:column;gap:24px" if m else "justify-content:space-between;align-items:flex-end"}">'
+           f'{head("Results", "Before &amp; after", "Real Siha Dental &amp; Facial patients, with every plan built from the treatments their smile actually needed.", m, width=760)}{arrows}</div>')
+    track = (f'<div data-name="Carousel" style="margin-top:{32 if m else 48}px;overflow:hidden;margin-right:-{20 if m else 80}px">'
+             f'<div data-name="Track" style="display:flex;gap:{16 if m else 24}px">{cards}</div></div>')
+    bar = (f'<div data-name="Progress" style="margin-top:{28 if m else 40}px;height:2px;background:rgba(20,33,26,.12);border-radius:2px">'
+           f'<div style="width:{"7%" if m else "29%"};height:2px;background:{C["od"]};border-radius:2px"></div></div>')
+    note = f'<p class="body" style="margin-top:20px;font-size:13px;color:{C["br"]}">Individual results vary. All images are of actual Siha Dental &amp; Facial patients, with consent.</p>'
+    return (f'<section data-name="Before and after (carousel)" style="position:relative;background:{C["be"]};padding:{"64px 20px" if m else "112px 80px"};overflow:hidden">'
+            f'{top}{track}{bar}{note}</section>')
 
 
 # ---------------------------------------------------------------- CTA #2 with form
