@@ -9,6 +9,7 @@ Curated strategy playbooks, UK-adapted for Vendo. Claude Code reads these files 
 | Meta creative system 2026 | [meta-creative-system-2026.md](meta-creative-system-2026.md) | Andromeda bundling and sequencing, hook grading, format economics, DPAs and partnership ads, fatigue, AI in production |
 | Meta static ads | [meta-static-ads.md](meta-static-ads.md) | Planning, building, testing and judging static image ads |
 | Meta ad copy | [meta-ad-copy.md](meta-ad-copy.md) | Primary text, headlines and scripts; awareness and sophistication; the nine beats; UK compliance |
+| Copywriting process & audit | [copywriter-sop.md](copywriter-sop.md) | Vendo copywriter SOP: 12 laws, 8-step writing process, templates (Meta, video, RSA, LP, brief), pre-launch QA checklist, monthly account copy audit |
 | Meta frequency & fatigue | [meta-frequency-creative-fatigue.md](meta-frequency-creative-fatigue.md) | Diagnosing fatigue and creative-diversity problems from frequency |
 | Google Ads | [google-ads-strategy-2026.md](google-ads-strategy-2026.md) | Account structure, PMax vs Shopping, bidding, search/negatives, landing pages, feeds, 90-day rollout (dental, ecom, plant hire) |
 | Ecommerce finance | [ecommerce-pl-for-marketers.md](ecommerce-pl-for-marketers.md) | Rebuilding a client P&L (UK VAT, Xero), contribution margin, first-time P&L, MER |
