@@ -65,7 +65,7 @@ body {{ background: #2a2a2a; font-family: Metropolis, sans-serif; padding: 80px;
 TICK_SVG = f'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{C["od"]}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg>'
 STAR = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>'
 PHONE = "020 4602 3510"
-CTA = "Book your check-up"
+CTA = "Book Now"  # SOP: one unified CTA; forms use Book Now / Book Appointment / Book Consultation
 
 
 def tick(text, size=16):
@@ -95,22 +95,23 @@ def s_hero(fw, fh, target_w):
     return frame, cut
 
 
-def form_card(width, pad=40):
+def form_card(width, pad=40, offer=False, title="Book your first visit"):
     fields = "".join(f'<label class="field"><span>{f} *</span><div></div></label>' for f in ["First name", "Last name", "Email", "Mobile"])
     return f"""
 <div class="card" data-name="Booking form" style="width:{width}px;background:{C['wh']};padding:{pad}px;box-shadow:0 30px 60px rgba(20,33,26,.14),0 4px 12px rgba(20,33,26,.06)">
   <div class="label" style="color:{C['bo']}">New patient check-up</div>
-  <div class="h2" style="margin-top:10px">Book your first visit</div>
+  <div class="h2" style="margin-top:10px">{title}</div>
   <div class="body" style="margin-top:6px;color:{C['br']}">Same-week appointments, evenings and weekends available.</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">{fields}</div>
-  <span class="btn offer" style="width:100%;margin-top:26px;height:56px">{CTA}</span>
+  <span class="btn {'offer' if offer else 'primary'}" style="width:100%;margin-top:26px;height:56px">{CTA}</span>
   <div class="body" style="margin-top:14px;font-size:14px;text-align:center;color:{C['br']}">Your check-up is £89, with no hidden extras.</div>
+  <div class="body" style="margin-top:6px;font-size:12px;text-align:center;color:{C['br']}">By submitting, you agree to our <u>privacy policy</u>.</div>
 </div>"""
 
 
 def nav_d():
     return f"""
-<div data-name="Nav" style="height:96px;padding:0 80px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,33,26,.1)">
+<div data-name="Sticky header" style="height:96px;padding:0 80px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,33,26,.1)">
   <div style="width:150px;color:{C['ol']}">{LOGO}</div>
   <div style="display:flex;align-items:center;gap:40px">
     <span class="body" style="font-size:14px;color:{C['ol']}">157 Askew Road, London W12 9AU</span>
@@ -123,29 +124,32 @@ def nav_d():
 def hero_d():
     frame, cut = s_hero(380, 640, 330)
     stats = "".join(f'<div><div class="h1" style="font-size:40px">{n}</div><div class="label" style="margin-top:6px;color:{C["br"]}">{l}</div></div>'
-                    for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("£89", "Check-up")])
+                    for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("3", "2025 award wins")])
     return f"""
-<section data-name="Hero" style="position:relative;height:820px">
+<section data-name="Hero" style="position:relative;height:840px">
   <div style="position:absolute;inset:0;background:radial-gradient(circle at 72% 40%,#f4efea 0%,{C['nu']} 55%)"></div>
   <div style="position:absolute;left:80px;top:96px;width:560px">
-    <div class="label" style="color:{C['bo']}">Award-winning dental care</div>
-    <h1 class="display" style="margin-top:22px">A dentist you can actually <b>stick with</b></h1>
-    <p class="body" style="margin-top:24px;font-size:18px;color:{C['ol']};width:500px">Thorough check-ups, honest advice and treatment that’s genuinely right for you. New patients welcome at our Shepherd’s Bush practice.</p>
+    <div class="label" style="color:{C['bo']}">New patients welcome · Shepherd’s Bush, W12</div>
+    <h1 class="display" style="margin-top:22px">New patient check-up <b>£89</b></h1>
+    <p class="h2" style="margin-top:18px;font-weight:300">A dentist you can actually stick with.</p>
+    <p class="body" style="margin-top:16px;font-size:18px;color:{C['ol']};width:500px">Thorough check-ups, honest advice and treatment that’s genuinely right for you. New patients welcome at our Shepherd’s Bush practice.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:32px;width:520px">
       {tick("Full exam + 3D scan")}{tick("Same-week appointments")}{tick("0% finance available")}{tick("Evening &amp; weekend slots")}
     </div>
     <div style="display:flex;gap:56px;margin-top:48px;padding-top:32px;border-top:1px solid rgba(20,33,26,.12);width:520px">{stats}</div>
   </div>
   <div data-name="S-frame" style="position:absolute;left:660px;top:100px;width:380px;height:640px">{frame}{cut}</div>
-  <div style="position:absolute;left:960px;top:150px">{form_card(400, 36)}</div>
+  <div style="position:absolute;left:960px;top:150px">{form_card(400, 36, offer=True)}</div>
 </section>"""
 
 
 def nav_m():
     return f"""
-<div data-name="Nav" style="height:72px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,33,26,.1)">
-  <div style="width:120px;color:{C['ol']}">{LOGO}</div>
-  <span class="btn primary" style="height:42px;padding:0 18px;font-size:11px">Book now</span>
+<div data-name="Sticky header (stays on scroll)" style="height:72px;padding:0 16px 0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,33,26,.1);background:{C['nu']};box-shadow:0 6px 16px rgba(20,33,26,.06)">
+  <div style="width:116px;color:{C['ol']}">{LOGO}</div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span data-name="Call" style="width:42px;height:42px;border-radius:50%;border:1.5px solid {C['od']};display:flex;align-items:center;justify-content:center;color:{C['od']}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></span>
+    <span class="btn primary" style="height:42px;padding:0 18px;font-size:11px">{CTA}</span></div>
 </div>"""
 
 
@@ -153,14 +157,15 @@ def hero_m():
     frame, cut = s_hero(260, 440, 240)
     return f"""
 <section data-name="Hero" style="position:relative;padding:40px 20px 48px">
-  <div class="label" style="color:{C['bo']}">Award-winning dental care</div>
-  <h1 class="display" style="margin-top:16px;font-size:36px">A dentist you can actually <b>stick with</b></h1>
-  <p class="body" style="margin-top:16px;color:{C['ol']}">Thorough check-ups, honest advice and treatment that’s genuinely right for you. New patients welcome at our Shepherd’s Bush practice.</p>
+  <div class="label" style="color:{C['bo']}">New patients welcome · Shepherd’s Bush, W12</div>
+  <h1 class="display" style="margin-top:16px;font-size:36px">New patient check-up <b>£89</b></h1>
+  <p class="h2" style="margin-top:12px;font-size:22px;font-weight:300">A dentist you can actually stick with.</p>
+  <p class="body" style="margin-top:12px;color:{C['ol']}">Thorough check-ups, honest advice and treatment that’s genuinely right for you. New patients welcome at our Shepherd’s Bush practice.</p>
   <div style="display:grid;gap:12px;margin-top:24px">{tick("Full exam + 3D scan", 15)}{tick("Same-week appointments", 15)}{tick("0% finance available", 15)}{tick("Evening &amp; weekend slots", 15)}</div>
   <div data-name="S-frame" style="position:relative;width:260px;height:440px;margin:40px auto 0">{frame}{cut}</div>
-  <div style="margin-top:-60px;position:relative">{form_card(350, 24)}</div>
+  <div style="margin-top:-60px;position:relative">{form_card(350, 24, offer=True)}</div>
   <div style="display:flex;justify-content:space-between;margin-top:32px">
-    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:11px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("£89", "Check-up")])}
+    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:11px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("3", "2025 awards")])}
   </div>
 </section>"""
 
@@ -177,6 +182,11 @@ def page(title, cls, sections):
 
 
 if __name__ == "__main__":
+    from sections import BODY, thank_you
+    SECTIONS_D += [lambda f=f: f(False) for f in BODY]
+    SECTIONS_M += [lambda f=f: f(True) for f in BODY]
     (ROOT / "lp-desktop.html").write_text(page("New patient check-up | Desktop", "d", SECTIONS_D))
     (ROOT / "lp-mobile.html").write_text(page("New patient check-up | Mobile", "m", SECTIONS_M))
-    print("wrote lp-desktop.html, lp-mobile.html")
+    (ROOT / "ty-desktop.html").write_text(page("Thank you | Desktop", "d", [lambda: thank_you(False)]))
+    (ROOT / "ty-mobile.html").write_text(page("Thank you | Mobile", "m", [lambda: thank_you(True)]))
+    print("wrote lp-desktop.html, lp-mobile.html, ty-desktop.html, ty-mobile.html")

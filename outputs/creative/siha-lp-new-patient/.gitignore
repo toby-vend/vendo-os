@@ -4,3 +4,6 @@ renders/
 contact.jpg
 .claude-flow/
 assets/cutouts/
+assets/awards/
+__pycache__/
+awards-check.jpg
