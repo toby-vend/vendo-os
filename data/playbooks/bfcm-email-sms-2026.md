@@ -6,14 +6,31 @@ How Vendo plans Klaviyo email and SMS for Black Friday / Cyber Monday (BFCM) and
 
 ## How to apply this at Vendo
 
-- **Ecommerce clients where Vendo runs Klaviyo.** Full framework applies. Start the September/October prep (list health, deliverability, VIP list) before any offer is agreed.
-- **Client-specific rules override this playbook.** Send caps, banned content and approval lead times in a client's brief win over the cadence advice here. Example: MR Mouldings has a 2-campaigns-a-month cap and DIY-only voice — the "elevated/aggressive" cadence below is a proposal to put to the approver, never a default.
+- **Ecommerce clients where Vendo runs Klaviyo.** Full framework applies. Start the September/October prep (list health, deliverability, VIP list) before any offer is agreed. Check which channels Vendo actually manages for each client before planning.
+- **Ecommerce clients where Vendo runs ads but not email (check per client, e.g. Sword Stall, Veltuff, MR Mouldings).** Use Parts 2–4 to line paid social and search up with the client's offer windows and email/SMS moments: the same offer, the same dates, the same deadline messages.
+- **Client-specific rules override this playbook.** Send caps, banned content, brand voice and approval lead times in a client's brief win over the cadence advice here. The "elevated/aggressive" cadence below is a proposal to put to the client's approver, never a default.
+- **Dental clients.** Limited relevance. Private practices rarely run BFCM-style discounting, and any treatment promotion must meet GDC and ASA healthcare advertising rules. The useful parts are list hygiene, consent, the Q1 retention thinking (recall and treatment follow-up) and, at most, a seasonal event or open-day push using the same tease → launch → last-chance structure.
+- **Plant hire clients.** Not applicable beyond general list-hygiene and consent rules.
+- **Vendo standard: report BFCM results on Shopify revenue.** Klaviyo, Meta and Google each claim credit for the same orders, so attributed revenue double counts. Use platform attribution to compare sends against each other, and Shopify (ex VAT) for the total. Meta numbers use 7-day click attribution only.
 - **Frequency is earned, not assumed.** Only push cadence up for clients whose engaged segment and deliverability are healthy going into November.
 - **Every temporary BFCM change gets a written rollback** (date, owner, what reverts) before it goes live.
 
 ## The benchmark (why it matters)
 
-Klaviyo's 2025 BFCM recap: $3.8B+ Klaviyo-attributed revenue over BFCM (+27% YoY), 22.7B messages sent (+25% YoY), and Black Friday was the first single day over $1B. Inbox competition, buying intent and the commercial case for sending more all peak at once.
+Klaviyo's 2025 BFCM recap (global platform totals, reported in US currency; approx. GBP conversions shown, not a UK client benchmark): roughly £3bn of Klaviyo-attributed revenue over BFCM (+27% YoY), 22.7 billion messages sent (+25% YoY), and Black Friday was the platform's first single day above roughly £0.8bn. The useful point is the growth rate and the volume: inbox competition, buying intent and the commercial case for sending more all peak at once.
+
+## UK dates for 2026
+
+| Moment | 2026 date |
+|---|---|
+| Black Friday | Friday 27 November |
+| BFCM weekend | Friday 27 – Monday 30 November |
+| Cyber Monday | Monday 30 November |
+| Christmas Day / Boxing Day | Friday 25 / Saturday 26 December (bank holiday substitute Monday 28 December) |
+
+- Black Friday 2026 falls close to many UK month-end paydays, which helps the BF weekend; check the client's own past data rather than assuming.
+- **Last order dates for Christmas delivery:** take them from the client's actual carriers (Royal Mail, DPD, Evri etc.) once published each autumn, and build the December deadline sends around them. Never guess a date in customer-facing copy.
+- Ignore US-calendar framing (Thanksgiving, "holiday season" sales). UK copy uses Black Friday, Cyber Monday, Christmas and Boxing Day.
 
 ## Q4 shape
 
@@ -24,6 +41,17 @@ Klaviyo's 2025 BFCM recap: $3.8B+ Klaviyo-attributed revenue over BFCM (+27% YoY
 | November | **Maximise** — build anticipation, launch, raise frequency |
 | December | **Extend** — gifting, shipping-deadline urgency, Christmas promos |
 | Q1 | **Retain** — turn BFCM buyers into repeat customers |
+
+## UK consent and promotion rules
+
+The source is written for a US audience. In the UK the rules below apply to every send, at every cadence tier:
+
+- **Consent (PECR and UK GDPR).** Marketing email and SMS to individuals needs prior opt-in consent, or the "soft opt-in": the person is an existing customer (or bought/negotiated to buy), the message is about similar products, and they were given a simple opt-out when their details were collected and in every message since. No pre-ticked boxes. Email consent does not cover SMS: collect SMS consent separately.
+- **Every message carries an opt-out**, and SMS identifies the sender with a free or low-cost opt-out (e.g. reply STOP). Honour unsubscribes immediately and never import old or bought lists to boost BFCM volume.
+- **Keep consent records** (source, wording, timestamp). Klaviyo stores these per profile; check pop-up and checkout wording before October list-growth pushes.
+- **Send timing:** there is no UK legal quiet-hours rule for SMS, but avoid late-night and early-morning sends.
+- **Urgency and pricing must be genuine.** Under the Digital Markets, Competition and Consumers Act 2024 the CMA can fine directly for misleading practices, including fake countdown timers, false scarcity ("only 2 left" when untrue) and misleading reference prices. "Was" prices must be genuine previous selling prices, and "up to X% off" claims need a fair share of the range at that discount (ASA/CAP rules). Deadlines in emails must match when the offer actually ends.
+- **Prices are shown VAT-inclusive** to consumers, as standard UK practice.
 
 ## Part 1 — Prepare
 
@@ -95,7 +123,7 @@ Before the main offer: teasers, VIP list building, product previews, wishlist/sh
 
 **Strategic resends** for the most important sends only — change subject line, preview text, creative/message or audience; never resend the identical email.
 
-**SMS amplifies, it doesn't mirror email.** Use it for early access, launch, major offer change, genuine low stock, final hours.
+**SMS amplifies, it doesn't mirror email.** Use it for early access, launch, major offer change, genuine low stock, final hours. Send only to profiles with SMS-specific consent (see UK consent rules above).
 
 ## Part 5 — The whole Klaviyo account
 
@@ -126,7 +154,7 @@ Before the main offer: teasers, VIP list building, product previews, wishlist/sh
 
 ## Checklist
 
-**Before BFCM:** review last year · set Q4 goals · confirm November structure · lock offers and dates · review deliverability and list health · grow email/SMS list · build VIP/early-access audience · prepare segments · build calendar · plan cadence · plan SMS · build BFCM pop-ups · review and adjust flows · BFCM-specific flows where justified · confirm shipping deadlines · QA every campaign, code, link and segment.
+**Before BFCM:** review last year · set Q4 goals · confirm November structure · lock offers and dates · review deliverability and list health · grow email/SMS list · build VIP/early-access audience · prepare segments · build calendar · plan cadence · plan SMS · build BFCM pop-ups · review and adjust flows · BFCM-specific flows where justified · confirm UK carrier shipping deadlines · check email and SMS consent wording and opt-outs · confirm every price claim and deadline is genuine · QA every campaign, code, link and segment.
 
 **During:** monitor performance · raise cadence where earned · strategic resends · adjust targeting as people buy · keep flows and pop-ups aligned · SMS on high-intent moments · keep deadlines accurate.
 

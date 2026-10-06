@@ -1,6 +1,6 @@
 # Meta Frequency & Creative Fatigue — Vendo Playbook
 
-How Vendo uses frequency as the leading indicator of creative fatigue and creative-diversity problems in Meta accounts. Frequency warns you **before** performance visibly degrades — it is not a vanity metric. Source: Blue Sense Digital, "The Most Important Metric for Creative Fatigue" (2026).
+How Vendo uses frequency as the leading indicator of creative fatigue and creative-diversity problems in Meta accounts. Frequency warns you **before** performance visibly degrades — it is not a vanity metric. Source: Blue Sense Digital, "The Most Important Metric for Creative Fatigue" (youtube.com/watch?v=GKvBZOwfN2o).
 
 **Core principle: frequency is the symptom; creative is the cause.** High frequency cannot be fixed at the ad-set or targeting level — only with creative diversity and volume.
 
@@ -8,7 +8,8 @@ How Vendo uses frequency as the leading indicator of creative fatigue and creati
 
 - **Any frequency number quoted internally must carry two qualifiers: the date range and the account-structure level.** "Frequency is 3" is meaningless on its own. Vendo standard: **14-day window**, stated level (ad / ad set / campaign).
 - **Ecommerce clients (Veltuff, Sword Stall).** Full framework applies. Fast purchase cycles (low AOV) mean healthy frequency sits low; do not read a competitor's or another client's number as a benchmark.
-- **Dental and lead-gen clients (Bond Dental, Bright Orthodontics, Zen House).** Treatment decisions (e.g. Invisalign, implants) have long consideration windows — a higher frequency is required and expected, not a warning sign. Benchmark each account against its own strong-performance baseline.
+- **Dental clients (e.g. Bond Dental, Bright Orthodontics, Zen House Dental).** Treatment decisions (e.g. Invisalign, implants) have long consideration windows — a higher frequency is required and expected, not a warning sign. Practices also target small local radiuses, so a tight geographic audience pushes frequency up faster than a national ecommerce account. Benchmark each account against its own strong-performance baseline; Rule 1's ad-level ceiling still applies to cold ads.
+- **Plant hire clients.** Small, often B2B, local audiences behave like dental: frequency builds quickly and the purchase is need-driven rather than impulse. Use the account's own baseline, and treat rising frequency with falling lead volume as the creative-refresh signal.
 - **When frequency flags red, the fix goes on the creative roadmap, not the media plan**: new angles, personas and offers, plus more creative volume. Targeting tweaks and stacking more of the same ads will not move it.
 
 ## The mechanics: what frequency measures
@@ -32,7 +33,7 @@ Blended frequency lies. Existing customers and engaged audiences are served far 
 
 ### Rule 3 — Frequency is relative to average time to purchase; never compare brand to brand
 
-A 4-day purchase cycle needs only one to three exposures — low frequency is natural. A 14-day cycle needs more exposures to stay top of mind — higher frequency is required. A high-ticket furniture brand can be healthy at a 14-day frequency of 5; a £70-AOV fashion brand may need to stay under ~2.7. Above the ad level there is no universal benchmark: establish each account's own baseline during strong-performance periods and measure drift against that.
+A 4-day purchase cycle needs only one to three exposures — low frequency is natural. A 14-day cycle needs more exposures to stay top of mind — higher frequency is required. A high-ticket furniture brand can be healthy at a 14-day frequency of 5 (ad set/campaign level); a low-AOV fashion brand with a quick purchase cycle may need to stay under ~2.7. Both are examples from the source's own accounts, not benchmarks. Above the ad level there is no universal benchmark: establish each account's own baseline during strong-performance periods and measure drift against that.
 
 ### Rule 4 — Fix frequency at the creative level, not the ad-set level
 

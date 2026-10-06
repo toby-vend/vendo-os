@@ -1,17 +1,64 @@
 # Google Ads Strategy 2026 (UK)
 
-Source: "The Only Google Ads Strategy You Need for 2026" — Blue Sense Digital (https://www.youtube.com/watch?v=DQKF8O1ZcPA), processed via yt-doc on 2026-07-29.
+Source: "The Only Google Ads Strategy You Need for 2026", Blue Tent YouTube channel (Australian eCommerce Google Ads agency), https://www.youtube.com/watch?v=DQKF8O1ZcPA. Transcribed and summarised 2026-07-29; adapted for Vendo Digital (UK) 2026-10-06.
 
 ## How to apply this at Vendo (UK)
 
-- **Currency.** All figures in this document are quoted from the video in USD. Treat them as order-of-magnitude decision thresholds, not exact numbers — read $10k/month as roughly £8k/month, $15–20k as roughly £12–16k, and so on. Vendo clients pay ad platforms directly and some accounts bill in other currencies (e.g. Veltuff in DKK, some clients in EUR) — always sense-check thresholds against the account's billing currency.
-- **Lead-gen clients (dental and other service businesses).** The video is aimed at eCommerce retail and says so explicitly: lead-gen should substitute "search" wherever it says "shopping". For Vendo's dental and service clients, the applicable sections are: account structure and consolidation, single topic ad groups, the rapid-fire mistakes list, search campaigns and negative keywords, landing page split testing, bidding strategies (including the target ROAS/target CPA death spiral — for lead-gen read tCPA where it says tROAS), portfolio bidding, and the 90-day rollout. Skip the PMax listing-group, standard shopping and GMC feed sections.
-- **eCommerce clients.** Everything applies, including the shopping-first allocation, the PMax overattribution warnings, feed-only PMax, and Merchant Centre feed optimisation. The "one feed per currency" rule is directly relevant to any client selling into multiple markets.
-- **UK terminology.** GMC = Google Merchant Centre. All spellings and platform labels below are UK English (Maximise Conversions, Maximise Conversion Value).
+### Read this first: currency and benchmarks
+
+- **No figure in this document is a UK or Vendo benchmark.** The presenter runs an Australian agency and quotes money figures without naming the currency (one example is a "small Australian market", so they may be Australian rather than US currency). Every money figure below has been converted to an approximate GBP equivalent at the US exchange rate of roughly 1.27 to the pound. If the source meant Australian currency, the true GBP value is lower still. Treat them as the presenter's illustrations and order-of-magnitude thresholds, never as targets, CPC norms or CPA norms for UK accounts.
+- **Spend thresholds come from very large accounts.** The presenter works with brands spending tens to hundreds of thousands a month. Most Vendo accounts are far smaller (dental packages, for example, start at up to £1,500 a month of Google Ads spend). Read the thresholds as "this tactic is for big accounts" or "this tactic is for small accounts", not as numbers to quote.
+- **Use Vendo's own data for UK benchmarks.** For dental CPCs, cost per lead or conversion rates, use Vendo's account data or internal benchmark reports, not this video.
+- **Billing currency.** Clients pay ad platforms directly (ad spend is pass-through), and some accounts bill in other currencies (e.g. Veltuff in DKK, some clients in EUR). Sense-check every threshold against the account's billing currency.
+
+### Vendo standards that override the source
+
+- **Vendo standard: ad spend is the client's money.** Clients pay Google directly. Budget increases (including the 20% stepping rule), "underspender" scale-ups and reallocations are recommendations the client agrees to, not changes Vendo makes on its own.
+- **Vendo standard: never offer a client a campaign pause.** The options are continue or restructure. Removing or merging redundant campaigns inside an account (the "zombie campaign" clean-up below) is restructuring, not pausing the client's advertising. When a campaign is in a tROAS/tCPA death spiral, the fix is to loosen the target, not to pause.
+- **Vendo standard: judge results on the back end, not platform attribution.** For ecommerce, anchor on Shopify revenue rather than Google-reported conversion value; this is exactly why the source's PMax over-attribution warning matters. For dental, reconcile to the practice's own enquiry and patient records where the client keeps them, not to platform-reported conversions alone.
+- **Vendo standard: dental Google leads are calls, tap-to-call and form submissions.** Count clicks-to-call, calls from ads and lead-form/website-form submissions; do not double-count call-tracking-number actions that duplicate click-to-call.
+
+### Dental (core vertical, 50–60% of revenue)
+
+Private UK practices, high-ticket treatments (Invisalign, implants, composite bonding), local intent, often multi-location groups. This is lead-gen, so the presenter's own instruction applies: wherever he says "shopping", read "search" (he says this at [21:47](https://youtu.be/DQKF8O1ZcPA?t=1307)).
+
+- **Applies directly:** consolidation over segmentation, single topic ad groups, the rapid-fire mistakes list, search campaign components and negative keywords, landing page split testing, bidding strategy logic (read tCPA wherever it says tROAS), the death spiral, portfolio bidding, budget-change pacing and the 90-day rollout (minus the feed step).
+- **Does not apply:** Shopping, the PMax-vs-standard-shopping allocation, listing groups, feed-only PMax, the labeliser, and all Merchant Center feed sections. Dental has no product feed.
+- **Segmentation translated:** the four justifications map to (1) brand vs non-brand (practice name searches always separate), (2) geography: per location for multi-location groups, and remember the practice's town and the areas the ads target are often different, so confirm both, (3) different value or efficiency goals: an implant lead is worth far more than a check-up enquiry, and (4) treatment categories: Invisalign, implants, bonding and general dentistry are different personas, so they warrant separate campaigns or at least separate topic ad groups. Do not segment beyond that.
+- **Low volume makes consolidation more important, not less.** Small dental budgets produce few conversions per campaign, so splitting campaigns starves smart bidding. The 270,000-impression maths for responsive search ads means most dental ad groups will never fully exit learning; keep the number of ad groups small and topic-led (e.g. "Invisalign cost", "Invisalign near me", "clear aligners").
+- **Max conversions vs value, dental version:** maximise conversions pushes spend into the cheapest leads, the same way it pushes the cheapest product in ecommerce. If the account mixes low-value and high-value treatments, either split them by campaign/budget or assign conversion values by treatment so bidding can weight them. Start new campaigns on Maximise Conversions, move to tCPA once there is enough conversion volume, and loosen the target aggressively if volume starts falling.
+- **Tracking:** most dental leads come by phone, so call conversions (calls from ads, website calls with Google forwarding numbers or a call-tracking integration) must be primary conversions alongside forms. Do not use GA4-imported events as primary conversions; use the Google Ads tag with enhanced conversions for leads.
+- **Landing pages are the biggest lever here too:** treatment-specific pages, split tested ad-by-ad as described below. Higher enquiry conversion rate is what lets a practice outbid competitors in expensive auctions like implants and Invisalign.
+- **PMax and AI Max for dental:** with no feed, PMax spends across search, display, YouTube, Discover and Gmail. Treat it as secondary to search, with brand exclusions on, and watch for the junk-click pattern in the Gmail war story below. Check lead quality, not just lead count.
+- **UK compliance (not in the source):** follow the CAP Code (ASA) and the General Dental Council's advertising guidance: no misleading claims, accurate prices and finance terms, and do not call a dentist a "specialist" unless they are on the GDC specialist list. Prescription-only medicines (e.g. Botox) cannot be advertised to the public in the UK, so never name them in ad copy. Google's healthcare and medicines policy and personalised advertising restrictions on health also apply, so check before relying on remarketing or customer-list audience signals.
+
+### Ecommerce (~30% of revenue)
+
+Shopify brands running Shopping and PMax. This is the presenter's home ground, so nearly everything applies: shopping-first allocation, PMax over-attribution, feed-only PMax, standard shopping strategies, value-based bidding and Merchant Center feed optimisation.
+
+- **Measure against Shopify revenue** (Vendo standard above). The presenter's core evidence is PMax reporting a steady ROAS while back-end revenue stays flat; Shopify is the back end.
+- **UK Merchant Center setup:** feed targeted at the United Kingdom, prices in GBP and shown including VAT, UK shipping settings. For clients selling abroad, set up a separate feed (or country-specific feed settings) per country and currency, with its own campaigns per the geography rule. A UK shopper seeing a price "converted from" another currency is the problem described in the feed section.
+- **Feed edits via supplementary feeds** where the Shopify Google channel controls the main feed (titles, 4:5 images, custom labels).
+- **Thresholds:** the "PMax suits smaller accounts" and "signals barely matter on mature accounts" points are about relative account maturity; the presenter's numbers come from much larger accounts than most Vendo clients.
+- **B2B exception:** an ecommerce client that sells wholesale or trade should lean further into search, as the source explains.
+
+### Plant hire (~10–20% of revenue)
+
+Local lead gen with a B2B lean (contractors, trades, some domestic customers). Search-led; there is no product feed for hire, so the Shopping, listing-group and feed sections do not apply.
+
+- **The source's B2B point supports search-first:** business buyers look for suppliers via search ads, not consumer-style listings.
+- **Topic ad groups by machine or hire category** (e.g. mini digger hire, excavator hire, dumper hire, access platforms), segmented by depot or service area only where geography genuinely differs.
+- **Negative keywords matter heavily:** "for sale", "used", "second hand", "jobs", "driver", "toy", "parts" and similar, in an account-level list from day one.
+- **Tracking:** calls and quote/booking forms as primary conversions; maximise conversions then tCPA, with the same death-spiral caution.
+- **Value differences:** long-term or large-machine hires are worth more than one-day small-tool hires; split or assign values in the same way as dental treatments.
+
+### Terminology
+
+- Google's product names keep their official spelling: Google Merchant Center (GMC). Everything else is UK English. Bidding strategy names follow the UK interface (Maximise Conversions, Maximise Conversion Value).
 
 ## What this video covers
 
-A full teardown of how Google Ads actually works in 2026, aimed at eCommerce retail brands. It argues that most agencies are still running 2022–2023 playbooks, then rebuilds the modern approach from the ground up: account structure and when segmentation is justified, Performance Max mechanics and traps, where standard shopping fits, search campaigns and landing pages, bidding strategies (expansive vs restrictive, the target ROAS death spiral, portfolio bidding), Google Merchant Centre feed optimisation, and a 90-day rollout plan to transition an existing account.
+A full teardown of how Google Ads actually works in 2026, aimed at eCommerce retail brands (see "How to apply this at Vendo" for dental and plant hire). It argues that most agencies are still running 2022–2023 playbooks, then rebuilds the modern approach from the ground up: account structure and when segmentation is justified, Performance Max mechanics and traps, where standard shopping fits, search campaigns and landing pages, bidding strategies (expansive vs restrictive, the target ROAS death spiral, portfolio bidding), Google Merchant Center feed optimisation, and a 90-day rollout plan to transition an existing account.
 
 ---
 
@@ -20,13 +67,13 @@ A full teardown of how Google Ads actually works in 2026, aimed at eCommerce ret
 Almost every advertiser is in one of two camps:
 
 - **Overspenders.** Google sits at the very bottom of the funnel. Top-of-funnel demand is generated by Meta, TikTok, affiliates and so on; Google simply captures that bottom-intent demand and claims a very high ROAS. Because the in-platform ROAS looks great, spend gets pushed up even though the extra spend is not genuinely incremental to the business.
-- **Underspenders.** These advertisers understand the bottom-of-funnel critique — often too well. They cap Google at, say, $10,000 a month while spending a quarter of a million on Meta, reasoning "Google is just bottom-of-funnel, why scale it?" But they are in categories with large volumes of cold traffic searching relevant terms every day, so they leave genuine scalable demand on the table because they do not trust the platform.
+- **Underspenders.** These advertisers understand the bottom-of-funnel critique — often too well. They cap Google at, say, approx. £8k a month while spending approx. £200k a month on Meta (the presenter's illustration, converted from the source), reasoning "Google is just bottom-of-funnel, why scale it?" But they are in categories with large volumes of cold traffic searching relevant terms every day, so they leave genuine scalable demand on the table because they do not trust the platform.
 
 By the end of the video you should know which camp you are in and where spend needs to move.
 
 ## The 5 big shifts in Google Ads — [2:15](https://youtu.be/DQKF8O1ZcPA?t=135)
 
-1. **PMax hit its ceiling.** At launch, Google was likely discounting auctions to push adoption, so early results were exceptional. Once everyone weighted spend into PMax, the arbitrage disappeared. Scaling PMax to $100k–$300k/month showed in-platform ROAS holding (e.g. still reporting 5x after doubling budget) while back-end revenue did not move — which triggered incrementality testing and budget redistribution.
+1. **PMax hit its ceiling.** At launch, Google was likely discounting auctions to push adoption, so early results were exceptional. Once everyone weighted spend into PMax, the arbitrage disappeared. Scaling PMax on large accounts to approx. £80k–£235k/month showed in-platform ROAS holding (e.g. still reporting 5x after doubling budget) while back-end revenue did not move — which triggered incrementality testing and budget redistribution.
 2. **Standard shopping is back.** It was phased out of most accounts when PMax arrived, but once PMax hits diminishing returns, continued cold new-customer acquisition requires layering standard shopping back into the structure.
 3. **Match type definitions changed.** Exact match now matches to "same meaning" rather than the literal keyword; phrase match got broader; broad match is as broad as ever. This breaks older strategies such as SKAGs (single keyword ad groups), which effectively stopped working around 2020.
 4. **Google introduced AI Max and Demand Gen.**
@@ -66,10 +113,10 @@ The principle: **stay as consolidated as possible while introducing the commerci
 
 ## Why shopping beats search for eCommerce — [11:42](https://youtu.be/DQKF8O1ZcPA?t=702)
 
-(Note: this video is oriented to eCommerce retail; the channel only works with eCommerce brands. Lead-gen viewers should mentally substitute "search" wherever "shopping" is said.)
+(Note: this video is oriented to eCommerce retail; the presenter's agency only works with eCommerce brands. At [21:47](https://youtu.be/DQKF8O1ZcPA?t=1307) he tells lead-gen viewers to substitute "search" wherever he says "shopping". For Vendo's dental and plant hire clients, see "How to apply this at Vendo" above.)
 
 - In eCommerce retail, **80–90% of spend should sit in shopping, not search**, because of **pre-click information**.
-- A search ad gives a headline, a description nobody reads, and a couple of extensions. Searching "buy red dress size medium for wedding" returns an ad that matches the words but shows no price, no image, no options — you pay $1–$2 per click hoping the landing page matches desire. In visual categories like fashion, that produces many clicks from people who bounce with "this isn't the style I like".
+- A search ad gives a headline, a description nobody reads, and a couple of extensions. Searching "buy red dress size medium for wedding" returns an ad that matches the words but shows no price, no image, no options — you pay for the click hoping the landing page matches desire (the presenter quotes a typical non-UK fashion CPC, so no figure is given here). In visual categories like fashion, that produces many clicks from people who bounce with "this isn't the style I like".
 - A shopping ad shows the image, price, title, promos, reviews and brand — and crucially, **five competitors appear alongside you**, so the user compares six listings and clicks the one they prefer. They arrive **pre-bought into your listing being the best**, so conversion rates are higher.
 - Therefore shopping will outperform search in almost any eCommerce business **until you fully saturate the shopping network**, at which point you expand into search for additional volume.
 
@@ -104,7 +151,7 @@ Common mistakes:
 
 **Caveats:**
 
-- PMax is great for **smaller accounts** (roughly ≤$15–20k/month) — it gets accounts moving and scaling.
+- PMax is great for **smaller accounts** (presenter's threshold roughly ≤ approx. £12–16k/month; a principle about account size, not a UK benchmark) — it gets accounts moving and scaling.
 - PMax **hits a ceiling**: beyond a point, incremental back-end returns stop following the platform's numbers.
 - The natural responses to the plateau — raise budgets further, or raise the target ROAS — both just push more spend into warm and repeat traffic. Reported ROAS rises, but the campaign becomes "a glorified retargeting campaign".
 - Reframe the question from *"should I run PMax?"* to *"what percentage allocation should PMax get vs standard shopping?"* For most mid-to-upper-market eCommerce retail, the answer is **20–40% to PMax**, with most spend through standard shopping ([21:47](https://youtu.be/DQKF8O1ZcPA?t=1307)).
@@ -137,7 +184,7 @@ Three things to know:
 
 1. **They are inputs, not targeting.** Adding search themes does not guarantee PMax bids on those terms — it is directional signal only.
 2. **Use converting terms, not guesses.** Pull historically converting key terms from your search campaigns' data. Historical account data always beats invention.
-3. **They barely matter on mature accounts.** Based on running PMax on 250+ accounts and consulting on ~400 more (7–10 figures): if you are already spending $30k–$100k/month on PMax, tweaking signals and themes "is a one-percenter at best". An agency audit whose headline finding is "your audience signals could be tweaked" will make no material impact.
+3. **They barely matter on mature accounts.** Based on running PMax on 250+ accounts and consulting on ~400 more (7–10 figures): if you are already spending approx. £24k–£80k/month on PMax, tweaking signals and themes "is a one-percenter at best". An agency audit whose headline finding is "your audience signals could be tweaked" will make no material impact.
 
 **Where they do matter: new launches** — a new business, product, category or asset group with no historical data. There, PMax uses the themes and signals as its starting direction. After roughly **30 days of conversion data**, Google effectively bypasses the audience signals; you could remove them without affecting performance.
 
@@ -163,14 +210,14 @@ If a negative keyword variation is missed, the brand list catches it; if negativ
 - **What it is:** delete the asset groups, leaving only the listing group (products from the GMC feed). PMax then can only place on **shopping** and **display retargeting** (product tiles only — it has no headlines or descriptions to build anything else). This is effectively what the old **Smart Shopping** campaign type was.
 - **Two settings that destroy feed-only campaigns** ([33:55](https://youtu.be/DQKF8O1ZcPA?t=2035)): turn **off URL expansion** (or it scrapes URLs and auto-builds asset groups) and turn **off automatically created assets**.
 - **Why run it:** to force spend into the shopping placement when you do not want PMax on search, YouTube, Gmail, etc.
-- **War story ([34:45](https://youtu.be/DQKF8O1ZcPA?t=2085)):** a client spending a couple of hundred thousand per month on PMax saw clicks spike and ROAS drop ~20%. The campaign had gone rogue — YouTube spend jumped from 2% to ~10%, and ~10% went into cold Gmail placements. Gmail placements are especially misleading: the "ad" looks like an email at the top of the inbox, and Google counts *opening the email* as a click — not an outbound click to the site. So you get thousands of apparent 10-cent clicks that never reach your website, plus angry customers complaining they unsubscribed and are still "getting emails". Pivoting that PMax to feed-only made those placements physically impossible, fixed the issue, and the account kept scaling.
+- **War story ([34:45](https://youtu.be/DQKF8O1ZcPA?t=2085)):** a client spending a couple of hundred thousand per month on PMax saw clicks spike and ROAS drop ~20%. The campaign had gone rogue — YouTube spend jumped from 2% to ~10%, and ~10% went into cold Gmail placements. Gmail placements are especially misleading: the "ad" looks like an email at the top of the inbox, and Google counts *opening the email* as a click — not an outbound click to the site. So you get thousands of apparent pennies-per-click clicks that never reach your website, plus angry customers complaining they unsubscribed and are still "getting emails". Pivoting that PMax to feed-only made those placements physically impossible, fixed the issue, and the account kept scaling.
 - You can also mix: multiple PMax campaigns per category, some feed-only, some not.
 
 ## Target ROAS and the bidding trap — [36:47](https://youtu.be/DQKF8O1ZcPA?t=2207)
 
 - Standard progression: launch on **max conversion value** to accumulate data, then roll into **target ROAS**. That is broadly correct.
 - **What tROAS actually changes:** max conversion value performance is volatile — big bets that sometimes pay off, sometimes lose. tROAS flattens it. **Average performance over time is roughly the same; the difference is day-to-day reliability**, which most businesses want.
-- **The trap ([38:21](https://youtu.be/DQKF8O1ZcPA?t=2301)):** you set tROAS at 400% (trailing ROAS was ~420–430%). It stabilises. You cannot or do not want to scale budget, so you squeeze: 425%… 450%… eventually ~500%, where spend starts pulling back to equilibrium. Zoomed out it looks like brilliant media buying — from a 4x ROAS to a 5x, then 6x, at the same $1,000/day. **In reality the earlier position was probably better**, because it was reaching more cold traffic.
+- **The trap ([38:21](https://youtu.be/DQKF8O1ZcPA?t=2301)):** you set tROAS at 400% (trailing ROAS was ~420–430%). It stabilises. You cannot or do not want to scale budget, so you squeeze: 425%… 450%… eventually ~500%, where spend starts pulling back to equilibrium. Zoomed out it looks like brilliant media buying — from a 4x ROAS to a 5x, then 6x, at the same approx. £800/day. **In reality the earlier position was probably better**, because it was reaching more cold traffic.
 - **The mechanism — the bullseye analogy ([39:50](https://youtu.be/DQKF8O1ZcPA?t=2390)):** picture the whole population as a circle. The subset you can hit a 7x on is small and full of warm people — site visitors, existing customers, people who saw your Meta ads. To scale spend, the circle must widen into colder users at worse efficiency. Raising tROAS does the opposite: **the circle shrinks**. Efficiency looks better, but you are not genuinely acquiring new customers — you are tightening the pool.
 
 ## Feeder strategies — [40:48](https://youtu.be/DQKF8O1ZcPA?t=2448)
@@ -190,11 +237,11 @@ All previous rules still apply (consolidation over segmentation; segment only on
 
 1. **Top sellers vs everything else.** One campaign holds your top sellers, another holds the rest — forcing Pareto's principle (~80% of spend into the top 20% of products) while keeping testing budget on the long tail so new winners can roll up. Only appropriate for **large SKU counts outside fashion**; wrong for fashion and wrong for 5–10-product stores.
 2. **The feeder strategy** (as above): standard shopping feeding a high-tROAS PMax.
-3. **The labeliser (à la "flow roast" tiering).** Split ad groups/campaigns by product performance tier: **over-index, index, near-index, under-index, no-index** (above expectation, on target, just below, below, zero). Small catalogues can do this manually with custom labels; otherwise use an **automated labeliser script** that re-tiers products on 30-day rolling performance in real time, with a bidding strategy and budget per tier. **Not recommended for most businesses** — it adds heavy segmentation for limited upside — but with **thousands of SKUs** it becomes an effective management system.
+3. **The labeliser (e.g. the Flowboost Labelizer tool).** Split ad groups/campaigns by product performance tier: **over-index, index, near-index, under-index, no-index** (above expectation, on target, just below, below, zero). Small catalogues can do this manually with custom labels; otherwise use an **automated labeliser script** that re-tiers products on 30-day rolling performance in real time, with a bidding strategy and budget per tier. **Not recommended for most businesses** — it adds heavy segmentation for limited upside — but with **thousands of SKUs** it becomes an effective management system.
 
 ## Search campaigns (and when they matter) — [46:15](https://youtu.be/DQKF8O1ZcPA?t=2775)
 
-- For ~90% of eCommerce brands, ~90% of focus belongs on shopping. The exception: **eCommerce with a B2B component**. Business buyers intuitively know B2B does not happen on the shopping network — a café owner sourcing bulk tea will not click a $5 consumer shopping listing because it does not match the bulk/wholesale price in their head. They click search ads instead. Example: selling bulk eyelashes to technicians — search outperforms shopping.
+- For ~90% of eCommerce brands, ~90% of focus belongs on shopping. The exception: **eCommerce with a B2B component**. Business buyers intuitively know B2B does not happen on the shopping network — a café owner sourcing bulk tea will not click a cheap single-unit consumer shopping listing because it does not match the bulk/wholesale price in their head. They click search ads instead. Example: selling bulk eyelashes to technicians — search outperforms shopping.
 - **Components of a modern search campaign ([47:47](https://youtu.be/DQKF8O1ZcPA?t=2867)):**
   - **Topic ad groups**, not keyword ad groups.
   - **Negative keywords:** the first 30 days are the highest-leverage window — the campaign goes out broad and places on plenty of irrelevant terms. Review negatives **weekly** in month one (daily on very high budgets), then drop to weekly–fortnightly. Do not over-tweak: every change resets learnings slightly.
@@ -206,7 +253,7 @@ All previous rules still apply (consolidation over segmentation; segment only on
 The largest lever in search campaigns is not in the account at all — it is the landing page.
 
 - **The economics:** you pay a CPC, drive traffic to the site, and revenue = conversion rate × average order value. That yields ROAS.
-- **CPC is largely a vanity metric ([50:26](https://youtu.be/DQKF8O1ZcPA?t=3026)).** Across large datasets, CPC and ROAS show very little relationship — high-CPC/high-ROAS accounts and the reverse both exist, at product and campaign level. Only the extremes are meaningful ($100 CPCs will never be profitable; 10-cent clicks are junk traffic). In the middle, CPC tells you nothing, because **click quality varies** — and quality is determined by the automated bidding you are trusting.
+- **CPC is largely a vanity metric ([50:26](https://youtu.be/DQKF8O1ZcPA?t=3026)).** Across large datasets, CPC and ROAS show very little relationship — high-CPC/high-ROAS accounts and the reverse both exist, at product and campaign level. Only the extremes are meaningful (three-figure CPCs will never be profitable; clicks costing pennies are probably junk traffic). In the middle, CPC tells you nothing, because **click quality varies** — and quality is determined by the automated bidding you are trusting.
 - **Google is ultimately an auction ([51:50](https://youtu.be/DQKF8O1ZcPA?t=3110)):** whoever can pay most to win the auction gets the listing, the click and the conversion. How do you afford to pay the most? **By having the highest conversion rate and AOV.** If you convert at double your competitors' rate, you can pay double per click for the same economics. Everything in-platform — segmentation, asset groups, signals, feed optimisation — is really about entering better auctions and improving quality score so your effective bid is artificially advantaged. But a competitor with better conversion rate and AOV can still beat you **with worse ads and worse structure**, simply because they can afford to.
 - **The practical tactic almost nobody does ([53:35](https://youtu.be/DQKF8O1ZcPA?t=3215)): split test landing pages.** In an ad group, duplicate the ad: ad 1 → landing page 1, ad 2 → landing page 2. Monitor conversion rate over 30–60 days, keep the winner, rotate in a new challenger (ad 3 → landing page 3), and repeat. Average conversion rate climbs, letting you bid more; add AOV optimisation and revenue per visitor rises — which is what unlocks scale.
 - Two side notes ([54:23](https://youtu.be/DQKF8O1ZcPA?t=3263)): exclude brand on search campaigns too, and for bidding generally use a smart strategy (target ROAS, max conversions or similar).
@@ -225,7 +272,7 @@ The largest lever in search campaigns is not in the account at all — it is the
 
 ## Max conversions vs max conversion value — [59:48](https://youtu.be/DQKF8O1ZcPA?t=3588)
 
-In eCommerce, choose **value ~90% of the time**. Max conversions optimises for the lowest CPA, which systematically pushes your **cheapest product**: a $40 t-shirt might achieve a $20 CPA while a $200 jumper costs $60 per order. Even when the jumper's ROAS is *better* (3.5x vs 2x in the example), the campaign does not care — it is optimising order count, not value — so budget floods into the t-shirt. Optimising for value avoids spending into products you do not want to push.
+In eCommerce, choose **value ~90% of the time**. Max conversions optimises for the lowest CPA, which systematically pushes your **cheapest product**: a £30 t-shirt might achieve a £15 CPA while a £160 jumper costs £45 per order (illustrative, converted from the presenter's example). Even when the jumper's ROAS is *better* (roughly 3.5x vs 2x), the campaign does not care — it is optimising order count, not value — so budget floods into the t-shirt. Optimising for value avoids spending into products you do not want to push.
 
 ## The target ROAS death spiral — [1:00:10](https://youtu.be/DQKF8O1ZcPA?t=3610)
 
@@ -241,9 +288,9 @@ The presenter sees onboarded accounts mid-spiral constantly; knowing the mechani
 
 - A **portfolio bidding strategy** is set at the account level and applied across multiple campaigns. (A similar capability exists in SA360, but that is enterprise-only.)
 - **Killer feature: merged learnings.** Remember campaigns A/B/C learning in isolation? A portfolio strategy applied to all of them **takes the silos down** — they learn together. This is the fix if you need segmentation for commercial reasons but want pooled data.
-- **Second benefit: max/min CPC caps** on top of tROAS or max value. Example: high-end furniture, where auctions can hit $10–$30 per click — you can set the target ROAS *and* a max CPC so the campaign never pays $30 for a user regardless of intent.
+- **Second benefit: max/min CPC caps** on top of tROAS or max value. Example: high-end furniture, where auctions can hit approx. £8–£24 per click — you can set the target ROAS *and* a max CPC so the campaign never pays the top of that range for a user regardless of intent.
 - **Smart bidding exploration** ([1:04:32](https://youtu.be/DQKF8O1ZcPA?t=3872)) — search-only setting (not on PMax/shopping): even under tROAS, the campaign may go 10–30% outside the target in bands to test. Effectively a middle ground between restrictive and expansive — you hit target while still making learning plays. Recommended if you run search.
-- **"Limited by budget"** ([1:05:24](https://youtu.be/DQKF8O1ZcPA?t=3924)): an *indicator*, not a rule, that more auctions were available. It appears on virtually every account at every spend level — even $5–10k/day PMax in a small Australian market. Do not treat it as the Bible for incremental spend.
+- **"Limited by budget"** ([1:05:24](https://youtu.be/DQKF8O1ZcPA?t=3924)): an *indicator*, not a rule, that more auctions were available. It appears on virtually every account at every spend level — even approx. £4–8k/day PMax in a small Australian market. Do not treat it as the Bible for incremental spend.
 - **Budget changes** ([1:05:53](https://youtu.be/DQKF8O1ZcPA?t=3953)): the 20%-increment rule is real on Google. Meta and TikTok tolerate faster moves; Google is a more stable, consistent platform that wants slow, methodical changes. Doubling budgets overnight or halving a tCPA overnight is a bad idea. Bringing budgets *down* quickly is generally fine with little instability; going up (and changing bidding strategies) should be slow.
 
 ## GMC feed optimisation — [1:06:43](https://youtu.be/DQKF8O1ZcPA?t=4003)
@@ -271,17 +318,18 @@ Two fixes:
 ### Other feed items — [1:13:08](https://youtu.be/DQKF8O1ZcPA?t=4388)
 
 - Descriptions and all remaining attributes should already be clean — it is a one-time setup; if it is not done, do it.
-- **One feed per currency.** A common audit finding: every region running through one feed in one currency. Google then shows a live currency conversion on the listing ("converted from AUD/USD plus tax"), which signals an international store and **kills both CTR and conversion rate** — often when the store is not even really "international", just misconfigured.
+- **One feed per currency.** A common audit finding: every region running through one feed in one currency. Google then shows a live currency conversion on the listing (e.g. a UK shopper seeing a price "converted from" a foreign currency), which signals an international store and **kills both CTR and conversion rate** — often when the store is not even really "international", just misconfigured.
 
 ## The 90-day rollout plan — [1:13:54](https://youtu.be/DQKF8O1ZcPA?t=4434)
 
 1. **Tracking.** No GA4 events as primary conversions; direct/back-end events with enhanced conversions on; auto-tagging on; everything up to scratch.
 2. **Structure map.** How many campaigns do we actually need? The goal is one; every extra needs a commercial reason. Always split brand vs non-brand. Enforce naming consistency.
 3. **PMax check.** Asset groups split by product type; listing groups segmented accordingly; brand exclusions on; audience signals present (not urgent); tROAS not absurdly high (which would make it a pure retargeting campaign); correct bidding strategy per the expansive/restrictive and conversions/value logic.
-4. **Wasted-spend audit.** Kill or roll up zombie campaigns ($400/month campaigns that serve no purpose); negative-keyword unprofitable search terms; turn off display on search campaigns.
-5. **(Implied step 5 folded into the audit above.)**
-6. **Ad asset health check.** Sitelinks, callouts, promos that are not stale — maximise assets on every campaign to increase your ads' on-page real estate; an easy quick win.
-7. **Feed check — with a slow rollout.** Optimise titles and images, but **do not swap all titles overnight** — that resets learning phases on every campaign. Roll titles gradually, watch CTR, CPCs and returns in real time, and iterate with different keywords if changes are not making a material impact.
+4. **Wasted-spend audit.** Remove or roll up zombie campaigns (small campaigns, approx. £300/month in the presenter's example, that serve no purpose; at Vendo this is restructuring, not pausing the client's advertising); negative-keyword unprofitable search terms; turn off display on search campaigns.
+5. **Ad asset health check.** Sitelinks, callouts, promos that are not stale — maximise assets on every campaign to increase your ads' on-page real estate; an easy quick win.
+6. **Feed check — with a slow rollout (ecommerce only).** Optimise titles and images, but **do not swap all titles overnight** — that resets learning phases on every campaign. Roll titles gradually, watch CTR, CPCs and returns in real time, and iterate with different keywords if changes are not making a material impact.
+
+(The presenter's own numbering skips from three to six; the steps above are his, renumbered. For dental and plant hire, replace step 6 with a landing page split-testing plan.)
 
 ---
 
@@ -294,6 +342,6 @@ Two fixes:
 5. **Segment PMax asset groups by product type (min 3, max 20, ~15+ products each)** and always customise the listing groups; never run one default asset group.
 6. **Exclude brand everywhere** (brand lists *and* negative keywords on PMax; negatives on search) — unexcluded, PMax is just a retargeting campaign.
 7. **Raising target ROAS shrinks your audience to warm traffic** — it flatters reported efficiency while strangling new-customer acquisition, and mis-set targets trigger a death spiral of falling data, worse modelling and collapsing spend.
-8. **Optimise for conversion value, not conversions**, in eCommerce — max conversions floods budget into your cheapest products.
+8. **Optimise for conversion value, not conversions**, in eCommerce — max conversions floods budget into your cheapest products. Lead-gen equivalent: max conversions floods budget into the cheapest leads, so split or value high-ticket treatments separately.
 9. **Conversion rate and AOV are the real competitive weapons**: Google is an auction, and whoever converts best can outbid everyone else — so split test landing pages relentlessly; CPC in the mid-range is a vanity metric.
-10. **The GMC feed is the top PMax/shopping lever**: keyword-led titles built from search term report data, 4:5 imagery with contrast against competitors, per-currency feeds — rolled out slowly to avoid resetting learning.
+10. **The GMC feed is the top PMax/shopping lever** (ecommerce only): keyword-led titles built from search term report data, 4:5 imagery with contrast against competitors, per-currency feeds — rolled out slowly to avoid resetting learning.
