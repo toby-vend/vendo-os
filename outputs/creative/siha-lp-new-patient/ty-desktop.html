@@ -1,4 +1,4 @@
-<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><title>Thank you | Desktop</title><style>
+<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><script>if(location.hash.indexOf('figmacapture')<0)document.documentElement.className='live'</script><title>Thank you | Desktop</title><style>
 @font-face { font-family: Metropolis; src: url(assets/fonts/Metropolis-Light.otf); font-weight: 300; }
 @font-face { font-family: Metropolis; src: url(assets/fonts/Metropolis-Regular.otf); font-weight: 400; }
 @font-face { font-family: Metropolis; src: url(assets/fonts/Metropolis-Medium.otf); font-weight: 500; }
@@ -6,6 +6,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #2a2a2a; font-family: Metropolis, sans-serif; padding: 80px; color: #14211a; }
 .page { background: #eae3de; overflow: hidden; }
+/* Live browser preview (the Figma capture adds #figmacapture to the URL and keeps the static layout) */
+.live body { padding: 0; background: #eae3de; }
+.live .page { margin: 0 auto; }
+.live .bar { position: fixed !important; top: auto !important; bottom: 0; left: 50% !important; transform: translateX(-50%); }
+.live .track { margin-left: 0 !important; padding-right: var(--g); animation: marquee 30s linear infinite; }
+.live .track:hover { animation-play-state: paused; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .live .track { animation: none; } }
 .d { width: 1440px; }
 .m { width: 390px; padding-bottom: 84px; }
 .logo, .icon { display: block; height: auto; }

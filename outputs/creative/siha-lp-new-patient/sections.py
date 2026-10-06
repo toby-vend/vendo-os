@@ -92,7 +92,7 @@ def awards(m):
     return (f'<section data-name="Awards marquee (auto-scrolls, loops)" style="position:relative;background:{C["wh"]};padding:{"28px 0 30px" if m else "36px 0 40px"};overflow:hidden">'
             f'<div class="label" style="text-align:center;color:{C["bo"]};margin-bottom:{18 if m else 24}px">Award-winning care</div>'
             f'<div style="position:relative;overflow:hidden">{fade("left")}{fade("right")}'
-            f'<div data-name="Track" style="display:flex;gap:{gap}px;align-items:flex-start;margin-left:-{70 if m else 220}px;width:max-content">{items}{items}</div></div></section>')
+            f'<div class="track" data-name="Track" style="--g:{gap}px;display:flex;gap:{gap}px;align-items:flex-start;margin-left:-{70 if m else 220}px;width:max-content">{items}{items}</div></div></section>')
 
 
 # ---------------------------------------------------------------- 2 why patients choose us

@@ -33,6 +33,14 @@ CSS = f"""
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{ background: #2a2a2a; font-family: Metropolis, sans-serif; padding: 80px; color: {C['od']}; }}
 .page {{ background: {C['nu']}; overflow: hidden; }}
+/* Live browser preview (the Figma capture adds #figmacapture to the URL and keeps the static layout) */
+.live body {{ padding: 0; background: {C['nu']}; }}
+.live .page {{ margin: 0 auto; }}
+.live .bar {{ position: fixed !important; top: auto !important; bottom: 0; left: 50% !important; transform: translateX(-50%); }}
+.live .track {{ margin-left: 0 !important; padding-right: var(--g); animation: marquee 30s linear infinite; }}
+.live .track:hover {{ animation-play-state: paused; }}
+@keyframes marquee {{ to {{ transform: translateX(-50%); }} }}
+@media (prefers-reduced-motion: reduce) {{ .live .track {{ animation: none; }} }}
 .d {{ width: 1440px; }}
 .m {{ width: 390px; padding-bottom: 84px; }}
 .logo, .icon {{ display: block; height: auto; }}
@@ -176,14 +184,14 @@ SECTIONS_M = [nav_m, hero_m]
 
 # Mobile sticky bottom bar (form CTA only, scrolls to the hero form): fixed to the bottom of the viewport on every scroll position (shown at the first
 # screen's fold, 844px, in the design). The page gets matching bottom padding so the footer isn't hidden.
-BOTTOM_BAR = (f'<div data-name="Sticky bottom bar (fixed to viewport bottom)" style="position:absolute;left:0;top:760px;width:390px;height:84px;'
+BOTTOM_BAR = (f'<div class="bar" data-name="Sticky bottom bar (fixed to viewport bottom)" style="position:absolute;left:0;top:760px;width:390px;height:84px;'
               f'padding:12px 16px;background:{C["nu"]};box-shadow:0 -8px 24px rgba(20,33,26,.12);display:grid;z-index:5">'
               f'<span class="btn primary" style="height:56px">{CTA}</span></div>')
 
 
 def page(title, cls, sections):
     body = "".join(s() for s in sections)
-    return (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><title>{title}</title><style>{CSS}</style>"
+    return (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><script>if(location.hash.indexOf('figmacapture')<0)document.documentElement.className='live'</script><title>{title}</title><style>{CSS}</style>"
             f"<script src='https://mcp.figma.com/mcp/html-to-design/capture.js' async></script></head>"
             f"<body><div class='page {cls}' data-name='{title}' style='position:relative'>{body}{BOTTOM_BAR if cls == 'm' else ''}</div></body></html>")
 
