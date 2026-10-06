@@ -45,8 +45,7 @@ def mob_cta(title):
     inner = (f'<div class="label" style="color:{C["bo"]}">Book now</div>'
              f'<h2 class="h1" style="margin-top:12px;font-size:30px">{title}</h2>'
              f'<p class="body" style="margin-top:12px;color:{C["ol"]}">It takes under a minute. We’ll call you back to confirm.</p>'
-             f'<div style="display:grid;gap:12px;margin-top:24px"><span class="btn primary" style="height:56px">{CTA}</span>'
-             f'<span class="btn outline" style="height:56px">Call {PHONE}</span></div>')
+             f'<div style="margin-top:24px"><span class="btn primary" style="height:56px;width:100%">{CTA}</span></div>')
     return sec("Book now (mobile: button to hero form)", inner, True, pad_m=(48, 20))
 
 
@@ -56,11 +55,10 @@ def photo(img, h, radius=30, pos="50% 50%"):
 
 
 def cta_row(m, dark=False, top=48):
-    """Repeated CTA (Ad LP SOP: one unified CTA and one phone number, repeated down the page)."""
+    """Repeated CTA: one unified button that scrolls to the form (form fill is the only CTA, per Toby 6 Oct 2026)."""
     phone_c, num_c = (C['be'], C['nu']) if dark else (C['ol'], C['od'])
     return (f'<div data-name="CTA" style="display:flex;{"flex-direction:column;align-items:flex-start;" if m else "align-items:center;"}gap:{16 if m else 24}px;margin-top:{top}px">'
-            f'<span class="btn {"beige" if dark else "primary"}">{CTA}</span>'
-            f'<span class="body" style="color:{phone_c}">or call <b style="font-weight:600;color:{num_c}">{PHONE}</b></span></div>')
+            f'<span class="btn {"beige" if dark else "primary"}">{CTA}</span></div>')
 
 
 def mark(color, size=22):
@@ -79,21 +77,22 @@ AWARD_CAPTIONS = [("Winner", "Practice brand &amp; design", "Private Dentistry A
 
 
 def awards(m):
-    if m:
-        cards = [f'''<div class="card" data-name="Award" style="width:100%;background:{C['wh']};border-radius:24px;padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center">
-          <div style="height:96px;width:100%;display:flex;align-items:center;justify-content:center"><img src="assets/awards/{a}" style="max-height:96px;max-width:170px;width:auto;height:auto"></div>
-          <div class="label" style="margin-top:14px;font-size:12px;color:{C['bo']}">{w}</div>
-          <div class="h3" style="margin-top:6px;font-size:17px">{t}</div>
-          <div class="body" style="margin-top:4px;font-size:13px;color:{C['br']}">{e}</div></div>''' for a, (w, t, e) in zip(AWARDS, AWARD_CAPTIONS)]
-        inner = (f'<div class="label" style="color:{C["bo"]}">Award-winning care</div>'
-                 f'<h2 class="h1" style="margin-top:10px;font-size:26px">Recognised by the industry</h2>'
-                 f'<div style="margin-top:24px">{swipe(cards, w=230)}</div>')
-        return sec("Awards", inner, m, bg=C['be'], pad_m=(48, 20))
-    logos = "".join(f'<img data-name="Award" src="assets/awards/{a}" style="height:84px;width:auto;flex:none">' for a in AWARDS)
-    inner = (f'<div style="display:flex;align-items:center;gap:56px">'
-             f'<div class="label" style="flex:none;color:{C["br"]}">Award-winning care</div>'
-             f'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:48px">{logos}</div></div>')
-    return sec("Awards", inner, m, bg=C['wh'], pad=(40, 80), pad_m=(32, 20))
+    """Awards marquee: an edge-to-edge banner that auto-scrolls right to left and loops (shown mid-scroll here).
+    Build: CSS animation translateX(-50%) over ~30s on a doubled track; pause on hover; respect prefers-reduced-motion."""
+    h, gap = (58, 28) if m else (84, 72)
+    item = lambda a, w, t: (f'<div data-name="Award" style="flex:none;{"width:140px;" if m else ""}display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">'
+                            f'<img src="assets/awards/{a}" style="height:{h}px;width:auto;max-width:{140 if m else 220}px;object-fit:contain">'
+                            f'<span class="label" style="font-size:{10 if m else 12}px;line-height:1.5;{"" if m else "white-space:nowrap;"}color:{C["br"]}">{w}<br>{t}</span></div>' if m else
+                            f'<div data-name="Award" style="flex:none;display:flex;flex-direction:column;align-items:center;gap:10px">'
+                            f'<img src="assets/awards/{a}" style="height:{h}px;width:auto">'
+                            f'<span class="label" style="font-size:12px;white-space:nowrap;color:{C["br"]}">{w} · {t}</span></div>')
+    items = "".join(item(a, w, t) for a, (w, t, e) in zip(AWARDS, AWARD_CAPTIONS))
+    fade = lambda side: (f'<div style="position:absolute;top:0;bottom:0;{side}:0;width:{60 if m else 160}px;'
+                         f'background:linear-gradient(to {"right" if side == "left" else "left"},{C["wh"]},rgba(255,255,255,0));z-index:1"></div>')
+    return (f'<section data-name="Awards marquee (auto-scrolls, loops)" style="position:relative;background:{C["wh"]};padding:{"28px 0 30px" if m else "36px 0 40px"};overflow:hidden">'
+            f'<div class="label" style="text-align:center;color:{C["bo"]};margin-bottom:{18 if m else 24}px">Award-winning care</div>'
+            f'<div style="position:relative;overflow:hidden">{fade("left")}{fade("right")}'
+            f'<div data-name="Track" style="display:flex;gap:{gap}px;align-items:flex-start;margin-left:-{70 if m else 220}px;width:max-content">{items}{items}</div></div></section>')
 
 
 # ---------------------------------------------------------------- 2 why patients choose us
@@ -215,8 +214,7 @@ def cta_form(m):
         return mob_cta("Don’t wait in pain")
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head("New patient check-up", "Ready when you are", "Same-week appointments, evenings and weekends. £89 for a full exam and 3D scan, with no hidden extras.", m, width=520)}
-      <div style="display:grid;gap:12px;margin-top:28px">{tick("Full exam + 3D scan")}{tick("Oral cancer screening")}{tick("A clear, costed plan")}{tick("0% finance available")}</div>
-      <p class="body" style="margin-top:28px;color:{C['ol']}">Prefer to talk? Call <b style="font-weight:600;color:{C['od']}">{PHONE}</b></p></div>'''
+      <div style="display:grid;gap:12px;margin-top:28px">{tick("Full exam + 3D scan")}{tick("Oral cancer screening")}{tick("A clear, costed plan")}{tick("0% finance available")}</div></div>'''
     form = form_card(350 if m else 520, 24 if m else 40, title="Book your check-up")
     body = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 520px;gap:96px;align-items:center">{left}{form}</div>'
     return sec("Book your check-up (form 2)", body, m, bg=C['be'])
@@ -356,7 +354,7 @@ FAQ = [("What’s included in a new patient check-up?", "Every new patient check
        ("How much does a new patient check-up cost?", "£89, flat. That includes your full examination. There’s nothing added on afterwards. If your check-up identifies anything that needs attention, it’s costed and explained upfront before you decide anything."),
        ("Do you accept dental insurance?", "Yes. All major dental insurances are accepted. We’ll provide the receipts and paperwork you need to claim back with your insurer. If you’re unsure whether your policy covers a check-up or any recommended treatment, bring your policy details and we’ll help you check."),
        ("Is finance or a membership plan available if I’m not insured?", "Yes. Any treatment identified at your check-up can be spread over up to 12 months with 0% interest-free finance. We also offer a Siha Dental &amp; Facial Membership plan designed for patients without insurance. Ask at your visit and the team will talk you through the options."),
-       ("Do you offer emergency appointments?", "Yes. We hold same-week appointments for pain, breakages or anything that can’t wait. Call us on 020 4602 3510 and we’ll get you seen as quickly as possible."),
+       ("Do you offer emergency appointments?", "Yes. We hold same-week appointments for pain, breakages or anything that can’t wait. Send us your details and we’ll get you seen as quickly as possible."),
        ("How often should I have a check-up?", "For most people, every six to twelve months. It depends on your oral health, your history, and your risk of things like gum disease. Your dentist will recommend the right interval for you at your first visit, rather than defaulting everyone to the same schedule."),
        ("Do you see children and treat the whole family?", "Yes. We look after whole families: check-ups, hygiene and treatment for adults and children under one roof, with dentists who get to know your history. Booking family appointments together is no problem; just mention it when you book."),
        ("It’s been years since my last check-up. Is that a problem?", "Not at all, and you won’t get a lecture about it. A large share of our new patients haven’t seen a dentist in years. Your check-up simply establishes where things stand today, and anything that needs attention is explained and costed clearly. No judgement, no pressure.")]
@@ -371,7 +369,7 @@ def faq(m):
           <div style="display:flex;justify-content:space-between;gap:20px;align-items:center"><span class="h3" style="font-size:{17 if m else 20}px">{q}</span>
           <span style="flex:none;width:36px;height:36px;border-radius:50%;background:{C['od'] if open_ else C['be']};color:{C['nu'] if open_ else C['od']};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:300">{'–' if open_ else '+'}</span></div>
           {ans}</div>''')
-    left = head("FAQ", "Common questions", f"Can’t see your question? Call us on {PHONE}.", m, width=380)
+    left = head("FAQ", "Common questions", "Can’t see your question? Send us your details and we’ll call you back.", m, width=380)
     right = f'<div style="border-top:1px solid rgba(20,33,26,.14)">{"".join(rows)}</div>'
     body = grid([left, right], 1, 32) if m else f'<div style="display:grid;grid-template-columns:380px 1fr;gap:80px">{left}{right}</div>'
     return sec("FAQ", body, m)
@@ -383,7 +381,6 @@ def final(m):
       <div class="label" style="color:{C['bo']}">Get started</div>
       <h2 class="display" style="margin-top:18px;color:{C['nu']};font-size:{34 if m else 56}px">Your next <span style="white-space:nowrap">check-up,</span> <b>sorted</b></h2>
       <p class="body" style="margin-top:20px;color:{C['be']};font-size:{16 if m else 18}px">Book your new patient check-up at Siha Dental &amp; Facial. Straight answers, no pressure, and a plan you understand.</p>
-      <p class="body" style="margin-top:24px;color:{C['be']}">Prefer to talk? Call <b style="color:{C['nu']};font-weight:600">{PHONE}</b></p>
       <div style="display:flex;gap:28px;margin-top:20px;flex-wrap:wrap">
         <span class="label" style="color:{C['be']};font-weight:500">0% finance available</span><span class="label" style="color:{C['be']};font-weight:500">All major insurances accepted</span></div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:28px">{stars(5, 16)}<span class="body" style="color:{C['be']};font-size:14px">5.0 from 157 Google reviews</span></div>
@@ -393,7 +390,7 @@ def final(m):
     inner = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 500px;gap:96px;align-items:center">{left}{form}</div>'
     foot = f'''<div data-name="Footer" style="margin-top:{56 if m else 96}px;padding-top:32px;border-top:1px solid rgba(225,213,202,.2);display:flex;{'flex-direction:column;gap:16px' if m else 'justify-content:space-between;align-items:center'}">
       <div style="width:130px;color:{C['be']}">{LOGO}</div>
-      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU · {PHONE}</span>
+      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU</span>
       <span class="body" style="font-size:13px;color:{C['br']}">© 2026 Siha Dental &amp; Facial. All rights reserved. <u>Privacy policy</u> · Marketing by Vendo Digital</span></div>'''
     return sec("Final CTA", inner + foot, m, bg=C['od'])
 
@@ -410,12 +407,12 @@ def thank_you(m):
       <h1 class="h1" style="margin-top:12px;font-size:{32 if m else 44}px">Thank you. We’ve got your details.</h1>
       <p class="body" style="margin-top:16px;color:{C['ol']};font-size:{16 if m else 18}px">Our team will be in touch to confirm your new patient check-up. If you’d rather pick a time yourself, you can book online now.</p>
       <div style="display:flex;{'flex-direction:column;' if m else ''}gap:16px;justify-content:center;align-items:center;margin-top:32px">
-        <span class="btn primary">Choose a time online</span><span class="btn outline">Call {PHONE}</span></div>
+        <span class="btn primary">Choose a time online</span></div>
       <p class="body" style="margin-top:28px;font-size:14px;color:{C['br']}">157 Askew Road, London W12 9AU</p>
     </div>'''
     foot = f'''<div style="display:flex;{'flex-direction:column;gap:16px' if m else 'justify-content:space-between;align-items:center'}">
       <div style="width:130px;color:{C['be']}">{LOGO}</div>
-      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU · {PHONE}</span>
+      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU</span>
       <span class="body" style="font-size:13px;color:{C['br']}">© 2026 Siha Dental &amp; Facial. All rights reserved. <u>Privacy policy</u></span></div>'''
     return ((nav_m() if m else nav_d()) + sec("Thank you", card, m, pad=(120, 80), pad_m=(48, 20))
             + sec("Footer", foot, m, bg=C['od'], pad=(40, 80), pad_m=(32, 20)))

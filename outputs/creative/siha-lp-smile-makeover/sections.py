@@ -93,8 +93,7 @@ def cta_form(m):
         return mob_cta("See your new smile before you commit")
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head("Smile makeover consultation", "See your new smile before you commit", "We scan your teeth, design the result with you and give you a full itemised plan. The consultation is free, with no obligation.", m, width=520)}
-      <div style="display:grid;gap:12px;margin-top:28px">{tick("3D digital scan")}{tick("Your smile designed with you")}{tick("A full, itemised plan")}{tick("0% finance available")}</div>
-      <p class="body" style="margin-top:28px;color:{C['ol']}">Prefer to talk? Call <b style="font-weight:600;color:{C['od']}">{PHONE}</b></p></div>'''
+      <div style="display:grid;gap:12px;margin-top:28px">{tick("3D digital scan")}{tick("Your smile designed with you")}{tick("A full, itemised plan")}{tick("0% finance available")}</div></div>'''
     form = form_card(350 if m else 520, 24 if m else 40, title="Book your free consultation")
     body = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 520px;gap:96px;align-items:center">{left}{form}</div>'
     return sec("Book a consultation (form 2)", body, m)
@@ -214,7 +213,6 @@ def final(m):
       <div class="label" style="color:{C['bo']}">Get started</div>
       <h2 class="display" style="margin-top:18px;color:{C['nu']};font-size:{32 if m else 50}px">One plan, <b>one result</b></h2>
       <p class="body" style="margin-top:20px;color:{C['be']};font-size:{16 if m else 18}px">Book your free smile makeover consultation at Siha Dental &amp; Facial. We’ll scan your teeth, design your new smile with you, and give you a full itemised plan. No commitment required.</p>
-      <p class="body" style="margin-top:24px;color:{C['be']}">Prefer to talk? Call <b style="color:{C['nu']};font-weight:600">{PHONE}</b></p>
       <div style="display:flex;gap:28px;margin-top:20px;flex-wrap:wrap">
         <span class="label" style="color:{C['be']};font-weight:500">No obligation</span><span class="label" style="color:{C['be']};font-weight:500">0% finance available</span><span class="label" style="color:{C['be']};font-weight:500">Free consultation</span></div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:28px">{stars(5, 16)}<span class="body" style="color:{C['be']};font-size:14px">5.0 from 157 Google reviews</span></div>
@@ -223,7 +221,7 @@ def final(m):
     inner = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 500px;gap:96px;align-items:center">{left}{form}</div>'
     foot = f'''<div data-name="Footer" style="margin-top:{56 if m else 96}px;padding-top:32px;border-top:1px solid rgba(225,213,202,.2);display:flex;{'flex-direction:column;gap:16px' if m else 'justify-content:space-between;align-items:center'}">
       <div style="width:130px;color:{C['be']}">{LOGO}</div>
-      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU · {PHONE}</span>
+      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU</span>
       <span class="body" style="font-size:13px;color:{C['br']}">© 2026 Siha Dental &amp; Facial. All rights reserved. <u>Privacy policy</u> · Marketing by Vendo Digital</span></div>'''
     return sec("Final CTA", inner + foot, m, bg=C['od'])
 
@@ -242,12 +240,12 @@ def thank_you(m):
       <h1 class="h1" style="margin-top:12px;font-size:{32 if m else 44}px">Thank you. We’ve got your details.</h1>
       <p class="body" style="margin-top:16px;color:{C['ol']};font-size:{16 if m else 18}px">Our team will be in touch to confirm your free smile makeover consultation. If you’d rather pick a time yourself, you can book online now.</p>
       <div style="display:flex;{'flex-direction:column;' if m else ''}gap:16px;justify-content:center;align-items:center;margin-top:32px">
-        <span class="btn primary">Choose a time online</span><span class="btn outline">Call {PHONE}</span></div>
+        <span class="btn primary">Choose a time online</span></div>
       <p class="body" style="margin-top:28px;font-size:14px;color:{C['br']}">157 Askew Road, London W12 9AU</p>
     </div>'''
     foot = f'''<div style="display:flex;{'flex-direction:column;gap:16px' if m else 'justify-content:space-between;align-items:center'}">
       <div style="width:130px;color:{C['be']}">{LOGO}</div>
-      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU · {PHONE}</span>
+      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU</span>
       <span class="body" style="font-size:13px;color:{C['br']}">© 2026 Siha Dental &amp; Facial. All rights reserved. <u>Privacy policy</u></span></div>'''
     return ((nav_m() if m else nav_d()) + sec("Thank you", card, m, pad=(120, 80), pad_m=(48, 20))
             + sec("Footer", foot, m, bg=C['od'], pad=(40, 80), pad_m=(32, 20)))

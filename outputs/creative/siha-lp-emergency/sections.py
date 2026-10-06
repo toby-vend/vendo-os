@@ -60,8 +60,7 @@ def cta_form(m):
         return mob_cta("Don’t wait in pain")
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head("Emergency appointment", "Don’t wait in pain", "Same-day appointments are often available, and we aim to see you within 24 hours. Send your details and we’ll call you back.", m, width=520)}
-      <div style="display:grid;gap:12px;margin-top:28px">{tick("Pain relief comes first")}{tick("New &amp; existing patients")}{tick("Open Saturdays and late on Tuesdays")}{tick("Every cost agreed before treatment")}</div>
-      <p class="body" style="margin-top:28px;color:{C['ol']}">In severe pain? Call <b style="font-weight:600;color:{C['od']}">{PHONE}</b></p></div>'''
+      <div style="display:grid;gap:12px;margin-top:28px">{tick("Pain relief comes first")}{tick("New &amp; existing patients")}{tick("Open Saturdays and late on Tuesdays")}{tick("Every cost agreed before treatment")}</div></div>'''
     form = form_card(350 if m else 520, 24 if m else 40)
     body = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 520px;gap:96px;align-items:center">{left}{form}</div>'
     return sec("Get seen (form 2)", body, m)
@@ -168,7 +167,7 @@ def dentist(m):
 
 # ---------------------------------------------------------------- faq
 common.FAQ = [
-    ("How quickly can I be seen?", "Same-day appointments are often available, and we aim to see you within 24 hours. Get in touch as early in the day as you can and we’ll book you into the first available appointment. If you’re in severe pain, call us on 020 4602 3510."),
+    ("How quickly can I be seen?", "Same-day appointments are often available, and we aim to see you within 24 hours. Get in touch as early in the day as you can and we’ll book you into the first available appointment."),
     ("How much does an emergency appointment cost?", None), ("I’m not a Siha Dental &amp; Facial patient. Can I still come in?", None),
     ("What should I do with a knocked-out tooth?", None), ("Will I be treated on the same day?", None),
     ("Do you offer evening and weekend appointments?", None), ("Can I spread the cost of treatment?", None),
@@ -184,7 +183,6 @@ def final(m):
       <div class="label" style="color:{C['bo']}">Don’t wait in pain</div>
       <h2 class="display" style="margin-top:18px;color:{C['nu']};font-size:{32 if m else 50}px">In pain? <b>Let’s get you seen</b></h2>
       <p class="body" style="margin-top:20px;color:{C['be']};font-size:{16 if m else 18}px">Same-day emergency appointments are often available at our Shepherd’s Bush practice. Pain relief first, honest advice always, and every cost agreed before treatment.</p>
-      <p class="body" style="margin-top:24px;color:{C['be']}">In severe pain? Call <b style="color:{C['nu']};font-weight:600">{PHONE}</b></p>
       <div style="display:flex;gap:28px;margin-top:20px;flex-wrap:wrap">
         <span class="label" style="color:{C['be']};font-weight:500">Open Saturdays</span><span class="label" style="color:{C['be']};font-weight:500">0% finance available</span><span class="label" style="color:{C['be']};font-weight:500">New patients welcome</span></div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:28px">{stars(5, 16)}<span class="body" style="color:{C['be']};font-size:14px">5.0 from 157 Google reviews</span></div>
@@ -193,7 +191,7 @@ def final(m):
     inner = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 500px;gap:96px;align-items:center">{left}{form}</div>'
     foot = f'''<div data-name="Footer" style="margin-top:{56 if m else 96}px;padding-top:32px;border-top:1px solid rgba(225,213,202,.2);display:flex;{'flex-direction:column;gap:16px' if m else 'justify-content:space-between;align-items:center'}">
       <div style="width:130px;color:{C['be']}">{LOGO}</div>
-      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU · {PHONE}</span>
+      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU</span>
       <span class="body" style="font-size:13px;color:{C['br']}">© 2026 Siha Dental &amp; Facial. All rights reserved. <u>Privacy policy</u> · Marketing by Vendo Digital</span></div>'''
     return sec("Final CTA", inner + foot, m, bg=C['od'])
 
@@ -210,14 +208,14 @@ def thank_you(m):
       <div style="width:64px;height:64px;border-radius:50%;background:{C['be']};display:flex;align-items:center;justify-content:center;margin:0 auto">{big_tick}</div>
       <div class="label" style="color:{C['bo']};margin-top:28px">Request received</div>
       <h1 class="h1" style="margin-top:12px;font-size:{32 if m else 44}px">Thank you. We’ll call you back.</h1>
-      <p class="body" style="margin-top:16px;color:{C['ol']};font-size:{16 if m else 18}px">Our team will call you as soon as possible to get you booked in. If you’re in severe pain, call us now. You can also pick a time online.</p>
+      <p class="body" style="margin-top:16px;color:{C['ol']};font-size:{16 if m else 18}px">Our team will call you as soon as possible to get you booked in. You can also pick a time online now.</p>
       <div style="display:flex;{'flex-direction:column;' if m else ''}gap:16px;justify-content:center;align-items:center;margin-top:32px">
-        <span class="btn primary">Call {PHONE}</span><span class="btn outline">Choose a time online</span></div>
+        <span class="btn primary">Choose a time online</span></div>
       <p class="body" style="margin-top:28px;font-size:14px;color:{C['br']}">157 Askew Road, London W12 9AU</p>
     </div>'''
     foot = f'''<div style="display:flex;{'flex-direction:column;gap:16px' if m else 'justify-content:space-between;align-items:center'}">
       <div style="width:130px;color:{C['be']}">{LOGO}</div>
-      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU · {PHONE}</span>
+      <span class="body" style="font-size:13px;color:{C['be']}">157 Askew Road, London W12 9AU</span>
       <span class="body" style="font-size:13px;color:{C['br']}">© 2026 Siha Dental &amp; Facial. All rights reserved. <u>Privacy policy</u></span></div>'''
     return ((nav_m() if m else nav_d()) + sec("Thank you", card, m, pad=(120, 80), pad_m=(48, 20))
             + sec("Footer", foot, m, bg=C['od'], pad=(40, 80), pad_m=(32, 20)))

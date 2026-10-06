@@ -117,7 +117,6 @@ def nav_d():
   <div style="width:150px;color:{C['ol']}">{LOGO}</div>
   <div style="display:flex;align-items:center;gap:40px">
     <span class="body" style="font-size:14px;color:{C['ol']}">157 Askew Road, London W12 9AU</span>
-    <span class="body" style="font-size:14px;font-weight:500">{PHONE}</span>
     <span class="btn primary">{CTA}</span>
   </div>
 </div>"""
@@ -147,7 +146,7 @@ def hero_d():
 
 def nav_m():
     return f"""
-<div data-name="Sticky header (stays on scroll; Call lives in the bottom bar)" style="height:72px;padding:0 16px 0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,33,26,.1);background:{C['nu']};box-shadow:0 6px 16px rgba(20,33,26,.06)">
+<div data-name="Sticky header (stays on scroll)" style="height:72px;padding:0 16px 0 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(20,33,26,.1);background:{C['nu']};box-shadow:0 6px 16px rgba(20,33,26,.06)">
   <div style="width:116px;color:{C['ol']}">{LOGO}</div>
   <div style="display:flex;gap:8px;align-items:center">
     <span class="btn primary" style="height:42px;padding:0 18px;font-size:11px">{CTA}</span></div>
@@ -163,7 +162,7 @@ def hero_m():
   <p class="h2" style="margin-top:12px;font-size:22px;font-weight:300">A complete smile makeover, designed around you.</p>
   <p class="body" style="margin-top:12px;color:{C['ol']}">Bonding, veneers, whitening and clear aligners, combined into one plan by cosmetic dentists you can trust. Treatments from £250 a tooth.</p>
   <div style="display:grid;gap:10px;margin-top:20px">{tick("Bespoke smile design", 15)}{tick("3D digital preview", 15)}</div>
-  <div data-name="Hero buttons" style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:22px"><span class="btn primary" style="height:54px">{CTA}</span><span class="btn outline" style="height:54px;padding:0 22px">Call</span></div>
+  <div data-name="Hero button (scrolls to the form)" style="margin-top:22px"><span class="btn primary" style="height:54px;width:100%">{CTA}</span></div>
   <div data-name="Trust line" style="display:flex;align-items:center;gap:10px;margin-top:18px">{stars(5, 14)}<span class="body" style="font-size:13px;white-space:nowrap;color:{C['ol']}">5.0 from 157 Google reviews</span></div>
   <div data-name="S-frame" style="position:relative;width:230px;height:360px;margin:96px auto 0">{frame}{cut}</div>
   <div style="margin-top:-60px;position:relative">{form_card(350, 24, offer=True)}</div>
@@ -177,11 +176,11 @@ SECTIONS_D = [nav_d, hero_d]
 SECTIONS_M = [nav_m, hero_m]
 
 
-# Mobile sticky bottom bar: fixed to the bottom of the viewport on every scroll position (shown at the first
+# Mobile sticky bottom bar (form CTA only, scrolls to the hero form): fixed to the bottom of the viewport on every scroll position (shown at the first
 # screen's fold, 844px, in the design). The page gets matching bottom padding so the footer isn't hidden.
 BOTTOM_BAR = (f'<div data-name="Sticky bottom bar (fixed to viewport bottom)" style="position:absolute;left:0;top:760px;width:390px;height:84px;'
-              f'padding:12px 16px;background:{C["nu"]};box-shadow:0 -8px 24px rgba(20,33,26,.12);display:grid;grid-template-columns:auto 1fr;gap:10px;z-index:5">'
-              f'<span class="btn outline" style="height:56px;padding:0 20px">Call</span><span class="btn primary" style="height:56px">{CTA}</span></div>')
+              f'padding:12px 16px;background:{C["nu"]};box-shadow:0 -8px 24px rgba(20,33,26,.12);display:grid;z-index:5">'
+              f'<span class="btn primary" style="height:56px">{CTA}</span></div>')
 
 
 def page(title, cls, sections):
