@@ -28,7 +28,7 @@ Photos/awards/cut-out are pulled from the Siha Drive and gitignored.
 ## For the build / to confirm with Hannan
 - Tour video: source clips in Siha Drive > Video - Clinic Interior (vertical); needs a landscape edit for the desktop slot.
 - Thank-you "Choose a time online" needs Siha's online booking link.
-- Membership: this page says Smile £19.56/m and "plans from £22.50/month"; the live site says £18.28/m. Confirm.
+- Membership: siha.dental/fees-and-finance confirms Smile £19.56/m (6 Oct 2026); the draft's "plans from £22.50/month" corrected to £19.56.
 - 0% finance over 12 months, "same-week appointments" and "all major insurances accepted" need confirming.
 - Award logos used: PDA 2025 winner (Brand & Design, Patient Care), Dentistry Awards 2025 winner (Team of the Year London),
   PDA 2025 highly commended (Practice of the Year), PDA 2024 highly commended (New Practice).

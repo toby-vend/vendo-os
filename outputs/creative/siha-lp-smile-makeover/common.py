@@ -96,7 +96,7 @@ def stories(m):
     </div>''' for t, q, n in STORIES]
     inner = (head("Patient stories", "Real patients. Real results.",
                   "Every smile is different. These are a few of the people who trusted us with theirs.", m)
-             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20 if m else 24)}</div>' + cta_row(m))
+             + f'<div style="margin-top:{32 if m else 56}px">{grid(cards, 1 if m else 3, 20 if m else 24)}</div>')
     return sec("Patient stories", inner, m)
 
 

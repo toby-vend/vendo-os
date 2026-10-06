@@ -1,0 +1,13 @@
+src/
+assets/photos/
+renders/
+contact.jpg
+.claude-flow/
+assets/cutouts/
+assets/awards/
+__pycache__/
+awards-check.jpg
+assets/ba/
+ba-check.jpg
+__pycache__/
+renders/
