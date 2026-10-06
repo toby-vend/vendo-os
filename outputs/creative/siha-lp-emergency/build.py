@@ -37,7 +37,18 @@ body {{ background: #2a2a2a; font-family: Metropolis, sans-serif; padding: 80px;
 /* Live browser preview (the Figma capture adds #figmacapture to the URL and keeps the static layout) */
 .live body {{ padding: 0; background: {C['nu']}; }}
 .live .page {{ margin: 0 auto; }}
-.live .bar {{ position: fixed !important; top: auto !important; bottom: 0; left: 50% !important; transform: translateX(-50%); }}
+.live .page {{ overflow: clip; }}
+.live .d, .live .m {{ width: 100%; }}
+.live [data-name^="Sticky header"] {{ position: sticky; top: 0; z-index: 20; background: {C['nu']}; }}
+.live .d > [style*="px 80px"], .live .d > [data-name="Sticky header"] {{
+  padding-left: max(clamp(32px, 5.5vw, 80px), calc(50% - 640px)) !important; padding-right: max(clamp(32px, 5.5vw, 80px), calc(50% - 640px)) !important; }}
+.live .m > [style*="px 20px"] {{ padding-left: max(20px, calc(50% - 300px)) !important; padding-right: max(20px, calc(50% - 300px)) !important; }}
+.live .hero-copy {{ width: min(560px, calc(100% - 440px)) !important; }}
+@media (max-width: 1419px) {{ .live .hero-s {{ display: none; }} }}
+.live .bar {{ position: fixed !important; top: auto !important; bottom: 0; left: 0 !important; width: 100% !important; transform: translateY(110%); transition: transform .3s ease; }}
+.live.show-bar .bar {{ transform: none; }}
+@media (max-width: 1023px) {{ .live .both .page.d {{ display: none; }} }}
+@media (min-width: 1024px) {{ .live .both .page.m {{ display: none; }} }}
 .live .track {{ margin-left: 0 !important; padding-right: var(--g); animation: marquee 30s linear infinite; }}
 .live .track:hover {{ animation-play-state: paused; }}
 @keyframes marquee {{ to {{ transform: translateX(-50%); }} }}
@@ -108,7 +119,7 @@ def form_card(width, pad=40, offer=False, title="Get seen as soon as possible"):
     fields = ('<label class="field" style="grid-column:1 / -1"><span>Full name *</span><div></div></label>'
               + "".join(f'<label class="field"><span>{f} *</span><div></div></label>' for f in ["Email", "Mobile"]))
     return f"""
-<div class="card" data-name="Booking form" style="width:{width}px;background:{C['wh']};padding:{pad}px;box-shadow:0 30px 60px rgba(20,33,26,.14),0 4px 12px rgba(20,33,26,.06)">
+<div class="card" data-name="Booking form" style="width:100%;max-width:{width}px;margin:0 auto;background:{C['wh']};padding:{pad}px;box-shadow:0 30px 60px rgba(20,33,26,.14),0 4px 12px rgba(20,33,26,.06)">
   <div class="label" style="color:{C['bo']}">Emergency appointment</div>
   <div class="h2" style="margin-top:10px">{title}</div>
   <div class="body" style="margin-top:6px;color:{C['br']}">Send your details and we’ll call you back to get you booked in.</div>
@@ -135,20 +146,22 @@ def hero_d():
     stats = "".join(f'<div><div class="h1" style="font-size:40px">{n}</div><div class="label" style="margin-top:6px;color:{C["br"]}">{l}</div></div>'
                     for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("3", "2025 award wins")])
     return f"""
-<section data-name="Hero" style="position:relative;height:840px">
+<section data-name="Hero" style="position:relative;min-height:840px;padding:0px 80px">
   <div style="position:absolute;inset:0;background:radial-gradient(circle at 72% 40%,#f4efea 0%,{C['nu']} 55%)"></div>
-  <div style="position:absolute;left:80px;top:96px;width:560px">
+  <div class="hero-in" style="position:relative;max-width:1280px;margin:0 auto;min-height:840px">
+  <div class="hero-copy" style="position:relative;padding:96px 0 80px;width:560px">
     <div class="label" style="color:{C['bo']}">Emergency dentist · Shepherd’s Bush, W12</div>
     <h1 class="display" style="margin-top:22px;font-size:52px">Emergency dentist <b>£95</b></h1>
     <p class="h2" style="margin-top:18px;font-weight:300">In pain? Same-day appointments are often available.</p>
-    <p class="body" style="margin-top:16px;font-size:18px;color:{C['ol']};width:500px">For severe pain, swelling, breakages and anything that can’t wait. Open Saturdays and until 7pm on Tuesdays, at our Shepherd’s Bush practice.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:32px;width:520px">
+    <p class="body" style="margin-top:16px;font-size:18px;color:{C['ol']};max-width:500px">For severe pain, swelling, breakages and anything that can’t wait. Open Saturdays and until 7pm on Tuesdays, at our Shepherd’s Bush practice.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:32px;max-width:520px">
       {tick("Pain relief comes first")}{tick("New &amp; existing patients")}{tick("Open Saturdays")}{tick("0% finance on treatment")}
     </div>
-    <div style="display:flex;gap:56px;margin-top:48px;padding-top:32px;border-top:1px solid rgba(20,33,26,.12);width:520px">{stats}</div>
+    <div style="display:flex;gap:56px;margin-top:48px;padding-top:32px;border-top:1px solid rgba(20,33,26,.12);max-width:520px">{stats}</div>
   </div>
-  <div data-name="S-frame" style="position:absolute;left:660px;top:100px;width:380px;height:640px">{frame}{cut}</div>
-  <div style="position:absolute;left:960px;top:150px">{form_card(400, 36, offer=True)}</div>
+  <div data-name="S-frame" class="hero-s" style="position:absolute;right:320px;top:100px;width:380px;height:640px">{frame}{cut}</div>
+  <div class="hero-form" style="position:absolute;right:0;top:150px;width:400px">{form_card(400, 36, offer=True)}</div>
+  </div>
 </section>"""
 
 
@@ -193,9 +206,17 @@ BOTTOM_BAR = (f'<div class="bar" data-name="Sticky bottom bar (fixed to viewport
 
 def page(title, cls, sections):
     body = "".join(s() for s in sections)
-    return (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><script>if(location.hash.indexOf('figmacapture')<0)document.documentElement.className='live'</script><title>{title}</title><style>{CSS}</style>"
+    return (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><script>if(location.hash.indexOf('figmacapture')<0)document.documentElement.className='live'</script><title>{title}</title><style>{CSS}</style><script>document.addEventListener('DOMContentLoaded',function(){{var R=document.documentElement;if(!R.classList.contains('live'))return;var btn=document.querySelector('.page.m [data-name^=\"Hero button\"]'),form=document.querySelector('.page.m [data-name=\"Hero\"] [data-name=\"Booking form\"]');function upd(){{if(!btn||btn.offsetParent===null)return R.classList.remove('show-bar');var b=btn.getBoundingClientRect(),f=form.getBoundingClientRect();R.classList.toggle('show-bar',b.bottom<0&&(f.bottom<innerHeight*.25||f.top>innerHeight*.75))}}addEventListener('scroll',upd,{{passive:true}});addEventListener('resize',upd);upd();document.addEventListener('click',function(ev){{var b=ev.target.closest('.btn');if(!b||b.closest('[data-name=\"Booking form\"]'))return;var f=[].slice.call(document.querySelectorAll('[data-name=\"Hero\"] [data-name=\"Booking form\"]')).filter(function(x){{return x.offsetParent!==null}})[0];if(f){{ev.preventDefault();scrollTo({{top:f.getBoundingClientRect().top+scrollY-96,behavior:'smooth'}})}}}});}});</script>"
             f"<script src='https://mcp.figma.com/mcp/html-to-design/capture.js' async></script></head>"
             f"<body><div class='page {cls}' data-name='{title}' style='position:relative'>{body}{BOTTOM_BAR if cls == 'm' else ''}</div></body></html>")
+
+
+def page_both(title, d_sections, m_sections):
+    """Responsive page: desktop layout from 1024px, mobile layout below, both fluid."""
+    d = "".join(s() for s in d_sections)
+    m = "".join(s() for s in m_sections)
+    return (page(title, "d", []).replace("<body>", "<body class='both'>", 1)
+            .replace("style='position:relative'></div>", f"style='position:relative'>{d}</div><div class='page m' data-name='{title} | Mobile' style='position:relative'>{m}{BOTTOM_BAR}</div>", 1))
 
 
 if __name__ == "__main__":
@@ -206,4 +227,6 @@ if __name__ == "__main__":
     (ROOT / "lp-mobile.html").write_text(page("Emergency dentist | Mobile", "m", SECTIONS_M))
     (ROOT / "ty-desktop.html").write_text(page("Thank you | Desktop", "d", [lambda: thank_you(False)]))
     (ROOT / "ty-mobile.html").write_text(page("Thank you | Mobile", "m", [lambda: thank_you(True)]))
+    (ROOT / "index.html").write_text(page_both("Emergency dentist | Siha Dental", SECTIONS_D, SECTIONS_M))
+    (ROOT / "thank-you.html").write_text(page_both("Thank you | Siha Dental", [lambda: thank_you(False)], [lambda: thank_you(True)]))
     print("wrote lp-desktop.html, lp-mobile.html, ty-desktop.html, ty-mobile.html")

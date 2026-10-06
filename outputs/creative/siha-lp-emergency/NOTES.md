@@ -23,3 +23,6 @@ Build: `python3 build.py`, serve on :8855, `./render.sh <height>`; Figma capture
   treatment page says £49. The live site needs to match £95 before ads run.
 - The out-of-hours £450 (assessment + treatment) line is from the fees page; confirm it should show on the LP.
 - Online booking link for the thank-you page; tour video edit.
+
+## Responsive preview
+`index.html` (+ `thank-you.html`) is the live, fully responsive page: mobile layout below 1024px, desktop layout from 1024px, content capped at 1280px. Sticky header; mobile Book Now bar appears once the hero button has scrolled off and hides while the hero form is on screen; every button scrolls to the hero form. `lp-*/ty-*` stay as the fixed 1440/390 Figma capture files (the `#figmacapture` hash switches live behaviour off).

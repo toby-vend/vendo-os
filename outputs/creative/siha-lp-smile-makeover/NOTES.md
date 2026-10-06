@@ -27,3 +27,6 @@ Figma captures run in headless Chrome (no focus stealing): scratchpad hcap.sh pa
 - That the smile-gallery consent covers paid ads use.
 - Online booking link for the thank-you page; tour video edit (Drive > Video - Clinic Interior).
 - FAQ answers for the collapsed items follow the draft with the price fixes above.
+
+## Responsive preview
+`index.html` (+ `thank-you.html`) is the live, fully responsive page: mobile layout below 1024px, desktop layout from 1024px, content capped at 1280px. Sticky header; mobile Book Now bar appears once the hero button has scrolled off and hides while the hero form is on screen; every button scrolls to the hero form. `lp-*/ty-*` stay as the fixed 1440/390 Figma capture files (the `#figmacapture` hash switches live behaviour off).

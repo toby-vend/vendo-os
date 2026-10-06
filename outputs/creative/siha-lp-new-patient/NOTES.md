@@ -33,3 +33,6 @@ Photos/awards/cut-out are pulled from the Siha Drive and gitignored.
 - Award logos used: PDA 2025 winner (Brand & Design, Patient Care), Dentistry Awards 2025 winner (Team of the Year London),
   PDA 2025 highly commended (Practice of the Year), PDA 2024 highly commended (New Practice).
 - Tracking (GTM, form + call conversions) and the LP tracker/brief steps are for the build stage.
+
+## Responsive preview
+`index.html` (+ `thank-you.html`) is the live, fully responsive page: mobile layout below 1024px, desktop layout from 1024px, content capped at 1280px. Sticky header; mobile Book Now bar appears once the hero button has scrolled off and hides while the hero form is on screen; every button scrolls to the hero form. `lp-*/ty-*` stay as the fixed 1440/390 Figma capture files (the `#figmacapture` hash switches live behaviour off).
