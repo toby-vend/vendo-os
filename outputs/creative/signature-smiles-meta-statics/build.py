@@ -93,6 +93,20 @@ def badge(x, y, size=150):
     return f'<img class="abs" src="assets/curve-text.webp" style="left:{x}px;top:{y}px;width:{size}px;height:{size}px;object-fit:contain">'
 
 
+def ribbon(y, size=30, n=5, color=C['terra'], line=C['stone']):
+    """The site's "Your Smile, Your Story" ribbon: monogram + line, ruled top and bottom."""
+    item = (f'<span style="display:inline-flex;align-items:center;gap:18px;margin-right:56px">{logo("icon", int(size * 1.1))}'
+            f'<span class="hl" style="font-size:{size}px;color:{color};white-space:nowrap">Your Smile, Your Story</span></span>')
+    return (f'<div class="abs" style="left:0;right:0;top:{y}px;height:{int(size * 2.6)}px;border-top:1px solid {line};border-bottom:1px solid {line};'
+            f'display:flex;align-items:center;white-space:nowrap;overflow:hidden;padding-left:40px">{item * n}</div>')
+
+
+def dots(items, color, size=20):
+    """Inclusions as one quiet line, separated by small terracotta dots (no boxes)."""
+    sep = f'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:{C["terra"]};margin:0 16px;vertical-align:middle"></span>'
+    return f'<div class="small" style="font-size:{size}px;color:{color};line-height:1.7">{sep.join(items)}</div>'
+
+
 STAR = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>'
 TICK = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10.5" stroke-width="1.4"/><path d="M7.5 12.4l3 3 6-6.4"/></svg>'
 REVIEWS = "5.0 from 110 Google reviews"
@@ -158,6 +172,7 @@ def warm_olive():
 CTA_FIRST = "Book your first visit"
 EXAM_ITEMS = ["Teeth and gums checked", "Two x-rays", "Oral cancer screening", "Jaw and bite check", "A plan with every cost"]
 D = "261008"
+EXAM_INC = ["Two x-rays", "Oral cancer screening", "Every cost explained"]
 
 
 def mark_1x1():
@@ -174,12 +189,14 @@ def mark_1x1():
   <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
   <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
     b.append(board("M2", f"The twinge | Static | Stock man 40s | Comes and goes | 1x1 | {D}", "s1", C['linen'], f"""
-  {photo(380, 0, 700, 1080, 'mark-kitchen-thoughtful.jpg', fx=0.62, fy=0.5)}
-  <div class="cover" style="background:linear-gradient(90deg,{C['linen']} 0%,{C['linen']} 36%,rgba(249,247,245,.86) 48%,rgba(249,247,245,0) 72%)"></div>
-  <div class="abs hl" style="left:80px;top:150px;font-size:100px">It comes<br>and goes.</div>
-  <div class="abs hl" style="left:80px;top:390px;font-size:60px;color:{C['olive']}">But it<br>hasn&rsquo;t gone.</div>
-  <div class="abs body" style="left:80px;top:570px;width:430px;font-size:26px">Get it looked at properly, without the lecture.</div>
-  <div class="abs body" style="left:80px;top:700px;width:430px;font-size:24px;color:{C['copper']};font-weight:500">New patient exam £90,<br>x-rays included</div>
+  {warm_linen()}
+  <div class="abs" style="left:600px;top:0;width:480px;height:1080px;background:{C['sage']}"></div>
+  {arch(640, 150, 380, 640, 'mark-kitchen-thoughtful.jpg', fx=0.6, fy=0.4)}
+  {badge(540, 680, 140)}
+  <div class="abs hl" style="left:80px;top:150px;font-size:92px">It comes<br>and goes.</div>
+  <div class="abs hl" style="left:80px;top:380px;font-size:54px;color:{C['olive']}">But it<br>hasn&rsquo;t gone.</div>
+  <div class="abs body" style="left:80px;top:560px;width:430px;font-size:25px">Get it looked at properly, without the lecture.</div>
+  <div class="abs body" style="left:80px;top:690px;width:430px;font-size:24px;color:{C['copper']};font-weight:500">New patient exam £90,<br>x-rays included</div>
   <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
   <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
     b.append(board("M3", f"What happens | Static | Stock man 40s | Step by step | 1x1 | {D}", "s1", C['sage'], f"""
@@ -191,25 +208,26 @@ def mark_1x1():
   <div class="abs" style="left:80px;top:720px;display:flex;align-items:baseline;gap:20px"><span class="price" style="font-size:110px">£90</span><span class="label" style="font-size:17px">New patient exam</span></div>
   <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
   <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
-    b.append(board("M4", f"Cost fear | Static | Product | One number | 1x1 | {D}", "s1", C['olive'], f"""
+    b.append(board("M4", f"Cost fear | Static | Stock man 50s | One number | 1x1 | {D}", "s1", C['olive'], f"""
   {warm_olive()}
-  <div class="abs hl" style="left:80px;top:110px;font-size:62px;color:{C['linen']}">Worried what it&rsquo;ll<br>cost after all<br>this time?</div>
-  <div class="abs label" style="left:80px;top:380px;color:{C['stone']}">Start with one number</div>
-  <div class="abs price" style="left:70px;top:440px;font-size:210px;color:{C['linen']}">£90</div>
-  <div class="abs body" style="left:80px;top:660px;width:380px;font-size:24px;color:rgba(249,247,245,.88)">Every cost explained before anything starts.</div>
-  {receipt(545, 300, 470, "Your new patient exam", EXAM_ITEMS, scale=0.96, rot=2.2)}
+  {arch(640, 130, 360, 720, 'mark-kitchen-smile.jpg', fx=0.5, fy=0.3)}
+  <div class="abs hl" style="left:80px;top:130px;font-size:60px;color:{C['linen']}">Worried what<br>it&rsquo;ll cost after<br>all this time?</div>
+  <div class="abs label" style="left:80px;top:390px;color:{C['stone']}">Start with one number</div>
+  <div class="abs price" style="left:70px;top:440px;font-size:200px;color:{C['linen']}">£90</div>
+  <div class="abs" style="left:80px;top:650px;width:470px">{dots(["Two x-rays", "Oral cancer screening"], 'rgba(249,247,245,.88)', 21)}{dots(["Every cost explained first"], 'rgba(249,247,245,.88)', 21)}</div>
   <div class="abs" style="left:80px;top:790px">{proof('rgba(249,247,245,.85)', 20)}</div>
   <div class="abs" style="left:80px;top:950px">{logo('web-light', 230)}</div>
   <div class="abs" style="left:640px;top:968px"><span class="cta linen" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
-    b.append(board("M5", f"Social proof | Static | Stock man 50s | 110 reviews | 1x1 | {D}", "s1", C['linen'], f"""
-  {photo(0, 0, 1080, 520, 'mark-couch.jpg', fx=0.15, fy=0.4)}
-  <div class="cover" style="top:300px;height:240px;background:linear-gradient(180deg,rgba(249,247,245,0) 0%,{C['linen']} 100%)"></div>
-  <div class="abs" style="left:80px;top:470px;display:flex;align-items:center;gap:26px"><span class="price" style="font-size:150px">5.0</span>
-    <div><div style="display:flex;gap:6px;color:{C['terra']}">{''.join(STAR.format(s=40) for _ in range(5))}</div><div class="hl" style="font-size:44px;margin-top:8px">from 110 Google reviews</div></div></div>
-  <div class="abs label" style="left:80px;top:660px">What people mention most</div>
-  <div class="abs" style="left:80px;top:705px;width:920px;display:flex;gap:0;border-top:1px solid {C['stone']};border-bottom:1px solid {C['stone']}">
-    {''.join(f'<div style="flex:1;padding:22px 0;text-align:center;font-size:24px;color:{C["ink"]};{"border-left:1px solid " + C["stone"] + ";" if i else ""}">{t}</div>' for i, t in enumerate(["Comfortable atmosphere", "Clear explanations", "Welcoming staff"]))}</div>
-  <div class="abs body" style="left:80px;top:830px;font-size:24px;color:{C['copper']};font-weight:500">New patient exam £90</div>
+    b.append(board("M5", f"Social proof | Static | Stock man 50s | 110 reviews | 1x1 | {D}", "s1", C['sage'], f"""
+  {warm_sage()}
+  {arch(80, 150, 400, 700, 'mark-couch.jpg', fx=0.26, fy=0.4)}
+  <div class="abs" style="left:540px;top:110px;width:460px;height:780px;border-radius:230px 230px 0 0;background:{C['linen']};box-shadow:0 30px 60px rgba(30,30,28,.10)"></div>
+  <div class="abs" style="left:540px;top:250px;width:460px;text-align:center">
+    <div class="price" style="font-size:150px">5.0</div>
+    <div style="display:flex;gap:6px;justify-content:center;color:{C['terra']};margin-top:14px">{''.join(STAR.format(s=34) for _ in range(5))}</div>
+    <div class="hl" style="font-size:40px;margin-top:18px">from 110<br>Google reviews</div>
+    <div class="label" style="font-size:15px;margin-top:44px">What people mention most</div>
+    <div class="body" style="font-size:23px;line-height:1.75;margin-top:12px">Comfortable atmosphere<br>Clear explanations<br>Welcoming staff</div></div>
   <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
   <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
     return page("Signature Smiles | Mark | 1x1", b)
@@ -230,13 +248,15 @@ def mark_9x16():
   <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FIRST}</span></div>
   <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
     b.append(board("M2s", f"The twinge | Static | Stock man 40s | Comes and goes | 9x16 | {D}", "s9", C['linen'], f"""
-  {photo(0, 0, 1080, 1000, 'mark-kitchen-thoughtful.jpg', fx=0.6, fy=0.45)}
-  <div class="cover" style="background:linear-gradient(180deg,rgba(249,247,245,0) 0%,rgba(249,247,245,0) 30%,rgba(249,247,245,.92) 46%,{C['linen']} 52%)"></div>
-  <div class="abs hl" style="left:90px;top:860px;font-size:124px">It comes<br>and goes.</div>
-  <div class="abs hl" style="left:90px;top:1140px;font-size:68px;color:{C['olive']}">But it hasn&rsquo;t gone.</div>
-  <div class="abs body" style="left:90px;top:1250px;width:880px;font-size:32px">Get it looked at properly, without the lecture.</div>
-  <div class="abs body" style="left:90px;top:1360px;font-size:28px;color:{C['copper']};font-weight:500">New patient exam £90, x-rays included</div>
-  <div class="abs" style="left:90px;top:1450px"><span class="cta olive">{CTA_FIRST}</span></div>
+  {warm_linen()}
+  <div class="abs" style="left:0;top:0;width:1080px;height:960px;background:{C['sage']}"></div>
+  {arch(250, 250, 580, 820, 'mark-kitchen-thoughtful.jpg', fx=0.6, fy=0.4)}
+  {badge(130, 920, 170)}
+  <div class="abs hl" style="left:90px;top:1120px;font-size:104px">It comes and goes.</div>
+  <div class="abs hl" style="left:90px;top:1245px;font-size:60px;color:{C['olive']}">But it hasn&rsquo;t gone.</div>
+  <div class="abs body" style="left:90px;top:1335px;width:880px;font-size:30px">Get it looked at properly, without the lecture.</div>
+  <div class="abs body" style="left:90px;top:1395px;font-size:26px;color:{C['copper']};font-weight:500">New patient exam £90, x-rays included</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FIRST}</span></div>
   <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
     b.append(board("M3s", f"What happens | Static | Stock man 40s | Step by step | 9x16 | {D}", "s9", C['sage'], f"""
   {warm_sage()}
@@ -247,23 +267,27 @@ def mark_9x16():
   <div class="abs" style="left:90px;top:1300px;display:flex;align-items:baseline;gap:24px"><span class="price" style="font-size:130px">£90</span><span class="label">New patient exam</span></div>
   <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FIRST}</span></div>
   <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
-    b.append(board("M4s", f"Cost fear | Static | Product | One number | 9x16 | {D}", "s9", C['olive'], f"""
+    b.append(board("M4s", f"Cost fear | Static | Stock man 50s | One number | 9x16 | {D}", "s9", C['olive'], f"""
   {warm_olive()}
-  <div class="abs hl" style="left:90px;top:290px;font-size:80px;color:{C['linen']}">Worried what it&rsquo;ll cost<br>after all this time?</div>
-  <div class="abs label" style="left:90px;top:520px;color:{C['stone']}">Start with one number</div>
-  <div class="abs price" style="left:80px;top:560px;font-size:280px;color:{C['linen']}">£90</div>
-  {receipt(300, 790, 640, "Your new patient exam", EXAM_ITEMS, scale=1.2, rot=2.0)}
-  <div class="abs body" style="left:90px;top:1360px;width:880px;font-size:30px;color:rgba(249,247,245,.88)">Every cost explained before anything starts.</div>
+  <div class="abs hl" style="left:90px;top:280px;font-size:78px;color:{C['linen']}">Worried what it&rsquo;ll cost<br>after all this time?</div>
+  {arch(560, 500, 430, 760, 'mark-kitchen-smile.jpg', fx=0.5, fy=0.3)}
+  <div class="abs label" style="left:90px;top:560px;color:{C['stone']}">Start with<br>one number</div>
+  <div class="abs price" style="left:80px;top:660px;font-size:205px;color:{C['linen']}">£90</div>
+  <div class="abs label" style="left:90px;top:880px;color:{C['stone']}">New patient exam</div>
+  <div class="abs" style="left:90px;top:1310px;width:900px">{dots(EXAM_INC, 'rgba(249,247,245,.9)', 26)}</div>
+  <div class="abs" style="left:90px;top:1375px">{proof('rgba(249,247,245,.85)', 22)}</div>
   <div class="abs" style="left:90px;top:1460px"><span class="cta linen">{CTA_FIRST}</span></div>
   <div class="abs" style="left:90px;top:1640px">{logo('web-light', 250)}</div>"""))
-    b.append(board("M5s", f"Social proof | Static | Stock man 50s | 110 reviews | 9x16 | {D}", "s9", C['linen'], f"""
-  {photo(0, 0, 1080, 900, 'mark-couch.jpg', fx=0.12, fy=0.4)}
-  <div class="cover" style="top:600px;height:320px;background:linear-gradient(180deg,rgba(249,247,245,0) 0%,{C['linen']} 100%)"></div>
-  <div class="abs price" style="left:80px;top:860px;font-size:190px">5.0</div>
-  <div class="abs" style="left:90px;top:1050px;display:flex;gap:8px;color:{C['terra']}">{''.join(STAR.format(s=46) for _ in range(5))}</div>
-  <div class="abs hl" style="left:90px;top:1110px;font-size:58px">from 110 Google reviews</div>
-  <div class="abs label" style="left:90px;top:1210px">What people mention most</div>
-  <div class="abs body" style="left:90px;top:1250px;font-size:32px;line-height:1.5">Comfortable atmosphere<br>Clear explanations<br>Welcoming staff</div>
+    b.append(board("M5s", f"Social proof | Static | Stock man 50s | 110 reviews | 9x16 | {D}", "s9", C['sage'], f"""
+  {warm_sage()}
+  {arch(90, 260, 470, 620, 'mark-couch.jpg', fx=0.26, fy=0.4)}
+  {ribbon(960, 30)}
+  <div class="abs" style="left:600px;top:300px;width:400px;text-align:center">
+    <div class="price" style="font-size:170px">5.0</div>
+    <div style="display:flex;gap:6px;justify-content:center;color:{C['terra']};margin-top:16px">{''.join(STAR.format(s=38) for _ in range(5))}</div>
+    <div class="hl" style="font-size:46px;margin-top:20px">from 110<br>Google reviews</div></div>
+  <div class="abs label" style="left:90px;top:1100px">What people mention most</div>
+  <div class="abs hl" style="left:90px;top:1150px;font-size:54px;line-height:1.25">Comfortable atmosphere.<br>Clear explanations.<br>Welcoming staff.</div>
   <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FIRST}</span></div>
   <div class="abs body" style="left:560px;top:1478px;font-size:28px;color:{C['copper']};font-weight:500">New patient exam £90</div>
   <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
