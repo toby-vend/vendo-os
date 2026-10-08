@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Black&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#E6E6E6;font-family:'Archivo',sans-serif;color:#0A0A0A;-webkit-font-smoothing:antialiased}
+</style>
+</helmet>
+<!-- Source: "Compound Callout Ads.dc.html" in the Compound Claude Design project. Amended 08/10/2026 for the RiskSave
+     accountant batch review: CQ-01 and CQ-12 CTA "See the quicker way" -> "See how it works" (COBS 4.5.6R),
+     FCA status line added to every risk panel (batch condition 1), Nest client-count variants dropped (not reviewed). -->
+<section style="padding:80px;display:flex;flex-direction:column;gap:56px">
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <div style="font-family:'Archivo Black',sans-serif;font-size:34px;letter-spacing:-0.015em">Portrait 4:5 · 1080 × 1350</div>
+    <div style="display:flex;flex-wrap:wrap;gap:48px">
+      <sc-for list="{{ ads }}" as="a" hint-placeholder-count="12">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:#555">{{ a.ref }} · {{ a.audience }}</div>
+          <div id="p-{{ a.slug }}-45" style="position:relative;width:1080px;height:1350px;box-sizing:border-box;padding:68px 80px 60px;background:{{ a.base }};color:{{ a.fg }};display:flex;flex-direction:column;gap:28px;overflow:hidden">
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:{{ a.grain }};background-size:240px 240px;opacity:{{ a.grainOp }}"></div>
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle, {{ a.dot }} 1.5px, transparent 2px);background-size:30px 30px;-webkit-mask-image:radial-gradient(55% 45% at 100% 55%, #000 0%, transparent 100%);mask-image:radial-gradient(55% 45% at 100% 55%, #000 0%, transparent 100%)"></div>
+            <div style="position:relative;display:flex;justify-content:space-between;align-items:center">
+              <img src="{{ a.logo }}" alt="Compound" style="height:42px;width:auto">
+              <div style="border:2px solid {{ a.chipLine }};border-radius:999px;padding:10px 22px;font-size:23px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase">{{ a.eyebrow }}</div>
+            </div>
+            <div style="position:relative;flex:1 1 0;min-height:0;display:flex;flex-direction:column;justify-content:center">
+              <div style="font-family:'Archivo Black',sans-serif;font-size:{{ a.h45 }}px;line-height:1.03;letter-spacing:-0.03em;text-wrap:balance">{{ a.headline }}</div>
+            </div>
+            <div style="position:relative;display:flex"><div style="background:{{ a.pillBg }};color:{{ a.pillFg }};box-shadow:{{ a.pillShadow }};border-radius:999px;padding:24px 44px;font-size:30px;font-weight:900">{{ a.cta }} →</div></div>
+            <div style="position:relative;background:{{ a.riskBg }};color:{{ a.riskFg }};border-radius:20px;padding:22px 28px;font-size:28px;font-weight:600;line-height:1.4">{{ a.risk }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <div style="font-family:'Archivo Black',sans-serif;font-size:34px;letter-spacing:-0.015em">Square 1:1 · 1080 × 1080</div>
+    <div style="display:flex;flex-wrap:wrap;gap:48px">
+      <sc-for list="{{ ads }}" as="a" hint-placeholder-count="12">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:#555">{{ a.ref }} · {{ a.audience }}</div>
+          <div id="p-{{ a.slug }}-11" style="position:relative;width:1080px;height:1080px;box-sizing:border-box;padding:60px 72px 56px;background:{{ a.base }};color:{{ a.fg }};display:flex;flex-direction:column;gap:30px;overflow:hidden">
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:{{ a.grain }};background-size:240px 240px;opacity:{{ a.grainOp }}"></div>
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle, {{ a.dot }} 1.5px, transparent 2px);background-size:28px 28px;-webkit-mask-image:radial-gradient(55% 50% at 100% 70%, #000 0%, transparent 100%);mask-image:radial-gradient(55% 50% at 100% 70%, #000 0%, transparent 100%)"></div>
+            <div style="position:relative;display:flex;justify-content:space-between;align-items:center">
+              <img src="{{ a.logo }}" alt="Compound" style="height:36px;width:auto">
+              <div style="border:2px solid {{ a.chipLine }};border-radius:999px;padding:8px 20px;font-size:21px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase">{{ a.eyebrow }}</div>
+            </div>
+            <div style="position:relative;flex:1 1 0;min-height:0;display:flex;flex-direction:column;justify-content:center"><div style="font-family:'Archivo Black',sans-serif;font-size:{{ a.h11 }}px;line-height:1.03;letter-spacing:-0.03em;text-wrap:balance">{{ a.headline }}</div></div>
+            <div style="position:relative;display:flex"><div style="background:{{ a.pillBg }};color:{{ a.pillFg }};box-shadow:{{ a.pillShadow }};border-radius:999px;padding:20px 34px;font-size:26px;font-weight:900;white-space:nowrap">{{ a.cta }} →</div></div>
+            <div style="position:relative;background:{{ a.riskBg }};color:{{ a.riskFg }};border-radius:18px;padding:18px 24px;font-size:25px;font-weight:600;line-height:1.4">{{ a.risk }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <div style="font-family:'Archivo Black',sans-serif;font-size:34px;letter-spacing:-0.015em">Story 9:16 · 1080 × 1920 · copy held inside story-safe zone</div>
+    <div style="display:flex;flex-wrap:wrap;gap:48px">
+      <sc-for list="{{ ads }}" as="a" hint-placeholder-count="12">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:#555">{{ a.ref }} · {{ a.audience }}</div>
+          <div id="p-{{ a.slug }}-916" style="position:relative;width:1080px;height:1920px;box-sizing:border-box;padding:200px 90px 280px;background:{{ a.base }};color:{{ a.fg }};display:flex;flex-direction:column;gap:32px;overflow:hidden">
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:{{ a.grain }};background-size:240px 240px;opacity:{{ a.grainOp }}"></div>
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle, {{ a.dot }} 1.5px, transparent 2px);background-size:32px 32px;-webkit-mask-image:radial-gradient(60% 40% at 100% 55%, #000 0%, transparent 100%);mask-image:radial-gradient(60% 40% at 100% 55%, #000 0%, transparent 100%)"></div>
+            <div style="position:relative;display:flex;justify-content:space-between;align-items:center">
+              <img src="{{ a.logo }}" alt="Compound" style="height:48px;width:auto">
+              <div style="border:2px solid {{ a.chipLine }};border-radius:999px;padding:10px 26px;font-size:26px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase">{{ a.eyebrow }}</div>
+            </div>
+            <div style="position:relative;flex:1 1 0;min-height:0;display:flex;flex-direction:column;justify-content:center">
+              <div style="font-family:'Archivo Black',sans-serif;font-size:{{ a.h916 }}px;line-height:1.03;letter-spacing:-0.03em;text-wrap:balance">{{ a.headline }}</div>
+            </div>
+            <div style="position:relative;display:flex"><div style="background:{{ a.pillBg }};color:{{ a.pillFg }};box-shadow:{{ a.pillShadow }};border-radius:999px;padding:28px 52px;font-size:36px;font-weight:900">{{ a.cta }} →</div></div>
+            <div style="position:relative;background:{{ a.riskBg }};color:{{ a.riskFg }};border-radius:22px;padding:22px 30px;font-size:30px;font-weight:600;line-height:1.4">{{ a.risk }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <div style="font-family:'Archivo Black',sans-serif;font-size:34px;letter-spacing:-0.015em">Landscape 1.91:1 · 1200 × 628</div>
+    <div style="display:flex;flex-wrap:wrap;gap:48px">
+      <sc-for list="{{ ads }}" as="a" hint-placeholder-count="12">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:#555">{{ a.ref }} · {{ a.audience }}</div>
+          <div id="p-{{ a.slug }}-191" style="position:relative;width:1200px;height:628px;box-sizing:border-box;padding:38px 50px 34px;background:{{ a.base }};color:{{ a.fg }};display:flex;flex-direction:column;gap:20px;overflow:hidden">
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:{{ a.grain }};background-size:240px 240px;opacity:{{ a.grainOp }}"></div>
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle, {{ a.dot }} 1.3px, transparent 1.8px);background-size:22px 22px;-webkit-mask-image:radial-gradient(45% 70% at 100% 45%, #000 0%, transparent 100%);mask-image:radial-gradient(45% 70% at 100% 45%, #000 0%, transparent 100%)"></div>
+            <div style="position:relative;flex:1 1 0;min-height:0;display:flex;flex-direction:column;justify-content:space-between;gap:16px">
+              <div style="display:flex;align-items:center;gap:16px">
+                <img src="{{ a.logo }}" alt="Compound" style="height:26px;width:auto">
+                <div style="border:2px solid {{ a.chipLine }};border-radius:999px;padding:5px 14px;font-size:15px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase">{{ a.eyebrow }}</div>
+              </div>
+              <div style="font-family:'Archivo Black',sans-serif;font-size:{{ a.h191 }}px;line-height:1.04;letter-spacing:-0.028em;text-wrap:balance">{{ a.headline }}</div>
+              <div style="display:flex"><div style="background:{{ a.pillBg }};color:{{ a.pillFg }};box-shadow:{{ a.pillShadow }};border-radius:999px;padding:13px 26px;font-size:19px;font-weight:900;white-space:nowrap">{{ a.cta }} →</div></div>
+            </div>
+            <div style="position:relative;background:{{ a.riskBg }};color:{{ a.riskFg }};border-radius:14px;padding:12px 18px;font-size:19px;font-weight:600;line-height:1.4">{{ a.risk }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const A = 'Accountants', B = 'Payroll bureaus';
+    const RISK = 'Capital at risk. The value of investments can go down as well as up and members may get back less than is paid in. Tax rules can change. Compound does not provide financial advice.'
+      + ' Compound Digital Ltd is an appointed representative of RiskSave Technologies Ltd, which is authorised and regulated by the Financial Conduct Authority (FRN 775330).';
+    const raw = [
+      [A, 'Are you an accountant with 20+ clients on Nest?', 'See how it works'],
+      [A, 'Are you an accountant running payroll for 50+ clients?', 'See how it works'],
+      [A, 'Are you an accountant with more than 10 clients on a default pension scheme?', 'Check your options'],
+      [A, 'Are you a practice owner with 100+ payroll clients and no pension partner?', 'Become a partner'],
+      [A, 'Are you an accountant who inherited auto enrolment in 2014 and never revisited it?', 'Take a second look'],
+      [A, 'Are you an accountant whose clients are spread across four different pension providers?', 'See one dashboard'],
+      [A, 'Are you the person at your practice who gets the pension questions?', 'See how it works'],
+      [B, 'Do you run payroll for 50+ client companies?', 'See how it works'],
+      [B, 'Are you a payroll bureau logging into more than five pension portals a month?', 'See one dashboard'],
+      [B, 'Are you a payroll bureau still uploading contribution files by hand?', 'See the integration'],
+      [B, 'Do you process 500+ payslips a month across multiple pension providers?', 'See how it works'],
+      [B, 'Are you a bureau with 20+ clients on Nest?', 'See how it works']
+    ];
+    const GRAD = 'linear-gradient(135deg,#C400D7,#6C1AF9)';
+    const THEMES = {
+      bloom: { base:'radial-gradient(85% 60% at 95% -6%, rgba(226,56,240,0.92) 0%, rgba(226,56,240,0) 62%), radial-gradient(80% 60% at -12% 110%, rgba(30,4,100,0.85) 0%, rgba(30,4,100,0) 62%), linear-gradient(140deg,#B000D0 0%,#6C1AF9 100%)',
+        fg:'#FFFFFF', chipLine:'rgba(255,255,255,0.45)', logo:'brand/logo.svg',
+        grain:"url('brand/grain-light.png')", grainOp:0.16, dot:'rgba(255,255,255,0.30)',
+        pillBg:'#FFFFFF', pillFg:'#0E0716', pillShadow:'0 16px 34px -12px rgba(20,0,60,0.55)', riskBg:'rgba(16,4,44,0.62)', riskFg:'#FFFFFF' },
+      pearl: { base:'radial-gradient(80% 55% at 100% 0%, rgba(196,0,215,0.18) 0%, rgba(196,0,215,0) 62%), radial-gradient(75% 55% at 0% 100%, rgba(108,26,249,0.16) 0%, rgba(108,26,249,0) 65%), #F7F4FB',
+        fg:'#0E0716', chipLine:'rgba(14,7,22,0.2)', logo:'brand/logo-dark.svg',
+        grain:"url('brand/grain-dark.png')", grainOp:0.07, dot:'rgba(90,20,150,0.20)',
+        pillBg:'#0E0716', pillFg:'#FFFFFF', pillShadow:'0 16px 32px -14px rgba(14,7,22,0.5)', riskBg:'#0E0716', riskFg:'#FFFFFF' },
+      ink: { base:'radial-gradient(80% 55% at 100% 0%, rgba(196,0,215,0.5) 0%, rgba(196,0,215,0) 62%), radial-gradient(75% 55% at 0% 100%, rgba(108,26,249,0.45) 0%, rgba(108,26,249,0) 65%), #0D0716',
+        fg:'#FFFFFF', chipLine:'rgba(255,255,255,0.28)', logo:'brand/logo.svg',
+        grain:"url('brand/grain-light.png')", grainOp:0.14, dot:'rgba(255,255,255,0.16)',
+        pillBg:GRAD, pillFg:'#FFFFFF', pillShadow:'0 16px 38px -12px rgba(196,0,215,0.65)', riskBg:'rgba(255,255,255,0.08)', riskFg:'#FFFFFF' }
+    };
+    const ORDER = ['bloom', 'pearl', 'ink', 'pearl'];
+    const size = (len, big, mid, small) => len <= 50 ? big : len <= 72 ? mid : small;
+    const ads = raw.map(([aud, headline, cta], i) => {
+      const n = String(i + 1).padStart(2, '0');
+      const len = headline.length;
+      return Object.assign({
+        ref: 'CQ-' + n, slug: 'cq-' + n, audience: aud,
+        eyebrow: aud === A ? 'For accountants' : 'For payroll bureaus',
+        headline, cta, risk: RISK,
+        h45: size(len, 120, 104, 90), h11: size(len, 104, 90, 78),
+        h916: size(len, 132, 116, 100), h191: size(len, 60, 54, 48)
+      }, THEMES[ORDER[i % 4]]);
+    });
+    return { ads };
+  }
+}
+</script>
+</body>
+</html>

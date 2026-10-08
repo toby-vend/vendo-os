@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#8A16E8">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C400D7"/><stop offset="1" stop-color="#6C1AF9"/></linearGradient></defs>
+    <rect width="1200" height="800" fill="url(#g)"/>
+    <text x="600" y="470" font-family="Archivo Black, Arial Black, sans-serif" font-size="200" fill="#fff" text-anchor="middle">Ad</text>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#E9E6EE;font-family:'Archivo',sans-serif;color:#0E0716;-webkit-font-smoothing:antialiased}
+a{color:#6C1AF9}a:hover{color:#C400D7}
+</style>
+</helmet>
+<div style="padding:48px 28px 100px;display:flex;flex-direction:column;gap:40px">
+
+  <div style="display:flex;flex-direction:column;gap:12px;max-width:920px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.06em;color:#A400B5">ACCOUNTANT BATCH · L-01 TO L-05 · RISKSAVE AMENDS 08/10/2026</div>
+    <h1 style="font-family:'Archivo Black',sans-serif;font-size:38px;line-height:1.04;letter-spacing:-0.025em;margin:0">Same messaging. More depth.</h1>
+    <div style="font-size:15.5px;color:#3F3848;line-height:1.62">Every approved accountant concept rebuilt on a new visual system: lit backgrounds instead of flat fills, a fine grain, and a floating product-style artefact on each card that shows the problem rather than describing it. Copy is unchanged. Destination: <a href="https://lp.compoundapp.co.uk/accountants/">lp.compoundapp.co.uk/accountants/</a></div>
+    <div style="font-size:14px;color:#3F3848;line-height:1.6;border-left:3px solid #C400D7;padding-left:14px">{{ tallyLine }}</div>
+  </div>
+
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ g.hasSection }}">
+        <div style="font-family:'Archivo Black',sans-serif;font-size:26px;letter-spacing:-0.02em;padding-top:12px">{{ g.sectionTitle }}</div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:14px;border-top:1px solid #D6D1DE;padding-top:22px">
+        <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#A400B5">{{ g.ref }}</div>
+          <div style="font-family:'Archivo Black',sans-serif;font-size:21px;letter-spacing:-0.015em">{{ g.name }}</div>
+          <div style="font-size:13px;color:#4F4858">{{ g.note }}</div>
+        </div>
+        <div style="display:flex;gap:24px;align-items:flex-start;overflow-x:auto;padding-bottom:10px">
+          <sc-for list="{{ g.cards }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4F4858">{{ c.label }}</div>
+
+              <div id="{{ c.id }}" style="position:relative;width:{{ c.w }}px;height:{{ c.h }}px;background:{{ c.base }};color:{{ c.fg }};border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 34px rgba(30,10,60,0.18)">
+                <div style="position:absolute;inset:0;pointer-events:none;background-image:{{ c.grain }};background-size:240px 240px;opacity:{{ c.grainOp }}"></div>
+                <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle, {{ c.dot }} 1.5px, transparent 2px);background-size:{{ c.dotGrid }}px {{ c.dotGrid }}px;-webkit-mask-image:{{ c.patternMask }};mask-image:{{ c.patternMask }};opacity:{{ c.patternOp }}"></div>
+
+                <div style="position:relative;padding:{{ c.padT }}px {{ c.pad }}px 0;display:flex;justify-content:space-between;align-items:center;gap:16px">
+                  <sc-if value="{{ c.logoWhite }}" hint-placeholder-val="{{ true }}">
+                    <img src="brand/logo.svg" alt="Compound" style="height:{{ c.logoH }}px;width:auto;display:block">
+                  </sc-if>
+                  <sc-if value="{{ c.logoDark }}">
+                    <img src="brand/logo-dark.svg" alt="Compound" style="height:{{ c.logoH }}px;width:auto;display:block">
+                  </sc-if>
+                  <div style="border:1px solid {{ c.chipLine }};border-radius:999px;padding:{{ c.eyeY }}px {{ c.eyeX }}px;font-size:{{ c.tiny }}px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:{{ c.eyeFg }};white-space:nowrap">{{ c.eyebrow }}</div>
+                </div>
+
+                <div style="position:relative;flex:1;min-height:0;padding:{{ c.bodyY }}px {{ c.pad }}px;display:flex;flex-direction:{{ c.dir }};gap:{{ c.split }}px;align-items:{{ c.align }}">
+                  <div style="flex:{{ c.textFlex }};min-width:0;display:flex;flex-direction:column;gap:{{ c.tGap }}px;justify-content:center">
+                    <div style="display:flex;align-items:center;gap:{{ c.kGap }}px">
+                      <span style="width:{{ c.barW }}px;height:{{ c.barH }}px;border-radius:99px;background:{{ c.barBg }};flex-shrink:0"></span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:{{ c.kick }}px;color:{{ c.kickFg }};line-height:1.35">{{ c.kicker }}</span>
+                    </div>
+                    <div style="font-family:'Archivo Black',sans-serif;font-size:{{ c.h1 }}px;line-height:1.03;letter-spacing:-0.03em;text-wrap:balance">{{ c.pre }}<span style="color:{{ c.hlFg }};background:{{ c.hlBg }};padding:{{ c.hlPad }};border-radius:0.14em;-webkit-box-decoration-break:clone;box-decoration-break:clone">{{ c.hl }}</span>{{ c.post }}</div>
+                    <sc-if value="{{ c.hasSub }}">
+                      <div style="font-size:{{ c.sub }}px;line-height:1.42;font-weight:500;color:{{ c.subFg }};max-width:{{ c.subMax }}px;text-wrap:pretty">{{ c.subText }}</div>
+                    </sc-if>
+                  </div>
+
+                  <div style="position:relative;flex:{{ c.artFlex }};min-width:0;min-height:0;padding-top:{{ c.artTopPad }}px;display:flex;align-items:center;justify-content:{{ c.artJustify }}">
+                    <div style="position:absolute;left:50%;top:50%;width:{{ c.spotS }}px;height:{{ c.spotS }}px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side, {{ c.spot }}, transparent);pointer-events:none"></div>
+
+                    <sc-if value="{{ c.isRows }}" hint-placeholder-val="{{ true }}">
+                      <div style="position:relative;width:100%;max-width:{{ c.artW }}px">
+                        <sc-if value="{{ c.hasBadge }}">
+                          <div style="position:absolute;z-index:3;top:{{ c.badgeT }}px;left:{{ c.badgeL }};right:{{ c.badgeR }};background:linear-gradient(135deg,#C400D7,#6C1AF9);color:#FFFFFF;border-radius:999px;padding:{{ c.badgeY }}px {{ c.badgeX }}px;font-size:{{ c.badgeS }}px;font-weight:800;white-space:nowrap;box-shadow:0 18px 36px -12px rgba(108,26,249,0.65), inset 0 1px 0 rgba(255,255,255,0.35);transform:rotate({{ c.badgeTilt }}deg)">{{ c.badge }}</div>
+                        </sc-if>
+                        <div style="position:absolute;inset:0;border-radius:{{ c.artR }}px;background:{{ c.plate }};transform:translate({{ c.plateX }}px,{{ c.plateY }}px) rotate({{ c.plateTilt }}deg)"></div>
+                        <div style="position:relative;background:{{ c.panel }};color:{{ c.panelFg }};border:1px solid {{ c.panelLine }};border-radius:{{ c.artR }}px;padding:{{ c.artPad }}px;box-shadow:{{ c.panelShadow }};transform:rotate({{ c.tilt }}deg)">
+                          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:{{ c.rowY }}px">
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:{{ c.artTitleS }}px;letter-spacing:0.06em;text-transform:uppercase;color:{{ c.panelMuted }}">{{ c.art.title }}</span>
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:{{ c.artTitleS }}px;color:{{ c.panelMuted }}">{{ c.art.meta }}</span>
+                          </div>
+                          <sc-for list="{{ c.art.rows }}" as="r" hint-placeholder-count="3">
+                            <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:{{ c.rowY }}px 0;border-top:1px solid {{ c.panelLine }}">
+                              <span style="font-size:{{ c.rowS }}px;font-weight:600;line-height:1.25">{{ r.k }}</span>
+                              <span style="flex-shrink:0;font-size:{{ c.chipS }}px;font-weight:700;padding:{{ c.chipY }}px {{ c.chipX }}px;border-radius:999px;background:{{ r.bg }};color:{{ r.fg }};text-decoration:{{ r.deco }};white-space:nowrap">{{ r.v }}</span>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ c.isLines }}">
+                      <div style="position:relative;width:100%;max-width:{{ c.artW }}px">
+                        <sc-if value="{{ c.hasBadge }}">
+                          <div style="position:absolute;z-index:3;top:{{ c.badgeT }}px;left:{{ c.badgeL }};right:{{ c.badgeR }};background:linear-gradient(135deg,#C400D7,#6C1AF9);color:#FFFFFF;border-radius:999px;padding:{{ c.badgeY }}px {{ c.badgeX }}px;font-size:{{ c.badgeS }}px;font-weight:800;white-space:nowrap;box-shadow:0 18px 36px -12px rgba(108,26,249,0.65), inset 0 1px 0 rgba(255,255,255,0.35);transform:rotate({{ c.badgeTilt }}deg)">{{ c.badge }}</div>
+                        </sc-if>
+                        <div style="position:absolute;inset:0;border-radius:{{ c.artR }}px;background:{{ c.plate }};transform:translate({{ c.plateX }}px,{{ c.plateY }}px) rotate({{ c.plateTilt }}deg)"></div>
+                        <div style="position:relative;background:{{ c.panel }};color:{{ c.panelFg }};border:1px solid {{ c.panelLine }};border-radius:{{ c.artR }}px;padding:{{ c.artPad }}px;box-shadow:{{ c.panelShadow }};transform:rotate({{ c.tilt }}deg);display:flex;flex-direction:column;gap:{{ c.lineGap }}px">
+                          <div style="display:flex;align-items:center;gap:{{ c.dotGap }}px;padding-bottom:{{ c.rowY }}px;border-bottom:1px solid {{ c.panelLine }}">
+                            <span style="width:{{ c.dotS }}px;height:{{ c.dotS }}px;border-radius:50%;background:#C400D7"></span>
+                            <span style="width:{{ c.dotS }}px;height:{{ c.dotS }}px;border-radius:50%;background:{{ c.panelLine }}"></span>
+                            <span style="width:{{ c.dotS }}px;height:{{ c.dotS }}px;border-radius:50%;background:{{ c.panelLine }}"></span>
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:{{ c.artTitleS }}px;color:{{ c.panelMuted }};margin-left:{{ c.dotGap }}px">{{ c.art.title }}</span>
+                          </div>
+                          <sc-for list="{{ c.art.lines }}" as="l" hint-placeholder-count="3">
+                            <div style="font-family:'JetBrains Mono',monospace;font-size:{{ c.lineS }}px;line-height:1.4;color:{{ l.fg }}">{{ l.t }}</div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ c.isQuote }}">
+                      <div style="position:relative;width:100%;max-width:{{ c.artW }}px">
+                        <sc-if value="{{ c.hasBadge }}">
+                          <div style="position:absolute;z-index:3;top:{{ c.badgeT }}px;left:{{ c.badgeL }};right:{{ c.badgeR }};background:linear-gradient(135deg,#C400D7,#6C1AF9);color:#FFFFFF;border-radius:999px;padding:{{ c.badgeY }}px {{ c.badgeX }}px;font-size:{{ c.badgeS }}px;font-weight:800;white-space:nowrap;box-shadow:0 18px 36px -12px rgba(108,26,249,0.65), inset 0 1px 0 rgba(255,255,255,0.35);transform:rotate({{ c.badgeTilt }}deg)">{{ c.badge }}</div>
+                        </sc-if>
+                        <div style="position:absolute;inset:0;border-radius:{{ c.artR }}px;background:{{ c.plate }};transform:translate({{ c.plateX }}px,{{ c.plateY }}px) rotate({{ c.plateTilt }}deg)"></div>
+                        <div style="position:relative;background:{{ c.panel }};color:{{ c.panelFg }};border:1px solid {{ c.panelLine }};border-radius:{{ c.artR }}px;padding:{{ c.artPad }}px;box-shadow:{{ c.panelShadow }};transform:rotate({{ c.tilt }}deg);display:flex;flex-direction:column;gap:{{ c.quoteGap }}px">
+                          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:{{ c.artTitleS }}px;letter-spacing:0.06em;text-transform:uppercase;color:{{ c.panelMuted }}">{{ c.art.title }}</span>
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:{{ c.artTitleS }}px;color:{{ c.panelMuted }}">{{ c.art.meta }}</span>
+                          </div>
+                          <div style="border-left:3px solid #C400D7;padding-left:{{ c.rowY }}px;font-family:'Archivo Black',sans-serif;font-size:{{ c.quoteS }}px;line-height:1.14;letter-spacing:-0.02em;text-wrap:balance">{{ c.art.quote }}</div>
+                          <div style="display:flex;align-items:center;gap:{{ c.dotGap }}px;padding-top:{{ c.rowY }}px;border-top:1px solid {{ c.panelLine }}">
+                            <span style="width:{{ c.dotS }}px;height:{{ c.dotS }}px;border-radius:50%;background:#C400D7;flex-shrink:0"></span>
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:{{ c.artTitleS }}px;color:{{ c.panelAccent }}">{{ c.art.foot }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ c.isToasts }}">
+                      <div style="position:relative;width:100%;max-width:{{ c.artW }}px;display:flex;flex-direction:column;gap:{{ c.toastGap }}px">
+                        <sc-if value="{{ c.hasBadge }}">
+                          <div style="position:absolute;z-index:3;top:{{ c.badgeT }}px;left:{{ c.badgeL }};right:{{ c.badgeR }};background:linear-gradient(135deg,#C400D7,#6C1AF9);color:#FFFFFF;border-radius:999px;padding:{{ c.badgeY }}px {{ c.badgeX }}px;font-size:{{ c.badgeS }}px;font-weight:800;white-space:nowrap;box-shadow:0 18px 36px -12px rgba(108,26,249,0.65), inset 0 1px 0 rgba(255,255,255,0.35);transform:rotate({{ c.badgeTilt }}deg)">{{ c.badge }}</div>
+                        </sc-if>
+                        <sc-for list="{{ c.art.toasts }}" as="t" hint-placeholder-count="2">
+                          <div style="margin-left:{{ t.indent }}px;background:{{ c.panel }};color:{{ c.panelFg }};border:1px solid {{ c.panelLine }};border-radius:{{ c.artR }}px;padding:{{ c.toastPad }}px;box-shadow:{{ c.panelShadow }};transform:rotate({{ t.tilt }}deg);display:flex;gap:{{ c.toastPad }}px;align-items:flex-start">
+                            <div style="width:{{ c.iconS }}px;height:{{ c.iconS }}px;border-radius:{{ c.iconR }}px;background:{{ t.iconBg }};color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:{{ c.iconFont }}px;flex-shrink:0">{{ t.initial }}</div>
+                            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:{{ c.dotGap }}px">
+                              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+                                <span style="font-size:{{ c.toastS }}px;font-weight:800">{{ t.app }}</span>
+                                <span style="font-family:'JetBrains Mono',monospace;font-size:{{ c.artTitleS }}px;color:{{ c.panelMuted }};white-space:nowrap">{{ t.time }}</span>
+                              </div>
+                              <div style="font-size:{{ c.toastBodyS }}px;font-weight:500;line-height:1.35">{{ t.body }}</div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ c.isNumeral }}">
+                      <div style="position:relative;display:flex;align-items:flex-end;gap:{{ c.rowY }}px">
+                        <div style="font-family:'Archivo Black',sans-serif;font-size:{{ c.numS }}px;line-height:0.8;letter-spacing:-0.06em;color:{{ c.hlFg }}">{{ c.art.num }}</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:{{ c.kick }}px;color:{{ c.subFg }};padding-bottom:{{ c.rowY }}px">{{ c.art.of }}</div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+
+                <div style="position:relative;padding:0 {{ c.pad }}px {{ c.footB }}px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                  <span style="background:{{ c.pillBg }};color:{{ c.pillFg }};border-radius:999px;padding:{{ c.pillY }}px {{ c.pillX }}px;font-size:{{ c.pillS }}px;font-weight:800;white-space:nowrap;box-shadow:{{ c.pillShadow }}">{{ c.cta }}</span>
+                  <span style="font-size:{{ c.tiny }}px;font-weight:700;color:{{ c.urlFg }};text-align:right">compoundapp.co.uk</span>
+                </div>
+                <div style="position:relative;background:{{ c.riskBg }};color:{{ c.riskFg }};border-top:1px solid {{ c.riskLine }};padding:{{ c.riskY }}px {{ c.pad }}px {{ c.riskPadB }}px;font-size:{{ c.riskS }}px;line-height:1.4;font-weight:500">{{ c.risk }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-for>
+
+  <div style="border-left:3px solid #C400D7;padding-left:16px;font-size:14.5px;color:#3F3848;line-height:1.6;max-width:860px">Artefacts are illustrative interface mock-ups built in type, not screenshots of any provider’s system, and none carries a provider name, logo or brand colour. Error strings are quoted from published payroll-software documentation. Nothing here is financial advice and choice of workplace pension scheme remains the employer’s decision.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Finish&quot;},&quot;tilt&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Finish&quot;},&quot;pattern&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Finish&quot;},&quot;badges&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Finish&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const grainOn = this.props.grain ?? true;
+    const tiltOn = this.props.tilt ?? true;
+    const patternOn = this.props.pattern ?? true;
+    const badgesOn = this.props.badges ?? true;
+    const SAVED = '1 hour';
+    const figureSet = true;
+
+    const RISK = 'Capital at risk. The value of investments can go down as well as up and members may get back less than is paid in.';
+    const RISK_ADVICE = RISK + ' Compound does not provide financial advice.';
+    const RISK_DUTY = RISK + ' Choice of workplace pension scheme remains the employer\u2019s decision.';
+    const RISK_LINK = RISK + ' Compound links to the accounting software you already use, not to every system.';
+    const RISK_SHORT = 'Capital at risk. Investments can go down as well as up.';
+
+    const noise = (rgb) => "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 " + rgb + " 0 0 0 0 " + rgb + " 0 0 0 0 " + rgb + " 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+    const GRAD = 'linear-gradient(135deg,#C400D7,#6C1AF9)';
+
+    const THEMES = {
+      bloom: { logoWhite:true, logoDark:false,
+        base:'radial-gradient(85% 60% at 95% -6%, rgba(226,56,240,0.92) 0%, rgba(226,56,240,0) 62%), radial-gradient(80% 60% at -12% 110%, rgba(30,4,100,0.85) 0%, rgba(30,4,100,0) 62%), linear-gradient(155deg,#7A1CF4 0%,#5313D8 55%,#3D0CAE 100%)',
+        fg:'#FFFFFF', kickFg:'#FBE3FF', hlFg:'#FFFFFF', hlBg:'rgba(22,4,60,0.34)', hlPad:'0 0.1em', subFg:'rgba(255,255,255,0.93)',
+        barBg:'#FFFFFF', chipLine:'rgba(255,255,255,0.4)', eyeFg:'#FFFFFF', grainImg:"url('brand/grain-light.png')", grainOp:0.16,
+        panel:'#FFFFFF', panelFg:'#0E0716', panelMuted:'#666070', panelLine:'rgba(14,7,22,0.09)', panelAccent:'#A400B5',
+        panelShadow:'0 60px 120px -30px rgba(24,0,70,0.7), 0 24px 48px -18px rgba(24,0,70,0.45)', plate:'rgba(255,255,255,0.18)',
+        neutralIcon:'#2A1F38', mutedChipBg:'rgba(14,7,22,0.06)', okFg:'#0E0716',
+        pillBg:'#FFFFFF', pillFg:'#0E0716', pillShadow:'0 16px 34px -12px rgba(20,0,60,0.55)', urlFg:'#FFFFFF',
+        riskBg:'rgba(16,4,44,0.62)', riskFg:'#FFFFFF', riskLine:'rgba(255,255,255,0.14)', dot:'rgba(255,255,255,0.30)', spot:'rgba(255,170,250,0.55)' },
+      ink: { logoWhite:true, logoDark:false,
+        base:'radial-gradient(80% 55% at 100% 0%, rgba(196,0,215,0.5) 0%, rgba(196,0,215,0) 62%), radial-gradient(75% 55% at 0% 100%, rgba(108,26,249,0.45) 0%, rgba(108,26,249,0) 65%), #0D0716',
+        fg:'#FFFFFF', kickFg:'#EDB8F8', hlFg:'#F291FF', hlBg:'transparent', hlPad:'0', subFg:'rgba(255,255,255,0.88)',
+        barBg:GRAD, chipLine:'rgba(255,255,255,0.24)', eyeFg:'rgba(255,255,255,0.92)', grainImg:"url('brand/grain-light.png')", grainOp:0.14,
+        panel:'linear-gradient(180deg,#261A3B 0%,#180F27 100%)', panelFg:'#FFFFFF', panelMuted:'#B3A7C2', panelLine:'rgba(255,255,255,0.11)', panelAccent:'#F291FF',
+        panelShadow:'0 60px 120px -30px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.14)', plate:'rgba(255,255,255,0.06)',
+        neutralIcon:'#43365A', mutedChipBg:'rgba(255,255,255,0.09)', okFg:'#FFFFFF',
+        pillBg:GRAD, pillFg:'#FFFFFF', pillShadow:'0 16px 38px -12px rgba(196,0,215,0.65)', urlFg:'rgba(255,255,255,0.82)',
+        riskBg:'rgba(255,255,255,0.05)', riskFg:'rgba(255,255,255,0.93)', riskLine:'rgba(255,255,255,0.1)', dot:'rgba(255,255,255,0.16)', spot:'rgba(196,0,215,0.42)' },
+      pearl: { logoWhite:false, logoDark:true,
+        base:'radial-gradient(80% 55% at 100% 0%, rgba(196,0,215,0.18) 0%, rgba(196,0,215,0) 62%), radial-gradient(75% 55% at 0% 100%, rgba(108,26,249,0.16) 0%, rgba(108,26,249,0) 65%), #F7F4FB',
+        fg:'#0E0716', kickFg:'#A400B5', hlFg:'#A400B5', hlBg:'transparent', hlPad:'0', subFg:'#3F3848',
+        barBg:GRAD, chipLine:'rgba(14,7,22,0.18)', eyeFg:'#3F3848', grainImg:"url('brand/grain-dark.png')", grainOp:0.07,
+        panel:'#FFFFFF', panelFg:'#0E0716', panelMuted:'#666070', panelLine:'rgba(14,7,22,0.08)', panelAccent:'#A400B5',
+        panelShadow:'0 60px 120px -34px rgba(70,20,120,0.34), 0 20px 40px -18px rgba(70,20,120,0.22)', plate:'rgba(164,0,181,0.1)',
+        neutralIcon:'#2A1F38', mutedChipBg:'rgba(14,7,22,0.06)', okFg:'#0E0716',
+        pillBg:'#0E0716', pillFg:'#FFFFFF', pillShadow:'0 16px 32px -14px rgba(14,7,22,0.5)', urlFg:'#3F3848',
+        riskBg:'#0E0716', riskFg:'#FFFFFF', riskLine:'transparent', dot:'rgba(90,20,150,0.20)', spot:'rgba(196,0,215,0.20)' }
+    };
+
+    const RATIOS = [
+      { key:'45', label:'4:5 · 1080×1350', w:1080, h:1350, pad:84, padT:72, bodyY:40, footB:34, dir:'column', align:'stretch', textFlex:'0 0 auto', artFlex:'1 1 0', artJustify:'center', split:44,
+        h1:80, kick:25, sub:32, subMax:860, tiny:20, eyeY:10, eyeX:20, logoH:40, pillS:26, pillY:22, pillX:42, riskS:26, riskY:22, a:1, artW:820, maxRows:4, maxToasts:3, tiltDeg:-2 },
+      { key:'11', label:'1:1 · 1080×1080', w:1080, h:1080, pad:72, padT:58, bodyY:26, footB:26, dir:'column', align:'stretch', textFlex:'0 0 auto', artFlex:'1 1 0', artJustify:'center', split:30,
+        h1:62, kick:22, sub:27, subMax:900, tiny:19, eyeY:9, eyeX:18, logoH:34, pillS:23, pillY:18, pillX:36, riskS:24, riskY:18, a:0.74, artW:700, maxRows:3, maxToasts:2, tiltDeg:-1.6 },
+      { key:'916', label:'9:16 · 1080×1920', w:1080, h:1920, pad:92, padT:200, bodyY:56, footB:60, dir:'column', align:'stretch', textFlex:'0 0 auto', artFlex:'1 1 0', artJustify:'center', split:44,
+        h1:88, kick:28, sub:36, subMax:880, tiny:24, eyeY:12, eyeX:24, logoH:46, pillS:30, pillY:26, pillX:50, riskS:30, riskY:26, a:1.0, artW:860, maxRows:3, maxToasts:2, tiltDeg:-2.2 },
+      { key:'191', label:'1.91:1 · 1200×628', w:1200, h:628, pad:54, padT:34, bodyY:16, footB:18, dir:'row', align:'center', textFlex:'1 1 0', artFlex:'0 0 42%', artJustify:'center', split:40,
+        h1:44, kick:16, sub:19, subMax:600, tiny:15, eyeY:6, eyeX:13, logoH:24, pillS:17, pillY:12, pillX:26, riskS:19, riskY:11, a:0.55, artW:470, maxRows:3, maxToasts:2, tiltDeg:-1.4 }
+    ];
+    const R11 = RATIOS[1];
+
+    const EYEBROW = 'For accountants and bureaus';
+    const rows = (title, meta, list) => ({ kind:'rows', title, meta, rows: list.map(r => ({ k:r[0], v:r[1], tone:r[2] || 'muted' })) });
+    const lines = (title, list) => ({ kind:'lines', title, lines: list.map(l => ({ t:l[0], tone:l[1] || '' })) });
+    const quote = (title, meta, q, foot) => ({ kind:'quote', title, meta, quote:q, foot });
+    const toasts = (list) => ({ kind:'toasts', toasts: list.map(t => ({ app:t[0], time:t[1], body:t[2], brand:!!t[3] })) });
+    const numeral = (num, of) => ({ kind:'numeral', num, of });
+
+    const SINGLES = [
+      { ref:'ACC-01', badge:'Never reviewed', name:'Callout – You Never Chose It', note:'Statement · cold', theme:'bloom',
+        kicker:'The default, not a decision', headline:'You didn\u2019t choose your clients\u2019 pension provider. You accepted the default.', hl:'You accepted the default.', cta:'Learn more', risk:RISK_DUTY,
+        art: rows('Client setup · pension', '', [['Options compared','None'],['Chosen by','Default','accent'],['Last reviewed','Never'],['Used for','Every client']]) },
+      { ref:'ACC-04', badge:'Unsent', name:'Agitate – Your Name Is On It', note:'Statement · cold', theme:'pearl',
+        kicker:'Their workplace pension scheme', headline:'Your clients think you chose their pension provider. Did you?', hl:'Did you?', cta:'Learn more', risk:RISK_ADVICE + ' Choice of scheme remains the employer\u2019s decision.',
+        art: toasts([['Client \u00b7 Director','now','Why did you pick this pension provider for us?'],['You \u00b7 draft reply','unsent','It was sort of the default\u2026']]) },
+      { ref:'ACC-07', badge:'Same duties', name:'Proof – Same Duties, Different Month', note:'Statement · warm', theme:'bloom',
+        kicker:'Auto-enrolment duties', headline:'The pension duties don\u2019t change. The monthly process can.', hl:'The monthly process can.', cta:'Learn more', risk:RISK_DUTY,
+        art: rows('Employer duties', '', [['Assess the workforce','Unchanged'],['Enrol and contribute','Unchanged'],['Declaration of compliance','Unchanged'],['Monthly process','Payroll-linked','accent']]) },
+      { ref:'ACC-17', badge:'One sitting', name:'Speed – Same Job, Payroll-Linked', note:'Statement · warm', theme:'pearl',
+        kicker:'Payroll-linked', headline:'The pension side of the run, done in the same sitting as the payroll.', hl:'in the same sitting as the payroll.', cta:'Book a 15-minute call', risk:RISK_LINK,
+        art: rows('This month\u2019s run', '', [['Payroll','\u2713 Done','ok'],['Pension contributions','Same sitting','accent'],['Separate portal login','None']]) },
+      { ref:'ACC-22', badge:'Locked out', name:'Agitate – The Security Question', note:'Absurdity · cold', theme:'ink',
+        kicker:'Locked out of your client\u2019s pension portal', headline:'You are the delegate. You do not know.', hl:'You do not know.', cta:'Learn more', risk:RISK,
+        art: quote('Security check', 'Attempt 5', '\u201cHow many delegates are authorised on this account?\u201d', 'Answer not recognised') },
+      { ref:'ACC-03', badge:'Just habit', name:'Objection – It Was Never a Decision', note:'Absurdity · warm', theme:'pearl',
+        kicker:'Why this pension provider?', headline:'That\u2019s not a recommendation. That\u2019s a default.', hl:'That\u2019s a default.', cta:'Learn more', risk:RISK_DUTY,
+        art: quote('Client review · notes', 'Pension', '\u201cWe\u2019ve always used them.\u201d', 'Reason recorded: habit') },
+      { ref:'ACC-02', badge:'Untouched since 2019', name:'Blame – Set Up in 2019', note:'Absurdity · cold', theme:'bloom',
+        kicker:'Every client on the same pension scheme', headline:'Not because you compared. Because nobody asked you to.', hl:'Because nobody asked you to.', cta:'Learn more', risk:RISK,
+        art: quote('Scheme record', 'Set up 2019', '\u201cIt was set up in 2019 and nobody has touched it since.\u201d', 'Last reviewed: never') },
+      { ref:'ACC-16', badge:'Still waiting', name:'The Wait – Days to Show Up', note:'Consequence · cold', theme:'ink',
+        kicker:'You submitted the pension contributions.', headline:'Your client wants to know why nobody can see them yet.', hl:'why nobody can see them yet.',
+        sub:'The pension side of the run, in the same sitting as the payroll.', cta:'Learn more', risk:RISK,
+        art: toasts([['Payroll','Monday','Pension contributions submitted for 14 employees.'],['Client \u00b7 MD','Thursday','The team still can\u2019t see their pension payments. Any idea why?']]) },
+      { ref:'ACC-27', badge:'Window closed', name:'Members – Comms That Arrive', note:'Consequence · cold', theme:'pearl',
+        kicker:'Their pension enrolment letter never arrived.', headline:'The opt-out window closed anyway. Guess who hears about it.', hl:'Guess who hears about it.',
+        sub:'Compound shows members where they stand in an app, not a posted pack.', cta:'Learn more', risk:RISK_ADVICE,
+        art: toasts([['Enrolment pack','posted','Delivery status: not received.'],['Client','now','One of the team says nobody told them anything.']]) },
+      { ref:'ACC-06', badge:'Overdue', name:'Agitate – Nobody Reviews It', note:'Consequence · cold', theme:'bloom',
+        kicker:'You review their accounting software every year.', headline:'When did you last review their pension?', hl:'their pension?',
+        sub:'Fifteen minutes to find out what else is on the table.', cta:'Book a 15-minute call', risk:RISK_DUTY,
+        art: rows('Annual client review', '2026', [['Accounting software','\u2713 Reviewed','ok'],['Bank feeds','\u2713 Reviewed','ok'],['Payroll','\u2713 Reviewed','ok'],['Workplace pension','Not reviewed','accent']]) },
+      { ref:'ACC-11', badge:'Every month', name:'Joke – Muscle Memory', note:'Error log · cold', theme:'ink',
+        kicker:'Your client\u2019s pension portal', headline:'You could do this with your eyes shut. Nobody should be proud of that.', hl:'Nobody should be proud of that.', cta:'Learn more', risk:RISK,
+        art: lines('pension-portal \u00b7 monthly', [['> log in, reset password'],['> select payment source'],['> match the group name exactly'],['> upload, wait, refresh','err']]) },
+      { ref:'ACC-14', badge:'Owner unknown', name:'Joke – Inherited Login', note:'Error log · cold', theme:'pearl',
+        kicker:'Pension portal access', headline:'Nobody knows whose login it is. Everybody uses it.', hl:'Everybody uses it.', cta:'Learn more', risk:RISK,
+        art: lines('account.details', [['> user: the person who set it up'],['> left the practice: 2021','dim'],['> status: still how everyone logs in','err']]) },
+      { ref:'ACC-23', badge:'Diarise it', name:'Agitate – Pay Early or Log Back In', note:'Before and after · cold', theme:'bloom',
+        kicker:'Paying your clients\u2019 pension contributions', headline:'You cannot diarise the payment. So you either pay it early or log back in on the day.', hl:'log back in on the day.',
+        sub:'This describes the process, not a saving.', cta:'Learn more', risk:RISK_LINK,
+        art: rows('Contribution payment', '', [['Your process today','Pay it early','strike'],['Or','Log back in on the day','strike'],['On Compound','Diarise it','accent']]) },
+      { ref:'ACC-09', badge:'1 left to change', name:'Joke – Default Settings', note:'Punchline · brand', theme:'pearl',
+        kicker:'You changed the default browser.', headline:'The default ringtone. The default everything. Except your clients\u2019 pension.', hl:'Except your clients\u2019 pension.',
+        sub:'Workplace pensions built this decade.', cta:'Learn more', risk:RISK_DUTY,
+        art: rows('Settings', 'Defaults', [['Browser','\u2713 Changed','ok'],['Ringtone','\u2713 Changed','ok'],['Wallpaper','\u2713 Changed','ok'],['Clients\u2019 pension','Default','accent']]) },
+      { ref:'ACC-10', badge:'Still on paper', name:'Joke – Fax Energy', note:'Punchline · brand', theme:'ink',
+        kicker:'Your practice went paperless in 2016.', headline:'Your clients\u2019 pension provider never got the memo.', hl:'never got the memo.',
+        sub:'Payroll-linked, app-first, and there is no portal to log into.', cta:'Learn more', risk:RISK_LINK,
+        art: toasts([['Memo \u00b7 2016','unread','We are going paperless from Monday.'],['Enrolment packs','today','Sent to 14 employees by post.']]) },
+      { ref:'ACC-13', badge:'Book 15 minutes', name:'Joke – Anti-pitch', note:'Punchline · brand', theme:'bloom',
+        kicker:'We are not going to pretend pensions are exciting.', headline:'We are going to make them take less of your Tuesday.', hl:'less of your Tuesday.',
+        sub:'Fifteen minutes to see whether moving a client across is worth it.', cta:'Book a 15-minute call', risk:RISK,
+        art: rows('Tuesday', 'Calendar', [['09:30 \u00b7 Client call','Busy'],['11:00 \u00b7 Year-end review','Busy'],['14:00 \u00b7 Payroll run','Busy'],['14:00 \u00b7 Pensions','Same sitting','accent']]) },
+      { ref:'ACC-25', badge:'Access pending', name:'Onboarding – Taking On a Client', note:'Punchline · high intent', theme:'pearl',
+        kicker:'New client. Previous accountant. Bad breakup.', headline:'Guess who has to grant your pension portal access.', hl:'grant your pension portal access.',
+        sub:'Or start them on a scheme where the access is yours from day one.', cta:'Book a 15-minute call', risk:RISK_DUTY,
+        art: toasts([['Access request','pending','Waiting for the previous adviser to add you.'],['Previous accountant','seen','Read. No reply.']]) }
+    ];
+
+    const QUAL = 'Typical time saved per client, per month. Individual results vary and are not guaranteed.';
+    const TIME = [
+      { ref:'TIME-01', badge:'Every month', name:'Time saved – Get It Back', note:'Time saved · direct', theme:'bloom',
+        kicker:'Pension admin, per client', headline:'Get an hour back per client, every month.', hl:'an hour back per client', sub:QUAL, cta:'Book a 15-minute call', risk:RISK_LINK,
+        art: rows('This month\u2019s run', '', [['Payroll','\u2713 Done','ok'],['Pension contributions','\u2713 Done','ok'],['Time saved per client','1 hour','accent']]) },
+      { ref:'TIME-02', badge:'Time saved', name:'Time saved – Plain Claim', note:'Time saved · direct', theme:'pearl',
+        kicker:'Workplace pensions for practices', headline:'Compound saves you an hour per client, every month, on pension admin.', hl:'an hour per client', sub:QUAL, cta:'Book a 15-minute call', risk:RISK_LINK,
+        art: toasts([['Compound','this month','Pension run complete. 1 hour saved for this client.', true],['Payroll','today','Contributions submitted in the same sitting.']]) },
+      { ref:'TIME-03', badge:'Per client', name:'Time saved – Every Run', note:'Time saved · direct', theme:'ink',
+        kicker:'Per client, per month', headline:'An hour saved on every client\u2019s pension run.', hl:'An hour saved', sub:QUAL, cta:'Learn more', risk:RISK_LINK,
+        art: lines('pension-run.log', [['> payroll linked'],['> contributions submitted'],['> time saved: 1 hour / client','err']]) },
+      { ref:'TIME-04', name:'Time saved – The Number', note:'Time saved · direct', theme:'bloom',
+        kicker:'Saved on pension admin', headline:'Less pension admin. Every single month.', hl:'Every single month.', sub:QUAL, cta:'Book a 15-minute call', risk:RISK_LINK,
+        art: Object.assign(quote('Time saved', 'Per client', '1 hour', 'Every month, on pension admin'), { big:true }) }
+    ];
+
+    const CAROUSELS = [
+      { ref:'ACC-05', name:'What to Ask Before You Re-recommend', note:'Carousel · warm', cards:[
+        { theme:'pearl', badge:'4 questions', kicker:'Before you re-recommend', headline:'Four questions to put to any workplace pension scheme. Including the one you already use.', hl:'Including the one you already use.', cta:'Swipe', risk:RISK_SHORT,
+          art: rows('Scheme review', '4 questions', [['01 \u00b7 Time to go live','Ask'],['02 \u00b7 Diarised payments','Ask'],['03 \u00b7 Who controls access','Ask'],['04 \u00b7 Taking a scheme over','Ask']]) },
+        { theme:'pearl', kicker:'Ask any scheme', headline:'How long to go live before first payroll?', hl:'', sub:'Ask for a date, not a range. You are the one with the deadline.', cta:'Swipe', risk:RISK_SHORT, art: numeral('01','/ 04') },
+        { theme:'pearl', kicker:'Ask any scheme', headline:'Can I diarise a contribution payment?', hl:'', sub:'If not, you either pay it early or log back in on the day to approve it.', cta:'Swipe', risk:RISK_SHORT, art: numeral('02','/ 04') },
+        { theme:'pearl', kicker:'Ask any scheme', headline:'Who controls my access to a client?', hl:'', sub:'If the employer has to grant it, you will be locked out eventually.', cta:'Swipe', risk:RISK_SHORT, art: numeral('03','/ 04') },
+        { theme:'pearl', kicker:'Ask any scheme', headline:'What happens when I take a scheme over from another accountant?', hl:'', sub:'If the outgoing adviser has to add you, expect a wait \u2014 and an awkward email.', cta:'Book a 15-minute call', risk:RISK_DUTY, art: numeral('04','/ 04') }
+      ] },
+      { ref:'ACC-24', name:'Error Codes Are Not a Workflow', note:'Carousel · cold', cards:[
+        { theme:'ink', badge:'3 errors', kicker:'Pension submission failed', headline:'Three codes. One cause.', hl:'One cause.', cta:'Swipe', risk:RISK_SHORT,
+          art: lines('submission.log \u00b7 failed', [['> IFC012345','err'],['> 401 Unauthorised','err'],['> pay periods must align to tax periods','err']]) },
+        { theme:'pearl', kicker:'IFC012345', headline:'The payment source name does not match your payroll.', hl:'does not match your payroll.', sub:'Change it in the portal, not in payroll, then resubmit.', cta:'Swipe', risk:RISK_SHORT,
+          art: lines('submission.log', [['> IFC012345','err'],['# payment source name \u2260 payroll','dim']]) },
+        { theme:'ink', kicker:'401 Unauthorised', headline:'You used your own login instead of the delegate credentials.', hl:'the delegate credentials.', sub:'Nothing tells you that until the submission fails.', cta:'Swipe', risk:RISK_SHORT,
+          art: lines('submission.log', [['> 401 Unauthorised','err'],['# signed in as you, not the delegate','dim']]) },
+        { theme:'pearl', kicker:'Pay periods must align to tax periods', headline:'Set in the provider portal. Not in your payroll.', hl:'Not in your payroll.', sub:'On Compound the run is linked, so there is nothing to reconcile by hand.', cta:'Learn more', risk:RISK_LINK,
+          art: lines('submission.log', [['> pay periods must align to tax periods','err'],['# fixed in the portal, not payroll','dim']]) }
+      ] },
+      { ref:'ACC-28', name:'Three Things Practices Actually Complain About', note:'Carousel · warm', cards:[
+        { theme:'bloom', badge:'Most reported', kicker:'We read the threads so you do not have to', headline:'Three complaints, over and over.', hl:'over and over.', cta:'Swipe', risk:RISK_SHORT,
+          art: rows('What practices report', 'Public threads', [['01 \u00b7 Delegate access','Common'],['02 \u00b7 No diarised payments','Common'],['03 \u00b7 Submissions failing on a name','Common']]) },
+        { theme:'bloom', kicker:'01 \u00b7 Delegate access', headline:'\u201cIt is a pain to make sure we both have access to all our clients.\u201d', hl:'', sub:'Access is granted per client by the employer, and only the employer can change it.', cta:'Swipe', risk:RISK_SHORT, art: numeral('01','/ 03') },
+        { theme:'bloom', kicker:'02 \u00b7 No diarised payments', headline:'Upload the schedule, then come back on the day to pay it.', hl:'come back on the day to pay it.', sub:'Practices point out that other schemes let them do both in one visit.', cta:'Swipe', risk:RISK_SHORT, art: numeral('02','/ 03') },
+        { theme:'bloom', kicker:'03 \u00b7 Submissions that fail on a name', headline:'Payment source, payment date, group name. All must match exactly.', hl:'All must match exactly.', sub:'What accountants report publicly. Sources retained on file.', cta:'Book a 15-minute call', risk:RISK_DUTY, art: numeral('03','/ 03') }
+      ] },
+      { ref:'ACC-12', name:'Things Faster Than the Pension Run', note:'Carousel · brand', cards:[
+        { theme:'pearl', badge:'Still going', kicker:'Timed, unscientifically', headline:'Three things that finish before your monthly pension upload does.', hl:'before your monthly pension upload does.', cta:'Swipe', risk:RISK_SHORT,
+          art: rows('Race', 'This month', [['The kettle. Twice.','\u2713 Finished','ok'],['A client call you were dreading','\u2713 Finished','ok'],['The rest of the payroll run','\u2713 Finished','ok'],['Pension upload','Still going','accent']]) },
+        { theme:'pearl', kicker:'Faster than the pension upload', headline:'The kettle. Twice.', hl:'', sub:'Three minutes, give or take.', cta:'Swipe', risk:RISK_SHORT, art: numeral('01','/ 03') },
+        { theme:'pearl', kicker:'Faster than the pension upload', headline:'A client call you were dreading.', hl:'', sub:'Including the small talk at the start.', cta:'Swipe', risk:RISK_SHORT, art: numeral('02','/ 03') },
+        { theme:'pearl', kicker:'Faster than the pension upload', headline:'The rest of the payroll run. All of it.', hl:'All of it.', sub:'Payroll is fine. It is the pension side that drags.', cta:'Learn more', risk:RISK, art: numeral('03','/ 03') }
+      ] }
+    ];
+
+    const keepRows = (list, max) => {
+      if (list.length <= max) return list;
+      const must = list.filter(r => r.tone === 'accent');
+      const rest = list.filter(r => r.tone !== 'accent').slice(0, Math.max(0, max - must.length));
+      return list.filter(r => must.includes(r) || rest.includes(r));
+    };
+
+    const build = (src, R, idLabel, label) => {
+      const T = THEMES[src.theme];
+      const s = v => Math.round(v * R.a);
+      const len = src.headline.length;
+      const f = len > 85 ? 0.8 : len > 65 ? 0.87 : len > 45 ? 0.94 : 1.04;
+      const i = src.hl ? src.headline.lastIndexOf(src.hl) : -1;
+      const pre = i >= 0 ? src.headline.slice(0, i) : src.headline;
+      const hl = i >= 0 ? src.hl : '';
+      const post = i >= 0 ? src.headline.slice(i + src.hl.length) : '';
+      const tilt = tiltOn ? R.tiltDeg : 0;
+      const badgeRise = Math.round((Math.round(s(22) * 1.2) + 2 * s(12)) * 0.78);
+      const padTop = (badgesOn && !!src.badge && src.art.kind !== 'numeral' && R.dir === 'column') ? badgeRise + s(12) : 0;
+      const A = src.art;
+      const chip = r => r.tone === 'accent' ? { bg:GRAD, fg:'#FFFFFF', deco:'none' }
+        : r.tone === 'strike' ? { bg:'transparent', fg:T.panelMuted, deco:'line-through' }
+        : r.tone === 'ok' ? { bg:'transparent', fg:T.okFg, deco:'none' }
+        : { bg:T.mutedChipBg, fg:T.panelMuted, deco:'none' };
+      const art = {
+        title: A.title || '', meta: A.meta || '', quote: A.quote || '', foot: A.foot || '', num: A.num || '', of: A.of || '',
+        rows: A.kind === 'rows' ? keepRows(A.rows, R.maxRows).map(r => Object.assign({ k:r.k, v:r.v }, chip(r))) : [],
+        lines: A.kind === 'lines' ? A.lines.slice(0, R.maxRows + 1).map(l => ({ t:l.t, fg: l.tone === 'err' ? T.panelAccent : l.tone === 'dim' ? T.panelMuted : T.panelFg })) : [],
+        toasts: A.kind === 'toasts' ? A.toasts.slice(0, R.maxToasts).map((t, n) => ({ app:t.app, time:t.time, body:t.body,
+          initial: t.app.charAt(0), iconBg: n === 0 ? GRAD : T.neutralIcon, indent: n * s(34), tilt: tiltOn ? (n % 2 ? 1.2 : R.tiltDeg) : 0 })) : []
+      };
+      return Object.assign({}, R, T, {
+        id: idLabel, label,
+        eyebrow: EYEBROW, kicker: src.kicker, pre, hl, post,
+        // no highlight phrase: collapse the span so no empty highlight block renders
+        hlBg: hl ? T.hlBg : 'transparent', hlPad: hl ? T.hlPad : '0',
+        hasSub: !!src.sub, subText: src.sub || '', cta: src.cta + '  \u2192', risk: src.risk,
+        h1: Math.round(R.h1 * f),
+        kGap: Math.round(R.kick * 0.6), barW: Math.round(R.kick * 1.5), barH: Math.max(3, Math.round(R.kick * 0.16)), tGap: Math.round(R.kick * 1.05),
+        grain: T.grainImg, grainOp: grainOn ? T.grainOp : 0,
+        tilt, plateTilt: tiltOn ? -R.tiltDeg * 1.5 : 0, plateX: s(16), plateY: s(20),
+        artPad: s(34), artR: s(26), rowY: s(15), rowS: s(26), chipS: s(20), chipY: s(7), chipX: s(15), artTitleS: Math.max(11, s(17)),
+        lineS: s(24), lineGap: s(14), quoteS: A.big ? s(150) : s(44), quoteGap: s(22), toastS: s(21), toastBodyS: s(25), toastPad: s(24), toastGap: s(18),
+        iconS: s(54), iconR: s(15), iconFont: s(24), numS: s(300), dotS: s(12), dotGap: s(8),
+        artJustify: A.kind === 'numeral' ? 'flex-end' : R.artJustify,
+        isRows: A.kind === 'rows', isLines: A.kind === 'lines', isQuote: A.kind === 'quote', isToasts: A.kind === 'toasts', isNumeral: A.kind === 'numeral',
+        art,
+        dot: T.dot, dotGrid: Math.max(16, Math.round(30 * R.a)), patternOp: patternOn ? 1 : 0,
+        patternMask: R.dir === 'row' ? 'radial-gradient(ellipse 55% 75% at 78% 55%, #000 0%, transparent 75%)' : 'radial-gradient(ellipse 75% 50% at 60% 68%, #000 0%, transparent 72%)',
+        spot: T.spot, spotS: Math.round(R.artW * 1.15),
+        hasBadge: badgesOn && !!src.badge && A.kind !== 'numeral', badge: src.badge || '',
+        // Badge straddles the panel's top edge but sits mostly above it: only a quarter of its height
+        // enters the panel, which is less than the panel or toast padding, so it never reaches the header text.
+        badgeT: -badgeRise, badgeY: s(12), badgeX: s(22), badgeS: s(22), badgeTilt: tiltOn ? 3 : 0,
+        // Toasts carry their timestamp top-right, so their badge anchors top-left over the app icon instead.
+        badgeL: A.kind === 'toasts' ? (-s(16)) + 'px' : 'auto', badgeR: A.kind === 'toasts' ? 'auto' : (-s(16)) + 'px',
+        // Reserve the badge's protrusion so it can never rise into the text column.
+        artTopPad: padTop,
+        split: Math.max(0, R.split - padTop),
+        // Story: keep the risk text clear of Meta's bottom CTA overlay (~250px), panel colour runs to the edge.
+        riskPadB: R.key === '916' ? 250 : R.riskY
+      });
+    };
+
+    // RiskSave accountant batch review (6 Oct 2026): L-01 to L-05 only, with the held items amended.
+    const FCA = ' Compound Digital Ltd is an appointed representative of RiskSave Technologies Ltd, which is authorised and regulated by the Financial Conduct Authority (FRN 775330).';
+    const find = ref => SINGLES.concat(TIME).find(s => s.ref === ref);
+    const L = [
+      Object.assign({}, find('ACC-02'), { ref:'L-01', name:'Set Up in 2019', note:'Amended: illustrative card, full risk warning',
+        risk: RISK_ADVICE + ' Choice of workplace pension scheme remains the employer’s decision.',
+        art: rows('Example · a typical client setup', '', [['Set up','2019'],['Options compared','None'],['Last reviewed','Never','accent']]) }),
+      Object.assign({}, find('TIME-01'), { ref:'L-02', name:'Same Sitting as Payroll', note:'Amended: one-hour claim removed',
+        headline:'Pension admin, done in the same sitting as payroll.', hl:'in the same sitting as payroll.', sub:'',
+        art: rows('This month’s run', '', [['Payroll','✓ Done','ok'],['Pension contributions','✓ Done','ok'],['Contribution file to build','None','accent']]) }),
+      Object.assign({}, find('TIME-04'), { ref:'L-03', name:'Less Pension Admin', note:'Amended: one-hour claim removed',
+        kicker:'Pension admin, every month', sub:'',
+        art: rows('Pension admin · this month', '', [['Payroll','✓ Done','ok'],['Pension contributions','Same sitting','accent'],['Separate portal login','None']]) }),
+      Object.assign({}, find('ACC-01'), { ref:'L-04', name:'You Never Chose It', note:'Approved' }),
+      Object.assign({}, find('ACC-04'), { ref:'L-05', name:'Your Name Is On It', note:'Approved' })
+    ].map(s => Object.assign(s, { risk: s.risk + FCA }));
+    const groups = L.map((s, n) => ({
+      hasSection: n === 0, sectionTitle: 'L-01 to L-05 · all four ratios',
+      ref: s.ref, name: s.name, note: s.note,
+      cards: RATIOS.map(R => build(s, R, 'p-' + s.ref.toLowerCase() + '-' + R.key, R.label))
+    }));
+    const tallyLine = '5 concepts × 4 ratios = 20 cards.';
+    return { groups, tallyLine };
+  }
+}
+</script>
+</body>
+</html>
