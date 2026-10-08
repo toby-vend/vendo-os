@@ -17,3 +17,12 @@ and `Compound Accountant Creatives Premium.dc.html` (copy of the original in `sr
 ## Build
 `python3 build.py` renders the dc sources in headless Chrome, writes `src/harness.html` (Figma capture page)
 and `qa/*.png`. Serve `src/` and capture `harness.html` with the Figma MCP.
+
+## Figma (Vendo team › Compound folder, id 667488079)
+- Statics: "Compound — Accountant Meta Statics" `AawqnNRFntwaAKZD0VtJiA` — page "CQ-01 to CQ-12 | Callouts" (48),
+  page "L-01 to L-05 | Accountant singles" (20), "Brand assets" (vector logo components). Auto layout off,
+  artboards at page level, grain/dot overlays locked, raster logos swapped for vector instances.
+- Guideline: "Compound — Brand Guidelines" `nfpHUfDUsV7oRL1DmqbiIU` — 9 × 1920×1080 pages from `guideline/index.html`.
+
+Capture gotchas: inline highlight spans split into overlapping text (fixed by `src/flatten-headlines.js`);
+CSS-repeated grain comes in as one CROP tile (set fills to TILE, scalingFactor 1); `<img>` SVGs rasterise.

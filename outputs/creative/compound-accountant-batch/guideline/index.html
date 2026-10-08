@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Compound Brand Guidelines</title>
+<!-- Source: "Compound Brand Cheat Sheet.dc.html" (Claude Design project 3345d961…), the Meta ad system in
+     ../src, and RiskSave's accountant batch review (6 Oct 2026). Each .page is one 1920×1080 Figma frame. -->
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Black&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<style>
+:root{--mag:#C400D7;--vio:#6C1AF9;--ink:#0A0A0A;--fog:#F3F3F3;--growth:#2EBD6B;--grad:linear-gradient(135deg,#C400D7,#6C1AF9);--deep:#0E0716}
+*{box-sizing:border-box}
+body{margin:0;background:#D9D6DF;font-family:'Archivo',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.deck{display:flex;flex-direction:column;gap:120px;padding:120px}
+.page{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--fog);padding:96px 120px;display:flex;flex-direction:column}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:.1em;text-transform:uppercase;color:var(--mag)}
+.h{font-family:'Archivo Black',sans-serif;font-size:96px;line-height:1;letter-spacing:-.025em;margin-top:20px}
+.lede{font-size:26px;line-height:1.5;color:#444;max-width:1100px;margin-top:24px}
+.foot{position:absolute;left:120px;right:120px;bottom:48px;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:16px;color:#888}
+.card{background:#fff;border-radius:28px;padding:40px}
+.mono{font-family:'JetBrains Mono',monospace}
+.note{font-size:20px;line-height:1.55;color:#444}
+.note b{color:var(--ink)}
+.grain{position:absolute;inset:0;background-image:url('img/grain-light.png');background-size:240px 240px;opacity:.16;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- 01 Cover -->
+<div class="page" style="background:var(--grad);color:#fff;justify-content:space-between">
+  <div class="grain"></div>
+  <div style="position:relative;display:flex;justify-content:space-between;align-items:center">
+    <img src="img/logo.svg" alt="Compound" style="height:56px">
+    <div class="mono" style="font-size:20px;letter-spacing:.08em;text-transform:uppercase;opacity:.85">Brand guidelines · v1 · October 2026</div>
+  </div>
+  <div style="position:relative">
+    <div style="font-family:'Archivo Black',sans-serif;font-size:200px;line-height:.92;letter-spacing:-.035em">The Pension<br>That Works</div>
+    <div style="font-size:30px;font-weight:500;margin-top:40px;max-width:1000px;line-height:1.45;opacity:.92">Plain-spoken, confident, warm. Modern fintech energy on a serious, regulated product.</div>
+  </div>
+</div>
+
+<!-- 02 Logo -->
+<div class="page">
+  <div class="eyebrow">01 · Logo</div>
+  <div class="h">One wordmark. Three grounds.</div>
+  <div style="display:flex;gap:32px;margin-top:64px;flex:1">
+    <div style="flex:1;border-radius:28px;background:var(--grad);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden"><div class="grain"></div><img src="img/logo.svg" alt="Compound" style="height:64px;position:relative"></div>
+    <div style="flex:1;border-radius:28px;background:#fff;display:flex;align-items:center;justify-content:center"><img src="img/logo-dark.svg" alt="Compound" style="height:64px"></div>
+    <div style="flex:1;border-radius:28px;background:var(--deep);display:flex;align-items:center;justify-content:center"><img src="img/logo.svg" alt="Compound" style="height:64px"></div>
+  </div>
+  <div style="display:flex;gap:32px;margin-top:28px">
+    <div class="note" style="flex:1"><b>White</b> on the gradient and on ink.</div>
+    <div class="note" style="flex:1"><b>Ink</b> on Fog and white.</div>
+    <div class="note" style="flex:1"><b>Always</b> the supplied vector. Never recolour, stretch, outline or add effects.</div>
+  </div>
+  <div style="height:56px"></div>
+</div>
+
+<!-- 03 Colour -->
+<div class="page">
+  <div class="eyebrow">02 · Colour</div>
+  <div class="h">Gradient is the hero.</div>
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:20px;margin-top:56px;height:420px">
+    <div style="background:var(--grad);border-radius:24px;padding:28px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff"><div style="font-weight:800;font-size:28px">Compound Gradient</div><div class="mono" style="font-size:18px;opacity:.9;margin-top:6px">135° · #C400D7 → #6C1AF9</div></div>
+    <div style="background:#C400D7;border-radius:24px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff"><div style="font-weight:800;font-size:24px">Magenta</div><div class="mono" style="font-size:16px;opacity:.9">#C400D7</div></div>
+    <div style="background:#6C1AF9;border-radius:24px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff"><div style="font-weight:800;font-size:24px">Violet</div><div class="mono" style="font-size:16px;opacity:.9">#6C1AF9</div></div>
+    <div style="background:#0A0A0A;border-radius:24px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff"><div style="font-weight:800;font-size:24px">Ink</div><div class="mono" style="font-size:16px;opacity:.9">#0A0A0A</div></div>
+    <div style="background:#fff;border:1px solid #E4E4E4;border-radius:24px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end"><div style="font-weight:800;font-size:24px">Fog</div><div class="mono" style="font-size:16px;color:#666">#F3F3F3</div></div>
+    <div style="background:#2EBD6B;border-radius:24px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff"><div style="font-weight:800;font-size:24px">Growth</div><div class="mono" style="font-size:16px;opacity:.9">#2EBD6B</div></div>
+  </div>
+  <div style="display:flex;gap:48px;margin-top:48px">
+    <div class="note" style="flex:1"><b>Use.</b> Gradient for headline moments, feature cards and primary CTAs. Everything else sits on Fog and white.</div>
+    <div class="note" style="flex:1"><b>Growth green</b> is functional only: gains and success states. Never decorative.</div>
+    <div class="note" style="flex:1"><b>Ratio.</b> About 80% neutral, 15% gradient, 5% green. One gradient block per view.</div>
+  </div>
+</div>
+
+<!-- 04 Typography -->
+<div class="page">
+  <div class="eyebrow">03 · Typography</div>
+  <div style="display:flex;gap:80px;margin-top:40px;flex:1">
+    <div style="flex:1.3;display:flex;flex-direction:column;gap:52px;justify-content:center">
+      <div><div style="font-family:'Archivo Black',sans-serif;font-size:150px;line-height:1;letter-spacing:-.025em">Archivo Black</div><div class="mono" style="font-size:18px;color:#888;margin-top:12px">Display · headlines · tracking −2 to −3% · line 1.0</div></div>
+      <div><div style="font-size:72px;font-weight:800;letter-spacing:-.01em">Archivo ExtraBold</div><div class="mono" style="font-size:18px;color:#888;margin-top:8px">Headings · CTAs · line 1.15</div></div>
+      <div><div style="font-size:30px;line-height:1.5;color:#333;max-width:900px">Archivo Regular. Short sentences, no jargon. Pensions explained like a friend would, not a fund manager.</div><div class="mono" style="font-size:18px;color:#888;margin-top:8px">Body · line 1.5–1.6</div></div>
+      <div><div class="mono" style="font-size:30px">JetBrains Mono — kickers &amp; interface labels</div><div class="mono" style="font-size:18px;color:#888;margin-top:8px">Ad kickers, artefact card titles, codes</div></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:28px;justify-content:center">
+      <div style="background:var(--grad);border-radius:28px;padding:48px;color:#fff"><div style="font-size:22px;font-weight:500;opacity:.85">Numerals: big, black, tabular</div><div style="font-family:'Archivo Black',sans-serif;font-size:120px;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.1">£7,500.23</div></div>
+      <div class="note">Sentence case everywhere except labels and the wordmark. Archivo is the closest open match to the brand grotesque. Swap in the licensed brand font when it's supplied.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 05 Buttons, tags, shape -->
+<div class="page">
+  <div class="eyebrow">04 · Buttons, tags &amp; shape</div>
+  <div class="h">Everything rounded.</div>
+  <div style="display:flex;gap:32px;margin-top:56px">
+    <div class="card" style="flex:1;display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;gap:20px;align-items:center">
+        <span style="background:var(--grad);color:#fff;border-radius:999px;padding:24px 44px;font-size:26px;font-weight:700">Sign Up</span>
+        <span style="background:#0A0A0A;color:#fff;border-radius:999px;padding:24px 44px;font-size:26px;font-weight:700">Talk To Our Team</span>
+        <span style="background:#fff;color:#0A0A0A;border:2px solid #0A0A0A;border-radius:999px;padding:22px 42px;font-size:26px;font-weight:700">Learn More ↗</span>
+      </div>
+      <div class="note">Primary = gradient. Secondary = ink. Tertiary = outline. One primary per view. ↗ marks navigation, → marks an action.</div>
+    </div>
+    <div class="card" style="flex:.8;display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <span style="background:#F6E6F9;color:#A100B4;border-radius:999px;padding:10px 22px;font-size:20px;font-weight:700;letter-spacing:.04em;text-transform:uppercase">General</span>
+        <span style="background:#EFE8FE;color:#5312C4;border-radius:999px;padding:10px 22px;font-size:20px;font-weight:700;letter-spacing:.04em;text-transform:uppercase">Employers</span>
+        <span style="background:#E2F6EB;color:#177A44;border-radius:999px;padding:10px 22px;font-size:20px;font-weight:700">+£36.99</span>
+        <span style="background:#F3F3F3;color:#555;border-radius:999px;padding:10px 22px;font-size:20px;font-weight:600">60 seconds</span>
+      </div>
+      <div class="note">Tags: label colour at ~10% tint behind, fully rounded, caps. Green is for money gains only.</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:32px;margin-top:32px">
+    <div class="card" style="flex:1;display:flex;gap:40px;align-items:center">
+      <div style="width:220px;height:140px;border-radius:28px;background:#fff;border:2px solid #E4E4E4;flex-shrink:0"></div>
+      <div class="note"><b>Cards</b> 24–28px radius. <b>Inputs</b> 14px with a 1.5px hairline and magenta focus ring. <b>Buttons</b> full pill. No sharp corners. Shadows no heavier than a whisper.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 06 Photography & voice -->
+<div class="page" style="padding:0;flex-direction:row">
+  <div style="flex:1.15;position:relative"><img src="img/hero.jpg" alt="Couple looking at a phone by firelight" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+  <div style="flex:1;padding:96px 96px;display:flex;flex-direction:column;gap:44px;justify-content:center">
+    <div>
+      <div class="eyebrow">05 · Photography</div>
+      <div style="font-family:'Archivo Black',sans-serif;font-size:64px;line-height:1.02;letter-spacing:-.02em;margin-top:16px">Life being lived.</div>
+      <div class="note" style="margin-top:20px">Real people, candid, warm ambient light. Never desks or graphs. The gradient does the fintech; photos do the humanity.</div>
+    </div>
+    <div>
+      <div class="eyebrow">06 · Voice</div>
+      <div style="font-family:'Archivo Black',sans-serif;font-size:64px;line-height:1.02;letter-spacing:-.02em;margin-top:16px">Like a friend would.</div>
+      <div class="note" style="margin-top:20px">Plain English, second person, lightly cheeky: “You might be richer than you think.” Benefit-first headlines of 3–6 words. Warm but never flippant about money.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 07 Meta ad system -->
+<div class="page">
+  <div class="eyebrow">07 · Meta ads</div>
+  <div class="h" style="font-size:80px">Lit grounds. One idea per ad.</div>
+  <div style="display:flex;gap:32px;margin-top:40px;align-items:flex-end">
+    <div style="display:flex;flex-direction:column;gap:10px"><img src="img/p-cq-01-45.jpg" alt="Bloom ground example" style="height:490px;border-radius:12px;display:block"><div class="mono" style="font-size:18px">Bloom</div></div>
+    <div style="display:flex;flex-direction:column;gap:10px"><img src="img/p-cq-02-45.jpg" alt="Pearl ground example" style="height:490px;border-radius:12px;display:block"><div class="mono" style="font-size:18px">Pearl</div></div>
+    <div style="display:flex;flex-direction:column;gap:10px"><img src="img/p-cq-03-45.jpg" alt="Ink ground example" style="height:490px;border-radius:12px;display:block"><div class="mono" style="font-size:18px">Ink</div></div>
+    <div style="display:flex;flex-direction:column;gap:10px"><img src="img/p-l-05-45.jpg" alt="Artefact card example" style="height:490px;border-radius:12px;display:block"><div class="mono" style="font-size:18px">Artefact card</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:32px">
+    <div class="note"><b>Grounds.</b> Bloom, Pearl (#F7F4FB) and Ink (#0D0716). Rotate so no two ads in a row share one.</div>
+    <div class="note"><b>Finish.</b> Fine grain (16% dark, 7% light) and a dot field fading in from one edge.</div>
+    <div class="note"><b>Callouts.</b> The question is the whole message. No highlight, no supporting line.</div>
+    <div class="note"><b>Artefacts</b> are illustrative mock-ups built in type. Never a provider's screen, name, logo or colour.</div>
+  </div>
+</div>
+
+<!-- 08 Formats & safe zones -->
+<div class="page">
+  <div class="eyebrow">08 · Formats</div>
+  <div class="h" style="font-size:80px">Four ratios, every concept.</div>
+  <div style="display:flex;gap:48px;margin-top:48px;flex:1;min-height:0;align-items:flex-start">
+    <div style="position:relative;flex-shrink:0">
+      <img src="img/p-l-01-916.jpg" alt="Story example" style="height:760px;display:block;border-radius:12px">
+      <div style="position:absolute;left:0;right:0;top:0;height:79px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.55) 0 6px,rgba(255,255,255,.15) 6px 14px);border-bottom:2px dashed #fff;border-radius:12px 12px 0 0"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:99px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.55) 0 6px,rgba(255,255,255,.15) 6px 14px);border-top:2px dashed #fff;border-radius:0 0 12px 12px"></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:20px">
+      <div class="card" style="padding:32px;display:grid;grid-template-columns:1fr 1fr 1fr;row-gap:18px;font-size:22px">
+        <div class="mono" style="color:#888">Format</div><div class="mono" style="color:#888">Size</div><div class="mono" style="color:#888">Risk text min.</div>
+        <div><b>Portrait 4:5</b></div><div>1080 × 1350</div><div>26px</div>
+        <div><b>Square 1:1</b></div><div>1080 × 1080</div><div>24px</div>
+        <div><b>Story 9:16</b></div><div>1080 × 1920</div><div>30px</div>
+        <div><b>Landscape 1.91:1</b></div><div>1200 × 628</div><div>19px</div>
+      </div>
+      <div class="note"><b>Story safe zones</b> (dashed lines): keep copy below the top 200px and above the bottom 250px. Meta's buttons cover the rest. The risk panel's colour can run to the edge; its text can't.</div>
+      <div class="note"><b>Landscape</b> is the tightest crop. Check the risk panel survives it before anything else.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 09 Compliance -->
+<div class="page" style="background:var(--deep);color:#fff">
+  <div class="eyebrow" style="color:#F291FF">09 · Financial promotions</div>
+  <div class="h" style="font-size:80px">Every ad carries the risk.</div>
+  <div style="display:flex;gap:48px;margin-top:44px;flex:1;min-height:0">
+    <div style="flex:1.1;display:flex;flex-direction:column;gap:16px">
+      <div class="mono" style="font-size:18px;color:#B3A7C2;letter-spacing:.06em;text-transform:uppercase">Risk panel · build from these lines</div>
+      <div style="background:rgba(255,255,255,.07);border-radius:20px;padding:24px 28px;font-size:24px;line-height:1.5"><b>Always:</b> Capital at risk. The value of investments can go down as well as up and members may get back less than is paid in.</div>
+      <div style="background:rgba(255,255,255,.07);border-radius:20px;padding:24px 28px;font-size:24px;line-height:1.5"><b>Add as relevant:</b> Tax rules can change. · Compound does not provide financial advice. · Choice of workplace pension scheme remains the employer's decision. · Compound links to the accounting software you already use, not to every system.</div>
+      <div style="background:rgba(255,255,255,.07);border-radius:20px;padding:24px 28px;font-size:24px;line-height:1.5"><b>Paid placement:</b> Compound Digital Ltd is an appointed representative of RiskSave Technologies Ltd, which is authorised and regulated by the Financial Conduct Authority (FRN 775330).</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:14px;font-size:24px;line-height:1.45;color:rgba(255,255,255,.92)">
+      <div class="mono" style="font-size:18px;color:#B3A7C2;letter-spacing:.06em;text-transform:uppercase">RiskSave signs off every ad</div>
+      <div>• No comparison with a named provider, stated or implied.</div>
+      <div>• Any figure (time saved, returns, pot values) needs evidence on file and its source.</div>
+      <div>• Mock-ups must read as illustrative: “Example”, “Draft”, “Unsent”. Never a real record or quote.</div>
+      <div>• Put the premise as a question, not an assertion about the reader.</div>
+      <div>• No unconditional promises (“forever”) or primacy claims.</div>
+      <div>• A batch only goes live once every item in it is approved or withdrawn.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
