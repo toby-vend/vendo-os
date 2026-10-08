@@ -294,7 +294,127 @@ def mark_9x16():
     return page("Signature Smiles | Mark | 9x16", b)
 
 
-BUILDERS = {"mark": (mark_1x1, mark_9x16)}
+# ---------------------------------------------------------------- SOPHIE (registering the family)
+CTA_FAM = "Book your family in"
+
+
+def price_rows(rows, color_l, color_v, color_n, line, size=26, vsize=54, gap=20, width=480):
+    """Prices as ruled rows (label left, PARISIAN figure right). No boxes."""
+    return "".join(
+        f'<div style="width:{width}px;display:flex;justify-content:space-between;align-items:baseline;padding:{gap}px 0;border-top:1px solid {line}">'
+        f'<div><div style="font-size:{size}px;font-weight:500;color:{color_l}">{l}</div><div class="small" style="font-size:{int(size * .72)}px;color:{color_n};margin-top:4px">{n}</div></div>'
+        f'<div class="price" style="font-size:{vsize}px;color:{color_v}">{v}</div></div>' for l, v, n in rows)
+
+
+FAM_ROWS = [("Under 4s", "Free", "With a full-paying adult"), ("Children", "£28", "New patient exam"), ("Adults", "£90", "New patient exam, x-rays included")]
+
+
+def sophie_1x1():
+    b = []
+    b.append(board("S1", f"Under 4s free | Static | Stock family | Family prices | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  {arch(640, 110, 380, 700, 'family-sofa.jpg', fx=0.3, fy=0.4)}
+  {badge(545, 690, 140)}
+  <div class="abs hl" style="left:80px;top:110px;font-size:78px">Registering<br>the family?</div>
+  <div class="abs label" style="left:80px;top:325px">Here&rsquo;s what it costs</div>
+  <div class="abs" style="left:80px;top:365px">{price_rows(FAM_ROWS, C['ink'], C['copper'], C['sand'], C['stone'], size=25, vsize=56, gap=18, width=470)}</div>
+  <div class="abs" style="left:80px;top:760px">{proof(C['sand'], 20)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FAM}</span></div>"""))
+    b.append(board("S2", f"New to Brackley | Static | Stock mum and daughter | Moving boxes | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  <div class="abs" style="left:0;top:0;width:470px;height:1080px;background:{C['sage']}"></div>
+  {arch(60, 150, 380, 640, 'sophie-moving.jpg', fx=0.62, fy=0.3)}
+  {badge(380, 760, 130)}
+  <div class="abs label" style="left:560px;top:150px">Welcoming new families</div>
+  <div class="abs hl" style="left:560px;top:195px;font-size:84px">New to<br>Brackley?</div>
+  <div class="abs hl" style="left:560px;top:400px;width:440px;font-size:44px;color:{C['olive']}">Still haven&rsquo;t found a dentist for the kids?</div>
+  <div class="abs body" style="left:560px;top:590px;width:440px;font-size:25px">We&rsquo;re taking on new families now, adults and children.</div>
+  <div class="abs" style="left:560px;top:710px">{dots(["Under 4s free", "Children £28"], C['copper'], 23)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FAM}</span></div>"""))
+    b.append(board("S3", f"Their first visit | Static | Stock child in chair | First visit | 1x1 | {D}", "s1", C['olive'], f"""
+  {warm_olive()}
+  {arch(620, 120, 400, 720, 'girl-chair.jpg', fx=0.55, fy=0.3)}
+  <div class="abs hl" style="left:80px;top:120px;width:500px;font-size:60px;color:{C['linen']}">Their first visit decides how they feel about the dentist.</div>
+  <div class="abs" style="left:80px;top:470px;width:60px;height:1px;background:{C['terra']}"></div>
+  <div class="abs body" style="left:80px;top:510px;width:470px;font-size:26px;color:rgba(249,247,245,.9)">Longer appointments, so nobody&rsquo;s rushed. Time to see the chair and ask questions first.</div>
+  <div class="abs" style="left:80px;top:680px">{dots(["Under 4s free with a paying adult"], 'rgba(249,247,245,.9)', 22)}</div>
+  <div class="abs" style="left:80px;top:740px">{proof('rgba(249,247,245,.85)', 20)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web-light', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta linen" style="height:62px;font-size:17px;padding:0 32px">{CTA_FAM}</span></div>"""))
+    b.append(board("S4", f"Calling round | Static | Stock mum and toddler | Nobody taking on | 1x1 | {D}", "s1", C['sage'], f"""
+  {warm_sage()}
+  {arch(80, 150, 400, 700, 'sophie-phone.jpg', fx=0.32, fy=0.35)}
+  <div class="abs hl" style="left:560px;top:150px;width:440px;font-size:62px">Called round and nobody&rsquo;s taking on?</div>
+  <div class="abs price" style="left:556px;top:400px;font-size:150px">We are.</div>
+  <div class="abs body" style="left:560px;top:600px;width:430px;font-size:25px">Adults, children and toddlers. Longer appointments, prices published online.</div>
+  <div class="abs" style="left:560px;top:740px">{dots(["Under 4s free", "Children £28", "Adults £90"], C['copper'], 21)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FAM}</span></div>"""))
+    b.append(board("S5", f"Logistics | Static | Stock mum and daughter | Late Weds and Saturdays | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  {photo(0, 0, 1080, 470, 'sophie-school.jpg', fx=0.6, fy=0.25)}
+  {ribbon(470, 26, line=C['stone'])}
+  <div class="abs hl" style="left:80px;top:600px;width:470px;font-size:64px">Fits around school and work</div>
+  <div class="abs" style="left:560px;top:595px">{price_rows([("Wednesdays", "8pm", "Open until 8pm"), ("Saturdays", "8:30", "Appointments from 8:30am"), ("Parking", "Free", "Juno Crescent, Brackley")], C['ink'], C['copper'], C['sand'], C['stone'], size=22, vsize=40, gap=12, width=440)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FAM}</span></div>"""))
+    return page("Signature Smiles | Sophie | 1x1", b)
+
+
+def sophie_9x16():
+    b = []
+    b.append(board("S1s", f"Under 4s free | Static | Stock family | Family prices | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  {arch(250, 260, 580, 640, 'family-sofa.jpg', fx=0.3, fy=0.4)}
+  {badge(140, 780, 170)}
+  <div class="abs hl" style="left:90px;top:960px;font-size:96px">Registering the family?</div>
+  <div class="abs" style="left:90px;top:1090px">{price_rows(FAM_ROWS, C['ink'], C['copper'], C['sand'], C['stone'], size=28, vsize=62, gap=16, width=900)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FAM}</span></div>
+  <div class="abs" style="left:540px;top:1484px">{proof(C['sand'], 21)}</div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    b.append(board("S2s", f"New to Brackley | Static | Stock mum and daughter | Moving boxes | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  <div class="abs" style="left:0;top:0;width:1080px;height:960px;background:{C['sage']}"></div>
+  {arch(250, 250, 580, 820, 'sophie-moving.jpg', fx=0.62, fy=0.3)}
+  {badge(130, 920, 170)}
+  <div class="abs hl" style="left:90px;top:1120px;font-size:110px">New to Brackley?</div>
+  <div class="abs hl" style="left:90px;top:1250px;font-size:52px;color:{C['olive']}">Still haven&rsquo;t found a dentist for the kids?</div>
+  <div class="abs body" style="left:90px;top:1330px;width:900px;font-size:30px">We&rsquo;re taking on new families now.</div>
+  <div class="abs" style="left:90px;top:1385px">{dots(["Under 4s free", "Children £28", "Adults £90"], C['copper'], 26)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FAM}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    b.append(board("S3s", f"Their first visit | Static | Stock child in chair | First visit | 9x16 | {D}", "s9", C['olive'], f"""
+  {warm_olive()}
+  <div class="abs hl" style="left:90px;top:280px;width:900px;font-size:76px;color:{C['linen']}">Their first visit decides how they feel about the dentist.</div>
+  {arch(250, 560, 580, 680, 'girl-chair.jpg', fx=0.55, fy=0.3)}
+  <div class="abs body" style="left:90px;top:1290px;width:900px;font-size:30px;color:rgba(249,247,245,.9)">Longer appointments, so nobody&rsquo;s rushed.</div>
+  <div class="abs" style="left:90px;top:1345px">{dots(["Under 4s free with a paying adult"], 'rgba(249,247,245,.9)', 26)}</div>
+  <div class="abs" style="left:90px;top:1400px">{proof('rgba(249,247,245,.85)', 22)}</div>
+  <div class="abs" style="left:90px;top:1470px"><span class="cta linen">{CTA_FAM}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web-light', 250)}</div>"""))
+    b.append(board("S4s", f"Calling round | Static | Stock mum and toddler | Nobody taking on | 9x16 | {D}", "s9", C['sage'], f"""
+  {warm_sage()}
+  <div class="abs hl" style="left:90px;top:280px;width:900px;font-size:80px">Called round and nobody&rsquo;s taking on?</div>
+  {arch(90, 520, 520, 720, 'sophie-phone.jpg', fx=0.32, fy=0.35)}
+  <div class="abs price" style="left:640px;top:880px;font-size:150px;line-height:1">We<br>are.</div>
+  <div class="abs body" style="left:90px;top:1290px;width:900px;font-size:30px">Adults, children and toddlers.</div>
+  <div class="abs" style="left:90px;top:1345px">{dots(["Under 4s free", "Children £28", "Adults £90"], C['copper'], 26)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FAM}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    b.append(board("S5s", f"Logistics | Static | Stock mum and daughter | Late Weds and Saturdays | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  {photo(0, 0, 1080, 880, 'sophie-school.jpg', fx=0.78, fy=0.3)}
+  {ribbon(880, 30)}
+  <div class="abs hl" style="left:90px;top:985px;font-size:80px">Fits around<br>school and work</div>
+  <div class="abs" style="left:90px;top:1170px">{price_rows([("Wednesdays", "8pm", "Open until 8pm"), ("Saturdays", "8:30", "Appointments from 8:30am"), ("Parking", "Free", "Juno Crescent, Brackley")], C['ink'], C['copper'], C['sand'], C['stone'], size=26, vsize=46, gap=10, width=900)}</div>
+  <div class="abs" style="left:90px;top:1490px"><span class="cta olive">{CTA_FAM}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    return page("Signature Smiles | Sophie | 9x16", b)
+
+
+BUILDERS = {"mark": (mark_1x1, mark_9x16), "sophie": (sophie_1x1, sophie_9x16)}
 
 if __name__ == "__main__":
     for p in sys.argv[1:] or BUILDERS:

@@ -10,9 +10,9 @@ Casting: real-feeling families, bright and natural; the site's family-sofa and c
 **Awareness:** solution aware. **Sophistication:** 2 to 3. **Angle:** price on screen for the whole family.
 Research: "Every dentist I have spoken with will only let my son register if I pay over £100 to register privately." (Mumsnet [4]).
 
-**On image:** Registering the family? / Under 4s: free with a paying adult / Children's first check-up: £28 / Adults: £90, x-rays included / Book your family in
+**On image:** Registering the family? / Under 4s: free with a paying adult / Children's new patient exam: £28 / Adults: £90, x-rays included / Book your family in
 
-**Headline:** Under 4s free. Children's check-ups £28.
+**Headline:** Under 4s free. Children's exams £28.
 
 **Primary text:**
 Finding a dentist for the whole family shouldn't mean finding a small fortune first.
