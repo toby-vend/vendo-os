@@ -100,7 +100,7 @@ def main():
         cells = "".join(
             f'<div class="cell"><div class="lbl">{ref} · {label} · {w}×{h}</div>'
             f'{boards[f"p-{slug}-{k}"]}</div>' for k, label, w, h in RATIOS)
-        rows.append(f'<div class="row"><div class="head"><b>{ref}</b> {name}<span>{status}</span></div>'
+        rows.append(f'<div class="row" data-set="{slug.split("-")[0]}"><div class="head"><b>{ref}</b> {name}<span>{status}</span></div>'
                     f'<div class="cells">{cells}</div></div>')
 
     css = ("body{margin:0;background:#E9E6EE;font-family:'Archivo',sans-serif;color:#0E0716;-webkit-font-smoothing:antialiased}"
@@ -114,7 +114,11 @@ def main():
            ".lbl{font-family:'JetBrains Mono',monospace;font-size:18px;color:#4F4858}")
     head = (f'<!DOCTYPE html><html lang="en-GB"><head><meta charset="utf-8"><title>Compound Accountant Batch</title>'
             f'{FONTS}<style>{css}</style>'
-            '<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script></head>')
+            '<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>'
+            # ?set=cq or ?set=l keeps one series, so each lands on its own Figma page
+            '<script>document.addEventListener("DOMContentLoaded",()=>{const s=new URLSearchParams(location.search).get("set");'
+            'if(s)document.querySelectorAll(".row").forEach(r=>{if(r.dataset.set!==s)r.remove()})})</script>'
+            '<script src="flatten-headlines.js" defer></script></head>')
     (SRC / "harness.html").write_text(head + '<body><div class="wrap">' + "".join(rows) + "</div></body></html>")
     print(f"harness.html: {len(expected)} artboards")
 
