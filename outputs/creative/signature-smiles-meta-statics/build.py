@@ -414,7 +414,117 @@ def sophie_9x16():
     return page("Signature Smiles | Sophie | 9x16", b)
 
 
-BUILDERS = {"mark": (mark_1x1, mark_9x16), "sophie": (sophie_1x1, sophie_9x16)}
+# ---------------------------------------------------------------- DENISE (no NHS place, wary of private)
+PLAN_ROWS = [("Pay as you go", "£90", "New patient exam, x-rays included"), ("Or a plan", "£20/m", "2 check-ups, 2 hygiene visits, 1 emergency appointment a year")]
+
+
+def denise_1x1():
+    b = []
+    b.append(board("D1", f"The price out loud | Static | Stock woman 50s | Exam price | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  {arch(640, 110, 380, 720, 'denise-sofa.jpg', fx=0.72, fy=0.3)}
+  {badge(545, 700, 140)}
+  <div class="abs hl" style="left:80px;top:110px;width:520px;font-size:62px">What does a private dentist cost in Brackley?</div>
+  <div class="abs label" style="left:80px;top:380px">New patient exam</div>
+  <div class="abs price" style="left:72px;top:420px;font-size:230px">£90</div>
+  <div class="abs" style="left:80px;top:650px;width:470px">{dots(EXAM_INC, C['ink'], 21)}</div>
+  <div class="abs" style="left:80px;top:770px">{proof(C['sand'], 20)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
+    b.append(board("D2", f"Gone private | Static | Stock woman 60s | Kitchen table | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  <div class="abs" style="left:610px;top:0;width:470px;height:1080px;background:{C['sage']}"></div>
+  {arch(650, 150, 380, 660, 'denise-kitchen.jpg', fx=0.42, fy=0.25)}
+  {badge(570, 720, 130)}
+  <div class="abs hl" style="left:80px;top:150px;width:480px;font-size:80px">Your dentist gone private?</div>
+  <div class="abs hl" style="left:80px;top:470px;width:470px;font-size:40px;color:{C['olive']}">If you&rsquo;re paying privately anyway, choose where.</div>
+  <div class="abs" style="left:80px;top:660px;width:470px">{dots(["New patient exam £90", "Prices published online"], C['copper'], 22)}</div>
+  <div class="abs" style="left:80px;top:770px">{proof(C['sand'], 20)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
+    b.append(board("D3", f"Private means upselling | Static | Team Lorraine | Every cost explained | 1x1 | {D}", "s1", C['olive'], f"""
+  {warm_olive()}
+  {arch(620, 120, 400, 720, 'team-lorraine.jpg', fx=0.5, fy=0.2)}
+  <div class="abs hl" style="left:80px;top:120px;width:500px;font-size:66px;color:{C['linen']}">Worried private means being sold to?</div>
+  <div class="abs" style="left:80px;top:400px;width:60px;height:1px;background:{C['terra']}"></div>
+  <div class="abs body" style="left:80px;top:440px;width:480px;font-size:30px;color:rgba(249,247,245,.92)">Every cost explained before anything starts. You decide what happens next.</div>
+  <div class="abs" style="left:80px;top:640px">{dots(["New patient exam £90"], 'rgba(249,247,245,.9)', 22)}</div>
+  <div class="abs" style="left:80px;top:700px">{proof('rgba(249,247,245,.85)', 20)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web-light', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta linen" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
+    b.append(board("D4", f"Pay monthly forever | Static | Stock older couple | Plan optional | 1x1 | {D}", "s1", C['sage'], f"""
+  {warm_sage()}
+  {arch(80, 150, 400, 700, 'older-couple.jpg', fx=0.5, fy=0.3)}
+  <div class="abs hl" style="left:560px;top:150px;width:440px;font-size:64px">Private doesn&rsquo;t have to mean a plan.</div>
+  <div class="abs" style="left:560px;top:420px">{price_rows(PLAN_ROWS, C['ink'], C['copper'], C['olive'], C['stone'], size=27, vsize=54, gap=18, width=440)}</div>
+  <div class="abs" style="left:560px;top:760px">{proof(C['sand'], 19)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
+    b.append(board("D5", f"Still on the waiting list | Static | Stock woman 60s | On the phone | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  {photo(0, 0, 1080, 470, 'denise-phone.jpg', fx=0.4, fy=0.22)}
+  {ribbon(470, 26, line=C['stone'])}
+  <div class="abs hl" style="left:80px;top:600px;width:470px;font-size:66px">Still on a waiting list?</div>
+  <div class="abs body" style="left:580px;top:605px;width:420px;font-size:28px">We&rsquo;re welcoming new patients in Brackley now.</div>
+  <div class="abs" style="left:580px;top:730px">{dots(["New patient exam £90"], C['copper'], 21)}</div>
+  <div class="abs" style="left:580px;top:790px">{proof(C['sand'], 18)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:640px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_FIRST}</span></div>"""))
+    return page("Signature Smiles | Denise | 1x1", b)
+
+
+def denise_9x16():
+    b = []
+    b.append(board("D1s", f"The price out loud | Static | Stock woman 50s | Exam price | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  <div class="abs hl" style="left:90px;top:270px;width:900px;font-size:78px">What does a private dentist cost in Brackley?</div>
+  {arch(560, 520, 430, 700, 'denise-sofa.jpg', fx=0.72, fy=0.3)}
+  <div class="abs label" style="left:90px;top:800px">New patient exam</div>
+  <div class="abs price" style="left:80px;top:840px;font-size:210px">£90</div>
+  <div class="abs" style="left:90px;top:1290px;width:900px">{dots(EXAM_INC, C['ink'], 26)}</div>
+  <div class="abs" style="left:90px;top:1370px">{proof(C['sand'], 22)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FIRST}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    b.append(board("D2s", f"Gone private | Static | Stock woman 60s | Kitchen table | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  <div class="abs" style="left:0;top:0;width:1080px;height:880px;background:{C['sage']}"></div>
+  {arch(250, 250, 580, 740, 'denise-kitchen.jpg', fx=0.42, fy=0.25)}
+  {badge(130, 840, 170)}
+  <div class="abs hl" style="left:90px;top:1050px;font-size:92px">Your dentist<br>gone private?</div>
+  <div class="abs hl" style="left:90px;top:1280px;width:900px;font-size:44px;color:{C['olive']}">If you&rsquo;re paying privately anyway, choose where.</div>
+  <div class="abs" style="left:90px;top:1405px">{dots(["New patient exam £90", "5.0 from 110 Google reviews"], C['copper'], 26)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_FIRST}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    b.append(board("D3s", f"Private means upselling | Static | Team Lorraine | Every cost explained | 9x16 | {D}", "s9", C['olive'], f"""
+  {warm_olive()}
+  <div class="abs hl" style="left:90px;top:280px;width:900px;font-size:84px;color:{C['linen']}">Worried private means being sold to?</div>
+  {arch(250, 560, 580, 680, 'team-lorraine.jpg', fx=0.5, fy=0.2)}
+  <div class="abs body" style="left:90px;top:1290px;width:900px;font-size:32px;color:rgba(249,247,245,.92)">Every cost explained before anything starts.</div>
+  <div class="abs" style="left:90px;top:1350px">{dots(["New patient exam £90"], 'rgba(249,247,245,.9)', 26)}</div>
+  <div class="abs" style="left:90px;top:1405px">{proof('rgba(249,247,245,.85)', 22)}</div>
+  <div class="abs" style="left:90px;top:1475px"><span class="cta linen">{CTA_FIRST}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web-light', 250)}</div>"""))
+    b.append(board("D4s", f"Pay monthly forever | Static | Stock older couple | Plan optional | 9x16 | {D}", "s9", C['sage'], f"""
+  {warm_sage()}
+  <div class="abs hl" style="left:90px;top:280px;width:900px;font-size:84px">Private doesn&rsquo;t have to mean a plan.</div>
+  {arch(250, 540, 580, 560, 'older-couple.jpg', fx=0.5, fy=0.3)}
+  <div class="abs" style="left:90px;top:1150px">{price_rows(PLAN_ROWS, C['ink'], C['copper'], C['olive'], C['stone'], size=32, vsize=62, gap=16, width=900)}</div>
+  <div class="abs" style="left:90px;top:1480px"><span class="cta olive">{CTA_FIRST}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    b.append(board("D5s", f"Still on the waiting list | Static | Stock woman 60s | On the phone | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  {photo(0, 0, 1080, 880, 'denise-phone.jpg', fx=0.4, fy=0.25)}
+  {ribbon(880, 30)}
+  <div class="abs hl" style="left:90px;top:985px;font-size:92px">Still on a<br>waiting list?</div>
+  <div class="abs body" style="left:90px;top:1200px;width:900px;font-size:34px">We&rsquo;re welcoming new patients in Brackley now.</div>
+  <div class="abs" style="left:90px;top:1270px">{dots(["New patient exam £90"], C['copper'], 26)}</div>
+  <div class="abs" style="left:90px;top:1330px">{proof(C['sand'], 22)}</div>
+  <div class="abs" style="left:90px;top:1470px"><span class="cta olive">{CTA_FIRST}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    return page("Signature Smiles | Denise | 9x16", b)
+
+
+BUILDERS = {"mark": (mark_1x1, mark_9x16), "sophie": (sophie_1x1, sophie_9x16), "denise": (denise_1x1, denise_9x16)}
 
 if __name__ == "__main__":
     for p in sys.argv[1:] or BUILDERS:

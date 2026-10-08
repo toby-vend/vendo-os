@@ -1,6 +1,6 @@
 # Denise: no NHS place | Meta copy
 
-Campaign: General. Persona: Denise, 40 to 70. Her practice went private or she can't get registered anywhere. She assumes private means upselling and has no idea whether a check-up is £40 or £150 (Dental Persona Bank, General Dentistry mini). The fee said out loud, with the number on screen, is the whole brief. Offer across all five: new patient exam £90 including two x-rays; optional £20 monthly plan. Research: research.md (Denise section, offer facts). Location line: Brackley.
+Campaign: General. Persona: Denise, 40 to 70. Her practice went private or she can't get registered anywhere. She assumes private means upselling and has no idea whether a first visit is £40 or £150 (Dental Persona Bank, General Dentistry mini). The fee said out loud, with the number on screen, is the whole brief. Offer across all five: new patient exam £90 including two x-rays; optional £20 monthly plan. Research: research.md (Denise section, offer facts). Location line: Brackley.
 
 Casting: women 45 to 70, warm and ordinary; the practice manager or reception is more credible than a clinician for this persona.
 
@@ -10,9 +10,9 @@ Casting: women 45 to 70, warm and ordinary; the practice manager or reception is
 **Awareness:** solution aware. **Sophistication:** 3. **Angle:** say the number. Nobody else does.
 Research: "I just book an appointment and hope it isn't too expensive, no idea of their actual prices" (Mumsnet [6]).
 
-**On image:** What does a private check-up cost in Brackley? / Here: £90 / Full exam · two x-rays · oral cancer screening · your plan and costs / 5.0 from 110 Google reviews / Book your first visit
+**On image:** What does a private dentist cost in Brackley? / New patient exam: £90 / Full exam · two x-rays · oral cancer screening · your plan and costs / 5.0 from 110 Google reviews / Book your first visit
 
-**Headline:** A private check-up in Brackley: £90
+**Headline:** New patient exam in Brackley: £90
 
 **Primary text:**
 What does a private dentist actually cost? Most practices make you ring to find out.
@@ -67,7 +67,7 @@ Research: "the upsell pressure now is absolutely blatant" (Mumsnet [9]); "I'm te
 **Headline:** Every cost explained before anything starts
 
 **Primary text:**
-The worry with going private isn't the check-up. It's what happens after.
+The worry with going private isn't the first appointment. It's what happens after.
 
 The list of "recommended" treatments. The pressure to say yes today.
 
