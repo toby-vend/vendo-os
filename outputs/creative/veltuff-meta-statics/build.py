@@ -1,6 +1,6 @@
-"""Veltuff UK Black November statics: HTML harness for render QA and Figma capture.
+"""Veltuff UK Black Friday statics: HTML harness for render QA and Figma capture.
 
-Brand: Veltuff guideline (Figma aHWliZbwJcLPtVS1PWzulV) + Veltuff's own Black November identity
+Brand: Veltuff guideline (Figma aHWliZbwJcLPtVS1PWzulV) + the look of Veltuff's draft Black November banner, renamed Black Friday (Toby, 8 Oct)
 (assets/src/black-november-ref.png). Copy and facts: copy-suite.md, offers.md. Prices are Stuart's 2 Oct list.
 Assets: make_assets.py (logos, textures, tears), make_cutouts.py (product mattes), make_lockups.py (lockup, badge, chevrons).
 
@@ -56,7 +56,7 @@ def logo(colour, w, x, y):
 
 
 def lockup(w, x, y):
-    return f'<img class="abs" src="assets/bn-lockup.png" style="left:{x}px;top:{y}px;width:{w}px;height:auto">'
+    return f'<img class="abs" src="assets/bf-lockup.png" style="left:{x}px;top:{y}px;width:{w}px;height:auto">'
 
 
 def badge(w, x, y):
@@ -79,7 +79,7 @@ def photo(src, x, y, w, h, pos='50% 50%', extra=''):
             f'<img src="assets/photos/{src}" style="width:100%;height:100%;object-fit:cover;object-position:{pos};display:block"></div>')
 
 
-def price(now, was, x, y, size=120, align='left', label='Black November price'):
+def price(now, was, x, y, size=120, align='left', label='Black Friday price'):
     was_html = f'<div style="font-size:{size * .26}px;font-weight:600;color:{STEEL};margin-top:6px">RRP <span class="strike">{was}</span></div>' if was else ''
     return (f'<div class="abs" style="left:{x}px;top:{y}px;text-align:{align}">'
             f'<div class="lbl" style="font-size:{max(16, size * .15)}px;color:{SIG}">{label}</div>'
@@ -115,24 +115,24 @@ def ab(size, name, body):
 # ---------- concepts: each returns (name, body) for a size ----------
 
 def s01a(s):
-    n = 'S01a Black November teaser | Static | Range | Prep teaser'
+    n = 'S01a Black Friday teaser | Static | Range | Prep teaser'
     if s == 's1':
         return n, f"""{logo('white', 230, 425, 70)}
 <div class="abs lbl" style="left:0;right:0;top:230px;text-align:center;color:{WHITE};font-size:26px;letter-spacing:.4em">It's coming</div>
 {lockup(920, 80, 280)}
-<div class="abs" style="left:0;right:0;top:665px;text-align:center;font-size:40px;font-weight:600">A month full of tough discounts</div>
+<div class="abs" style="left:0;right:0;top:665px;text-align:center;font-size:40px;font-weight:600">Tough discounts on real workwear</div>
 <div class="abs" style="left:0;right:0;top:760px;display:flex;justify-content:center"><div class="h" style="font-size:44px;border:3px solid {SIG};padding:18px 34px">Up to 60% off RRP from <span class="ph">16 NOV</span></div></div>
 {badge(150, 60, 870)}{badge(150, 870, 870)}"""
     return n, f"""{logo('white', 260, 410, 260)}
 <div class="abs lbl" style="left:0;right:0;top:520px;text-align:center;font-size:30px;letter-spacing:.4em">It's coming</div>
 {lockup(1000, 40, 590)}
-<div class="abs" style="left:0;right:0;top:1010px;text-align:center;font-size:46px;font-weight:600">A month full of tough discounts</div>
+<div class="abs" style="left:0;right:0;top:1010px;text-align:center;font-size:46px;font-weight:600">Tough discounts on real workwear</div>
 <div class="abs" style="left:0;right:0;top:1120px;display:flex;justify-content:center"><div class="h" style="font-size:48px;border:3px solid {SIG};padding:20px 36px">Up to 60% off RRP<br>from <span class="ph">16 NOV</span></div></div>
 {badge(200, 440, 1330)}"""
 
 
 def s01b(s):
-    n = 'S01b Black November hero | Static | Range | Up to 60% off RRP'
+    n = 'S01b Black Friday hero | Static | Range | Up to 60% off RRP'
     if s == 's1':
         return n, f"""{logo('white', 200, 440, 50)}
 {lockup(620, 230, 120)}
@@ -224,7 +224,7 @@ def s06(s):
 {logo('white', 190, 60, 60)}
 <div class="abs h" style="left:60px;top:180px;font-size:92px;width:470px">Not sure <span style="color:{SIG}">on size?</span></div>
 <div class="abs body" style="left:60px;top:430px;width:450px;font-size:32px">Our trousers run small. Order <b>one waist size up</b> from your normal and they'll fit how they should.</div>
-<div class="abs lbl" style="left:60px;top:740px;color:{CONCRETE};font-size:20px;line-height:1.6">30 days to return<br>Black November prices end 26 Nov</div>
+<div class="abs lbl" style="left:60px;top:740px;color:{CONCRETE};font-size:20px;line-height:1.6">30 days to return<br>Black Friday prices end 26 Nov</div>
 {lockup(320, 60, 930)}"""
     return n, f"""{photo('TR9074_4.jpg', 60, 880, 960, 700, '50% 30%', 'border:3px solid ' + SIG)}
 {dim(300, 1180, 480)}
@@ -319,7 +319,7 @@ def dpa():
 <div class="abs lbl" style="left:0;right:0;top:{h / 2 - 20}px;text-align:center;color:#777;font-size:24px">Catalogue image area</div>
 {logo('lime', 200, 40, top + 36)}
 <div class="abs" style="left:0;right:0;top:{bot - band}px;height:{band}px;background:{INK};border-top:6px solid {SIG}"></div>
-<img class="abs" src="assets/bn-lockup.png" style="left:40px;top:{bot - band + 30}px;width:330px">
+<img class="abs" src="assets/bf-lockup.png" style="left:40px;top:{bot - band + 30}px;width:330px">
 <div class="abs" style="right:40px;top:{bot - band + 34}px;text-align:right"><div class="h" style="font-size:34px;color:{SIG}">Up to</div><div class="h" style="font-size:96px;color:{SIG};line-height:.85">60% off</div></div>"""
         b = f"""<div class="fill" style="background:repeating-linear-gradient(45deg,#3a3a3a 0 20px,#444 20px 40px)"></div>
 <div class="abs lbl" style="left:0;right:0;top:{h / 2 - 20}px;text-align:center;color:#777;font-size:24px">Catalogue image area (full-price set only)</div>
@@ -334,7 +334,7 @@ def dpa():
 
 def stickers():
     st = [
-        ('Sticker Black November', f'<div style="width:300px;height:300px;border-radius:50%;background:{INK};border:6px solid {SIG};display:flex;align-items:center;justify-content:center"><img src="assets/bn-lockup.png" style="width:240px"></div>'),
+        ('Sticker Black Friday', f'<div style="width:300px;height:300px;border-radius:50%;background:{INK};border:6px solid {SIG};display:flex;align-items:center;justify-content:center"><img src="assets/bf-lockup.png" style="width:240px"></div>'),
         ('Sticker Price drop', f'<div style="display:flex;align-items:center;gap:14px;background:{SIG};padding:18px 30px"><svg width="40" height="48" viewBox="0 0 34 40"><path d="M17 40 L0 20 H10 V0 H24 V20 H34 Z" fill="#000"/></svg><span class="promo" style="font-size:64px;color:#000">Price drop</span></div>'),
         ('Sticker Up to 60', f'<div style="background:{INK};border:5px solid {SIG};padding:16px 30px;text-align:center"><div class="h" style="font-size:30px;color:{SIG}">Up to</div><div class="h" style="font-size:96px;color:{SIG};line-height:.85">60% off</div><div class="h" style="font-size:30px;color:{SIG}">RRP</div></div>'),
         ('Sticker 30 sitewide', f'<div style="background:{SIG};padding:18px 30px;transform:rotate(-4deg)"><div class="promo" style="font-size:84px;color:#000">30% off</div><div class="h" style="font-size:34px;color:#000">Sitewide</div></div>'),
@@ -352,13 +352,13 @@ def main():
     for size, fname in (('s1', 'suite-1x1'), ('s9', 'suite-9x16')):
         body = ''.join(ab(size, *c(size)) for c in CONCEPTS)
         for cap in (False, True):
-            (HERE / f'{fname}{"-capture" if cap else ""}.html').write_text(page(f'Veltuff Black November {fname}', body, cap))
+            (HERE / f'{fname}{"-capture" if cap else ""}.html').write_text(page(f'Veltuff Black Friday {fname}', body, cap))
     car = ''.join(ab('s1', n, b) for n, b in carousel())
     d = ''.join(f'<section class="ab {s}" data-name="{n}">{b}</section>' for s, n, b in dpa()) + f'<div style="display:flex;flex-direction:column;gap:60px">{stickers()}</div>'
     for cap in (False, True):
         sfx = '-capture' if cap else ''
-        (HERE / f'carousel{sfx}.html').write_text(page('Veltuff Black November carousel', car, cap))
-        (HERE / f'dpa{sfx}.html').write_text(page('Veltuff Black November DPA', d, cap))
+        (HERE / f'carousel{sfx}.html').write_text(page('Veltuff Black Friday carousel', car, cap))
+        (HERE / f'dpa{sfx}.html').write_text(page('Veltuff Black Friday DPA', d, cap))
     print('concepts', len(CONCEPTS), 'carousel cards', len(carousel()))
 
 
