@@ -24,6 +24,13 @@ color:transparent;-webkit-text-stroke:9px {SIG};text-shadow:0 0 22px rgba(210,24
 <div style="position:absolute;left:250px;top:330px;width:200px;height:12px;border-radius:50%;background:radial-gradient(closest-side,rgba(240,255,140,.9),rgba(210,240,0,.5) 40%,rgba(210,240,0,0))"></div>
 <div style="position:absolute;left:0;right:0;top:372px;text-align:center;font-family:SairaV;font-stretch:125%;font-weight:700;font-size:112px;line-height:1;letter-spacing:.42em;padding-left:.42em;color:{SIG}">NOVEMBER</div>
 """),
+    'bf-lockup': (1400, 560, f"""
+<div style="position:absolute;left:0;right:0;top:40px;text-align:center;font-family:SairaV;font-stretch:125%;font-weight:600;font-size:300px;line-height:1;letter-spacing:.01em;
+color:transparent;-webkit-text-stroke:9px {SIG};text-shadow:0 0 22px rgba(210,240,0,.75),0 0 60px rgba(210,240,0,.35)">BLACK</div>
+<div style="position:absolute;left:478px;top:28px;width:260px;height:14px;border-radius:50%;background:radial-gradient(closest-side,rgba(240,255,140,1),rgba(210,240,0,.6) 40%,rgba(210,240,0,0))"></div>
+<div style="position:absolute;left:250px;top:330px;width:200px;height:12px;border-radius:50%;background:radial-gradient(closest-side,rgba(240,255,140,.9),rgba(210,240,0,.5) 40%,rgba(210,240,0,0))"></div>
+<div style="position:absolute;left:0;right:0;top:372px;text-align:center;font-family:SairaV;font-stretch:125%;font-weight:700;font-size:112px;line-height:1;letter-spacing:.42em;padding-left:.42em;color:{SIG}">FRIDAY</div>
+"""),
     'bn-badge': (420, 420, f"""
 <svg width="420" height="420" viewBox="0 0 420 420" style="position:absolute;left:0;top:0;filter:drop-shadow(0 0 14px rgba(210,240,0,.55))">
 <polygon fill="none" stroke="{SIG}" stroke-width="16" stroke-linejoin="round" points="{' '.join(f'{210+ (180 if i%2==0 else 150)*__import__("math").cos(__import__("math").pi*i/12)},{210+(180 if i%2==0 else 150)*__import__("math").sin(__import__("math").pi*i/12)}' for i in range(24))}"/>

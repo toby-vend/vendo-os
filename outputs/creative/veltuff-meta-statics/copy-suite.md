@@ -163,7 +163,7 @@
 ## S05 · DPA frames and stickers
 **Phase A frame (16–26 Nov)**
 - Top-left: the Veltuff logo.
-- Bottom: a black band with the Black November wordmark and "UP TO 60% OFF RRP".
+- Bottom: a black band with the Black Friday lockup and "UP TO 60% OFF RRP". (Changed from Black November at Toby's request, 8 Oct.)
 - The middle stays clear for the catalogue image.
 - Sizes: 1080×1080 and 1080×1920.
 
@@ -172,13 +172,13 @@
 - Note: catalogue DPAs pull the BF collection, which is already reduced and excluded from the 30%. **Use the Phase B frame only on a full-price catalogue set.**
 
 **Stickers (transparent PNG):**
-- "BLACK NOVEMBER" roundel
+- "BLACK FRIDAY" roundel
 - "PRICE DROP" with the down-arrow
 - "UP TO 60% OFF RRP"
 - "30% OFF SITEWIDE"
 - "LAST DAYS"
 
-**DPA caption template:** "Black November price: {{product.price}} (RRP {{product.compare_at_price}}). No code needed. Range ends 26 Nov."
+**DPA caption template:** "Black Friday price: {{product.price}} (RRP {{product.compare_at_price}}). No code needed. Range ends 26 Nov."
 
 ---
 
