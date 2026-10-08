@@ -17,7 +17,7 @@ Compiled 8 Oct 2026 from Stuart's emails and the Fathom calls. Prices are the cu
 
 ## Offer windows (Stuart, 17 Sept)
 - **16–26 Nov:** Black Friday savings, up to 60% off RRP, on a dedicated category. The category duplicates the Sale category and is preloaded with the prices, so no code is needed.
-- **27–30 Nov:** 30% off sitewide, excluding items that are already marked down. This one runs on a code (2 Oct call). The code name hasn't been confirmed. Last year's was BF30.
+- **27–30 Nov:** 30% off sitewide, excluding items that are already marked down. No code: the discount is applied automatically at checkout (Toby, 8 Oct 2026; the 2 Oct call had assumed a code).
 - Stuart may start early if sales are low.
 - The internal 2 Oct plan has three phases:
   - Prep, 1–15 Nov: awareness, 25% of budget.

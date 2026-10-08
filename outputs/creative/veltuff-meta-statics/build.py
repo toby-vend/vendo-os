@@ -269,17 +269,17 @@ def s08a(s):
 
 def s08b(s):
     return weekend(s, 'S08b Black Friday 30 sitewide | Static | Protex1 | Code', "It's Black Friday", '30% off', 'Sitewide',
-                   'With code <span class="ph">[CODE]</span><br>Excludes reduced items · Ends midnight Mon 30 Nov')
+                   'Applied automatically at checkout<br>Excludes reduced items · Ends midnight Mon 30 Nov')
 
 
 def s08c(s):
     return weekend(s, 'S08c Last day 30 | Static | Protex1 | Ends midnight', 'Last day', '30% off', 'Ends midnight',
-                   'Code <span class="ph">[CODE]</span> · Sitewide<br>Excludes reduced items')
+                   'Applied automatically at checkout<br>Sitewide · Excludes reduced items')
 
 
 def s09(s):
     return weekend(s, 'S09 HOLD Extension | Static | Protex1 | Extended', 'Extended', '30% off', 'Sitewide',
-                   'Now ends <span class="ph">[DAY DATE]</span><br>Code <span class="ph">[CODE]</span> · Excludes reduced items', flag='HOLD')
+                   'Now ends <span class="ph">[DAY DATE]</span><br>Applied at checkout · Excludes reduced items', flag='HOLD')
 
 
 CONCEPTS = [s01a, s01b, s02a, s02b, s02c, s03, s06, s08a, s08b, s08c, s09]
@@ -326,7 +326,7 @@ def dpa():
 {logo('lime', 200, 40, top + 36)}
 <div class="abs" style="left:0;right:0;top:{bot - band}px;height:{band}px;background:{SIG}"></div>
 <div class="abs promo" style="left:40px;top:{bot - band + 36}px;font-size:118px;color:{BLACK}">30% off</div>
-<div class="abs" style="right:40px;top:{bot - band + 44}px;text-align:right;color:{BLACK}"><div class="h" style="font-size:44px">Sitewide</div><div class="h" style="font-size:34px;margin-top:8px">Code <span style="border:3px dashed #000;padding:0 8px">[CODE]</span></div></div>"""
+<div class="abs" style="right:40px;top:{bot - band + 44}px;text-align:right;color:{BLACK}"><div class="h" style="font-size:44px">Sitewide</div><div class="h" style="font-size:34px;margin-top:8px">At checkout</div></div>"""
         out.append((size, f'S05 DPA frame A 60 | {"1x1" if size == "s1" else "9x16"}', a))
         out.append((size, f'S05 DPA frame B 30 | {"1x1" if size == "s1" else "9x16"}', b))
     return out

@@ -11,7 +11,7 @@
 - Phase-specific dates only:
   - Prep, 1–15 Nov: teaser, no prices.
   - Category, 16–26 Nov: "up to 60% off RRP".
-  - Weekend, 27–30 Nov: "30% off sitewide" with a code, excluding reduced items.
+  - Weekend, 27–30 Nov: "30% off sitewide", applied automatically at checkout (no code), excluding reduced items.
 - Ad names: `<Concept> | Static | Product | <Detail> | 1x1 | YYMMDD`.
 
 ---
@@ -168,7 +168,7 @@
 - Sizes: 1080×1080 and 1080×1920.
 
 **Phase B frame (27–30 Nov)**
-- Bottom band: "30% OFF SITEWIDE · CODE [CODE]".
+- Bottom band: "30% OFF SITEWIDE · APPLIED AT CHECKOUT".
 - Note: catalogue DPAs pull the BF collection, which is already reduced and excluded from the 30%. **Use the Phase B frame only on a full-price catalogue set.**
 
 **Stickers (transparent PNG):**
@@ -205,7 +205,7 @@
 Overlay text and end cards to match the statics:
 - **Prep cut (1–15 Nov):** hook overlay "The kit you keep meaning to replace". End card: the Black Friday lockup + "From [16 Nov]".
 - **Launch cut (16–26 Nov):** hook overlay "Sealed seams. £18." on the water-resistance shot. End card: "Up to 60% off RRP · Check the offers".
-- **Weekend cut (27–30 Nov):** hook overlay "30% off everything else". End card: "Code [CODE] · Ends Monday".
+- **Weekend cut (27–30 Nov):** hook overlay "30% off everything else". End card: "Applied automatically at checkout · Ends Monday".
 - Only show products that are actually in the sale. Helen should cross-check against Stuart's list.
 - No Duratex™ Full Zip Jacket on timber or site footage (1★ review).
 
@@ -218,35 +218,35 @@ Overlay text and end cards to match the statics:
   - Primary text:
     > Three days left on our Black Friday deals. Up to 60% off RRP across a dedicated range of VELTUFF trousers, jackets and hi-vis ends Thursday 26 November. The prices are already on the site, so there's no code needed. Trousers run small, so go one waist size up.
 - **S08b, Fri 27 Nov:**
-  - On image: "BLACK FRIDAY · 30% OFF SITEWIDE", "Code [CODE] · excludes reduced items".
-  - Headline: 30% off sitewide with code [CODE]
+  - On image: "BLACK FRIDAY · 30% OFF SITEWIDE", "Applied automatically at checkout · excludes reduced items".
+  - Headline: 30% off sitewide, no code needed
   - Primary text:
-    > It's Black Friday. 30% off everything on veltuff.co.uk that isn't already reduced, with code [CODE] at checkout. That includes the full-price Protex1 and hi-vis ranges. Ends midnight Monday 30 November.
+    > It's Black Friday. 30% off everything on veltuff.co.uk that isn't already reduced, taken off automatically at checkout. No code needed. That includes the full-price Protex1 and hi-vis ranges. Ends midnight Monday 30 November.
 - **S08c, Mon 30 Nov:**
-  - On image: "LAST DAY", "30% off sitewide ends midnight", "Code [CODE]".
+  - On image: "LAST DAY", "30% off sitewide ends midnight", "Applied automatically at checkout".
   - Headline: Last day for 30% off
   - Primary text:
-    > Last day. 30% off everything on veltuff.co.uk that isn't already reduced, with code [CODE] at checkout. It ends at midnight tonight.
-- **Notes:** Confirm the code name and whether it ends at midnight on 30 Nov.
+    > Last day. 30% off everything on veltuff.co.uk that isn't already reduced, taken off automatically at checkout. It ends at midnight tonight.
+- **Notes:** No code: the 30% applies automatically at checkout (Toby, 8 Oct). Confirm it ends at midnight on 30 Nov.
 
 ---
 
-## S09 · 30% code extension (HOLD: do not launch without Stuart's sign-off)
+## S09 · 30% weekend extension (HOLD: do not launch without Stuart's sign-off)
 - **On image:**
   - "EXTENDED".
   - "30% OFF SITEWIDE".
   - "Now ends [DAY DATE]".
-  - "Code [CODE] · excludes reduced items".
+  - "Applied automatically at checkout · excludes reduced items".
 - **Headline:** Extended: 30% off sitewide
 - **Primary text:**
-  > Missed the weekend? 30% off sitewide is extended until [DAY DATE]. Use code [CODE] at checkout. Excludes items that are already reduced.
+  > Missed the weekend? 30% off sitewide is extended until [DAY DATE]. It comes off automatically at checkout. Excludes items that are already reduced.
 - **Notes:** Built ready to go and held. Every [ ] field needs Stuart's confirmation first.
 
 ---
 
 ## Checks for the client (Stuart)
 1. Start date: does the category open on 16 Nov or earlier? The banner says 01/11.
-2. The 30% code name, and its end time on 30 Nov.
+2. The end time of the 30% weekend on 30 Nov. (No code: it applies automatically at checkout, per Toby 8 Oct.)
 3. Several BLKNOV items are more than 60% off RRP (Cotton Trade 70%, Turbocharge 70%, Duratex Sweatshirt 70%). Should the headline stay at "up to 60%"?
 4. Do the extra promo prices (Waterproof Bomber £18, Cargo Hi-Vis £18, Two Tone Polo £7.95, Hi-Vis LS Polo £9.95, Hi-Vis Vest £5) go live on 16 Nov?
 5. Can "Proud manufacturers for DSV, Amazon, GLS, Swissport, DFDS" be used in paid ads?
