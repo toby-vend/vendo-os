@@ -524,7 +524,123 @@ def denise_9x16():
     return page("Signature Smiles | Denise | 9x16", b)
 
 
-BUILDERS = {"mark": (mark_1x1, mark_9x16), "sophie": (sophie_1x1, sophie_9x16), "denise": (denise_1x1, denise_9x16)}
+# ---------------------------------------------------------------- MICHELLE (smile makeover, wanted it for years)
+CTA_CONSULT = "Book your free consultation"
+SM_ROWS = [("Whitening", "£450", "Professional whitening"), ("Edge bonding", "£250", "Starting price"),
+           ("Composite veneers", "£300", "Starting price"), ("Clear aligners", "£3,500", "Starting price, retainers included")]
+SM_TREAT = ["Whitening", "Bonding", "Aligners", "Veneers"]
+
+
+def michelle_1x1():
+    b = []
+    b.append(board("C1", f"Twenty years | Static | Stock woman 50s | Not too late | 1x1 | {D}", "s1", C['olive'], f"""
+  {warm_olive()}
+  {arch(620, 120, 400, 720, 'michelle-jumper.jpg', fx=0.5, fy=0.25)}
+  <div class="abs hl" style="left:80px;top:120px;width:500px;font-size:62px;color:{C['linen']}">Wanted to change your smile for twenty years?</div>
+  <div class="abs" style="left:80px;top:480px;width:60px;height:1px;background:{C['terra']}"></div>
+  <div class="abs hl" style="left:80px;top:515px;width:500px;font-size:42px;color:{C['stone']}">It isn&rsquo;t too late.<br>It never was.</div>
+  <div class="abs" style="left:80px;top:680px">{dots(["Free smile makeover consultation"], 'rgba(249,247,245,.9)', 22)}</div>
+  <div class="abs" style="left:80px;top:740px">{proof('rgba(249,247,245,.85)', 20)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web-light', 230)}</div>
+  <div class="abs" style="left:600px;top:968px"><span class="cta linen" style="height:62px;font-size:17px;padding:0 32px">{CTA_CONSULT}</span></div>"""))
+    b.append(board("C2", f"Real prices | Static | Stock couple 40s | Starting prices | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  <div class="abs" style="left:0;top:0;width:470px;height:1080px;background:{C['sage']}"></div>
+  {arch(60, 150, 380, 640, 'couple-laughing.jpg', fx=0.3, fy=0.3)}
+  {badge(380, 740, 130)}
+  <div class="abs hl" style="left:560px;top:110px;width:440px;font-size:56px">Think a new smile costs a fortune?</div>
+  <div class="abs label" style="left:560px;top:320px">Here&rsquo;s where it starts</div>
+  <div class="abs" style="left:560px;top:355px">{price_rows(SM_ROWS, C['ink'], C['copper'], C['olive'], C['stone'], size=23, vsize=44, gap=13, width=440)}</div>
+  <div class="abs" style="left:560px;top:780px">{dots(["0% finance", "Free consultation"], C['copper'], 21)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:600px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_CONSULT}</span></div>"""))
+    b.append(board("C3", f"See it first | Static | Stock woman 60s | Mirror | 1x1 | {D}", "s1", C['sage'], f"""
+  {warm_sage()}
+  {arch(80, 150, 400, 700, 'michelle-mirror.jpg', fx=0.62, fy=0.3)}
+  <div class="abs hl" style="left:560px;top:150px;width:440px;font-size:60px">See your new smile before you commit to anything.</div>
+  <div class="abs body" style="left:560px;top:520px;width:430px;font-size:26px">Digital smile planning at your free consultation. Natural results, planned around you.</div>
+  <div class="abs" style="left:560px;top:720px">{dots(SM_TREAT, C['copper'], 20)}</div>
+  <div class="abs" style="left:560px;top:780px">{proof(C['sand'], 19)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:600px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_CONSULT}</span></div>"""))
+    b.append(board("C4", f"Natural not new | Static | Stock woman 50s | Natural smile | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  {photo(0, 0, 1080, 470, 'michelle-sun.jpg', fx=0.55, fy=0.3)}
+  {ribbon(470, 26, line=C['stone'])}
+  <div class="abs hl" style="left:80px;top:600px;width:470px;font-size:60px">Not a Hollywood smile.</div>
+  <div class="abs hl" style="left:80px;top:745px;width:470px;font-size:40px;color:{C['olive']}">Your smile, at its best.</div>
+  <div class="abs body" style="left:580px;top:605px;width:420px;font-size:25px">Whitening, bonding, aligners or veneers, planned to look natural on you.</div>
+  <div class="abs" style="left:580px;top:760px">{dots(["Free smile makeover consultation"], C['copper'], 20)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:600px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_CONSULT}</span></div>"""))
+    b.append(board("C5", f"Hand over mouth | Static | Stock woman 50s | Hiding smile | 1x1 | {D}", "s1", C['linen'], f"""
+  {warm_linen()}
+  {arch(640, 110, 380, 720, 'michelle-hand.jpg', fx=0.6, fy=0.3, zoom=1.35)}
+  {badge(545, 700, 140)}
+  <div class="abs hl" style="left:80px;top:110px;width:520px;font-size:64px">Still smiling with your mouth closed in photos?</div>
+  <div class="abs body" style="left:80px;top:480px;width:470px;font-size:27px">It&rsquo;s usually fixable with less treatment than people expect.</div>
+  <div class="abs" style="left:80px;top:640px;width:470px">{dots(["Free consultation", "0% finance available"], C['copper'], 21)}</div>
+  <div class="abs" style="left:80px;top:770px">{proof(C['sand'], 20)}</div>
+  <div class="abs" style="left:80px;top:950px">{logo('web', 230)}</div>
+  <div class="abs" style="left:600px;top:968px"><span class="cta olive" style="height:62px;font-size:17px;padding:0 32px">{CTA_CONSULT}</span></div>"""))
+    return page("Signature Smiles | Michelle | 1x1", b)
+
+
+def michelle_9x16():
+    b = []
+    b.append(board("C1s", f"Twenty years | Static | Stock woman 50s | Not too late | 9x16 | {D}", "s9", C['olive'], f"""
+  {warm_olive()}
+  <div class="abs hl" style="left:90px;top:280px;width:900px;font-size:76px;color:{C['linen']}">Wanted to change your smile for twenty years?</div>
+  {arch(250, 560, 580, 680, 'michelle-jumper.jpg', fx=0.5, fy=0.25)}
+  <div class="abs hl" style="left:90px;top:1285px;width:900px;font-size:52px;color:{C['stone']}">It isn&rsquo;t too late. It never was.</div>
+  <div class="abs" style="left:90px;top:1370px">{dots(["Free smile makeover consultation"], 'rgba(249,247,245,.9)', 26)}</div>
+  <div class="abs" style="left:90px;top:1420px">{proof('rgba(249,247,245,.85)', 22)}</div>
+  <div class="abs" style="left:90px;top:1490px"><span class="cta linen">{CTA_CONSULT}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web-light', 250)}</div>"""))
+    b.append(board("C2s", f"Real prices | Static | Stock couple 40s | Starting prices | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  <div class="abs" style="left:0;top:0;width:1080px;height:760px;background:{C['sage']}"></div>
+  {arch(290, 250, 500, 620, 'couple-laughing.jpg', fx=0.3, fy=0.3)}
+  {badge(110, 640, 160)}
+  <div class="abs hl" style="left:90px;top:920px;width:900px;font-size:76px">Think a new smile costs a fortune?</div>
+  <div class="abs" style="left:90px;top:1110px">{price_rows(SM_ROWS, C['ink'], C['copper'], C['olive'], C['stone'], size=27, vsize=50, gap=10, width=900)}</div>
+  <div class="abs" style="left:90px;top:1500px"><span class="cta olive">{CTA_CONSULT}</span></div>
+  <div class="abs" style="left:620px;top:1524px">{dots(["0% finance"], C['copper'], 24)}</div>
+  <div class="abs" style="left:90px;top:1650px">{logo('web', 250)}</div>"""))
+    b.append(board("C3s", f"See it first | Static | Stock woman 60s | Mirror | 9x16 | {D}", "s9", C['sage'], f"""
+  {warm_sage()}
+  <div class="abs hl" style="left:90px;top:280px;width:900px;font-size:76px">See your new smile before you commit to anything.</div>
+  {arch(250, 560, 580, 680, 'michelle-mirror.jpg', fx=0.62, fy=0.3)}
+  <div class="abs body" style="left:90px;top:1290px;width:900px;font-size:31px">Digital smile planning at your free consultation.</div>
+  <div class="abs" style="left:90px;top:1350px">{dots(SM_TREAT, C['copper'], 26)}</div>
+  <div class="abs" style="left:90px;top:1405px">{proof(C['sand'], 22)}</div>
+  <div class="abs" style="left:90px;top:1475px"><span class="cta olive">{CTA_CONSULT}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    b.append(board("C4s", f"Natural not new | Static | Stock woman 50s | Natural smile | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  {photo(0, 0, 1080, 880, 'michelle-sun.jpg', fx=0.55, fy=0.3)}
+  {ribbon(880, 30)}
+  <div class="abs hl" style="left:90px;top:985px;font-size:88px">Not a Hollywood smile.</div>
+  <div class="abs hl" style="left:90px;top:1090px;font-size:56px;color:{C['olive']}">Your smile, at its best.</div>
+  <div class="abs body" style="left:90px;top:1190px;width:900px;font-size:31px">Whitening, bonding, aligners or veneers, planned to look natural on you.</div>
+  <div class="abs" style="left:90px;top:1310px">{dots(["Free smile makeover consultation"], C['copper'], 26)}</div>
+  <div class="abs" style="left:90px;top:1460px"><span class="cta olive">{CTA_CONSULT}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    b.append(board("C5s", f"Hand over mouth | Static | Stock woman 50s | Hiding smile | 9x16 | {D}", "s9", C['linen'], f"""
+  {warm_linen()}
+  <div class="abs hl" style="left:90px;top:270px;width:900px;font-size:78px">Still smiling with your mouth closed in photos?</div>
+  {arch(250, 540, 580, 700, 'michelle-hand.jpg', fx=0.58, fy=0.3, zoom=1.5)}
+  {badge(130, 1080, 170)}
+  <div class="abs body" style="left:90px;top:1290px;width:900px;font-size:31px">Usually fixable with less treatment than you&rsquo;d expect.</div>
+  <div class="abs" style="left:90px;top:1350px">{dots(["Free consultation", "0% finance available"], C['copper'], 26)}</div>
+  <div class="abs" style="left:90px;top:1405px">{proof(C['sand'], 22)}</div>
+  <div class="abs" style="left:90px;top:1475px"><span class="cta olive">{CTA_CONSULT}</span></div>
+  <div class="abs" style="left:90px;top:1640px">{logo('web', 250)}</div>"""))
+    return page("Signature Smiles | Michelle | 9x16", b)
+
+
+BUILDERS = {"mark": (mark_1x1, mark_9x16), "sophie": (sophie_1x1, sophie_9x16), "denise": (denise_1x1, denise_9x16),
+            "michelle": (michelle_1x1, michelle_9x16)}
 
 if __name__ == "__main__":
     for p in sys.argv[1:] or BUILDERS:
