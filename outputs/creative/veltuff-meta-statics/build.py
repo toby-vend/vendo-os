@@ -48,7 +48,7 @@ def canvas(size, tone='chevron'):
 
 
 def grain():
-    return '<img class="fill" src="assets/grain.png" style="object-fit:cover;opacity:.06;mix-blend-mode:overlay">'
+    return '<img class="fill" src="assets/grain.jpg" style="object-fit:cover;opacity:.06;mix-blend-mode:overlay">'
 
 
 def logo(colour, w, x, y):

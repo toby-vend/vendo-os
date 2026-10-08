@@ -215,6 +215,8 @@ Overlay text and end cards to match the statics:
 - **S08a, Tue 24 Nov:**
   - On image: "3 DAYS LEFT", the Black November lockup, "Up to 60% off RRP ends Thursday".
   - Headline: Black November range ends Thursday
+  - Primary text:
+    > Three days left on Black November. Up to 60% off RRP across a dedicated range of VELTUFF trousers, jackets and hi-vis ends Thursday 26 November. The prices are already on the site, so there's no code needed. Trousers run small, so go one waist size up.
 - **S08b, Fri 27 Nov:**
   - On image: "BLACK FRIDAY · 30% OFF SITEWIDE", "Code [CODE] · excludes reduced items".
   - Headline: 30% off sitewide with code [CODE]
@@ -223,6 +225,8 @@ Overlay text and end cards to match the statics:
 - **S08c, Mon 30 Nov:**
   - On image: "LAST DAY", "30% off sitewide ends midnight", "Code [CODE]".
   - Headline: Last day for 30% off
+  - Primary text:
+    > Last day. 30% off everything on veltuff.co.uk that isn't already reduced, with code [CODE] at checkout. It ends at midnight tonight.
 - **Notes:** Confirm the code name and whether it ends at midnight on 30 Nov.
 
 ---
