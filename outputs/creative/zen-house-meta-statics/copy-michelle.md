@@ -7,7 +7,7 @@
 - **Bonding and smile makeover hero points (Priya, 6 Oct 2026):** "Natural look that lasts for years", "FREE home whitening kit", "FREE custom retainer".
 
 **Proof:** Banstead: 5.0 from 600+ Google reviews. Battersea uses brand-level proof.
-**Photography:** licensed Freepik stock of one model in her 50s (series 273443, four shots), so every Michelle ad casts to her age. The Zen shoot has no patients in this age range. Copy sits below faces.
+**Photography:** Zen House's own imagery only: the Banstead reception and treatment-room details from the May shoot, the Battersea interiors from Drive, and real shade-matching moments from the shoot. Drive has no patients aged 40 to 60, so the photo ads lead on the practice and the moment, not a cast model. Copy sits below faces.
 **Place:** practice named in the eyebrow on every ad.
 
 **Rules for this persona**
@@ -24,7 +24,7 @@ Research: research.md and research-forums.md.
 ## M1 | Is it too late?
 **Awareness:** problem aware. **Sophistication:** 5 (identity). **Angle:** "not too late", head on.
 **Research:** "Turned 50 this year and wondering about getting my teeth sorted… Is it too late to bother sorting my teeth?" (Mumsnet, Fatbadger50). "I'll be 50 in 18 months time and I keep swinging between 'why bother I'm too old' to 'I really need to do something, I hate looking at photos of myself'" (Mumsnet, WickedWitchOfTheTrent). "I am pleased I did it as teeth don't improve with age" (Mumsnet, RipleyGreen, 55).
-**Layout:** photo. Banstead: m-kitchen-1. Battersea: m-kitchen-2.
+**Layout:** photo. Banstead: zh-4 (reception, Zen Dental sign). Battersea: bat-048 (reception arch).
 
 **On image**
 - Eyebrow: SMILE MAKEOVER · BANSTEAD / BATTERSEA
@@ -54,7 +54,7 @@ The best time was years ago. The next best time is this one.
 ## M2 | Something just for you
 **Awareness:** problem aware. **Sophistication:** 5 (identity and permission). **Angle:** it isn't selfish.
 **Research:** "I would never have gone if he had not booked it as to me it feels selfish taking that amount of money from my family and also vain." (Mumsnet, I8toys, 44). "Braces are going to be my 50th birthday present to myself - and cheaper than a sports car!" (Mumsnet, Fleabagging, 49).
-**Layout:** photo. Banstead: m-phone-2. Battersea: m-phone-1.
+**Layout:** photo. Banstead: zh-3 (Buddha and plants). Battersea: bat-025 (corridor).
 
 **On image**
 - Eyebrow: SMILE MAKEOVER · BANSTEAD / BATTERSEA
@@ -116,7 +116,7 @@ The goal is simple: people notice you look well, not that you've had work done.
 ## M4 | Smile in the photos
 **Awareness:** problem aware. **Sophistication:** 5. **Angle:** the accommodation: decades of closed-mouth photos.
 **Research:** "There are very few photos of me smiling properly over the decades, even on my wedding day." (Mumsnet, OccultGnuAgain, 63). "Beforehand I avoided all photos as I smiled with my mouth closed (and looked odd)" (Mumsnet, CQCnamechange). "I just smile in all my photos now which I didn't for my whole adult life." (Mumsnet, Decaffeinatedplease).
-**Layout:** photo. Banstead: m-phone-1. Battersea: m-kitchen-1.
+**Layout:** photo. Banstead: zh-44 (shade matching with the mirror). Battersea: zh-43 (patient smiling with the shade guide).
 
 **On image**
 - Eyebrow: SMILE MAKEOVER · BANSTEAD / BATTERSEA
@@ -180,5 +180,5 @@ Often it's a smaller step than you've been imagining.
 1. **Prices:** from the fees page (whitening £400, veneers £950 per tooth, bonding packages from £2,100) and Priya's "Invisalign from £2650". Confirm they're all current and apply at Battersea. The fees page marks bonding, veneers and Invisalign as "varies dependent on consultation".
 2. **Consultation fee:** the smile makeover consultation is listed at £30. The bonding page also mentions a "free smile consultation". Which applies to smile makeovers?
 3. **FREE whitening kit and retainer:** these are tied to bonding packages, per Priya's list. Confirm whether they also apply to veneer or mixed makeover plans.
-4. **Photography:** licensed Freepik stock (one model in her 50s), because Zen has no lifestyle photos of patients in this age range. A shoot with a real patient aged 45 to 60 would outperform it.
+4. **Photography:** Zen's Drive has no photos of patients aged 40 to 60, so these ads use the practice interiors and younger shoot patients. A short shoot with a real patient aged 45 to 60 would let Michelle's ads cast to her age.
 5. **Reviews:** a named review can run only with the reviewer's permission. "I was not by any means expecting perfection, just something better than what I had" would suit this persona if the reviewer agrees.

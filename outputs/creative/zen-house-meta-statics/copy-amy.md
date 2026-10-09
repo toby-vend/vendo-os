@@ -158,7 +158,7 @@ Straight is good. Staying straight is the point.
 ## A5 | 30 minutes, then you'll know
 **Awareness:** problem aware. **Sophistication:** 2. **Angle:** "I'll do it later": make the first step small and local.
 **Research:** "I have been thinking about this for YEARS. I have just ordered an impression set… but for some reason I can't bring myself to do the impression kit." (Mumsnet, kellyb85). "I don't smile in photos, except for a closed mouth smile which just looks naff." (Mumsnet, spookysoul). Site: "Your FREE consultation takes around 30 minutes. You'll leave knowing whether Invisalign is right for you, which package fits your case, and what your smile could look like at the end of treatment – before any commitment is made." Shaimil (8 Sept call): some people "just need a static one with information… the right information for them to book".
-**Layout:** photo. Banstead: zh-1 (High Street shopfront). Battersea: battersea-reception (Northcote Road reception).
+**Layout:** photo. Banstead: zh-1 (High Street shopfront). Battersea: bat-055 (128 Northcote Road shopfront, from Drive).
 
 **On image**
 - Eyebrow: INVISALIGN · BANSTEAD / BATTERSEA
@@ -255,5 +255,5 @@ Everything you need to finish, from the first scan.
 4. **Treatment time:** the site says both "6–18 months" and "12–18 months", so no duration is on the ads.
 5. **"Vivera":** Priya's list has "vivera" in lower case. The ads capitalise it as the brand name.
 6. **Battersea:** confirm the same offer and the same Diamond Apex clinicians apply at Battersea (Dr Akshay is named in Battersea Invisalign reviews).
-7. **Photos:** every photo except the Battersea reception comes from the May 2026 Banstead shoot. The Battersea ads use tight crops with no Banstead signage.
+7. **Photos:** every photo except the Battersea shopfront (from the Battersea Drive folder) comes from the May 2026 Banstead shoot. The Battersea ads use tight crops with no Banstead signage.
 8. **Diamond Apex / "top 1%":** keep Align's certificate on file. It already runs in signed-off ads.
