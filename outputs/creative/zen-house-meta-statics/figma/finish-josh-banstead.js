@@ -1,0 +1,35 @@
+const SITE="Banstead", PAGE="9:2", W1="14:2", W9="15:2";
+const C=[["J1", "Still your teeth", "Patient + clinician", "Natural bonding, nothing filed down", "\"I just want them to look nicer, not the false look.\"\n\nThat's the brief most people bring us, almost word for word.\n\nNobody wants the blocky, too-white teeth everyone can spot from across the room. They want their own smile, with the chip fixed, the gap closed, the edges evened out.\n\nThat's what composite bonding does. We add tooth-coloured composite to the teeth you already have and shape it by hand, so nothing healthy is drilled or filed away. It's reversible, and it's designed digitally first, so you see the result before we start.\n\nEvery package comes with a FREE home whitening kit and a FREE custom retainer, so the colour matches and the result lasts.\n\nBook a consultation today at Zen House Dental, [Banstead / Battersea].\n\nThe best bonding is the kind nobody notices."], ["J2", "Two hours", "Clinician", "Bonding in a single visit", "Most cosmetic treatments ask you to wait. Temporaries, second fittings, weeks of in-between.\n\nBonding doesn't.\n\nYour dentist builds tooth-coloured composite onto your teeth by hand, layer by layer, sets it with a curing light and polishes it to a natural finish. Most cases are done in one visit. Even a full smile usually takes one to two hours.\n\nYou walk in with the chip, the gap or the short tooth. You walk out without it.\n\nPackages start from £2,100 for six teeth, with a FREE home whitening kit and a FREE custom retainer.\n\nBook a consultation today at Zen House Dental, [Banstead / Battersea].\n\nTwo hours. That's the whole wait."], ["J3", "From 2100", "No talent", "Composite bonding from £2,100", "Bonding prices are hard to pin down online. So here are ours.\n\nSix teeth: £2,100. Eight teeth: £2,800. Ten teeth: £3,500.\n\nEvery package includes a full dental examination, digital smile design so you see the result first, the bonding itself, a final polish, a FREE home whitening kit and a FREE custom retainer to protect it.\n\nNo drilling. Nothing filed down. Most cases are done in a single visit.\n\n0% finance over 12 months is available.\n\nBook a consultation today at Zen House Dental, [Banstead / Battersea].\n\nThe price, the plan and the result, all before you commit."], ["J4", "Chips easily", "No talent", "How long does bonding really last?", "\"Composite only lasts a couple of years. It chips easily.\"\n\nYou've probably read that. It's half true, so here's the whole answer.\n\nWith proper care, composite bonding typically lasts five to seven years before it needs a refresh, and individual teeth can last much longer. Biting hard things directly can chip it. Coffee and red wine can stain it over time.\n\nWhat we do about it: unlike porcelain, bonding can be repaired if a chip happens, rather than replaced. We check it at your annual review. Every package comes with a FREE custom retainer to protect it and a FREE home whitening kit to keep the colour even.\n\nPackages from £2,100 for six teeth.\n\nBook a consultation today at Zen House Dental, [Banstead / Battersea]. Ask us anything.\n\nBetter to decide with the whole picture."], ["J5", "On camera", "Patient", "Your smile, fixed in one visit", "Back-to-back calls. Your own face in the corner of the screen, all day.\n\nIt's often the moment people start noticing the small things. The chipped edge. The gap. The tooth that's a little shorter than the rest.\n\nThey're usually quick to fix.\n\nComposite bonding reshapes them with tooth-coloured composite, sculpted by hand onto the teeth you already have. No drilling, nothing filed down, and most cases are done in a single visit.\n\nPackages start from £2,100 for six teeth, with a FREE home whitening kit and a FREE custom retainer included.\n\nBook a consultation today at Zen House Dental, [Banstead / Battersea].\n\nSmile on the next call like you mean it."]];
+const fix=t=>t.split('[Banstead / Battersea]').join(SITE).split('[the High Street in Banstead / Northcote Road in Battersea]').join(SITE==='Banstead'?'the High Street in Banstead':'Northcote Road in Battersea');
+const page=await figma.getNodeByIdAsync(PAGE); await figma.setCurrentPageAsync(page);
+const depth=n=>{let d=0,p=n.parent;while(p){d++;p=p.parent;}return d;};
+const out={rows:{}};
+for (const [wid,size] of [[W1,'1x1'],[W9,'9x16']]) {
+  const wrap=await figma.getNodeByIdAsync(wid);
+  for (const t of wrap.findAllWithCriteria({types:['TEXT']})) for (const f of t.getRangeAllFontNames(0,t.characters.length)) { try{await figma.loadFontAsync(f);}catch(e){} }
+  const all=wrap.findAll(()=>true); const geo=new Map();
+  for (const n of all){const m=n.absoluteTransform; geo.set(n.id,{ax:m[0][2],ay:m[1][2],w:n.width,h:n.height,d:depth(n)});}
+  for (const f of all.filter(n=>'layoutMode' in n&&n.layoutMode!=='NONE').sort((a,b)=>geo.get(a.id).d-geo.get(b.id).d)) f.layoutMode='NONE';
+  for (const n of all.sort((a,b)=>geo.get(a.id).d-geo.get(b.id).d)){ const g=geo.get(n.id); if(!n.parent||n.parent.id===wid) continue; const p=geo.get(n.parent.id); if(!p) continue;
+    if('resize' in n&&n.type!=='TEXT'&&(Math.abs(n.width-g.w)>.5||Math.abs(n.height-g.h)>.5)){try{n.resize(Math.max(g.w,.01),Math.max(g.h,.01));}catch(e){}}
+    n.x=g.ax-p.ax; n.y=g.ay-p.ay; }
+  const boards=[...wrap.children[0].children].filter(b=>b.width>100);
+  const y = size==='1x1'?80:2560;
+  boards.forEach((b,i)=>{ page.appendChild(b); b.x=80+i*1160; b.y=y; b.clipsContent=true; const c=C[i]; b.name=`${c[1]} | Static | ${c[2]} | ${SITE} | ${size} | 261009`;
+    for (const n of b.findAll(n=>n.type!=='TEXT'&&'fills' in n&&Array.isArray(n.fills))){ const f=n.fills;
+      if(f.some(p=>p.type==='IMAGE')) n.name='Photo';
+      else if(n.parent===b&&Math.abs(n.width-b.width)<2&&Math.abs(n.height-b.height)<2&&(!('children' in n)||n.children.length===0)&&f.some(p=>p.type.startsWith('GRADIENT'))){ n.name='Overlay (locked)'; n.locked=true; } } });
+  wrap.remove(); out.rows[size]=boards.length;
+}
+await figma.loadFontAsync({family:'Inter',style:'Regular'}); await figma.loadFontAsync({family:'Inter',style:'Bold'});
+let maxH=0;
+C.forEach((c,i)=>{ const card=figma.createFrame(); card.name=`Copy | ${c[0]} ${c[1]} | ${SITE}`; card.fills=[{type:'SOLID',color:{r:1,g:1,b:1}}]; card.cornerRadius=12;
+  const mk=(txt,size,bold,y,col)=>{const t=figma.createText(); t.fontName={family:'Inter',style:bold?'Bold':'Regular'}; t.fontSize=size; t.characters=txt; t.fills=[{type:'SOLID',color:col||{r:.1,g:.1,b:.1}}]; t.textAutoResize='HEIGHT'; t.resize(1000,t.height); t.x=40; t.y=y; card.appendChild(t); return t;};
+  const a=mk(`${c[0]} | ${c[1]} | ${SITE}`,22,true,36,{r:.45,g:.37,b:.25});
+  const b=mk('HEADLINE',14,true,a.y+a.height+24,{r:.5,g:.5,b:.5});
+  const h=mk(fix(c[3]),26,true,b.y+b.height+6);
+  const p=mk('PRIMARY TEXT',14,true,h.y+h.height+24,{r:.5,g:.5,b:.5});
+  const t=mk(fix(c[4]),19,false,p.y+p.height+8);
+  card.resize(1080,t.y+t.height+40); page.appendChild(card); card.x=80+i*1160; card.y=1240; maxH=Math.max(maxH,card.height); });
+out.cards=C.length; out.maxCard=Math.round(maxH);
+return out;

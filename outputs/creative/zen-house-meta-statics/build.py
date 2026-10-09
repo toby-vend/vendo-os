@@ -99,7 +99,7 @@ def photo_1x1(c, site):
 <div class="abs" style="left:92px;bottom:200px;width:880px;color:{WHITE}">
   <div class="eb" style="font-size:24px">{c['eyebrow']} · {SITES[site]}</div>
   <div class="hl" style="font-size:{c.get('size1', 80)}px;margin-top:14px">{hl(c['hl'][site])}</div>
-  <div class="sup" style="font-size:27px;margin-top:18px;width:{c.get('supw', 700)}px">{c['sup'][site]}</div>
+  <div class="sup" style="font-size:27px;margin-top:18px;width:{c.get('supw', 700)}px">{free(c['sup'][site])}</div>
 </div>
 <div class="abs cta" style="left:92px;top:905px;width:737px;height:88px;font-size:40px;background:rgba(255,255,255,.75)">{CTA}</div>"""
 
@@ -113,7 +113,7 @@ def photo_9x16(c, site):
 <div class="abs" style="left:115px;bottom:480px;width:860px;color:{WHITE}">
   <div class="eb" style="font-size:30px">{c['eyebrow']} · {SITES[site]}</div>
   <div class="hl" style="font-size:{c.get('size9', 92)}px;margin-top:16px">{hl(c['hl'][site])}</div>
-  <div class="sup" style="font-size:33px;margin-top:20px">{c['sup'][site]}</div>
+  <div class="sup" style="font-size:33px;margin-top:20px">{free(c['sup'][site])}</div>
 </div>
 <div class="abs cta" style="left:115px;top:1478px;width:849px;height:102px;font-size:56px;background:rgba(255,255,255,.6)">{CTA}</div>"""
 
@@ -122,34 +122,55 @@ def sand_bg():
     return f'<div class="scrim" style="background:radial-gradient(120% 90% at 50% 18%,{CREAM} 0%,#E4D9C6 45%,{SAND} 100%)"></div>'
 
 
+def free(t):
+    return t.replace('FREE', '<strong style="font-weight:600;letter-spacing:.04em">FREE</strong>')
+
+
+def items_html(c, fs, pad, mt, w, num_fs, cols=1, items=None):
+    items = items or c.get('items')
+    if not items:
+        return ''
+    if c.get('ticks'):
+        marks = ['<b style="font-size:%dpx;width:%dpx;flex:none;font-style:normal">✓</b>' % (num_fs, num_fs + 14)] * len(items)
+    else:
+        marks = [f'<b style="font-size:{num_fs}px;width:{num_fs + 14}px;flex:none">{i + 1:02d}</b>' for i in range(len(items))]
+    if cols == 2:
+        return (f'<div style="margin-top:{mt}px;width:{w}px;display:grid;grid-template-columns:1fr 1fr;column-gap:36px;text-align:left">'
+                + ''.join(f'<div style="display:flex;gap:12px;align-items:baseline;font-size:{fs}px;line-height:1.25;padding:{pad}px 0;border-top:1.5px solid rgba(0,0,0,.18)">{m}<span>{free(t)}</span></div>' for m, t in zip(marks, items))
+                + '</div>')
+    return (f'<ul class="list" style="margin-top:{mt}px;width:{w}px;text-align:left">'
+            + ''.join(f'<li style="font-size:{fs}px;padding:{pad}px 4px">{m}<span>{free(t)}</span></li>' for m, t in zip(marks, items))
+            + '</ul>')
+
+
+def sup_html(c, site, fs, mt, w, key='sup'):
+    t = (c.get(key) or c['sup'])[site]
+    return f'<div class="sup" style="font-size:{fs}px;margin-top:{mt}px;width:{w}px;color:{GRAPHITE}">{free(t)}</div>' if t else ''
+
+
 def plain_1x1(c, site):
-    items = c.get('items')
-    body = (f'<ul class="list" style="margin-top:26px;width:820px;text-align:left">'
-            + ''.join(f'<li style="font-size:28px;padding:11px 4px"><b style="font-size:32px;width:46px;flex:none">{i + 1:02d}</b>{t}</li>' for i, t in enumerate(items))
-            + '</ul>') if items else ''
+    it = c.get('items1') or c.get('items')
+    body = items_html(c, c.get('li1', 28), c.get('pad1', 11), 26, c.get('w1', 820), 32, c.get('cols1', 1), it)
     return f"""{sand_bg()}
 <div class="abs" style="left:0;right:0;top:92px;display:flex;justify-content:center">{logo(BLACK, 340)}</div>
 <div class="abs" style="left:0;right:0;top:{c.get('top1', 250)}px;display:flex;flex-direction:column;align-items:center;text-align:center;color:{BLACK}">
   <div class="eb" style="font-size:24px">{c['eyebrow']} · {SITES[site]}</div>
   <div class="hl" style="font-size:{c.get('size1', 96)}px;margin-top:16px">{hl(c['hl'][site])}</div>
   {body}
-  <div class="sup" style="font-size:26px;margin-top:20px;width:820px;color:{GRAPHITE}">{c['sup'][site]}</div>
+  {sup_html(c, site, 26, 20, 820, 'sup1')}
 </div>
 <div class="abs cta" style="left:171px;top:930px;width:737px;height:88px;font-size:40px;background:rgba(255,255,255,.75)">{CTA}</div>"""
 
 
 def plain_9x16(c, site):
-    items = c.get('items')
-    body = (f'<ul class="list" style="margin-top:44px;width:850px;text-align:left">'
-            + ''.join(f'<li style="font-size:36px;padding:22px 4px"><b style="font-size:40px;width:56px;flex:none">{i + 1:02d}</b>{t}</li>' for i, t in enumerate(items))
-            + '</ul>') if items else ''
+    body = items_html(c, c.get('li9', 36), c.get('pad9', 22), 44, 850, 40)
     return f"""{sand_bg()}
 <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(BLACK, 440)}</div>
 <div class="abs" style="left:0;right:0;top:{c.get('top9', 560)}px;display:flex;flex-direction:column;align-items:center;text-align:center;color:{BLACK}">
   <div class="eb" style="font-size:30px">{c['eyebrow']} · {SITES[site]}</div>
   <div class="hl" style="font-size:{c.get('size9', 112)}px;margin-top:18px">{hl(c['hl'][site])}</div>
   {body}
-  <div class="sup" style="font-size:33px;margin-top:30px;width:860px;color:{GRAPHITE}">{c['sup'][site]}</div>
+  {sup_html(c, site, 33, 30, 860)}
 </div>
 <div class="abs cta" style="left:115px;top:1478px;width:849px;height:102px;font-size:56px;background:rgba(255,255,255,.75)">{CTA}</div>"""
 
@@ -171,15 +192,19 @@ def both(v):
     return {'banstead': v, 'battersea': v}
 
 
+# Priya's wording (email 9 Oct 2026, "Post Meeting Action Points"); Vivera capitalised as the brand name.
+PRIYA_INVIS = ['FREE consultation &amp; 3D digital scan', 'FREE dental assessment &amp; OPG', 'FREE refinement aligners',
+               'FREE home whitening kit', 'FREE teeth edge sculpting', 'FREE premium Vivera retainers (3 sets)',
+               'All aligners and review appointments']
+
 CONCEPTS = {
     'amy': [
-        dict(id='A1', name='Included', layout='plain', eyebrow='Invisalign',
-             hl=both('Already in | your treatment.'), size1=88, size9=110, top1=205, top9=520,
-             items=['Whitening', 'Tooth contouring', 'Three sets of Vivera retainers', 'Check-up and OPG', 'Follow-ups at 3 and 6 months'],
-             sup=both('Plus a free consultation and 3D scan.')),
+        dict(id='A1', name='Save over 1500', layout='plain', eyebrow='Invisalign', ticks=True,
+             hl=both('Save over £1,500 | on Invisalign.'), size1=86, size9=104, top1=200, top9=500, li1=29, pad1=14, li9=34, pad9=18,
+             items=PRIYA_INVIS, items1=PRIYA_INVIS[:6], cols1=2, w1=900, sup=both(''), sup1=both(PRIYA_INVIS[6] + '.')),
         dict(id='A2', name='See it first', layout='photo', eyebrow='Invisalign', talent='Clinician + patient',
              hl=both('See the result | before you start.'),
-             sup=both('A free 3D scan shows your expected smile before a single aligner is made.'),
+             sup=both('A FREE 3D digital scan shows your expected smile before a single aligner is made.'),
              photo={'banstead': dict(img='shoot/zh-39.jpg', fx=.5, fy=.35),
                     'battersea': dict(img='shoot/zh-16.jpg', fx=.5, fy=.3)}),
         dict(id='A3', name='Too complex', layout='photo', eyebrow='Invisalign', talent='Clinician',
@@ -189,15 +214,48 @@ CONCEPTS = {
                     'battersea': dict(img='shoot/zh-27.jpg', fx=.4, fy=.2)}),
         dict(id='A4', name='After the last aligner', layout='photo', eyebrow='Invisalign', talent='Patient + clinician',
              hl=both('Straight teeth. | Staying straight.'),
-             sup=both('Three sets of Vivera retainers and follow-ups at 3 and 6 months, included.'),
+             sup=both('FREE premium Vivera retainers (3 sets) and review appointments, with every treatment.'),
              photo={'banstead': dict(img='shoot/zh-43.jpg', fx=.5, fy=.3),
                     'battersea': dict(img='shoot/zh-45.jpg', fx=.5, fy=.3)}),
         dict(id='A5', name='30 minutes', layout='photo', eyebrow='Invisalign', talent='No talent', size1=62, size9=66,
              hl={'banstead': '30 minutes on the High Street. | Then you’ll know.',
                  'battersea': '30 minutes on Northcote Road. | Then you’ll know.'},
-             sup=both('Whether Invisalign suits you, which package fits, and your 3D result. Free, no commitment.'),
+             sup=both('Whether Invisalign suits you, which package fits, and your 3D result. FREE, no commitment.'),
              photo={'banstead': dict(img='shoot/zh-1.jpg', fx=.5, fy=.4),
                     'battersea': dict(img='battersea-reception.jpg', fx=.45, fy=.5)}),
+        dict(id='A6', name='From 2650', layout='plain', eyebrow='Invisalign', talent='No talent',
+             hl=both('Invisalign | from £2,650.'), size1=130, size9=150, top1=300, top9=640,
+             sup=both('Save over £1,500 with FREE whitening, refinement aligners and 3 sets of Vivera retainers.')),
+        dict(id='A7', name='All free', layout='photo', eyebrow='Invisalign', talent='Clinician + patient', size1=72, size9=84,
+             hl=both('Whitening. Retainers. Refinements. | All FREE.'),
+             sup=both('Plus a FREE consultation, 3D scan and dental assessment. Save over £1,500 on Invisalign.'),
+             photo={'banstead': dict(img='shoot/zh-17.jpg', fx=.5, fy=.25),
+                    'battersea': dict(img='shoot/zh-42.jpg', fx=.5, fy=.25)}),
+    ],
+    'josh': [
+        dict(id='J1', name='Still your teeth', layout='photo', eyebrow='Composite bonding', talent='Patient + clinician',
+             hl=both('Still your teeth. | Just better.'),
+             sup=both('Bonding adds to the teeth you have. No drilling, nothing filed down, nothing fake.'),
+             photo={'banstead': dict(img='shoot/zh-46.jpg', fx=.5, fy=.15),
+                    'battersea': dict(img='delighted-chair.jpg', fx=.5, fy=.3)}),
+        dict(id='J2', name='Two hours', layout='photo', eyebrow='Composite bonding', talent='Clinician',
+             hl=both('One visit. | A whole new edge.'),
+             sup=both('Chips, gaps and uneven edges reshaped in a single appointment, usually in 1 to 2 hours.'),
+             photo={'banstead': dict(img='shoot/zh-33.jpg', fx=.5, fy=.25),
+                    'battersea': dict(img='shoot/zh-38.jpg', fx=.5, fy=.25)}),
+        dict(id='J3', name='From 2100', layout='plain', eyebrow='Composite bonding', ticks=True,
+             hl=both('Six teeth | from £2,100.'), size1=104, size9=124, top1=230, top9=540, li1=29, pad1=12, li9=36, pad9=20,
+             items=['6 teeth £2,100 · 8 teeth £2,800 · 10 teeth £3,500', 'FREE home whitening kit', 'FREE custom retainer', 'Digital smile design before you start'],
+             sup=both('No drilling. Nothing filed down. Most cases done in one visit.')),
+        dict(id='J4', name='Chips easily', layout='plain', eyebrow='Composite bonding', ticks=True,
+             hl=both('“It chips easily.” | The honest answer.'), size1=92, size9=112, top1=230, top9=560, li1=30, pad1=13, li9=38, pad9=22,
+             items=['Typically lasts 5 to 7 years with care', 'A chip can be repaired, not replaced', 'Checked at every annual review', 'FREE custom retainer to protect it'],
+             sup=both('')),
+        dict(id='J5', name='On camera', layout='photo', eyebrow='Composite bonding', talent='Patient',
+             hl=both('On camera all day? | Smile like it.'),
+             sup=both('Chips, gaps and short teeth reshaped in one visit. No drilling, nothing filed down.'),
+             photo={'banstead': dict(img='shoot/zh-15.jpg', fx=.5, fy=.8, s9=dict(fy=.3)),
+                    'battersea': dict(img='shoot/zh-44.jpg', fx=.6, fy=.55, s9=dict(fy=.25))}),
     ],
 }
 
