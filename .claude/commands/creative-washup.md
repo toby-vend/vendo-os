@@ -56,13 +56,15 @@ Note the agreed actions and rules; this fortnight's themes should check them.
 
 ## 6. Write RUN/notes.json
 Run `python3 -I scripts/creative-washup/build.py RUN --concepts-only` for the
-concept tables. Use the previous run's notes.json as the shape:
+concept tables and the winners boards. Use the previous run's notes.json as the shape:
 
     { "order": [client names, fixes first then biggest accounts],
       "fixes": [{"client","ads":[exact ad names],"sev":"Fix today|This week|Housekeeping","text"}],
       "themes": [{"title","body","ask"}],            // 4 to 6
       "clients": {"<client name>": ["1 to 4 talking points"]},
-      "concepts": ["3 to 6 takeaways from the concept tables"] }
+      "concepts": ["3 to 6 takeaways from the concept tables"],
+      "winners": ["3 to 5 observations from the winners boards: what the top
+                   creatives share, hook vs hold vs click gaps, hidden gems"] }
 
 How to write it:
 - **Fixes** are copy problems in live ads. Check every price, finance figure,

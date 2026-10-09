@@ -84,6 +84,90 @@ def concept_tables():
 
 concepts = concept_tables()
 json.dump(concepts, open(os.path.join(RUN, 'concepts.json'), 'w'), indent=1)
+
+
+# ---------- winners (leaderboards) ----------
+MIN_GBP = 50  # ignore creatives that spent less than about £50: too little data to rank
+
+
+def money(cur, v):
+    return f"{v:,.0f} kr" if cur.strip() == 'DKK' else f"{cur}{v:,.0f}"
+
+
+def gbp(x):
+    return (x['m']['spend'] or 0) * FX.get(x['cur'], 1)
+
+
+def outcome(x):
+    m = x['m']
+    if x['ecom']:
+        n = m['purchase_count'] or 0
+        return f"ROAS {m['roas'] or 0:.1f} · {n} sale{'s' if n != 1 else ''}"
+    n = (m['view_content'] or 0) + (m['leads_all'] or 0)
+    return f"{n} lead{'s' if n != 1 else ''}"
+
+
+def video_sub(x):
+    m = x['m']
+    return f"hook {m['thumbstop_ratio']:.0f}% · hold {m['video_thruplay_ratio'] or 0:.0f}% · CTR {m['ctr_outbound'] or 0:.1f}%"
+
+
+def leaderboards():
+    idx = list(enumerate(c))
+    vids = [(i, x) for i, x in idx if x['is_video'] and gbp(x) >= MIN_GBP]
+    web_dental = [(i, x) for i, x in idx if not x['ecom'] and in_concepts(x) and gbp(x) >= MIN_GBP
+                  and (x['m']['view_content'] or 0) >= 3]
+    statics = [(i, x) for i, x in idx if not x['is_video'] and gbp(x) >= MIN_GBP and in_concepts(x)]
+    ecom = [(i, x) for i, x in idx if x['ecom'] and gbp(x) >= MIN_GBP and (x['m']['purchase_count'] or 0) >= 2]
+    copy = [(i, x) for i, x in idx if x['texts'] and gbp(x) >= MIN_GBP and x['m'].get('see_more_ratio')]
+
+    def board(key, title, why, rows, val, show, sub, reverse=True, n=5):
+        top = sorted(rows, key=lambda t: val(t[1]), reverse=reverse)[:n]
+        return {'key': key, 'title': title, 'why': why,
+                'rows': [{'i': i, 'v': show(x), 'sub': sub(x), 'set': x['adset']} for i, x in top]}
+
+    m = lambda x, k: x['m'].get(k) or 0
+    return [
+        board('hook', 'Hook rate', 'Share of impressions that watched 3 seconds. Our bar: 30%.', vids,
+              lambda x: m(x, 'thumbstop_ratio'), lambda x: f"{m(x, 'thumbstop_ratio'):.1f}%",
+              lambda x: f"{money(x['cur'], m(x, 'spend'))} · {outcome(x)}"),
+        board('hold', 'Hold rate', 'Share of impressions watched to 15 seconds or the end.', vids,
+              lambda x: m(x, 'video_thruplay_ratio'), lambda x: f"{m(x, 'video_thruplay_ratio'):.1f}%",
+              lambda x: f"hook {m(x, 'thumbstop_ratio'):.0f}% · {outcome(x)}"),
+        board('ctr', 'Video CTR', 'Outbound click-through. Our bar: 2%.', vids,
+              lambda x: m(x, 'ctr_outbound'), lambda x: f"{m(x, 'ctr_outbound'):.1f}%",
+              lambda x: f"hook {m(x, 'thumbstop_ratio'):.0f}% · {outcome(x)}"),
+        board('watch', 'Average watch time', 'Seconds the average viewer watches.', vids,
+              lambda x: m(x, 'video_avg_time_watched'), lambda x: f"{m(x, 'video_avg_time_watched'):.1f}s",
+              lambda x: f"of {round(x['videoLength'] or 0)}s · {outcome(x)}"),
+        board('cpl', 'Cost per lead', 'Dental website ads with 3+ leads.', web_dental,
+              lambda x: gbp(x) / m(x, 'view_content'), lambda x: money(x['cur'], m(x, 'spend') / m(x, 'view_content')),
+              lambda x: f"{m(x, 'view_content')} leads on {money(x['cur'], m(x, 'spend'))}", reverse=False),
+        board('c2l', 'Click to lead', 'Leads per outbound click: is the landing page converting?', web_dental,
+              lambda x: m(x, 'view_content') / max(m(x, 'clicks_outbound'), 1),
+              lambda x: f"{100 * m(x, 'view_content') / max(m(x, 'clicks_outbound'), 1):.1f}%",
+              lambda x: f"{m(x, 'view_content')} leads from {m(x, 'clicks_outbound'):,} clicks"),
+        board('roas', 'ROAS', 'Ecommerce ads with 2+ sales.', ecom,
+              lambda x: m(x, 'roas'), lambda x: f"{m(x, 'roas'):.1f}",
+              lambda x: f"{m(x, 'purchase_count')} sales on {money(x['cur'], m(x, 'spend'))}"),
+        board('static', 'Static CTR', 'Statics and image posts (instant-form ads left out).', statics,
+              lambda x: m(x, 'ctr_outbound'), lambda x: f"{m(x, 'ctr_outbound'):.1f}%",
+              lambda x: f"{money(x['cur'], m(x, 'spend'))} · {outcome(x)}"),
+        board('seemore', '"See more" rate', 'Share who expanded the primary text: is the copy earning attention?', copy,
+              lambda x: m(x, 'see_more_ratio'), lambda x: f"{m(x, 'see_more_ratio'):.1f}%",
+              lambda x: f"{money(x['cur'], m(x, 'spend'))} · {outcome(x)}"),
+        board('gems', 'Hidden gems', 'Hooks of 30%+ that spent under about £50. Candidates for more budget.',
+              [(i, x) for i, x in idx if x['is_video'] and m(x, 'thumbstop_ratio') >= 30 and gbp(x) < MIN_GBP],
+              lambda x: m(x, 'thumbstop_ratio'), lambda x: f"{m(x, 'thumbstop_ratio'):.1f}%",
+              lambda x: f"{money(x['cur'], m(x, 'spend'))} · hold {m(x, 'video_thruplay_ratio'):.0f}%"),
+        board('leaks', 'Weak hooks on big budgets', 'Biggest spenders with a hook under 15%. A stronger opening could make them cheaper.',
+              [(i, x) for i, x in vids if m(x, 'thumbstop_ratio') < 15],
+              gbp, lambda x: money(x['cur'], m(x, 'spend')),
+              lambda x: f"hook {m(x, 'thumbstop_ratio'):.0f}% · {outcome(x)}"),
+    ]
+
+
+boards = leaderboards()
 if '--concepts-only' in sys.argv:
     for seg in concepts:
         for d in DIMS:
@@ -91,6 +175,10 @@ if '--concepts-only' in sys.argv:
             for r in concepts[seg][d]:
                 k = f"ROAS {r['roas']} sales {r['sales']}" if seg == 'ecom' else f"res {r['results']} cpr {r['cpr']}"
                 print(f"  {r['value'][:38]:38} n={r['n']:3} cl={r['clients']:2} £{r['spend']:6} {k}  ts={r['ts']} ctr={r['ctr']}")
+    for b in boards:
+        print(f"\n## winners / {b['title']}")
+        for r in b['rows']:
+            print(f"  {r['v']:>8}  {c[r['i']]['client']} | {c[r['i']]['adName']} | {r['sub']}")
     sys.exit(0)
 
 # ---------- page ----------
@@ -125,7 +213,8 @@ clients = [{'name': n, 'cur': ws_cur.get(n, '£'), 'notes': notes['clients'].get
 meta = {'date': run_day.strftime('%A %-d %B %Y'), 'from': period[0].strftime('%-d %b'),
         'to': period[1].strftime('%-d %b'), 'fx': {k.strip(): v for k, v in FX.items() if v != 1}}
 data = {'items': items, 'clients': clients, 'fixes': notes['fixes'], 'themes': notes['themes'],
-        'concepts': concepts, 'conceptNotes': notes.get('concepts', []), 'meta': meta}
+        'concepts': concepts, 'conceptNotes': notes.get('concepts', []), 'meta': meta,
+        'boards': boards, 'winnerNotes': notes.get('winners', [])}
 blob = json.dumps(data, ensure_ascii=False).replace('</', '<\\/')
 logo_path = os.path.join(ROOT, '.claude', 'skills', 'vendo-brand', 'assets', 'logo', 'VD_LOGO_WHITE.svg')
 logo = open(logo_path).read().replace('<svg ', '<svg class="logo" role="img" aria-label="Vendo" ', 1)
@@ -134,10 +223,10 @@ os.makedirs(os.path.join(RUN, 'site'), exist_ok=True)
 open(os.path.join(RUN, 'site', 'index.html'), 'w').write(tpl.replace('/*DATA*/', blob).replace('<!--LOGO-->', logo))
 
 # ---------- sheet payload ----------
-def money(cur, v):
-    return f"{v:,.0f} kr" if cur.strip() == 'DKK' else f"{cur}{v:,.0f}"
-
-
+winner_rows = [{'board': b['title'], 'rank': n + 1, 'client': c[r['i']]['client'], 'ad': c[r['i']]['adName'],
+                'value': r['v'], 'detail': r['sub'], 'preview': c[r['i']]['preview'] or '',
+                'play': c[r['i']]['video'] or ''}
+               for b in boards for n, r in enumerate(b['rows'])]
 creative_rows = []
 for n in names:
     for it in sorted((it for it in items if it['cl'] == n), key=lambda r: -r['sp']):
@@ -157,6 +246,7 @@ payload = {'title': 'Creative Wash-Up (Vendo only)', 'runDate': run_day.isoforma
            'period': f"{meta['from']} to {meta['to']}", 'fixes': notes['fixes'], 'themes': notes['themes'],
            'clients': {n: notes['clients'].get(n, []) for n in names}, 'concepts': concepts,
            'conceptNotes': notes.get('concepts', []), 'creatives': creative_rows,
+           'winners': winner_rows, 'winnerNotes': notes.get('winners', []),
            'pageUrl': json.load(open(os.path.join(CACHE, 'artifact.json')))['url']}
 json.dump(payload, open(os.path.join(RUN, 'sheet-payload.json'), 'w'), indent=1, ensure_ascii=False)
 print(f'built page ({len(items)} creatives, {len(clients)} accounts) and sheet payload')

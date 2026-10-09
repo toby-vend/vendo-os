@@ -114,6 +114,24 @@ details[open] summary::before{content:"– ";}
 .full h4{margin:4px 0 0;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
 .full ul{margin:0;padding-left:18px}
 .empty{color:var(--faint);font-size:14px}
+.boards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px;align-items:start}
+.board{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 8px;display:grid;gap:4px;min-width:0}
+.board.warn{border-color:rgba(245,214,116,.35)}
+.board h3{margin:0;font-size:16px;color:var(--heading);letter-spacing:-.01em}
+.board .why{margin:0 0 8px;font-size:12.5px;color:var(--faint)}
+.board ol{list-style:none;margin:0;padding:0;display:grid}
+.board li a{display:grid;grid-template-columns:18px 44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);text-decoration:none}
+.board li a:hover .ad{color:var(--mint)}
+.board .rk{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.board .th{width:44px;height:55px;border-radius:6px;overflow:hidden;background:var(--sunken)}
+.board .th img{width:100%;height:100%;object-fit:cover;display:block}
+.board .who{min-width:0}
+.board .cl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.board .ad{font-size:13.5px;font-weight:600;color:var(--heading);overflow-wrap:anywhere;line-height:1.3}
+.board .det{font-size:12px;color:var(--muted)}
+.board .val{font-size:18px;font-weight:800;color:var(--mint);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.board.warn .val{color:var(--warn)}
+.board .none{font-size:13px;color:var(--faint);padding:8px 0;border-top:1px solid var(--line)}
 .ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
 .seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:4px}
 .seg button{font:inherit;font-size:13.5px;color:var(--muted);background:transparent;border:0;border-radius:9px;padding:7px 14px;cursor:pointer}
@@ -169,6 +187,13 @@ footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--line);color:v
     <h2>Fix these <em>first</em></h2>
     <p class="sub">Copy problems in live ads, checked against confirmed prices and decisions we have on record.</p>
     <div class="fixes" id="fixes"></div>
+  </section>
+
+  <section class="block" id="winners">
+    <span class="eyebrow">Top five per metric · creatives that spent about £50 or more</span>
+    <h2>This fortnight's <em>winners</em></h2>
+    <ul class="talk" id="winnerNotes"></ul>
+    <div class="boards" id="boards"></div>
   </section>
 
   <section class="block" id="themes-sec">
@@ -307,6 +332,17 @@ document.getElementById('clients').innerHTML = D.clients.map(cl => {
 }).join('');
 D.clients.forEach(cl => { const o = document.createElement('option'); o.value = slug(cl.name); o.textContent = cl.name; jump.appendChild(o); });
 jump.addEventListener('change', () => { if (jump.value) document.getElementById(jump.value).scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); });
+
+// winners
+const nameCount = D.items.reduce((m, x) => m.set(x.n, (m.get(x.n) || 0) + 1), new Map());
+const dupNames = new Set([...nameCount].filter(([, k]) => k > 1).map(([n]) => n));
+document.getElementById('winnerNotes').innerHTML = (D.winnerNotes||[]).map(n => `<li>${esc(n)}</li>`).join('');
+document.getElementById('boards').innerHTML = (D.boards||[]).map(b => `
+  <article class="board${b.key === 'leaks' ? ' warn' : ''}"><h3>${esc(b.title)}</h3><p class="why">${esc(b.why)}</p>
+  <ol>${b.rows.length ? b.rows.map((r, n) => { const x = byId[r.i]; return `<li><a href="#c${r.i}">
+    <span class="rk">${n+1}</span><span class="th"><img src="img/c${r.i}.jpg" alt="" loading="lazy"></span>
+    <span class="who"><span class="cl">${esc(x.cl)}</span><span class="ad" style="display:block">${esc(x.n)}</span><span class="det" style="display:block">${esc(r.sub)}${dupNames.has(x.n) ? ' · ' + esc(r.set) : ''}</span></span>
+    <span class="val">${esc(r.v)}</span></a></li>`; }).join('') : '<li class="none">Nothing qualified this fortnight.</li>'}</ol></article>`).join('');
 
 // concepts
 document.getElementById('conceptNotes').innerHTML = (D.conceptNotes||[]).map(n => `<li>${esc(n)}</li>`).join('');

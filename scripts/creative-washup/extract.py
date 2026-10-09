@@ -18,7 +18,8 @@ CFG = json.load(open(os.path.join(HERE, 'workspaces.json')))
 WS = {w['slug']: w for w in CFG['workspaces']}
 PREF = ['4:5', '1:1', '9:16', '16:9']
 METRICS = ['spend', 'impressions', 'cpm', 'ctr_outbound', 'thumbstop_ratio', 'video_thruplay_ratio',
-           'leads_all', 'view_content', 'purchase_count', 'purchase_value', 'roas', 'add_to_cart']
+           'leads_all', 'view_content', 'purchase_count', 'purchase_value', 'roas', 'add_to_cart',
+           'video_avg_time_watched', 'see_more_ratio', 'clicks_outbound', 'landing_page_views']
 
 
 def pick(lst, key):

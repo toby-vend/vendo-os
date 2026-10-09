@@ -42,6 +42,8 @@ interface Payload {
   fixes: Fix[]; themes: Theme[]; clients: Record<string, string[]>;
   concepts: Record<'lead' | 'ecom', Record<string, ConceptRow[]>>; conceptNotes: string[];
   creatives: Record<string, string>[];
+  winners: { board: string; rank: number; client: string; ad: string; value: string; detail: string; preview: string; play: string }[];
+  winnerNotes: string[];
 }
 const p = JSON.parse(readFileSync(path.join(RUN, 'sheet-payload.json'), 'utf-8')) as Payload;
 
@@ -124,7 +126,7 @@ const tabs = [
     rows: [
       ['Refreshed automatically before each fortnightly Creative Wash Up. Every run overwrites this sheet.'],
       [`Designed version with images, copy and scripts: ${p.pageUrl}`],
-      ['Tabs: Fix first (copy problems in live ads), Talking points (themes and per-client prompts), Concepts (format, angle, offer and persona compared), Creatives (every live creative with preview, tags, metrics, copy and script).'],
+      ['Tabs: Fix first (copy problems in live ads), Winners (top five per metric), Talking points (themes and per-client prompts), Concepts (format, angle, offer and persona compared), Creatives (every live creative with preview, tags, metrics, copy and script).'],
       ['Figures come from Motion (ad-level attribution). Check Ads Manager before quoting a client. Dentistry.ie is in euros, Veltuff in Danish krone, Iconic Dent in US dollars; the Concepts tab converts to £ at approximate rates.'],
       ...p.conceptNotes.map((n) => [`Concept takeaway: ${n}`]),
     ],
@@ -140,6 +142,15 @@ const tabs = [
     rows: [
       ...p.themes.map((t) => [t.title, t.body, t.ask]),
       ...Object.entries(p.clients).flatMap(([client, notes]) => notes.map((n) => [client, n, ''])),
+    ],
+  },
+  {
+    title: 'Winners', sheetId: 5, frozenCols: 1, rowHeight: 110, widths: [190, 50, 100, 160, 260, 90, 300, 60],
+    head: ['Metric', 'Rank', 'Preview', 'Client', 'Ad', 'Value', 'Detail', 'Video'],
+    rows: [
+      ...p.winnerNotes.map((n) => ['Takeaway', '', '', '', n, '', '', '']),
+      ...p.winners.map((w) => [w.board, w.rank, w.preview ? `=IMAGE("${w.preview}", 1)` : '', w.client, w.ad, w.value,
+        w.detail, w.play ? `=HYPERLINK("${w.play}", "Play")` : '']),
     ],
   },
   {
