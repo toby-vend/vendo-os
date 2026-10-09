@@ -98,7 +98,7 @@ def photo_1x1(c, site):
 <div class="abs" style="left:0;right:0;top:104px;display:flex;justify-content:center">{logo(WHITE, 408)}</div>
 <div class="abs" style="left:92px;bottom:200px;width:880px;color:{WHITE}">
   <div class="eb" style="font-size:24px">{c['eyebrow']} · {SITES[site]}</div>
-  <div class="hl" style="font-size:{c.get('size1', 80)}px;margin-top:14px">{hl(c['hl'][site])}</div>
+  <div class="hl" style="font-size:{c.get('size1', 80)}px;margin-top:14px;line-height:{c.get('lh', 1.06)}">{hl(c['hl'][site])}</div>
   <div class="sup" style="font-size:27px;margin-top:18px;width:{c.get('supw', 700)}px">{free(c['sup'][site])}</div>
 </div>
 <div class="abs cta" style="left:92px;top:905px;width:737px;height:88px;font-size:40px;background:rgba(255,255,255,.75)">{CTA}</div>"""
@@ -112,7 +112,7 @@ def photo_9x16(c, site):
 <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(WHITE, 520)}</div>
 <div class="abs" style="left:115px;bottom:480px;width:860px;color:{WHITE}">
   <div class="eb" style="font-size:30px">{c['eyebrow']} · {SITES[site]}</div>
-  <div class="hl" style="font-size:{c.get('size9', 92)}px;margin-top:16px">{hl(c['hl'][site])}</div>
+  <div class="hl" style="font-size:{c.get('size9', 92)}px;margin-top:16px;line-height:{c.get('lh', 1.06)}">{hl(c.get('hl9', c['hl'])[site])}</div>
   <div class="sup" style="font-size:33px;margin-top:20px">{free(c['sup'][site])}</div>
 </div>
 <div class="abs cta" style="left:115px;top:1478px;width:849px;height:102px;font-size:56px;background:rgba(255,255,255,.6)">{CTA}</div>"""
@@ -155,7 +155,7 @@ def plain_1x1(c, site):
 <div class="abs" style="left:0;right:0;top:92px;display:flex;justify-content:center">{logo(BLACK, 340)}</div>
 <div class="abs" style="left:0;right:0;top:{c.get('top1', 250)}px;display:flex;flex-direction:column;align-items:center;text-align:center;color:{BLACK}">
   <div class="eb" style="font-size:24px">{c['eyebrow']} · {SITES[site]}</div>
-  <div class="hl" style="font-size:{c.get('size1', 96)}px;margin-top:16px">{hl(c['hl'][site])}</div>
+  <div class="hl" style="font-size:{c.get('size1', 96)}px;margin-top:16px;line-height:{c.get('lh', 1.06)}">{hl(c['hl'][site])}</div>
   {body}
   {sup_html(c, site, 26, 20, 820, 'sup1')}
 </div>
@@ -168,7 +168,7 @@ def plain_9x16(c, site):
 <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(BLACK, 440)}</div>
 <div class="abs" style="left:0;right:0;top:{c.get('top9', 560)}px;display:flex;flex-direction:column;align-items:center;text-align:center;color:{BLACK}">
   <div class="eb" style="font-size:30px">{c['eyebrow']} · {SITES[site]}</div>
-  <div class="hl" style="font-size:{c.get('size9', 112)}px;margin-top:18px">{hl(c['hl'][site])}</div>
+  <div class="hl" style="font-size:{c.get('size9', 112)}px;margin-top:18px;line-height:{c.get('lh', 1.06)}">{hl(c.get('hl9', c['hl'])[site])}</div>
   {body}
   {sup_html(c, site, 33, 30, 860)}
 </div>
@@ -219,14 +219,16 @@ CONCEPTS = {
              sup=both('FREE premium Vivera retainers (3 sets) and review appointments, with every treatment.'),
              photo={'banstead': dict(img='drive/stills/st-34.jpg', fx=.5, fy=.3),
                     'battersea': dict(img='drive/stills/st-39.jpg', fx=.5, fy=.3)}),
-        dict(id='A5', name='30 minutes', layout='photo', eyebrow='Invisalign', talent={'banstead': 'Patient + clinician', 'battersea': 'No talent'}, size1=62, size9=66,
+        dict(id='A5', name='30 minutes', layout='photo', eyebrow='Invisalign', talent={'banstead': 'Patient + clinician', 'battersea': 'No talent'}, size1=62, size9=88,
              hl={'banstead': '30 minutes on the High Street. | Then you’ll know.',
                  'battersea': '30 minutes on Northcote Road. | Then you’ll know.'},
+             hl9={'banstead': '30 minutes on<br>the High Street. | Then you’ll know.',
+                  'battersea': '30 minutes on<br>Northcote Road. | Then you’ll know.'}, lh=1.1,
              sup=both('Whether Invisalign suits you, which package fits, and your 3D result. FREE, no commitment.'),
              photo={'banstead': dict(img='drive/stills/st-46.jpg', fx=.6, fy=.4),
                     'battersea': dict(img='drive/battersea/bat-055.jpg', fx=.5, fy=.35)}),
         dict(id='A6', name='From 2650', layout='plain', eyebrow='Invisalign', talent='No talent',
-             hl=both('Invisalign | from £2,650.'), size1=130, size9=150, top1=300, top9=640,
+             hl=both('Invisalign | from £2,650.'), size1=126, size9=172, top1=290, top9=660, lh=1.16,
              sup=both('Save over £1,500 with FREE whitening, refinement aligners and 3 sets of Vivera retainers.')),
         dict(id='A7', name='All free', layout='photo', eyebrow='Invisalign', talent='Clinician + patient', size1=72, size9=84,
              hl=both('Whitening. Retainers. Refinements. | All FREE.'),
