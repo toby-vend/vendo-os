@@ -1,0 +1,364 @@
+<title>Creative Wash-Up 9 Oct</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@1&display=swap">
+<style>
+/* Layout: one 1280px column on the Vendo dark canvas; fixes and themes up top, then one section per client with a card grid of live creatives. Deliberately dark-only (Vendo is dark-first). */
+:root{
+  --canvas:#051412; --sunken:#030D0B; --card:#09221F; --raised:#0E2C28; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --text:#E8F2EC; --heading:#FFFFFF; --muted:#B9C7C0; --faint:#7F918A;
+  --mint:#8EFEBB; --mint-soft:rgba(142,254,187,.12);
+  --good:#5DEFA0; --warn:#F5D674; --bad:#FF8A80; --bad-soft:rgba(255,138,128,.12); --warn-soft:rgba(245,214,116,.12);
+  --f-display:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --f-body:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--canvas);color:var(--text);font-family:var(--f-body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1280px;margin:0 auto;padding-inline:24px;padding-block:0 96px}
+@media (max-width:600px){.wrap{padding-inline:16px}}
+.logo{height:22px;width:auto;display:block}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:28px 8px;flex-wrap:wrap}
+.eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hero{padding-block:40px 32px;display:grid;gap:18px;max-width:900px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,7vw,76px);line-height:.98;letter-spacing:-.035em;color:var(--heading);margin:0;text-wrap:balance}
+h1 em,h2 em{font-family:var(--f-serif);font-style:italic;font-weight:400;color:var(--mint);letter-spacing:-.01em}
+.lede{font-size:17px;color:var(--muted);max-width:68ch;margin:0}
+.meta-row{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:6px}
+.meta-row div{display:grid;gap:2px}
+.meta-row b{font-size:24px;font-weight:700;color:var(--heading);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.meta-row span{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em}
+
+.toolbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(5,20,18,.92);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border-block:1px solid var(--line);margin-inline:-24px;padding:10px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+@media (max-width:600px){.toolbar{margin-inline:-16px;padding-inline:16px}}
+.toolbar label{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em}
+select,.chip{font:inherit;font-size:13.5px;color:var(--text);background:var(--card);border:1px solid var(--line-2);border-radius:999px;padding:7px 14px;cursor:pointer}
+select{border-radius:10px;max-width:100%}
+.chip[aria-pressed="true"]{background:var(--mint);color:#051412;border-color:var(--mint);font-weight:700}
+.chip:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid rgba(142,254,187,.45);outline-offset:2px}
+.toolbar .count{margin-left:auto;font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums}
+
+section.block{padding-block:56px 8px;display:grid;gap:22px}
+h2{font-family:var(--f-display);font-size:clamp(26px,3.6vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:0;color:var(--heading);text-wrap:balance}
+.sub{color:var(--muted);margin:0;max-width:72ch}
+
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 28px;padding:18px 0 0;border-top:1px solid var(--line)}
+.legend div{font-size:13.5px;color:var(--muted)}
+.legend b{display:block;color:var(--heading);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+
+.fixes{display:grid;gap:0;border-top:1px solid var(--line)}
+.fix{display:grid;grid-template-columns:150px 1fr;gap:6px 24px;padding:18px 0;border-bottom:1px solid var(--line)}
+@media (max-width:700px){.fix{grid-template-columns:1fr}}
+.fix .who{display:grid;gap:6px;align-content:start}
+.fix .who strong{color:var(--heading);font-size:15px}
+.fix p{margin:0;max-width:78ch}
+.adlinks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.adlinks a{font-size:12.5px;text-decoration:none;color:var(--mint);border:1px solid rgba(142,254,187,.3);border-radius:999px;padding:3px 10px}
+.adlinks a:hover{background:var(--mint-soft)}
+.sev{display:inline-block;width:max-content;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:3px 9px}
+.sev.today{background:var(--bad-soft);color:var(--bad)}
+.sev.week{background:var(--warn-soft);color:var(--warn)}
+.sev.house{background:var(--raised);color:var(--muted)}
+
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px}
+.theme{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:10px;align-content:start}
+.theme h3{margin:0;font-size:18px;line-height:1.25;color:var(--heading);letter-spacing:-.01em}
+.theme p{margin:0;color:var(--muted);font-size:14.5px}
+.theme .ask{color:var(--text);border-top:1px solid var(--line);padding-top:10px}
+.theme .ask::before{content:"Ask the room";display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mint);font-weight:700;margin-bottom:3px}
+
+.client{padding-block:64px 0;display:grid;gap:20px;scroll-margin-top:72px}
+.client-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 32px;border-bottom:1px solid var(--line);padding-bottom:16px}
+.stats{display:flex;gap:24px;flex-wrap:wrap}
+.stats div{display:grid}
+.stats b{font-size:20px;color:var(--heading);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stats span{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em}
+.talk{margin:0;padding:0;list-style:none;display:grid;gap:10px;max-width:90ch}
+.talk li{position:relative;padding-left:22px}
+.talk li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:2px;background:var(--mint)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:16px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid;scroll-margin-top:80px;min-width:0}
+.card.flagged{border-color:rgba(255,138,128,.55)}
+.card:target{box-shadow:0 0 0 3px var(--mint)}
+.media{position:relative;aspect-ratio:4/5;background:var(--sunken);display:block;max-width:100%}
+.media img{width:100%;height:100%;object-fit:contain;display:block}
+.play{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:8px;background:rgba(3,13,11,.82);color:var(--heading);border:1px solid var(--line-2);border-radius:999px;padding:6px 12px 6px 8px;font-size:12.5px;font-weight:600;text-decoration:none}
+.play svg{width:18px;height:18px;fill:var(--mint)}
+a.media:hover .play{border-color:var(--mint)}
+.badges{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:6px;pointer-events:none}
+.pill{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:rgba(3,13,11,.82);color:var(--muted);border:1px solid var(--line)}
+.pill.fl{background:var(--bad);color:#2a0905;border-color:transparent}
+.pill.st-new{color:var(--mint)} .pill.st-declining{color:var(--warn)} .pill.st-scaling{color:var(--good)}
+.body{padding:14px 16px 16px;display:grid;gap:12px;min-width:0}
+.name{font-weight:700;color:var(--heading);font-size:14.5px;line-height:1.3;overflow-wrap:anywhere}
+.where{font-size:12px;color:var(--faint);overflow-wrap:anywhere;margin-top:3px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.metrics div{background:var(--card);padding:7px 9px;display:grid;gap:1px;min-width:0}
+.metrics b{font-size:15px;color:var(--heading);font-variant-numeric:tabular-nums;font-weight:700}
+.metrics span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.metrics .good b{color:var(--good)} .metrics .weak b{color:var(--bad)}
+.hook{font-size:13.5px;color:var(--text);background:var(--raised);border-radius:10px;padding:10px 12px}
+.hook span{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mint);font-weight:700;margin-bottom:3px}
+.copy{font-size:13.5px;color:var(--muted);white-space:pre-line;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+details{border-top:1px solid var(--line);padding-top:8px}
+details+details{border-top:0;padding-top:0}
+summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--mint);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+ ";}
+details[open] summary::before{content:"– ";}
+.full{display:grid;gap:10px;margin-top:8px;font-size:13.5px;color:var(--text)}
+.full .v{white-space:pre-line;overflow-wrap:anywhere;background:var(--sunken);border-radius:8px;padding:10px 12px}
+.full h4{margin:4px 0 0;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.full ul{margin:0;padding-left:18px}
+.empty{color:var(--faint);font-size:14px}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:4px}
+.seg button{font:inherit;font-size:13.5px;color:var(--muted);background:transparent;border:0;border-radius:9px;padding:7px 14px;cursor:pointer}
+.seg button[aria-selected="true"]{background:var(--raised);color:var(--heading);font-weight:700;box-shadow:inset 0 0 0 1px var(--line-2)}
+.seg button:focus-visible{outline:3px solid rgba(142,254,187,.45)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.ctable{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums;min-width:820px}
+.ctable th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:600;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ctable td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.ctable tr:last-child td{border-bottom:0}
+.ctable td.num,.ctable th.num{text-align:right}
+.ctable td.concept{color:var(--heading);font-weight:600;min-width:200px}
+.ctable td.best{color:var(--good);font-weight:700}
+.ctable td.worst{color:var(--bad);font-weight:700}
+.bar{display:block;height:4px;border-radius:2px;background:var(--mint);opacity:.55;margin-top:5px}
+.thumbs{display:flex;gap:6px}
+.thumbs a{display:block;width:40px;height:50px;border-radius:6px;overflow:hidden;background:var(--sunken);border:1px solid var(--line);flex:none}
+.thumbs a:hover{border-color:var(--mint)}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.fine{font-size:12.5px;color:var(--faint);margin:0;max-width:90ch}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tags span{font-size:11px;color:var(--muted);background:var(--sunken);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.tags span b{color:var(--faint);font-weight:600;margin-right:4px}
+footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--line);color:var(--faint);font-size:13px;display:grid;gap:6px;max-width:90ch}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}.card:hover{border-color:var(--line-2)}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <!--LOGO-->
+    <span class="eyebrow">Fortnightly creative wash-up</span>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow" id="heroDate"></span>
+    <h1>Creative <em>wash-up</em></h1>
+    <p class="lede">Every live Meta creative that spent in the last fortnight, with the actual image or video, the copy and the spoken script, so we can talk about how to make each one better. Built from Motion and the last four wash-up calls on Fathom.</p>
+    <div class="meta-row" id="metaRow"></div>
+  </section>
+
+  <nav class="toolbar" aria-label="Filters">
+    <label for="jump">Client</label>
+    <select id="jump"><option value="">Jump to client…</option></select>
+    <button class="chip" type="button" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" type="button" data-f="video" aria-pressed="false">Video</button>
+    <button class="chip" type="button" data-f="static" aria-pressed="false">Static</button>
+    <button class="chip" type="button" data-f="flag" aria-pressed="false">Flagged</button>
+    <span class="count" id="count"></span>
+  </nav>
+
+  <section class="block" id="fix">
+    <span class="eyebrow">Before we start</span>
+    <h2>Fix these <em>first</em></h2>
+    <p class="sub">Copy problems in live ads, checked against confirmed prices and decisions we have on record.</p>
+    <div class="fixes" id="fixes"></div>
+  </section>
+
+  <section class="block" id="themes-sec">
+    <span class="eyebrow">Measured against what we agreed on past calls</span>
+    <h2>What to <em>talk</em> about</h2>
+    <div class="themes" id="themes"></div>
+    <div class="legend">
+      <div><b>Thumbstop</b>Share of impressions that watched 3 seconds. Our bar from 12 June: 30%+. Green at 30%+, red under 15%.</div>
+      <div><b>Thru-play</b>Share of impressions watched to 15 seconds or the end. Tells us if the video holds after the hook.</div>
+      <div><b>CTR</b>Outbound click-through. Our bar from 12 June: 2%+. Red under 0.5%. Instant-form ads show low CTR by design.</div>
+      <div><b>Leads</b>Website or instant-form leads per ad; ecommerce shows purchases and ROAS. Motion's ad-level attribution, so check Ads Manager before quoting a client.</div>
+    </div>
+  </section>
+
+  <section class="block" id="concepts">
+    <span class="eyebrow">Format, angle, offer and persona</span>
+    <h2>Concepts <em>compared</em></h2>
+    <ul class="talk" id="conceptNotes"></ul>
+    <div class="ctl">
+      <div class="seg" role="tablist" aria-label="Dimension" id="dimTabs"></div>
+      <div class="seg" role="tablist" aria-label="Business type" id="segTabs"></div>
+    </div>
+    <div class="tablewrap"><table class="ctable" id="ctable"></table></div>
+    <p class="fine" id="conceptFine"></p>
+  </section>
+
+  <main id="clients"></main>
+
+  <footer>
+    <div id="footSource"></div>
+    <div>Spend shown in each account's own currency: Dentistry.ie in euros, Veltuff in Danish krone, Iconic Dent in US dollars (old account, before the 5 Oct move to GBP).</div>
+  </footer>
+</div>
+
+<script>
+const D = /*DATA*/;
+const byId = Object.fromEntries(D.items.map(x => [x.i, x]));
+const DIMS = ['format','angle','offer','persona'];
+const DIM_LABEL = {format:'Format', angle:'Angle', offer:'Offer', persona:'Persona'};
+const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const nf0 = new Intl.NumberFormat('en-GB',{maximumFractionDigits:0});
+const nf1 = new Intl.NumberFormat('en-GB',{maximumFractionDigits:1});
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const money = (cur, v) => cur.trim() === 'DKK' ? nf0.format(v) + ' kr' : cur + nf0.format(v);
+const sevCls = s => s === 'Fix today' ? 'today' : s === 'This week' ? 'week' : 'house';
+
+document.getElementById('heroDate').textContent = `${D.meta.date} · Meta, ${D.meta.from} to ${D.meta.to}`;
+document.getElementById('footSource').textContent = `Source: Motion creative analytics, ${D.meta.from} to ${D.meta.to} (workspace default attribution), creatives with more than 15 in spend, top 25 by spend per account. Scripts are Motion's automatic transcripts and can mis-hear names. Concept tags are Claude's reading of each creative.`;
+
+// header stats
+const nClients = D.clients.length, nItems = D.items.length;
+const nVid = D.items.filter(x => x.v).length;
+document.getElementById('metaRow').innerHTML = [
+  [nItems,'live creatives'],[nClients,'accounts'],[nVid,'videos'],[nItems-nVid,'statics and posts'],
+  [D.fixes.filter(f=>f.sev!=='Housekeeping').length,'copy fixes']
+].map(([b,s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
+
+// card ids for anchors
+const cardId = x => 'c' + x.i;
+const findAd = (cl, name) => D.items.find(x => x.cl === cl && x.n === name);
+
+document.getElementById('fixes').innerHTML = D.fixes.map(f => {
+  const links = f.ads.map(a => { const x = findAd(f.client, a); return x ? `<a href="#${cardId(x)}">${esc(a)}</a>` : ''; }).join('');
+  return `<div class="fix"><div class="who"><strong>${esc(f.client)}</strong><span class="sev ${sevCls(f.sev)}">${esc(f.sev)}</span></div>
+  <div><p>${esc(f.text)}</p>${links ? `<div class="adlinks">${links}</div>` : ''}</div></div>`;
+}).join('');
+
+document.getElementById('themes').innerHTML = D.themes.map(t =>
+  `<article class="theme"><h3>${esc(t.title)}</h3><p>${esc(t.body)}</p><p class="ask">${esc(t.ask)}</p></article>`).join('');
+
+const playIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+
+function results(x, cur){
+  if (x.ecom) return [
+    {k:'ROAS', v: x.roas ? nf1.format(x.roas) : '0', c: x.roas >= 4 ? 'good' : (x.sp > 50 && x.roas < 1 ? 'weak' : '')},
+    {k:'Sales', v: nf0.format(x.pu)}];
+  const r = x.vc + x.ld;
+  const lbl = x.ld && !x.vc ? 'Form leads' : 'Leads';
+  return [{k:lbl, v: nf0.format(r), c: r === 0 && x.sp > 80 ? 'weak' : ''},
+          {k:'Per lead', v: r ? money(cur, x.sp / r) : '–'}];
+}
+
+function card(x, cur){
+  const tsC = x.ts == null ? '' : x.ts >= 30 ? 'good' : x.ts < 15 ? 'weak' : '';
+  const ctrC = x.ctr >= 2 ? 'good' : (x.ctr < 0.5 && x.ld === 0 ? 'weak' : '');
+  const m = [{k:'Spend', v: money(cur, x.sp)}];
+  if (x.v) { m.push({k:'Thumbstop', v: nf1.format(x.ts)+'%', c: tsC}); m.push({k:'Thru-play', v: x.hold != null ? nf1.format(x.hold)+'%' : '–'}); }
+  m.push({k:'CTR', v: nf1.format(x.ctr)+'%', c: ctrC});
+  if (!x.v) m.push({k:'CPM', v: money(cur, x.cpm)});
+  m.push(...results(x, cur));
+  while (m.length % 3) m.push({k:'', v:''});
+  const img = `<img src="img/c${x.i}.jpg" alt="${esc(x.n)}" loading="lazy" decoding="async">`;
+  const badges = `<div class="badges"><span class="pill st-${slug(x.st||'')}">${esc(x.st||'')}${x.ln ? ' · ' + esc(new Date(x.ln+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'})) : ''}</span>${x.fl ? `<span class="pill fl">${esc(x.fl)}</span>` : ''}</div>`;
+  const media = x.url
+    ? `<a class="media" href="${esc(x.url)}" target="_blank" rel="noopener">${img}${badges}<span class="play">${playIcon}Play${x.len ? ' · ' + x.len + 's' : ''}</span></a>`
+    : `<div class="media">${img}${badges}${x.car ? `<span class="play">Carousel · ${x.car} cards</span>` : ''}</div>`;
+  const firstSentence = s => { const w = s.split(/\s+/); return w.length > 26 ? w.slice(0,26).join(' ') + '…' : s; };
+  const hook = x.sc ? `<div class="hook"><span>Opens with</span>“${esc(firstSentence(x.sc))}”</div>` : '';
+  const copy = x.tx.length ? `<div class="copy">${esc(x.tx[0])}</div>` : '<div class="copy">No primary text on this ad (organic post or text in the creative).</div>';
+  const fullCopy = (x.tx.length > 1 || x.hl.length || x.ds.length || x.tx[0]?.length > 260)
+    ? `<details><summary>All copy · ${x.tx.length} primary text${x.tx.length===1?'':'s'}, ${x.hl.length} headline${x.hl.length===1?'':'s'}</summary><div class="full">
+      ${x.tx.map((t,k) => `<h4>Primary text ${x.tx.length>1?k+1:''}</h4><div class="v">${esc(t)}</div>`).join('')}
+      ${x.hl.length ? `<h4>Headlines</h4><ul>${x.hl.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>` : ''}
+      ${x.ds.length ? `<h4>Description</h4><ul>${x.ds.map(h=>`<li>${esc(h)}</li>`).join('')}</ul>` : ''}
+    </div></details>` : '';
+  const script = x.sc ? `<details><summary>Full script (spoken)</summary><div class="full"><div class="v">${esc(x.sc)}</div></div></details>` : '';
+  return `<article class="card${x.fl?' flagged':''}" id="${cardId(x)}" data-v="${x.v?1:0}" data-f="${x.fl?1:0}">
+    ${media}
+    <div class="body">
+      <div><div class="name">${esc(x.n)}</div><div class="where">${esc(x.cp)} › ${esc(x.as)}</div></div>
+      <div class="metrics">${m.map(z => `<div class="${z.c||''}"><span>${z.k}</span><b>${z.v}</b></div>`).join('')}</div>
+      ${x.tg ? `<div class="tags">${DIMS.map(d => `<span><b>${DIM_LABEL[d]}</b>${esc(x.tg[d])}</span>`).join('')}</div>` : ''}
+      ${hook}${copy}${fullCopy}${script}
+    </div></article>`;
+}
+
+const jump = document.getElementById('jump');
+document.getElementById('clients').innerHTML = D.clients.map(cl => {
+  const rows = cl.ids.map(i => byId[i]);
+  const sp = rows.reduce((a,x)=>a+x.sp,0);
+  const ecom = rows[0].ecom;
+  let stats = `<div><b>${money(cl.cur, sp)}</b><span>Spend</span></div><div><b>${rows.length}</b><span>Creatives</span></div>`;
+  if (ecom) {
+    const pu = rows.reduce((a,x)=>a+x.pu,0);
+    const rev = rows.reduce((a,x)=>a+x.roas*x.sp,0);
+    stats += `<div><b>${nf0.format(pu)}</b><span>Sales</span></div><div><b>${nf1.format(sp?rev/sp:0)}</b><span>ROAS</span></div>`;
+  } else {
+    const r = rows.reduce((a,x)=>a+x.vc+x.ld,0);
+    stats += `<div><b>${nf0.format(r)}</b><span>Leads</span></div><div><b>${r?money(cl.cur, sp/r):'–'}</b><span>Per lead</span></div>`;
+  }
+  return `<section class="client" id="${slug(cl.name)}">
+    <div class="client-head"><h2>${esc(cl.name)}</h2><div class="stats">${stats}</div></div>
+    ${cl.notes.length ? `<ul class="talk">${cl.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+    <div class="grid">${rows.map(x => card(x, cl.cur)).join('')}</div>
+  </section>`;
+}).join('');
+D.clients.forEach(cl => { const o = document.createElement('option'); o.value = slug(cl.name); o.textContent = cl.name; jump.appendChild(o); });
+jump.addEventListener('change', () => { if (jump.value) document.getElementById(jump.value).scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); });
+
+// concepts
+document.getElementById('conceptNotes').innerHTML = (D.conceptNotes||[]).map(n => `<li>${esc(n)}</li>`).join('');
+const fxNote = Object.entries(D.meta.fx).map(([k,v]) => `${k} × ${v}`).join(', ');
+let dim = 'format', seg = 'lead';
+const dimTabs = document.getElementById('dimTabs'), segTabs = document.getElementById('segTabs');
+dimTabs.innerHTML = DIMS.map(d => `<button type="button" role="tab" data-d="${d}">${DIM_LABEL[d]}</button>`).join('');
+segTabs.innerHTML = [['lead','Dental leads'],['ecom','Ecommerce']].map(([k,l]) => `<button type="button" role="tab" data-s="${k}">${l}</button>`).join('');
+function renderConcepts(){
+  dimTabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.d === dim)));
+  segTabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.s === seg)));
+  const rows = D.concepts[seg][dim];
+  const maxSp = Math.max(...rows.map(r => r.spend), 1);
+  const ecom = seg === 'ecom';
+  const solid = rows.filter(r => r.spend >= 300 && (ecom ? true : r.results > 0));
+  const key = r => ecom ? r.roas : -(r.cpr ?? Infinity);
+  const best = solid.length > 1 ? solid.reduce((a,b) => key(b) > key(a) ? b : a) : null;
+  const worst = solid.length > 1 ? solid.reduce((a,b) => key(b) < key(a) ? b : a) : null;
+  const effCls = r => r === best ? 'best' : r === worst ? 'worst' : '';
+  const head = `<tr><th>${DIM_LABEL[dim]}</th><th class="num">Ads</th><th class="num">Accounts</th><th class="num">Spend</th>
+    ${ecom ? '<th class="num">Sales</th><th class="num">ROAS</th>' : '<th class="num">Leads</th><th class="num">Per lead</th>'}
+    <th class="num">Thumbstop</th><th class="num">CTR</th><th>Top creatives</th></tr>`;
+  const body = rows.map(r => `<tr>
+    <td class="concept">${esc(r.value)}<span class="bar" style="width:${Math.max(4, r.spend / maxSp * 100)}%"></span></td>
+    <td class="num">${r.n}</td><td class="num">${r.clients}</td><td class="num">£${nf0.format(r.spend)}</td>
+    ${ecom ? `<td class="num">${nf0.format(r.sales)}</td><td class="num ${effCls(r)}">${nf1.format(r.roas)}</td>`
+           : `<td class="num">${nf0.format(r.results)}</td><td class="num ${effCls(r)}">${r.cpr != null ? '£' + nf0.format(r.cpr) : '–'}</td>`}
+    <td class="num">${r.ts != null ? nf1.format(r.ts) + '%' : '–'}</td><td class="num">${nf1.format(r.ctr)}%</td>
+    <td><div class="thumbs">${r.ex.map(i => `<a href="#c${i}" title="${esc(byId[i].cl + ': ' + byId[i].n)}"><img src="img/c${i}.jpg" alt="" loading="lazy"></a>`).join('')}</div></td>
+  </tr>`).join('');
+  document.getElementById('ctable').innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+  document.getElementById('conceptFine').textContent = (ecom
+    ? 'Ecommerce accounts only. ROAS is purchase value over spend. '
+    : 'Dental website campaigns only: instant-form ads and non-dental lead gen are left out so lead costs compare like with like. ')
+    + `Spend converted to £ at approximate rates (${fxNote}). Thumbstop and CTR are medians. Green and red mark the best and worst cost among concepts with £300+ spend.`;
+}
+dimTabs.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { dim = b.dataset.d; renderConcepts(); } });
+segTabs.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { seg = b.dataset.s; renderConcepts(); } });
+renderConcepts();
+
+const chips = [...document.querySelectorAll('.chip')];
+const count = document.getElementById('count');
+function applyFilter(f){
+  chips.forEach(c => c.setAttribute('aria-pressed', String(c.dataset.f === f)));
+  let shown = 0;
+  document.querySelectorAll('.card').forEach(el => {
+    const ok = f === 'all' || (f === 'video' && el.dataset.v === '1') || (f === 'static' && el.dataset.v === '0') || (f === 'flag' && el.dataset.f === '1');
+    el.hidden = !ok; if (ok) shown++;
+  });
+  document.querySelectorAll('section.client').forEach(s => { s.hidden = !s.querySelector('.card:not([hidden])'); });
+  count.textContent = shown + ' of ' + nItems + ' creatives';
+}
+chips.forEach(c => c.addEventListener('click', () => applyFilter(c.dataset.f)));
+applyFilter('all');
+</script>

@@ -1,0 +1,32 @@
+{
+  "organizationId": "69820039192ecf069b48dfd8",
+  "fx_to_gbp_approx": {"£": 1, "€": 0.87, "DKK ": 0.116, "$": 0.75},
+  "workspaces": [
+    {"slug": "access-platforms", "name": "Access Platform Sales", "id": "69d779c437687eb8d184e16d", "cur": "£", "ecom": true},
+    {"slug": "avenue", "name": "Avenue Dental", "id": "69bad00ac59623df7523a074", "cur": "£", "ecom": false},
+    {"slug": "billericay", "name": "Billericay Dental Care", "id": "69e759301c149e17ff0882c9", "cur": "£", "ecom": false},
+    {"slug": "boho-bell-tent", "name": "Boho Bell Tent", "id": "69bad0b3108fb9814e644cf1", "cur": "£", "ecom": true},
+    {"slug": "bond", "name": "Bond Dental", "id": "6a7c5fe2cf82d4de63816fe8", "cur": "£", "ecom": false},
+    {"slug": "bright-ortho", "name": "Bright Orthodontics", "id": "69bad0ca864ec91ccb3c2755", "cur": "£", "ecom": false},
+    {"slug": "dk", "name": "DK Dental", "id": "69f07db6056fb6c226cfd102", "cur": "£", "ecom": false},
+    {"slug": "iconic", "name": "Iconic Dent", "id": "69f208588ab35c76f674d890", "cur": "$", "ecom": false, "note": "Old USD account; moved to GBP act_4680630072260291 on 5 Oct 2026. Swap this id when Motion has the new account."},
+    {"slug": "just-smile", "name": "Just Smile Dental", "id": "69f2112a5c43cdc600fa46a7", "cur": "£", "ecom": false},
+    {"slug": "kana", "name": "Kana Health Group", "id": "69bad02d5c5c69fae8ef25bd", "cur": "£", "ecom": false},
+    {"slug": "lakewood", "name": "Lakewood Dental", "id": "69bad0f718a8724f79a5f03c", "cur": "£", "ecom": false},
+    {"slug": "lateral", "name": "Lateral Dental", "id": "69bad04bc59623df7523b02b", "cur": "£", "ecom": false},
+    {"slug": "mr-mouldings", "name": "MR Mouldings", "id": "6982008be49609a463b22949", "cur": "£", "ecom": true},
+    {"slug": "r-dental", "name": "R-Dental", "id": "69dcfd21b03dc5a9edeb901a", "cur": "£", "ecom": false},
+    {"slug": "dentistry-ie", "name": "Dentistry.ie (Ravensdale)", "id": "69e5e874c75ae02ca4980399", "cur": "€", "ecom": false},
+    {"slug": "rothley", "name": "Rothley Lodge", "id": "69bad090108fb9814e6448b8", "cur": "£", "ecom": false},
+    {"slug": "signature-smiles", "name": "Signature Smiles", "id": "69f4a6e1d740a696387ed3a1", "cur": "£", "ecom": false},
+    {"slug": "stamford", "name": "Stamford Dental Care", "id": "69f08bbf7e6868c431048d53", "cur": "£", "ecom": false},
+    {"slug": "studio-glide", "name": "Studio Glide Pilates", "id": "69bad16a95346927082ba782", "cur": "£", "ecom": false},
+    {"slug": "swinnow", "name": "Swinnow Dental", "id": "69d78e1e1cf203f23cfa85b7", "cur": "£", "ecom": false},
+    {"slug": "sword-stall", "name": "The Sword Stall", "id": "69bacfed5acd2fc00b1e719f", "cur": "£", "ecom": true},
+    {"slug": "thornbury", "name": "Thornbury Dental", "id": "69bad12783ac1d3f50ca2a3a", "cur": "£", "ecom": false},
+    {"slug": "thornley-park", "name": "Thornley Park Dental", "id": "69df52726ccfe986a6230fef", "cur": "£", "ecom": false},
+    {"slug": "veltuff", "name": "Veltuff", "id": "69d67133d81725a1ff0d80bc", "cur": "DKK ", "ecom": true},
+    {"slug": "vendo", "name": "Vendo Digital", "id": "69bc08ccf04c066f2580a3c2", "cur": "£", "ecom": false},
+    {"slug": "zen", "name": "Zen House Dental", "id": "69bad10d864ec91ccb3c30d4", "cur": "£", "ecom": false}
+  ]
+}

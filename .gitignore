@@ -79,3 +79,7 @@ outputs/creative/veltuff-meta-statics/assets/photos/
 outputs/creative/veltuff-meta-statics/assets/cand/
 outputs/creative/veltuff-meta-statics/assets/src/
 outputs/creative/veltuff-meta-statics/renders/
+
+# Creative wash-up runs and caches (client ad data)
+data/creative-washup/
+__pycache__/

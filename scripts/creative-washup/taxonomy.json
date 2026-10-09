@@ -1,0 +1,39 @@
+{
+  "format": {
+    "Talking head / UGC": "A person talks to camera (clinician, founder, creator, staff).",
+    "Patient testimonial": "A real patient or customer tells their story.",
+    "Practice walkthrough / B-roll": "Tour, drone, behind-the-scenes or montage footage without a main speaker.",
+    "Before & after": "Shows a transformation (image or video).",
+    "Motion graphic / animated text": "Video built from animated text, graphics or product renders.",
+    "Lifestyle photo static": "Single image led by a photo of a person or setting.",
+    "Product photo static": "Single image led by a product shot (ecommerce).",
+    "Typographic / infographic static": "Single image led by text, price, list or comparison graphic.",
+    "Carousel": "Multiple cards.",
+    "Organic / partnership post": "Boosted organic or creator partnership post."
+  },
+  "angle": {
+    "Anxiety / nervous": "Fear of the dentist, gentle care, calm.",
+    "Confidence / appearance": "Hiding smile, photos, how you look.",
+    "Function / comfort": "Eating, speaking, pain, slipping dentures, getting the machine working.",
+    "Price / value": "Cost, savings, affordability, what's included.",
+    "Convenience / speed": "One visit, fast, fits your life, easy booking, delivery.",
+    "Expertise / trust": "Credentials, specialists, reviews, technology, years established.",
+    "Local / community": "Names the town, local practice, family-run.",
+    "Life event / timing": "Wedding, birthday, new job, season, back to school, Christmas.",
+    "Gifting": "Buying for someone else.",
+    "Craft / quality": "Materials, durability, finish, how it's made.",
+    "Transformation / aspiration": "Dream smile, finished room, the result itself."
+  },
+  "offer": {
+    "Free consultation / assessment": "",
+    "Priced exam / check-up / intro offer": "e.g. new patient exam £75, £29 for 3 classes.",
+    "From-price": "e.g. implants from £1,400.",
+    "Monthly finance": "Monthly price or 0% finance is the lead offer.",
+    "Bonus extras": "Free whitening, free retainers, free scan worth £X.",
+    "Open day / event": "",
+    "Limited-time discount / sale": "",
+    "Free delivery / shop offer": "Ecommerce shipping or product promos.",
+    "No offer": "Brand or soft sell with no offer."
+  },
+  "persona": "Short noun phrase for who the ad speaks to, normalised to one of: Nervous patient, Lapsed patient, New to area, Busy professional, Parent, Teen / child (via parent), Denture wearer, Missing teeth, Cosmetic-conscious adult, Bride / life-event, Medical card holder, Fan / gift buyer, Collector, Tradesperson, Site manager / buyer, DIY homeowner, Interior enthusiast, Fitness beginner, Dental practice owner, General / broad."
+}
