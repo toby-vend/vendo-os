@@ -23,7 +23,7 @@ Research: research.md and research-forums.md.
 ## J1 | Still your teeth
 **Awareness:** solution aware. **Sophistication:** 4 (mechanism: adds to the tooth, nothing removed). **Angle:** natural, not fake.
 **Research:** "I hate turkey teeth I just want them to look nicer not the false look." (Mumsnet, Everchanging24). "Delighted with results, very natural and much nicer than the fake veneer look" (Mumsnet, Bobbins36). Site: "no enamel removal, no drilling… fully reversible."
-**Layout:** photo. Banstead: zh-46 (patient laughing with clinician). Battersea: delighted-chair (patient reacting in the chair).
+**Layout:** photo. Banstead: zh-46 (patient laughing with clinician). Battersea: st-25 (patient reacting after bonding, from the bonding process video).
 
 **On image**
 - Eyebrow: COMPOSITE BONDING · BANSTEAD / BATTERSEA
@@ -53,7 +53,7 @@ The best bonding is the kind nobody notices.
 ## J2 | Two hours
 **Awareness:** solution aware. **Sophistication:** 3. **Angle:** speed: a visible result in one visit.
 **Research:** "It took 2 hours and totally changed my smile." (Mumsnet, kitkatkaytie). Site: "Most cases are completed in one visit… Most full-smile cases take between one and two hours."
-**Layout:** photo. Banstead: zh-33 (clinician working, focused). Battersea: zh-38 (treatment, tight crop).
+**Layout:** photo. Banstead: zh-33 (clinician working, focused). Battersea: st-20 (bonding in progress, from the bonding process video).
 
 **On image**
 - Eyebrow: COMPOSITE BONDING · BANSTEAD / BATTERSEA
@@ -151,7 +151,7 @@ Better to decide with the whole picture.
 ## J5 | On camera all day
 **Awareness:** problem aware. **Sophistication:** 5 (identity and moment). **Angle:** the trigger: seeing yourself on screen every day.
 **Research:** "I've been wanting to improve my smile for a couple of years now, probably since I have had to stare at myself all day on MS Teams!" (Mumsnet, Goldengoosey). "Lately it seems all my colleagues at work are doing some sort of smile improvement with a dentist." (Mumsnet, PraCh12). "Incredible result… I smile with my teeth now, allllll the time." (Mumsnet, WhoOfWhoville).
-**Layout:** photo. Banstead: zh-15 (patient on her phone by the Banstead neon). Battersea: zh-44 (patient with a mirror, tight crop).
+**Layout:** photo. Banstead: zh-15 (patient on her phone by the Banstead neon). Battersea: st-24 (mirror reveal, from the bonding process video).
 
 **On image**
 - Eyebrow: COMPOSITE BONDING · BANSTEAD / BATTERSEA

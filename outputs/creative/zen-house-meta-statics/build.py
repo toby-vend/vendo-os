@@ -181,7 +181,9 @@ LAYOUTS = {'photo': (photo_1x1, photo_9x16), 'plain': (plain_1x1, plain_9x16)}
 def board(c, site, size, persona):
     f1, f9 = LAYOUTS[c['layout']]
     inner = f1(c, site) if size == '1x1' else f9(c, site)
-    name = f"{c['name']} | Static | {c.get('talent', 'No talent')} | {SITES[site]} | {size} | {DATE}"
+    talent = c.get('talent', 'No talent')
+    talent = talent[site] if isinstance(talent, dict) else talent
+    name = f"{c['name']} | Static | {talent} | {SITES[site]} | {size} | {DATE}"
     cls = 's1' if size == '1x1' else 's9'
     return f'<div class="ab {cls}" id="{c["id"]}-{site}-{size}" data-name="{name}">{inner}</div>'
 
@@ -205,23 +207,23 @@ CONCEPTS = {
         dict(id='A2', name='See it first', layout='photo', eyebrow='Invisalign', talent='Clinician + patient',
              hl=both('See the result | before you start.'),
              sup=both('A FREE 3D digital scan shows your expected smile before a single aligner is made.'),
-             photo={'banstead': dict(img='shoot/zh-39.jpg', fx=.5, fy=.35),
-                    'battersea': dict(img='shoot/zh-16.jpg', fx=.5, fy=.3)}),
+             photo={'banstead': dict(img='drive/stills/st-12.jpg', fx=.25, fy=.4, s9=dict(fx=.3)),
+                    'battersea': dict(img='drive/stills/st-32.jpg', fx=.5, fy=.4)}),
         dict(id='A3', name='Too complex', layout='photo', eyebrow='Invisalign', talent='Clinician',
              hl=both('Told your case | is too complex?'),
              sup=both('Our Diamond Apex team treats the cases many practices refer on.'),
-             photo={'banstead': dict(img='shoot/zh-26.jpg', fx=.5, fy=.2),
-                    'battersea': dict(img='shoot/zh-27.jpg', fx=.4, fy=.2)}),
+             photo={'banstead': dict(img='drive/stills/st-09.jpg', fx=.6, fy=.3),
+                    'battersea': dict(img='drive/stills/st-30.jpg', fx=.65, fy=.3)}),
         dict(id='A4', name='After the last aligner', layout='photo', eyebrow='Invisalign', talent='Patient + clinician',
              hl=both('Straight teeth. | Staying straight.'),
              sup=both('FREE premium Vivera retainers (3 sets) and review appointments, with every treatment.'),
-             photo={'banstead': dict(img='shoot/zh-43.jpg', fx=.5, fy=.3),
-                    'battersea': dict(img='shoot/zh-45.jpg', fx=.5, fy=.3)}),
-        dict(id='A5', name='30 minutes', layout='photo', eyebrow='Invisalign', talent='No talent', size1=62, size9=66,
+             photo={'banstead': dict(img='drive/stills/st-34.jpg', fx=.5, fy=.3),
+                    'battersea': dict(img='drive/stills/st-39.jpg', fx=.5, fy=.3)}),
+        dict(id='A5', name='30 minutes', layout='photo', eyebrow='Invisalign', talent={'banstead': 'Patient + clinician', 'battersea': 'No talent'}, size1=62, size9=66,
              hl={'banstead': '30 minutes on the High Street. | Then you’ll know.',
                  'battersea': '30 minutes on Northcote Road. | Then you’ll know.'},
              sup=both('Whether Invisalign suits you, which package fits, and your 3D result. FREE, no commitment.'),
-             photo={'banstead': dict(img='shoot/zh-1.jpg', fx=.5, fy=.4),
+             photo={'banstead': dict(img='drive/stills/st-46.jpg', fx=.6, fy=.4),
                     'battersea': dict(img='drive/battersea/bat-055.jpg', fx=.5, fy=.35)}),
         dict(id='A6', name='From 2650', layout='plain', eyebrow='Invisalign', talent='No talent',
              hl=both('Invisalign | from £2,650.'), size1=130, size9=150, top1=300, top9=640,
@@ -229,20 +231,20 @@ CONCEPTS = {
         dict(id='A7', name='All free', layout='photo', eyebrow='Invisalign', talent='Clinician + patient', size1=72, size9=84,
              hl=both('Whitening. Retainers. Refinements. | All FREE.'),
              sup=both('Plus a FREE consultation, 3D scan and dental assessment. Save over £1,500 on Invisalign.'),
-             photo={'banstead': dict(img='shoot/zh-17.jpg', fx=.5, fy=.25),
-                    'battersea': dict(img='shoot/zh-42.jpg', fx=.5, fy=.25)}),
+             photo={'banstead': dict(img='drive/stills/st-43.jpg', fx=.5, fy=.3),
+                    'battersea': dict(img='drive/stills/st-38.jpg', fx=.45, fy=.3)}),
     ],
     'josh': [
         dict(id='J1', name='Still your teeth', layout='photo', eyebrow='Composite bonding', talent='Patient + clinician',
              hl=both('Still your teeth. | Just better.'),
              sup=both('Bonding adds to the teeth you have. No drilling, nothing filed down, nothing fake.'),
              photo={'banstead': dict(img='shoot/zh-46.jpg', fx=.5, fy=.15),
-                    'battersea': dict(img='delighted-chair.jpg', fx=.5, fy=.3)}),
+                    'battersea': dict(img='drive/stills/st-25.jpg', fx=.55, fy=.3)}),
         dict(id='J2', name='Two hours', layout='photo', eyebrow='Composite bonding', talent='Clinician',
              hl=both('One visit. | A whole new edge.'),
              sup=both('Chips, gaps and uneven edges reshaped in a single appointment, usually in 1 to 2 hours.'),
              photo={'banstead': dict(img='shoot/zh-33.jpg', fx=.5, fy=.25),
-                    'battersea': dict(img='shoot/zh-38.jpg', fx=.5, fy=.25)}),
+                    'battersea': dict(img='drive/stills/st-20.jpg', fx=.6, fy=1, zoom=1.4, s9=dict(fy=.3, zoom=1))}),
         dict(id='J3', name='From 2100', layout='plain', eyebrow='Composite bonding', ticks=True,
              hl=both('Six teeth | from £2,100.'), size1=104, size9=124, top1=230, top9=540, li1=29, pad1=12, li9=36, pad9=20,
              items=['6 teeth £2,100 · 8 teeth £2,800 · 10 teeth £3,500', 'FREE home whitening kit', 'FREE custom retainer', 'Digital smile design before you start'],
@@ -255,7 +257,7 @@ CONCEPTS = {
              hl=both('On camera all day? | Smile like it.'),
              sup=both('Chips, gaps and short teeth reshaped in one visit. No drilling, nothing filed down.'),
              photo={'banstead': dict(img='shoot/zh-15.jpg', fx=.5, fy=.8, s9=dict(fy=.3)),
-                    'battersea': dict(img='shoot/zh-44.jpg', fx=.6, fy=.55, s9=dict(fy=.25))}),
+                    'battersea': dict(img='drive/stills/st-24.jpg', fx=.45, fy=.3)}),
     ],
     'michelle': [
         dict(id='M1', name='Too late', layout='photo', eyebrow='Smile makeover', talent='No talent',

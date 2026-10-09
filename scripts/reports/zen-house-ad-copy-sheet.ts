@@ -8,11 +8,12 @@
  * The payload is { Banstead: Row[], Battersea: Row[] }, built from
  * outputs/creative/zen-house-meta-statics/copy-*.md. Paths in it are relative to that folder.
  * The folder is link-shared because =IMAGE() is fetched without the viewer's credentials.
- * Re-running with the folder and sheet IDs skips files already uploaded and rewrites the tabs.
+ * Re-running with the folder and sheet IDs keeps unchanged files, re-uploads changed ones and rewrites the tabs.
  */
 import { config } from 'dotenv';
 config({ path: '.env.local', override: true });
 
+import { createHash } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { basename, join } from 'path';
 import { mintSheetsAccessToken } from '../../web/lib/google-sheets.js';
@@ -81,30 +82,42 @@ if (!folderId) {
   console.log(`folder created and link-shared: ${folderId}`);
 }
 
-const existing = new Map<string, string>();
+const existing = new Map<string, { id: string; md5: string }>();
 let pageToken: string | undefined;
 do {
   const params = new URLSearchParams({
     q: `'${folderId}' in parents and trashed=false`,
-    fields: 'nextPageToken,files(id,name)',
+    fields: 'nextPageToken,files(id,name,md5Checksum)',
     pageSize: '200',
   });
   if (pageToken) params.set('pageToken', pageToken);
-  const page = await call<{ nextPageToken?: string; files: { id: string; name: string }[] }>(
+  const page = await call<{ nextPageToken?: string; files: { id: string; name: string; md5Checksum: string }[] }>(
     `https://www.googleapis.com/drive/v3/files?${params}`,
     'GET',
     driveToken,
   );
-  for (const f of page.files) existing.set(f.name, f.id);
+  for (const f of page.files) existing.set(f.name, { id: f.id, md5: f.md5Checksum });
   pageToken = page.nextPageToken;
 } while (pageToken);
 
+// FORCE_REUPLOAD=<regex> re-uploads matching files even if unchanged (to escape a stale Sheets cache).
+const force = process.env.FORCE_REUPLOAD ? new RegExp(process.env.FORCE_REUPLOAD) : null;
 const ids: Record<string, string> = {};
 for (const rel of Object.values(payload).flat().flatMap((r) => [r.f1, r.f9])) {
   const name = basename(rel);
-  if (existing.has(name)) {
-    ids[rel] = existing.get(name)!;
+  const bytes = readFileSync(join(HARNESS, rel));
+  const prior = existing.get(name);
+  if (prior && !force?.test(name) && prior.md5 === createHash('md5').update(bytes).digest('hex')) {
+    ids[rel] = prior.id;
     continue;
+  }
+  // A changed image gets a new file ID: Sheets caches =IMAGE() by URL, so replacing
+  // bytes under the same ID keeps showing the old picture.
+  if (prior) {
+    await fetch(`https://www.googleapis.com/drive/v3/files/${prior.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${driveToken}` },
+    });
   }
   const boundary = `b${Date.now()}${Math.random().toString(36).slice(2)}`;
   const body = Buffer.concat([
@@ -112,7 +125,7 @@ for (const rel of Object.values(payload).flat().flatMap((r) => [r.f1, r.f9])) {
       `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name, parents: [folderId] })}\r\n` +
         `--${boundary}\r\nContent-Type: image/png\r\n\r\n`,
     ),
-    readFileSync(join(HARNESS, rel)),
+    bytes,
     Buffer.from(`\r\n--${boundary}--\r\n`),
   ]) as Buffer<ArrayBuffer>;
   const resp = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
@@ -123,6 +136,17 @@ for (const rel of Object.values(payload).flat().flatMap((r) => [r.f1, r.f9])) {
   if (!resp.ok) throw new Error(`Upload of ${name} failed (${resp.status}): ${await resp.text()}`);
   ids[rel] = ((await resp.json()) as { id: string }).id;
   console.log(`  uploaded ${name}`);
+}
+// Remove files from earlier runs that no longer match an ad name (e.g. a renamed talent label).
+const wanted = new Set(Object.values(ids));
+for (const [name, { id: fileId }] of existing) {
+  if (wanted.has(fileId)) continue;
+  if (Object.values(payload).flat().some((r) => basename(r.f1) === name || basename(r.f9) === name)) continue;
+  await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${driveToken}` },
+  });
+  console.log(`  removed stale ${name}`);
 }
 writeFileSync(ASSETS_PATH, JSON.stringify({ folderId, files: ids }, null, 2));
 
