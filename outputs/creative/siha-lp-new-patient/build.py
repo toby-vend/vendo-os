@@ -1,9 +1,10 @@
-"""Build the Siha Dental 'New patient check-up' landing page harness (desktop 1440 + mobile 390).
+"""Build the Siha Dental 'New patient oral health assessment' landing page harness (desktop 1440 + mobile 390).
 
 Usage: python3 build.py  -> writes lp-desktop.html and lp-mobile.html
 Brand: Siha guideline only (Figma AbtwUHTD50G38QuOaCG4Hh): Metropolis, Dark Olive / Nude lead,
 Beige panels, Burnt Orange for the one offer CTA, 30px card corners, pill buttons, S-frame once (hero).
-Copy: maxr155.sg-host.com/new-patient-check-up (6 Oct 2026), with the fixes agreed with Toby.
+Copy: maxr155.sg-host.com/new-patient-check-up (6 Oct 2026), with the fixes agreed with Toby and Hannan's
+feedback (10 Oct 2026): 'oral health assessment', not 'check-up'.
 Photos: Siha shared Drive (clinic interior, action shots, team), downscaled into assets/photos.
 """
 import re
@@ -95,22 +96,24 @@ def stars(n=5, s=16, color=C['bo']):
     return f'<span style="display:inline-flex;gap:2px;color:{color}">{"".join(STAR.format(s=s) for _ in range(n))}</span>'
 
 
-# Hannan cut-out over the S-frame (photo bottom edge on the frame bottom, person breaks out of it)
-HANNAN = dict(w=1067, h=1600, bbox=(223, 312, 1007, 1600))
+# Hannan cut-out over the S-frame (frame bottom at mid-chest, head breaks out of the S curve).
+# Hannan, 10 Oct 2026: team photos mid-chest up only. Face box from Apple Vision on hannan-1600.jpg.
+HANNAN = dict(w=1067, h=1600, head_top=312, chest=1031, face_cx=545)
 
 
-def s_hero(fw, fh, target_w):
+def s_hero(fw, fh, target_w=None):
     """Return (frame_html, cutout_html) positioned relative to a wrapper of size fw x fh."""
-    bx0, by0, bx1, _ = HANNAN['bbox']
-    s = max(target_w / (bx1 - bx0), fh / HANNAN['h'], fw / HANNAN['w'])
+    out = 40  # clip headroom above the frame (the head sits just inside the frame top, breaking out of the S curve)
+    s = fh * .86 / (HANNAN['chest'] - HANNAN['head_top'])
     w, h = HANNAN['w'] * s, HANNAN['h'] * s
-    left, top = fw / 2 - s * (bx0 + bx1) / 2, fh - h
+    left, top = fw / 2 - s * HANNAN['face_cx'], fh - s * HANNAN['chest']
     bg = f"background-image:url(assets/photos/hannan-1600.jpg);background-size:{w:.0f}px {h:.0f}px;"
     frame = (f'<div class="sframe" data-name="Photo" style="position:absolute;left:0;top:0;width:{fw}px;height:{fh}px">'
              f'<div class="t" style="{bg}background-position:{left:.0f}px {top:.0f}px"></div>'
              f'<div class="b" style="{bg}background-position:{left:.0f}px {top - fh / 2:.0f}px"></div></div>')
-    cut = (f'<img data-name="Cut-out" src="assets/cutouts/hannan.png" '
-           f'style="position:absolute;left:{left:.0f}px;top:{top:.0f}px;width:{w:.0f}px;height:{h:.0f}px">')
+    cut = (f'<div data-name="Cut-out clip" style="position:absolute;left:0;top:-{out}px;width:{fw}px;height:{fh + out}px;overflow:hidden">'
+           f'<img data-name="Cut-out" src="assets/cutouts/hannan.png" '
+           f'style="position:absolute;left:{left:.0f}px;top:{top + out:.0f}px;width:{w:.0f}px;height:{h:.0f}px;max-width:none"></div>')
     return frame, cut
 
 
@@ -118,12 +121,12 @@ def form_card(width, pad=40, offer=False, title="Book your first visit"):
     fields = "".join(f'<label class="field"><span>{f} *</span><div></div></label>' for f in ["First name", "Last name", "Email", "Mobile"])
     return f"""
 <div class="card" data-name="Booking form" style="width:100%;max-width:{width}px;margin:0 auto;background:{C['wh']};padding:{pad}px;box-shadow:0 30px 60px rgba(20,33,26,.14),0 4px 12px rgba(20,33,26,.06)">
-  <div class="label" style="color:{C['bo']}">New patient check-up</div>
+  <div class="label" style="color:{C['bo']}">Oral health assessment</div>
   <div class="h2" style="margin-top:10px">{title}</div>
   <div class="body" style="margin-top:6px;color:{C['br']}">Same-week appointments, evenings and weekends available.</div>
   <div style="display:grid;grid-template-columns:{"1fr" if width < 400 else "1fr 1fr"};gap:16px;margin-top:24px">{fields}</div>
   <span class="btn {'offer' if offer else 'primary'}" style="width:100%;margin-top:26px;height:56px">{CTA}</span>
-  <div class="body" style="margin-top:14px;font-size:14px;text-align:center;color:{C['br']}">Your check-up is £89, with no hidden extras.</div>
+  <div class="body" style="margin-top:14px;font-size:14px;text-align:center;color:{C['br']}">Your assessment is £89, small X-rays included.</div>
   <div class="body" style="margin-top:6px;font-size:12px;text-align:center;color:{C['br']}">By submitting, you agree to our <u>privacy policy</u>.</div>
 </div>"""
 
@@ -142,18 +145,18 @@ def nav_d():
 def hero_d():
     frame, cut = s_hero(380, 640, 330)
     stats = "".join(f'<div><div class="h1" style="font-size:40px">{n}</div><div class="label" style="margin-top:6px;color:{C["br"]}">{l}</div></div>'
-                    for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("3", "2025 award wins")])
+                    for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("8", "Award wins")])
     return f"""
 <section data-name="Hero" style="position:relative;min-height:840px;padding:0px 80px">
   <div style="position:absolute;inset:0;background:radial-gradient(circle at 72% 40%,#f4efea 0%,{C['nu']} 55%)"></div>
   <div class="hero-in" style="position:relative;max-width:1280px;margin:0 auto;min-height:840px">
   <div class="hero-copy" style="position:relative;padding:96px 0 80px;width:560px">
     <div class="label" style="color:{C['bo']}">New patients welcome · Shepherd’s Bush, W12</div>
-    <h1 class="display" style="margin-top:22px">New patient check-up <b>£89</b></h1>
+    <h1 class="display" style="margin-top:22px">Oral health assessment <b>£89</b></h1>
     <p class="h2" style="margin-top:18px;font-weight:300">A dentist you can actually stick with.</p>
-    <p class="body" style="margin-top:16px;font-size:18px;color:{C['ol']};max-width:500px">Thorough check-ups, honest advice and treatment that’s genuinely right for you. New patients welcome at our Shepherd’s Bush practice.</p>
+    <p class="body" style="margin-top:16px;font-size:18px;color:{C['ol']};max-width:500px">Not a quick check-up: a comprehensive look at your oral health, honest advice and a plan built around your goals.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:32px;max-width:520px">
-      {tick("Full exam + 3D scan")}{tick("Same-week appointments")}{tick("0% finance available")}{tick("Evening &amp; weekend slots")}
+      {tick("Full exam, 3D scan + X-rays")}{tick("Same-week appointments")}{tick("Sedation available")}{tick("0% finance available")}
     </div>
     <div style="display:flex;gap:56px;margin-top:48px;padding-top:32px;border-top:1px solid rgba(20,33,26,.12);max-width:520px">{stats}</div>
   </div>
@@ -177,16 +180,16 @@ def hero_m():
     return f"""
 <section data-name="Hero" style="position:relative;padding:40px 20px 48px">
   <div class="label" style="color:{C['bo']}">New patients welcome · Shepherd’s Bush, W12</div>
-  <h1 class="display" style="margin-top:16px;font-size:36px">New patient check-up <b>£89</b></h1>
+  <h1 class="display" style="margin-top:16px;font-size:36px">Oral health assessment <b>£89</b></h1>
   <p class="h2" style="margin-top:12px;font-size:22px;font-weight:300">A dentist you can actually stick with.</p>
-  <p class="body" style="margin-top:12px;color:{C['ol']}">Thorough check-ups, honest advice and treatment that’s genuinely right for you. New patients welcome at our Shepherd’s Bush practice.</p>
-  <div style="display:grid;gap:10px;margin-top:20px">{tick("Full exam + 3D scan", 15)}{tick("Same-week appointments", 15)}</div>
+  <p class="body" style="margin-top:12px;color:{C['ol']}">Not a quick check-up: a comprehensive look at your oral health, honest advice and a plan built around your goals.</p>
+  <div style="display:grid;gap:10px;margin-top:20px">{tick("Full exam, 3D scan + small X-rays", 15)}{tick("Sedation for nervous patients", 15)}</div>
   <div data-name="Hero button (scrolls to the form)" style="margin-top:22px"><span class="btn primary" style="height:54px;width:100%">{CTA}</span></div>
   <div data-name="Trust line" style="display:flex;align-items:center;gap:10px;margin-top:18px">{stars(5, 14)}<span class="body" style="font-size:13px;white-space:nowrap;color:{C['ol']}">5.0 from 157 Google reviews</span></div>
-  <div data-name="S-frame" style="position:relative;width:230px;height:360px;margin:96px auto 0">{frame}{cut}</div>
+  <div data-name="S-frame" style="position:relative;width:230px;height:360px;margin:48px auto 0">{frame}{cut}</div>
   <div style="margin-top:-60px;position:relative">{form_card(350, 24, offer=True)}</div>
   <div style="display:flex;justify-content:space-between;margin-top:32px">
-    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:12px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("3", "2025 awards")])}
+    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:12px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("8", "Awards")])}
   </div>
 </section>"""
 

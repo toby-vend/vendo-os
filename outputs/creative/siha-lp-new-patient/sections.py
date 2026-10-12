@@ -1,4 +1,4 @@
-"""Body sections 2-15 of the Siha new patient check-up landing page.
+"""Body sections 2-15 of the Siha new patient oral health assessment landing page.
 
 Each section is a function taking m (True = mobile 390, False = desktop 1440) and returning HTML.
 Copy follows the live page, with the fixes agreed with Toby on 6 Oct 2026:
@@ -66,13 +66,37 @@ def mark(color, size=22):
     return f'<div style="flex:none;width:{size}px;color:{color}">{svg}</div>'
 
 
+# Simple thin-line icons (Hannan, 10 Oct 2026: a simple graphic per item instead of the Siha logo mark)
+ICONS = {
+    "plan": '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M8.5 10h7M8.5 13.5h7M8.5 17h4"/>',
+    "award": '<circle cx="12" cy="9" r="5.5"/><path d="M8.6 13.4L7 21l5-2.6 5 2.6-1.6-7.6"/>',
+    "wallet": '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M15.5 14.5h2"/>',
+    "clock": '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    "calm": '<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>',
+    "shield": '<path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.4"/>',
+    "person": '<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c.8-3.8 3.8-6 7.5-6s6.7 2.2 7.5 6"/>',
+    "tooth": '<path d="M12 6.2C10.4 4.6 8 4 6.3 5 4 6.4 4.2 9.6 5.3 12.5c.8 2 1 4.6 1.6 6.6.4 1.4 1.9 1.4 2.3 0 .5-1.7.8-4.1 2.8-4.1s2.3 2.4 2.8 4.1c.4 1.4 1.9 1.4 2.3 0 .6-2 .8-4.6 1.6-6.6C19.8 9.6 20 6.4 17.7 5 16 4 13.6 4.6 12 6.2z"/>',
+    "star": '<path d="M12 3.8l2.5 5.2 5.7.7-4.2 3.9 1.1 5.6L12 16.4l-5.1 2.8 1.1-5.6-4.2-3.9 5.7-.7z"/>',
+    "scan": '<path d="M4 8.5V5.5A1.5 1.5 0 0 1 5.5 4h3M15.5 4h3A1.5 1.5 0 0 1 20 5.5v3M20 15.5v3a1.5 1.5 0 0 1-1.5 1.5h-3M8.5 20h-3A1.5 1.5 0 0 1 4 18.5v-3M4 12h16"/>',
+}
+
+
+def icon(name, color, size=40):
+    return (f'<svg data-name="Icon" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="{color}" '
+            f'stroke-width="{1.5 * 24 / size:.2f}" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block">{ICONS[name]}</svg>')
+
+
 # ---------------------------------------------------------------- awards strip (Siha Drive: Awards PNGs), trust signals by the hero
-AWARDS = ["brand-design-2025.png", "patient-care-2025.png", "da25-team-london.png", "practice-of-year-2025.png", "best-new-practice-2024.png"]
+AWARDS = ["brand-design-2025.png", "patient-care-2025.png", "da25-team-london.png", "da25-website-london.png", "da25-website-overall.png",
+          "brand-design-2024.png", "website-2024.png", "best-new-practice-2024.png"]
 # Plain-text captions so the award reads even where the logo's own gold lettering is faint (mobile cards)
 AWARD_CAPTIONS = [("Winner", "Practice brand &amp; design", "Private Dentistry Awards 2025"),
                   ("Winner", "Patient care", "Private Dentistry Awards 2025"),
                   ("Winner", "Team of the year, London", "Dentistry Awards 2025"),
-                  ("Highly commended", "Practice of the year", "Private Dentistry Awards 2025"),
+                  ("Winner", "Website of the year, London", "Dentistry Awards 2025"),
+                  ("Overall winner", "Website of the year", "Dentistry Awards 2025"),
+                  ("Winner", "Practice brand &amp; design, South", "Private Dentistry Awards 2024"),
+                  ("Winner", "Website of the year, London", "Private Dentistry Awards 2024"),
                   ("Highly commended", "New practice", "Private Dentistry Awards 2024")]
 
 
@@ -90,24 +114,24 @@ def awards(m):
     fade = lambda side: (f'<div style="position:absolute;top:0;bottom:0;{side}:0;width:{60 if m else 160}px;'
                          f'background:linear-gradient(to {"right" if side == "left" else "left"},{C["wh"]},rgba(255,255,255,0));z-index:1"></div>')
     return (f'<section data-name="Awards marquee (auto-scrolls, loops)" style="position:relative;background:{C["wh"]};padding:{"28px 0 30px" if m else "36px 0 40px"};overflow:hidden">'
-            f'<div class="label" style="text-align:center;color:{C["bo"]};margin-bottom:{18 if m else 24}px">Award-winning care</div>'
+            f'<div class="label" style="text-align:center;color:{C["bo"]};margin-bottom:{18 if m else 24}px">3 awards in 2024 · 5 in 2025</div>'
             f'<div style="position:relative;overflow:hidden">{fade("left")}{fade("right")}'
             f'<div class="track" data-name="Track" style="--g:{gap}px;display:flex;gap:{gap}px;align-items:flex-start;margin-left:-{70 if m else 220}px;width:max-content">{items}{items}</div></div></section>')
 
 
 # ---------------------------------------------------------------- 2 why patients choose us
-WHY = ["Carefully-curated treatment based on your individual needs",
-       "An award-winning team of professionals and specialists",
-       "Flexible payments and dental membership plans",
-       "Evening, weekend and out-of-hours appointments",
-       "Trained to ease your dental anxieties, ensuring a stress-free visit"]
+WHY = [("plan", "A comprehensive assessment, with a plan built around your goals"),
+       ("award", "An award-winning team of professionals and specialists"),
+       ("wallet", "Flexible payments and dental membership plans"),
+       ("clock", "Evening, weekend and out-of-hours appointments"),
+       ("calm", "Sedation available for nervous patients")]
 
 
 def why_choose(m):
     if m:
         return ""  # mobile: folded into the hero trust line
-    items = [f'<div style="display:flex;gap:16px;align-items:flex-start">{mark(C["bo"], 18)}'
-             f'<span class="body" style="color:{C["be"]};font-size:{15 if m else 16}px">{t}</span></div>' for t in WHY]
+    items = [f'<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{icon(i, C["bo"], 36)}'
+             f'<span class="body" style="color:{C["be"]};font-size:{15 if m else 16}px">{t}</span></div>' for i, t in WHY]
     inner = (f'<div class="label" style="color:{C["bo"]};{"" if m else "text-align:center;"}margin-bottom:{24 if m else 40}px">Why patients choose us</div>'
              + grid(items, 1 if m else 5, 20 if m else 40))
     return sec("Why patients choose us", inner, m, bg=C['od'], pad=(56, 80), pad_m=(48, 20))
@@ -137,8 +161,8 @@ def stories(m):
 
 # ---------------------------------------------------------------- 4 pricing + what you get
 GET = [("Comprehensive exam", "Teeth, gums, bite and jaw, plus an oral cancer screening"),
-       ("3D digital scan", "See your own mouth on-screen as your dentist talks you through it"),
-       ("A clear, honest plan", "Everything costed upfront, including if nothing needs doing at all"),
+       ("Small X-rays and a 3D scan", "Included. See your own mouth on-screen as your dentist talks you through it"),
+       ("A plan built around your goals", "Your short- and long-term goals first, then a plan tailored to them, costed upfront"),
        ("Siha Dental &amp; Facial Membership plan", "For patients without insurance. Plans from £19.56 a month, see below")]
 
 
@@ -146,11 +170,11 @@ def pricing(m):
     price = f'''<div class="card" data-name="Price card" style="background:{C['od']};color:{C['nu']};padding:{32 if m else 56}px;display:flex;flex-direction:column">
       <div class="label" style="color:{C['bo']}">Pricing</div>
       <h2 class="h1" style="margin-top:14px;font-size:{30 if m else 40}px;color:{C['nu']}">Transparent pricing. No surprises.</h2>
-      <p class="body" style="margin-top:16px;color:{C['be']}">One flat fee for your check-up. Anything that needs attention afterwards is costed and explained upfront, before you decide anything.</p>
+      <p class="body" style="margin-top:16px;color:{C['be']}">One flat fee for a comprehensive oral health assessment. Anything that needs attention afterwards is costed and explained upfront, before you decide anything.</p>
       <div style="margin-top:{32 if m else 44}px;padding-top:28px;border-top:1px solid rgba(225,213,202,.2)">
-        <div class="label" style="color:{C['be']}">New patient check-up</div>
-        <div style="display:flex;align-items:baseline;gap:16px;margin-top:8px"><span style="font-weight:300;font-size:{72 if m else 96}px;line-height:1">£89</span><span class="body" style="color:{C['be']}">No hidden extras</span></div>
-        <p class="body" style="margin-top:16px;font-size:14px;color:{C['be']}">Up to 12 months 0% interest-free finance available for any treatment identified at your check-up.</p>
+        <div class="label" style="color:{C['be']}">Oral health assessment</div>
+        <div style="display:flex;align-items:baseline;gap:16px;margin-top:8px"><span style="font-weight:300;font-size:{72 if m else 96}px;line-height:1">£89</span><span class="body" style="color:{C['be']}">Small X-rays included</span></div>
+        <p class="body" style="margin-top:16px;font-size:14px;color:{C['be']}">Up to 12 months 0% interest-free finance available for any treatment identified at your assessment.</p>
       </div>
       <span class="btn beige" style="margin-top:32px;align-self:flex-start">{CTA}</span>
     </div>'''
@@ -165,27 +189,40 @@ def pricing(m):
 
 
 # ---------------------------------------------------------------- 5 membership
-PLANS = [("Smile", "£19.56", "Adult plan", ["1 oral health assessment per year", "5% discount on treatments", "10% discount on oral health products", "2 hygiene appointments per year", "Routine X-rays included as required", "Global dental accident and emergency scheme"]),
-         ("Smile Plus", "£33.89", "For patients requiring more regular maintenance", ["5% discount on treatments", "4 hygiene appointments per year", "Global dental accident and emergency cover"]),
-         ("Smile Child", "£5.45", "Under 12 years", ["2 routine oral health assessments per year including tooth brushing and dietary advice", "Fluoride varnish application", "Routine x-rays included as clinically required", "5% discount on treatments"]),
-         ("Smile Plus", "£12.07", "13-17 years", ["1 hygiene visit per year", "5% discount on treatments"])]
+# siha.dental/fees-and-finance (12 Oct 2026). Under-6s free with a registered parent: Hannan, 10 Oct 2026.
+ADULT_PLANS = [("Smile", "£19.56", "Routine care", ["1 oral health assessment a year", "2 hygiene appointments a year", "Routine X-rays as required", "5% off treatments, 10% off oral health products", "Global dental accident &amp; emergency scheme"]),
+               ("Smile Plus", "£33.89", "Gum health or complex restorative work", ["1 oral health assessment a year", "4 hygiene appointments a year", "Routine X-rays as required", "5% off treatments, 10% off oral health products", "Global dental accident &amp; emergency cover"])]
+CHILD_PLANS = [("Smile Child", "£5.45", "Under 12 years", ["2 oral health assessments a year, with brushing and diet advice", "Fluoride varnish", "Routine X-rays as clinically required", "5% off treatments, 10% off oral health products"]),
+               ("Smile Plus", "£12.07", "13–17 years", ["2 oral health assessments a year, with brushing and diet advice", "1 hygiene visit a year", "Fluoride varnish", "Routine X-rays as clinically required", "5% off treatments, 10% off oral health products"])]
 
 
 def membership(m):
-    cards = []
-    for i, (n, pr, who, feats) in enumerate(PLANS):
-        hi = i == 0
+    def plan_cards(plans, hi_first):
+        return [plan_card(n, pr, who, feats, hi_first and i == 0) for i, (n, pr, who, feats) in enumerate(plans)]
+
+    def plan_card(n, pr, who, feats, hi):
         bg, fg, sub = (C['od'], C['nu'], C['be']) if hi else (C['wh'], C['od'], C['ol'])
         line = 'rgba(225,213,202,.2)' if hi else 'rgba(20,33,26,.1)'
         feat_html = "".join(f'<div class="body" style="font-size:14px;line-height:1.5;color:{sub};display:flex;gap:10px"><span style="color:{C["bo"]}">•</span><span>{f}</span></div>' for f in feats)
-        cards.append(f'''<div class="card" data-name="Plan" style="background:{bg};color:{fg};padding:32px;display:flex;flex-direction:column">
+        return (f'''<div class="card" data-name="Plan" style="background:{bg};color:{fg};padding:32px;display:flex;flex-direction:column;width:100%">
           <div class="h3">{n}</div><div class="body" style="font-size:14px;color:{sub};margin-top:2px">{who}</div>
           <div style="margin-top:24px"><span style="font-weight:300;font-size:48px;line-height:1">{pr}</span><span class="body" style="color:{sub}"> /month</span></div>
           <div style="height:1px;background:{line};margin:24px 0"></div>
           <div style="display:grid;gap:12px">{feat_html}</div></div>''')
+
+    def group(label, sub):
+        return (f'<div data-name="Plan group" style="display:flex;align-items:baseline;gap:14px;{"flex-direction:column;gap:4px;" if m else ""}'
+                f'padding-bottom:16px;margin-bottom:{20 if m else 24}px;border-bottom:1.5px solid {C["od"]}">'
+                f'<span class="h2" style="font-size:{24 if m else 28}px">{label}</span><span class="body" style="font-size:15px;color:{C["ol"]}">{sub}</span></div>')
+    free = (f'<div data-name="Under 6s free" style="display:flex;gap:14px;align-items:center;margin-top:20px;padding:18px 22px;border-radius:20px;background:{C["be"]}">'
+            f'<span style="flex:none;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:{C["bo"]}">Under 6s free</span>'
+            f'<span class="body" style="font-size:14px;color:{C["ol"]}">when a parent is registered with us and attends regularly</span></div>')
+    adults = group("Adults", "18 and over") + (swipe(plan_cards(ADULT_PLANS, True)) if m else grid(plan_cards(ADULT_PLANS, True), 2, 20))
+    kids = group("Children", "Plans from £5.45 a month") + (swipe(plan_cards(CHILD_PLANS, False)) if m else grid(plan_cards(CHILD_PLANS, False), 2, 20)) + free
+    plans = (adults + f'<div style="margin-top:48px">{kids}</div>') if m else f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start"><div>{adults}</div><div>{kids}</div></div>'
     inner = (head("Siha Dental &amp; Facial Membership", "A smarter way to care for your smile",
-                  "A monthly plan that builds your routine care in: check-ups, Airflow® hygiene appointments and X-rays, with member benefits like treatment savings, Siha Dental &amp; Facial Wallet credit and priority booking, depending on your tier.", m)
-             + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 4, 20))}</div>'
+                  "A monthly plan that builds your routine care in, with separate plans for adults and children.", m)
+             + f'<div style="margin-top:{32 if m else 56}px">{plans}</div>'
              + f'<p class="body" style="margin-top:28px;font-size:13px;color:{C["br"]};max-width:900px">Siha Dental &amp; Facial Membership is not dental insurance and does not cover all treatments. It is designed to support routine preventative care, and additional treatment may incur separate costs. T&amp;Cs apply. Ask the team about joining at your visit.</p>')
     return sec("Membership", inner, m)
 
@@ -213,27 +250,27 @@ def cta_form(m):
     if m:
         return mob_cta("Ready when you are")
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
-      {head("New patient check-up", "Ready when you are", "Same-week appointments, evenings and weekends. £89 for a full exam and 3D scan, with no hidden extras.", m, width=520)}
-      <div style="display:grid;gap:12px;margin-top:28px">{tick("Full exam + 3D scan")}{tick("Oral cancer screening")}{tick("A clear, costed plan")}{tick("0% finance available")}</div></div>'''
-    form = form_card(350 if m else 520, 24 if m else 40, title="Book your check-up")
+      {head("Oral health assessment", "Ready when you are", "Same-week appointments, evenings and weekends. £89 for a full exam, 3D scan and small X-rays, with no hidden extras.", m, width=520)}
+      <div style="display:grid;gap:12px;margin-top:28px">{tick("Full exam, 3D scan + small X-rays")}{tick("Oral cancer screening")}{tick("A plan built around your goals")}{tick("0% finance available")}</div></div>'''
+    form = form_card(350 if m else 520, 24 if m else 40, title="Book your assessment")
     body = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 520px;gap:96px;align-items:center">{left}{form}</div>'
-    return sec("Book your check-up (form 2)", body, m, bg=C['be'])
+    return sec("Book your assessment (form 2)", body, m, bg=C['be'])
 
 
 # ---------------------------------------------------------------- 7 sound familiar
 FAMILIAR = [("You haven’t seen a dentist in years", "Life got busy. No judgement here, just a proper look at where things stand."),
-            ("You’re anxious about the dentist", "A bad experience put you off. Our team specialises in gentle, unhurried appointments and explains everything as they go."),
+            ("You’re anxious about the dentist", "A bad experience put you off. Our team takes gentle, unhurried appointments, and sedation is available if you need it."),
             ("You’ve just moved to London", "You need a dental home close to work or home, run to a consistent standard."),
             ("You’ve got an issue you’ve been ignoring", "Sensitivity, a chip, something that doesn’t feel quite right. Better to get it looked at now than wait for it to get worse."),
             ("Your last dentist rushed you through", "Ten minutes and out the door. You want a dentist who actually explains what they’re looking at."),
-            ("You want one dentist for the whole family", "Check-ups, hygiene and treatment for you and your kids, all under one roof, with dentists who know your history.")]
+            ("You want one dentist for the whole family", "Care for you and your kids under one roof. Under 6s are free when a parent is registered and attends regularly.")]
 
 
 def familiar(m):
     cards = [f'''<div class="card" data-name="Situation" style="background:{C['wh']};padding:{28 if m else 36}px">
       <div class="h3">{t}</div><p class="body" style="margin-top:10px;color:{C['ol']}">{d}</p></div>''' for t, d in FAMILIAR]
     close = (f'<p style="margin:{36 if m else 56}px auto 0;max-width:860px;{"" if m else "text-align:center;"}font-size:{20 if m else 24}px;font-weight:300;line-height:1.45">'
-             'A Siha Dental &amp; Facial check-up is a <b style="font-weight:600">full assessment with honest advice</b>: no lectures, no judgement, and no pressure to have anything done.</p>')
+             'Our assessment is a <b style="font-weight:600">full look at your oral health with honest advice</b>: no lectures, no judgement, and no pressure to have anything done.</p>')
     inner = (head("Sound familiar?", "It’s been a while and that’s okay",
                   "Most new patients come to us after months, sometimes years, of meaning to book. Whatever brought you here, you’re in the right place.", m, center=not m)
              + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20))}</div>' + close)
@@ -241,28 +278,28 @@ def familiar(m):
 
 
 # ---------------------------------------------------------------- 8 the check-up
-FACTS = ["Same-week appointments", "Full oral health assessment", "0% finance available", "No pressure, no upselling"]
+FACTS = ["Small X-rays included", "Prevention before cure", "Mercury-free &amp; BPA-free fillings", "Sedation for nervous patients"]
 
 
 def checkup(m):
     left = photo("hygienist-action.jpg", 360 if m else 680, pos="40% 50%")
     right = f'''<div style="display:flex;flex-direction:column;justify-content:center">
-      {head("The check-up", "A proper look at your oral health. With clear advice you can trust.", None, m, width=560)}
-      <p class="body" style="margin-top:18px;color:{C['ol']}">Every new patient starts with a comprehensive check-up, not a rushed once-over. You’ll see exactly what we see, and you’ll leave knowing exactly where you stand. Some of our dentists speak different languages, keeping appointments accessible to all.</p>
+      {head("The assessment", "More than a check-up. A proper look at your oral health.", None, m, width=560)}
+      <p class="body" style="margin-top:18px;color:{C['ol']}">We take time to understand your short- and long-term goals, then tailor your plan to them. Small issues are fixed early, before they get worse: prevention before cure.</p>
       <div class="card" style="background:{C['be']};padding:28px;margin-top:28px">
-        <div class="h3">What is a Siha Dental &amp; Facial new patient check-up?</div>
-        <p class="body" style="margin-top:10px;color:{C['ol']};font-size:15px">A new patient check-up is a full assessment of your oral health, not a rushed five-minute look. Every new patient receives a comprehensive exam covering teeth, gums, bite and jaw, an oral cancer screening, and a 3D digital scan that lets you see your own mouth on-screen as your dentist talks you through it. You leave with a clear, honest plan, including if there’s nothing that needs doing at all.</p>
+        <div class="h3">Your oral health is part of your overall health</div>
+        <p class="body" style="margin-top:10px;color:{C['ol']};font-size:15px">Gum disease is linked to chronic conditions including cardiovascular disease, diabetes and Alzheimer’s. That’s why your assessment covers teeth, gums, bite and jaw, an oral cancer screening, small X-rays and a 3D scan, not just a quick look.</p>
       </div>
       <div class="label" style="color:{C['bo']};margin-top:28px">Key facts</div>
       <div style="display:grid;grid-template-columns:{'1fr' if m else '1fr 1fr'};gap:14px 20px;margin-top:14px">{"".join(tick(f, 15) for f in FACTS)}</div>
     </div>'''
-    return sec("The check-up", grid([left, right], 1 if m else 2, 32 if m else 72), m)
+    return sec("The assessment", grid([left, right], 1 if m else 2, 32 if m else 72), m)
 
 
 # ---------------------------------------------------------------- 9 how it works
-STEPS = [("Book your check-up", "Choose a time that works for you, including evenings and weekends."),
-         ("Full examination &amp; scan", "Teeth, gums, bite and a 3D digital scan, explained in plain English as we go."),
-         ("Your personalised plan", "Anything that needs attention is costed and explained upfront, no pressure to proceed same-day."),
+STEPS = [("Book your assessment", "Choose a time that works for you, including evenings and weekends."),
+         ("Full examination &amp; scan", "Teeth, gums, bite, small X-rays and a 3D scan, explained in plain English as we go."),
+         ("A plan around your goals", "We talk through your goals, then cost everything upfront. No pressure to proceed same-day."),
          ("Ongoing care", "Regular hygiene visits and a dentist who knows your history for whatever comes next.")]
 
 
@@ -275,34 +312,34 @@ def how(m):
 
 
 # ---------------------------------------------------------------- 10 services
-SERVICES = [("Check-ups &amp; Hygiene", "Routine exams and professional cleans that catch small issues before they become big ones.", "hygiene-suite.jpg", "50% 50%"),
-            ("Fillings &amp; Restorations", "Tooth-coloured fillings and repairs that blend with your natural teeth.", "suite-one.jpg", "50% 50%"),
+SERVICES = [("Oral Health &amp; Hygiene", "Regular assessments and professional cleans that catch small issues before they become big ones.", "hygiene-suite.jpg", "50% 50%"),
+            ("Fillings &amp; Restorations", "Mercury-free, BPA-free tooth-coloured fillings that blend with your natural teeth.", "suite-one.jpg", "50% 50%"),
             ("Root Canal Treatment", "Gentle, modern endodontics to save a tooth rather than lose it.", "asiya-magnification.jpg", "50% 40%"),
-            ("Gum Health", "Screening and treatment for gum disease, one of the most common reasons teeth are lost.", "suite-consult.jpg", "50% 60%"),
+            ("Gum Health", "Screening and treatment for gum disease, which is linked to wider health problems as well as tooth loss.", "suite-consult.jpg", "50% 60%"),
             ("Emergency Dentistry", "Same-week appointments for pain, breakages or anything that can’t wait.", "concierge-patient.jpg", "50% 40%"),
-            ("Cosmetic &amp; Straightening", "Whitening, bonding, veneers and Invisalign, if your check-up uncovers something you’d like to change.", "face-photo.jpg", "50% 40%")]
+            ("Cosmetic &amp; Straightening", "Whitening, bonding, veneers and Invisalign, if your assessment uncovers something you’d like to change.", "face-photo.jpg", "50% 40%")]
 
 
 def services(m):
     cards = [f'''<div class="card" data-name="Service" style="background:{C['wh']};overflow:hidden">
       {photo(img, 200, 0, pos)}<div style="padding:28px"><div class="h3">{t}</div><p class="body" style="margin-top:8px;color:{C['ol']};font-size:15px">{d}</p></div></div>''' for t, d, img, pos in SERVICES]
     return sec("Services", head("Our services", "Everything your mouth needs, under one roof",
-                                "Whatever your check-up uncovers, you won’t need to be referred somewhere else.", m)
+                                "Whatever your assessment uncovers, you won’t need to be referred somewhere else.", m)
                + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20 if m else 24))}</div>', m)
 
 
 # ---------------------------------------------------------------- 11 why siha
-WHY_SIHA = [("GDC-registered dentists", "GDC-registered dentists trained to handle both simple and complex cases."),
-            ("Founder-led care", "Dr. Hannan Imran is personally involved in the standard of care across all treatments."),
-            ("Convenient Shepherd’s Bush location", "Easy to reach in Shepherd’s Bush, with modern facilities and unhurried, personal care."),
-            ("Rated 5.0★ by patients", "150+ verified Google reviews from real patients, consistency you can check for yourself."),
-            ("0% finance &amp; membership", "0% interest-free finance, plus a Siha Dental &amp; Facial Membership plan for patients without insurance."),
-            ("Digital-first diagnostics", "Modern, digital-first diagnostics, including 3D intraoral scanning at every check-up.")]
+WHY_SIHA = [("shield", "GDC-registered dentists", "GDC-registered dentists trained to handle both simple and complex cases."),
+            ("person", "Founder-led care", "Dr Hannan is personally involved in the standard of care across all treatments."),
+            ("tooth", "Mercury-free &amp; BPA-free fillings", "Tooth-coloured fillings without mercury or BPA."),
+            ("star", "Rated 5.0★ by patients", "150+ verified Google reviews from real patients, consistency you can check for yourself."),
+            ("wallet", "0% finance &amp; membership", "0% interest-free finance, plus a Siha Dental &amp; Facial Membership plan for patients without insurance."),
+            ("scan", "Digital-first diagnostics", "Modern, digital-first diagnostics, including 3D intraoral scanning at every assessment.")]
 
 
 def why_siha(m):
     cards = [f'''<div data-name="Reason" style="padding:{24 if m else 32}px 0;border-top:1px solid rgba(225,213,202,.2)">
-      {mark(C['bo'], 20)}<div class="h3" style="margin-top:16px;color:{C['nu']}">{t}</div><p class="body" style="margin-top:8px;color:{C['be']};font-size:15px">{d}</p></div>''' for t, d in WHY_SIHA]
+      {icon(i, C['bo'], 40)}<div class="h3" style="margin-top:16px;color:{C['nu']}">{t}</div><p class="body" style="margin-top:8px;color:{C['be']};font-size:15px">{d}</p></div>''' for i, t, d in WHY_SIHA]
     # Design QA 9.2: no unverifiable superlatives ("the most trusted name") in healthcare copy
     return sec("Why Siha", head("Why Siha Dental &amp; Facial", "Why patients trust us with their smiles", None, m, dark=True)
                + f'<div style="margin-top:{24 if m else 48}px">{(swipe(cards, dark=True) if m else grid(cards, 3, 48))}</div>' + cta_row(m, dark=True), m, bg=C['od'])
@@ -319,11 +356,15 @@ def quote(m):
     creds = "".join(f'<div class="body" style="font-size:15px;color:{C["ol"]};display:flex;gap:10px"><span style="color:{C["bo"]}">•</span><span>{c}</span></div>' for c in CREDS)
     text = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       <div class="label" style="color:{C['bo']}">Meet your dentist</div>
-      <h2 class="h1" style="margin-top:14px;font-size:{32 if m else 44}px">Dr. Hannan Imran</h2>
+      <h2 class="h1" style="margin-top:14px;font-size:{32 if m else 44}px">Dr Hannan</h2>
       <div class="body" style="color:{C['br']}">Director and Restorative Dentist · Founder · GDC 264888</div>
-      <p style="font-weight:300;font-size:{21 if m else 26}px;line-height:1.45;margin-top:28px;padding-left:24px;border-left:2px solid {C['bo']}">“The best check-up is the one where nothing’s a surprise. We tell you exactly what we see and let you decide what happens next.”</p>
+      <p style="font-weight:300;font-size:{21 if m else 26}px;line-height:1.45;margin-top:28px;padding-left:24px;border-left:2px solid {C['bo']}">“The best appointment is the one where nothing’s a surprise. We tell you exactly what we see and let you decide what happens next.”</p>
       <div style="display:grid;gap:10px;margin-top:28px">{creds}</div></div>'''
-    pic = photo("hannan-2.jpg", 380 if m else 560, pos="50% 22%")
+    # Mid-chest up (Hannan, 10 Oct 2026): face box (Apple Vision) 620,578 317px on the 1467x2200 source
+    ph = 380 if m else 560
+    sc = ph / (1434 - 340)
+    pic = (f'<div data-name="Photo" style="height:{ph}px;border-radius:30px;background:url(assets/photos/hannan-2.jpg) '
+           f'calc(50% - {(778 - 1467 / 2) * sc:.0f}px) -{340 * sc:.0f}px/{1467 * sc:.0f}px {2200 * sc:.0f}px no-repeat {C["be"]}"></div>')
     return sec("Founder quote", grid([pic, text] if m else [text, pic], 1 if m else 2, 32 if m else 96), m, bg=C['be'])
 
 
@@ -350,14 +391,15 @@ def gallery(m):
 
 
 # ---------------------------------------------------------------- 14 faq
-FAQ = [("What’s included in a new patient check-up?", "Every new patient check-up includes a comprehensive exam covering your teeth, gums, bite and jaw, an oral cancer screening, and a 3D digital scan you can see on-screen while your dentist talks you through it. You leave with a clear, personalised plan, including confirmation that nothing needs doing, if that’s the case."),
-       ("How much does a new patient check-up cost?", "£89, flat. That includes your full examination. There’s nothing added on afterwards. If your check-up identifies anything that needs attention, it’s costed and explained upfront before you decide anything."),
-       ("Do you accept dental insurance?", "Yes. All major dental insurances are accepted. We’ll provide the receipts and paperwork you need to claim back with your insurer. If you’re unsure whether your policy covers a check-up or any recommended treatment, bring your policy details and we’ll help you check."),
-       ("Is finance or a membership plan available if I’m not insured?", "Yes. Any treatment identified at your check-up can be spread over up to 12 months with 0% interest-free finance. We also offer a Siha Dental &amp; Facial Membership plan designed for patients without insurance. Ask at your visit and the team will talk you through the options."),
+FAQ = [("What’s included in the oral health assessment?", "A comprehensive exam covering your teeth, gums, bite and jaw, an oral cancer screening, small X-rays, and a 3D digital scan you can see on-screen while your dentist talks you through it. We ask about your short- and long-term goals, and you leave with a plan tailored to them, including confirmation that nothing needs doing, if that’s the case."),
+       ("How much does the oral health assessment cost?", "£89, flat. That includes your full examination and small X-rays. There’s nothing added on afterwards. If your assessment identifies anything that needs attention, it’s costed and explained upfront before you decide anything."),
+       ("Do you accept dental insurance?", "Yes. All major dental insurances are accepted. We’ll provide the receipts and paperwork you need to claim back with your insurer. If you’re unsure whether your policy covers the assessment or any recommended treatment, bring your policy details and we’ll help you check."),
+       ("Is finance or a membership plan available if I’m not insured?", "Yes. Any treatment identified at your assessment can be spread over up to 12 months with 0% interest-free finance. We also offer a Siha Dental &amp; Facial Membership plan designed for patients without insurance. Ask at your visit and the team will talk you through the options."),
        ("Do you offer emergency appointments?", "Yes. We hold same-week appointments for pain, breakages or anything that can’t wait. Send us your details and we’ll get you seen as quickly as possible."),
-       ("How often should I have a check-up?", "For most people, every six to twelve months. It depends on your oral health, your history, and your risk of things like gum disease. Your dentist will recommend the right interval for you at your first visit, rather than defaulting everyone to the same schedule."),
-       ("Do you see children and treat the whole family?", "Yes. We look after whole families: check-ups, hygiene and treatment for adults and children under one roof, with dentists who get to know your history. Booking family appointments together is no problem; just mention it when you book."),
-       ("It’s been years since my last check-up. Is that a problem?", "Not at all, and you won’t get a lecture about it. A large share of our new patients haven’t seen a dentist in years. Your check-up simply establishes where things stand today, and anything that needs attention is explained and costed clearly. No judgement, no pressure.")]
+       ("How often should I come in?", "For most people, every six to twelve months. It depends on your oral health, your history, and your risk of things like gum disease. Your dentist will recommend the right interval for you at your first visit, rather than defaulting everyone to the same schedule."),
+       ("Do you see children and treat the whole family?", "Yes. We look after whole families: assessments, hygiene and treatment for adults and children under one roof, with dentists who get to know your history. Children under 6 are free when a parent is registered with us and attends regularly."),
+       ("I’m nervous about the dentist. Can you help?", "Yes. Appointments are gentle and unhurried, and sedation is available for nervous patients. Mention it when you book and we’ll talk you through the options."),
+       ("It’s been years since I last saw a dentist. Is that a problem?", "Not at all, and you won’t get a lecture about it. A large share of our new patients haven’t seen a dentist in years. Your assessment simply establishes where things stand today, and anything that needs attention is explained and costed clearly. No judgement, no pressure.")]
 
 
 def faq(m):
@@ -379,13 +421,13 @@ def faq(m):
 def final(m):
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       <div class="label" style="color:{C['bo']}">Get started</div>
-      <h2 class="display" style="margin-top:18px;color:{C['nu']};font-size:{34 if m else 56}px">Your next <span style="white-space:nowrap">check-up,</span> <b>sorted</b></h2>
-      <p class="body" style="margin-top:20px;color:{C['be']};font-size:{16 if m else 18}px">Book your new patient check-up at Siha Dental &amp; Facial. Straight answers, no pressure, and a plan you understand.</p>
+      <h2 class="display" style="margin-top:18px;color:{C['nu']};font-size:{34 if m else 56}px">Your oral <span style="white-space:nowrap">health,</span> <b>sorted</b></h2>
+      <p class="body" style="margin-top:20px;color:{C['be']};font-size:{16 if m else 18}px">Book your oral health assessment at Siha Dental &amp; Facial. Straight answers, no pressure, and a plan you understand.</p>
       <div style="display:flex;gap:28px;margin-top:20px;flex-wrap:wrap">
         <span class="label" style="color:{C['be']};font-weight:500">0% finance available</span><span class="label" style="color:{C['be']};font-weight:500">All major insurances accepted</span></div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:28px">{stars(5, 16)}<span class="body" style="color:{C['be']};font-size:14px">5.0 from 157 Google reviews</span></div>
     </div>'''
-    form = form_card(350 if m else 500, 24 if m else 40, title="Book your check-up")
+    form = form_card(350 if m else 500, 24 if m else 40, title="Book your assessment")
     # LP framework step 9: final CTA with a clean, easy form
     inner = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 500px;gap:96px;align-items:center">{left}{form}</div>'
     foot = f'''<div data-name="Footer" style="margin-top:{56 if m else 96}px;padding-top:32px;border-top:1px solid rgba(225,213,202,.2);display:flex;{'flex-direction:column;gap:16px' if m else 'justify-content:space-between;align-items:center'}">
@@ -407,7 +449,7 @@ def thank_you(m):
       <div style="width:64px;height:64px;border-radius:50%;background:{C['be']};display:flex;align-items:center;justify-content:center;margin:0 auto">{big_tick}</div>
       <div class="label" style="color:{C['bo']};margin-top:28px">Request received</div>
       <h1 class="h1" style="margin-top:12px;font-size:{32 if m else 44}px">Thank you. We’ve got your details.</h1>
-      <p class="body" style="margin-top:16px;color:{C['ol']};font-size:{16 if m else 18}px">Our team will be in touch to confirm your new patient check-up. If you’d rather pick a time yourself, you can book online now.</p>
+      <p class="body" style="margin-top:16px;color:{C['ol']};font-size:{16 if m else 18}px">Our team will be in touch to confirm your oral health assessment. If you’d rather pick a time yourself, you can book online now.</p>
       <div style="display:flex;{'flex-direction:column;' if m else ''}gap:16px;justify-content:center;align-items:center;margin-top:32px">
         <span class="btn primary">Choose a time online</span></div>
       <p class="body" style="margin-top:28px;font-size:14px;color:{C['br']}">157 Askew Road, London W12 9AU</p>

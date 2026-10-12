@@ -66,13 +66,52 @@ def mark(color, size=22):
     return f'<div style="flex:none;width:{size}px;color:{color}">{svg}</div>'
 
 
+# Simple line icons for per-item grids (Hannan, 10 Oct 2026: graphics instead of the Siha logo next to each item).
+# 24px grid, drawn at ~1.5px visual stroke whatever the size.
+_TOOTH = "M7 3c-2 0-3.5 1.6-3.5 4 0 2.2 1 3.6 1.5 5.5.6 2.3.7 8.5 2.6 8.5 1.6 0 1.6-5 4.4-5s2.8 5 4.4 5c1.9 0 2-6.2 2.6-8.5.5-1.9 1.5-3.3 1.5-5.5 0-2.4-1.5-4-3.5-4-1.8 0-2.6 1-5 1S8.8 3 7 3z"
+ICONS = {
+    "toothache": _TOOTH + "M12.6 6.5l-1.8 3h2.4l-1.8 3",
+    "crack": _TOOTH + "M12.5 4.6l-1.3 2.6 1.8 1.8-1.5 2.6",
+    "root": _TOOTH + "M10 9.5h4",
+    "knocked": "M9 6c-1.6 0-2.8 1.3-2.8 3.2 0 1.8.8 2.9 1.2 4.4.5 1.8.6 6.9 2.1 6.9 1.3 0 1.3-4 3.5-4s2.2 4 3.5 4c1.5 0 1.6-5.1 2.1-6.9.4-1.5 1.2-2.6 1.2-4.4C19.8 7.3 18.6 6 17 6c-1.4 0-2.1.8-4 .8S10.4 6 9 6zM2.5 9h2M2 12.5h2.5M3 16h2",
+    "crown": "M4 19h16M5 16l-1.5-9 5 3.5L12 4l3.5 6.5 5-3.5L19 16z",
+    "implant": "M8 3h8v3.5H8zM9.5 6.5h5l-.4 2.5h-4.2zM9.6 9h4.8M9.9 11.5h4.2M10.2 14h3.6M10.4 16.5h3.2L12 21z",
+    "shield": "M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6zM9 12l2 2 4-4",
+    "person": "M12 12a4 4 0 100-8 4 4 0 000 8zM4.5 21c.8-4 3.8-6 7.5-6s6.7 2 7.5 6",
+    "calendar": "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2",
+    "clock": "M12 21a9 9 0 100-18 9 9 0 000 18zM12 7v5l3 2",
+    "star": "M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z",
+    "card": "M3 6h18v12H3zM3 10h18M6.5 14.5h4",
+    "scan": "M4 5h16v11H4zM9 20h6M12 16v4M8 10.5h8",
+    "plan": "M8 4h8v3H8zM6.5 5.5H5v15h14v-15h-1.5M8.5 12h7M8.5 16h5",
+    "award": "M12 14a5 5 0 100-10 5 5 0 000 10zM9 13.2L8 21l4-2 4 2-1-7.8",
+    "heart": "M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z",
+    "pin": "M12 21s-6.5-6-6.5-11a6.5 6.5 0 0113 0c0 5-6.5 11-6.5 11zM12 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z",
+    "pound": "M16 6.5A3.5 3.5 0 009.5 8v4.5c0 2.5-.8 4.5-2.5 6h10M7.5 12.5h6",
+    "phone": "M5 4h3.5l1.5 4-2 1.5a11 11 0 006.5 6.5l1.5-2 4 1.5V19a1.5 1.5 0 01-1.5 1.5A16.5 16.5 0 013.5 5.5 1.5 1.5 0 015 4z",
+    "chat": "M4 19.5l1.2-3.6A8 8 0 1112 20a8 8 0 01-4.3-1.3z",
+}
+
+
+def icon(name, color, size=40):
+    sw = 1.5 * 24 / size
+    return (f'<div data-name="Icon" style="flex:none;width:{size}px;height:{size}px;color:{color}">'
+            f'<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{sw:.2f}" '
+            f'stroke-linecap="round" stroke-linejoin="round"><path d="{ICONS[name]}"/></svg></div>')
+
+
 # ---------------------------------------------------------------- awards strip (Siha Drive: Awards PNGs), trust signals by the hero
-AWARDS = ["brand-design-2025.png", "patient-care-2025.png", "da25-team-london.png", "practice-of-year-2025.png", "best-new-practice-2024.png"]
-# Plain-text captions so the award reads even where the logo's own gold lettering is faint (mobile cards)
+AWARDS = ["brand-design-2025.png", "patient-care-2025.png", "da25-team-london.png", "da25-website-london.png", "da25-website-overall.png",
+          "brand-design-2024.png", "website-2024.png", "best-new-practice-2024.png"]
+# Plain-text captions so the award reads even where the logo's own gold lettering is faint (mobile cards).
+# Hannan, 10 Oct 2026: 3 awards in 2024 (Private Dentistry) and 5 in 2025 (Private Dentistry + Dentistry Awards).
 AWARD_CAPTIONS = [("Winner", "Practice brand &amp; design", "Private Dentistry Awards 2025"),
                   ("Winner", "Patient care", "Private Dentistry Awards 2025"),
                   ("Winner", "Team of the year, London", "Dentistry Awards 2025"),
-                  ("Highly commended", "Practice of the year", "Private Dentistry Awards 2025"),
+                  ("Winner", "Website of the year, London", "Dentistry Awards 2025"),
+                  ("Overall winner", "Website of the year", "Dentistry Awards 2025"),
+                  ("Winner", "Practice brand &amp; design, South", "Private Dentistry Awards 2024"),
+                  ("Winner", "Website of the year, London", "Private Dentistry Awards 2024"),
                   ("Highly commended", "New practice", "Private Dentistry Awards 2024")]
 
 
@@ -90,7 +129,7 @@ def awards(m):
     fade = lambda side: (f'<div style="position:absolute;top:0;bottom:0;{side}:0;width:{60 if m else 160}px;'
                          f'background:linear-gradient(to {"right" if side == "left" else "left"},{C["wh"]},rgba(255,255,255,0));z-index:1"></div>')
     return (f'<section data-name="Awards marquee (auto-scrolls, loops)" style="position:relative;background:{C["wh"]};padding:{"28px 0 30px" if m else "36px 0 40px"};overflow:hidden">'
-            f'<div class="label" style="text-align:center;color:{C["bo"]};margin-bottom:{18 if m else 24}px">Award-winning care</div>'
+            f'<div class="label" style="text-align:center;color:{C["bo"]};margin-bottom:{18 if m else 24}px">3 awards in 2024 · 5 in 2025</div>'
             f'<div style="position:relative;overflow:hidden">{fade("left")}{fade("right")}'
             f'<div class="track" data-name="Track" style="--g:{gap}px;display:flex;gap:{gap}px;align-items:flex-start;margin-left:-{70 if m else 220}px;width:max-content">{items}{items}</div></div></section>')
 
@@ -101,13 +140,14 @@ WHY = ["Carefully-curated treatment based on your individual needs",
        "Flexible payments and dental membership plans",
        "Evening, weekend and out-of-hours appointments",
        "Trained to ease your dental anxieties, ensuring a stress-free visit"]
+WHY_ICONS = ["plan", "award", "card", "clock", "heart"]
 
 
 def why_choose(m):
     if m:
         return ""  # mobile: folded into the hero trust line
-    items = [f'<div style="display:flex;gap:16px;align-items:flex-start">{mark(C["bo"], 18)}'
-             f'<span class="body" style="color:{C["be"]};font-size:{15 if m else 16}px">{t}</span></div>' for t in WHY]
+    items = [f'<div style="display:flex;gap:16px;align-items:flex-start">{icon(i, C["bo"], 32)}'
+             f'<span class="body" style="color:{C["be"]};font-size:{15 if m else 16}px">{t}</span></div>' for t, i in zip(WHY, WHY_ICONS)]
     inner = (f'<div class="label" style="color:{C["bo"]};{"" if m else "text-align:center;"}margin-bottom:{24 if m else 40}px">Why patients choose us</div>'
              + grid(items, 1 if m else 5, 20 if m else 40))
     return sec("Why patients choose us", inner, m, bg=C['od'], pad=(56, 80), pad_m=(48, 20))
@@ -298,11 +338,12 @@ WHY_SIHA = [("GDC-registered dentists", "GDC-registered dentists trained to hand
             ("Rated 5.0★ by patients", "150+ verified Google reviews from real patients, consistency you can check for yourself."),
             ("0% finance &amp; membership", "0% interest-free finance, plus a Siha Dental &amp; Facial Membership plan for patients without insurance."),
             ("Digital-first diagnostics", "Modern, digital-first diagnostics, including 3D intraoral scanning at every check-up.")]
+WHY_SIHA_ICONS = ["shield", "person", "pin", "star", "card", "scan"]
 
 
 def why_siha(m):
     cards = [f'''<div data-name="Reason" style="padding:{24 if m else 32}px 0;border-top:1px solid rgba(225,213,202,.2)">
-      {mark(C['bo'], 20)}<div class="h3" style="margin-top:16px;color:{C['nu']}">{t}</div><p class="body" style="margin-top:8px;color:{C['be']};font-size:15px">{d}</p></div>''' for t, d in WHY_SIHA]
+      {icon(i, C['bo'])}<div class="h3" style="margin-top:16px;color:{C['nu']}">{t}</div><p class="body" style="margin-top:8px;color:{C['be']};font-size:15px">{d}</p></div>''' for (t, d), i in zip(WHY_SIHA, WHY_SIHA_ICONS)]
     # Design QA 9.2: no unverifiable superlatives ("the most trusted name") in healthcare copy
     return sec("Why Siha", head("Why Siha Dental &amp; Facial", "Why patients trust us with their smiles", None, m, dark=True)
                + f'<div style="margin-top:{24 if m else 48}px">{(swipe(cards, dark=True) if m else grid(cards, 3, 48))}</div>' + cta_row(m, dark=True), m, bg=C['od'])

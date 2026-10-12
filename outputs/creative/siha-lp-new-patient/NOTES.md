@@ -36,3 +36,23 @@ Photos/awards/cut-out are pulled from the Siha Drive and gitignored.
 
 ## Responsive preview
 `index.html` (+ `thank-you.html`) is the live, fully responsive page: mobile layout below 1024px, desktop layout from 1024px, content capped at 1280px. Sticky header; mobile Book Now bar appears once the hero button has scrolled off and hides while the hero form is on screen; every button scrolls to the hero form. `lp-*/ty-*` stay as the fixed 1440/390 Figma capture files (the `#figmacapture` hash switches live behaviour off).
+
+## Hannan's feedback (email 10 Oct 2026), applied 12 Oct 2026
+- "Oral health assessment", never "check-up": hero, forms, pricing, FAQ, final CTA, thank-you page. £89, small X-rays included.
+- Assessment section: goals-led plan (short- and long-term), prevention before cure; holistic card (gum disease *linked to*
+  cardiovascular disease, diabetes, Alzheimer's). Mercury-free + BPA-free fillings (key facts, services, why-Siha);
+  sedation for nervous patients (hero, why-choose, familiar card, new FAQ).
+- Membership split into Adults (Smile, Smile Plus) and Children (Smile Child under 12, Smile Plus 13–17) with an
+  "Under 6s free" note (parent registered and attending regularly). Plan inclusions from siha.dental/fees-and-finance (12 Oct).
+- Awards: 8 (3 in 2024, 5 in 2025) from the Drive Awards PNGs; PDA 2025 Practice of the Year (highly commended) dropped
+  so the strip matches Hannan's count. Hero stat now "8 award wins".
+- Simple line icons replace the Siha S-mark in "Why patients choose us" and "Why patients trust us with their smiles".
+- Team: 12 people incl. Dr Nicholas, Dr Ayesha, Dr Thishock; first names only; every photo cropped mid-chest up
+  (assets/team-chest, face-detected crops). Hero cut-out and "Meet your dentist" photo also cropped to mid-chest.
+
+## To confirm with Hannan (from this round)
+- Roles for Dr Ayesha and Dr Thishock (shown as "Dentist"; not on siha.dental yet).
+- Sedation type to name (left generic).
+- Child plan age bands: site says Smile Child "under 12" and Smile Plus "13–17" (12-year-olds not covered by either).
+- Root canal service card photo shows Dr Asiya (on maternity leave); swap if Hannan prefers.
+- Figma frame names still read "New patient check-up | …" to match the existing frames/URL slug.

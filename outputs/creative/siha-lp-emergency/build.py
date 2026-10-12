@@ -3,8 +3,8 @@
 Usage: python3 build.py  -> writes lp-desktop.html and lp-mobile.html
 Brand: Siha guideline only (Figma AbtwUHTD50G38QuOaCG4Hh): Metropolis, Dark Olive / Nude lead,
 Beige panels, Burnt Orange for the one offer CTA, 30px card corners, pill buttons, S-frame once (hero).
-Copy: maxr155.sg-host.com/emergency-dentist (6 Oct 2026). Emergency price £95 as set by Toby on the draft
-(6 Oct 2026; Siha's fees page lists £49/£69, flagged); Saturday + late-Tuesday hook from the Siha Client Bio sheet.
+Copy: maxr155.sg-host.com/emergency-dentist (6 Oct 2026). Emergency price £49 (Hannan, 10 Oct 2026:
+includes assessment, treatment plan and prescription; X-rays and treatment extra); Saturday + late-Tuesday hook from the Siha Client Bio sheet.
 Photos: Siha shared Drive (clinic interior, action shots, team), downscaled into assets/photos.
 """
 import re
@@ -45,6 +45,8 @@ body {{ background: #2a2a2a; font-family: Metropolis, sans-serif; padding: 80px;
 .live .m > [style*="px 20px"] {{ padding-left: max(20px, calc(50% - 300px)) !important; padding-right: max(20px, calc(50% - 300px)) !important; }}
 .live .hero-copy {{ width: min(560px, calc(100% - 440px)) !important; }}
 @media (max-width: 1419px) {{ .live .hero-s {{ display: none; }} }}
+/* Capture layout drops the mobile S-frame below the drawn bottom bar (fold at 760px) so it doesn't cover the face */
+.live .m [data-name="S-frame"] {{ margin-top: 40px !important; }}
 .live .bar {{ position: fixed !important; top: auto !important; bottom: 0; left: 0 !important; width: 100% !important; transform: translateY(110%); transition: transform .3s ease; }}
 .live.show-bar .bar {{ transform: none; }}
 @media (max-width: 1023px) {{ .live .both .page.d {{ display: none; }} }}
@@ -96,23 +98,22 @@ def stars(n=5, s=16, color=C['bo']):
     return f'<span style="display:inline-flex;gap:2px;color:{color}">{"".join(STAR.format(s=s) for _ in range(n))}</span>'
 
 
-# Hannan cut-out over the S-frame (photo bottom edge on the frame bottom, person breaks out of it)
-HANNAN = dict(w=1067, h=1600, bbox=(302, 334, 919, 1600))  # hero clinician: Dr Asiya (endodontics)
+# Hero clinician in the S-frame: Dr Abeera (Toby, 12 Oct 2026; Dr Asiya is on maternity leave). Photo only, cropped
+# mid-chest up per Hannan (10 Oct 2026: no hands/arms, some team photos are AI-generated), so no break-out cut-out.
+HERO = dict(img="abeera-1600.jpg", w=1067, h=1600, crop=(250, 1040), cx=560)  # crop = source rows shown top..bottom
 
 
-def s_hero(fw, fh, target_w):
-    """Return (frame_html, cutout_html) positioned relative to a wrapper of size fw x fh."""
-    bx0, by0, bx1, _ = HANNAN['bbox']
-    s = max(target_w / (bx1 - bx0), fh / HANNAN['h'], fw / HANNAN['w'])
-    w, h = HANNAN['w'] * s, HANNAN['h'] * s
-    left, top = fw / 2 - s * (bx0 + bx1) / 2, fh - h
-    bg = f"background-image:url(assets/photos/asiya-1600.jpg);background-size:{w:.0f}px {h:.0f}px;"
+def s_hero(fw, fh, target_w=None):
+    """Return (frame_html, "") for an S-frame of size fw x fh showing HERO's crop window."""
+    t, b = HERO['crop']
+    s = fh / (b - t)
+    w, h = HERO['w'] * s, HERO['h'] * s
+    left, top = min(0, max(fw - w, fw / 2 - HERO['cx'] * s)), -t * s
+    bg = f"background-image:url(assets/photos/{HERO['img']});background-size:{w:.0f}px {h:.0f}px;"
     frame = (f'<div class="sframe" data-name="Photo" style="position:absolute;left:0;top:0;width:{fw}px;height:{fh}px">'
              f'<div class="t" style="{bg}background-position:{left:.0f}px {top:.0f}px"></div>'
              f'<div class="b" style="{bg}background-position:{left:.0f}px {top - fh / 2:.0f}px"></div></div>')
-    cut = (f'<img data-name="Cut-out" src="assets/cutouts/asiya.png" '
-           f'style="position:absolute;left:{left:.0f}px;top:{top:.0f}px;width:{w:.0f}px;height:{h:.0f}px">')
-    return frame, cut
+    return frame, ""
 
 
 def form_card(width, pad=40, offer=False, title="Get seen as soon as possible"):
@@ -125,7 +126,7 @@ def form_card(width, pad=40, offer=False, title="Get seen as soon as possible"):
   <div class="body" style="margin-top:6px;color:{C['br']}">Send your details and we’ll call you back to get you booked in.</div>
   <div style="display:grid;grid-template-columns:{"1fr" if width < 400 else "1fr 1fr"};gap:16px;margin-top:24px">{fields}</div>
   <span class="btn {'offer' if offer else 'primary'}" style="width:100%;margin-top:26px;height:56px">{CTA}</span>
-  <div class="body" style="margin-top:14px;font-size:14px;text-align:center;color:{C['br']}">Your emergency appointment is £95. Any treatment is costed and agreed first.</div>
+  <div class="body" style="margin-top:14px;font-size:14px;text-align:center;color:{C['br']}">Your emergency appointment is £49. X-rays and treatment are costed and agreed first.</div>
   <div class="body" style="margin-top:6px;font-size:12px;text-align:center;color:{C['br']}">By submitting, you agree to our <u>privacy policy</u>.</div>
 </div>"""
 
@@ -144,14 +145,14 @@ def nav_d():
 def hero_d():
     frame, cut = s_hero(380, 640, 330)
     stats = "".join(f'<div><div class="h1" style="font-size:40px">{n}</div><div class="label" style="margin-top:6px;color:{C["br"]}">{l}</div></div>'
-                    for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("3", "2025 award wins")])
+                    for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("5", "2025 award wins")])
     return f"""
 <section data-name="Hero" style="position:relative;min-height:840px;padding:0px 80px">
   <div style="position:absolute;inset:0;background:radial-gradient(circle at 72% 40%,#f4efea 0%,{C['nu']} 55%)"></div>
   <div class="hero-in" style="position:relative;max-width:1280px;margin:0 auto;min-height:840px">
   <div class="hero-copy" style="position:relative;padding:96px 0 80px;width:560px">
     <div class="label" style="color:{C['bo']}">Emergency dentist · Shepherd’s Bush, W12</div>
-    <h1 class="display" style="margin-top:22px;font-size:52px">Emergency dentist <b>£95</b></h1>
+    <h1 class="display" style="margin-top:22px;font-size:52px">Emergency dentist <b>£49</b></h1>
     <p class="h2" style="margin-top:18px;font-weight:300">In pain? Same-day appointments are often available.</p>
     <p class="body" style="margin-top:16px;font-size:18px;color:{C['ol']};max-width:500px">For severe pain, swelling, breakages and anything that can’t wait. Open Saturdays and until 7pm on Tuesdays, at our Shepherd’s Bush practice.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:32px;max-width:520px">
@@ -179,16 +180,16 @@ def hero_m():
     return f"""
 <section data-name="Hero" style="position:relative;padding:40px 20px 48px">
   <div class="label" style="color:{C['bo']}">Emergency dentist · Shepherd’s Bush, W12</div>
-  <h1 class="display" style="margin-top:16px;font-size:36px">Emergency dentist <b>£95</b></h1>
+  <h1 class="display" style="margin-top:16px;font-size:36px">Emergency dentist <b>£49</b></h1>
   <p class="h2" style="margin-top:12px;font-size:22px;font-weight:300">In pain? Same-day appointments are often available.</p>
   <p class="body" style="margin-top:12px;color:{C['ol']}">For severe pain, swelling, breakages and anything that can’t wait. Open Saturdays and until 7pm on Tuesdays, at our Shepherd’s Bush practice.</p>
   <div style="display:grid;gap:10px;margin-top:20px">{tick("Pain relief comes first", 15)}{tick("New &amp; existing patients", 15)}</div>
   <div data-name="Hero button (scrolls to the form)" style="margin-top:22px"><span class="btn primary" style="height:54px;width:100%">{CTA}</span></div>
   <div data-name="Trust line" style="display:flex;align-items:center;gap:10px;margin-top:18px">{stars(5, 14)}<span class="body" style="font-size:13px;white-space:nowrap;color:{C['ol']}">5.0 from 157 Google reviews</span></div>
-  <div data-name="S-frame" style="position:relative;width:230px;height:360px;margin:96px auto 0">{frame}{cut}</div>
+  <div data-name="S-frame" style="position:relative;width:230px;height:360px;margin:150px auto 0">{frame}{cut}</div>
   <div style="margin-top:-60px;position:relative">{form_card(350, 24, offer=True)}</div>
   <div style="display:flex;justify-content:space-between;margin-top:32px">
-    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:12px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("3", "2025 awards")])}
+    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:12px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("5", "2025 awards")])}
   </div>
 </section>"""
 

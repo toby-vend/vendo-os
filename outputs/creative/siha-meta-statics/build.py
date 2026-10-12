@@ -101,6 +101,34 @@ def sframe(x, y, w, h, img, fx=0.5, fy=0.35, zoom=1.0):
             f'<div class="b" style="{bg}background-position:{ox:.0f}px {oy - h / 2:.0f}px"></div></div>')
 
 
+# Face boxes (x, y, w, h in source pixels, Apple Vision) for photos used in bust(). Hannan asked for team
+# shots from mid-chest up only (12 Oct 2026): some team photos are AI-retouched and hands/arms aren't accurate.
+FACES = {"hannan.jpg": (1200, 1800, 491, 488, 248, 248), "hannan-2.jpg": (1200, 1800, 506, 474, 262, 262)}
+
+
+def bust(x, y, w, h, img, breakout=100, dx=20):
+    """Team member from mid-chest up inside the S-frame; only the head breaks out above the frame's top edge.
+
+    Mid-chest (face top + 2.7 face heights) sits on the frame's bottom edge and the head top sits `breakout` px
+    above the frame. The cut-out (assets/cutouts/<img>.png, same pixels as the photo) is clipped to the area above
+    the frame, so shoulders never spill past the S shape.
+    """
+    W, H, fx, fy, fw, fh = FACES[img]
+    s = (h + breakout) / (3.25 * fh)
+    bw, bh = W * s, H * s
+    left = x + w / 2 + dx - s * (fx + fw / 2)
+    top = y + h - s * (fy + 2.7 * fh)
+    bg = f"background-image:url(assets/photos/{img});background-size:{bw:.0f}px {bh:.0f}px;"
+    frame = (f'<div class="sframe" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px">'
+             f'<div class="t" style="{bg}background-position:{left - x:.0f}px {top - y:.0f}px"></div>'
+             f'<div class="b" style="{bg}background-position:{left - x:.0f}px {top - y - h / 2:.0f}px"></div></div>')
+    pad = 60
+    bx, by = x - pad, y - breakout - pad
+    cut = (f'<div class="abs" data-name="Head breakout" style="left:{bx}px;top:{by}px;width:{w + 2 * pad}px;height:{breakout + pad}px;overflow:hidden">'
+           f'<img data-name="Cut-out" src="assets/cutouts/{img.rsplit(".", 1)[0]}.png" style="position:absolute;left:{left - bx:.0f}px;top:{top - by:.0f}px;width:{bw:.0f}px;height:{bh:.0f}px"></div>')
+    return frame + cut
+
+
 def page(title, boards):
     return (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><title>{title}</title>"
             f"<style>{CSS}</style><script src='https://mcp.figma.com/mcp/html-to-design/capture.js' async></script></head><body>{''.join(boards)}</body></html>")
@@ -139,7 +167,7 @@ def josh_1x1():
     b.append(f"""
 <div class="ab s1" id="J2" data-name="Josh | Static | Accommodation | 1x1" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 75% 35%,#efe7df 0%,{C['be']} 45%,#d4c5b7 100%)"></div>
-  {sframe(560, 110, 450, 812, 'hannan.jpg', fx=0.55, fy=0.2)}
+  {bust(560, 300, 450, 622, 'hannan.jpg')}
   <div class="abs hl" style="left:80px;top:150px;font-size:66px;color:{C['bo']}">You rarely<br>show your<br>teeth when<br>you <b>smile.</b></div>
   <div class="abs body" style="left:80px;top:470px;width:440px;color:{C['od']}">One small fix. One appointment. Still your teeth.</div>
   <div class="abs body" style="left:80px;top:620px;width:440px;font-size:24px;color:{C['ol']}">Bonding from £250 a tooth, usually done in a single 1 to 2 hour visit.</div>
@@ -212,7 +240,7 @@ def josh_9x16():
     b.append(f"""
 <div class="ab s9" id="J2s" data-name="Josh | Static | Accommodation | 9x16" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 60% 30%,#efe7df 0%,{C['be']} 45%,#d4c5b7 100%)"></div>
-  {sframe(310, 230, 460, 830, 'hannan.jpg', fx=0.55, fy=0.2)}
+  {bust(280, 390, 520, 670, 'hannan.jpg', breakout=110)}
   <div class="abs hl" style="left:90px;top:1100px;font-size:84px;color:{C['bo']}">You rarely show<br>your teeth when<br>you <b>smile.</b></div>
   <div class="abs body" style="left:90px;top:1400px;width:880px;font-size:34px;color:{C['od']}">One small fix. One appointment. Still your teeth. Bonding from £250 a tooth.</div>
   <div class="abs" style="left:90px;top:1540px;width:190px;color:{C['ol']}">{LOGO}</div>
@@ -316,7 +344,7 @@ def hannah_1x1():
 <div class="ab s1" id="H1" data-name="Hannah | Static | Same teeth | 1x1" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 72% 32%,#f1e9e1 0%,{C['be']} 48%,#d4c5b7 100%)"></div>
   <div class="abs" style="left:575px;top:150px;width:430px;height:750px;border-radius:30px;background:#fff;overflow:hidden;box-shadow:0 26px 54px rgba(20,33,26,.16)">
-    <div class="cover" style="background-image:url(assets/photos/patient-smile.jpg);background-size:contain;background-repeat:no-repeat;background-position:50% 100%"></div></div>
+    <div class="cover" style="background-image:url(assets/photos/patient-video.jpg);background-position:50% 18%"></div></div>
   <div class="abs hl" style="left:80px;top:140px;font-size:58px;color:{C['bo']}">The same<br>teeth.<br>Just <b>whiter</b><br><b>and repaired.</b></div>
   <div class="abs body" style="left:80px;top:500px;width:450px;font-size:27px;color:{C['od']}">Not a set of veneers. Not one big white strip. Yours, done carefully.</div>
   <div class="abs" style="left:80px;top:700px">{proof(C['br'],20)}</div>
@@ -360,7 +388,7 @@ def hannah_1x1():
 </div>""")
     b.append(f"""
 <div class="ab s1" id="H5" data-name="Hannah | Static | Dont need the names | 1x1" style="background:{C['od']}">
-  <div class="cover" style="height:330px;background-image:url(assets/photos/concierge-2.jpg);background-position:50% 30%"></div>
+  <div class="cover" style="height:330px;background-image:url(assets/photos/concierges-desk.jpg);background-position:58% 23%"></div>
   <div class="cover" style="top:120px;height:230px;background:linear-gradient(180deg,rgba(20,33,26,0) 0%,{C['od']} 100%)"></div>
   <div class="abs hl" style="left:80px;top:340px;font-size:52px;color:{C['nu']}">Don&rsquo;t know what to ask for?<br><b>That&rsquo;s fine.</b></div>
   <div class="abs" style="left:80px;top:520px;width:920px">{vocab(VOCAB, C['be'], C['nu'], size=26, gap=20)}</div>
@@ -377,7 +405,7 @@ def hannah_9x16():
 <div class="ab s9" id="H1s" data-name="Hannah | Static | Same teeth | 9x16" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 55% 28%,#f1e9e1 0%,{C['be']} 45%,#d4c5b7 100%)"></div>
   <div class="abs" style="left:250px;top:250px;width:580px;height:760px;border-radius:30px;background:#fff;overflow:hidden;box-shadow:0 26px 54px rgba(20,33,26,.16)">
-    <div class="cover" style="background-image:url(assets/photos/patient-smile.jpg);background-size:contain;background-repeat:no-repeat;background-position:50% 100%"></div></div>
+    <div class="cover" style="background-image:url(assets/photos/patient-video.jpg);background-position:50% 24%"></div></div>
   <div class="abs hl" style="left:90px;top:1050px;font-size:80px;color:{C['bo']}">The same teeth.<br>Just <b>whiter and<br>repaired.</b></div>
   <div class="abs body" style="left:90px;top:1310px;width:880px;font-size:32px;color:{C['od']}">Not a set of veneers. Not one big white strip. Yours, done carefully.</div>
   <div class="abs" style="left:90px;top:1415px">{proof(C['br'],22)}</div>
@@ -420,7 +448,7 @@ def hannah_9x16():
 </div>""")
     b.append(f"""
 <div class="ab s9" id="H5s" data-name="Hannah | Static | Dont need the names | 9x16" style="background:{C['od']}">
-  <div class="cover" style="height:720px;background-image:url(assets/photos/concierge-2.jpg);background-position:30% 30%"></div>
+  <div class="cover" style="height:720px;background-image:url(assets/photos/concierges-desk.jpg);background-position:62% 40%"></div>
   <div class="cover" style="top:360px;height:380px;background:linear-gradient(180deg,rgba(20,33,26,0) 0%,{C['od']} 100%)"></div>
   <div class="abs hl" style="left:90px;top:720px;font-size:80px;color:{C['nu']}">Don&rsquo;t know<br>what to ask for?<br><b>That&rsquo;s fine.</b></div>
   <div class="abs" style="left:90px;top:1030px;width:900px">{vocab(VOCAB, C['be'], C['nu'], size=30, gap=26)}</div>
@@ -433,7 +461,7 @@ def hannah_9x16():
 
 
 # ---------------------------------------------------------------- MARK (lapsed patient)
-CTA_CHECK = "Book your check-up"
+CTA_CHECK = "Book your assessment"
 TICK = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg>'
 
 
@@ -472,7 +500,7 @@ def receipt(x, y, w, scale=1.0, rot=1.2):
         f'<span style="font-size:{int(27*scale)}px">{t}</span></div>' for t in CHECK_ITEMS)
     return (f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;padding:{int(38*scale)}px {int(44*scale)}px;background:#fbf9f6;border-radius:8px;'
             f'transform:rotate({rot}deg);box-shadow:0 34px 64px rgba(20,33,26,.22),0 6px 14px rgba(20,33,26,.14)">'
-            f'<div class="eyebrow" style="font-size:{int(17*scale)}px;color:{C["br"]};margin-bottom:{int(12*scale)}px">Your new patient check-up</div>'
+            f'<div class="eyebrow" style="font-size:{int(17*scale)}px;color:{C["br"]};margin-bottom:{int(12*scale)}px">Your oral health assessment</div>'
             f'{items}</div>')
 
 
@@ -481,7 +509,7 @@ def mark_1x1():
     b.append(f"""
 <div class="ab s1" id="M1" data-name="Mark | Static | No telling off | 1x1" style="background:{C['nu']}">
   <div class="cover" style="background:radial-gradient(circle at 75% 30%,#f4efea 0%,{C['nu']} 48%,#ddd2c8 100%)"></div>
-  {sframe(620, 110, 390, 704, 'hannan-2.jpg', fx=0.5, fy=0.15)}
+  {bust(620, 260, 390, 554, 'hannan-2.jpg')}
   <div class="abs hl" style="left:80px;top:120px;font-size:52px;color:{C['od']}">You think<br>we&rsquo;ll tell you<br>off for leaving<br>it so <b>long.</b></div>
   <div class="abs body" style="left:80px;top:440px;width:470px;font-size:38px;font-weight:600;color:{C['bo']}">We won&rsquo;t.</div>
   <div class="abs body" style="left:80px;top:510px;width:470px;font-size:25px;color:{C['ol']}">Plenty of our patients have stayed away for years. We&rsquo;ve never judged anyone for it.</div>
@@ -495,7 +523,7 @@ def mark_1x1():
   <div class="cover" style="height:400px;background-image:url(assets/photos/patient-concierge.jpg);background-position:50% 60%"></div>
   <div class="cover" style="top:160px;height:260px;background:linear-gradient(180deg,rgba(20,33,26,0) 0%,{C['od']} 100%)"></div>
   <div class="abs hl" style="left:80px;top:360px;font-size:52px;color:{C['nu']}">If it&rsquo;s been years, here&rsquo;s<br>exactly <b>what happens.</b></div>
-  <div class="abs" style="left:80px;top:520px">{numbered(["A quick call with our patient concierge", "A full check-up, with X-rays and a 3D scan", "Your plan, in order, with prices", "You decide what happens next"], C['be'], C['nu'], size=26, gap=18, circle=46)}</div>
+  <div class="abs" style="left:80px;top:520px">{numbered(["A quick call with our patient concierge", "A full oral health assessment, with X-rays and a 3D scan", "Your plan, in order, with prices", "You decide what happens next"], C['be'], C['nu'], size=26, gap=18, circle=46)}</div>
   <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
   <div class="abs" style="left:700px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_CHECK}</span></div>
   <div class="grain"></div>
@@ -516,14 +544,14 @@ def mark_1x1():
   <div class="cover" style="background:linear-gradient(90deg,{C['od']} 0%,{C['od']} 45%,rgba(20,33,26,.55) 65%,rgba(20,33,26,.1) 100%)"></div>
   <div class="abs hl" style="left:80px;top:130px;font-size:70px;color:{C['nu']}">That twinge<br>hasn&rsquo;t gone<br>away, has it?</div>
   <div class="abs body" style="left:80px;top:470px;width:480px;font-size:28px;color:{C['be']}">Small problems are quicker to sort early.</div>
-  <div class="abs body" style="left:80px;top:580px;width:480px;font-size:24px;color:{C['be']}">Check-up <b style="color:{C['nu']}">£89</b>. Tuesday evenings and Saturdays available.</div>
+  <div class="abs body" style="left:80px;top:580px;width:480px;font-size:24px;color:{C['be']}">Oral health assessment <b style="color:{C['nu']}">£89</b>. Tuesday evenings and Saturdays available.</div>
   <div class="abs" style="left:80px;top:700px">{proof(C['be'],20)}</div>
   <div class="abs" style="left:80px;top:950px;width:200px;color:{C['be']}">{LOGO}</div>
   <div class="abs" style="left:700px;top:972px"><span class="cta light" style="height:60px;font-size:17px;padding:0 30px">{CTA_CHECK}</span></div>
   <div class="grain"></div>
 </div>""")
     b.append(f"""
-<div class="ab s1" id="M5" data-name="Mark | Static | 89 check-up | 1x1" style="background:{C['be']}">
+<div class="ab s1" id="M5" data-name="Mark | Static | 89 assessment | 1x1" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 25% 25%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
   <div class="abs price" style="left:70px;top:120px;font-size:200px;color:{C['bo']}">£89</div>
   <div class="abs hl" style="left:80px;top:320px;font-size:44px;color:{C['od']}">Everything<br><b>checked.</b></div>
@@ -542,7 +570,7 @@ def mark_9x16():
     b.append(f"""
 <div class="ab s9" id="M1s" data-name="Mark | Static | No telling off | 9x16" style="background:{C['nu']}">
   <div class="cover" style="background:radial-gradient(circle at 55% 28%,#f4efea 0%,{C['nu']} 45%,#ddd2c8 100%)"></div>
-  {sframe(330, 240, 420, 758, 'hannan-2.jpg', fx=0.5, fy=0.15)}
+  {bust(300, 380, 480, 618, 'hannan-2.jpg', breakout=110)}
   <div class="abs hl" style="left:90px;top:1050px;font-size:72px;color:{C['od']}">You think we&rsquo;ll tell<br>you off for leaving<br>it so <b>long.</b></div>
   <div class="abs body" style="left:90px;top:1300px;width:880px;font-size:44px;font-weight:600;color:{C['bo']}">We won&rsquo;t.</div>
   <div class="abs body" style="left:90px;top:1370px;width:880px;font-size:30px;color:{C['ol']}">Plenty of our patients have stayed away for years. We&rsquo;ve never judged anyone for it.</div>
@@ -555,7 +583,7 @@ def mark_9x16():
   <div class="cover" style="height:820px;background-image:url(assets/photos/patient-concierge.jpg);background-position:45% 60%"></div>
   <div class="cover" style="top:420px;height:420px;background:linear-gradient(180deg,rgba(20,33,26,0) 0%,{C['od']} 100%)"></div>
   <div class="abs hl" style="left:90px;top:770px;font-size:74px;color:{C['nu']}">If it&rsquo;s been years,<br>here&rsquo;s exactly<br><b>what happens.</b></div>
-  <div class="abs" style="left:90px;top:1060px">{numbered(["A quick call with our patient concierge", "A full check-up, with X-rays and a 3D scan", "Your plan, in order, with prices", "You decide what happens next"], C['be'], C['nu'], size=31, gap=22, circle=54)}</div>
+  <div class="abs" style="left:90px;top:1060px">{numbered(["A quick call with our patient concierge", "A full oral health assessment, with X-rays and a 3D scan", "Your plan, in order, with prices", "You decide what happens next"], C['be'], C['nu'], size=31, gap=22, circle=54)}</div>
   <div class="abs" style="left:90px;top:1460px"><span class="cta light">{CTA_CHECK}</span></div>
   <div class="abs" style="left:780px;top:1474px;width:200px;color:{C['be']}">{LOGO}</div>
   <div class="grain"></div>
@@ -575,14 +603,14 @@ def mark_9x16():
   <div class="cover" style="height:1050px;background-image:url(assets/photos/lounge-seating-2.jpg);background-position:50% 50%"></div>
   <div class="cover" style="background:linear-gradient(180deg,rgba(20,33,26,.2) 0%,rgba(20,33,26,.55) 35%,{C['od']} 55%)"></div>
   <div class="abs hl" style="left:90px;top:820px;font-size:90px;color:{C['nu']}">That twinge<br>hasn&rsquo;t gone away,<br>has it?</div>
-  <div class="abs body" style="left:90px;top:1150px;width:880px;font-size:34px;color:{C['be']}">Small problems are quicker to sort early. Check-up <b style="color:{C['nu']}">£89</b>. Tuesday evenings and Saturdays available.</div>
+  <div class="abs body" style="left:90px;top:1150px;width:880px;font-size:34px;color:{C['be']}">Small problems are quicker to sort early. Oral health assessment <b style="color:{C['nu']}">£89</b>. Tuesday evenings and Saturdays available.</div>
   <div class="abs" style="left:90px;top:1330px">{proof(C['be'],24)}</div>
   <div class="abs" style="left:90px;top:1420px"><span class="cta light">{CTA_CHECK}</span></div>
   <div class="abs" style="left:780px;top:1434px;width:200px;color:{C['be']}">{LOGO}</div>
   <div class="grain"></div>
 </div>""")
     b.append(f"""
-<div class="ab s9" id="M5s" data-name="Mark | Static | 89 check-up | 9x16" style="background:{C['be']}">
+<div class="ab s9" id="M5s" data-name="Mark | Static | 89 assessment | 9x16" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 30% 25%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
   <div class="abs price" style="left:80px;top:280px;font-size:300px;color:{C['bo']}">£89</div>
   <div class="abs hl" style="left:90px;top:570px;font-size:60px;color:{C['od']}">Everything <b>checked.</b></div>
@@ -646,7 +674,7 @@ def niamh_1x1():
 <div class="ab s1" id="N3" data-name="Niamh | Static | Booked it cancelled it | 1x1" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 25% 20%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
   <div class="abs" style="left:540px;top:80px;width:460px;height:820px;border-radius:30px;overflow:hidden;box-shadow:0 26px 54px rgba(20,33,26,.18)">
-    <div class="cover" style="background-image:url(assets/photos/concierge.jpg);background-position:42% 40%"></div>
+    <div class="cover" style="background-image:url(assets/photos/sara-phone.jpg);background-position:50% 30%"></div>
   </div>
   <div class="abs hl" style="left:80px;top:130px;font-size:58px;color:{C['od']}">Booked it.<br><span style="text-decoration:line-through;text-decoration-thickness:4px;text-decoration-color:{C['bo']}">Cancelled it.</span><br><b>Booked it<br>again.</b></div>
   <div class="abs body" style="left:80px;top:500px;width:420px;font-size:30px;font-weight:500;color:{C['bo']}">Start with a conversation, not the chair.</div>
@@ -704,7 +732,7 @@ def niamh_9x16():
 <div class="ab s9" id="N3s" data-name="Niamh | Static | Booked it cancelled it | 9x16" style="background:{C['be']}">
   <div class="cover" style="background:radial-gradient(circle at 30% 20%,#f1e9e1 0%,{C['be']} 45%,#d2c2b2 100%)"></div>
   <div class="abs" style="left:90px;top:260px;width:900px;height:640px;border-radius:30px;overflow:hidden;box-shadow:0 26px 54px rgba(20,33,26,.18)">
-    <div class="cover" style="background-image:url(assets/photos/concierge.jpg);background-position:45% 40%"></div>
+    <div class="cover" style="background-image:url(assets/photos/sara-phone.jpg);background-position:50% 22%"></div>
   </div>
   <div class="abs hl" style="left:90px;top:960px;font-size:82px;color:{C['od']}">Booked it.<br><span style="text-decoration:line-through;text-decoration-thickness:5px;text-decoration-color:{C['bo']}">Cancelled it.</span><br><b>Booked it again.</b></div>
   <div class="abs body" style="left:90px;top:1250px;width:880px;font-size:36px;font-weight:500;color:{C['bo']}">Start with a conversation, not the chair.</div>
