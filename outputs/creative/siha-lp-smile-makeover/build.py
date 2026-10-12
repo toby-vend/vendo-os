@@ -96,22 +96,28 @@ def stars(n=5, s=16, color=C['bo']):
     return f'<span style="display:inline-flex;gap:2px;color:{color}">{"".join(STAR.format(s=s) for _ in range(n))}</span>'
 
 
-# Hannan cut-out over the S-frame (photo bottom edge on the frame bottom, person breaks out of it)
-HANNAN = dict(w=1067, h=1600, bbox=(213, 294, 1054, 1600))
+# Hannan cut-out over the S-frame, mid-chest up (Hannan, 10 Oct 2026: team photos from mid-chest upwards only).
+# face = Apple Vision face box (x, y, w, h) on the 1067x1600 photo; the frame shows from just above the head to mid-chest,
+# and the cut-out is clipped at the frame's bottom edge so the person still breaks out of the S at the sides and top.
+HANNAN = dict(w=1067, h=1600, face=(453, 420, 228, 228))
 
 
-def s_hero(fw, fh, target_w):
+def s_hero(fw, fh, target_w=None):
     """Return (frame_html, cutout_html) positioned relative to a wrapper of size fw x fh."""
-    bx0, by0, bx1, _ = HANNAN['bbox']
-    s = max(target_w / (bx1 - bx0), fh / HANNAN['h'], fw / HANNAN['w'])
+    fx, fy, fwd, fhd = HANNAN['face']
+    y0, y1 = fy - 1.1 * fhd, fy + 2.7 * fhd
+    s = max(fh / (y1 - y0), fw / HANNAN['w'])
     w, h = HANNAN['w'] * s, HANNAN['h'] * s
-    left, top = fw / 2 - s * (bx0 + bx1) / 2, fh - h
+    left = min(0, max(fw - w, fw / 2 - s * (fx + fwd / 2)))
+    top = -s * y0
     bg = f"background-image:url(assets/photos/hannan-2-1600.jpg);background-size:{w:.0f}px {h:.0f}px;"
     frame = (f'<div class="sframe" data-name="Photo" style="position:absolute;left:0;top:0;width:{fw}px;height:{fh}px">'
              f'<div class="t" style="{bg}background-position:{left:.0f}px {top:.0f}px"></div>'
              f'<div class="b" style="{bg}background-position:{left:.0f}px {top - fh / 2:.0f}px"></div></div>')
-    cut = (f'<img data-name="Cut-out" src="assets/cutouts/hannan-2.png" '
-           f'style="position:absolute;left:{left:.0f}px;top:{top:.0f}px;width:{w:.0f}px;height:{h:.0f}px">')
+    o = 200  # clip box overhang: free above and to the sides, flush with the frame bottom
+    cut = (f'<div data-name="Cut-out clip" style="position:absolute;left:-{o}px;top:-{o}px;width:{fw + 2 * o}px;height:{fh + o}px;overflow:hidden">'
+           f'<img data-name="Cut-out" src="assets/cutouts/hannan-2.png" '
+           f'style="position:absolute;left:{left + o:.0f}px;top:{top + o:.0f}px;width:{w:.0f}px;height:{h:.0f}px"></div>')
     return frame, cut
 
 
@@ -125,7 +131,7 @@ def form_card(width, pad=40, offer=False, title="Book your free consultation"):
   <div class="body" style="margin-top:6px;color:{C['br']}">Find out what your makeover would involve. No commitment, no pressure.</div>
   <div style="display:grid;grid-template-columns:{"1fr" if width < 400 else "1fr 1fr"};gap:16px;margin-top:24px">{fields}</div>
   <span class="btn {'offer' if offer else 'primary'}" style="width:100%;margin-top:26px;height:56px">{CTA}</span>
-  <div class="body" style="margin-top:14px;font-size:14px;text-align:center;color:{C['br']}">Your smile makeover consultation is free.</div>
+  <div class="body" style="margin-top:14px;font-size:14px;text-align:center;color:{C['br']}">Free consultation. A refundable deposit secures your slot.</div>
   <div class="body" style="margin-top:6px;font-size:12px;text-align:center;color:{C['br']}">By submitting, you agree to our <u>privacy policy</u>.</div>
 </div>"""
 
@@ -144,7 +150,7 @@ def nav_d():
 def hero_d():
     frame, cut = s_hero(380, 640, 330)
     stats = "".join(f'<div><div class="h1" style="font-size:40px">{n}</div><div class="label" style="margin-top:6px;color:{C["br"]}">{l}</div></div>'
-                    for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("3", "2025 award wins")])
+                    for n, l in [("5.0", "Google rating"), ("150+", "Patient reviews"), ("5", "2025 award wins")])
     return f"""
 <section data-name="Hero" style="position:relative;min-height:840px;padding:0px 80px">
   <div style="position:absolute;inset:0;background:radial-gradient(circle at 72% 40%,#f4efea 0%,{C['nu']} 55%)"></div>
@@ -188,7 +194,7 @@ def hero_m():
   <div data-name="S-frame" style="position:relative;width:230px;height:360px;margin:96px auto 0">{frame}{cut}</div>
   <div style="margin-top:-60px;position:relative">{form_card(350, 24, offer=True)}</div>
   <div style="display:flex;justify-content:space-between;margin-top:32px">
-    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:12px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("3", "2025 awards")])}
+    {"".join(f'<div><div class="h1" style="font-size:32px">{n}</div><div class="label" style="margin-top:4px;font-size:12px;color:{C["br"]}">{l}</div></div>' for n, l in [("5.0", "Google rating"), ("150+", "Reviews"), ("5", "2025 awards")])}
   </div>
 </section>"""
 

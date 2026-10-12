@@ -5,6 +5,7 @@ Copy follows the live page, with the fixes agreed with Toby on 6 Oct 2026:
 real Google reviews in Patient stories, £89 everywhere, one practice (no "clinics"),
 and a photo gallery in place of the empty tour-video slot.
 """
+from icons import icon
 from build import C, ICON, LOGO, TICK_SVG, CTA, PHONE, stars, tick, form_card, nav_d, nav_m
 
 PLAY = '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'
@@ -67,13 +68,19 @@ def mark(color, size=22):
 
 
 # ---------------------------------------------------------------- awards strip (Siha Drive: Awards PNGs), trust signals by the hero
-AWARDS = ["brand-design-2025.png", "patient-care-2025.png", "da25-team-london.png", "practice-of-year-2025.png", "best-new-practice-2024.png"]
+# Hannan (10 Oct 2026): 3 awards in 2024 (Private Dentistry) and 5 in 2025 (Private Dentistry and Dentistry Awards)
+AWARDS = ["brand-design-2025.png", "patient-care-2025.png", "da25-team-london.png", "da25-website-london.png", "da25-website-overall.png",
+          "brand-design-2024.png", "website-2024.png", "best-new-practice-2024.png"]
 # Plain-text captions so the award reads even where the logo's own gold lettering is faint (mobile cards)
 AWARD_CAPTIONS = [("Winner", "Practice brand &amp; design", "Private Dentistry Awards 2025"),
                   ("Winner", "Patient care", "Private Dentistry Awards 2025"),
                   ("Winner", "Team of the year, London", "Dentistry Awards 2025"),
-                  ("Highly commended", "Practice of the year", "Private Dentistry Awards 2025"),
+                  ("Winner", "Website of the year, London", "Dentistry Awards 2025"),
+                  ("Overall winner", "Website of the year", "Dentistry Awards 2025"),
+                  ("Winner", "Practice brand &amp; design, South", "Private Dentistry Awards 2024"),
+                  ("Winner", "Website of the year, London", "Private Dentistry Awards 2024"),
                   ("Highly commended", "New practice", "Private Dentistry Awards 2024")]
+AWARDS_LABEL = "3 awards in 2024 · 5 in 2025"
 
 
 def awards(m):
@@ -90,24 +97,24 @@ def awards(m):
     fade = lambda side: (f'<div style="position:absolute;top:0;bottom:0;{side}:0;width:{60 if m else 160}px;'
                          f'background:linear-gradient(to {"right" if side == "left" else "left"},{C["wh"]},rgba(255,255,255,0));z-index:1"></div>')
     return (f'<section data-name="Awards marquee (auto-scrolls, loops)" style="position:relative;background:{C["wh"]};padding:{"28px 0 30px" if m else "36px 0 40px"};overflow:hidden">'
-            f'<div class="label" style="text-align:center;color:{C["bo"]};margin-bottom:{18 if m else 24}px">Award-winning care</div>'
+            f'<div class="label" style="text-align:center;color:{C["bo"]};margin-bottom:{18 if m else 24}px">{AWARDS_LABEL}</div>'
             f'<div style="position:relative;overflow:hidden">{fade("left")}{fade("right")}'
             f'<div class="track" data-name="Track" style="--g:{gap}px;display:flex;gap:{gap}px;align-items:flex-start;margin-left:-{70 if m else 220}px;width:max-content">{items}{items}</div></div></section>')
 
 
 # ---------------------------------------------------------------- 2 why patients choose us
-WHY = ["Carefully-curated treatment based on your individual needs",
-       "An award-winning team of professionals and specialists",
-       "Flexible payments and dental membership plans",
-       "Evening, weekend and out-of-hours appointments",
-       "Trained to ease your dental anxieties, ensuring a stress-free visit"]
+WHY = [("plan", "Carefully-curated treatment based on your individual needs"),
+       ("award", "An award-winning team of professionals and specialists"),
+       ("card", "Flexible payments and dental membership plans"),
+       ("clock", "Evening, weekend and out-of-hours appointments"),
+       ("heart", "Trained to ease your dental anxieties, ensuring a stress-free visit")]
 
 
 def why_choose(m):
     if m:
         return ""  # mobile: folded into the hero trust line
-    items = [f'<div style="display:flex;gap:16px;align-items:flex-start">{mark(C["bo"], 18)}'
-             f'<span class="body" style="color:{C["be"]};font-size:{15 if m else 16}px">{t}</span></div>' for t in WHY]
+    items = [f'<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">{icon(k, C["bo"], 36)}'
+             f'<span class="body" style="color:{C["be"]};font-size:{15 if m else 16}px">{t}</span></div>' for k, t in WHY]
     inner = (f'<div class="label" style="color:{C["bo"]};{"" if m else "text-align:center;"}margin-bottom:{24 if m else 40}px">Why patients choose us</div>'
              + grid(items, 1 if m else 5, 20 if m else 40))
     return sec("Why patients choose us", inner, m, bg=C['od'], pad=(56, 80), pad_m=(48, 20))
@@ -292,17 +299,17 @@ def services(m):
 
 
 # ---------------------------------------------------------------- 11 why siha
-WHY_SIHA = [("GDC-registered dentists", "GDC-registered dentists trained to handle both simple and complex cases."),
-            ("Founder-led care", "Dr. Hannan Imran is personally involved in the standard of care across all treatments."),
-            ("Convenient Shepherd’s Bush location", "Easy to reach in Shepherd’s Bush, with modern facilities and unhurried, personal care."),
-            ("Rated 5.0★ by patients", "150+ verified Google reviews from real patients, consistency you can check for yourself."),
-            ("0% finance &amp; membership", "0% interest-free finance, plus a Siha Dental &amp; Facial Membership plan for patients without insurance."),
-            ("Digital-first diagnostics", "Modern, digital-first diagnostics, including 3D intraoral scanning at every check-up.")]
+WHY_SIHA = [("doctor", "GDC-registered dentists", "GDC-registered dentists trained to handle both simple and complex cases."),
+            ("award", "Founder-led care", "Dr Hannan is personally involved in the standard of care across all treatments."),
+            ("pin", "Convenient Shepherd’s Bush location", "Easy to reach in Shepherd’s Bush, with modern facilities and unhurried, personal care."),
+            ("star", "Rated 5.0★ by patients", "150+ verified Google reviews from real patients, consistency you can check for yourself."),
+            ("card", "0% finance &amp; membership", "0% interest-free finance, plus a Siha Dental &amp; Facial Membership plan for patients without insurance."),
+            ("target", "Digital-first diagnostics", "Modern, digital-first diagnostics, including 3D intraoral scanning at every check-up.")]
 
 
 def why_siha(m):
     cards = [f'''<div data-name="Reason" style="padding:{24 if m else 32}px 0;border-top:1px solid rgba(225,213,202,.2)">
-      {mark(C['bo'], 20)}<div class="h3" style="margin-top:16px;color:{C['nu']}">{t}</div><p class="body" style="margin-top:8px;color:{C['be']};font-size:15px">{d}</p></div>''' for t, d in WHY_SIHA]
+      {icon(k, C['bo'], 40)}<div class="h3" style="margin-top:16px;color:{C['nu']}">{t}</div><p class="body" style="margin-top:8px;color:{C['be']};font-size:15px">{d}</p></div>''' for k, t, d in WHY_SIHA]
     # Design QA 9.2: no unverifiable superlatives ("the most trusted name") in healthcare copy
     return sec("Why Siha", head("Why Siha Dental &amp; Facial", "Why patients trust us with their smiles", None, m, dark=True)
                + f'<div style="margin-top:{24 if m else 48}px">{(swipe(cards, dark=True) if m else grid(cards, 3, 48))}</div>' + cta_row(m, dark=True), m, bg=C['od'])
@@ -360,10 +367,13 @@ FAQ = [("What’s included in a new patient check-up?", "Every new patient check
        ("It’s been years since my last check-up. Is that a problem?", "Not at all, and you won’t get a lecture about it. A large share of our new patients haven’t seen a dentist in years. Your check-up simply establishes where things stand today, and anything that needs attention is explained and costed clearly. No judgement, no pressure.")]
 
 
+FAQ_OPEN = {0}  # items shown expanded in the design
+
+
 def faq(m):
     rows = []
     for i, (q, a) in enumerate(FAQ):
-        open_ = i == 0
+        open_ = i in FAQ_OPEN
         ans = f'<p class="body" style="margin-top:12px;color:{C["ol"]};max-width:760px">{a}</p>' if open_ else ''
         rows.append(f'''<div data-name="FAQ item" style="border-bottom:1px solid rgba(20,33,26,.14);padding:{20 if m else 26}px 0">
           <div style="display:flex;justify-content:space-between;gap:20px;align-items:center"><span class="h3" style="font-size:{17 if m else 20}px">{q}</span>

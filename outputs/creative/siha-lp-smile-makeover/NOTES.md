@@ -23,7 +23,26 @@ Figma captures run in headless Chrome (no focus stealing): scratchpad hcap.sh pa
 - Gum contouring removed (not a listed Siha treatment); ICON (£395 up to two teeth) added in its place.
 - Before & after: 4 cases from siha.dental/smile-gallery (P15, P14, P9, P11), per Toby.
 
+## Hannan's feedback (email 10 Oct 2026), applied 12 Oct
+- Awards banner: "3 awards in 2024 · 5 in 2025". 2025 winners: PDA practice brand & design, PDA patient care, DA team of the year London,
+  DA website of the year London, DA overall winner website of the year. 2024: PDA brand & design (South), PDA website of the year (London),
+  plus the existing PDA 2024 new practice highly-commended badge. PDA 2025 practice-of-the-year (highly commended) dropped to match his count.
+  Hero stat now "5 · 2025 award wins".
+- Orthodontist-led aligners: new dark section after pricing (Dr Abeera, Specialist Orthodontist; more predictable / safer / faster,
+  no never-ending adjustments), plus a line on the aligners price card and the building-blocks card.
+- Refundable deposit: form card line, a deposit card in the consultation section (desktop + mobile), second FAQ (shown open),
+  final CTA copy. No amount shown.
+- Simple line icons (icons.py) replace the Siha mark in "Why patients choose us", "What can your makeover include?" and
+  "Why patients trust us with their smiles".
+- Team: Dr Nicholas, Dr Ayesha, Dr Thishock added; first names only everywhere; every team photo cropped mid-chest up
+  (assets/team-chest, face-detected crops). Hero cut-out reframed to mid-chest and clipped at the frame bottom; "Meet your dentist"
+  uses a mid-chest crop (assets/photos/hannan-chest.jpg). "The treatment" photo (two team members, full length) swapped for the
+  empty consult room (suite-consult.jpg).
+
 ## To confirm with Hannan
+- Deposit amount (not shown on the page) and exact refund terms wording.
+- Roles for Dr Ayesha and Dr Thishock (shown as "Dentist"; they aren't on siha.dental yet).
+- That "planned and led by our specialist orthodontist" applies to every aligner case.
 - That the smile-gallery consent covers paid ads use.
 - Online booking link for the thank-you page; tour video edit (Drive > Video - Clinic Interior).
 - FAQ answers for the collapsed items follow the draft with the price fixes above.

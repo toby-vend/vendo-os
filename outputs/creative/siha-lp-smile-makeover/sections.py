@@ -8,9 +8,13 @@ with the fixes agreed with Toby on 6 Oct 2026:
 - no "minimum 6 teeth", no Bond Dental carry-over (4 locations, other clinics, Vendo Whitening, £0 deposit line)
 - no "specialist" wording for non-specialists, no unverifiable superlatives, no finance monthly figures
 - before-and-afters: carousel of Option A cards built from Siha's Drive treatment folders
+Hannan's feedback (10 Oct 2026): orthodontist-led aligners highlighted (own section + pricing + building blocks),
+refundable consultation deposit (form, consultation section, FAQ, final CTA), first names only, mid-chest-up photos,
+simple line icons instead of the Siha mark on per-item grids.
 """
 import common
 from common import sec, head, grid, photo, mark, cta_row, swipe, mob_cta, awards, why_choose, reviews, gallery, faq, why_siha
+from icons import icon
 from build import C, LOGO, TICK_SVG, CTA, PHONE, stars, tick, form_card, nav_d, nav_m
 
 # ---------------------------------------------------------------- patient stories (real Google reviews on the draft page)
@@ -27,7 +31,7 @@ PRICES = [
     ("Same day", "Composite bonding", "Chips, gaps and uneven edges reshaped by hand, usually in one visit.", "£250", "per tooth (edge)",
      ["£295 per tooth for a full surface", "Usually one visit of 1 to 2 hours", "No drilling, nothing healthy removed", "12-month warranty"]),
     ("Straighten first", "Clear aligners", "Straighten first, then finish with whitening or bonding. The foundation of many makeovers.", "£2,195", "from (treatment under 3 months)",
-     ["Plans for minor to complex cases", "All-inclusive plan, no hidden fees", "Virtually invisible, removable aligners"]),
+     ["Planned and led by our specialist orthodontist", "Plans for minor to complex cases", "All-inclusive plan, no hidden fees", "Virtually invisible, removable aligners"]),
     ("Biggest change", "Porcelain veneers", "Custom-made porcelain for a bigger change in shape, shade and symmetry.", "£995", "per tooth",
      ["Custom-made and colour-matched", "Used where bonding alone can’t get the result", "Planned and previewed before anything starts"]),
 ]
@@ -55,6 +59,29 @@ def pricing(m):
                   "Your makeover is built from whichever of these your smile needs, often more than one. The full plan is priced and agreed upfront, before any treatment begins.", m)
              + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20 if m else 24))}</div>' + finance + cta_row(m))
     return sec("Pricing", inner, m)
+
+
+# ---------------------------------------------------------------- orthodontist-led aligners (Hannan, 10 Oct 2026: "I really want to highlight")
+ORTHO = [("target", "More predictable", "Your plan is set by a specialist orthodontist, so you know where your teeth are heading from the first scan."),
+         ("shield", "Safer", "Tooth movement is planned around your bite and long-term dental health, not just how the smile looks."),
+         ("timer", "Faster", "Planned properly from the start, so treatment moves on without never-ending adjustments.")]
+
+
+def ortho(m):
+    pillars = [f'''<div data-name="Benefit" style="padding-top:{20 if m else 24}px;border-top:1px solid rgba(225,213,202,.2)">
+      {icon(k, C['bo'], 40)}<div class="h3" style="margin-top:16px;color:{C['nu']}">{t}</div>
+      <p class="body" style="margin-top:8px;color:{C['be']};font-size:15px">{d}</p></div>''' for k, t, d in ORTHO]
+    pic = (f'<div data-name="Dr Abeera" style="position:relative">'
+           f'<div data-name="Photo" style="height:{400 if m else 680}px;border-radius:30px;background:url(assets/team-chest/abeera.jpg) 50% 0%/cover no-repeat"></div>'
+           f'<div class="card" style="position:absolute;left:{16 if m else 24}px;bottom:{16 if m else 24}px;background:{C["nu"]};padding:{"14px 18px" if m else "18px 24px"}">'
+           f'<div class="h3" style="font-size:{17 if m else 20}px">Dr Abeera</div>'
+           f'<div class="label" style="margin-top:4px;font-size:11px;color:{C["br"]}">Specialist Orthodontist</div></div></div>')
+    text = (head("Orthodontist-led aligners", "Straightening planned by a specialist orthodontist",
+                 "Every aligner case at Siha is planned and led by Dr Abeera, our specialist orthodontist. That makes treatment more predictable, safer and faster, without the never-ending adjustments.",
+                 m, dark=True, width=600)
+            + f'<div style="margin-top:{28 if m else 40}px;display:grid;gap:{20 if m else 24}px">{"".join(pillars)}</div>' + cta_row(m, dark=True, top=40))
+    body = grid([pic, text], 1, 32) if m else f'<div style="display:grid;grid-template-columns:520px 1fr;gap:96px;align-items:center">{pic}<div>{text}</div></div>'
+    return sec("Orthodontist-led aligners", body, m, bg=C['od'])
 
 
 # ---------------------------------------------------------------- before & after carousel
@@ -88,12 +115,25 @@ def before_after(m):
 
 
 # ---------------------------------------------------------------- CTA #2 with form
+DEPOSIT = ("Your consultation is free. A refundable deposit secures your slot: it’s returned when you attend "
+           "(or if you give us at least 2 full working days’ notice), or you can put it towards your treatment.")
+
+
+def deposit_note(m, dark=False):
+    bg, fg, sub = (C['ol'], C['nu'], C['be']) if dark else (C['be'], C['od'], C['ol'])
+    return (f'<div class="card" data-name="Refundable deposit" style="background:{bg};padding:{"20px" if m else "22px 26px"};display:flex;gap:16px;align-items:flex-start">'
+            f'{icon("shield", C["bo"], 32)}<div><div class="h3" style="font-size:17px;color:{fg}">Refundable deposit</div>'
+            f'<p class="body" style="margin-top:6px;font-size:15px;color:{sub}">{DEPOSIT}</p></div></div>')
+
+
 def cta_form(m):
     if m:
-        return mob_cta("See your new smile before you commit")
+        out = mob_cta("See your new smile before you commit")
+        return out.replace('</section>', f'<div style="margin-top:20px">{deposit_note(m)}</div></section>', 1)
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head("Smile makeover consultation", "See your new smile before you commit", "We scan your teeth, design the result with you and give you a full itemised plan. The consultation is free, with no obligation.", m, width=520)}
-      <div style="display:grid;gap:12px;margin-top:28px">{tick("3D digital scan")}{tick("Your smile designed with you")}{tick("A full, itemised plan")}{tick("0% finance available")}</div></div>'''
+      <div style="display:grid;gap:12px;margin-top:28px">{tick("3D digital scan")}{tick("Your smile designed with you")}{tick("A full, itemised plan")}{tick("0% finance available")}</div>
+      <div style="margin-top:28px">{deposit_note(m)}</div></div>'''
     form = form_card(350 if m else 520, 24 if m else 40, title="Book your free consultation")
     body = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 520px;gap:96px;align-items:center">{left}{form}</div>'
     return sec("Book a consultation (form 2)", body, m)
@@ -124,7 +164,7 @@ FACTS = ["Fully bespoke plan", "3D smile preview", "Single visit possible", "Min
 
 
 def treatment(m):
-    left = photo("concierge-discuss.jpg", 360 if m else 700, pos="50% 50%")
+    left = photo("suite-consult.jpg", 360 if m else 700, pos="50% 50%")  # no people: team photos mid-chest up only (Hannan)
     right = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head("The treatment", "One plan. Every treatment your smile needs. Nothing it doesn’t.", None, m, width=560)}
       <p class="body" style="margin-top:18px;color:{C['ol']}">A smile makeover isn’t a single procedure. It’s a sequence of treatments designed together, so the straightening, the shade and the shape all arrive at one finished result.</p>
@@ -154,29 +194,29 @@ def how(m):
 
 
 # ---------------------------------------------------------------- building blocks
-BLOCKS = [("Composite bonding", "Chips, gaps and uneven edges sculpted by hand, usually in a single visit. From £250 a tooth, with nothing healthy drilled away."),
-          ("Porcelain veneers", "Thin, custom-made porcelain for a bigger change in shape and shade, from £995 a tooth."),
-          ("Professional whitening", "Lifts years of staining safely, and is often the finishing touch of a makeover."),
-          ("Clear aligners", "Invisalign® and clear aligner straightening. Virtually invisible, and often the first step of a makeover."),
-          ("ICON white spot treatment", "White spots treated without needles or drilling. £395 for up to two teeth."),
-          ("Airflow hygiene polish", "A professional clean and polish so your new smile starts from the healthiest possible base.")]
+BLOCKS = [("bonding", "Composite bonding", "Chips, gaps and uneven edges sculpted by hand, usually in a single visit. From £250 a tooth, with nothing healthy drilled away."),
+          ("veneers", "Porcelain veneers", "Thin, custom-made porcelain for a bigger change in shape and shade, from £995 a tooth."),
+          ("whitening", "Professional whitening", "Lifts years of staining safely, and is often the finishing touch of a makeover."),
+          ("aligners", "Clear aligners", "Invisalign® and clear aligners, planned and led by our specialist orthodontist. Virtually invisible, and often the first step of a makeover."),
+          ("droplet", "ICON white spot treatment", "White spots treated without needles or drilling. £395 for up to two teeth."),
+          ("air", "Airflow hygiene polish", "A professional clean and polish so your new smile starts from the healthiest possible base.")]
 
 
 def blocks(m):
     cards = [f'''<div class="card" data-name="Treatment" style="background:{C['wh']};padding:{28 if m else 36}px">
-      {mark(C['bo'], 22)}<div class="h3" style="margin-top:18px">{t}</div><p class="body" style="margin-top:8px;color:{C['ol']};font-size:15px">{d}</p></div>''' for t, d in BLOCKS]
+      {icon(k, C['bo'], 40)}<div class="h3" style="margin-top:18px">{t}</div><p class="body" style="margin-top:8px;color:{C['ol']};font-size:15px">{d}</p></div>''' for k, t, d in BLOCKS]
     return sec("Building blocks", head("The building blocks", "What can your makeover include?",
                                        "Every plan is different. Yours is built from whichever of these your smile actually needs.", m)
                + f'<div style="margin-top:{32 if m else 56}px">{(swipe(cards) if m else grid(cards, 3, 20 if m else 24))}</div>', m)
 
 
 # ---------------------------------------------------------------- why siha (no "specialist" wording, no superlatives)
-common.WHY_SIHA = [("Smile design experience", "Full smile makeovers: bonding, veneers, whitening and aligners planned together, not sold separately."),
-                   ("Founder-led care", "Dr. Hannan Imran sees patients personally, and the practice is built on the standard of results he delivers himself."),
-                   ("Convenient Shepherd’s Bush location", "Easy to reach in Shepherd’s Bush, with modern facilities and unhurried, personal care."),
-                   ("Rated 5.0★ by patients", "150+ verified Google reviews from real patients, consistency you can check for yourself."),
-                   ("0% interest-free finance", "Spread the cost over up to 12 months with no interest, on treatments over £300."),
-                   ("Tracked from scan to finish", "Your treatment is monitored throughout, with check-in appointments, adjustments where needed and support at every stage.")]
+common.WHY_SIHA = [("smile", "Smile design experience", "Full smile makeovers: bonding, veneers, whitening and aligners planned together, not sold separately."),
+                   ("doctor", "Founder-led care", "Dr Hannan sees patients personally, and the practice is built on the standard of results he delivers himself."),
+                   ("pin", "Convenient Shepherd’s Bush location", "Easy to reach in Shepherd’s Bush, with modern facilities and unhurried, personal care."),
+                   ("star", "Rated 5.0★ by patients", "150+ verified Google reviews from real patients, consistency you can check for yourself."),
+                   ("card", "0% interest-free finance", "Spread the cost over up to 12 months with no interest, on treatments over £300."),
+                   ("calendar", "Tracked from scan to finish", "Your treatment is monitored throughout, with check-in appointments, adjustments where needed and support at every stage.")]
 
 
 # ---------------------------------------------------------------- meet your dentist
@@ -190,19 +230,21 @@ def dentist(m):
     creds = "".join(f'<div class="body" style="font-size:15px;color:{C["ol"]};display:flex;gap:10px"><span style="color:{C["bo"]}">•</span><span>{c}</span></div>' for c in CREDS)
     text = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       <div class="label" style="color:{C['bo']}">Meet your dentist</div>
-      <h2 class="h1" style="margin-top:14px;font-size:{32 if m else 44}px">Dr. Hannan Imran</h2>
+      <h2 class="h1" style="margin-top:14px;font-size:{32 if m else 44}px">Dr Hannan</h2>
       <div class="body" style="color:{C['br']}">Director and Restorative Dentist · Founder · GDC 264888</div>
       <p style="font-weight:300;font-size:{21 if m else 26}px;line-height:1.45;margin-top:28px;padding-left:24px;border-left:2px solid {C['bo']}">“A great smile makeover result comes from careful planning, not shortcuts. Every treatment is designed around your smile, your facial features and your long-term dental health.”</p>
       <div style="display:grid;gap:10px;margin-top:28px">{creds}</div></div>'''
-    pic = photo("hannan.jpg", 380 if m else 560, pos="50% 22%")
+    pic = photo("hannan-chest.jpg", 380 if m else 560, pos="50% 0%")  # mid-chest up
     return sec("Meet your dentist", grid([pic, text] if m else [text, pic], 1 if m else 2, 32 if m else 96), m, bg=C['be'])
 
 
 # ---------------------------------------------------------------- faq
 common.FAQ = [
     ("What exactly is a smile makeover?", "It’s a personalised combination of cosmetic treatments (usually some mix of clear aligners, professional whitening, composite bonding and porcelain veneers) planned together as one journey. Rather than treating each issue separately, your dentist designs the finished smile first, then sequences only the treatments needed to get there."),
+    ("Is there a deposit to book the consultation?", DEPOSIT),
     ("How much does a smile makeover cost?", None), ("How long does a smile makeover take?", None), ("Will the result look natural?", None),
     ("Do I need veneers, or is bonding enough?", None), ("Is any of it painful?", None), ("How do I look after my new smile?", None), ("Do you offer finance?", None)]
+common.FAQ_OPEN = {0, 1}
 # Answers for the collapsed items (for the build): cost = bonding from £250 a tooth, veneers from £995 a tooth,
 # clear aligners from £2,195, whitening priced at consultation, full itemised cost upfront, 0% finance over up to 12 months.
 
@@ -212,7 +254,7 @@ def final(m):
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       <div class="label" style="color:{C['bo']}">Get started</div>
       <h2 class="display" style="margin-top:18px;color:{C['nu']};font-size:{32 if m else 50}px">One plan, <b>one result</b></h2>
-      <p class="body" style="margin-top:20px;color:{C['be']};font-size:{16 if m else 18}px">Book your free smile makeover consultation at Siha Dental &amp; Facial. We’ll scan your teeth, design your new smile with you, and give you a full itemised plan. No commitment required.</p>
+      <p class="body" style="margin-top:20px;color:{C['be']};font-size:{16 if m else 18}px">Book your free smile makeover consultation at Siha Dental &amp; Facial. We’ll scan your teeth, design your new smile with you, and give you a full itemised plan. No commitment required, and your booking deposit is refundable.</p>
       <div style="display:flex;gap:28px;margin-top:20px;flex-wrap:wrap">
         <span class="label" style="color:{C['be']};font-weight:500">No obligation</span><span class="label" style="color:{C['be']};font-weight:500">0% finance available</span><span class="label" style="color:{C['be']};font-weight:500">Free consultation</span></div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:28px">{stars(5, 16)}<span class="body" style="color:{C['be']};font-size:14px">5.0 from 157 Google reviews</span></div>
@@ -228,7 +270,7 @@ def final(m):
 
 from team import team
 
-BODY = [awards, why_choose, stories, pricing, before_after, reviews, cta_form, familiar, treatment, how, blocks, why_siha, dentist, team, gallery, faq, final]
+BODY = [awards, why_choose, stories, pricing, ortho, before_after, reviews, cta_form, familiar, treatment, how, blocks, why_siha, dentist, team, gallery, faq, final]
 
 
 # ---------------------------------------------------------------- thank-you page
