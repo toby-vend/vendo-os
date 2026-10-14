@@ -16,10 +16,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 A = ROOT / 'assets'
-DATE = '261009'
+DATE = '261014'
 
 WHITE, BLACK, SAND, CREAM, GRAPHITE = '#FFFFFF', '#000000', '#C7BBA5', '#F5ECDD', '#4B4A45'
 CTA = 'Book a consultation today'
+CTA_FREE = 'Book FREE Consultation'  # Priya, 12 Oct 2026: Invisalign everywhere, smile makeover at Battersea
+# Priya, 12 Oct 2026: headline lines too close together. Smaller type, more leading, on every board.
+HL_SCALE, HL_LH = 0.85, 1.22
 SITES = {'banstead': 'Banstead', 'battersea': 'Battersea'}
 
 
@@ -67,7 +70,7 @@ body{{background:#2a2a2a;font-family:'Open Sans',sans-serif;display:flex;gap:80p
 .abs{{position:absolute}} .ph{{position:absolute;background-repeat:no-repeat}}
 .scrim{{position:absolute;inset:0}}
 .eb{{font-weight:400;letter-spacing:.1em;text-transform:uppercase}}
-.hl{{font-family:'SLTF The Silver Editorial',serif;font-weight:400;line-height:1.06}}
+.hl{{font-family:'SLTF The Silver Editorial',serif;font-weight:400;line-height:{HL_LH}}}
 .hl em{{font-style:italic;font-weight:400}}
 .sup{{font-weight:400;line-height:1.38}}
 .cta{{display:flex;align-items:center;justify-content:center;font-family:'SLTF The Silver Editorial',serif;font-weight:500;color:{BLACK}}}
@@ -81,6 +84,14 @@ body{{background:#2a2a2a;font-family:'Open Sans',sans-serif;display:flex;gap:80p
 def page(title, boards):
     return (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><title>{title}</title><style>{CSS}</style>"
             f"<script src='https://mcp.figma.com/mcp/html-to-design/capture.js' async></script></head><body>{''.join(boards)}</body></html>")
+
+
+def hs(c, key, default):
+    return round(c.get(key, default) * HL_SCALE)
+
+
+def lh(c):
+    return max(c.get('lh', HL_LH), HL_LH)
 
 
 def hl(text):
@@ -98,10 +109,10 @@ def photo_1x1(c, site):
 <div class="abs" style="left:0;right:0;top:104px;display:flex;justify-content:center">{logo(WHITE, 408)}</div>
 <div class="abs" style="left:92px;bottom:200px;width:880px;color:{WHITE}">
   <div class="eb" style="font-size:24px">{c['eyebrow']} · {SITES[site]}</div>
-  <div class="hl" style="font-size:{c.get('size1', 80)}px;margin-top:14px;line-height:{c.get('lh', 1.06)}">{hl(c['hl'][site])}</div>
+  <div class="hl" style="font-size:{hs(c, 'size1', 80)}px;margin-top:14px;line-height:{lh(c)}">{hl(c['hl'][site])}</div>
   <div class="sup" style="font-size:27px;margin-top:18px;width:{c.get('supw', 700)}px">{free(c['sup'][site])}</div>
 </div>
-<div class="abs cta" style="left:92px;top:905px;width:737px;height:88px;font-size:40px;background:rgba(255,255,255,.75)">{CTA}</div>"""
+<div class="abs cta" style="left:92px;top:905px;width:737px;height:88px;font-size:40px;background:rgba(255,255,255,.75)">{c['_cta']}</div>"""
 
 
 def photo_9x16(c, site):
@@ -112,10 +123,10 @@ def photo_9x16(c, site):
 <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(WHITE, 520)}</div>
 <div class="abs" style="left:115px;bottom:480px;width:860px;color:{WHITE}">
   <div class="eb" style="font-size:30px">{c['eyebrow']} · {SITES[site]}</div>
-  <div class="hl" style="font-size:{c.get('size9', 92)}px;margin-top:16px;line-height:{c.get('lh', 1.06)}">{hl(c.get('hl9', c['hl'])[site])}</div>
+  <div class="hl" style="font-size:{hs(c, 'size9', 92)}px;margin-top:16px;line-height:{lh(c)}">{hl(c.get('hl9', c['hl'])[site])}</div>
   <div class="sup" style="font-size:33px;margin-top:20px">{free(c['sup'][site])}</div>
 </div>
-<div class="abs cta" style="left:115px;top:1478px;width:849px;height:102px;font-size:56px;background:rgba(255,255,255,.6)">{CTA}</div>"""
+<div class="abs cta" style="left:115px;top:1478px;width:849px;height:102px;font-size:56px;background:rgba(255,255,255,.6)">{c['_cta']}</div>"""
 
 
 def sand_bg():
@@ -155,11 +166,11 @@ def plain_1x1(c, site):
 <div class="abs" style="left:0;right:0;top:92px;display:flex;justify-content:center">{logo(BLACK, 340)}</div>
 <div class="abs" style="left:0;right:0;top:{c.get('top1', 250)}px;display:flex;flex-direction:column;align-items:center;text-align:center;color:{BLACK}">
   <div class="eb" style="font-size:24px">{c['eyebrow']} · {SITES[site]}</div>
-  <div class="hl" style="font-size:{c.get('size1', 96)}px;margin-top:16px;line-height:{c.get('lh', 1.06)}">{hl(c['hl'][site])}</div>
+  <div class="hl" style="font-size:{hs(c, 'size1', 96)}px;margin-top:16px;line-height:{lh(c)}">{hl(c['hl'][site])}</div>
   {body}
   {sup_html(c, site, 26, 20, 820, 'sup1')}
 </div>
-<div class="abs cta" style="left:171px;top:930px;width:737px;height:88px;font-size:40px;background:rgba(255,255,255,.75)">{CTA}</div>"""
+<div class="abs cta" style="left:171px;top:930px;width:737px;height:88px;font-size:40px;background:rgba(255,255,255,.75)">{c['_cta']}</div>"""
 
 
 def plain_9x16(c, site):
@@ -168,18 +179,54 @@ def plain_9x16(c, site):
 <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(BLACK, 440)}</div>
 <div class="abs" style="left:0;right:0;top:{c.get('top9', 560)}px;display:flex;flex-direction:column;align-items:center;text-align:center;color:{BLACK}">
   <div class="eb" style="font-size:30px">{c['eyebrow']} · {SITES[site]}</div>
-  <div class="hl" style="font-size:{c.get('size9', 112)}px;margin-top:18px;line-height:{c.get('lh', 1.06)}">{hl(c.get('hl9', c['hl'])[site])}</div>
+  <div class="hl" style="font-size:{hs(c, 'size9', 112)}px;margin-top:18px;line-height:{lh(c)}">{hl(c.get('hl9', c['hl'])[site])}</div>
   {body}
   {sup_html(c, site, 33, 30, 860)}
 </div>
-<div class="abs cta" style="left:115px;top:1478px;width:849px;height:102px;font-size:56px;background:rgba(255,255,255,.75)">{CTA}</div>"""
+<div class="abs cta" style="left:115px;top:1478px;width:849px;height:102px;font-size:56px;background:rgba(255,255,255,.75)">{c['_cta']}</div>"""
 
 
-LAYOUTS = {'photo': (photo_1x1, photo_9x16), 'plain': (plain_1x1, plain_9x16)}
+def ba_pair(c, x, y, w, h, gap, fs):
+    """Stacked before/after strips from the client's own case photo (Priya, 12 Oct 2026)."""
+    out = []
+    for i, (img, label) in enumerate(((c['before'], 'Before'), (c['after'], 'After'))):
+        top = y + i * (h + gap)
+        out.append(cover(img, w, h, x=x, y=top)
+                   + f'<div class="tag" style="left:{x + 22}px;top:{top + h - fs - 20}px;font-size:{fs}px">{label}</div>')
+    return ''.join(out)
+
+
+def ba_1x1(c, site):
+    return f"""{sand_bg()}
+<div class="abs" style="left:0;right:0;top:92px;display:flex;justify-content:center">{logo(BLACK, 300)}</div>
+<div class="abs" style="left:0;right:0;top:206px;display:flex;flex-direction:column;align-items:center;text-align:center;color:{BLACK}">
+  <div class="eb" style="font-size:24px">{c['eyebrow']} · {SITES[site]}</div>
+  <div class="hl" style="font-size:{hs(c, 'size1', 80)}px;margin-top:10px">{c['hl1'][site]}</div>
+  {sup_html(c, site, 26, 6, 880)}
+</div>
+{ba_pair(c, 100, 420, 880, 200, 12, 22)}
+<div class="abs cta" style="left:171px;top:930px;width:737px;height:88px;font-size:40px;background:rgba(255,255,255,.75)">{c['_cta']}</div>"""
+
+
+def ba_9x16(c, site):
+    return f"""{sand_bg()}
+<div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(BLACK, 440)}</div>
+<div class="abs" style="left:0;right:0;top:500px;display:flex;flex-direction:column;align-items:center;text-align:center;color:{BLACK}">
+  <div class="eb" style="font-size:30px">{c['eyebrow']} · {SITES[site]}</div>
+  <div class="hl" style="font-size:{hs(c, 'size9', 112)}px;margin-top:18px">{hl(c['hl'][site])}</div>
+  {sup_html(c, site, 33, 20, 860)}
+</div>
+{ba_pair(c, 90, 930, 900, 250, 14, 28)}
+<div class="abs cta" style="left:115px;top:1478px;width:849px;height:102px;font-size:56px;background:rgba(255,255,255,.75)">{c['_cta']}</div>"""
+
+
+LAYOUTS = {'photo': (photo_1x1, photo_9x16), 'plain': (plain_1x1, plain_9x16), 'ba': (ba_1x1, ba_9x16)}
 
 
 def board(c, site, size, persona):
     f1, f9 = LAYOUTS[c['layout']]
+    free_cta = persona == 'amy' or (persona == 'michelle' and site == 'battersea')
+    c = dict(c, _cta=CTA_FREE if free_cta else CTA)
     inner = f1(c, site) if size == '1x1' else f9(c, site)
     talent = c.get('talent', 'No talent')
     talent = talent[site] if isinstance(talent, dict) else talent
@@ -247,10 +294,11 @@ CONCEPTS = {
              sup=both('Chips, gaps and uneven edges reshaped in a single appointment, usually in 1 to 2 hours.'),
              photo={'banstead': dict(img='shoot/zh-33.jpg', fx=.5, fy=.25),
                     'battersea': dict(img='drive/stills/st-20.jpg', fx=.6, fy=1, zoom=1.4, s9=dict(fy=.3, zoom=1))}),
-        dict(id='J3', name='From 2100', layout='plain', eyebrow='Composite bonding', ticks=True,
-             hl=both('Six teeth | from £2,100.'), size1=104, size9=124, top1=230, top9=540, li1=29, pad1=12, li9=36, pad9=20,
-             items=['6 teeth £2,100 · 8 teeth £2,800 · 10 teeth £3,500', 'FREE home whitening kit', 'FREE custom retainer', 'Digital smile design before you start'],
-             sup=both('No drilling. Nothing filed down. Most cases done in one visit.')),
+        # Before/after per Priya (12 Oct 2026); real Zen case (Drive bonding folder, 1.jpg, 8 teeth, Dr Akshay).
+        dict(id='J3', name='Before and after', layout='ba', eyebrow='Composite bonding', talent='Patient',
+             hl=both('Six teeth | from £2,100.'), hl1=both('Six teeth <em>from £2,100.</em>'), size1=80, size9=124,
+             before='drive/bonding/b-1-before.jpg', after='drive/bonding/b-1-after.jpg',
+             sup=both('With a FREE home whitening kit and custom retainer.')),
         dict(id='J4', name='Chips easily', layout='plain', eyebrow='Composite bonding', ticks=True,
              hl=both('“It chips easily.” | The honest answer.'), size1=92, size9=112, top1=230, top9=560, li1=30, pad1=13, li9=38, pad9=22,
              items=['Typically lasts 5 to 7 years with care', 'A chip can be repaired, not replaced', 'Checked at every annual review', 'FREE custom retainer to protect it'],
@@ -283,8 +331,9 @@ CONCEPTS = {
                     'battersea': dict(img='shoot/zh-43.jpg', fx=.5, fy=.3)}),
         dict(id='M5', name='Every option', layout='plain', eyebrow='Smile makeover', ticks=True,
              hl=both('One consultation. | Every option.'), size1=92, size9=112, top1=220, top9=540, li1=30, pad1=13, li9=38, pad9=22,
-             items=['Teeth whitening £400', 'Composite bonding, 6 teeth from £2,100', 'Porcelain veneers £950 a tooth', 'Invisalign from £2,650'],
-             sup=both('Smile makeover consultation £30. 0% finance over 12 months.')),
+             items=['Teeth whitening £400', 'Composite bonding, 6 teeth from £2,100', 'Porcelain veneers from £950 a tooth', 'Invisalign from £2,650'],
+             sup={'banstead': 'Smile makeover consultation £30. 0% finance over 12 months.',
+                  'battersea': 'FREE smile makeover consultation. 0% finance over 12 months.'}),
     ],
 }
 
