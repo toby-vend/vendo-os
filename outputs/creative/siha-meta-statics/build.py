@@ -767,24 +767,12 @@ def niamh_9x16():
 
 # ---------------------------------------------------------------- CLAIRE (camera-conscious, ICON)
 def video_call(x, y, w, scale=1.0):
-    h = int(w * 0.66)
-    tile_w, tile_h = (w - int(54 * scale)) // 2, (h - int(110 * scale)) // 2
-    def tile(label, initials, you=False):
-        ring = f"border:{max(2,int(3*scale))}px solid {C['bo']};" if you else "border:1px solid rgba(225,213,202,.12);"
-        person = (f'<svg viewBox="0 0 100 100" width="{int(tile_h*0.62)}" height="{int(tile_h*0.62)}" style="display:block">'
-                  f'<circle cx="50" cy="36" r="18" fill="{C["gl"]}"/><path d="M14 96c4-22 19-33 36-33s32 11 36 33z" fill="{C["gl"]}"/></svg>') if you else \
-                 (f'<div style="width:{int(tile_h*0.42)}px;height:{int(tile_h*0.42)}px;border-radius:50%;background:{C["ol"]};color:{C["be"]};'
-                  f'display:flex;align-items:center;justify-content:center;font-size:{int(tile_h*0.15)}px;font-weight:500">{initials}</div>')
-        return (f'<div style="position:relative;width:{tile_w}px;height:{tile_h}px;border-radius:{int(12*scale)}px;box-sizing:border-box;'
-                f'background:{"#24342b" if you else "#1b2a22"};{ring}display:flex;align-items:center;justify-content:center">{person}'
-                f'<div style="position:absolute;left:{int(12*scale)}px;bottom:{int(10*scale)}px;font-size:{int(15*scale)}px;font-weight:500;color:{C["be"]}">{label}</div></div>')
-    tiles = tile("You", "", True) + tile("Weekly review", "WR") + tile("Sam", "S") + tile("Priya", "P")
-    dot = lambda c: f'<span style="width:{int(40*scale)}px;height:{int(40*scale)}px;border-radius:50%;background:{c};display:inline-block"></span>'
-    bar = (f'<div style="display:flex;gap:{int(14*scale)}px;justify-content:center;margin-top:{int(16*scale)}px">'
-           f'{dot("#33463b")}{dot("#33463b")}{dot(C["bo"])}</div>')
-    return (f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;padding:{int(18*scale)}px;box-sizing:border-box;border-radius:{int(18*scale)}px;'
+    """Google Meet screenshot (AI-generated, ordinary late-20s/early-30s people, one camera off) in a dark screen frame."""
+    pad = int(14 * scale)
+    img_h = int((w - 2 * pad) * 768 / 1152)  # side gutters cropped off the 1376x768 screenshot
+    return (f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;padding:{pad}px;box-sizing:border-box;border-radius:{int(18*scale)}px;'
             f'background:#101a14;box-shadow:0 {int(40*scale)}px {int(80*scale)}px rgba(0,0,0,.45),0 {int(6*scale)}px {int(14*scale)}px rgba(0,0,0,.3)">'
-            f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:{int(18*scale)}px">{tiles}</div>{bar}</div>')
+            f'<div style="height:{img_h}px;border-radius:{int(8*scale)}px;background:url(assets/photos/video-call.jpg) center/cover no-repeat"></div></div>')
 
 
 def claire_1x1():
@@ -804,8 +792,8 @@ def claire_1x1():
 <div class="ab s1" id="C2" data-name="Claire | Static | Video calls | 1x1" style="background:{C['nu']}">
   <div class="cover" style="background:radial-gradient(ellipse at 60% 60%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
   <div class="abs hl" style="left:80px;top:90px;font-size:54px;color:{C['od']}">You&rsquo;ve watched your own<br>smile on <b>every call</b> this week.</div>
-  {video_call(170, 300, 740)}
-  <div class="abs body" style="left:80px;top:840px;width:900px;font-size:26px;color:{C['ol']}">White spots and marks, gone in one 90-minute appointment.</div>
+  {video_call(130, 255, 820)}
+  <div class="abs body" style="left:80px;top:855px;width:900px;font-size:26px;color:{C['ol']}">White spots and marks, gone in one 90-minute appointment.</div>
   <div class="abs" style="left:80px;top:950px;width:200px;color:{C['ol']}">{LOGO}</div>
   <div class="abs" style="left:620px;top:965px"><span class="cta dark" style="height:60px;font-size:17px;padding:0 30px">{CTA_FREE}</span></div>
   <div class="grain"></div>
@@ -864,7 +852,7 @@ def claire_9x16():
 <div class="ab s9" id="C2s" data-name="Claire | Static | Video calls | 9x16" style="background:{C['nu']}">
   <div class="cover" style="background:radial-gradient(ellipse at 50% 50%,#f7f3ee 0%,{C['nu']} 45%,#d8cbbf 100%)"></div>
   <div class="abs hl" style="left:90px;top:300px;font-size:76px;color:{C['od']}">You&rsquo;ve watched<br>your own smile on<br><b>every call</b> this week.</div>
-  {video_call(90, 640, 900, scale=1.15)}
+  {video_call(90, 600, 900, scale=1.15)}
   <div class="abs body" style="left:90px;top:1300px;width:880px;font-size:34px;color:{C['ol']}">White spots and marks, gone in one 90-minute appointment.</div>
   <div class="abs" style="left:90px;top:1440px"><span class="cta dark">{CTA_FREE}</span></div>
   <div class="abs" style="left:780px;top:1454px;width:200px;color:{C['ol']}">{LOGO}</div>
