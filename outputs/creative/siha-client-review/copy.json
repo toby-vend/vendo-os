@@ -1,5 +1,5 @@
 {
- "_source": "Figma UwQkUCpzSoFVngNIRjkSG5, page '08 Internal | Ad copy', read 2026-10-08. Headline + primary text only; internal angle/awareness notes deliberately left out. Updated 2026-10-12 after Hannan's feedback (Check-up -> Oral health assessment, 13-card team carousel).",
+ "_source": "Figma UwQkUCpzSoFVngNIRjkSG5, page '08 Internal | Ad copy', read 2026-10-08. Headline + primary text only; internal angle/awareness notes deliberately left out. Updated 2026-10-12 after Hannan's feedback (Check-up -> Oral health assessment, 13-card team carousel). 2026-10-15: added the 10 Oct batch (membership, ICON before/after, before/after cases) from outputs/creative/siha-new-ads/copy.md.",
  "ads": [
   {
    "treatment": "Composite bonding",
@@ -210,6 +210,76 @@
    "concept": "Not ten veneers",
    "headline": "You probably don't need ten veneers.",
    "primary": "Ten veneers here would be £9,950. And they'd mean filing down ten healthy teeth.\n\nMost smiles don't need that.\n\nIf your teeth are crooked, aligners move them. If they're dull, whitening brightens them. If a few edges are chipped or uneven, bonding adds to them, one appointment, from £250 a tooth.\n\nThat's how we approach most makeovers: align, whiten, then bond the two to four teeth that still need it. Less treatment, less upkeep, and your own teeth underneath.\n\n5.0 from 156 Google reviews.\n\nBook a free consultation. We'll tell you honestly what you need, and what you don't."
+  },
+  {
+   "treatment": "Membership plans",
+   "file": "Membership 1 - Adult Smile plan",
+   "concept": "Adult Smile plan",
+   "headline": "Your dental care for £19.56 a month",
+   "primary": "Most of us only see a dentist when something hurts. By then, the small problem has usually become a bigger one.\n\nOur Smile plan keeps you ahead of it, for £19.56 a month:\n\n✓ 1 oral health assessment a year\n✓ 2 hygiene visits a year\n✓ Routine X-rays included\n✓ 5% off treatments\n✓ 10% off oral health products\n✓ Dental accident and emergency cover\n\nMembers also get first choice of appointments, from early mornings to evenings and weekends.\n\nWe'll start with your oral health assessment, then recommend the plan that fits your mouth, not a one-size-fits-all package.\n\nBook your assessment at our Shepherd's Bush practice."
+  },
+  {
+   "treatment": "Membership plans",
+   "file": "Membership 2 - Child plan",
+   "concept": "Child plan",
+   "headline": "Children's dental care from £5.45 a month",
+   "primary": "A good first experience at the dentist shapes how your child feels about it for life.\n\nOur Smile Child plan (under 12) is £5.45 a month and includes:\n\n✓ 2 oral health assessments a year\n✓ Brushing and diet advice they'll actually understand\n✓ Fluoride varnish\n✓ X-rays when clinically needed\n✓ 5% off treatments\n✓ Dental accident and emergency cover\n\nTeenagers (13 to 17) get 1 hygiene visit a year too, for £12.07 a month.\n\nAnd if your child is under 6, their care is free when you're a registered patient who comes in regularly.\n\nWe never rush, and we explain everything in a way children can follow.\n\nBook your family's assessment today."
+  },
+  {
+   "treatment": "Membership plans",
+   "file": "Membership 3 - Whole family",
+   "concept": "Whole family",
+   "headline": "Dental plans for the whole family",
+   "primary": "Juggling different dentists for different people in the family? It doesn't need to be that hard.\n\nAt Siha, everyone's under one roof, with a monthly plan for each age:\n\nAdults: £19.56 a month\nTeens (13 to 17): £12.07 a month\nChildren under 12: £5.45 a month\nUnder 6: free, when a parent is a registered patient who attends regularly\n\nEvery plan includes regular oral health assessments, routine X-rays, 5% off treatments and dental accident and emergency cover. Adults and teens get hygiene visits too.\n\nWe look for small problems early, so they never become big ones.\n\nBook your assessment and we'll recommend the right plan for each of you."
+  },
+  {
+   "treatment": "Membership plans",
+   "file": "Membership 4 - Smile Plus for gums",
+   "concept": "Smile Plus for gums",
+   "headline": "4 hygiene visits a year, £33.89 a month",
+   "primary": "Bleeding when you brush. Gums that feel tender. Or an implant, crown or bridge you want to last.\n\nTwice a year isn't always enough.\n\nSmile Plus is our plan for mouths that need more regular care, for £33.89 a month:\n\n✓ 4 hygiene visits a year\n✓ 1 oral health assessment a year\n✓ Routine X-rays included\n✓ 5% off treatments\n✓ Dental accident and emergency cover\n\nGum health matters beyond your mouth too. Gum disease is linked to conditions like heart disease and diabetes, so keeping on top of it is worth it.\n\nBook your assessment and we'll tell you which plan suits you."
+  },
+  {
+   "treatment": "ICON before and after",
+   "file": "ICON before and after 1 - Gone in one visit",
+   "concept": "Gone in one visit",
+   "headline": "White spots, gone in one visit",
+   "primary": "You've had those white spots for years. Maybe since braces. You notice them in every photo, even if nobody else mentions them.\n\nThis patient had the same marks on their front teeth. One appointment of ICON treatment later, they're gone.\n\nICON fills the marked enamel with a special resin, so the spot blends into the rest of the tooth. No drilling, no needles, and nothing healthy is removed.\n\nFrom £395 for up to two teeth.\n\nBook a free consultation and we'll tell you if ICON is right for your spots."
+  },
+  {
+   "treatment": "ICON before and after",
+   "file": "ICON before and after 2 - Long-standing mark",
+   "concept": "Long-standing mark",
+   "headline": "The mark you've had for years",
+   "primary": "Some marks have been there so long you've stopped expecting them to go. A knock as a child. A patch that's always looked different.\n\nThis patient had a deep white mark on a front tooth. We planned the result in steps: Enlighten whitening first, then ICON to treat the mark, then a touch of composite bonding to finish the shape.\n\nThe order matters. Whitening first means the rest of the treatment matches your new shade.\n\nEvery plan starts with a free consultation, where we look at your teeth and tell you honestly what will and won't work.\n\nBook yours today."
+  },
+  {
+   "treatment": "ICON before and after",
+   "file": "ICON before and after 3 - No drilling",
+   "concept": "No drilling",
+   "headline": "No drilling. No needles. No spots.",
+   "primary": "Most people assume fixing a white spot means drilling into the tooth.\n\nIt doesn't.\n\nICON treats the spot without drilling or injections. A gentle gel prepares the marked enamel, then a resin fills it, so the spot blends into the tooth around it. Most people see the difference straight away.\n\nThis patient had ICON with whitening, which brings out the natural colour of the tooth for an even finish. We recommend whitening alongside ICON in most cases.\n\nICON starts from £395 for up to two teeth.\n\nBook a free consultation and see what's possible for your smile."
+  },
+  {
+   "treatment": "Before and after",
+   "file": "Before and after 1 - Bonding",
+   "concept": "Bonding",
+   "headline": "Same teeth. Better shape.",
+   "primary": "Chipped edges. Small gaps. Teeth that are slightly uneven. Nothing big, but enough to make you hold back your smile.\n\nComposite bonding reshapes your own teeth with tooth-coloured resin. No drilling, and it's usually done in a single 1 to 2 hour visit.\n\nWe keep it natural. A few teeth, shaped to suit your face, so people notice your smile, not your dental work.\n\nFrom £250 a tooth, with a 12-month warranty. 0% finance available on treatments over £300.\n\nBook a free consultation to see what bonding could do for you."
+  },
+  {
+   "treatment": "Before and after",
+   "file": "Before and after 2 - Aligners",
+   "concept": "Aligners",
+   "headline": "Aligners planned by an orthodontist",
+   "primary": "Crowded or gappy teeth bothering you, but worried about months of treatment that never seems to end?\n\nAt Siha, aligner treatment is orthodontist-led. That means your plan is set by a specialist from day one, so treatment is more predictable, safer and often faster. No endless rounds of adjustments.\n\nClear aligners are almost invisible and come out to eat, so the only person who really notices is you.\n\nSpread the cost with 0% finance over up to 12 months.\n\nBook a free consultation and find out how long your treatment would take."
+  },
+  {
+   "treatment": "Before and after",
+   "file": "Before and after 3 - Whitening then bonding",
+   "concept": "Whitening then bonding",
+   "headline": "Whitening, then bonding. One plan.",
+   "primary": "Darker, uneven teeth can make you look more tired than you feel.\n\nThis patient's smile makeover was two steps, in the right order. Whitening first, to lift the colour. Then composite bonding, matched to the new shade, to even out the shape.\n\nNo veneers, no drilling. Just their own teeth, looking their best.\n\nWe plan every makeover around what you want and what your teeth need, and we'll be honest if less is more.\n\n0% finance over up to 12 months on treatments over £300.\n\nBook a free consultation to plan yours."
   }
  ],
  "team": {

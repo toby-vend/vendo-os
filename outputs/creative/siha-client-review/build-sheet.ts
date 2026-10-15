@@ -92,7 +92,7 @@ const INTRO = [
   ['Click the cell you want to comment on, then right-click › Comment (or Ctrl + Alt + M, Cmd + Option + M on a Mac). We see every comment and will reply in the thread.'],
   [''],
   ['What is in each tab'],
-  ['Meta ads: 30 ads across six treatments. Composite bonding, natural smile, oral health assessment, nervous patients, ICON white spot treatment and smile makeover.'],
+  ['Meta ads: 40 ads. Composite bonding, natural smile, oral health assessment, nervous patients, ICON white spot treatment and smile makeover, plus the newest ads at the bottom: membership plans and before-and-after cases.'],
   ['Meet the team: a 13-card carousel introducing the team.'],
   ['Landing pages: oral health assessment, smile makeover and emergency dentist, each with its desktop, mobile and thank-you page. Click a link to open the full page.'],
   [''],
