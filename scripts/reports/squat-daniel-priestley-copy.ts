@@ -166,7 +166,7 @@ Bobby has already proved it. He built Avenue Dental from zero patients, and now 
 
 Daniel calls them exactly the right people he loves working with. On Saturday 14 November he is in Birmingham to help get them oversubscribed.
 
-His three-hour workshop is part of Squat Success Live. Day 1 is the blueprint for opening a private squat. Day 2 is building the business, finishing with Daniel.
+His three-hour workshop is part of Squat Success Live. Day 1 is the blueprint for opening a private squat. Day 2 is building the business, including Daniel's workshop.
 
 ${DETAILS}
 
