@@ -1,7 +1,7 @@
 # Plan: /client-landing-pages — client-branded landing pages on the Vendo Dental Kit
 
 **Created:** 2026-10-19
-**Status:** Draft
+**Status:** Approved 2026-10-19 (Step 7 dropped for now)
 **Layer:** Function
 **Request:** Turn what we did by hand for Siha into a repeatable skill. It runs after `/client-meta-statics` and designs a client's landing pages on Vendo's own LP system: same sections and features for every client, but branded to the client's design language rather than recoloured.
 
@@ -209,7 +209,7 @@ Every page passes the Vendo LP SOPs and a content check before anyone sees it.
 - `.claude/commands/client-meta-statics.md`
 - `CLAUDE.md`
 
-### Step 7: Kit backlog for the developers
+### Step 7: Kit backlog for the developers (DROPPED for now, Toby 2026-10-19)
 **Actions:**
 - Write `docs/vendo-dental-kit-backlog.md`:
   - **Features to move into the kit.** Each comes from the Maylands Additional CSS, with what it does, where it is today and why it belongs in the kit:
@@ -252,9 +252,9 @@ Every page passes the Vendo LP SOPs and a content check before anyone sees it.
 
 ---
 
-## Open Questions (need Toby before Step 6)
-1. **Page types:** start with new patient, emergency and smile makeover? Others to add (implants, Invisalign, check-up offer)?
-2. **Pilot client:** which client next needs LPs?
-3. **Designers:** do they want both desktop and mobile frames, as on Siha, or desktop only?
-4. **Brand layer in WordPress:** who on the dev side owns the kit and can answer the backlog doc?
-5. **Maylands leftovers:** do you want them flagged to the account owner now? (Out of scope for this plan.)
+## Decisions from Toby (2026-10-19)
+1. Page types: new patient, emergency, smile makeover.
+2. Pilot client: Concept Dental (statics in progress on feat/concept-dental-meta-statics).
+3. Designers get desktop and mobile frames.
+4. Dilith owns the kit. Step 7 (backlog doc) is dropped for now; do what we can without it.
+5. Maylands copy problems already flagged by Toby.

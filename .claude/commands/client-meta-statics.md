@@ -157,3 +157,7 @@ Do these in this order. Getting it wrong stacks every artboard on top of each ot
 - Promise the client launch dates or say creative is "ready" before Toby confirms.
 - Build for campaigns that aren't on the Media Plan.
 - Present forum quotes as the client's patients.
+
+## Next
+
+Landing pages for the same client: `/client-landing-pages <client>`. Its brand layer (`brand.json`) is built from the guideline signed off in Phase 1.

@@ -61,7 +61,7 @@ def render_sections(ctx, recipe, m):
 
 def doc(ctx, title, body_cls, inner):
     return (f"<!doctype html><html lang='en-GB'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>"
-            f"<script>if(location.hash.indexOf('figmacapture')<0)document.documentElement.className='live'</script><title>{title}</title>"
+            f"<script>if(!/figmacapture|static/.test(location.hash))document.documentElement.className='live'</script><title>{title}</title>"
             f"<style>{ctx.brand.css()}{LIVE_CSS}</style><script>{LIVE_JS}</script>"
             f"<script src='https://mcp.figma.com/mcp/html-to-design/capture.js' async></script></head>"
             f"<body{body_cls}>{inner}</body></html>")

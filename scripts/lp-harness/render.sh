@@ -12,7 +12,7 @@ mkdir -p "$DIR/renders"
 trap 'kill $SRV 2>/dev/null' EXIT
 sleep 1
 shot() { "$C" --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 --window-size="$1,$2" \
-           --virtual-time-budget=8000 --screenshot="$DIR/renders/$T-$3.png" "http://localhost:$PORT/$T/$4#figmacapture" 2>/dev/null; }
+           --virtual-time-budget=8000 --screenshot="$DIR/renders/$T-$3.png" "http://localhost:$PORT/$T/$4#static" 2>/dev/null; }
 shot 1600 "$H" desktop lp-desktop.html
 shot 550 "$((H * 3 / 2))" mobile lp-mobile.html
 shot 1600 1800 ty-desktop ty-desktop.html

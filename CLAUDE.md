@@ -145,6 +145,7 @@ ai-os-blueprint/
 | `/decide [question]` | Log a decision to the decision journal | Any significant business decision |
 | `/create-plan [request]` | Create a detailed implementation plan | Before building anything significant |
 | `/implement [plan-path]` | Execute a plan step by step | After a plan is approved |
+| `/client-landing-pages <client>` | Client-branded LP designs on the Vendo Dental Kit (Figma, content check, review pack, handover) | After `/client-meta-statics` signs off the brand guideline |
 
 ---
 
