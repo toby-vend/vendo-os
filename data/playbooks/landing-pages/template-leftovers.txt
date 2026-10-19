@@ -1,0 +1,23 @@
+# Phrases the content check flags on any client landing page. One per line: <severity>|<regex>|<why>
+# severity: fail blocks the Figma capture; warn is listed for Toby to confirm.
+# Most of these are carry-overs from the Bond Dental template the LP theme started from (found on Siha and Maylands, Oct 2026).
+fail|Vendo Whitening|Template product name from the Bond template, not the client's
+fail|Marylebone|Bond Dental clinic name in template testimonials and copy
+fail|Mayfair|Bond Dental clinic name in template testimonials and copy
+fail|King['’]s Cross|Bond Dental clinic name in template testimonials and copy
+fail|four London locations|Bond Dental multi-site line
+fail|£0 deposit|Bond Dental offer line
+fail|most trusted name|Unverifiable superlative (healthcare advertising)
+fail|\bthe best dentists?\b|Unverifiable superlative (healthcare advertising)
+fail|\bfrom\s+a month|Missing price left by the template
+fail|\[[A-Z][a-z]+( [a-z]+)*\]|Bracketed template placeholder, e.g. [Phone number]
+fail|Book Online|SOP: forms never say Book Online (use Book Now, Book Appointment or Book Consultation)
+fail|—|Em dash in client-facing copy
+warn|Diamond[- ](Invisalign|provider|certified)|Invisalign tier: only if the client confirms it
+warn|worth £595|Bond template whitening inclusion: only if the client's own offer includes it
+warn|worth £395|Bond template retainer inclusion: only if the client's own offer includes it
+warn|minimum 6 teeth|Bond template veneer rule: only if the client confirms it
+warn|\bspecialists?\b|GDC protected title: only for clinicians on the GDC specialist list
+warn|same-week|Availability claim: confirm with the client
+warn|all major insurances|Insurance claim: confirm with the client
+warn|TBC|Placeholder still in the copy

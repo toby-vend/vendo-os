@@ -1,0 +1,43 @@
+{
+  "_note": "Verified prices and claims for Siha landing pages. Every £ figure on a page must be listed here with its source.",
+  "prices": [
+    "£89",
+    "£49",
+    "£450",
+    "£300",
+    "£250",
+    "£295",
+    "£995",
+    "£2,195",
+    "£395",
+    "£19.56",
+    "£33.89",
+    "£5.45",
+    "£12.07"
+  ],
+  "sources": {
+    "£89": "Oral health assessment, small X-rays included (Hannan, 2 Oct 2026 call; 10 Oct email)",
+    "£49": "Emergency appointment (Hannan, 10 Oct 2026). Fees page still lists £49 existing / £69 new: to confirm",
+    "£450": "Out-of-hours fixed fee (siha.dental fees page, 6 Oct 2026)",
+    "£300": "Tabeo 0% finance threshold (siha.dental fees page)",
+    "£250": "Composite bonding edge, per tooth",
+    "£295": "Composite bonding full surface, per tooth",
+    "£995": "Porcelain veneers per tooth (siha.dental, 6 Oct 2026)",
+    "£2,195": "Clear aligners from, treatment under 3 months, after 1 Oct +£200 rise",
+    "£395": "ICON, up to two teeth",
+    "£19.56": "Smile membership /month",
+    "£33.89": "Smile Plus /month",
+    "£5.45": "Smile Child /month",
+    "£12.07": "Smile Plus 13-17 /month",
+    "specialist orthodontist": "Dr Abeera, Specialist Orthodontist (siha.dental/our-team); Hannan asked for orthodontist-led aligners to be highlighted, 10 Oct 2026"
+  },
+  "to_confirm": [
+    "Roles for Dr Ayesha and Dr Thishock",
+    "Online booking link",
+    "WhatsApp number",
+    "Deposit amount and refund terms"
+  ],
+  "confirmed": [
+    "specialist orthodontist"
+  ]
+}
