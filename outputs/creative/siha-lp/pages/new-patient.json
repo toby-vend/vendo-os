@@ -1,0 +1,639 @@
+{
+ "title": "New patient assessment",
+ "form": {
+  "label": "Oral health assessment",
+  "title": "Book your first visit",
+  "sub": "Same-week appointments, evenings and weekends available.",
+  "note": "Your assessment is £89, small X-rays included."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "New patients welcome · Shepherd’s Bush, W12",
+   "title": "Oral health assessment <b>£89</b>",
+   "tagline": "A dentist you can actually stick with.",
+   "sub": "Not a quick check-up: a comprehensive look at your oral health, honest advice and a plan built around your goals.",
+   "ticks": [
+    "Full exam, 3D scan + X-rays",
+    "Same-week appointments",
+    "Sedation available",
+    "0% finance available"
+   ],
+   "ticks_m": [
+    "Full exam, 3D scan + small X-rays",
+    "Sedation for nervous patients"
+   ],
+   "stats": [
+    [
+     "5.0",
+     "Google rating"
+    ],
+    [
+     "150+",
+     "Patient reviews"
+    ],
+    [
+     "8",
+     "Award wins"
+    ]
+   ],
+   "stats_m": [
+    [
+     "5.0",
+     "Google rating"
+    ],
+    [
+     "150+",
+     "Reviews"
+    ],
+    [
+     "8",
+     "Awards"
+    ]
+   ],
+   "photo": {
+    "src": "assets/photos/hannan-1600.jpg",
+    "w": 1067,
+    "h": 1600,
+    "head_top": 312,
+    "chest": 1031,
+    "face_cx": 545,
+    "cutout": "assets/cutouts/hannan.png"
+   }
+  },
+  {
+   "block": "awards",
+   "label": "3 awards in 2024 · 5 in 2025",
+   "items": [
+    {
+     "img": "assets/awards/brand-design-2025.png",
+     "result": "Winner",
+     "title": "Practice brand &amp; design"
+    },
+    {
+     "img": "assets/awards/patient-care-2025.png",
+     "result": "Winner",
+     "title": "Patient care"
+    },
+    {
+     "img": "assets/awards/da25-team-london.png",
+     "result": "Winner",
+     "title": "Team of the year, London"
+    },
+    {
+     "img": "assets/awards/da25-website-london.png",
+     "result": "Winner",
+     "title": "Website of the year, London"
+    },
+    {
+     "img": "assets/awards/da25-website-overall.png",
+     "result": "Overall winner",
+     "title": "Website of the year"
+    },
+    {
+     "img": "assets/awards/brand-design-2024.png",
+     "result": "Winner",
+     "title": "Practice brand &amp; design, South"
+    },
+    {
+     "img": "assets/awards/website-2024.png",
+     "result": "Winner",
+     "title": "Website of the year, London"
+    },
+    {
+     "img": "assets/awards/best-new-practice-2024.png",
+     "result": "Highly commended",
+     "title": "New practice"
+    }
+   ]
+  },
+  {
+   "block": "usp_text",
+   "items": [
+    [
+     "plan",
+     "A comprehensive assessment, with a plan built around your goals"
+    ],
+    [
+     "award",
+     "An award-winning team of professionals and specialists"
+    ],
+    [
+     "wallet",
+     "Flexible payments and dental membership plans"
+    ],
+    [
+     "clock",
+     "Evening, weekend and out-of-hours appointments"
+    ],
+    [
+     "calm",
+     "Sedation available for nervous patients"
+    ]
+   ]
+  },
+  {
+   "block": "story_cards",
+   "sub": "Every smile is different. These are a few of the people who trusted us with theirs.",
+   "items": [
+    [
+     "ICON, whitening &amp; bonding",
+     "I’ve had white spots for as long as I can remember and this year finally took the plunge to fix them, and I’m so glad I found Siha Dental.",
+     "Samantha Cooper"
+    ],
+    [
+     "Composite bonding",
+     "I came in with chipped front teeth and he restored them to perfection with composite bonding. You cannot even tell they were ever damaged.",
+     "Hoda Munchow"
+    ],
+    [
+     "Aligners &amp; edge bonding",
+     "My edge bonding was done really well and looks so natural, which I’m really pleased with. I’ve always felt like I was in good hands.",
+     "Aria KS"
+    ]
+   ]
+  },
+  {
+   "block": "pricing",
+   "layout": "panel",
+   "title": "Transparent pricing. No surprises.",
+   "sub": "One flat fee for a comprehensive oral health assessment. Anything that needs attention afterwards is costed and explained upfront, before you decide anything.",
+   "price_label": "Oral health assessment",
+   "price": "£89",
+   "price_note": "Small X-rays included",
+   "notes": [
+    "Up to 12 months 0% interest-free finance available for any treatment identified at your assessment."
+   ],
+   "photo": {
+    "src": "assets/photos/opg.jpg",
+    "pos": "50% 35%"
+   },
+   "get": [
+    [
+     "Comprehensive exam",
+     "Teeth, gums, bite and jaw, plus an oral cancer screening"
+    ],
+    [
+     "Small X-rays and a 3D scan",
+     "Included. See your own mouth on-screen as your dentist talks you through it"
+    ],
+    [
+     "A plan built around your goals",
+     "Your short- and long-term goals first, then a plan tailored to them, costed upfront"
+    ],
+    [
+     "Siha Dental &amp; Facial Membership plan",
+     "For patients without insurance. Plans from £19.56 a month, see below"
+    ]
+   ]
+  },
+  {
+   "block": "membership",
+   "eyebrow": "{{name}} Membership",
+   "title": "A smarter way to care for your smile",
+   "sub": "A monthly plan that builds your routine care in, with separate plans for adults and children.",
+   "groups": [
+    {
+     "label": "Adults",
+     "sub": "18 and over",
+     "plans": [
+      {
+       "name": "Smile",
+       "price": "£19.56",
+       "who": "Routine care",
+       "feats": [
+        "1 oral health assessment a year",
+        "2 hygiene appointments a year",
+        "Routine X-rays as required",
+        "5% off treatments, 10% off oral health products",
+        "Global dental accident &amp; emergency scheme"
+       ],
+       "featured": true
+      },
+      {
+       "name": "Smile Plus",
+       "price": "£33.89",
+       "who": "Gum health or complex restorative work",
+       "feats": [
+        "1 oral health assessment a year",
+        "4 hygiene appointments a year",
+        "Routine X-rays as required",
+        "5% off treatments, 10% off oral health products",
+        "Global dental accident &amp; emergency cover"
+       ],
+       "featured": false
+      }
+     ]
+    },
+    {
+     "label": "Children",
+     "sub": "Plans from £5.45 a month",
+     "plans": [
+      {
+       "name": "Smile Child",
+       "price": "£5.45",
+       "who": "Under 12 years",
+       "feats": [
+        "2 oral health assessments a year, with brushing and diet advice",
+        "Fluoride varnish",
+        "Routine X-rays as clinically required",
+        "5% off treatments, 10% off oral health products"
+       ]
+      },
+      {
+       "name": "Smile Plus",
+       "price": "£12.07",
+       "who": "13–17 years",
+       "feats": [
+        "2 oral health assessments a year, with brushing and diet advice",
+        "1 hygiene visit a year",
+        "Fluoride varnish",
+        "Routine X-rays as clinically required",
+        "5% off treatments, 10% off oral health products"
+       ]
+      }
+     ],
+     "note": {
+      "label": "Under 6s free",
+      "text": "when a parent is registered with us and attends regularly"
+     }
+    }
+   ],
+   "small": "{{name}} Membership is not dental insurance and does not cover all treatments. It is designed to support routine preventative care, and additional treatment may incur separate costs. T&amp;Cs apply. Ask the team about joining at your visit."
+  },
+  {
+   "block": "google_reviews",
+   "sub": "5.0 stars from 150+ verified Google reviews.",
+   "items": [
+    [
+     "Diane Redmond",
+     "My experience at Siha Dental Surgery has been very positive. I have always been treated with respect and given clear explanations about my treatment plan and what to expect."
+    ],
+    [
+     "Sheela Vaghela",
+     "They explained everything properly at every stage, so I always knew exactly what was happening and what to expect, which made the whole experience feel so comfortable and reassuring."
+    ],
+    [
+     "Kate Barry",
+     "I cannot thank Dr Hannan enough for the care and kindness he showed me when I was experiencing a dental emergency."
+    ]
+   ]
+  },
+  {
+   "block": "form_band",
+   "name": "Book your assessment (form 2)",
+   "eyebrow": "Oral health assessment",
+   "title": "Ready when you are",
+   "sub": "Same-week appointments, evenings and weekends. £89 for a full exam, 3D scan and small X-rays, with no hidden extras.",
+   "ticks": [
+    "Full exam, 3D scan + small X-rays",
+    "Oral cancer screening",
+    "A plan built around your goals",
+    "0% finance available"
+   ],
+   "form_title": "Book your assessment"
+  },
+  {
+   "block": "pain_points",
+   "title": "It’s been a while and that’s okay",
+   "sub": "Most new patients come to us after months, sometimes years, of meaning to book. Whatever brought you here, you’re in the right place.",
+   "items": [
+    [
+     "You haven’t seen a dentist in years",
+     "Life got busy. No judgement here, just a proper look at where things stand."
+    ],
+    [
+     "You’re anxious about the dentist",
+     "A bad experience put you off. Our team takes gentle, unhurried appointments, and sedation is available if you need it."
+    ],
+    [
+     "You’ve just moved to London",
+     "You need a dental home close to work or home, run to a consistent standard."
+    ],
+    [
+     "You’ve got an issue you’ve been ignoring",
+     "Sensitivity, a chip, something that doesn’t feel quite right. Better to get it looked at now than wait for it to get worse."
+    ],
+    [
+     "Your last dentist rushed you through",
+     "Ten minutes and out the door. You want a dentist who actually explains what they’re looking at."
+    ],
+    [
+     "You want one dentist for the whole family",
+     "Care for you and your kids under one roof. Under 6s are free when a parent is registered and attends regularly."
+    ]
+   ],
+   "close": "Our assessment is a <b style=\"font-weight:600\">full look at your oral health with honest advice</b>: no lectures, no judgement, and no pressure to have anything done."
+  },
+  {
+   "block": "explainer",
+   "name": "The assessment",
+   "photo": {
+    "src": "assets/photos/hygienist-action.jpg",
+    "pos": "40% 50%"
+   },
+   "eyebrow": "The assessment",
+   "title": "More than a check-up. A proper look at your oral health.",
+   "text": "We take time to understand your short- and long-term goals, then tailor your plan to them. Small issues are fixed early, before they get worse: prevention before cure.",
+   "card": {
+    "title": "Your oral health is part of your overall health",
+    "text": "Gum disease is linked to chronic conditions including cardiovascular disease, diabetes and Alzheimer’s. That’s why your assessment covers teeth, gums, bite and jaw, an oral cancer screening, small X-rays and a 3D scan, not just a quick look."
+   },
+   "facts": [
+    "Small X-rays included",
+    "Prevention before cure",
+    "Mercury-free &amp; BPA-free fillings",
+    "Sedation for nervous patients"
+   ]
+  },
+  {
+   "block": "steps",
+   "title": "From booking to ongoing care",
+   "items": [
+    [
+     "Book your assessment",
+     "Choose a time that works for you, including evenings and weekends."
+    ],
+    [
+     "Full examination &amp; scan",
+     "Teeth, gums, bite, small X-rays and a 3D scan, explained in plain English as we go."
+    ],
+    [
+     "A plan around your goals",
+     "We talk through your goals, then cost everything upfront. No pressure to proceed same-day."
+    ],
+    [
+     "Ongoing care",
+     "Regular hygiene visits and a dentist who knows your history for whatever comes next."
+    ]
+   ]
+  },
+  {
+   "block": "services",
+   "style": "photo",
+   "eyebrow": "Our services",
+   "title": "Everything your mouth needs, under one roof",
+   "sub": "Whatever your assessment uncovers, you won’t need to be referred somewhere else.",
+   "items": [
+    {
+     "title": "Oral Health &amp; Hygiene",
+     "text": "Regular assessments and professional cleans that catch small issues before they become big ones.",
+     "photo": {
+      "src": "assets/photos/hygiene-suite.jpg",
+      "pos": "50% 50%"
+     }
+    },
+    {
+     "title": "Fillings &amp; Restorations",
+     "text": "Mercury-free, BPA-free tooth-coloured fillings that blend with your natural teeth.",
+     "photo": {
+      "src": "assets/photos/suite-one.jpg",
+      "pos": "50% 50%"
+     }
+    },
+    {
+     "title": "Root Canal Treatment",
+     "text": "Gentle, modern endodontics to save a tooth rather than lose it.",
+     "photo": {
+      "src": "assets/photos/asiya-magnification.jpg",
+      "pos": "50% 40%"
+     }
+    },
+    {
+     "title": "Gum Health",
+     "text": "Screening and treatment for gum disease, which is linked to wider health problems as well as tooth loss.",
+     "photo": {
+      "src": "assets/photos/suite-consult.jpg",
+      "pos": "50% 60%"
+     }
+    },
+    {
+     "title": "Emergency Dentistry",
+     "text": "Same-week appointments for pain, breakages or anything that can’t wait.",
+     "photo": {
+      "src": "assets/photos/concierge-patient.jpg",
+      "pos": "50% 40%"
+     }
+    },
+    {
+     "title": "Cosmetic &amp; Straightening",
+     "text": "Whitening, bonding, veneers and Invisalign, if your assessment uncovers something you’d like to change.",
+     "photo": {
+      "src": "assets/photos/face-photo.jpg",
+      "pos": "50% 40%"
+     }
+    }
+   ]
+  },
+  {
+   "block": "why_us",
+   "name": "Why Siha",
+   "eyebrow": "Why {{name}}",
+   "title": "Why patients trust us with their smiles",
+   "items": [
+    [
+     "shield",
+     "GDC-registered dentists",
+     "GDC-registered dentists trained to handle both simple and complex cases."
+    ],
+    [
+     "person",
+     "Founder-led care",
+     "Dr Hannan is personally involved in the standard of care across all treatments."
+    ],
+    [
+     "tooth",
+     "Mercury-free &amp; BPA-free fillings",
+     "Tooth-coloured fillings without mercury or BPA."
+    ],
+    [
+     "star",
+     "Rated 5.0★ by patients",
+     "150+ verified Google reviews from real patients, consistency you can check for yourself."
+    ],
+    [
+     "wallet",
+     "0% finance &amp; membership",
+     "0% interest-free finance, plus a Siha Dental &amp; Facial Membership plan for patients without insurance."
+    ],
+    [
+     "scan",
+     "Digital-first diagnostics",
+     "Modern, digital-first diagnostics, including 3D intraoral scanning at every assessment."
+    ]
+   ]
+  },
+  {
+   "block": "meet_dentist",
+   "name": "Dr Hannan",
+   "role": "Director and Restorative Dentist · Founder · GDC 264888",
+   "quote": "The best appointment is the one where nothing’s a surprise. We tell you exactly what we see and let you decide what happens next.",
+   "creds": [
+    "Newcastle University School of Dental Science graduate",
+    "MFDS, Royal College of Surgeons (Edinburgh)",
+    "PG Certificate in Restorative Dentistry, Eastman Dental Institute",
+    "Member, British Society of Restorative Dentistry"
+   ],
+   "photo": {
+    "src": "assets/photos/hannan-2.jpg",
+    "crop": {
+     "w": 1467,
+     "h": 2200,
+     "top": 340,
+     "bottom": 1434,
+     "cx": 778
+    }
+   }
+  },
+  {
+   "block": "team",
+   "eyebrow": "Meet the team",
+   "title": "The people who’ll look after you",
+   "sub": "Dentists, specialists, hygienists and the faces who greet you at the door.",
+   "members": [
+    [
+     "assets/team-chest/hannan.jpg",
+     "Dr Hannan",
+     "Director &amp; Restorative Dentist"
+    ],
+    [
+     "assets/team-chest/abeera.jpg",
+     "Dr Abeera",
+     "Specialist Orthodontist"
+    ],
+    [
+     "assets/team-chest/darshan.jpg",
+     "Dr Darshan",
+     "Special interest in oral surgery"
+    ],
+    [
+     "assets/team-chest/nicholas.jpg",
+     "Dr Nicholas",
+     "Cosmetic Dentist"
+    ],
+    [
+     "assets/team-chest/ayesha.jpg",
+     "Dr Ayesha",
+     "Dentist"
+    ],
+    [
+     "assets/team-chest/thishock.jpg",
+     "Dr Thishock",
+     "Dentist"
+    ],
+    [
+     "assets/team-chest/asiya.jpg",
+     "Dr Asiya",
+     "Special interest in endodontics"
+    ],
+    [
+     "assets/team-chest/leen.jpg",
+     "Leen",
+     "Hygienist"
+    ],
+    [
+     "assets/team-chest/umasha.jpg",
+     "Umasha",
+     "Hygiene Therapist"
+    ],
+    [
+     "assets/team-chest/francisca.jpg",
+     "Francisca",
+     "Assistant Practice Manager"
+    ],
+    [
+     "assets/team-chest/amelia.jpg",
+     "Amelia",
+     "Patient Concierge"
+    ],
+    [
+     "assets/team-chest/sara.jpg",
+     "Sara",
+     "Patient Concierge"
+    ]
+   ]
+  },
+  {
+   "block": "practice_tour",
+   "eyebrow": "Inside {{name}}",
+   "title": "Take a look around our practice",
+   "poster": "assets/photos/lounge.jpg",
+   "photos": [
+    "assets/photos/suite-one.jpg",
+    "assets/photos/hygiene-suite.jpg",
+    "assets/photos/lounge-plants.jpg",
+    {
+     "src": "assets/photos/facade.jpg",
+     "pos": "50% 60%"
+    }
+   ]
+  },
+  {
+   "block": "faq",
+   "items": [
+    [
+     "What’s included in the oral health assessment?",
+     "A comprehensive exam covering your teeth, gums, bite and jaw, an oral cancer screening, small X-rays, and a 3D digital scan you can see on-screen while your dentist talks you through it. We ask about your short- and long-term goals, and you leave with a plan tailored to them, including confirmation that nothing needs doing, if that’s the case."
+    ],
+    [
+     "How much does the oral health assessment cost?",
+     "£89, flat. That includes your full examination and small X-rays. There’s nothing added on afterwards. If your assessment identifies anything that needs attention, it’s costed and explained upfront before you decide anything."
+    ],
+    [
+     "Do you accept dental insurance?",
+     "Yes. All major dental insurances are accepted. We’ll provide the receipts and paperwork you need to claim back with your insurer. If you’re unsure whether your policy covers the assessment or any recommended treatment, bring your policy details and we’ll help you check."
+    ],
+    [
+     "Is finance or a membership plan available if I’m not insured?",
+     "Yes. Any treatment identified at your assessment can be spread over up to 12 months with 0% interest-free finance. We also offer a Siha Dental &amp; Facial Membership plan designed for patients without insurance. Ask at your visit and the team will talk you through the options."
+    ],
+    [
+     "Do you offer emergency appointments?",
+     "Yes. We hold same-week appointments for pain, breakages or anything that can’t wait. Send us your details and we’ll get you seen as quickly as possible."
+    ],
+    [
+     "How often should I come in?",
+     "For most people, every six to twelve months. It depends on your oral health, your history, and your risk of things like gum disease. Your dentist will recommend the right interval for you at your first visit, rather than defaulting everyone to the same schedule."
+    ],
+    [
+     "Do you see children and treat the whole family?",
+     "Yes. We look after whole families: assessments, hygiene and treatment for adults and children under one roof, with dentists who get to know your history. Children under 6 are free when a parent is registered with us and attends regularly."
+    ],
+    [
+     "I’m nervous about the dentist. Can you help?",
+     "Yes. Appointments are gentle and unhurried, and sedation is available for nervous patients. Mention it when you book and we’ll talk you through the options."
+    ],
+    [
+     "It’s been years since I last saw a dentist. Is that a problem?",
+     "Not at all, and you won’t get a lecture about it. A large share of our new patients haven’t seen a dentist in years. Your assessment simply establishes where things stand today, and anything that needs attention is explained and costed clearly. No judgement, no pressure."
+    ]
+   ],
+   "open": [
+    0
+   ]
+  },
+  {
+   "block": "final_cta",
+   "title": "Your oral <span style=\"white-space:nowrap\">health,</span> <b>sorted</b>",
+   "sub": "Book your oral health assessment at {{name}}. Straight answers, no pressure, and a plan you understand.",
+   "tags": [
+    "0% finance available",
+    "All major insurances accepted"
+   ],
+   "form_title": "Book your assessment"
+  }
+ ],
+ "thank_you": {
+  "text": "Our team will be in touch to confirm your oral health assessment. If you’d rather pick a time yourself, you can book online now.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ }
+}
