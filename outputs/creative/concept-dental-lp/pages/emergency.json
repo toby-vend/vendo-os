@@ -1,0 +1,387 @@
+{
+ "title": "Emergency dentist",
+ "form": {
+  "fields": [
+   {
+    "label": "Full name",
+    "full": true
+   },
+   "Email",
+   "Mobile"
+  ],
+  "label": "Emergency appointment",
+  "title": "Get seen as soon as possible",
+  "sub": "Send your details and we’ll call you back to arrange an appointment.",
+  "note": "Emergency appointment £50, including X-rays."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "Emergency dentist · Stapleford, Nottingham",
+   "title": "Emergency dentist, <b>£50.</b>",
+   "tagline": "In pain? We’ll see you as quickly as possible.",
+   "sub": "Appointments for pain, swelling, broken teeth and lost fillings, including X-rays. Weekend and out-of-hours appointments available.",
+   "ticks": [
+    "X-rays included",
+    "New patients welcome",
+    "Weekend appointments",
+    "Written prices before follow-up"
+   ],
+   "ticks_m": [
+    "X-rays included",
+    "Weekend appointments"
+   ],
+   "stats": [
+    [
+     "£50",
+     "Inc. X-rays"
+    ],
+    [
+     "£200",
+     "Out of hours, inc. treatment"
+    ],
+    [
+     "7",
+     "Days a week"
+    ]
+   ],
+   "stats_m": [
+    [
+     "£50",
+     "Inc. X-rays"
+    ],
+    [
+     "£200",
+     "Out of hours"
+    ],
+    [
+     "7",
+     "Days a week"
+    ]
+   ],
+   "trust": false,
+   "photo": {
+    "src": "assets/photos/dr-zain-concept-dental.jpg",
+    "w": 1024,
+    "h": 1136,
+    "face": [
+     381,
+     190,
+     251,
+     251
+    ]
+   },
+   "device_gap_m": 285
+  },
+  {
+   "block": "usp_text",
+   "hide_m": false,
+   "label": "Four promises",
+   "items": [
+    [
+     "calm",
+     "Calm, patient-focused care, with sedation for nervous patients"
+    ],
+    [
+     "doctor",
+     "Postgraduate-trained dentists in restorative, aesthetic and implant dentistry"
+    ],
+    [
+     "scan",
+     "Modern equipment, including CBCT imaging and digital treatment planning"
+    ],
+    [
+     "plan",
+     "Clear written pricing before anything starts"
+    ]
+   ]
+  },
+  {
+   "block": "pain_points",
+   "title": "If it can’t wait, <b>neither should you.</b>",
+   "sub": "We treat urgent dental problems at our Stapleford practice. If you’re not sure whether it counts, get in touch: we’d always rather reassure you than have you waiting at home in pain.",
+   "items": [
+    [
+     "Severe toothache or facial swelling",
+     "Persistent pain or swelling that won’t settle with pain relief."
+    ],
+    [
+     "A knocked-out or displaced tooth",
+     "The sooner it is repositioned, the better the chance of saving it."
+    ],
+    [
+     "A cracked, chipped or fractured tooth",
+     "Stabilised and protected before it gets worse."
+    ],
+    [
+     "A lost or broken filling or crown",
+     "Covered and repaired so the tooth underneath is protected."
+    ],
+    [
+     "A dental abscess or infection",
+     "This needs urgent treatment, so don’t wait to see whether it settles."
+    ],
+    [
+     "A broken or painful denture",
+     "Made comfortable so you can eat properly again."
+    ]
+   ]
+  },
+  {
+   "block": "pricing",
+   "layout": "panel",
+   "eyebrow": "Pricing",
+   "title": "Clear fees, <b>even in an emergency.</b>",
+   "sub": "You get a written plan with prices before any follow-up treatment begins.",
+   "price_label": "Emergency appointment",
+   "price": "£50",
+   "price_note": "Including X-rays",
+   "notes": [
+    "Weekend and out of hours: £200, including treatment.",
+    "You don’t need to be an existing patient."
+   ],
+   "photo": {
+    "src": "assets/photos/dentist-treating-patient.jpg",
+    "pos": "50% 35%"
+   },
+   "get": [
+    [
+     "An urgent assessment",
+     "We find out exactly what’s happening, taking X-rays where needed"
+    ],
+    [
+     "Treatment at the appointment",
+     "We treat the source of your pain or injury wherever possible"
+    ],
+    [
+     "A clear follow-up plan",
+     "Any further treatment explained on the day, with costs confirmed in writing"
+    ],
+    [
+     "Support if you’re nervous",
+     "Tell us and we’ll go at your pace. Sedation is available at the practice"
+    ]
+   ]
+  },
+  {
+   "block": "form_band",
+   "name": "Get seen (form 2)",
+   "eyebrow": "Emergency appointment",
+   "title": "Don’t wait <b>in pain.</b>",
+   "sub": "Send us your details and we’ll call you back to arrange an appointment as quickly as possible.",
+   "ticks": [
+    "£50 including X-rays",
+    "New patients welcome",
+    "Weekend and out-of-hours appointments",
+    "Written prices before follow-up"
+   ]
+  },
+  {
+   "block": "explainer",
+   "name": "In an emergency",
+   "photo": {
+    "src": "assets/photos/young-woman-with-toothache-sitting-in-a-dental-cli.jpg",
+    "pos": "45% 30%"
+   },
+   "eyebrow": "While you wait",
+   "title": "What to do <b>in a dental emergency.</b>",
+   "text": "Over-the-counter pain relief such as ibuprofen or paracetamol can help while you wait, but don’t apply aspirin directly to the gum. If swelling is spreading to your face, jaw or neck, seek urgent medical attention.",
+   "card": {
+    "title": "Knocked-out tooth?",
+    "text": "Handle the tooth by the crown only, not the root. If it is clean, try to place it back in the socket or store it in milk, and get to us as quickly as possible."
+   },
+   "facts": [
+    "X-rays included",
+    "Weekend appointments",
+    "No registration needed",
+    "Sedation available"
+   ]
+  },
+  {
+   "block": "steps",
+   "eyebrow": "Your emergency appointment",
+   "title": "What happens <b>when you get in touch.</b>",
+   "active": 0,
+   "items": [
+    [
+     "Get in touch",
+     "We assess how urgent your situation is and arrange an appointment as quickly as possible."
+    ],
+    [
+     "Assessment",
+     "We assess the problem, taking X-rays where needed, so we know exactly what is happening."
+    ],
+    [
+     "Treatment",
+     "We treat the source of your pain or injury wherever possible: draining an abscess, stabilising a tooth or replacing a lost filling."
+    ],
+    [
+     "Follow-up plan",
+     "If further treatment is needed, we explain it on the day and confirm the costs in writing."
+    ]
+   ]
+  },
+  {
+   "block": "services",
+   "style": "icon",
+   "name": "What we treat",
+   "eyebrow": "What we treat",
+   "title": "Urgent care, <b>at the practice.</b>",
+   "sub": "Emergency appointments are carried out by one of our GDC-registered dentists.",
+   "items": [
+    {
+     "icon": "toothache",
+     "title": "Toothache &amp; swelling",
+     "text": "Pain treated at the source, not just masked."
+    },
+    {
+     "icon": "knocked",
+     "title": "Knocked-out teeth",
+     "text": "Repositioned as quickly as possible to give the tooth its best chance."
+    },
+    {
+     "icon": "crack",
+     "title": "Cracked or broken teeth",
+     "text": "Stabilised and protected at the appointment wherever possible."
+    },
+    {
+     "icon": "crown",
+     "title": "Lost fillings &amp; crowns",
+     "text": "Exposed teeth covered and protected."
+    },
+    {
+     "icon": "shield",
+     "title": "Abscesses &amp; infection",
+     "text": "Urgent treatment for infection, including draining an abscess."
+    },
+    {
+     "icon": "smile",
+     "title": "Denture problems",
+     "text": "Broken or ill-fitting dentures made comfortable again."
+    }
+   ]
+  },
+  {
+   "block": "why_us",
+   "eyebrow": "How we work",
+   "title": "Nothing moves forward <b>without your say-so.</b>",
+   "items": [
+    [
+     "person",
+     "We listen first",
+     "Every appointment starts with understanding what you want from your care."
+    ],
+    [
+     "plan",
+     "We explain your options",
+     "What’s possible, what it involves and what it costs, before you commit to anything."
+    ],
+    [
+     "calm",
+     "We support nervous patients",
+     "If you need more time, more reassurance or sedation, we plan for it from the start."
+    ],
+    [
+     "card",
+     "We put it in writing",
+     "Your treatment plan and costs are confirmed in writing before treatment begins."
+    ],
+    [
+     "calendar",
+     "Weekend and evening appointments",
+     "Open Monday to Friday 9am to 6pm, and Saturday and Sunday 10:30am to 3pm."
+    ],
+    [
+     "pin",
+     "On Toton Lane, Stapleford",
+     "On-site parking, for patients across Stapleford, Beeston, Bramcote, Sandiacre and Long Eaton."
+    ]
+   ]
+  },
+  {
+   "block": "meet_dentist",
+   "name": "Dr Zain",
+   "role": "Principal Dentist · GDC 283159",
+   "quote": "Time to talk, clear explanations and a written plan with prices before any treatment begins. Whoever you see, that’s the approach.",
+   "creds": [
+    "BDS, MSc, MFDS RCS England, MFDS RCS Glasgow",
+    "Postgraduate Diploma in Restorative and Aesthetic Dentistry",
+    "Postgraduate Diploma in Implant Dentistry",
+    "Special interest in sedation, provided at the practice"
+   ],
+   "photo": {
+    "src": "assets/photos/dr-zain-concept-dental.jpg",
+    "pos": "50% 0%"
+   }
+  },
+  {
+   "block": "practice_tour",
+   "eyebrow": "Inside the practice",
+   "title": "Take a look <b>around.</b>",
+   "poster": "assets/photos/concept-dental-reception-waiting-area.jpg",
+   "photos": [
+    "assets/photos/concept-dental-front-desk.jpg",
+    "assets/photos/dental-surgery-green-feature-wall.jpg",
+    "assets/photos/concept-dental-waiting-area.jpg",
+    {
+     "src": "assets/photos/dentist-talking-with-patient.jpg",
+     "pos": "50% 30%"
+    }
+   ]
+  },
+  {
+   "block": "faq",
+   "items": [
+    [
+     "How quickly can I be seen for a dental emergency?",
+     "Get in touch and we will arrange an appointment as quickly as possible. Weekend and out-of-hours appointments are also available."
+    ],
+    [
+     "How much is an emergency appointment?",
+     "Emergency appointments are £50, including X-rays. Weekend and out-of-hours appointments are £200, including treatment. You get a written plan with prices before any follow-up treatment begins."
+    ],
+    [
+     "What counts as a dental emergency?",
+     "Significant pain, swelling, injury or the sudden loss of a filling or crown that is affecting your ability to eat or function. If you’re unsure, get in touch and we’ll advise you."
+    ],
+    [
+     "Do I need to be a registered patient?",
+     "No. You do not need to be an existing patient to have an emergency appointment at Concept Dental."
+    ],
+    [
+     "Will I need follow-up treatment?",
+     "In most cases, yes. Emergency appointments focus on resolving the immediate problem, and definitive treatment is usually carried out at a follow-up appointment with costs confirmed in writing beforehand."
+    ]
+   ]
+  },
+  {
+   "block": "final_cta",
+   "eyebrow": "Don’t wait in pain",
+   "title": "In pain? <b>Let’s get you seen.</b>",
+   "size": 52,
+   "size_m": 32,
+   "sub": "Emergency appointments at our Stapleford practice are £50 including X-rays, with weekend and out-of-hours appointments available.",
+   "tags": [
+    "New patients welcome",
+    "Weekend appointments",
+    "On-site parking"
+   ],
+   "trust": null,
+   "form_title": "Get seen as soon as possible"
+  }
+ ],
+ "thank_you": {
+  "title": "Thank you. We’ll call you back.",
+  "text": "Our team will call you as soon as possible to arrange your emergency appointment.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ }
+}

@@ -1,0 +1,6 @@
+{
+  "parentId": "TBC: Toby's Drive folder for the Concept Dental review pack",
+  "title": "Concept Dental x Vendo — Landing pages for review",
+  "intro": "These are the landing pages for your Meta campaigns: new patient check-up, emergency dentist and smile makeover, each on desktop and mobile, with the thank-you page.",
+  "pages": [{"type": "new-patient", "label": "New patient check-up"}, {"type": "emergency", "label": "Emergency dentist"}, {"type": "smile-makeover", "label": "Smile makeover"}]
+}

@@ -1,0 +1,171 @@
+{
+  "_source": "Concept Dental brand guideline (Figma Sb4b57cWr7haaEpyW4ftP2, built 19 Oct 2026 from the Concept Brand Sheet + conceptdental.co.uk). Treatments: Montserrat Light sentence case with the italic turn, arch photo frames (the reception's arched alcoves), CD monogram watermark in Soft Dune, hairline timeline, founding-patient seal, Coffee pill buttons with an arrow. Square cards, no clinical blue, no pure white grounds.",
+  "palette": {
+    "ink": "#463A34",
+    "ink2": "#6E635D",
+    "muted": "#9C8670",
+    "bg": "#FCF6EE",
+    "panel": "#E6DDCB",
+    "card": "#FFFFFF",
+    "accent": "#9C8670",
+    "accent_on_dark": "#CAB39C",
+    "offer": "#463A34",
+    "on_accent": "#FCF6EE",
+    "dark": "#463A34",
+    "dark2": "#54473F",
+    "on_dark": "#FCF6EE",
+    "on_dark2": "#E6DDCB",
+    "btn_on_dark": "#FCF6EE",
+    "btn_on_dark_fg": "#463A34",
+    "fine": "#CAB39C",
+    "fine_on_dark": "#CAB39C",
+    "field_border": "#DCCFBC"
+  },
+  "fonts": {
+    "family": "Montserrat",
+    "fallback": "sans-serif",
+    "faces": [
+      {
+        "file": "assets/fonts/Montserrat.ttf",
+        "weight": "100 900"
+      },
+      {
+        "file": "assets/fonts/Montserrat-Italic.ttf",
+        "weight": "100 900",
+        "style": "italic"
+      }
+    ]
+  },
+  "type": {
+    "display": {
+      "weight": 300,
+      "size": 60,
+      "size_m": 38,
+      "line": 1.08,
+      "tracking": "-.015em",
+      "bold": {
+        "weight": 400,
+        "style": "italic"
+      }
+    },
+    "h1": {
+      "weight": 300,
+      "size": 46,
+      "size_m": 32,
+      "line": 1.12,
+      "tracking": "-.015em",
+      "bold": {
+        "weight": 400,
+        "style": "italic"
+      }
+    },
+    "h2": {
+      "weight": 400,
+      "size": 26,
+      "line": 1.3
+    },
+    "h3": {
+      "weight": 500,
+      "size": 19,
+      "line": 1.4
+    },
+    "body": {
+      "weight": 400,
+      "size": 16,
+      "line": 1.7
+    },
+    "label": {
+      "weight": 600,
+      "size": 12,
+      "tracking": ".24em",
+      "case": "uppercase"
+    },
+    "price": {
+      "weight": 200
+    }
+  },
+  "shape": {
+    "card": 0,
+    "button": 999,
+    "field": 0,
+    "photo": 0,
+    "thumb": 0
+  },
+  "button": {
+    "height": 54,
+    "pad": 32,
+    "weight": 600,
+    "size": 13,
+    "tracking": ".16em",
+    "case": "uppercase",
+    "arrow": true
+  },
+  "device": {
+    "type": "arch",
+    "cutout": false,
+    "backdrop": {
+      "color": "panel",
+      "dx": 36,
+      "dy": 36
+    }
+  },
+  "arch_photos": true,
+  "steps_style": "timeline",
+  "watermark": {
+    "file": "assets/group-10.svg",
+    "light": "#E6DDCB",
+    "dark": "#54473F",
+    "blocks": {
+      "hero_form": {
+        "x": -230,
+        "y": 470,
+        "w": 640,
+        "x_m": -120,
+        "y_m": 980,
+        "w_m": 320
+      },
+      "why_us": {
+        "anchor": "right",
+        "x": -120,
+        "y": -60,
+        "w": 560,
+        "x_m": -80,
+        "y_m": -30,
+        "w_m": 260
+      },
+      "final_cta": {
+        "anchor": "right",
+        "x": -160,
+        "y": 80,
+        "w": 720,
+        "x_m": -110,
+        "y_m": 20,
+        "w_m": 320
+      }
+    }
+  },
+  "rhythm": {
+    "default": "light",
+    "usp_text": "panel",
+    "pricing": "panel",
+    "membership": "light",
+    "form_band": "dark",
+    "steps": "card",
+    "services": "panel",
+    "why_us": "dark",
+    "meet_dentist": "panel",
+    "spotlight": "dark",
+    "final_cta": "dark",
+    "footer": "dark"
+  },
+  "icons": {
+    "stroke": 1.3
+  },
+  "logo": {
+    "dark": "assets/logo-site.svg",
+    "light": "assets/logo-site.svg",
+    "width": 168,
+    "width_m": 116,
+    "width_footer": 150
+  }
+}

@@ -14,12 +14,15 @@ def footer_html(ctx, m, credit=True):
 def final_cta(ctx, c, m):
     T = ctx.brand.type["display"]
     tags = "".join(f'<span class="label fg2" style="font-weight:500">{ctx.t(x)}</span>' for x in c.get("tags", []))
+    # trust line: the Google rating, unless the page sets "trust": null (no reviews yet)
+    trust = (f'<div style="display:flex;align-items:center;gap:12px;margin-top:28px">{stars(5, 16)}<span class="body fg2" style="font-size:14px">'
+             f'{ctx.t(c.get("trust", "{{rating}} from {{review_count}} Google reviews"))}</span></div>') if c.get("trust", True) else ""
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       <div class="label acc">{ctx.t(c.get('eyebrow', 'Get started'))}</div>
       <h2 class="display" style="margin-top:18px;font-size:{c.get('size_m', 34) if m else c.get('size', T['size'])}px">{ctx.t(c['title'])}</h2>
       <p class="body fg2" style="margin-top:20px;font-size:{16 if m else 18}px">{ctx.t(c['sub'])}</p>
       <div style="display:flex;gap:28px;margin-top:20px;flex-wrap:wrap">{tags}</div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:28px">{stars(5, 16)}<span class="body fg2" style="font-size:14px">{ctx.t(c.get('trust', '{{rating}} from {{review_count}} Google reviews'))}</span></div>
+      {trust}
     </div>'''
     form = form_card(ctx, 350 if m else 500, 24 if m else 40, title=c.get("form_title"))
     inner = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 500px;gap:96px;align-items:center">{left}{form}</div>'

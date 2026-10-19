@@ -92,9 +92,11 @@ class Brand:
                          extra=(f"--accent:{p['accent_on_dark']};" if p.get("accent_on_dark") else "")
                          + (f"--fine:{p['fine_on_dark']};" if p.get("fine_on_dark") else "")),
         }
+        # a light card nested in a dark band (e.g. the form) must get the light accent and hairline back
+        light_reset = f"--accent:{p['accent']};--fine:{p.get('fine', rgba(p['ink'], .2))};"
         tone_css = "\n".join(
             f".tone-{n} {{ --s-bg:{v['sbg']};--fg:{v['fg']};--fg2:{v['fg2']};--fg3:{v['fg3']};--surface:{v['surface']};"
-            f"--alt:{v['alt']};--rule:{v['rule']};--btn-bg:{v['btn']};--btn-fg:{v['btnfg']};{v.get('extra', '')}color:var(--fg); }}"
+            f"--alt:{v['alt']};--rule:{v['rule']};--btn-bg:{v['btn']};--btn-fg:{v['btnfg']};{v.get('extra', light_reset if n != 'dark' else '')}color:var(--fg); }}"
             for n, v in tones.items())
         types = "\n".join(self._type_rule(k, v) for k, v in t.items() if k not in ("price",))
         price = t.get("price", {})

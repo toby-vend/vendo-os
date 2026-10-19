@@ -1,0 +1,438 @@
+{
+ "title": "Smile makeover",
+ "form": {
+  "fields": [
+   {
+    "label": "Full name",
+    "full": true
+   },
+   "Email",
+   "Mobile"
+  ],
+  "label": "Smile makeover consultation",
+  "title": "Book your consultation",
+  "sub": "An unhurried consultation, with options, stages and costs explained before anything begins.",
+  "note": "Invisalign and whitening consultations are free."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "Smile makeovers · Stapleford, Nottingham",
+   "title": "A smile makeover, <b>planned around you.</b>",
+   "title_size": 54,
+   "tagline": "Whitening from £250. Invisalign from £2,000.",
+   "sub": "A planned combination of cosmetic treatments, in the right order, with a written plan and confirmed prices before you commit.",
+   "ticks": [
+    "Written plan, confirmed prices",
+    "Free Invisalign consultation",
+    "Free whitening consultation",
+    "Treatment in stages"
+   ],
+   "ticks_m": [
+    "Written plan, confirmed prices",
+    "Free Invisalign consultation"
+   ],
+   "stats": [
+    [
+     "£250",
+     "Whitening, usually £350"
+    ],
+    [
+     "£2,000",
+     "Invisalign from"
+    ],
+    [
+     "£695",
+     "E.max veneers"
+    ]
+   ],
+   "stats_m": [
+    [
+     "£250",
+     "Whitening"
+    ],
+    [
+     "£2,000",
+     "Invisalign"
+    ],
+    [
+     "£695",
+     "Veneers"
+    ]
+   ],
+   "trust": false,
+   "photo": {
+    "src": "assets/photos/dr-anas-ashekhi-concept-dental.jpg",
+    "w": 1024,
+    "h": 1136,
+    "face": [
+     365,
+     171,
+     260,
+     260
+    ]
+   },
+   "device_gap_m": 245
+  },
+  {
+   "block": "usp_text",
+   "hide_m": false,
+   "label": "Four promises",
+   "items": [
+    [
+     "calm",
+     "Calm, patient-focused care, with sedation for nervous patients"
+    ],
+    [
+     "doctor",
+     "Postgraduate-trained dentists in restorative, aesthetic and implant dentistry"
+    ],
+    [
+     "scan",
+     "Modern equipment, including CBCT imaging and digital treatment planning"
+    ],
+    [
+     "plan",
+     "Clear written pricing before anything starts"
+    ]
+   ]
+  },
+  {
+   "block": "pain_points",
+   "title": "More than one thing <b>you’d like to change?</b>",
+   "sub": "A smile makeover may suit you if there’s more than one thing about your smile you’d like to change. If only one thing bothers you, a single treatment may be all you need, and we’ll tell you so.",
+   "items": [
+    [
+     "Discoloured or stained teeth",
+     "Coffee, tea and time have taken the brightness out of your smile."
+    ],
+    [
+     "Chipped, worn or uneven teeth",
+     "Edges that have lost their shape over the years."
+    ],
+    [
+     "Gaps between teeth",
+     "Spacing you’d like closed or evened out."
+    ],
+    [
+     "Crooked or crowded teeth",
+     "One or two teeth sitting out of line."
+    ],
+    [
+     "You want it done in the right order",
+     "Straightening, whitening and bonding planned to work together."
+    ],
+    [
+     "You want to know the full cost",
+     "Every stage priced in writing before you commit."
+    ]
+   ],
+   "close": "Your teeth and gums need to be healthy first, so if we find decay or gum disease, <b style=\"font-weight:500\">we treat that first and include it in your plan.</b>"
+  },
+  {
+   "block": "pricing",
+   "layout": "cards",
+   "tone": "panel",
+   "eyebrow": "Pricing",
+   "title": "Clear prices, <b>stage by stage.</b>",
+   "sub": "The cost depends on which treatments are in your plan and how many teeth are involved. You see the full cost in writing before treatment begins.",
+   "items": [
+    {
+     "tag": "Brighter",
+     "name": "Teeth whitening",
+     "desc": "Lightens your natural teeth. Usually done before bonding or veneers so new work matches.",
+     "price": "£250",
+     "unit": "usually £350",
+     "feats": [
+      "Free whitening consultation",
+      "Dentist-led",
+      "Before bonding or veneers"
+     ]
+    },
+    {
+     "tag": "Straighten first",
+     "name": "Invisalign &amp; clear aligners",
+     "desc": "Discreet straightening, usually the first stage so later work fits your teeth in their new position.",
+     "price": "£2,000",
+     "unit": "from",
+     "feats": [
+      "Free Invisalign consultation",
+      "No fixed braces",
+      "Planned around your bite"
+     ],
+     "featured": true
+    },
+    {
+     "tag": "Shape &amp; shade",
+     "name": "Bonding &amp; veneers",
+     "desc": "Composite bonding to repair chips and close gaps, or E.max veneers to change shape and shade.",
+     "price": "£695",
+     "unit": "E.max veneers",
+     "feats": [
+      "Composite bonding £300",
+      "Shade matched to your whitened teeth",
+      "Planned in your written plan"
+     ]
+    }
+   ],
+   "finance": {
+    "title": "Flexible finance",
+    "text": "Flexible finance options to spread the cost of treatment, with clear pricing agreed before anything begins.",
+    "aside": "Ask about finance at your consultation."
+   }
+  },
+  {
+   "block": "spotlight",
+   "name": "Planned in the right order",
+   "photo": {
+    "src": "assets/photos/dr-anas-ashekhi-concept-dental.jpg",
+    "pos": "50% 0%"
+   },
+   "badge": {
+    "name": "Dr Anas Ashekhi",
+    "role": "Principal Dentist · GDC 274450"
+   },
+   "eyebrow": "How we plan it",
+   "title": "The order of treatment <b>matters.</b>",
+   "sub": "Smile makeovers are an area of special interest for Dr Anas. Your written plan sets out each treatment, the order we’ll carry them out in and the cost of each stage.",
+   "items": [
+    [
+     "aligners",
+     "Straightening first",
+     "So any bonding or veneers are designed around your teeth in their new position."
+    ],
+    [
+     "whitening",
+     "Whitening before bonding",
+     "Whitening doesn’t change the colour of composite or porcelain, so we match new work to your whitened shade."
+    ],
+    [
+     "calendar",
+     "In stages, when you’re ready",
+     "Start with one treatment and continue when you’re ready. We’ll tell you if a stage needs to follow on."
+    ]
+   ]
+  },
+  {
+   "block": "form_band",
+   "name": "Book a consultation (form 2)",
+   "eyebrow": "Smile makeover consultation",
+   "title": "See your options <b>before you commit.</b>",
+   "sub": "We talk through what you’d like to change, examine your teeth and gums, and explain which treatments could achieve it, and in what order.",
+   "ticks": [
+    "Free Invisalign consultation",
+    "Free whitening consultation",
+    "Written plan with prices",
+    "Treatment in stages"
+   ],
+   "form_title": "Book your consultation"
+  },
+  {
+   "block": "explainer",
+   "name": "What is a smile makeover",
+   "photo": {
+    "src": "assets/photos/woman-admiring-her-healthy-white-smile-in-a-dental.jpg",
+    "pos": "50% 30%"
+   },
+   "eyebrow": "The treatment",
+   "title": "Two or more treatments, <b>working together.</b>",
+   "text": "A smile makeover combines two or more cosmetic treatments, carried out in a planned order, to change the look of your smile.",
+   "card": {
+    "title": "As simple, or as complete, as you need",
+    "text": "It might be as simple as whitening followed by bonding on a couple of front teeth, or a longer plan that starts with straightening. Every plan is bespoke, and we recommend only what suits your smile."
+   },
+   "facts": [
+    "Bespoke plan",
+    "Confirmed prices",
+    "Treatment in stages",
+    "Free consultations"
+   ]
+  },
+  {
+   "block": "steps",
+   "eyebrow": "Your smile makeover journey",
+   "title": "From first chat <b>to final result.</b>",
+   "active": 0,
+   "items": [
+    [
+     "Your goals",
+     "We talk through what you’d like to change and examine your teeth and gums."
+    ],
+    [
+     "Your options",
+     "We explain which treatments could achieve it, and in what order."
+    ],
+    [
+     "Your written plan",
+     "You receive a written plan with confirmed prices before you commit to anything."
+    ],
+    [
+     "Your treatment",
+     "Each treatment in the order set out in your plan, then we review the result with you."
+    ]
+   ]
+  },
+  {
+   "block": "services",
+   "style": "icon",
+   "name": "Treatments we combine",
+   "eyebrow": "Treatments we combine",
+   "title": "What can your makeover <b>include?</b>",
+   "sub": "Every plan is different. Yours is built from whichever of these your smile actually needs.",
+   "items": [
+    {
+     "icon": "aligners",
+     "title": "Invisalign",
+     "text": "Clear aligners to straighten your teeth, from £2,000."
+    },
+    {
+     "icon": "whitening",
+     "title": "Teeth whitening",
+     "text": "Lightens your natural teeth. Currently £250 (usually £350)."
+    },
+    {
+     "icon": "bonding",
+     "title": "Composite bonding",
+     "text": "Tooth-coloured resin to repair chips, close gaps and reshape teeth."
+    },
+    {
+     "icon": "veneers",
+     "title": "Veneers",
+     "text": "Thin coverings that change the shape and shade of your teeth. E.max veneers are £695."
+    },
+    {
+     "icon": "air",
+     "title": "Hygiene &amp; air polish",
+     "text": "Often a good starting point, so treatment begins on clean, stain-free teeth."
+    },
+    {
+     "icon": "droplet",
+     "title": "White spot removal",
+     "text": "Treatment for white marks on the teeth, discussed at your consultation."
+    }
+   ]
+  },
+  {
+   "block": "why_us",
+   "eyebrow": "How we work",
+   "title": "Nothing moves forward <b>without your say-so.</b>",
+   "items": [
+    [
+     "person",
+     "We listen first",
+     "Every appointment starts with understanding what you want from your care."
+    ],
+    [
+     "plan",
+     "We explain your options",
+     "What’s possible, what it involves and what it costs, before you commit to anything."
+    ],
+    [
+     "calm",
+     "We support nervous patients",
+     "If you need more time, more reassurance or sedation, we plan for it from the start."
+    ],
+    [
+     "card",
+     "We put it in writing",
+     "Your treatment plan and costs are confirmed in writing before treatment begins."
+    ],
+    [
+     "calendar",
+     "Weekend and evening appointments",
+     "Open Monday to Friday 9am to 6pm, and Saturday and Sunday 10:30am to 3pm."
+    ],
+    [
+     "pin",
+     "On Toton Lane, Stapleford",
+     "On-site parking, for patients across Stapleford, Beeston, Bramcote, Sandiacre and Long Eaton."
+    ]
+   ]
+  },
+  {
+   "block": "meet_dentist",
+   "name": "Dr Anas Ashekhi",
+   "role": "Principal Dentist · GDC 274450",
+   "quote": "Time to talk, clear explanations and a written plan with prices before any treatment begins. Whoever you see, that’s the approach.",
+   "creds": [
+    "BDS",
+    "Postgraduate Diploma in Restorative and Aesthetic Dentistry",
+    "Postgraduate Diploma in Implant Dentistry",
+    "Smile makeovers are an area of special interest"
+   ],
+   "photo": {
+    "src": "assets/photos/dr-anas-ashekhi-concept-dental.jpg",
+    "pos": "50% 0%"
+   }
+  },
+  {
+   "block": "practice_tour",
+   "eyebrow": "Inside the practice",
+   "title": "Take a look <b>around.</b>",
+   "poster": "assets/photos/concept-dental-reception-waiting-area.jpg",
+   "photos": [
+    "assets/photos/concept-dental-front-desk.jpg",
+    "assets/photos/dental-surgery-green-feature-wall.jpg",
+    "assets/photos/concept-dental-waiting-area.jpg",
+    {
+     "src": "assets/photos/dentist-talking-with-patient.jpg",
+     "pos": "50% 30%"
+    }
+   ]
+  },
+  {
+   "block": "faq",
+   "items": [
+    [
+     "How many treatments make a smile makeover?",
+     "Usually two or more, chosen to work together. We recommend only what suits your smile, so your plan might be shorter than you expect."
+    ],
+    [
+     "Why does the order of treatment matter?",
+     "Straightening first means bonding or veneers fit your teeth in their final position, and whitening first means your new work can be matched to your whitened shade."
+    ],
+    [
+     "Can I have treatment in stages?",
+     "Yes. Because your plan is set out in stages, you can start with one treatment and continue when you are ready. We will tell you if any stage needs to follow on from another."
+    ],
+    [
+     "Do I need a consultation first?",
+     "Yes. We need to see your teeth and gums and hear what you would like to change before we can plan treatment. Invisalign and whitening consultations are free."
+    ],
+    [
+     "How long does a smile makeover take?",
+     "It depends on the treatments you choose. A plan that includes straightening takes longer than one based on whitening and bonding. We set out the timeline in your written plan."
+    ]
+   ]
+  },
+  {
+   "block": "final_cta",
+   "eyebrow": "Get started",
+   "title": "One plan, <b>at your pace.</b>",
+   "size": 52,
+   "size_m": 32,
+   "sub": "Book your smile makeover consultation at Concept Dental &amp; Implant Clinic. Options, stages and costs explained before anything begins.",
+   "tags": [
+    "Free Invisalign consultation",
+    "Free whitening consultation",
+    "On-site parking"
+   ],
+   "trust": null,
+   "form_title": "Book your consultation"
+  }
+ ],
+ "thank_you": {
+  "text": "Our team will be in touch to confirm your consultation. If you’d rather pick a time yourself, you can book online now.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ },
+ "cta": "Book Consultation"
+}

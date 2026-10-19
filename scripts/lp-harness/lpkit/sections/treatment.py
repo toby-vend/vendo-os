@@ -6,7 +6,7 @@ from ..ui import sec, head, grid, photo, tick, cta_row
 
 
 def explainer(ctx, c, m):
-    left = photo(c["photo"], 360 if m else c.get("photo_h", 680))
+    left = photo(c["photo"], 360 if m else c.get("photo_h", 680), arch=ctx.brand.data.get("arch_photos", False))
     card = c.get("card")
     right = f'''<div style="display:flex;flex-direction:column;justify-content:center">
       {head(ctx, c.get('eyebrow'), c['title'], None, m, width=560)}

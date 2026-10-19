@@ -25,7 +25,7 @@ def _place(spec, fw, fh, fill=.86):
         left, top = min(0, max(fw - W * s, fw / 2 - spec["cx"] * s)), -t * s
     elif "face" in spec:
         fx, fy, fwd, fhd = spec["face"]
-        y0, y1 = fy - 1.1 * fhd, fy + 2.7 * fhd
+        y0, y1 = max(0, fy - 1.1 * fhd), fy + 2.7 * fhd  # a tight portrait has no headroom: never leave the frame top empty
         s = max(fh / (y1 - y0), fw / W)
         left, top = min(0, max(fw - W * s, fw / 2 - s * (fx + fwd / 2))), -s * y0
     else:

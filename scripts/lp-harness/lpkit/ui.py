@@ -96,10 +96,13 @@ def stars(n=5, s=16):
     return f'<span class="acc" style="display:inline-flex;gap:2px">{"".join(STAR.format(s=s) for _ in range(n))}</span>'
 
 
-def photo(ph, h, radius="var(--photo-r)"):
-    """ph = {"src": "assets/photos/x.jpg", "pos": "50% 40%"} or a bare path."""
+def photo(ph, h, radius="var(--photo-r)", arch=False):
+    """ph = {"src": "assets/photos/x.jpg", "pos": "50% 40%"} or a bare path. arch=True gives the brand's arch top
+    (brand.json "arch_photos": true applies it to the feature photos: explainer, meet_dentist, spotlight)."""
     if isinstance(ph, str):
         ph = {"src": ph}
+    if arch:
+        radius = "999px 999px 0 0"
     if ph.get("crop"):  # chest-up crop from a face box: crop = {w, h, top, bottom, cx} in source pixels
         c = ph["crop"]
         sc = h / (c["bottom"] - c["top"])

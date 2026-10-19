@@ -1,0 +1,26 @@
+{
+  "_note": "Verified prices and claims for Concept Dental LPs. Sources: conceptdental.co.uk pages read 19 Oct 2026; the founding-patient offer from the brand guideline (offer confirmed live by Toby, 19 Oct 2026).",
+  "prices": ["£25", "£50", "£20", "£200", "£9.99", "£16.99", "£26.99", "£2,000", "£250", "£350", "£300", "£695", "£75", "£99"],
+  "sources": {
+    "£25": "Adult check-up incl. all X-rays, now £25 (fees page). Founding-patient offer, first 100 (guideline, Toby 19 Oct)",
+    "£50": "Adult check-up usual price; emergency appointment inc. X-rays (fees + emergency pages)",
+    "£20": "Child check-up 0-12 (fees page)",
+    "£200": "Weekend / out-of-hours emergency appointment incl. treatment (fees + emergency pages)",
+    "£9.99": "Membership Plan A /month", "£16.99": "Membership Plan B /month", "£26.99": "Membership Plan C /month",
+    "£2,000": "Invisalign / clear aligners from (fees + smile makeover pages)",
+    "£250": "Teeth whitening now £250", "£350": "Teeth whitening usual price",
+    "£300": "Composite bonding (fees page lists £300; unit not stated: confirm per tooth)",
+    "£695": "E.max veneers (smile makeover page; fees page 'Emax Crowns / Veneers £695')",
+    "£75": "Routine hygiene", "£99": "3D CBCT scan"
+  },
+  "confirmed": [],
+  "to_confirm": [
+    "Composite bonding £300: per tooth?",
+    "E.max veneers £695: per tooth?",
+    "Finance: provider and terms (site only says 'flexible finance options')",
+    "Founding-patient offer wording: 'exam + digital scan' (guideline) vs 'check-up including all X-rays' (fees page); first 100 patients",
+    "Whether the dentist portraits and the 'concept-dental' clinic photos on the site are real or generated",
+    "Thank-you page: call/WhatsApp buttons wanted on the emergency thank-you page?",
+    "Smile gallery on conceptdental.co.uk uses Shutterstock images under 'Real Results'"
+  ]
+}

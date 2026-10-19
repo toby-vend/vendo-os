@@ -1,0 +1,477 @@
+{
+ "title": "New patient check-up",
+ "form": {
+  "fields": [
+   {
+    "label": "Full name",
+    "full": true
+   },
+   "Email",
+   "Mobile"
+  ],
+  "label": "Founding patient offer",
+  "title": "Book your check-up",
+  "sub": "No referral needed. New patients welcome.",
+  "note": "£25 check-up, usually £50, including all X-rays."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "New patients welcome · Stapleford, Nottingham",
+   "title": "New patient check-up, <b>now £25.</b>",
+   "tagline": "Been a while? No judgement here.",
+   "sub": "A thorough check-up with all the X-rays you need, explained in plain language, at a calm new practice on Toton Lane.",
+   "ticks": [
+    "All X-rays included",
+    "Written prices, no pressure",
+    "Sedation available",
+    "Weekend appointments"
+   ],
+   "ticks_m": [
+    "All X-rays included",
+    "Written prices, no pressure"
+   ],
+   "stats": [
+    [
+     "£25",
+     "Usually £50"
+    ],
+    [
+     "7",
+     "Days a week"
+    ],
+    [
+     "2",
+     "Principal dentists"
+    ]
+   ],
+   "stats_m": [
+    [
+     "£25",
+     "Usually £50"
+    ],
+    [
+     "7",
+     "Days a week"
+    ],
+    [
+     "2",
+     "Dentists"
+    ]
+   ],
+   "trust": false,
+   "photo": {
+    "src": "assets/photos/dr-zain-concept-dental.jpg",
+    "w": 1024,
+    "h": 1136,
+    "face": [
+     381,
+     190,
+     251,
+     251
+    ]
+   },
+   "seal": {
+    "top": "Founding patient",
+    "price": "£25",
+    "bottom": "Check-up + X-rays",
+    "was": "£50"
+   },
+   "device_gap_m": 270
+  },
+  {
+   "block": "usp_text",
+   "hide_m": false,
+   "label": "Four promises",
+   "items": [
+    [
+     "calm",
+     "Calm, patient-focused care, with sedation for nervous patients"
+    ],
+    [
+     "doctor",
+     "Postgraduate-trained dentists in restorative, aesthetic and implant dentistry"
+    ],
+    [
+     "scan",
+     "Modern equipment, including CBCT imaging and digital treatment planning"
+    ],
+    [
+     "plan",
+     "Clear written pricing before anything starts"
+    ]
+   ]
+  },
+  {
+   "block": "pain_points",
+   "title": "It’s been a while, <b>and that’s okay.</b>",
+   "sub": "If it’s been years since your last visit, you won’t be judged for it. Whatever brought you here, we start with where things stand today.",
+   "items": [
+    [
+     "You haven’t seen a dentist in years",
+     "Life got busy, or the last visit put you off. We start fresh, with no lectures."
+    ],
+    [
+     "You’re nervous about the dentist",
+     "Agree a stop signal, take it at your pace, and ask about sedation if you need it."
+    ],
+    [
+     "Something doesn’t feel quite right",
+     "Sensitivity, a chip, a filling that’s seen better days. Better looked at now than later."
+    ],
+    [
+     "You want to know the cost first",
+     "Every recommendation comes with a written price before anything begins."
+    ],
+    [
+     "You want the same dentist each time",
+     "You can ask to see the same dentist at every visit."
+    ],
+    [
+     "You’re looking for a family dentist",
+     "Parents can stay throughout children’s appointments, and child check-ups are £20."
+    ]
+   ],
+   "close": "Your check-up is a <b style=\"font-weight:500\">calm, honest look at your oral health</b>, with no pressure to decide anything on the day."
+  },
+  {
+   "block": "pricing",
+   "layout": "panel",
+   "eyebrow": "Pricing",
+   "title": "Clear, honest fees. <b>Always in writing.</b>",
+   "sub": "You’ll always know the cost before treatment begins. Every plan comes with clear, written pricing, and we talk you through your options first.",
+   "price_label": "Adult check-up, all X-rays included",
+   "price": "£25",
+   "price_note": "Usually £50",
+   "notes": [
+    "Children aged 0 to 12: £20.",
+    "Routine hygiene: £75."
+   ],
+   "photo": {
+    "src": "assets/photos/dentist-xray-review-concept-dental.jpg",
+    "pos": "40% 40%"
+   },
+   "get": [
+    [
+     "A full check of teeth, gums and mouth",
+     "With any X-rays you need, only where they’re clinically necessary"
+    ],
+    [
+     "Plain-language explanations",
+     "We walk you through what we’ve found, with no jargon and no pressure"
+    ],
+    [
+     "A written plan if you need treatment",
+     "What we recommend, why, and what it costs, before anything begins"
+    ],
+    [
+     "Your recall interval",
+     "Usually every six to twelve months, set by the health of your teeth and gums"
+    ]
+   ]
+  },
+  {
+   "block": "membership",
+   "eyebrow": "Membership",
+   "title": "Regular care, <b>spread monthly.</b>",
+   "sub": "Check-ups and hygiene visits on a monthly Direct Debit, with 10% off private treatment. No assessment needed to join.",
+   "groups": [
+    {
+     "label": "Plans",
+     "sub": "From £9.99 a month",
+     "plans": [
+      {
+       "name": "Plan A",
+       "price": "£9.99",
+       "who": "1 check-up, 1 hygiene visit",
+       "featured": false,
+       "feats": [
+        "1 dental check-up a year",
+        "1 hygiene visit a year",
+        "10% off private treatment",
+        "All small X-rays included",
+        "Priority appointments",
+        "Worldwide dental A&amp;E cover"
+       ]
+      },
+      {
+       "name": "Plan B",
+       "price": "£16.99",
+       "who": "2 check-ups, 2 hygiene visits",
+       "featured": true,
+       "feats": [
+        "2 dental check-ups a year",
+        "2 hygiene visits a year",
+        "10% off private treatment",
+        "Free child check-up (1 child)",
+        "All small X-rays included",
+        "Priority appointments",
+        "Worldwide dental A&amp;E cover"
+       ]
+      },
+      {
+       "name": "Plan C",
+       "price": "£26.99",
+       "who": "2 check-ups, 2 hygiene visits, family",
+       "featured": false,
+       "feats": [
+        "2 dental check-ups a year",
+        "2 hygiene visits a year",
+        "10% off private treatment",
+        "Free child check-ups (up to 2 children)",
+        "All small X-rays included",
+        "Priority appointments",
+        "Worldwide dental A&amp;E cover"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "block": "form_band",
+   "name": "Book your check-up (form 2)",
+   "eyebrow": "Founding patient offer",
+   "title": "Start fresh, <b>for £25.</b>",
+   "sub": "Book your first check-up at our new Stapleford practice. Usually £50, now £25 including all X-rays.",
+   "ticks": [
+    "All X-rays included",
+    "Written plan with prices",
+    "No referral needed",
+    "Weekend appointments"
+   ],
+   "form_title": "Book your check-up"
+  },
+  {
+   "block": "explainer",
+   "name": "Your first visit",
+   "photo": {
+    "src": "assets/photos/dentist-consultation-concept-dental-1.jpg",
+    "pos": "72% 50%"
+   },
+   "eyebrow": "Your first visit",
+   "title": "An unhurried check-up, <b>explained properly.</b>",
+   "text": "We check your teeth, gums and mouth, take any X-rays you need, and walk you through what we’ve found in plain language.",
+   "card": {
+    "title": "What happens afterwards?",
+    "text": "If everything is healthy, we’ll recommend how often to come back and how to look after your teeth at home. If you need treatment, you’ll leave with a written plan showing what we recommend, why, and what it costs. There’s no pressure to decide on the day."
+   },
+   "facts": [
+    "All X-rays included",
+    "No referral needed",
+    "Same dentist each visit",
+    "Sedation available"
+   ]
+  },
+  {
+   "block": "steps",
+   "eyebrow": "What to expect",
+   "title": "Five calm steps, <b>at your pace.</b>",
+   "items": [
+    [
+     "Book an appointment",
+     "Send us your details and we’ll arrange your first visit. No referral needed."
+    ],
+    [
+     "Consultation",
+     "We assess your oral health, listen to your goals and explain your options in plain language."
+    ],
+    [
+     "Approval",
+     "You get a written plan with confirmed prices. Nothing moves forward without your agreement."
+    ],
+    [
+     "Treatment",
+     "In a calm, comfortable setting, at your own pace, with sedation available if you need it."
+    ],
+    [
+     "Aftercare",
+     "Reviews, hygiene support and clear guidance to keep your results looking their best."
+    ]
+   ],
+   "active": 0
+  },
+  {
+   "block": "services",
+   "style": "photo",
+   "eyebrow": "Treatments",
+   "title": "Everything under <b>one roof.</b>",
+   "sub": "Our dentists’ postgraduate training means most treatments are planned and carried out here at the practice.",
+   "items": [
+    {
+     "title": "Check-ups &amp; hygiene",
+     "text": "Routine check-ups, hygiene from £75 and EMS AIRFLOW® polishing.",
+     "photo": {
+      "src": "assets/photos/dentist-treatment-concept-dental.jpg",
+      "pos": "50% 40%"
+     }
+    },
+    {
+     "title": "Emergency dentistry",
+     "text": "Appointments for pain, swelling and broken teeth, from £50 including X-rays.",
+     "photo": {
+      "src": "assets/photos/dentist-treating-patient.jpg",
+      "pos": "50% 35%"
+     }
+    },
+    {
+     "title": "Nervous patients",
+     "text": "Agreed stop signals, time to talk, and conscious sedation at the practice.",
+     "photo": {
+      "src": "assets/photos/serene-young-woman-with-closed-eyes-enjoying-the-s.jpg",
+      "pos": "50% 30%"
+     }
+    },
+    {
+     "title": "Cosmetic dentistry",
+     "text": "Whitening, composite bonding and veneers, with free whitening consultations.",
+     "photo": {
+      "src": "assets/photos/woman-admiring-her-healthy-white-smile-in-a-dental.jpg",
+      "pos": "50% 30%"
+     }
+    },
+    {
+     "title": "Invisalign &amp; clear aligners",
+     "text": "Discreet straightening from £2,000, with a free Invisalign consultation.",
+     "photo": {
+      "src": "assets/photos/pair-of-clear-plastic-orthodontic-aligners-on-a-gr.jpg",
+      "pos": "50% 60%"
+     }
+    },
+    {
+     "title": "Dental implants",
+     "text": "Planned with 3D CBCT imaging and placed by a postgraduate-trained implant dentist.",
+     "photo": {
+      "src": "assets/photos/dentist-xray-review-concept-dental.jpg",
+      "pos": "40% 40%"
+     }
+    }
+   ]
+  },
+  {
+   "block": "why_us",
+   "eyebrow": "How we work",
+   "title": "Nothing moves forward <b>without your say-so.</b>",
+   "items": [
+    [
+     "person",
+     "We listen first",
+     "Every appointment starts with understanding what you want from your care."
+    ],
+    [
+     "plan",
+     "We explain your options",
+     "What’s possible, what it involves and what it costs, before you commit to anything."
+    ],
+    [
+     "calm",
+     "We support nervous patients",
+     "If you need more time, more reassurance or sedation, we plan for it from the start."
+    ],
+    [
+     "card",
+     "We put it in writing",
+     "Your treatment plan and costs are confirmed in writing before treatment begins."
+    ],
+    [
+     "calendar",
+     "Weekend and evening appointments",
+     "Open Monday to Friday 9am to 6pm, and Saturday and Sunday 10:30am to 3pm."
+    ],
+    [
+     "pin",
+     "On Toton Lane, Stapleford",
+     "On-site parking, for patients across Stapleford, Beeston, Bramcote, Sandiacre and Long Eaton."
+    ]
+   ]
+  },
+  {
+   "block": "meet_dentist",
+   "name": "Dr Zain",
+   "role": "Principal Dentist · GDC 283159",
+   "quote": "Time to talk, clear explanations and a written plan with prices before any treatment begins. Whoever you see, that’s the approach.",
+   "creds": [
+    "BDS, MSc, MFDS RCS England, MFDS RCS Glasgow",
+    "Postgraduate Diploma in Restorative and Aesthetic Dentistry",
+    "Postgraduate Diploma in Implant Dentistry",
+    "Special interest in sedation, provided at the practice"
+   ],
+   "photo": {
+    "src": "assets/photos/dr-zain-concept-dental.jpg",
+    "pos": "50% 0%"
+   }
+  },
+  {
+   "block": "practice_tour",
+   "eyebrow": "Inside the practice",
+   "title": "Take a look <b>around.</b>",
+   "poster": "assets/photos/concept-dental-reception-waiting-area.jpg",
+   "photos": [
+    "assets/photos/concept-dental-front-desk.jpg",
+    "assets/photos/dental-surgery-green-feature-wall.jpg",
+    "assets/photos/concept-dental-waiting-area.jpg",
+    {
+     "src": "assets/photos/dentist-talking-with-patient.jpg",
+     "pos": "50% 30%"
+    }
+   ]
+  },
+  {
+   "block": "faq",
+   "items": [
+    [
+     "How much does a dental examination cost?",
+     "An adult check-up, including X-rays, is currently £25 (usually £50). Children aged 0 to 12 are £20. Our membership plans include check-ups from £9.99 a month."
+    ],
+    [
+     "Do I need to be an existing patient to book?",
+     "No. New patients are welcome and don’t need a referral."
+    ],
+    [
+     "Will I have X-rays at my examination?",
+     "Only where they’re clinically necessary. We’ll always explain why we recommend one before taking it."
+    ],
+    [
+     "What if I am nervous about attending?",
+     "Let us know when you book and we’ll go at your pace. Sedation is also available at the practice for patients who need extra support."
+    ],
+    [
+     "How often should I have a dental examination?",
+     "For most patients, every six to twelve months. We’ll advise on the right interval for you based on the health of your teeth and gums."
+    ],
+    [
+     "Can I see the same dentist each time?",
+     "Yes. You can ask to see the same dentist at every visit."
+    ]
+   ]
+  },
+  {
+   "block": "final_cta",
+   "eyebrow": "Get started",
+   "title": "Calm, expert dentistry. <b>Now on Toton Lane.</b>",
+   "size": 52,
+   "size_m": 32,
+   "sub": "Book your £25 check-up at Concept Dental &amp; Implant Clinic. All X-rays included, written prices, and no pressure to decide on the day.",
+   "tags": [
+    "No referral needed",
+    "Weekend appointments",
+    "On-site parking"
+   ],
+   "trust": null,
+   "form_title": "Book your check-up"
+  }
+ ],
+ "thank_you": {
+  "text": "Our team will be in touch to confirm your appointment. If you’d rather pick a time yourself, you can book online now.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ }
+}
