@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT))
 import build  # noqa: E402
 
 persona = sys.argv[1]
-page_ix = int(sys.argv[2]) if len(sys.argv) > 2 else 0
+page_id = sys.argv[2] if len(sys.argv) > 2 else None
 
 # Artboard names from the harness (data-name), in order
 names1 = re.findall(r'class="ab s1" id="[^"]+" data-name="([^"]+)"', build.BUILDS[persona][0]())
@@ -33,11 +33,12 @@ for block in re.split(r"\n---\n", md):
     prim = re.sub(r"\n{3,}", "\n\n", prim).replace("**", "")
     cards.append({"title": f"{m.group(1)} | {m.group(2)}", "headline": head, "primary": prim})
 
-data = {"names1": names1, "names9": names9, "cards": cards}
+data = {"page": page_id, "names1": names1, "names9": names9, "cards": cards}
 
 JS = r"""
 const D = __DATA__;
-const page = figma.currentPage;
+const page = D.page ? await figma.getNodeByIdAsync(D.page) : figma.currentPage;
+if (D.page) await figma.setCurrentPageAsync(page);
 const wrappers = page.children.filter(n => n.type === 'FRAME' && n.width > 4000);
 const all = [];
 for (const w of wrappers) { all.push(w); for (const n of w.findAll(() => true)) all.push(n); }

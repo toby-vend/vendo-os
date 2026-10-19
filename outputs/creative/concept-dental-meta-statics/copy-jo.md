@@ -141,7 +141,7 @@ Here's a simple way to do it. Our Plan C membership is £26.99 a month and inclu
 - Priority appointments
 - Worldwide dental A&E cover
 
-One payment a month, and everyone's check-ups are covered. Smaller household? Plan B is £16.99 a month and includes one child's check-up.
+One payment a month covers your check-ups and up to two children's. Just one child? Plan B is £16.99 a month and includes one child's check-up.
 
 We're a new practice on Toton Lane, Stapleford, with on-site parking and weekend appointments.
 

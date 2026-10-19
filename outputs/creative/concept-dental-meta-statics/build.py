@@ -254,8 +254,253 @@ def mark_9x16():
     return page("Concept Dental | Mark | 9x16", b)
 
 
+def paper(x, y, w, inner, rot=-1.5, pad=48, bg="#FFFDF9"):
+    """A sheet of paper/card lying on the canvas, with a soft lifted shadow."""
+    return (f'<div class="abs" data-name="Card" style="left:{x}px;top:{y}px;width:{w}px;padding:{pad}px;background:{bg};border-radius:6px;'
+            f'transform:rotate({rot}deg);box-shadow:0 28px 56px rgba(70,58,52,.22),0 4px 10px rgba(70,58,52,.12)">{inner}</div>')
+
+
+def price_rows(rows, size=26):
+    out = []
+    for name, price, was in rows:
+        w = f'<span style="color:{TAUPE_D};text-decoration:line-through;margin-right:12px;font-weight:400">{was}</span>' if was else ""
+        out.append(f'<div style="display:flex;justify-content:space-between;align-items:baseline;padding:{size * .55:.0f}px 0;border-bottom:1px solid {DUNE};font-size:{size}px">'
+                   f'<span>{name}</span><span style="font-weight:600;white-space:nowrap">{w}{price}</span></div>')
+    return "".join(out)
+
+
+TICK = '<svg width="{s}" height="{s}" viewBox="0 0 24 24" fill="none" style="flex:none;margin-top:4px"><circle cx="12" cy="12" r="11" stroke="{c}" stroke-width="1.4"/><path d="M7 12.5l3.2 3.2L17 9" stroke="{c}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+
+
+def ticks(items, size=26, gap=18, colour=COFFEE):
+    rows = "".join(f'<div style="display:flex;gap:16px;align-items:flex-start;font-size:{size}px;line-height:1.35">{TICK.format(s=round(size * 1.05), c=colour)}<span>{t}</span></div>' for t in items)
+    return f'<div style="display:flex;flex-direction:column;gap:{gap}px">{rows}</div>'
+
+
+# ---------------------------------------------------------------- DENISE (locked out, General)
+
+D_FEES = [("Adult check-up, inc. X-rays", "£25", "£50"), ("Child check-up (0–12)", "£20", ""), ("Routine hygiene", "£75", ""), ("White fillings", "from £150", "")]
+D_CHECK = ["Every tooth, including existing fillings", "Gum health screening", "Soft tissue check for signs of oral cancer", "X-rays where clinically necessary", "Time for your questions"]
+
+
+def denise_1x1():
+    b = []
+    b.append(board("D1", f"Rung round | Static | Object | Notepad | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(600, 120, 400, 880, 'denise-notepad.jpg', fx=.3, fy=.6)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:260px;width:500px;font-size:58px">You&rsquo;ve rung round. <em>Everywhere&rsquo;s full.</em></div>
+  <div class="abs body" style="left:80px;top:560px;width:470px;font-size:28px">We&rsquo;re a new private practice on Toton Lane, and <b style="font-weight:600">we&rsquo;re taking new patients.</b></div>
+  {seal(400, 690, 190)}
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_CHECK, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("D2", f"Actual number | Static | Object | Fees card | 1x1 | {DATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '30% 20%')}
+  {watermark(700, -60, 480, VANILLA, .45)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:220px;width:900px;font-size:58px">What does a private check-up <em>actually cost?</em></div>
+  {paper(110, 420, 640, '<div class="label" style="font-size:15px;color:' + TAUPE_D + ';margin-bottom:10px">Our fees · published online</div>' + price_rows(D_FEES, 25), rot=-1.8, pad=44)}
+  <div class="abs body" style="left:800px;top:520px;width:220px;font-size:24px">Every fee is on our website <em style="font-weight:500">before you book.</em></div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_CHECK, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("D3", f"Not pushed | Static | Object | Envelope | 1x1 | {DATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '80% 30%')}
+  {photo(80, 120, 420, 880, 'denise-envelope.jpg', fx=.5, fy=.6)}
+  <div class="abs" style="left:580px;top:96px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:580px;top:260px;width:440px;font-size:56px;color:{VANILLA}">Worried private means <em>being sold things?</em></div>
+  <div class="abs body" style="left:580px;top:540px;width:420px;font-size:26px;color:{DUNE}">You get a written plan. Every option, every price.</div>
+  <div class="abs rule" style="left:580px;top:670px;width:400px"></div>
+  <div class="abs hl" style="left:580px;top:700px;width:420px;font-size:38px;color:{VANILLA}">You take it home. <em>You decide.</em></div>
+  <div class="abs" style="left:580px;top:916px">{cta(CTA_CHECK, 'light', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("D4", f"No waiting list | Static | Site photo | Front desk | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(560, 120, 440, 880, 'site-concept-dental-front-desk.jpg', fx=.42, fy=.5)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:460px;font-size:84px">No waiting <em>list.</em></div>
+  <div class="abs body" style="left:80px;top:470px;width:440px;font-size:28px">A new private practice on Toton Lane, taking new patients. No referral needed.</div>
+  <div class="abs" style="left:80px;top:650px;width:440px">{ticks(['Book online, by phone or WhatsApp', 'Weekend appointments', 'On-site parking'], size=24, gap=12)}</div>
+  <div class="abs body" style="left:80px;top:820px;width:440px;font-size:24px">Check-up with X-rays <b style="font-weight:600">£25</b> <span style="color:#9C8670;text-decoration:line-through">£50</span></div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_CHECK, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("D5", f"Five minutes | Static | Object | Checklist | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {watermark(-140, 640, 520, DUNE)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:230px;width:920px;font-size:58px">Paid for a <em>five-minute</em> check-up before?</div>
+  {paper(330, 420, 640, '<div class="label" style="font-size:15px;color:' + TAUPE_D + ';margin-bottom:22px">Your check-up includes</div>' + ticks(D_CHECK, size=24, gap=14), rot=1.4, pad=44)}
+  <div class="abs hl" style="left:80px;top:470px;width:220px;font-size:96px;font-weight:200">£25</div>
+  <div class="abs body" style="left:84px;top:580px;width:220px;font-size:20px;color:{TAUPE_D}">usually £50</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_CHECK, size=18, h=68, pad=34)}</div>
+"""))
+    return page("Concept Dental | Denise | 1x1", b)
+
+
+def denise_9x16():
+    b = []
+    b.append(board("D1s", f"Rung round | Static | Object | Notepad | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='70% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(220)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:450px;text-align:center;font-size:76px">You&rsquo;ve rung round. <em>Everywhere&rsquo;s full.</em></div>
+  {photo(240, 690, 600, 600, 'denise-notepad.jpg', fx=.3, fy=.55)}
+  {seal(720, 1060, 210)}
+  <div class="abs body" style="left:120px;right:120px;top:1330px;text-align:center;font-size:32px">A new private practice on Toton Lane, and <b style="font-weight:600">we&rsquo;re taking new patients.</b></div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta(CTA_CHECK)}</div>
+"""))
+    b.append(board("D2s", f"Actual number | Static | Object | Fees card | 9x16 | {DATE}", "s9", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '40% 25%')}
+  {watermark(640, 120, 560, VANILLA, .7)}
+  <div class="abs" style="left:100px;top:270px">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;top:440px;width:880px;font-size:76px">What does a private check-up <em>actually cost?</em></div>
+  {paper(110, 760, 860, '<div class="label" style="font-size:18px;color:' + TAUPE_D + ';margin-bottom:12px">Our fees · published online</div>' + price_rows(D_FEES, 32), rot=-1.6, pad=56)}
+  <div class="abs body" style="left:100px;top:1300px;width:880px;font-size:32px">Every fee is on our website <em style="font-weight:500">before you book.</em></div>
+  <div class="abs" style="left:100px;top:1440px">{cta(CTA_CHECK)}</div>
+"""))
+    b.append(board("D3s", f"Not pushed | Static | Object | Envelope | 9x16 | {DATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '50% 40%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:72px;color:{VANILLA}">Worried private means <em>being sold things?</em></div>
+  {photo(240, 690, 600, 560, 'denise-envelope.jpg', fx=.5, fy=.6)}
+  <div class="abs body" style="left:120px;right:120px;top:1290px;text-align:center;font-size:32px;color:{DUNE}">A written plan, every option, every price. <em style="font-weight:500;color:{VANILLA}">You take it home. You decide.</em></div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta(CTA_CHECK, 'light')}</div>
+"""))
+    b.append(board("D4s", f"No waiting list | Static | Site photo | Front desk | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:110px">No waiting <em>list.</em></div>
+  {photo(190, 640, 700, 640, 'site-concept-dental-front-desk.jpg', fx=.42, fy=.55)}
+  {seal(760, 1080, 200)}
+  <div class="abs body" style="left:120px;right:120px;top:1310px;text-align:center;font-size:32px">A new private practice on Toton Lane, taking new patients. Weekend appointments, on-site parking.</div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta(CTA_CHECK)}</div>
+"""))
+    b.append(board("D5s", f"Five minutes | Static | Object | Checklist | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  {watermark(-160, 1400, 600, DUNE)}
+  <div class="abs" style="left:100px;top:270px">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;top:440px;width:880px;font-size:76px">Paid for a <em>five-minute</em> check-up before?</div>
+  {paper(110, 760, 860, '<div class="label" style="font-size:18px;color:' + TAUPE_D + ';margin-bottom:26px">Your check-up includes</div>' + ticks(D_CHECK, size=32, gap=18), rot=1.2, pad=56)}
+  <div class="abs" style="left:100px;top:1380px;display:flex;align-items:baseline;gap:22px"><span class="price" style="font-size:110px">£25</span><span class="body" style="font-size:26px;color:{TAUPE_D}">usually £50</span></div>
+  <div class="abs" style="left:560px;top:1400px">{cta(CTA_CHECK, size=18, h=68, pad=32)}</div>
+"""))
+    return page("Concept Dental | Denise | 9x16", b)
+
+
+# ---------------------------------------------------------------- JO (family consolidator, General)
+
+
+def member_card(x, y, w, rot=-6):
+    h = w * .63
+    return (f'<div class="abs" data-name="Membership card" style="left:{x}px;top:{y}px;width:{w}px;height:{h:.0f}px;border-radius:{w * .05:.0f}px;background:linear-gradient(135deg,#54473F,{COFFEE} 60%,#3a302b);'
+            f'transform:rotate({rot}deg);box-shadow:0 30px 60px rgba(37,37,37,.3),inset 0 1px 0 rgba(255,255,255,.12);color:{VANILLA};padding:{w * .07:.0f}px;overflow:hidden">'
+            f'<div class="abs" style="right:-{w * .12:.0f}px;bottom:-{w * .18:.0f}px;opacity:.25">{mark(w * .6, TAUPE)}</div>'
+            f'<div>{logo(w * .34, VANILLA)}</div>'
+            f'<div class="label" style="position:absolute;left:{w * .07:.0f}px;bottom:{w * .16:.0f}px;font-size:{w * .036:.0f}px;color:{TAUPE}">Membership · Plan C</div>'
+            f'<div style="position:absolute;left:{w * .07:.0f}px;bottom:{w * .06:.0f}px;font-size:{w * .07:.0f}px;font-weight:300">£26.99 a month</div></div>')
+
+
+J_PLAN = ["2 check-ups + 2 hygiene visits for you", "Free check-ups for up to 2 children", "All small X-rays included", "10% off private treatment"]
+
+
+def jo_1x1():
+    b = []
+    b.append(board("J1", f"Everyone but you | Static | Object | Calendar | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(600, 120, 400, 880, 'jo-calendar.jpg', fx=.5, fy=.35)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:280px;width:500px;font-size:62px">You booked everyone&rsquo;s check-up. <em>Except yours.</em></div>
+  <div class="abs body" style="left:80px;top:590px;width:470px;font-size:27px">Kids&rsquo; check-ups (0&ndash;12) <b style="font-weight:600">£20.</b> Yours, with X-rays, <b style="font-weight:600">£25.</b></div>
+  <div class="abs" style="left:80px;top:916px">{cta('Book the family in', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("J2", f"Their pace | Static | Object | Trainers | 1x1 | {DATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '30% 20%')}
+  {photo(560, 120, 440, 880, 'jo-trainers.jpg', fx=.5, fy=.7)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:460px;font-size:58px">Their first visit <em>isn&rsquo;t about treatment.</em></div>
+  <div class="abs body" style="left:80px;top:540px;width:440px;font-size:26px">It&rsquo;s the chair, the light and a friendly face. We go at their pace, and you stay with them the whole time.</div>
+  <div class="abs label" style="left:80px;top:790px;color:{TAUPE_D}">Children&rsquo;s check-ups</div>
+  <div class="abs price" style="left:74px;top:820px;font-size:80px">£20</div>
+  <div class="abs" style="left:80px;top:930px">{cta('Book their check-up', size=17, h=64, pad=30)}</div>
+"""))
+    b.append(board("J3", f"Car park counts | Static | Object | Keys | 1x1 | {DATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '80% 30%')}
+  {photo(80, 120, 420, 880, 'jo-keys.jpg', fx=.4, fy=.6)}
+  <div class="abs" style="left:580px;top:96px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:580px;top:260px;width:440px;font-size:56px;color:{VANILLA}">Getting everyone there is <em>half the battle.</em></div>
+  <div class="abs" style="left:580px;top:520px;width:420px;color:{VANILLA}">{ticks(['Saturday and Sunday appointments', 'On-site parking', 'Book online when it suits you'], size=25, gap=16, colour=TAUPE)}</div>
+  <div class="abs body" style="left:580px;top:760px;width:420px;font-size:24px;color:{DUNE}">Kids £20. Adults £25 with X-rays.</div>
+  <div class="abs" style="left:580px;top:916px">{cta('Book online', 'light', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("J4", f"Family plan | Static | Object | Membership card | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:220px;width:900px;font-size:58px">Your check-ups and the kids&rsquo;, <em>£26.99 a month.</em></div>
+  {member_card(560, 470, 430, rot=-7)}
+  <div class="abs" style="left:80px;top:470px;width:460px">{ticks(J_PLAN, size=24, gap=14)}</div>
+  <div class="abs body" style="left:80px;top:790px;width:460px;font-size:20px;color:{TAUPE_D}">Plan B, £16.99, includes one child&rsquo;s check-up.</div>
+  <div class="abs" style="left:80px;top:916px">{cta('Ask about membership', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("J5", f"All of you | Static | Object | Coats | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(560, 120, 440, 880, 'jo-coats.jpg', fx=.4, fy=.4)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:280px;width:460px;font-size:66px">Taking new patients. <em>All of you.</em></div>
+  <div class="abs" style="left:80px;top:560px;width:440px">{price_rows([("Children (0–12)", "£20", ""), ("Adults, with X-rays", "£25", "£50")], 25)}</div>
+  <div class="abs body" style="left:80px;top:740px;width:440px;font-size:22px;color:{TAUPE_D}">Toton Lane, Stapleford. On-site parking, weekend appointments.</div>
+  <div class="abs" style="left:80px;top:916px">{cta('Book the family in', size=18, h=68, pad=34)}</div>
+"""))
+    return page("Concept Dental | Jo | 1x1", b)
+
+
+def jo_9x16():
+    b = []
+    b.append(board("J1s", f"Everyone but you | Static | Object | Calendar | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='70% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(220)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:440px;text-align:center;font-size:72px">You booked everyone&rsquo;s check-up. <em>Except yours.</em></div>
+  {photo(240, 700, 600, 600, 'jo-calendar.jpg', fx=.5, fy=.35)}
+  <div class="abs body" style="left:120px;right:120px;top:1340px;text-align:center;font-size:32px">Kids&rsquo; check-ups <b style="font-weight:600">£20.</b> Yours, with X-rays, <b style="font-weight:600">£25.</b></div>
+  <div class="abs" style="left:0;right:0;top:1460px;display:flex;justify-content:center">{cta('Book the family in')}</div>
+"""))
+    b.append(board("J2s", f"Their pace | Static | Object | Trainers | 9x16 | {DATE}", "s9", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '50% 20%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:72px">Their first visit <em>isn&rsquo;t about treatment.</em></div>
+  {photo(240, 690, 600, 600, 'jo-trainers.jpg', fx=.5, fy=.7)}
+  {seal(720, 1080, 200, top="Children 0–12", big="£20", sub="Check-up")}
+  <div class="abs body" style="left:120px;right:120px;top:1330px;text-align:center;font-size:32px">We go at their pace, and you stay with them the whole time.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta('Book their check-up')}</div>
+"""))
+    b.append(board("J3s", f"Car park counts | Static | Object | Keys | 9x16 | {DATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '50% 40%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:72px;color:{VANILLA}">Getting everyone there is <em>half the battle.</em></div>
+  {photo(240, 690, 600, 520, 'jo-keys.jpg', fx=.4, fy=.6)}
+  <div class="abs" style="left:200px;top:1250px;width:700px;color:{VANILLA}">{ticks(['Saturday and Sunday appointments', 'On-site parking', 'Book online when it suits you'], size=30, gap=14, colour=TAUPE)}</div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta('Book online', 'light')}</div>
+"""))
+    b.append(board("J4s", f"Family plan | Static | Object | Membership card | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 20%')}
+  <div class="abs" style="left:100px;top:270px">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;top:430px;width:880px;font-size:74px">Your check-ups and the kids&rsquo;, <em>£26.99 a month.</em></div>
+  {member_card(250, 700, 580, rot=-5)}
+  <div class="abs" style="left:100px;top:1150px;width:880px">{ticks(J_PLAN, size=30, gap=14)}</div>
+  <div class="abs" style="left:100px;top:1470px">{cta('Ask about membership')}</div>
+"""))
+    b.append(board("J5s", f"All of you | Static | Object | Coats | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:80px">Taking new patients. <em>All of you.</em></div>
+  {photo(240, 690, 600, 560, 'jo-coats.jpg', fx=.4, fy=.4)}
+  <div class="abs" style="left:200px;top:1270px;width:680px">{price_rows([("Children (0–12)", "£20", ""), ("Adults, with X-rays", "£25", "£50")], 30)}</div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta('Book the family in')}</div>
+"""))
+    return page("Concept Dental | Jo | 9x16", b)
+
+
 BUILDS = {
     "mark": (mark_1x1, mark_9x16),
+    "denise": (denise_1x1, denise_9x16),
+    "jo": (jo_1x1, jo_9x16),
 }
 
 if __name__ == "__main__":
