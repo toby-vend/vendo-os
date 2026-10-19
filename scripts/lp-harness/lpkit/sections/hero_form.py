@@ -5,7 +5,7 @@ The brand's graphic device frames the lead clinician (devices.frame); on mobile 
 and the form overlaps its bottom edge.
 """
 from ..devices import frame
-from ..ui import tick, stars, form_card
+from ..ui import tick, stars, form_card, seal, watermark
 
 
 def hero_form(ctx, c, m):
@@ -14,19 +14,23 @@ def hero_form(ctx, c, m):
     glow = ctx.brand.data.get("hero", {}).get("glow")
     stats_d = c.get("stats", [])
     if m:
-        fr = (f'<div data-name="Device" style="position:relative;width:230px;height:360px;margin:{c.get('device_gap_m', 48)}px auto 0">{frame(ctx, ph, 230, 360)}</div>'
+        sl = f'<div style="position:absolute;right:-56px;bottom:40px">{seal(ctx, c["seal"], 130)}</div>' if c.get("seal") else ""
+        fr = (f'<div data-name="Device" style="position:relative;width:230px;height:360px;margin:{c.get('device_gap_m', 48)}px auto 0">{frame(ctx, ph, 230, 360)}{sl}</div>'
               if ph else "")
+        trust = (f'<div data-name="Trust line" style="display:flex;align-items:center;gap:10px;margin-top:18px">{stars(5, 14)}<span class="body fg2" style="font-size:13px;white-space:nowrap">{ctx.t(c.get('trust', '{{rating}} from {{review_count}} Google reviews'))}</span></div>'
+                 if c.get("trust", True) else "")
         stats = "".join(f'<div><div class="h1" style="font-size:32px">{ctx.t(n)}</div><div class="label fg3" style="margin-top:4px;font-size:12px">{ctx.t(l)}</div></div>'
                         for n, l in c.get("stats_m", stats_d))
         return f"""
 <section data-name="Hero" class="tone-light" style="position:relative;padding:40px 20px 48px;background:var(--s-bg)">
-  <div class="label acc">{ctx.t(c['eyebrow'])}</div>
+  {watermark(ctx, "hero_form", m)}
+  <div class="label acc" style="position:relative">{ctx.t(c['eyebrow'])}</div>
   <h1 class="display" style="margin-top:16px;font-size:{T['display'].get('size_m', 36)}px">{ctx.t(c['title'])}</h1>
   <p class="h2" style="margin-top:12px;font-size:22px;font-weight:300">{ctx.t(c.get('tagline', ''))}</p>
   <p class="body fg2" style="margin-top:12px">{ctx.t(c.get('sub', ''))}</p>
   <div style="display:grid;gap:10px;margin-top:20px">{"".join(tick(ctx, x, 15) for x in c.get('ticks_m', c.get('ticks', [])[:2]))}</div>
-  <div data-name="Hero button (scrolls to the form)" style="margin-top:22px"><span class="btn primary" style="height:54px;width:100%">{ctx.cta}</span></div>
-  <div data-name="Trust line" style="display:flex;align-items:center;gap:10px;margin-top:18px">{stars(5, 14)}<span class="body fg2" style="font-size:13px;white-space:nowrap">{ctx.t(c.get('trust', '{{rating}} from {{review_count}} Google reviews'))}</span></div>
+  <div data-name="Hero button (scrolls to the form)" style="margin-top:22px"><span class="btn primary" style="height:54px;width:100%">{ctx.cta_label}</span></div>
+  {trust}
   {fr}
   <div style="margin-top:{-60 if ph else 32}px;position:relative">{form_card(ctx, 350, 24, offer=True)}</div>
   <div style="display:flex;justify-content:space-between;margin-top:32px">{stats}</div>
@@ -34,11 +38,12 @@ def hero_form(ctx, c, m):
     stats = "".join(f'<div><div class="h1" style="font-size:40px">{ctx.t(n)}</div><div class="label fg3" style="margin-top:6px">{ctx.t(l)}</div></div>'
                     for n, l in stats_d)
     bgl = f'<div style="position:absolute;inset:0;background:radial-gradient(circle at 72% 40%,{glow} 0%,var(--s-bg) 55%)"></div>' if glow else ""
-    fr = (f'<div data-name="Device" class="hero-s" style="position:absolute;right:320px;top:100px;width:380px;height:640px">{frame(ctx, ph, 380, 640)}</div>'
+    sl = f'<div style="position:absolute;left:-90px;bottom:60px">{seal(ctx, c["seal"], 180)}</div>' if c.get("seal") else ""
+    fr = (f'<div data-name="Device" class="hero-s" style="position:absolute;right:320px;top:100px;width:380px;height:640px">{frame(ctx, ph, 380, 640)}{sl}</div>'
           if ph else "")
     return f"""
 <section data-name="Hero" class="tone-light" style="position:relative;min-height:840px;padding:0px 80px;background:var(--s-bg)">
-  {bgl}
+  {bgl}{watermark(ctx, "hero_form", m)}
   <div class="hero-in" style="position:relative;max-width:1280px;margin:0 auto;min-height:840px">
   <div class="hero-copy" style="position:relative;padding:96px 0 80px;width:560px">
     <div class="label acc">{ctx.t(c['eyebrow'])}</div>

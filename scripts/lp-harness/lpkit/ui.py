@@ -14,6 +14,8 @@ STAR = ('<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="currentColor"><
         '1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg>')
 ARROW = ('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
          'stroke-linecap="round" stroke-linejoin="round"><path d="{d}"/></svg>')
+ARROW_BTN = ('<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" '
+             'stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>')
 PLAY = '<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'
 
 
@@ -24,6 +26,13 @@ class Ctx:
         self.brand, self.client, self.page = brand, client, page
         self.cta = page.get("cta") or client.get("cta", "Book Now")  # SOP wording only: Book Now, Book Appointment, Book Consultation
         self.form = page.get("form", {})
+
+    @property
+    def cta_label(self):
+        """The CTA text, plus the brand's arrow if its buttons carry one ("says what happens next")."""
+        if self.brand.data.get("button", {}).get("arrow"):
+            return self.cta + ARROW_BTN
+        return self.cta
 
     def t(self, s):
         """Fill {{tokens}} from client.json (name, address, rating, review_count ...) in any content string."""
@@ -44,6 +53,9 @@ class Ctx:
 def sec(ctx, name, block, inner, m, tone=None, pad=(112, 80), pad_m=(64, 20), extra=""):
     py, px = pad_m if m else pad
     tn = ctx.brand.tone(block, tone)
+    wm = watermark(ctx, block, m, tn)
+    if wm:  # the mark sits behind the content, clipped to the section
+        inner = f'{wm}<div style="position:relative">{inner}</div>'
     return (f'<section data-name="{name}" class="tone-{tn}" style="position:relative;padding:{py}px {px}px;{extra}">'
             f'{inner}</section>')
 
@@ -101,7 +113,7 @@ def photo(ph, h, radius="var(--photo-r)"):
 def cta_row(ctx, m, top=48):
     """The repeated CTA: one unified button that scrolls to the form. The form is the only CTA (no call, no WhatsApp)."""
     return (f'<div data-name="CTA" style="display:flex;{"flex-direction:column;align-items:flex-start;" if m else "align-items:center;"}gap:{16 if m else 24}px;margin-top:{top}px">'
-            f'<span class="btn primary">{ctx.cta}</span></div>')
+            f'<span class="btn primary">{ctx.cta_label}</span></div>')
 
 
 def form_card(ctx, width, pad=40, offer=False, title=None):
@@ -118,7 +130,7 @@ def form_card(ctx, width, pad=40, offer=False, title=None):
   <div class="h2" style="margin-top:10px">{ctx.t(title or f.get('title', 'Book your appointment'))}</div>
   <div class="body fg3" style="margin-top:6px">{ctx.t(f.get('sub', ''))}</div>
   <div style="display:grid;grid-template-columns:{"1fr" if width < 400 else "1fr 1fr"};gap:16px;margin-top:24px">{fields}</div>
-  <span class="btn {'offer' if offer else 'primary'}" style="width:100%;margin-top:26px;height:56px">{ctx.cta}</span>
+  <span class="btn {'offer' if offer else 'primary'}" style="width:100%;margin-top:26px;height:56px">{ctx.cta_label}</span>
   {note}
   <div class="body fg3" style="margin-top:6px;font-size:12px;text-align:center">By submitting, you agree to our <u>privacy policy</u>.</div>
 </div>"""
@@ -135,5 +147,31 @@ def progress(m, share_d, share_m):
             f'<div style="width:{share_m if m else share_d};height:2px;background:var(--fg);border-radius:2px"></div></div>')
 
 
+def seal(ctx, sd, w):
+    """Offer seal (round, double hairline ring), e.g. Concept's founding-patient £25 exam. Only while the offer is
+    genuinely live; sd = {"top", "price", "bottom", "was"?}."""
+    was = f'<div class="body" style="font-size:{w * .055:.0f}px;margin-top:{w * .02:.0f}px;opacity:.6;text-decoration:line-through">{ctx.t(sd["was"])}</div>' if sd.get("was") else ""
+    return (f'<div data-name="Offer seal" class="tone-dark" style="position:relative;width:{w}px;height:{w}px;border-radius:50%;background:var(--s-bg);'
+            f'border:1px solid var(--fine);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">'
+            f'<div style="position:absolute;inset:{w * .05:.0f}px;border-radius:50%;border:1px solid var(--fine)"></div>'
+            f'<div class="label" style="font-size:{w * .05:.0f}px;letter-spacing:.16em">{ctx.t(sd["top"])}</div>'
+            f'<div class="price" style="font-size:{w * .3:.0f}px;margin-top:{w * .03:.0f}px">{ctx.t(sd["price"])}</div>'
+            f'<div class="label" style="font-size:{w * .052:.0f}px;letter-spacing:.14em;margin-top:{w * .04:.0f}px;opacity:.85;max-width:{w * .7:.0f}px">{ctx.t(sd["bottom"])}</div>{was}</div>')
+
+
 def bullets(ctx, items, size=15):
     return "".join(f'<div class="body fg2" style="font-size:{size}px;line-height:1.5;display:flex;gap:10px"><span class="acc">•</span><span>{ctx.t(i)}</span></div>' for i in items)
+
+
+def watermark(ctx, block, m, tone="light"):
+    """The brand's watermark mark (e.g. Concept's CD monogram in Soft Dune), cropped off an edge of a section.
+    brand.json: "watermark": {"file", "light", "dark", "blocks": {"<block>": {"x", "y", "w", "x_m", "y_m", "w_m"}}}"""
+    wm = ctx.brand.data.get("watermark")
+    if not wm or block not in wm.get("blocks", {}):
+        return ""
+    b = wm["blocks"][block]
+    x, y, w = (b.get("x_m", b["x"]), b.get("y_m", b["y"]), b.get("w_m", b["w"])) if m else (b["x"], b["y"], b["w"])
+    color = wm.get("dark" if tone == "dark" else "light")
+    svg = ctx.brand.svg(wm["file"])
+    return (f'<div data-name="Watermark" style="position:absolute;inset:0;overflow:hidden;pointer-events:none">'
+            f'<div style="position:absolute;{"right" if b.get("anchor") == "right" else "left"}:{x}px;top:{y}px;width:{w}px;color:{color}">{svg}</div></div>')

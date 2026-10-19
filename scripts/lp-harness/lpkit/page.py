@@ -44,7 +44,7 @@ def bottom_bar(ctx):
     """Mobile sticky bottom bar: the form CTA only, scrolls to the hero form. Drawn at the first screen's fold."""
     return (f'<div class="bar tone-light" data-name="Sticky bottom bar (fixed to viewport bottom)" style="position:absolute;left:0;top:760px;width:390px;height:84px;'
             f'padding:12px 16px;background:var(--s-bg);box-shadow:0 -8px 24px rgba(0,0,0,.1);display:grid;z-index:5">'
-            f'<span class="btn primary" style="height:56px">{ctx.cta}</span></div>')
+            f'<span class="btn primary" style="height:56px">{ctx.cta_label}</span></div>')
 
 
 def render_sections(ctx, recipe, m):

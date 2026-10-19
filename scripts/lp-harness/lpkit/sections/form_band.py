@@ -15,7 +15,7 @@ def form_band(ctx, c, m):
         inner = (f'<div class="label acc">{ctx.t(c.get("m_label", "Book now"))}</div>'
                  f'<h2 class="h1" style="margin-top:12px;font-size:30px">{ctx.t(c["title"])}</h2>'
                  f'<p class="body fg2" style="margin-top:12px">{ctx.t(c.get("m_sub", "It takes under a minute. We’ll call you back to confirm."))}</p>'
-                 f'<div style="margin-top:24px"><span class="btn primary" style="height:56px;width:100%">{ctx.cta}</span></div>'
+                 f'<div style="margin-top:24px"><span class="btn primary" style="height:56px;width:100%">{ctx.cta_label}</span></div>'
                  + (f'<div style="margin-top:20px">{note_card(ctx, note, m)}</div>' if note else ""))
         return sec(ctx, "Book now (mobile: button to hero form)", "form_band", inner, True, c.get("tone"), pad_m=(48, 20))
     left = f'''<div style="display:flex;flex-direction:column;justify-content:center">

@@ -37,10 +37,14 @@ class Brand:
         return override or self.rhythm.get(block) or self.rhythm.get("default", "light")
 
     def logo(self, which="dark", cls="logo"):
-        path = self.root / self.data["logo"][which]
-        s = path.read_text()
+        return self.svg(self.data["logo"][which], cls)
+
+    def svg(self, rel, cls="logo"):
+        """Inline an SVG so it takes currentColor: fills are stripped, width/height dropped (CSS sizes it)."""
+        s = (self.root / rel).read_text()
         s = re.sub(r"<\?xml.*?\?>|<!DOCTYPE.*?>", "", s, flags=re.S)
         s = re.sub(r'fill:#[0-9a-fA-F]{6};?', "", s)
+        s = re.sub(r'(fill|stroke)="#[0-9a-fA-F]{3,6}"', r'\1="currentColor"', s)
         s = re.sub(r'(<svg[^>]*?)\swidth="[^"]*"', r"\1", s, count=1)
         s = re.sub(r'(<svg[^>]*?)\sheight="[^"]*"', r"\1", s, count=1)
         return s.replace("<svg", f'<svg class="{cls}" fill="currentColor"', 1)
@@ -84,17 +88,19 @@ class Brand:
             "card": dict(sbg=p["card"], fg=p["ink"], fg2=p["ink2"], fg3=p["muted"], surface=p["bg"], alt=p["panel"],
                          rule=rgba(p["ink"], .12), btn=p["ink"], btnfg=p["bg"]),
             "dark": dict(sbg=p["dark"], fg=p["on_dark"], fg2=p["on_dark2"], fg3=p["on_dark2"], surface=p["dark2"], alt=p["dark2"],
-                         rule=rgba(p["on_dark2"], .2), btn=p.get("btn_on_dark", p["panel"]), btnfg=p["ink"]),
+                         rule=rgba(p["on_dark2"], .2), btn=p.get("btn_on_dark", p["panel"]), btnfg=p.get("btn_on_dark_fg", p["ink"]),
+                         extra=(f"--accent:{p['accent_on_dark']};" if p.get("accent_on_dark") else "")
+                         + (f"--fine:{p['fine_on_dark']};" if p.get("fine_on_dark") else "")),
         }
         tone_css = "\n".join(
             f".tone-{n} {{ --s-bg:{v['sbg']};--fg:{v['fg']};--fg2:{v['fg2']};--fg3:{v['fg3']};--surface:{v['surface']};"
-            f"--alt:{v['alt']};--rule:{v['rule']};--btn-bg:{v['btn']};--btn-fg:{v['btnfg']};color:var(--fg); }}"
+            f"--alt:{v['alt']};--rule:{v['rule']};--btn-bg:{v['btn']};--btn-fg:{v['btnfg']};{v.get('extra', '')}color:var(--fg); }}"
             for n, v in tones.items())
         types = "\n".join(self._type_rule(k, v) for k, v in t.items() if k not in ("price",))
         price = t.get("price", {})
         return f"""
 {faces}
-:root {{ {roots}; --card-r:{sh['card']}px; --btn-r:{sh['button']}px; --field-r:{sh['field']}px; --photo-r:{sh.get('photo', sh['card'])}px; --thumb-r:{sh.get('thumb', sh['card'])}px; }}
+:root {{ {roots}; --fine:{p.get('fine', rgba(p['ink'], .2))}; --card-r:{sh['card']}px; --btn-r:{sh['button']}px; --field-r:{sh['field']}px; --photo-r:{sh.get('photo', sh['card'])}px; --thumb-r:{sh.get('thumb', sh['card'])}px; }}
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{ background: #2a2a2a; font-family: '{fonts['family']}', {fonts.get('fallback', 'sans-serif')}; padding: 80px; color: {p['ink']}; }}
 .page {{ background: {p['bg']}; overflow: hidden; }}
@@ -108,7 +114,8 @@ section.tone-light, section.tone-panel, section.tone-card, section.tone-dark {{ 
         border-radius: var(--btn-r); font-weight: {btn.get('weight', 600)}; font-size: {btn.get('size', 13)}px; letter-spacing: {btn.get('tracking', '.14em')};
         text-transform: {btn.get('case', 'uppercase')}; white-space: nowrap; text-decoration: none; }}
 .btn.primary {{ background: var(--btn-bg); color: var(--btn-fg); }}
-.btn.offer {{ background: var(--accent); color: {p.get('on_accent', p['bg'])}; }}
+.btn.offer {{ background: {p.get('offer', 'var(--accent)')}; color: {p.get('on_accent', p['bg'])}; }}
+.btn svg {{ flex: none; margin-left: 14px; }}
 .btn.outline {{ border: 1.5px solid var(--fg); color: var(--fg); }}
 .card {{ border-radius: var(--card-r); }}
 .field {{ display: flex; flex-direction: column; gap: 8px; }}

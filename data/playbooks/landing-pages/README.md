@@ -45,7 +45,9 @@ in Figma, built on the kit's sections and branded to the client, plus the review
 - No guaranteed outcomes. No sedation promises beyond what the client offers.
 
 **Imagery and design**
-- The client's own photos and video from their Drive or website. Never stock. Flag gaps instead.
+- The client's own photos and video from their Drive or website first. If the client has no photography yet (a new
+  practice), use stock where it helps the page, mark every stock slot in NOTES.md, and give a shot list of the real
+  photos to get (Toby, 19 Oct 2026). Real photos replace stock as soon as they exist.
 - Brand from the signed-off guideline (`/client-meta-statics` Phase 1), not just its colours: headline style, the
   graphic device, photo treatment, shapes and the light/dark rhythm all go in `brand.json` (see the harness README).
 - Desktop 1440 and mobile 390 frames, plus the responsive `index.html` preview. Sticky header on mobile; a Book Now

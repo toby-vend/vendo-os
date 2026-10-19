@@ -3,7 +3,7 @@
 @font-face { font-family: 'Metropolis'; src: url(../assets/fonts/Metropolis-Regular.otf); font-weight: 400; font-style: normal; }
 @font-face { font-family: 'Metropolis'; src: url(../assets/fonts/Metropolis-Medium.otf); font-weight: 500; font-style: normal; }
 @font-face { font-family: 'Metropolis'; src: url(../assets/fonts/Metropolis-SemiBold.otf); font-weight: 600; font-style: normal; }
-:root { --ink:#14211a;--ink2:#293425;--muted:#877663;--bg:#eae3de;--panel:#e1d5ca;--card:#ffffff;--accent:#ab6f4b;--on-accent:#eae3de;--dark:#14211a;--dark2:#293425;--on-dark:#eae3de;--on-dark2:#e1d5ca;--field-border:#d8cec4; --card-r:30px; --btn-r:999px; --field-r:12px; --photo-r:30px; --thumb-r:24px; }
+:root { --ink:#14211a;--ink2:#293425;--muted:#877663;--bg:#eae3de;--panel:#e1d5ca;--card:#ffffff;--accent:#ab6f4b;--on-accent:#eae3de;--dark:#14211a;--dark2:#293425;--on-dark:#eae3de;--on-dark2:#e1d5ca;--field-border:#d8cec4; --fine:rgba(20,33,26,0.2); --card-r:30px; --btn-r:999px; --field-r:12px; --photo-r:30px; --thumb-r:24px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #2a2a2a; font-family: 'Metropolis', sans-serif; padding: 80px; color: #14211a; }
 .page { background: #eae3de; overflow: hidden; }
@@ -27,6 +27,7 @@ section.tone-light, section.tone-panel, section.tone-card, section.tone-dark { b
         text-transform: uppercase; white-space: nowrap; text-decoration: none; }
 .btn.primary { background: var(--btn-bg); color: var(--btn-fg); }
 .btn.offer { background: var(--accent); color: #eae3de; }
+.btn svg { flex: none; margin-left: 14px; }
 .btn.outline { border: 1.5px solid var(--fg); color: var(--fg); }
 .card { border-radius: var(--card-r); }
 .field { display: flex; flex-direction: column; gap: 8px; }

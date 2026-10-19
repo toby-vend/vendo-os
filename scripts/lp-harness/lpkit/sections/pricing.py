@@ -22,7 +22,7 @@ def pricing(ctx, c, m):
         <div style="display:flex;align-items:baseline;gap:16px;margin-top:8px"><span class="price" style="font-size:{72 if m else 96}px">{ctx.t(c['price'])}</span><span class="body fg2">{ctx.t(c.get('price_note', ''))}</span></div>
         {notes}
       </div>
-      <span class="btn primary" style="margin-top:32px;align-self:flex-start">{ctx.cta}</span>
+      <span class="btn primary" style="margin-top:32px;align-self:flex-start">{ctx.cta_label}</span>
     </div>'''
     rows = "".join(f'''<div style="display:flex;gap:18px;padding:22px 0;border-bottom:1px solid var(--rule)">
         <i style="flex:none;width:36px;height:36px;border-radius:50%;background:var(--alt);display:flex;align-items:center;justify-content:center">{TICK.format(s=12)}</i>
