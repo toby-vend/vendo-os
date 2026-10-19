@@ -497,10 +497,356 @@ def jo_9x16():
     return page("Concept Dental | Jo | 9x16", b)
 
 
+# ---------------------------------------------------------------- PETER (single gap, Implants)
+
+P_OPTIONS = [("Implant", "Fixed. Teeth either side left alone. Minor surgery.", "£2,500", "inc. CBCT scan + crown"),
+             ("Bridge", "Fixed. No surgery. Neighbouring teeth prepared.", "£650", "per unit"),
+             ("Partial denture", "Removable. No surgery.", "£650", "")]
+
+
+def option_cards(x, y, w, size=1.0, gap=22, stack=False):
+    cards = []
+    for i, (name, desc, price, note) in enumerate(P_OPTIONS):
+        bg = COFFEE if i == 0 else "#FFFDF9"
+        fg = VANILLA if i == 0 else COFFEE
+        cards.append(f'<div style="flex:1;background:{bg};color:{fg};border-radius:8px;padding:{30 * size:.0f}px {26 * size:.0f}px;box-shadow:0 20px 40px rgba(70,58,52,.16);display:flex;flex-direction:column;gap:{12 * size:.0f}px">'
+                     f'<div class="label" style="font-size:{15 * size:.0f}px;color:{TAUPE}">0{i + 1}</div>'
+                     f'<div style="font-size:{34 * size:.0f}px;font-weight:400;line-height:1.1">{name}</div>'
+                     f'<div style="font-size:{19 * size:.0f}px;line-height:1.45;opacity:.85;min-height:{0 if stack else 80 * size:.0f}px">{desc}</div>'
+                     f'<div style="font-size:{46 * size:.0f}px;font-weight:300;line-height:1;margin-top:auto">{price}</div>'
+                     f'<div class="label" style="font-size:{12 * size:.0f}px;letter-spacing:.12em;opacity:.7;min-height:{14 * size:.0f}px">{note}</div></div>')
+    direction = "column" if stack else "row"
+    return f'<div class="abs" data-name="Options" style="left:{x}px;top:{y}px;width:{w}px;display:flex;flex-direction:{direction};gap:{gap}px">{"".join(cards)}</div>'
+
+
+def tooth_row(x, y, w, colour=COFFEE, drift=True, raster=True):
+    """Simple line drawing: a row of molars with one gap; neighbours lean into it."""
+    def tooth(cx, lean=0):
+        return (f'<g transform="rotate({lean} {cx} 150)"><path d="M{cx - 34} 40 q-6 -26 18 -28 q16 -2 16 10 q0 -12 16 -10 q24 2 18 28 '
+                f'l-6 60 q-3 18 -12 52 q-4 14 -10 0 l-6 -36 l-6 36 q-6 14 -10 0 q-9 -34 -12 -52 z" fill="none" stroke="{colour}" stroke-width="2.2" stroke-linejoin="round"/></g>')
+    teeth = tooth(60) + tooth(150) + tooth(240, 9 if drift else 0) + tooth(420, -9 if drift else 0) + tooth(510)
+    gum = f'<path d="M10 70 Q285 92 560 70" fill="none" stroke="{TAUPE}" stroke-width="1.5" stroke-dasharray="4 6"/>'
+    arrows = (f'<path d="M262 30 l26 14 M262 30 l8 26" stroke="{TAUPE_D}" stroke-width="2" fill="none" stroke-linecap="round"/>'
+              f'<path d="M398 30 l-26 14 M398 30 l-8 26" stroke="{TAUPE_D}" stroke-width="2" fill="none" stroke-linecap="round"/>') if drift else ""
+    gap = f'<text x="330" y="132" text-anchor="middle" font-family="Montserrat" font-size="15" font-weight="600" letter-spacing="3" fill="{TAUPE_D}">GAP</text>'
+    if raster:  # Figma capture mangles the rotated SVG paths, so the harness uses the PNG rendered from this SVG
+        return (f'<img class="abs" data-name="Tooth row" src="assets/tooth-row.png" '
+                f'style="left:{x}px;top:{y}px;width:{w}px;height:{w * 618 / 1600:.0f}px">')
+    return (f'<div class="abs" data-name="Tooth row" style="left:{x}px;top:{y}px;width:{w}px">'
+            f'<svg viewBox="0 0 570 220" width="{w}" height="{w * 220 / 570:.0f}" style="display:block;overflow:visible">{gum}{teeth}{arrows}{gap}</svg></div>')
+
+
+def receipt(x, y, w, rows, total, rot=1.2, size=26):
+    items = "".join(f'<div style="display:flex;gap:14px;align-items:baseline;font-size:{size}px;padding:{size * .45:.0f}px 0;border-bottom:1px dashed {TAUPE}">'
+                    f'{TICK.format(s=round(size * .9), c=COFFEE)}<span>{r}</span></div>' for r in rows)
+    inner = (f'<div class="label" style="font-size:{size * .6:.0f}px;color:{TAUPE_D};margin-bottom:12px">Single implant · what&rsquo;s included</div>{items}'
+             f'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:{size * .8:.0f}px">'
+             f'<span class="label" style="font-size:{size * .6:.0f}px">Total, in writing</span><span style="font-size:{size * 2.4:.0f}px;font-weight:300">{total}</span></div>')
+    return paper(x, y, w, inner, rot=rot, pad=round(size * 1.7))
+
+
+P_INCLUDED = ["CBCT scan to plan it", "The implant", "Your custom-made crown"]
+
+
+def peter_1x1():
+    b = []
+    b.append(board("P1", f"Three options | Static | Object | Option cards | 1x1 | {DATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '30% 15%')}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:220px;width:900px;font-size:64px">One gap. <em>Three options.</em></div>
+  {option_cards(80, 370, 920, size=.92)}
+  <div class="abs body" style="left:80px;top:830px;width:900px;font-size:24px">We&rsquo;ll tell you honestly which one suits you, including leaving it.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("P2", f"Nobody can see it | Static | Illustration | Drift | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:230px;width:900px;font-size:70px">Nobody can see it. <em>Your teeth can.</em></div>
+  {tooth_row(190, 420, 700)}
+  <div class="abs body" style="left:80px;top:720px;width:880px;font-size:27px">The teeth next to a gap can drift and tilt into the space. Find out where yours stands before they do.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("P3", f"Other side | Static | Object | Steak | 1x1 | {DATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '80% 30%')}
+  {photo(80, 120, 420, 880, 'peter-steak.jpg', fx=.45, fy=.65)}
+  <div class="abs" style="left:580px;top:96px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:580px;top:250px;width:440px;font-size:54px;color:{VANILLA}">You&rsquo;ve chewed on the other side <em>since it came out.</em></div>
+  <div class="abs body" style="left:580px;top:540px;width:420px;font-size:26px;color:{DUNE}">A single implant puts a fixed tooth back where the gap is.</div>
+  <div class="abs rule" style="left:580px;top:660px;width:400px"></div>
+  <div class="abs" style="left:580px;top:690px;color:{VANILLA}"><div class="label" style="color:{TAUPE}">Implant, scan and crown</div><div class="price" style="font-size:96px;margin-top:14px">£2,500</div></div>
+  <div class="abs" style="left:580px;top:916px">{cta(CTA_IMPLANT, 'light', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("P4", f"Everything in | Static | Object | Receipt | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {watermark(-140, 640, 520, DUNE)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:230px;width:440px;font-size:60px">One implant. <em>Everything in.</em></div>
+  <div class="abs body" style="left:80px;top:480px;width:400px;font-size:24px">Confirmed in writing before you commit. Led by Dr Zain, Postgraduate Diploma in Implant Dentistry.</div>
+  {receipt(500, 220, 510, P_INCLUDED, "£2,500", rot=1.6, size=30)}
+  <div class="abs body" style="left:540px;top:760px;width:420px;font-size:22px;color:{TAUPE_D}">Usually £3,000</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("P5", f"Find out first | Static | Object | CBCT tablet | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(560, 120, 440, 880, 'peter-cbct.jpg', fx=.5, fy=.55)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:460px;font-size:60px">Not sure an implant&rsquo;s <em>right for you?</em></div>
+  <div class="abs body" style="left:80px;top:530px;width:440px;font-size:26px">A CBCT scan shows the bone around your gap in 3D. You&rsquo;ll know if you&rsquo;re suitable, and what it costs, before you commit.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    return page("Concept Dental | Peter | 1x1", b)
+
+
+def peter_9x16():
+    b = []
+    b.append(board("P1s", f"Three options | Static | Object | Option cards | 9x16 | {DATE}", "s9", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '30% 15%')}
+  <div class="abs" style="left:100px;top:270px">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;top:430px;width:880px;font-size:80px">One gap. <em>Three options.</em></div>
+  {option_cards(100, 690, 880, size=.82, gap=14, stack=True)}
+  <div class="abs" style="left:100px;top:1480px">{cta(CTA_IMPLANT)}</div>
+"""))
+    b.append(board("P2s", f"Nobody can see it | Static | Illustration | Drift | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 20%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:440px;text-align:center;font-size:84px">Nobody can see it. <em>Your teeth can.</em></div>
+  {tooth_row(140, 790, 800)}
+  <div class="abs body" style="left:120px;right:120px;top:1180px;text-align:center;font-size:34px">The teeth next to a gap can drift and tilt into the space. Find out where yours stands before they do.</div>
+  <div class="abs" style="left:0;right:0;top:1460px;display:flex;justify-content:center">{cta(CTA_IMPLANT)}</div>
+"""))
+    b.append(board("P3s", f"Other side | Static | Object | Steak | 9x16 | {DATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '50% 40%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:70px;color:{VANILLA}">You&rsquo;ve chewed on the other side <em>since it came out.</em></div>
+  {photo(240, 720, 600, 520, 'peter-steak.jpg', fx=.45, fy=.65)}
+  <div class="abs body" style="left:120px;right:120px;top:1290px;text-align:center;font-size:32px;color:{DUNE}">A single implant puts a fixed tooth back where the gap is. £2,500, including your CBCT scan and crown.</div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta(CTA_IMPLANT, 'light')}</div>
+"""))
+    b.append(board("P4s", f"Everything in | Static | Object | Receipt | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 20%')}
+  <div class="abs" style="left:100px;top:270px">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;top:430px;width:880px;font-size:80px">One implant. <em>Everything in.</em></div>
+  {receipt(150, 680, 780, P_INCLUDED, "£2,500", rot=1.2, size=32)}
+  <div class="abs body" style="left:100px;top:1280px;width:880px;font-size:30px">Confirmed in writing before you commit. Usually £3,000. Led by Dr Zain, PgDip Implant Dentistry.</div>
+  <div class="abs" style="left:100px;top:1460px">{cta(CTA_IMPLANT)}</div>
+"""))
+    b.append(board("P5s", f"Find out first | Static | Object | CBCT tablet | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:76px">Not sure an implant&rsquo;s <em>right for you?</em></div>
+  {photo(240, 700, 600, 560, 'peter-cbct.jpg', fx=.5, fy=.55)}
+  <div class="abs body" style="left:120px;right:120px;top:1300px;text-align:center;font-size:32px">A CBCT scan shows the bone in 3D. Know if you&rsquo;re suitable, and the cost, before you commit.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_IMPLANT)}</div>
+"""))
+    return page("Concept Dental | Peter | 9x16", b)
+
+
+# ---------------------------------------------------------------- LINDA (loose denture, Implants)
+
+
+def linda_1x1():
+    b = []
+    b.append(board("L1", f"Adhesive | Static | Object | Adhesive tube | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(560, 120, 440, 880, 'linda-adhesive.jpg', fx=.4, fy=.6)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:460px;font-size:62px">Still using adhesive <em>every morning?</em></div>
+  <div class="abs body" style="left:80px;top:500px;width:440px;font-size:27px">And by the evening, it&rsquo;s worn off.</div>
+  <div class="abs rule" style="left:80px;top:600px;width:400px"></div>
+  <div class="abs body" style="left:80px;top:630px;width:440px;font-size:27px">Dentures can be held in place by implants, so they don&rsquo;t rely on adhesive. <em style="font-weight:500">Worth one conversation.</em></div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("L2", f"Apples cut up | Static | Object | Apple slices | 1x1 | {DATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '30% 20%')}
+  {photo(560, 120, 440, 880, 'linda-apple.jpg', fx=.4, fy=.62)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:460px;font-size:58px">When did you start <em>cutting your apples up?</em></div>
+  <div class="abs body" style="left:80px;top:520px;width:440px;font-size:26px">You didn&rsquo;t decide to. The denture decided for you.</div>
+  <div class="abs body" style="left:80px;top:640px;width:440px;font-size:26px">Ask about dentures that are <b style="font-weight:600">held in place by implants.</b></div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("L3", f"Not too old | Static | Object | Reading glasses | 1x1 | {DATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '80% 30%')}
+  {photo(80, 120, 420, 880, 'linda-glasses.jpg', fx=.4, fy=.6)}
+  <div class="abs" style="left:580px;top:96px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:580px;top:260px;width:440px;font-size:58px;color:{VANILLA}">Think you&rsquo;re too old <em>for implants?</em></div>
+  <div class="abs body" style="left:580px;top:520px;width:420px;font-size:26px;color:{DUNE}">Age on its own isn&rsquo;t what decides it.</div>
+  <div class="abs" style="left:580px;top:620px;width:420px;color:{VANILLA}">{ticks(['Your gums', 'The bone in your jaw', 'Your general health'], size=26, gap=12, colour=TAUPE)}</div>
+  <div class="abs body" style="left:580px;top:810px;width:420px;font-size:22px;color:{DUNE}">We check all three, and tell you honestly.</div>
+  <div class="abs" style="left:580px;top:916px">{cta(CTA_IMPLANT, 'light', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("L4", f"Laugh freely | Static | Site photo | Front desk | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(560, 120, 440, 880, 'site-concept-dental-front-desk.jpg', fx=.42, fy=.5)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:260px;width:460px;font-size:56px">You&rsquo;ve started laughing <em>with your hand over your mouth.</em></div>
+  <div class="abs body" style="left:80px;top:560px;width:440px;font-size:26px">Dentures held in place by implants don&rsquo;t rely on adhesive.</div>
+  <div class="abs hl" style="left:80px;top:690px;width:440px;font-size:36px"><em>Ask what&rsquo;s possible for you.</em></div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("L5", f"Booking for Mum | Static | Object | Two teas | 1x1 | {DATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '30% 20%')}
+  {photo(560, 120, 440, 880, 'linda-two-teas.jpg', fx=.5, fy=.6)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:460px;font-size:62px">Noticed Mum <em>cutting everything up?</em></div>
+  <div class="abs body" style="left:80px;top:500px;width:440px;font-size:26px">You can call us on her behalf. We&rsquo;ll talk you both through it, and you&rsquo;ll get a written plan to take home together.</div>
+  <div class="abs body" style="left:80px;top:760px;width:440px;font-size:24px"><b style="font-weight:600">01157 731923</b> · on-site parking</div>
+  <div class="abs" style="left:80px;top:916px">{cta('Call or book online', size=18, h=68, pad=34)}</div>
+"""))
+    return page("Concept Dental | Linda | 1x1", b)
+
+
+def linda_9x16():
+    b = []
+    rows = [("L1s", "Adhesive", "Adhesive tube", 'linda-adhesive.jpg', VANILLA, COFFEE, "Still using adhesive <em>every morning?</em>",
+             "Dentures can be held in place by implants, so they don&rsquo;t rely on adhesive. Worth one conversation.", .4, .6),
+            ("L2s", "Apples cut up", "Apple slices", 'linda-apple.jpg', DUNE, COFFEE, "When did you start <em>cutting your apples up?</em>",
+             "You didn&rsquo;t decide to. Ask about dentures that are held in place by implants.", .4, .62),
+            ("L3s", "Not too old", "Reading glasses", 'linda-glasses.jpg', COFFEE, VANILLA, "Think you&rsquo;re too old <em>for implants?</em>",
+             "Age on its own isn&rsquo;t what decides it. Your gums, bone and general health do. We check all three.", .4, .6),
+            ("L4s", "Laugh freely", "Front desk", 'site-concept-dental-front-desk.jpg', VANILLA, COFFEE, "Laughing with your hand <em>over your mouth?</em>",
+             "Dentures held in place by implants don&rsquo;t rely on adhesive. Ask what&rsquo;s possible for you.", .42, .55),
+            ("L5s", "Booking for Mum", "Two teas", 'linda-two-teas.jpg', DUNE, COFFEE, "Noticed Mum <em>cutting everything up?</em>",
+             "Call us on her behalf on 01157 731923. We&rsquo;ll talk you both through it.", .5, .6)]
+    for bid, concept, detail, img, bg, fg, hl, body, fx, fy in rows:
+        talent = "Site photo" if img.startswith("site-") else "Object"
+        light = bg == COFFEE
+        b.append(board(bid, f"{concept} | Static | {talent} | {detail} | 9x16 | {DATE}", "s9", bg, f"""
+  {glow('rgba(202,179,156,.18)' if light else 'rgba(252,246,238,.7)', '50% 30%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA if light else COFFEE)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:76px;color:{fg}">{hl}</div>
+  {photo(240, 700, 600, 560, img, fx=fx, fy=fy)}
+  <div class="abs body" style="left:120px;right:120px;top:1300px;text-align:center;font-size:32px;color:{DUNE if light else COFFEE}">{body}</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta('Call or book online' if bid == 'L5s' else CTA_IMPLANT, 'light' if light else 'dark')}</div>
+"""))
+    return page("Concept Dental | Linda | 9x16", b)
+
+
+# ---------------------------------------------------------------- BARRY (fears the surgery, Implants)
+
+
+def chat_phone(x, y, w, msgs, rot=-4):
+    h = w * 2.05
+    bubbles = "".join(
+        f'<div style="align-self:{"flex-end" if me else "flex-start"};max-width:82%;background:{COFFEE if me else "#FFFFFF"};color:{VANILLA if me else COFFEE};'
+        f'padding:{w * .045:.0f}px {w * .055:.0f}px;border-radius:{w * .06:.0f}px;font-size:{w * .052:.0f}px;line-height:1.4;box-shadow:0 2px 6px rgba(0,0,0,.06)">{t}</div>'
+        for me, t in msgs)
+    return (f'<div class="abs" data-name="Phone" style="left:{x}px;top:{y}px;width:{w}px;height:{h:.0f}px;border-radius:{w * .13:.0f}px;background:#1d1a18;padding:{w * .035:.0f}px;'
+            f'transform:rotate({rot}deg);box-shadow:0 40px 80px rgba(37,37,37,.35)">'
+            f'<div style="width:100%;height:100%;border-radius:{w * .1:.0f}px;background:{DUNE};overflow:hidden;display:flex;flex-direction:column">'
+            f'<div style="background:{VANILLA};padding:{w * .1:.0f}px {w * .06:.0f}px {w * .04:.0f}px;display:flex;align-items:center;gap:{w * .04:.0f}px;border-bottom:1px solid {DUNE}">'
+            f'<div style="width:{w * .12:.0f}px;height:{w * .12:.0f}px;border-radius:50%;background:{COFFEE};display:flex;align-items:center;justify-content:center">{mark(w * .07, VANILLA)}</div>'
+            f'<div style="font-size:{w * .05:.0f}px;font-weight:600;color:{COFFEE}">Concept Dental</div></div>'
+            f'<div style="flex:1;display:flex;flex-direction:column;gap:{w * .035:.0f}px;padding:{w * .06:.0f}px;justify-content:flex-start">{bubbles}</div></div></div>')
+
+
+B_MSGS = [(True, "Hi, I&rsquo;m really nervous about implants. Can I ask a few questions before I book?"),
+          (False, "Of course. Ask anything you like, and we&rsquo;ll talk you through exactly what&rsquo;s involved.")]
+B_STEPS = ["We examine the gap and talk it through", "A CBCT scan plans the implant", "Written plan and cost. You decide", "Implant placed under local anaesthetic", "Healing, then your crown"]
+
+
+def barry_1x1():
+    b = []
+    b.append(board("B1", f"Horror stories | Static | Object | Bedside phone | 1x1 | {DATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '80% 30%')}
+  {photo(80, 120, 420, 880, 'barry-bedside.jpg', fx=.5, fy=.55)}
+  <div class="abs" style="left:580px;top:96px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:580px;top:260px;width:440px;font-size:56px;color:{VANILLA}">You&rsquo;ve read every <em>horror story going.</em></div>
+  <div class="abs body" style="left:580px;top:500px;width:420px;font-size:26px;color:{DUNE}">None of them are about your mouth.</div>
+  <div class="abs rule" style="left:580px;top:600px;width:400px"></div>
+  <div class="abs body" style="left:580px;top:630px;width:420px;font-size:26px;color:{VANILLA}">Your consultation is a look, a scan and a conversation. <em style="font-weight:500">Nothing else.</em></div>
+  <div class="abs" style="left:580px;top:916px">{cta(CTA_IMPLANT, 'light', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("B2", f"Stop any time | Static | Object | Empty chair | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(560, 120, 440, 880, 'barry-chair.jpg', fx=.4, fy=.6)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:460px;font-size:70px">You can stop <em>at any point.</em></div>
+  <div class="abs body" style="left:80px;top:500px;width:440px;font-size:27px">We agree a signal before we start. Raise it, and we stop, take a break or slow down.</div>
+  <div class="abs hl" style="left:80px;top:700px;width:440px;font-size:36px"><em>You&rsquo;re in control of the pace.</em></div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("B3", f"The steps | Static | Object | Timeline | 1x1 | {DATE}", "s1", VANILLA, f"""
+  {glow()}
+  {photo(640, 80, 360, 520, 'peter-cbct.jpg', fx=.5, fy=.55)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:240px;width:520px;font-size:60px">Here&rsquo;s exactly <em>what happens.</em></div>
+  <div class="abs" style="left:80px;top:430px;width:900px">{steps(B_STEPS, COFFEE, COFFEE, size=25, gap=12, active=2)}</div>
+  <div class="abs body" style="left:640px;top:650px;width:360px;font-size:22px">No surprises. Just steps. Single implant £2,500, scan and crown included.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_IMPLANT, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("B4", f"Conversation first | Static | Site photo | Scan review | 1x1 | {DATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '20% 20%')}
+  {photo(520, 120, 480, 960, 'site-dentist-xray-review-concept-dental.jpg', fx=.45, fy=.4, shadow=False)}
+  <div class="abs" style="left:80px;top:80px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:80px;top:260px;width:420px;font-size:58px;color:{VANILLA}">Petrified of getting <em>an implant?</em></div>
+  <div class="abs body" style="left:80px;top:500px;width:400px;font-size:27px;color:{DUNE}">Start with a conversation, not a procedure. Meet the dentist. Ask everything.</div>
+  <div class="abs body" style="left:80px;top:720px;width:400px;font-size:21px;color:{TAUPE}">Led by Dr Zain, Postgraduate Diploma in Implant Dentistry.</div>
+  <div class="abs" style="left:80px;top:930px">{cta(CTA_IMPLANT, 'light', size=17, h=64, pad=30)}</div>
+"""))
+    b.append(board("B5", f"Message first | Static | Object | Chat | 1x1 | {DATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '70% 20%')}
+  {chat_phone(620, 120, 360, B_MSGS, rot=-4)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:480px;font-size:70px">Not ready <em>to book?</em></div>
+  <div class="abs body" style="left:80px;top:470px;width:470px;font-size:27px">Send us a WhatsApp first. Ask what it involves, what you&rsquo;ll feel, what it costs. No commitment.</div>
+  <div class="abs" style="left:80px;top:916px">{cta('Message us first', size=18, h=68, pad=34)}</div>
+"""))
+    return page("Concept Dental | Barry | 1x1", b)
+
+
+def barry_9x16():
+    b = []
+    b.append(board("B1s", f"Horror stories | Static | Object | Bedside phone | 9x16 | {DATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '50% 40%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:76px;color:{VANILLA}">You&rsquo;ve read every <em>horror story going.</em></div>
+  {photo(240, 700, 600, 560, 'barry-bedside.jpg', fx=.5, fy=.55)}
+  <div class="abs body" style="left:120px;right:120px;top:1300px;text-align:center;font-size:32px;color:{DUNE}">None of them are about your mouth. Your consultation is a look, a scan and a conversation.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_IMPLANT, 'light')}</div>
+"""))
+    b.append(board("B2s", f"Stop any time | Static | Object | Empty chair | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:86px">You can stop <em>at any point.</em></div>
+  {photo(240, 700, 600, 560, 'barry-chair.jpg', fx=.4, fy=.6)}
+  <div class="abs body" style="left:120px;right:120px;top:1300px;text-align:center;font-size:32px">We agree a signal before we start. Raise it, and we stop. You&rsquo;re in control of the pace.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_IMPLANT)}</div>
+"""))
+    b.append(board("B3s", f"The steps | Static | Object | Timeline | 9x16 | {DATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:100px;top:270px">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;top:430px;width:880px;font-size:80px">Here&rsquo;s exactly <em>what happens.</em></div>
+  <div class="abs" style="left:100px;top:700px;width:880px">{steps(B_STEPS, COFFEE, COFFEE, size=34, gap=22, active=2)}</div>
+  <div class="abs body" style="left:100px;top:1330px;width:880px;font-size:30px">No surprises. Just steps. Single implant £2,500, with the CBCT scan and crown.</div>
+  <div class="abs" style="left:100px;top:1460px">{cta(CTA_IMPLANT)}</div>
+"""))
+    b.append(board("B4s", f"Conversation first | Static | Site photo | Scan review | 9x16 | {DATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '50% 30%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:76px;color:{VANILLA}">Petrified of getting <em>an implant?</em></div>
+  {photo(190, 680, 700, 600, 'site-dentist-xray-review-concept-dental.jpg', fx=.45, fy=.4, shadow=False)}
+  <div class="abs body" style="left:120px;right:120px;top:1320px;text-align:center;font-size:32px;color:{DUNE}">Start with a conversation, not a procedure. Meet the dentist and ask everything.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_IMPLANT, 'light')}</div>
+"""))
+    b.append(board("B5s", f"Message first | Static | Object | Chat | 9x16 | {DATE}", "s9", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '50% 30%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:86px">Not ready <em>to book?</em></div>
+  {chat_phone(370, 620, 340, B_MSGS, rot=-3)}
+  <div class="abs body" style="left:120px;right:120px;top:1370px;text-align:center;font-size:30px">Send us a WhatsApp first. No commitment.</div>
+  <div class="abs" style="left:0;right:0;top:1440px;display:flex;justify-content:center">{cta('Message us first')}</div>
+"""))
+    return page("Concept Dental | Barry | 9x16", b)
+
+
 BUILDS = {
     "mark": (mark_1x1, mark_9x16),
     "denise": (denise_1x1, denise_9x16),
     "jo": (jo_1x1, jo_9x16),
+    "peter": (peter_1x1, peter_9x16),
+    "linda": (linda_1x1, linda_9x16),
+    "barry": (barry_1x1, barry_9x16),
 }
 
 if __name__ == "__main__":
