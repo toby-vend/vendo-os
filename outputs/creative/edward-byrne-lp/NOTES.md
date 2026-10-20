@@ -20,7 +20,7 @@ Build: `python3 make_pages.py`, then from `scripts/lp-harness/`: `build.py`, `li
 Brand spec sheet: `python3 brand_spec.py` after building `brand-spec`.
 
 ## Pages in Figma
-Node ids: Brand spec page 0:1 (sheet 5:4, desktop 6:4, mobile 4:4); New patient page 1:2 (desktop 8:4, mobile 7:4,
+Node ids: Brand spec page 0:1 (sheet 5:4, desktop 6:4, mobile 4:4); New patient page 1:2 (desktop 11:4, mobile 10:4,
 thank-you desktop 3:4, thank-you mobile 2:4). Captured 20 Oct 2026, auto layout stripped.
 - "Brand spec": palette + type sheet, desktop and mobile of the hero, USP strip, pricing panel and form band.
 - "New patient": desktop 1440, mobile 390 and both thank-you frames. Sections: header, hero + form (offer seal £60),
@@ -41,6 +41,7 @@ thank-you desktop 3:4, thank-you mobile 2:4). Captured 20 Oct 2026, auto layout 
   £60.00). No "was" price exists, so the seal has none.
 - CTA wording "Book Appointment" (closest SOP wording to the draft's "Schedule An Appointment").
 - Reviews: "Rated Excellent from 287 Google reviews", the draft's Trustindex widget (see open checks for 413).
+- Meet your dentist has no quote attributed to Dr Neeta (none published); it is plain practice copy. GDC 82463 is from the team page and the draft (GDC register not checked).
 - Hero photo: Dr Smita at the villa's front door (shoot p8). Meet your dentist: Dr Neeta Mehta at the door (p12).
   Both are matched by face to the named headshots on the draft; nobody wears a badge.
 - Team carousel: the five dentists on the draft with their draft headshots, cropped mid-chest, first names only,
