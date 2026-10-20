@@ -1,0 +1,36 @@
+{
+ "_note": "Source of truth (Toby's Meta draft, 20 Oct 2026): lp.wilsonhousedentalpractice.com/new-patients-offer-meta (read 20 Oct 2026). The Google draft (/new-patients-offer) has the same copy and prices; it only adds the phone number and a Book Now header button. Site facts from wilsonhousedentalpractice.com (home, /team/, /contact-us/, /fees-and-practice-membership-plans/), read the same day.",
+ "prices": ["£85", "£82.80", "£112.80"],
+ "sources": {
+  "£85": "New patient check-up including all X-rays (draft hero, price list, why-us and FAQ). Fees page '2026 Private Fees' agrees: New Patient Assessment – Adult £85.00",
+  "£82.80": "Hygiene appointment from £82.80 (draft hygiene section and why-us). CONFLICT: the draft's hero price list says £83.80; the fees page 2026 table says £83.30 (its 2025 table says £82.80)",
+  "£112.80": "Hygiene appointment with Airflow from £112.80 (draft hygiene section). CONFLICT: fees page 2026 table says £113.80 (2025 table £112.80)"
+ },
+ "claims": {
+  "reviews": "Trustindex Google widget on the draft: EXCELLENT, based on 428 reviews. The draft's header line says '425+ 5 Star Google Reviews'. The brand guideline uses 4.9 from 454 (Vendo catchment report, July 2026)",
+  "included": "Full dental examination; gum health review and oral cancer screening; digital X-rays included; complimentary 3D intra oral scan; time to talk; personalised treatment plan, no pressure and no hidden fees (draft)",
+  "hygiene": "Scale and polish, gum health check, optional Airflow stain removal, fresh breath, oral care advice, ongoing preventive care (draft)",
+  "hours": "Monday to Friday 8am to 6pm, Saturday and Sunday closed (draft). /contact-us/ adds a 12:30 to 1:30pm lunch closure",
+  "parking": "Free on-site parking and accessible spaces, step-free entrance (homepage)",
+  "denplan": "Denplan Essentials and Denplan Care offered (homepage)",
+  "awards": "Six badges on the homepage, all FINALIST: Dental Industry Awards 2023, 2024 and 2025; The Dentistry Awards 2024; Private Dentistry Awards 2024 and 2025. The homepage text says 'finalists and winners' but no winner badge is shown, so the LP says finalist only",
+  "clinicians": "Draft: Dr Keval Shah BDS Lond 2006 GDC 104249; Dr Zakaria Ghrouf DMD GDC 256699; Dr Ayyub Ahmed BDS (Sheffield) MFDS RCPS(Glasg) GDC 297066; Dr Kajal Sangani BDS MJDF RCS(Eng) GDC 228311; Dr Gizel Pereira BDS (UCLan) GDC 313476; Dr Nisha Sisodia BDS Lond 2005 GDC 101365. Site /team/: dentists Zakaria, Nisha, Keval, Ayyub, Gizel; hygienist Sarah Taylor; nurses Zara (head), Natalia, Nicola; trainee nurses Kesia, Jasmin, Ciera",
+  "team_photos": "Team carousel uses the site /team/ headshots, each paired with its name on that page (name tags visible on Keval, Gizel, Sarah, Zakaria). Dr Kajal is on the draft but not on the site team page, so she is left out",
+  "reviews_used": "Google reviews shown on the draft: Hannah Crook, jacqui burnett, doug futers, Margaret Hallett, Morts Barakat, Nader Srouji",
+  "videos": "YouTube e9-iPLeN30A 'Why Choose Wilson House Dental Practice?' and 2uPc7IxwYVQ 'General Dentistry at Wilson House Dental Practice' (Kana Health Group channel, embedded on the homepage)",
+  "booking": "Online booking link from the site header: booking.uk.hsone.app/soe/new/%20?pid=UKWLO02"
+ },
+ "confirmed": [],
+ "to_confirm": [
+  "Hygiene price: the draft says from £82.80 (twice) and from £83.80 (hero price list); the fees page 2026 table says from £83.30. Airflow: draft £112.80, fees page 2026 £113.80. The LP uses the draft's £82.80 and £112.80",
+  "Google reviews: draft widget 428, draft header '425+', brand guideline 4.9 from 454. The LP uses 'Rated Excellent from 428 Google reviews'",
+  "Awards: all six homepage badges say Finalist; the homepage text says 'finalists and winners'. Any wins to add?",
+  "Dr Nisha's headshot on the draft LP looks different from her photo on the site team page; the LP uses the site photo",
+  "Dr Kajal Sangani is on the draft but not on the site team page: still at the practice?",
+  "Meet your dentist uses Dr Zakaria (named in four of the draft's ten reviews); the quote is written from the draft's FAQ wording and needs his approval",
+  "Opening hours: draft Mon to Fri 8am to 6pm; contact page adds a 12:30 to 1:30pm lunch closure",
+  "Thank-you page online booking link (HS One link from the site header) still current?",
+  "Call / WhatsApp buttons wanted on the thank-you page? (kept off the LP itself)",
+  "Draft template leftover: the header review stars image loads from zenhousedental.co.uk"
+ ]
+}
