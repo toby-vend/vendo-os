@@ -1,7 +1,9 @@
 # Wilson House: landing pages (design)
 
 Built 20 Oct 2026 on the shared harness (`scripts/lp-harness/`) with `/client-landing-pages`, Phases 0 to 3, new
-patient page only (Meta). Figma: "Wilson House — Landing Pages" (Kana Health Group folder).
+patient page only (Meta). Figma: "Wilson House — Landing Pages" Dp4CF7h8Obwe2UT1elvp8d (Kana Health Group folder).
+Frames: Brand spec page: sheet 6:4, desktop 5:4, mobile 4:4. New patient page: desktop 8:4, mobile 7:4, thank-you
+desktop 3:4, thank-you mobile 2:4. Captured headless, auto layout stripped, sections named.
 
 Brand: Wilson House guideline (Figma IGQz4NTnCHwBgcouPheI90, harness `outputs/creative/wilson-house-meta-statics/`)
 plus the practice website's own shapes, which Toby asked for: arch photo frames with a 1px Blush hairline 8–10px
