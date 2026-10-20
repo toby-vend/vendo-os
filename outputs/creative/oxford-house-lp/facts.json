@@ -1,6 +1,17 @@
 {
  "_note": "Source of truth (Toby's live Meta draft, read 20 Oct 2026): lp.mkdentist.co.uk/new-patients-offer-meta/. The Google draft (lp.mkdentist.co.uk/new-patients-offer) has the same offer, prices and copy; the only difference is the phone number 01908 373614 in its header and body. Treatment prices beyond the draft are from mkdentist.co.uk/our-fees/ ('valid from March 2026', read 20 Oct 2026). Practice details from mkdentist.co.uk (homepage, meet-the-team, new-patients-the-journey, membership-plans-and-finance-options), read 20 Oct 2026.",
- "prices": ["£85", "£36.80", "£81.20", "£42.50", "£111.20", "£163", "£141", "£399", "£350", "£2,495"],
+ "prices": [
+  "£85",
+  "£36.80",
+  "£81.20",
+  "£42.50",
+  "£111.20",
+  "£163",
+  "£141",
+  "£399",
+  "£350",
+  "£2,495"
+ ],
  "sources": {
   "£85": "New Patient Dental Check Up £85 (Inc Xrays): draft hero (Meta and Google). Fees page agrees: New Patient Assessment - Adult £85.00. The new-patients-the-journey page still says £82 (stale).",
   "£36.80": "Draft: 'Keep your smile healthy with check-ups at just £36.80 after your first visit.' CONFLICT: fees page says Existing Routine Examination - Adult £38.80 (and the membership page lists £38.80). Draft price used per the LP rule; flagged.",
@@ -19,10 +30,12 @@
   "reviews": "Draft Trustindex widget: EXCELLENT, Based on 953 reviews. Draft header line: 'Google Rated by 840 Happy Patients'. Guideline: 4.8 stars, 956 reviews on Google Maps (2 Oct 2026), '950+ Google Reviews'. Page uses 'Rated Excellent from 950+ Google reviews'.",
   "reviews_used": "Google reviews on the draft's Trustindex widget: Jana Dobiasova, KeithPS2, Carole Hopkins, Barry Milne, jude G0ngq, Carol (quotes shortened, wording unchanged)",
   "hours": "Mon, Tue, Thu, Fri 8am-5:30pm; Wed 8am-6pm; Sat 8am-2pm; Sun closed (draft + fees page)",
-  "clinicians": "Draft 'Meet the clinicians': Dr Pavanpal Diu, Clinical Lead, BDS (London), GDC 211338; Dr Harshil Mazny 265169; Dr Kayesh Patel 265194; Dr Kar Heung Ho 248902; Dr Caroline Bunting 270751; Dr Ashul Patel 279343; Dr Syed Majid Hussain 278390; Dr Rakhee Raichoora 264521; Dr Joyce Leung 284147. Headshots from the draft.",
+  "clinicians": "Draft 'Meet the clinicians': Dr Pavanpal Diu, Clinical Lead, BDS (London), GDC 211338; Dr Harshil Mazny 265169; Dr Kayesh Patel 265194; Dr Kar Heung Ho 248902; Dr Caroline Bunting 270751; Dr Ashul Patel 279343; Dr Syed Majid Hussain 278390; Dr Rakhee Raichoora 264521; Dr Joyce Leung 284147. GDC numbers match the team block on mkdentist.co.uk/team/dr-pavanpal-diu/ (read 20 Oct 2026). Headshots from the draft.",
   "premises": "'our beautiful Edwardian premises', 'one of our two waiting areas', tablet check-in, refreshments, new patient assessment about 30 minutes (new-patients-the-journey page)",
   "finance": "0% finance through Tabeo on treatment over £500 (membership-plans-and-finance-options page). Not used on the page.",
-  "videos": "YouTube TLZ8eqWddsE 'Why Choose Oxford House Dental Practice?' (draft)"
+  "videos": "YouTube TLZ8eqWddsE 'Why Choose Oxford House Dental Practice?' (draft)",
+  "meet_dentist": "Dr Pavanpal Diu, BDS (London), Clinical Lead, GDC 211338: mkdentist.co.uk/team/dr-pavanpal-diu/ ('GDC: 211338', team block 'GDC No. 211338', read 20 Oct 2026); same number on the draft. Statement and credentials paraphrase that profile (King's College London 2011; patient-centred care; interests in Invisalign, whitening, composite bonding; undertaking a PG Diploma in Restorative and Aesthetic Dentistry). The profile is third person, so no quote marks: plain practice copy, no attribution.",
+  "quotes": "The only quote marks on the page are Google reviews, each under the reviewer's name as published on the draft's Trustindex widget."
  },
  "confirmed": [
   "Rated Excellent",
@@ -37,8 +50,8 @@
   "Draft 'Calm, spa-like surroundings in the heart of Milton Keynes': the practice is in Fenny Stratford, so the page says 'in Fenny Stratford'; 'spa-like' kept out (unverifiable).",
   "Specialists: the main site lists a specialist orthodontist (Harriet Shah), a registered specialist periodontist (Mitul Shah) and a specialist endodontist (Corneliu Gherasim, GDC 254033). Not checked on the GDC specialist list, so the LP makes no specialist claim.",
   "Thank-you page online booking link: mkdentist.co.uk 'Book Online' goes to uk.dentalhub.online/soe/new/%20?pid=UKOXF02 (the %20 practice name looks odd; confirm it opens the right diary).",
-  "Lead clinician for 'Meet your dentist': Dr Pavanpal Diu, Clinical Lead (draft). The quote is drawn from the practice's own copy, not Dr Diu's words: needs his approval. His draft headshot is only 425x500; a higher-resolution photo would help.",
   "Form fields: the draft's popup form asks first name, last name, phone, email and message (Boxly webform 019c043a-d13b-47a6-a044-a7648c85ea4f@webform.boxly.ai). Design uses full name, email, mobile like MK Smiles; confirm Boxly accepts a single name field.",
-  "Call / WhatsApp buttons wanted on the thank-you page? (the Google draft shows 01908 373614; the LP rules keep it off the page itself)"
+  "Call / WhatsApp buttons wanted on the thank-you page? (the Google draft shows 01908 373614; the LP rules keep it off the page itself)",
+  "Dr Pavanpal Diu's draft headshot is only 425x500; a higher-resolution photo would help."
  ]
 }

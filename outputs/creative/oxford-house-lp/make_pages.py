@@ -108,9 +108,10 @@ HOURS = {"block": "spotlight", "name": "Opening hours", "eyebrow": "Opening hour
                    ["calendar", "Wednesday", "8am to 6pm."],
                    ["calendar", "Saturday mornings", "Saturday, 8am to 2pm. Closed Sundays."]]}
 MEET = {"block": "meet_dentist", "name": "Dr Pavanpal Diu", "role": "Clinical Lead · BDS (London) · GDC 211338",
-        "quote": "Whether you’re visiting for a check-up or more extensive treatment, our friendly team will put you at ease and make you feel at home.",
+        # His profile (mkdentist.co.uk/team/dr-pavanpal-diu/) is third person, so no quote: plain practice copy from it
+        "statement": "Dr Pav focuses on high quality, patient-centred care, with a particular interest in minimally invasive aesthetic dentistry, including Invisalign, whitening and composite bonding.",
         "creds": ["Clinical Lead at Oxford House", "Graduated from King’s College London in 2011",
-                  "Named by patients for calm, comfortable care of nervous patients", "Leads a team of nine GDC-registered dentists"],
+                  "Studying for a Postgraduate Diploma in Restorative and Aesthetic Dentistry", "Leads a team of nine GDC-registered dentists"],
         "photo": {"src": "assets/team/pavanpal.jpg", "pos": "50% 20%"}}
 TEAM = {"block": "team", "eyebrow": "Meet your clinicians", "title": "The people who’ll <b>look after you.</b>",
         "sub": "Experienced, GDC-registered dentists providing friendly general and preventative care in Milton Keynes.",

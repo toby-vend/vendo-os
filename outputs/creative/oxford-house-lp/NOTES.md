@@ -23,7 +23,7 @@ Every price is in `facts.json`. Build: `python3 make_pages.py`, then from `scrip
 
 ## Pages in Figma
 - "Brand spec" (page 0:1): palette + type sheet 5:4, desktop 6:4 and mobile 11:4 of the hero, USP strip, pricing panel and form band.
-- "New patient" (page 1:2): desktop 1440 8:4, mobile 390 12:4, thank-you desktop 2:4 and mobile 3:4 (20 Oct 2026). Sections: header, hero + form (wash over the
+- "New patient" (page 1:2): desktop 1440 16:4, mobile 390 15:4, thank-you desktop 2:4 and mobile 3:4 (20 Oct 2026). Sections: header, hero + form (wash over the
   house, £85 seal), USP strip, patient stories, pricing panel, Google reviews, form band (wash over the lounge), pain
   points, what's included, four steps, services (photo cards), why us, opening hours spotlight, meet your dentist
   (Dr Pavanpal Diu, Clinical Lead), clinician carousel (first names, draft headshots), practice tour (the draft's
@@ -55,7 +55,7 @@ Every price is in `facts.json`. Build: `python3 make_pages.py`, then from `scrip
 ## Decisions
 - Hero price £85 inc X-rays (draft; fees page agrees). CTA "Book Appointment".
 - Hero photo: the red-brick house (Frame.io practice-1), the house in the logo. Form band: the lounge (practice-12).
-- Meet your dentist: Dr Pavanpal Diu, Clinical Lead, GDC 211338 (draft). Team carousel: the nine draft clinicians,
+- Meet your dentist: Dr Pavanpal Diu, Clinical Lead, GDC 211338 (his profile on mkdentist.co.uk and the draft). His profile is written in the third person, so the block carries plain practice copy from it, not a quote (rule: quote marks only for a person's own published words). Team carousel: the nine draft clinicians,
   draft headshots cropped mid-chest, first names only. Unnamed Frame.io portraits elsewhere.
 - No "specialist" wording anywhere (see open checks).
 
