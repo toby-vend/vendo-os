@@ -64,14 +64,14 @@
     ]
    ],
    "photo": {
-    "src": "assets/photos/26.jpg",
+    "src": "assets/photos/8.jpg",
     "w": 1800,
     "h": 1012,
     "rows": [
-     96,
+     0,
      1012
     ],
-    "cx": 1180
+    "cx": 1380
    },
    "device_gap_m": 130,
    "seal": {

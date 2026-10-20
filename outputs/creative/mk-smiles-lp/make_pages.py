@@ -14,6 +14,8 @@ from pathlib import Path
 P = "assets/photos/"
 T = "assets/team-chest/"
 # Dr Gizele Pereira at the MK reception wall (named on her scrubs); rows = source rows that fill the frame
+# Hero photo per Toby's Figma comment (20 Oct 2026): Frame.io MK SMILES 8.jpg, the reception waiting area
+RECEPTION = {"src": P + "8.jpg", "w": 1800, "h": 1012, "rows": [0, 1012], "cx": 1380}
 GIZEL = {"src": P + "26.jpg", "w": 1800, "h": 1012, "rows": [96, 1012], "cx": 1180}
 
 FORM = {"fields": [{"label": "Full name", "full": True}, "Email", "Mobile"]}
@@ -32,7 +34,7 @@ HERO = {"block": "hero_form", "eyebrow": "New patients welcome · Brooklands, Mi
         "trust": "Rated Excellent from {{review_count}} Google reviews",
         "stats": [["{{review_count}}", "Google reviews"], ["7", "GDC-registered dentists"], ["Sat", "Open to 4:30pm"]],
         "stats_m": [["{{review_count}}", "Reviews"], ["7", "Dentists"], ["Sat", "To 4:30pm"]],
-        "photo": GIZEL, "device_gap_m": 130,
+        "photo": RECEPTION, "device_gap_m": 130,
         "seal": {"top": "New patients", "price": "£50", "bottom": "Check-up + 3D scan", "was": "£76.70"}}
 USP = {"block": "usp_text", "hide_m": False, "label": "Why families choose MK Smiles", "items": [
     ["calendar", "Late evenings Monday and Wednesday, and Saturdays to 4:30pm"],

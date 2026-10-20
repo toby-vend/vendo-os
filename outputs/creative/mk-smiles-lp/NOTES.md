@@ -29,7 +29,7 @@ Every price is in `facts.json`. Build: `python3 make_pages.py`, then from `scrip
 - Hero price £50, usually £76.70 (the draft's price stands; the fees page agrees on £50 for the adult assessment).
 - CTA wording "Book Appointment" (closest SOP wording to the draft's "Book An Appointment").
 - Reviews: "Rated Excellent from 286 Google reviews", the Trustindex widget on the source page.
-- Hero photo: Dr Gizel Pereira at the MK reception wall (named on her scrubs). Real photos only, from Joe
+- Hero photo: the reception waiting area (Frame.io MK SMILES 8.jpg), per Toby's Figma comment on 20 Oct. Real photos only, from Joe
   Goodchild's July 2026 shoot. No stock.
 - Treatment prices from the source page: hygienist £79.80, airflow £105, fillings from £152, extractions from £131,
   whitening £350, sedation from £350.
