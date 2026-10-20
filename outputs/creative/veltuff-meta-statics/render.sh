@@ -11,10 +11,23 @@ shot() { "$CH" --headless=new --disable-gpu --hide-scrollbars --virtual-time-bud
 shot suite-1x1 15200,1240
 shot suite-9x16 15200,2080
 shot carousel 6000,1240
-n=11
+n=10
 for i in $(seq 0 $((n-1))); do
   ffmpeg -loglevel error -y -i renders/suite-1x1.png -vf "crop=540:540:$((40+i*580)):40" renders/a$((i+1)).png
   ffmpeg -loglevel error -y -i renders/suite-9x16.png -vf "crop=540:960:$((40+i*580)):40" renders/b$((i+1)).png
 done
 for i in 0 1 2 3 4; do ffmpeg -loglevel error -y -i renders/carousel.png -vf "crop=540:540:$((40+i*580)):40" renders/c$((i+1)).png; done
 echo rendered
+
+# Full-resolution exports for Figma image placement (Brockmann isn't available in Figma): ./render.sh full
+if [[ "$1" == full ]]; then
+  mkdir -p renders/full
+  full() { "$CH" --headless=new --disable-gpu --hide-scrollbars --virtual-time-budget=9000 --window-size=$2 --screenshot=renders/full/$1.png http://localhost:8781/$1.html 2>/dev/null }
+  full suite-1x1 30400,2480; full suite-9x16 30400,4160; full carousel 12000,2480; full dpa 12000,4160
+  for i in $(seq 0 $((n-1))); do
+    ffmpeg -loglevel error -y -i renders/full/suite-1x1.png -vf "crop=1080:1080:$((80+i*1160)):80" renders/full/a$((i+1)).png
+    ffmpeg -loglevel error -y -i renders/full/suite-9x16.png -vf "crop=1080:1920:$((80+i*1160)):80" renders/full/b$((i+1)).png
+  done
+  for i in 0 1 2 3 4; do ffmpeg -loglevel error -y -i renders/full/carousel.png -vf "crop=1080:1080:$((80+i*1160)):80" renders/full/c$((i+1)).png; done
+  echo full
+fi

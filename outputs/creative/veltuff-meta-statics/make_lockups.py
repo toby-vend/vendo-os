@@ -1,7 +1,7 @@
 """Bake Veltuff's Black November identity pieces to transparent PNGs (CSS outline text and glows don't survive Figma capture).
 
 Matches Veltuff's draft banner (assets/src/black-november-ref.png): outlined neon-lime "BLACK" with glow,
-letter-spaced solid "NOVEMBER", scalloped % badge. Set in Saira (brand font) at its widest width axis.
+letter-spaced solid "NOVEMBER", scalloped % badge. Set in Brockmann Bold, upright (Veltuff's brand font, Stuart 15 Oct 2026; no italic or black cut exists).
 Also writes the dark chevron backgrounds with Pillow.
 Usage: python3 make_lockups.py  (needs the local server on :8781; chevrons need the venv python)
 """
@@ -13,23 +13,22 @@ HERE = Path(__file__).parent
 A = HERE / 'assets'
 CH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 SIG = '#D2F000'
-FONT = ("@font-face{font-family:'SairaV';src:url('assets/fonts/Saira[wdth,wght].ttf') format('truetype');font-weight:100 900;font-stretch:50% 125%}"
-        "@font-face{font-family:'SairaVI';src:url('assets/fonts/Saira-Italic[wdth,wght].ttf') format('truetype');font-weight:100 900;font-stretch:50% 125%}")
+FONT = "@font-face{font-family:'Brockmann';src:url('assets/fonts/Brockmann-Bold.otf') format('opentype');font-weight:700}"
 
 PIECES = {
     'bn-lockup': (1400, 560, f"""
-<div style="position:absolute;left:0;right:0;top:40px;text-align:center;font-family:SairaV;font-stretch:125%;font-weight:600;font-size:300px;line-height:1;letter-spacing:.01em;
+<div style="position:absolute;left:0;right:0;top:40px;text-align:center;font-family:Brockmann;font-weight:700;font-size:290px;line-height:1;letter-spacing:.05em;padding-left:.05em;
 color:transparent;-webkit-text-stroke:9px {SIG};text-shadow:0 0 22px rgba(210,240,0,.75),0 0 60px rgba(210,240,0,.35)">BLACK</div>
 <div style="position:absolute;left:478px;top:28px;width:260px;height:14px;border-radius:50%;background:radial-gradient(closest-side,rgba(240,255,140,1),rgba(210,240,0,.6) 40%,rgba(210,240,0,0))"></div>
 <div style="position:absolute;left:250px;top:330px;width:200px;height:12px;border-radius:50%;background:radial-gradient(closest-side,rgba(240,255,140,.9),rgba(210,240,0,.5) 40%,rgba(210,240,0,0))"></div>
-<div style="position:absolute;left:0;right:0;top:372px;text-align:center;font-family:SairaV;font-stretch:125%;font-weight:700;font-size:112px;line-height:1;letter-spacing:.42em;padding-left:.42em;color:{SIG}">NOVEMBER</div>
+<div style="position:absolute;left:0;right:0;top:372px;text-align:center;font-family:Brockmann;font-weight:700;font-size:112px;line-height:1;letter-spacing:.42em;padding-left:.42em;color:{SIG}">NOVEMBER</div>
 """),
     'bf-lockup': (1400, 560, f"""
-<div style="position:absolute;left:0;right:0;top:40px;text-align:center;font-family:SairaV;font-stretch:125%;font-weight:600;font-size:300px;line-height:1;letter-spacing:.01em;
+<div style="position:absolute;left:0;right:0;top:40px;text-align:center;font-family:Brockmann;font-weight:700;font-size:290px;line-height:1;letter-spacing:.05em;padding-left:.05em;
 color:transparent;-webkit-text-stroke:9px {SIG};text-shadow:0 0 22px rgba(210,240,0,.75),0 0 60px rgba(210,240,0,.35)">BLACK</div>
 <div style="position:absolute;left:478px;top:28px;width:260px;height:14px;border-radius:50%;background:radial-gradient(closest-side,rgba(240,255,140,1),rgba(210,240,0,.6) 40%,rgba(210,240,0,0))"></div>
 <div style="position:absolute;left:250px;top:330px;width:200px;height:12px;border-radius:50%;background:radial-gradient(closest-side,rgba(240,255,140,.9),rgba(210,240,0,.5) 40%,rgba(210,240,0,0))"></div>
-<div style="position:absolute;left:0;right:0;top:372px;text-align:center;font-family:SairaV;font-stretch:125%;font-weight:700;font-size:112px;line-height:1;letter-spacing:.42em;padding-left:.42em;color:{SIG}">FRIDAY</div>
+<div style="position:absolute;left:0;right:0;top:372px;text-align:center;font-family:Brockmann;font-weight:700;font-size:112px;line-height:1;letter-spacing:.42em;padding-left:.42em;color:{SIG}">FRIDAY</div>
 """),
     'bn-badge': (420, 420, f"""
 <svg width="420" height="420" viewBox="0 0 420 420" style="position:absolute;left:0;top:0;filter:drop-shadow(0 0 14px rgba(210,240,0,.55))">

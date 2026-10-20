@@ -1,6 +1,6 @@
 """Veltuff UK Black Friday statics: HTML harness for render QA and Figma capture.
 
-Brand: Veltuff guideline (Figma aHWliZbwJcLPtVS1PWzulV) + the look of Veltuff's draft Black November banner, renamed Black Friday (Toby, 8 Oct)
+Brand: Veltuff guideline (Figma aHWliZbwJcLPtVS1PWzulV), set in Brockmann (Veltuff's brand font, Stuart 15 Oct; files from veltuff.com) + the look of Veltuff's draft Black November banner, renamed Black Friday (Toby, 8 Oct)
 (assets/src/black-november-ref.png). Copy and facts: copy-suite.md, offers.md. Prices are Stuart's 2 Oct list.
 Assets: make_assets.py (logos, textures, tears), make_cutouts.py (product mattes), make_lockups.py (lockup, badge, chevrons).
 
@@ -12,19 +12,16 @@ HERE = Path(__file__).parent
 LIME, SIG, BLACK, INK, GRAPHITE, CONCRETE, STEEL, WHITE = '#A8D500', '#D2F000', '#000000', '#0B0B0B', '#212121', '#ECEAEA', '#8A8A8A', '#FFFFFF'
 
 CSS = f"""
-@font-face{{font-family:'Saira';src:url('assets/fonts/Saira[wdth,wght].ttf') format('truetype');font-weight:100 900;font-stretch:50% 125%;font-style:normal}}
-@font-face{{font-family:'Saira';src:url('assets/fonts/Saira-Italic[wdth,wght].ttf') format('truetype');font-weight:100 900;font-stretch:50% 125%;font-style:italic}}
-@font-face{{font-family:'Titillium Web';src:url('assets/fonts/TitilliumWeb-Regular.ttf');font-weight:400}}
-@font-face{{font-family:'Titillium Web';src:url('assets/fonts/TitilliumWeb-SemiBold.ttf');font-weight:600}}
-@font-face{{font-family:'Titillium Web';src:url('assets/fonts/TitilliumWeb-Bold.ttf');font-weight:700}}
+@font-face{{font-family:'Brockmann';src:url('assets/fonts/Brockmann-Regular.otf') format('opentype');font-weight:400}}
+@font-face{{font-family:'Brockmann';src:url('assets/fonts/Brockmann-Bold.otf') format('opentype');font-weight:700}}
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:#2a2a2a;font-family:'Titillium Web',sans-serif;display:flex;gap:80px;padding:80px;align-items:flex-start;-webkit-font-smoothing:antialiased}}
+body{{background:#2a2a2a;font-family:'Brockmann',sans-serif;font-synthesis:none;display:flex;gap:80px;padding:80px;align-items:flex-start;-webkit-font-smoothing:antialiased}}
 .ab{{position:relative;overflow:hidden;flex:none;background:{INK};color:{WHITE}}}
 .s1{{width:1080px;height:1080px}} .s9{{width:1080px;height:1920px}}
 .abs{{position:absolute}} .fill{{position:absolute;left:0;top:0;width:100%;height:100%}}
-.h{{font-family:'Saira',sans-serif;font-weight:800;text-transform:uppercase;line-height:.92;letter-spacing:.005em}}
-.wide{{font-family:'Saira',sans-serif;font-stretch:125%;font-weight:800;text-transform:uppercase;line-height:.9}}
-.promo{{font-family:'Saira',sans-serif;font-style:italic;font-weight:900;text-transform:uppercase;line-height:.88}}
+.h{{font-family:'Brockmann',sans-serif;font-weight:700;text-transform:uppercase;line-height:.92;letter-spacing:.005em}}
+.wide{{font-family:'Brockmann',sans-serif;font-weight:700;text-transform:uppercase;line-height:.9}}
+.promo{{font-family:'Brockmann',sans-serif;font-weight:700;text-transform:uppercase;line-height:.88}}
 .body{{font-size:30px;line-height:1.35}}
 .lbl{{font-weight:700;font-size:22px;letter-spacing:.18em;text-transform:uppercase}}
 .btn{{display:inline-flex;align-items:center;justify-content:center;height:84px;padding:0 46px;background:{SIG};color:{BLACK};font-weight:700;font-size:28px;letter-spacing:.1em;text-transform:uppercase}}
@@ -149,7 +146,7 @@ def s01b(s):
 def hero_product(s, name, cut, hook, chip_list, now, was, product_h=(820, 1040)):
     if s == 's1':
         return name, f"""{logo('white', 190, 60, 60)}{lockup(300, 720, 40)}
-<div class="abs h" style="left:60px;top:170px;font-size:112px;width:620px">{hook}</div>
+<div class="abs h" style="left:60px;top:170px;font-size:104px;width:620px">{hook}</div>
 {chips(chip_list, 60, 520)}
 {price(now, was, 60, 760, 120)}
 {product(cut, 790, 1040, product_h[0])}"""
@@ -211,28 +208,6 @@ def s03(s):
 {tiles}"""
 
 
-def s06(s):
-    n = 'S06 Retargeting sizing | Static | Cargo Hybrid | Go one waist up'
-    dim = lambda x, y, w: (f'<div class="abs" style="left:{x}px;top:{y}px;width:{w}px;height:56px">'
-                           f'<div style="position:absolute;left:0;right:0;top:26px;height:4px;background:{SIG}"></div>'
-                           f'<div style="position:absolute;left:0;top:8px;width:4px;height:40px;background:{SIG}"></div>'
-                           f'<div style="position:absolute;right:0;top:8px;width:4px;height:40px;background:{SIG}"></div>'
-                           f'<div class="h" style="position:absolute;left:50%;top:-44px;transform:translateX(-50%);font-size:34px;color:{SIG};white-space:nowrap">+1 waist size</div></div>')
-    if s == 's1':
-        return n, f"""{photo('TR9074_4.jpg', 560, 60, 460, 960, '50% 30%', 'border:3px solid ' + SIG)}
-{dim(600, 360, 380)}
-{logo('white', 190, 60, 60)}
-<div class="abs h" style="left:60px;top:180px;font-size:92px;width:470px">Not sure <span style="color:{SIG}">on size?</span></div>
-<div class="abs body" style="left:60px;top:430px;width:450px;font-size:32px">Our trousers run small. Order <b>one waist size up</b> from your normal and they'll fit how they should.</div>
-<div class="abs lbl" style="left:60px;top:740px;color:{CONCRETE};font-size:20px;line-height:1.6">30 days to return<br>Black Friday prices end 26 Nov</div>
-{lockup(320, 60, 930)}"""
-    return n, f"""{photo('TR9074_4.jpg', 60, 880, 960, 700, '50% 30%', 'border:3px solid ' + SIG)}
-{dim(300, 1180, 480)}
-{logo('white', 220, 60, 260)}{lockup(330, 690, 230)}
-<div class="abs h" style="left:60px;top:400px;font-size:120px;width:960px">Not sure <span style="color:{SIG}">on size?</span></div>
-<div class="abs body" style="left:60px;top:660px;width:900px;font-size:40px">Our trousers run small. Order <b>one waist size up</b> and they'll fit how they should. 30 days to return.</div>"""
-
-
 def weekend(s, name, kicker, big, sub, small, flag=None):
     """27–30 Nov look: lime torn paper over scuffed black, full-price Protex1 jacket."""
     if s == 's1':
@@ -282,7 +257,7 @@ def s09(s):
                    'Now ends <span class="ph">[DAY DATE]</span><br>Applied at checkout · Excludes reduced items', flag='HOLD')
 
 
-CONCEPTS = [s01a, s01b, s02a, s02b, s02c, s03, s06, s08a, s08b, s08c, s09]
+CONCEPTS = [s01a, s01b, s02a, s02b, s02c, s03, s08a, s08b, s08c, s09]
 
 
 # ---------- carousel (1:1 cards) ----------
@@ -298,8 +273,8 @@ def carousel():
         return f"""{logo('white', 170, 60, 60)}{lockup(300, 720, 40)}
 <div class="abs h" style="left:60px;top:160px;font-size:96px">{title}</div>
 {product(ca, 290, 900, 560)}{product(cb, 790, 900, 560)}
-<div class="abs" style="left:60px;top:930px;width:460px"><div class="lbl" style="font-size:18px;color:{CONCRETE}">{na}</div><div class="h" style="font-size:58px;margin-top:4px">{pa} <span style="font-size:24px;font-weight:600;color:{STEEL};font-family:'Titillium Web'">{'RRP <span class="strike">' + wa + '</span>' if wa else ''}</span></div></div>
-<div class="abs" style="left:560px;top:930px;width:460px"><div class="lbl" style="font-size:18px;color:{CONCRETE}">{nb}</div><div class="h" style="font-size:58px;margin-top:4px">{pb} <span style="font-size:24px;font-weight:600;color:{STEEL};font-family:'Titillium Web'">{'RRP <span class="strike">' + wb + '</span>' if wb else ''}</span></div></div>"""
+<div class="abs" style="left:60px;top:930px;width:460px"><div class="lbl" style="font-size:18px;color:{CONCRETE}">{na}</div><div class="h" style="font-size:58px;margin-top:4px">{pa} <span style="font-size:24px;font-weight:600;color:{STEEL};font-family:'Brockmann'">{'RRP <span class="strike">' + wa + '</span>' if wa else ''}</span></div></div>
+<div class="abs" style="left:560px;top:930px;width:460px"><div class="lbl" style="font-size:18px;color:{CONCRETE}">{nb}</div><div class="h" style="font-size:58px;margin-top:4px">{pb} <span style="font-size:24px;font-weight:600;color:{STEEL};font-family:'Brockmann'">{'RRP <span class="strike">' + wb + '</span>' if wb else ''}</span></div></div>"""
     cards.append(('S04 Card 2 Jackets', pair(f'Jackets <span style="color:{SIG}">from £18</span>', ('waterproof-bomber', 'Waterproof Bomber', '£18', '£35.95'), ('bomber-work-jacket', 'Bomber Work Jacket', '£28.06', '£52.95'))))
     cards.append(('S04 Card 3 Trousers', pair(f'Trousers <span style="color:{SIG}">from £21</span>', ('cotton-trade-trousers', 'Cotton Trade Trousers', '£21', '£70'), ('stretch-multi-pocket', 'Stretch Multi-Pocket', '£25', '£62.95'))))
     cards.append(('S04 Card 4 Hi-vis', pair(f'Hi-vis <span style="color:{SIG}">from £16.30</span>', ('cargo-hivis-trousers', 'Cargo Hi-Vis · Class 2', '£18', '£42.95'), ('teamline-trousers', 'Teamline Reflective', '£16.30', '£33.95'))))

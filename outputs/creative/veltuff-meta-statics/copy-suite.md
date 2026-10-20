@@ -182,24 +182,9 @@
 
 ---
 
-## S06 · Retargeting (sizing objection)
-- **Labels:** most aware · sophistication 4 · angle: the "nearly didn't buy" (fit).
-- **Research:** "I'm usually a 36 waist so ordered a 38… could barely get the trousers over my legs" (verified buyer). The site says, "This style measures small."
-- **On image:**
-  - Hook: "NOT SURE ON SIZE?"
-  - Line: "Our trousers run small. Go one waist up."
-  - A tape measure on a trouser waistband (Cargo Hybrid flat-lay).
-  - Footer: "30 days to return · Black Friday prices end 26 Nov"
-- **Headline:** Go one waist size up
-- **Primary text:**
-  > Still got them in your basket? If it's the sizing that's stopping you, here's the honest answer: our trousers measure small. Order one waist size up from your normal and they'll fit how they should.
-  >
-  > If they don't, you've got 30 days to send them back.
-  >
-  > Black Friday prices end Thursday 26 November.
-- **Notes:** Returns are at the customer's own cost, so no "free returns". Ask Stuart whether the Black Friday window gets an extended returns period for Christmas.
+## S06 · Retargeting (sizing objection): DROPPED
 
----
+Stuart asked for this one to be left out (email, 15 Oct 2026). Removed from the harness and the Figma file.
 
 ## S07 · Video / UGC adaptations (brief for Helen's three cuts, not statics)
 Overlay text and end cards to match the statics:
