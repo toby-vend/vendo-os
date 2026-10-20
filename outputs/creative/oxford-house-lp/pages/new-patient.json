@@ -195,10 +195,11 @@
    "backdrop": {
     "src": "assets/photos/practice-12.jpg",
     "pos": "50% 55%",
-    "pos_m": "40% 50%",
+    "pos_m": "75% 75%",
     "h_m": 420,
     "a": 0.97,
-    "b": 0.55
+    "b": 0.55,
+    "b_m": 0.88
    }
   },
   {

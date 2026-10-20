@@ -54,7 +54,7 @@ FORM_BAND = {"block": "form_band", "name": "Book your check-up (form 2)", "eyebr
              "sub": "Book your £85 new patient check-up at Oxford House, with digital X-rays included.",
              "m_sub": "Book your £85 new patient check-up, with digital X-rays included.",
              "ticks": ["Open Saturday mornings", "X-rays included", "For you or your family", "Clear pricing upfront"], "form_title": "Book your check-up",
-             "backdrop": {"src": P + "practice-12.jpg", "pos": "50% 55%", "pos_m": "40% 50%", "h_m": 420, "a": .97, "b": .55}}
+             "backdrop": {"src": P + "practice-12.jpg", "pos": "50% 55%", "pos_m": "75% 75%", "h_m": 420, "a": .97, "b": .55, "b_m": .88}}
 
 STORIES = {"block": "story_cards", "sub": "Don’t just take it from us. Here’s what our patients say about their care.", "items": [
     ["Nervous patients", "I’ve always been a nervous patient but Dr Pav, who is very skilled at what he does, always makes sure I’m okay and comfortable during all the procedures.", "Jana Dobiasova"],

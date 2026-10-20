@@ -168,13 +168,13 @@ def bullets(ctx, items, size=15):
 
 def wash(ctx, bd, m):
     """A real photo under the brand's dark wash, as a section background (Oxford House: Deep Teal over the practice).
-    bd = {"src", "pos"?, "pos_m"?, "a"?, "b"?}: desktop fades from a (left, behind the copy) to b (right); mobile shows
+    bd = {"src", "pos"?, "pos_m"?, "a"?, "b"?, "b_m"?, "h_m"?}: desktop fades from a (left, behind the copy) to b (right); mobile shows
     the photo at the top and fades to solid behind the copy. Returns CSS for the section's style attribute."""
     from .brand import rgba
     d = ctx.brand.p["dark"]
     a, b = bd.get("a", .96), bd.get("b", .35)
     if m:
-        h = bd.get("h_m", 520)
+        h, b = bd.get("h_m", 520), bd.get("b_m", b)
         return (f"background:linear-gradient(180deg,{rgba(d, b * .4)} 0px,{rgba(d, b)} {h * .2:.0f}px,{rgba(d, .92)} {h * .4:.0f}px,{d} {h * .75:.0f}px),"
                 f"url({bd['src']}) {bd.get('pos_m', '50% 0%')}/auto {h}px no-repeat,{d};")
     return (f"background:linear-gradient(90deg,{rgba(d, a)} 0%,{rgba(d, a - .05)} 42%,{rgba(d, b)} 78%,{rgba(d, b - .1)} 100%),"

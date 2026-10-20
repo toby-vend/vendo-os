@@ -1,7 +1,7 @@
 # Oxford House: landing pages (design)
 
 Built 20 Oct 2026 on the shared harness (`scripts/lp-harness/`) with `/client-landing-pages`, following the MK Smiles
-build. First page type: new patient (Meta). Figma: "Oxford House — Landing Pages" (Kana Health Group folder).
+build. First page type: new patient (Meta). Figma: "Oxford House — Landing Pages" Mm9j4ONVzXbOu4xLwaU9y1 (Kana Health Group folder).
 
 Brand: Oxford House guideline (Figma i0YW4eDguLAwoZpLn4WSTX; harness `outputs/creative/oxford-house-meta-statics/`)
 and the practice's July 2026 Meta statics. `brand.json`: Josefin Sans Bold Deep Teal headlines with the turn in
@@ -22,8 +22,8 @@ Every price is in `facts.json`. Build: `python3 make_pages.py`, then from `scrip
 `lint.py` (0 failures), `render.sh` (port 8911). Brand spec sheet: `python3 brand_spec.py` after building `brand-spec`.
 
 ## Pages in Figma
-- "Brand spec": palette + type sheet, desktop and mobile of the hero, USP strip, pricing panel and form band.
-- "New patient": desktop 1440, mobile 390 and both thank-you frames. Sections: header, hero + form (wash over the
+- "Brand spec" (page 0:1): palette + type sheet 5:4, desktop 6:4 and mobile 11:4 of the hero, USP strip, pricing panel and form band.
+- "New patient" (page 1:2): desktop 1440 8:4, mobile 390 12:4, thank-you desktop 2:4 and mobile 3:4 (20 Oct 2026). Sections: header, hero + form (wash over the
   house, £85 seal), USP strip, patient stories, pricing panel, Google reviews, form band (wash over the lounge), pain
   points, what's included, four steps, services (photo cards), why us, opening hours spotlight, meet your dentist
   (Dr Pavanpal Diu, Clinical Lead), clinician carousel (first names, draft headshots), practice tour (the draft's
