@@ -46,6 +46,10 @@ Every price is in `facts.json`. Build: `python3 make_pages.py`, then from `scrip
 - doug futers' review is trimmed with an ellipsis (the cut part mentions phoning the on-call dentist).
 - Awards: the homepage says "finalists and winners" but all six badges say Finalist, so the strip says Finalist only.
 
+## Quotes and GDC numbers
+Quoted words under a named person are only that person's published words: Google reviews from the draft, and Dr Zakaria's
+line from his site profile. His GDC number (256699) and DMD are from the same profile page. Sources in facts.json.
+
 ## Photos
 Real practice photos only, no stock: Drive Content Assets, Joe Goodchild's July 2026 shoot, the site's /team/ headshots
 and the YouTube poster. Hero: Dr Keval in the lounge chair (the site's file names pair this face with him). People

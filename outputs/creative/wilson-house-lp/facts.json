@@ -1,6 +1,10 @@
 {
  "_note": "Source of truth (Toby's Meta draft, 20 Oct 2026): lp.wilsonhousedentalpractice.com/new-patients-offer-meta (read 20 Oct 2026). The Google draft (/new-patients-offer) has the same copy and prices; it only adds the phone number and a Book Now header button. Site facts from wilsonhousedentalpractice.com (home, /team/, /contact-us/, /fees-and-practice-membership-plans/), read the same day.",
- "prices": ["£85", "£82.80", "£112.80"],
+ "prices": [
+  "£85",
+  "£82.80",
+  "£112.80"
+ ],
  "sources": {
   "£85": "New patient check-up including all X-rays (draft hero, price list, why-us and FAQ). Fees page '2026 Private Fees' agrees: New Patient Assessment – Adult £85.00",
   "£82.80": "Hygiene appointment from £82.80 (draft hygiene section and why-us). CONFLICT: the draft's hero price list says £83.80; the fees page 2026 table says £83.30 (its 2025 table says £82.80)",
@@ -18,7 +22,9 @@
   "team_photos": "Team carousel uses the site /team/ headshots, each paired with its name on that page (name tags visible on Keval, Gizel, Sarah, Zakaria). Dr Kajal is on the draft but not on the site team page, so she is left out",
   "reviews_used": "Google reviews shown on the draft: Hannah Crook, jacqui burnett, doug futers, Margaret Hallett, Morts Barakat, Nader Srouji",
   "videos": "YouTube e9-iPLeN30A 'Why Choose Wilson House Dental Practice?' and 2uPc7IxwYVQ 'General Dentistry at Wilson House Dental Practice' (Kana Health Group channel, embedded on the homepage)",
-  "booking": "Online booking link from the site header: booking.uk.hsone.app/soe/new/%20?pid=UKWLO02"
+  "booking": "Online booking link from the site header: booking.uk.hsone.app/soe/new/%20?pid=UKWLO02",
+  "meet_dentist": "Dr Zakaria Ghrouf, Dentist, DMD, GDC 256699: GDC number and DMD from his site profile wilsonhousedentalpractice.com/team/dr-zakaria-ghrouf/ (also on the draft). Quote is his own first-person words on that profile: 'I am passionate within all aspects of dentistry and enjoy making my patients smile!'. Credentials from the same profile: qualified in Romania in 2009, keen interest in dental implants having recently gained his diploma, speaks English, Arabic and Romanian. 'Helping nervous patients' from jacqui burnett's Google review on the draft. Read 20 Oct 2026",
+  "quotes": "Every quoted line under a named person is that person's published words: patient quotes are Google reviews shown on the draft (names as posted); Dr Zakaria's quote is from his site profile. No other attributed quotes on the page"
  },
  "confirmed": [],
  "to_confirm": [
@@ -27,7 +33,7 @@
   "Awards: all six homepage badges say Finalist; the homepage text says 'finalists and winners'. Any wins to add?",
   "Dr Nisha's headshot on the draft LP looks different from her photo on the site team page; the LP uses the site photo",
   "Dr Kajal Sangani is on the draft but not on the site team page: still at the practice?",
-  "Meet your dentist uses Dr Zakaria (named in four of the draft's ten reviews); the quote is written from the draft's FAQ wording and needs his approval",
+  "Meet your dentist uses Dr Zakaria (named in four of the draft's ten reviews); quote and credentials are from his own site profile",
   "Opening hours: draft Mon to Fri 8am to 6pm; contact page adds a 12:30 to 1:30pm lunch closure",
   "Thank-you page online booking link (HS One link from the site header) still current?",
   "Call / WhatsApp buttons wanted on the thank-you page? (kept off the LP itself)",

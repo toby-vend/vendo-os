@@ -135,9 +135,10 @@ HOURS = {"block": "spotlight", "name": "Opening hours", "eyebrow": "Find us", "t
                    ["pin", "Free on-site parking", "Accessible parking spaces and a step-free entrance."],
                    ["shield", "Denplan Essentials and Care", "Ways to spread the cost of your care. Your dentist can talk you through them."]]}
 MEET = {"block": "meet_dentist", "name": "Dr Zakaria Ghrouf", "role": "Dentist · DMD · GDC 256699",
-        "quote": "Whether it’s been six months or several years, you’re welcome here. I’ll explain what I find and your options clearly, before anything goes ahead.",
-        "creds": ["GDC-registered dentist at Wilson House", "Named by patients for helping nervous patients through treatment",
-                  "“Great with adults and kids”, says a Google review", "Clear explanations and fees upfront"],
+        # quote: his own words on his site profile (wilsonhousedentalpractice.com/team/dr-zakaria-ghrouf/, 20 Oct 2026)
+        "quote": "I am passionate within all aspects of dentistry and enjoy making my patients smile!",
+        "creds": ["Qualified as a dentist in 2009 (DMD)", "A keen interest in dental implants, with a recent diploma",
+                  "Speaks English, Arabic and Romanian", "Named by patients for helping nervous patients through treatment"],
         "photo": {"src": "assets/team/site-zakaria.jpg", "pos": "45% 20%"}}
 TEAM = {"block": "team", "eyebrow": "Meet the team", "title": "The people who’ll <b>look after you.</b>",
         "sub": "A friendly, family-feel team, with positivity and patient care at its core.",
