@@ -1,0 +1,175 @@
+{
+ "title": "Brand spec",
+ "form": {
+  "fields": [
+   {
+    "label": "Full name",
+    "full": true
+   },
+   "Email",
+   "Mobile"
+  ],
+  "label": "New patient offer",
+  "title": "Book your check-up",
+  "sub": "New patients welcome, for you or your family.",
+  "note": "£85 new patient check-up, X-rays included."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "New patients welcome · Fenny Stratford",
+   "title": "Your new patient check-up, <b>£85.</b>",
+   "tagline": "Digital X-rays included, in a family practice that feels like home.",
+   "sub": "A detailed dental examination and a treatment plan tailored to your needs, from a friendly team who will put you at ease.",
+   "ticks": [
+    "Full dental examination",
+    "Digital X-rays included",
+    "Personalised treatment plan",
+    "Free treatment consultation"
+   ],
+   "ticks_m": [
+    "Digital X-rays included",
+    "Personalised treatment plan"
+   ],
+   "trust": "Rated Excellent from {{review_count}} Google reviews",
+   "stats": [
+    [
+     "{{review_count}}",
+     "Google reviews"
+    ],
+    [
+     "9",
+     "GDC-registered dentists"
+    ],
+    [
+     "Sat",
+     "Open to 2pm"
+    ]
+   ],
+   "stats_m": [
+    [
+     "{{review_count}}",
+     "Reviews"
+    ],
+    [
+     "9",
+     "Dentists"
+    ],
+    [
+     "Sat",
+     "To 2pm"
+    ]
+   ],
+   "backdrop": {
+    "src": "assets/photos/practice-1.jpg",
+    "pos": "70% 40%",
+    "pos_m": "62% 0%",
+    "h_m": 440,
+    "a": 0.97,
+    "b": 0.3
+   },
+   "seal": {
+    "top": "New patients",
+    "price": "£85",
+    "bottom": "Check-up + X-rays"
+   },
+   "form_top": 180,
+   "pad_top_m": 180
+  },
+  {
+   "block": "usp_text",
+   "hide_m": false,
+   "label": "Why families choose Oxford House",
+   "items": [
+    [
+     "calendar",
+     "Open from 8am, Wednesdays until 6pm and Saturday mornings"
+    ],
+    [
+     "card",
+     "Clear, upfront pricing with no hidden fees"
+    ],
+    [
+     "chat",
+     "A free 30-minute consultation if you’re considering further treatment"
+    ],
+    [
+     "pin",
+     "Our Edwardian house on Aylesbury Street, Fenny Stratford"
+    ]
+   ]
+  },
+  {
+   "block": "pricing",
+   "layout": "panel",
+   "eyebrow": "Pricing",
+   "title": "Clear pricing, <b>no hidden fees.</b>",
+   "sub": "If you need any treatment after your check-up, we explain your options and give you a detailed estimate before anything goes ahead.",
+   "price_label": "New patient check-up",
+   "price": "£85",
+   "price_note": "X-rays included",
+   "notes": [
+    "Check-ups at £36.80 after your first visit · Hygienist appointment £81.20.",
+    "Children’s new patient check-up £42.50."
+   ],
+   "photo": {
+    "src": "assets/photos/practice-9.jpg",
+    "pos": "50% 50%"
+   },
+   "get": [
+    [
+     "A full dental examination",
+     "A complete check-up of your current oral health and your goals"
+    ],
+    [
+     "Digital X-rays included",
+     "A clear, detailed view of your teeth and gums"
+    ],
+    [
+     "Your personalised treatment plan",
+     "Options that suit your needs and lifestyle"
+    ],
+    [
+     "Oral hygiene advice",
+     "Practical guidance to keep your smile healthy at home"
+    ]
+   ]
+  },
+  {
+   "block": "form_band",
+   "name": "Book your check-up (form 2)",
+   "eyebrow": "New patient offer",
+   "title": "Make yourself <b>at home.</b>",
+   "sub": "Book your £85 new patient check-up at Oxford House, with digital X-rays included.",
+   "m_sub": "Book your £85 new patient check-up, with digital X-rays included.",
+   "ticks": [
+    "Open Saturday mornings",
+    "X-rays included",
+    "For you or your family",
+    "Clear pricing upfront"
+   ],
+   "form_title": "Book your check-up",
+   "backdrop": {
+    "src": "assets/photos/practice-12.jpg",
+    "pos": "50% 55%",
+    "pos_m": "40% 50%",
+    "h_m": 420,
+    "a": 0.97,
+    "b": 0.55
+   }
+  }
+ ],
+ "thank_you": {
+  "text": "Thank you. Our team will be in touch to confirm your check-up. If you’d rather pick a time yourself, you can book online now.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ }
+}

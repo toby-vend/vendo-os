@@ -1,0 +1,44 @@
+{
+ "_note": "Source of truth (Toby's live Meta draft, read 20 Oct 2026): lp.mkdentist.co.uk/new-patients-offer-meta/. The Google draft (lp.mkdentist.co.uk/new-patients-offer) has the same offer, prices and copy; the only difference is the phone number 01908 373614 in its header and body. Treatment prices beyond the draft are from mkdentist.co.uk/our-fees/ ('valid from March 2026', read 20 Oct 2026). Practice details from mkdentist.co.uk (homepage, meet-the-team, new-patients-the-journey, membership-plans-and-finance-options), read 20 Oct 2026.",
+ "prices": ["£85", "£36.80", "£81.20", "£42.50", "£111.20", "£163", "£141", "£399", "£350", "£2,495"],
+ "sources": {
+  "£85": "New Patient Dental Check Up £85 (Inc Xrays): draft hero (Meta and Google). Fees page agrees: New Patient Assessment - Adult £85.00. The new-patients-the-journey page still says £82 (stale).",
+  "£36.80": "Draft: 'Keep your smile healthy with check-ups at just £36.80 after your first visit.' CONFLICT: fees page says Existing Routine Examination - Adult £38.80 (and the membership page lists £38.80). Draft price used per the LP rule; flagged.",
+  "£81.20": "Hygienist Appointment £81.20 (draft hero); fees page 'Hygiene Appointment from £81.20'",
+  "£42.50": "New Patient Assessment - Child £42.50 (fees page)",
+  "£111.20": "Hygiene Appointment with Airflow from £111.20 (fees page)",
+  "£163": "Fillings: Composite from £163 (fees page)",
+  "£141": "Extractions from £141 (fees page)",
+  "£399": "Tooth Whitening from £399.00 (fees page)",
+  "£350": "Sedation from £350.00 (fees page)",
+  "£2,495": "Invisalign from £2,495.00 (fees page)"
+ },
+ "claims": {
+  "offer": "Draft: new patient check-up £85 inc X-rays; detailed dental examination and bespoke treatment plan; free 30-minute consultation with the Treatment Co-ordinator (fees page: Patient Care Co-Ordinator consultation Complimentary)",
+  "included": "Draft: full dental examination, included digital X-rays, personalised treatment plan, oral hygiene advice, free TCO consultation (30 minutes, no obligation)",
+  "reviews": "Draft Trustindex widget: EXCELLENT, Based on 953 reviews. Draft header line: 'Google Rated by 840 Happy Patients'. Guideline: 4.8 stars, 956 reviews on Google Maps (2 Oct 2026), '950+ Google Reviews'. Page uses 'Rated Excellent from 950+ Google reviews'.",
+  "reviews_used": "Google reviews on the draft's Trustindex widget: Jana Dobiasova, KeithPS2, Carole Hopkins, Barry Milne, jude G0ngq, Carol (quotes shortened, wording unchanged)",
+  "hours": "Mon, Tue, Thu, Fri 8am-5:30pm; Wed 8am-6pm; Sat 8am-2pm; Sun closed (draft + fees page)",
+  "clinicians": "Draft 'Meet the clinicians': Dr Pavanpal Diu, Clinical Lead, BDS (London), GDC 211338; Dr Harshil Mazny 265169; Dr Kayesh Patel 265194; Dr Kar Heung Ho 248902; Dr Caroline Bunting 270751; Dr Ashul Patel 279343; Dr Syed Majid Hussain 278390; Dr Rakhee Raichoora 264521; Dr Joyce Leung 284147. Headshots from the draft.",
+  "premises": "'our beautiful Edwardian premises', 'one of our two waiting areas', tablet check-in, refreshments, new patient assessment about 30 minutes (new-patients-the-journey page)",
+  "finance": "0% finance through Tabeo on treatment over £500 (membership-plans-and-finance-options page). Not used on the page.",
+  "videos": "YouTube TLZ8eqWddsE 'Why Choose Oxford House Dental Practice?' (draft)"
+ },
+ "confirmed": [
+  "Rated Excellent",
+  "950+ Google reviews",
+  "Nine GDC-registered dentists"
+ ],
+ "to_confirm": [
+  "Follow-up check-up price: draft £36.80 vs fees page £38.80 (existing routine examination, adult). Page shows the draft's £36.80.",
+  "Review count: draft header says 840, the draft widget says 953, Google Maps 956 (2 Oct). Page says 950+.",
+  "Draft 'Same-day emergency appointments when you need them': availability claim, softened to 'Emergency appointments for new and existing patients' until confirmed.",
+  "Draft 'Flexible scheduling, including lunchtime and evening slots': latest close is 6pm Wednesday, so 'evening' was dropped; page says early starts from 8am, Wednesday to 6pm and Saturday mornings.",
+  "Draft 'Calm, spa-like surroundings in the heart of Milton Keynes': the practice is in Fenny Stratford, so the page says 'in Fenny Stratford'; 'spa-like' kept out (unverifiable).",
+  "Specialists: the main site lists a specialist orthodontist (Harriet Shah), a registered specialist periodontist (Mitul Shah) and a specialist endodontist (Corneliu Gherasim, GDC 254033). Not checked on the GDC specialist list, so the LP makes no specialist claim.",
+  "Thank-you page online booking link: mkdentist.co.uk 'Book Online' goes to uk.dentalhub.online/soe/new/%20?pid=UKOXF02 (the %20 practice name looks odd; confirm it opens the right diary).",
+  "Lead clinician for 'Meet your dentist': Dr Pavanpal Diu, Clinical Lead (draft). The quote is drawn from the practice's own copy, not Dr Diu's words: needs his approval. His draft headshot is only 425x500; a higher-resolution photo would help.",
+  "Form fields: the draft's popup form asks first name, last name, phone, email and message (Boxly webform 019c043a-d13b-47a6-a044-a7648c85ea4f@webform.boxly.ai). Design uses full name, email, mobile like MK Smiles; confirm Boxly accepts a single name field.",
+  "Call / WhatsApp buttons wanted on the thank-you page? (the Google draft shows 01908 373614; the LP rules keep it off the page itself)"
+ ]
+}
