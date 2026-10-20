@@ -20,7 +20,7 @@ Build: `python3 make_pages.py`, then from `scripts/lp-harness/`: `build.py`, `li
 Brand spec sheet: `python3 brand_spec.py` after building `brand-spec`.
 
 ## Pages in Figma
-Node ids: Brand spec page 0:1 (sheet 5:4, desktop 6:4, mobile 4:4); New patient page 1:2 (desktop 11:4, mobile 10:4,
+Node ids: Brand spec page 0:1 (sheet 5:4, desktop 6:4, mobile 4:4); New patient page 1:2 (desktop 14:4, mobile 13:4,
 thank-you desktop 3:4, thank-you mobile 2:4). Captured 20 Oct 2026, auto layout stripped.
 - "Brand spec": palette + type sheet, desktop and mobile of the hero, USP strip, pricing panel and form band.
 - "New patient": desktop 1440, mobile 390 and both thank-you frames. Sections: header, hero + form (offer seal £60),

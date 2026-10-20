@@ -120,8 +120,7 @@ HOURS = {"block": "spotlight", "name": "Opening hours", "eyebrow": "Opening hour
                    ["pin", "Weekdays", "Monday, Wednesday and Thursday 9am to 5pm. Friday 9am to 3:30pm. Closed Sundays."]]}
 MEET = {"block": "meet_dentist", "name": "Dr Neeta Mehta", "role": "Dentist · GDC 82463",
         "text": "Dr Neeta is one of our five GDC-registered dentists. At your first visit we take the time to understand your oral health and your goals, and explain everything clearly before anything goes ahead.",
-        "creds": ["BDS (Lond), MFDS RCS (Eng)", "Postgraduate diplomas in clear aligner therapy and orthodontics",
-                  "Part of a team of five GDC-registered dentists", "Clear explanations and costs before treatment"],
+        "creds": ["BDS (Lond), MFDS RCS (Eng)", "Postgraduate diplomas in clear aligner therapy and orthodontics", "Clear explanations and costs before treatment"],
         "photo": {"src": P + "p12.jpg", "pos": "50% 22%"}}
 TEAM = {"block": "team", "eyebrow": "Meet your dentists", "title": "The people who’ll <b>look after you.</b>",
         "sub": "A friendly, experienced team of GDC-registered dentists, supported by our hygienists and nurses.",
