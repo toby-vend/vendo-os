@@ -73,7 +73,13 @@
     ],
     "cx": 1180
    },
-   "device_gap_m": 130
+   "device_gap_m": 130,
+   "seal": {
+    "top": "New patients",
+    "price": "£50",
+    "bottom": "Check-up + 3D scan",
+    "was": "£76.70"
+   }
   },
   {
    "block": "usp_text",
@@ -434,6 +440,39 @@
    ]
   },
   {
+   "block": "spotlight",
+   "name": "Opening hours",
+   "tone": "light",
+   "eyebrow": "Opening hours",
+   "title": "Open when <b>you need us.</b>",
+   "sub": "Flexible appointment times to fit around work and the school run, at Brooklands Health Centre.",
+   "photo": {
+    "src": "assets/photos/4.jpg",
+    "pos": "50% 60%"
+   },
+   "badge": {
+    "name": "Brooklands Health Centre",
+    "role": "42 Montague Crescent, MK10 7LN"
+   },
+   "items": [
+    [
+     "clock",
+     "Late evenings",
+     "Monday and Wednesday, 8:45am to 7pm."
+    ],
+    [
+     "calendar",
+     "Saturday appointments",
+     "Saturday, 8:45am to 4:30pm."
+    ],
+    [
+     "pin",
+     "Weekdays",
+     "Tuesday, Thursday and Friday, 8:45am to 5pm. Closed Sundays."
+    ]
+   ]
+  },
+  {
    "block": "meet_dentist",
    "name": "Dr Kishan Chavda",
    "role": "Associate Dentist · GDC 243885",
@@ -556,6 +595,7 @@
     "Evenings and Saturdays",
     "Brooklands Health Centre"
    ],
+   "trust": "Rated Excellent from {{review_count}} Google reviews",
    "form_title": "Book your check-up"
   }
  ],

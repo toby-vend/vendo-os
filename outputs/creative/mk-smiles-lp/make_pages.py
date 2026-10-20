@@ -32,7 +32,8 @@ HERO = {"block": "hero_form", "eyebrow": "New patients welcome · Brooklands, Mi
         "trust": "Rated Excellent from {{review_count}} Google reviews",
         "stats": [["{{review_count}}", "Google reviews"], ["7", "GDC-registered dentists"], ["Sat", "Open to 4:30pm"]],
         "stats_m": [["{{review_count}}", "Reviews"], ["7", "Dentists"], ["Sat", "To 4:30pm"]],
-        "photo": GIZEL, "device_gap_m": 130}
+        "photo": GIZEL, "device_gap_m": 130,
+        "seal": {"top": "New patients", "price": "£50", "bottom": "Check-up + 3D scan", "was": "£76.70"}}
 USP = {"block": "usp_text", "hide_m": False, "label": "Why families choose MK Smiles", "items": [
     ["calendar", "Late evenings Monday and Wednesday, and Saturdays to 4:30pm"],
     ["scan", "A complimentary 3D digital scan, with no messy impressions"],
@@ -107,6 +108,14 @@ RESULTS = {"block": "results", "eyebrow": "Results", "title": "See the differenc
            "sub": "A healthy, confident smile can be life-changing. Every smile tells a story.", "ratio": 1.0,
            "items": [["assets/ba/ba-3.jpg", "Invisalign, whitening, veneer + bonding"], ["assets/ba/ba-4.jpg", "Invisalign"],
                      ["assets/ba/ba-2.jpg", "Invisalign, whitening + composite fillings"], ["assets/ba/ba-5.jpg", "Invisalign + whitening"]]}
+HOURS = {"block": "spotlight", "name": "Opening hours", "tone": "light", "eyebrow": "Opening hours",
+         "title": "Open when <b>you need us.</b>",
+         "sub": "Flexible appointment times to fit around work and the school run, at Brooklands Health Centre.",
+         "photo": {"src": P + "4.jpg", "pos": "50% 60%"},
+         "badge": {"name": "Brooklands Health Centre", "role": "42 Montague Crescent, MK10 7LN"},
+         "items": [["clock", "Late evenings", "Monday and Wednesday, 8:45am to 7pm."],
+                   ["calendar", "Saturday appointments", "Saturday, 8:45am to 4:30pm."],
+                   ["pin", "Weekdays", "Tuesday, Thursday and Friday, 8:45am to 5pm. Closed Sundays."]]}
 MEET = {"block": "meet_dentist", "name": "Dr Kishan Chavda", "role": "Associate Dentist · GDC 243885",
         "quote": "Your first visit is about understanding your oral health, your concerns and your goals, then explaining everything clearly before anything goes ahead.",
         "creds": ["GDC-registered dentist at MK Smiles", "Named by patients for nervous care and repairing a broken tooth",
@@ -131,7 +140,7 @@ FAQ = {"block": "faq", "items": [
     ["Where are you?", "MK Smiles is at Brooklands Health Centre, 42 Montague Crescent, Brooklands, Milton Keynes MK10 7LN."]]}
 FINAL = {"block": "final_cta", "eyebrow": "Book today", "title": "Your new patient check-up, <b>now £50.</b>", "size": 52, "size_m": 32,
          "sub": "Book today and experience professional, patient-focused dental care in a calm and modern environment at MK Smiles.",
-         "tags": ["Complimentary 3D scan", "Evenings and Saturdays", "Brooklands Health Centre"], "form_title": "Book your check-up"}
+         "tags": ["Complimentary 3D scan", "Evenings and Saturdays", "Brooklands Health Centre"], "trust": "Rated Excellent from {{review_count}} Google reviews", "form_title": "Book your check-up"}
 
 
 def page(title, form, sections, ty=TY, cta=None):
@@ -144,7 +153,7 @@ def page(title, form, sections, ty=TY, cta=None):
 brand_spec = page("Brand spec", NP_FORM, [{"block": "header"}, HERO, USP, PRICING, FORM_BAND])
 new_patient = page("New patient check-up", NP_FORM, [
     {"block": "header"}, HERO, USP, STORIES, PRICING, MEMBERSHIP, REVIEWS, FORM_BAND, PAIN, EXPLAINER, STEPS,
-    SERVICES, RESULTS, WHY, MEET, TEAM, TOUR, FAQ, FINAL])
+    SERVICES, RESULTS, WHY, HOURS, MEET, TEAM, TOUR, FAQ, FINAL])
 
 pages = {"brand-spec": brand_spec, "new-patient": new_patient}
 out = Path(__file__).parent / "pages"

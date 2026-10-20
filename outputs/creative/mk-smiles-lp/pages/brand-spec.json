@@ -73,7 +73,13 @@
     ],
     "cx": 1180
    },
-   "device_gap_m": 130
+   "device_gap_m": 130,
+   "seal": {
+    "top": "New patients",
+    "price": "£50",
+    "bottom": "Check-up + 3D scan",
+    "was": "£76.70"
+   }
   },
   {
    "block": "usp_text",

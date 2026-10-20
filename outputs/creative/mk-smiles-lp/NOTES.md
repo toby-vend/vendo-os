@@ -21,6 +21,8 @@ Every price is in `facts.json`. Build: `python3 make_pages.py`, then from `scrip
   USP strip, patient stories, pricing panel, membership (Options A/B/C), Google reviews, form band, pain points,
   what's included, four steps, services, before-and-afters, why us, meet your dentist (Dr Kishan Chavda), clinician
   carousel (first names), practice tour (YouTube poster), FAQ, final CTA + form, footer.
+- Added 20 Oct (Toby: use the before-and-afters, add the other features): hero offer seal (£50, usually £76.70),
+  opening hours + location spotlight from the source page, MK watermark on the Teal why-us and final CTA bands.
 - Left out: awards (none on the source page). Phone numbers and call buttons (LP rule: form only).
 
 ## Decisions so far
