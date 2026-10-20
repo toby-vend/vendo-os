@@ -1,0 +1,167 @@
+{
+ "title": "Brand spec",
+ "form": {
+  "fields": [
+   {
+    "label": "Full name",
+    "full": true
+   },
+   "Email",
+   "Mobile"
+  ],
+  "label": "New patient offer",
+  "title": "Book your check-up",
+  "sub": "New patients welcome, for you or your family.",
+  "note": "£85 new patient check-up, X-rays included."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "New patients welcome · Woburn Sands, Milton Keynes",
+   "title": "New patient<br>check&#8209;up, <b>only £85.</b>",
+   "tagline": "Need a new private dentist in Milton Keynes?",
+   "sub": "A thorough check-up and a clear, personalised plan from a friendly local team who take the time to listen.",
+   "ticks": [
+    "Full dental examination",
+    "X-rays included",
+    "Oral cancer screening",
+    "Personalised plan"
+   ],
+   "ticks_m": [
+    "Full dental examination",
+    "X-rays included"
+   ],
+   "trust": "Rated {{rating}} from {{review_count}} Google reviews",
+   "stats": [
+    [
+     "{{rating}}",
+     "Google rating"
+    ],
+    [
+     "{{review_count}}",
+     "Google reviews"
+    ],
+    [
+     "8am",
+     "Weekday starts"
+    ]
+   ],
+   "stats_m": [
+    [
+     "{{rating}}",
+     "Rating"
+    ],
+    [
+     "{{review_count}}",
+     "Reviews"
+    ],
+    [
+     "8am",
+     "Weekdays"
+    ]
+   ],
+   "photo": {
+    "src": "assets/photos/p1.jpg",
+    "w": 1012,
+    "h": 1800,
+    "rows": [
+     40,
+     1740
+    ],
+    "cx": 506
+   },
+   "device_gap_m": 96,
+   "seal": {
+    "top": "New patients",
+    "price": "£85",
+    "bottom": "Check-up + X-rays"
+   }
+  },
+  {
+   "block": "usp_text",
+   "hide_m": false,
+   "label": "Why families choose Woburn Sands",
+   "items": [
+    [
+     "person",
+     "A kind, caring team who explain everything clearly"
+    ],
+    [
+     "card",
+     "Transparent pricing, with no pressure"
+    ],
+    [
+     "heart",
+     "Nervous patients welcome"
+    ],
+    [
+     "pin",
+     "Ground-floor surgeries on Theydon Avenue"
+    ]
+   ]
+  },
+  {
+   "block": "pricing",
+   "layout": "panel",
+   "eyebrow": "Pricing",
+   "title": "Clear prices, <b>no surprises.</b>",
+   "sub": "You’ll leave with clear recommendations and full cost transparency, and a plan with no pressure.",
+   "price_label": "New patient check-up",
+   "price": "£85",
+   "price_note": "X-rays included",
+   "notes": [
+    "Hygiene appointments from £81.20.",
+    "Children’s new patient assessment £25 · Fillings from £132.30 · Extractions from £131.30."
+   ],
+   "photo": {
+    "src": "assets/photos/s10.jpg",
+    "pos": "50% 55%"
+   },
+   "get": [
+    [
+     "A full dental examination",
+     "We assess your teeth, gums, bite and soft tissues to spot any concerns early"
+    ],
+    [
+     "Health and oral cancer screening",
+     "A thorough check for early signs of gum disease, alongside a soft tissue screening"
+    ],
+    [
+     "Digital X-rays when needed",
+     "Safe, high-quality imaging to spot hidden issues, at no additional cost"
+    ],
+    [
+     "Your personalised treatment plan",
+     "Clear recommendations and full cost transparency, with no pressure"
+    ]
+   ]
+  },
+  {
+   "block": "form_band",
+   "name": "Book your check-up (form 2)",
+   "eyebrow": "New patient offer",
+   "title": "Your family dentist, <b>in Woburn Sands.</b>",
+   "sub": "Book your £85 new patient check-up, with X-rays included, at a practice families have trusted for years.",
+   "ticks": [
+    "Full examination and X-rays",
+    "Nervous patients welcome",
+    "For adults and children",
+    "Clear pricing upfront"
+   ],
+   "form_title": "Book your check-up"
+  }
+ ],
+ "thank_you": {
+  "text": "Thank you. Our team will be in touch to confirm your check-up. If you’d rather pick a time yourself, you can book online now.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ }
+}

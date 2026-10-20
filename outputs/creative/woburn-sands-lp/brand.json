@@ -1,0 +1,180 @@
+{
+ "_source": "Woburn Sands brand guideline (Figma xOAVGppKkuFSLDgZs0OoyO; harness outputs/creative/woburn-sands-meta-statics) and the practice site (woburnsandsdentalpractice.co.uk, read 20 Oct 2026). Treatments: Manrope Bold Woburn Green headlines with the turn in Instrument Serif Italic (Crown Gold on white, Mist on green), Jost caps labels in Crown Gold, Kana crown bullets in place of ticks, crown cards (Fern fill, white hairline) on green, square real-photo frames (the site and ads never round photos) with a Mist offset block, house-sketch watermark, green-wash photography behind the form band and final CTA, Mist buttons on green and green buttons on white, 4px buttons and fields, ExtraLight numerals.",
+ "palette": {
+  "ink": "#1D6340",
+  "ink2": "#33433A",
+  "muted": "#66756C",
+  "bg": "#FFFFFF",
+  "panel": "#F3F6F4",
+  "card": "#FFFFFF",
+  "accent": "#BE9E5A",
+  "accent_on_dark": "#DCE7E2",
+  "turn": "#BE9E5A",
+  "offer": "#1D6340",
+  "on_accent": "#FFFFFF",
+  "dark": "#1D6340",
+  "dark2": "#396735",
+  "on_dark": "#FFFFFF",
+  "on_dark2": "#DCE7E2",
+  "btn_on_dark": "#DCE7E2",
+  "btn_on_dark_fg": "#10261B",
+  "fine": "#ABC4B7",
+  "fine_on_dark": "#BE9E5A",
+  "field_border": "#C9D6CF",
+  "mist": "#DCE7E2",
+  "sage": "#ABC4B7"
+ },
+ "fonts": {
+  "family": "Manrope",
+  "fallback": "sans-serif",
+  "faces": [
+   {
+    "file": "assets/fonts/Manrope.ttf",
+    "weight": "200 800"
+   },
+   {
+    "file": "assets/fonts/InstrumentSerif-Italic.ttf",
+    "weight": 400,
+    "style": "italic",
+    "family": "Instrument Serif"
+   },
+   {
+    "file": "assets/fonts/Jost.ttf",
+    "weight": "100 900",
+    "family": "Jost"
+   }
+  ]
+ },
+ "type": {
+  "display": {
+   "weight": 700,
+   "size": 56,
+   "size_m": 36,
+   "line": 1.08,
+   "tracking": "-.015em",
+   "bold": {
+    "weight": 400,
+    "font": "'Instrument Serif', serif",
+    "style": "italic",
+    "color": "turn"
+   }
+  },
+  "h1": {
+   "weight": 700,
+   "size": 44,
+   "size_m": 30,
+   "line": 1.12,
+   "tracking": "-.015em",
+   "bold": {
+    "weight": 400,
+    "font": "'Instrument Serif', serif",
+    "style": "italic",
+    "color": "turn"
+   }
+  },
+  "h2": {
+   "weight": 600,
+   "size": 24,
+   "line": 1.3
+  },
+  "h3": {
+   "weight": 700,
+   "size": 18,
+   "line": 1.4
+  },
+  "body": {
+   "weight": 400,
+   "size": 16,
+   "line": 1.7
+  },
+  "label": {
+   "weight": 500,
+   "size": 13,
+   "tracking": ".22em",
+   "case": "uppercase",
+   "font": "'Jost', sans-serif"
+  },
+  "price": {
+   "weight": 200
+  }
+ },
+ "shape": {
+  "card": 6,
+  "button": 4,
+  "field": 4,
+  "photo": 0,
+  "thumb": 0
+ },
+ "button": {
+  "height": 54,
+  "pad": 32,
+  "weight": 600,
+  "size": 16,
+  "tracking": "0",
+  "case": "none"
+ },
+ "device": {
+  "type": "rounded",
+  "cutout": false,
+  "backdrop": {
+   "color": "mist",
+   "dx": -28,
+   "dy": 28
+  }
+ },
+ "watermark": {
+  "file": "assets/house-colour.svg",
+  "light": "#595958",
+  "dark": "#FFFFFF",
+  "blocks": {
+   "hero_form": {
+    "x": -150,
+    "y": 640,
+    "w": 520,
+    "x_m": -120,
+    "y_m": 1560,
+    "w_m": 300
+   },
+   "why_us": {
+    "anchor": "right",
+    "x": -120,
+    "y": 40,
+    "w": 640,
+    "x_m": -90,
+    "y_m": -10,
+    "w_m": 300
+   }
+  }
+ },
+ "rhythm": {
+  "default": "light",
+  "usp_text": "dark",
+  "pricing": "panel",
+  "membership": "light",
+  "google_reviews": "panel",
+  "form_band": "dark",
+  "pain_points": "panel",
+  "explainer": "light",
+  "steps": "panel",
+  "services": "light",
+  "results": "panel",
+  "why_us": "dark",
+  "spotlight": "light",
+  "meet_dentist": "panel",
+  "team": "light",
+  "faq": "panel",
+  "final_cta": "dark",
+  "footer": "dark"
+ },
+ "icons": {
+  "stroke": 1.5
+ },
+ "logo": {
+  "dark": "assets/logo-h-colour.svg",
+  "light": "assets/logo-h-white.svg",
+  "width": 230,
+  "width_m": 150,
+  "width_footer": 220
+ },
+ "css_extra": ".tone-dark { --turn:#DCE7E2; }\n.display b, .h1 b { font-size:1.12em; letter-spacing:0; line-height:1; }\n.tick i { background:url(assets/crown-colour.png) center/19px auto no-repeat; border-radius:0; width:22px; }\n.tick i svg { display:none; }\n.tone-dark .tick { background:#396735; border:1.5px solid rgba(255,255,255,.75); border-radius:6px; padding:12px 16px; align-items:center; }\n.tone-dark .tick i { background-image:url(assets/crown-white.png); margin-top:0; }\n.tone-dark .tick .body { color:#FFFFFF; font-weight:600; }\n[data-name=\"Watermark\"] svg { opacity:.16; }\n.tone-dark [data-name=\"Watermark\"] svg { filter:brightness(0) invert(1); opacity:.08; }\nsection[data-name^=\"Book\"].tone-dark { background:linear-gradient(90deg,rgba(29,99,64,.97) 0%,rgba(29,99,64,.93) 48%,rgba(29,99,64,.6) 100%),url(assets/photos/s11-dup1.jpg) 50% 45%/cover no-repeat; }\n.m section[data-name^=\"Book\"].tone-dark { background:linear-gradient(180deg,rgba(29,99,64,.97) 0%,rgba(29,99,64,.9) 60%,rgba(29,99,64,.7) 100%),url(assets/photos/s11-dup1.jpg) 50% 45%/cover no-repeat; }\nsection[data-name=\"Final CTA\"].tone-dark { background:linear-gradient(90deg,rgba(29,99,64,.98) 0%,rgba(29,99,64,.94) 50%,rgba(29,99,64,.72) 100%),url(assets/photos/s16.jpg) 50% 50%/cover no-repeat; }\n.m section[data-name=\"Final CTA\"].tone-dark { background:linear-gradient(180deg,rgba(29,99,64,.97) 0%,rgba(29,99,64,.95) 100%),url(assets/photos/s16.jpg) 50% 50%/cover no-repeat; }\n.tone-light [data-name=\"Story\"], .tone-light [data-name=\"Review\"] { border:1px solid #DCE7E2; }\n[data-name=\"Story\"] > div:last-child > div:first-child { flex-wrap:wrap; gap:6px 12px; }\n.btn { box-shadow:0 6px 14px rgba(16,38,27,.12); }"
+}

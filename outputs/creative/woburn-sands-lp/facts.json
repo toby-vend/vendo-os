@@ -1,0 +1,46 @@
+{
+ "_note": "Source of truth (Toby's draft, Meta campaign): lp.woburnsandsdentalpractice.co.uk/new-patients-offer-meta, read 20 Oct 2026. Google version (/new-patients-offer) is identical apart from the phone number in the header and beside each button (not used: the form is the only CTA). Other facts from woburnsandsdentalpractice.co.uk (our-fees, membership-plans, meet-the-team, about-us, smile-gallery, new-patients-the-journey), all read 20 Oct 2026.",
+ "prices": ["£85", "£81.20", "£25", "£132.30", "£131.30", "£350", "£145", "£110", "£8.60", "£19.25", "£29.45", "£9.60"],
+ "sources": {
+  "£85": "New patient check-up including X-rays, 'Only £85' (draft hero + price list). Fees page agrees: New Patient Assessment (Adult) £85.00",
+  "£81.20": "Hygiene appointment (from) £81.20 (draft price list). CONFLICT: fees page says Hygiene Appointment starting from £78.90 (prices valid from March 2025). Draft kept per the hero-price rule; flagged",
+  "£25": "New Patient Assessment (Child) £25.00 (fees page)",
+  "£132.30": "Fillings starting from £132.30 (fees page)",
+  "£131.30": "Extractions starting from £131.30 (fees page)",
+  "£350": "Tooth whitening starting from £350.00 (fees page)",
+  "£145": "Dental implants consultation £145.00 (fees page)",
+  "£110": "Invisalign consultation £110.00 (fees page)",
+  "£8.60": "Membership Option A £8.60 per month: 2 examinations a year, X-rays included, 10% off further private treatment (membership page)",
+  "£19.25": "Membership Option B £19.25 per month: 2 examinations, 2 hygiene appointments a year, X-rays, 10% off (membership page)",
+  "£29.45": "Membership Option C £29.45 per month: 2 examinations, 4 hygiene appointments a year, X-rays, 10% off (membership page)",
+  "£9.60": "Membership Option D £9.60 per month: 1 examination, 1 hygiene appointment a year, X-rays, 10% off (membership page)"
+ },
+ "claims": {
+  "reviews": "4.8 from 403 Google reviews: Google Maps embed on the homepage (rendered 20 Oct 2026), same as the brand guideline. The draft header says '340+ 5 Star Google Reviews' and its Trustindex widget says 'EXCELLENT, based on 341 reviews'",
+  "included": "Draft: full dental examination; health and oral cancer screening; digital X-rays when necessary at no additional cost; bespoke 3D digital imaging (3D scan); time to talk; personalised treatment plan",
+  "hygiene_included": "Draft: scale and polish, gum health check, Airflow stain removal if applicable, fresh breath, oral care advice, ongoing preventive care",
+  "hours": "Draft: Mon to Fri 8:00am to 5.30pm, Saturday 8:00am to 1.45pm, Sunday closed. Site: Saturday 8.15am to 1.45pm. Google: Saturday closed (catchment report). Unresolved",
+  "access": "Ground-floor surgeries with wide corridors, suitable for wheelchair users; digital radiography; private consultation room (About page)",
+  "assessment_time": "New patient assessment takes approximately 30 minutes, including a pre-appointment introduction and tour (new patient journey page)",
+  "clinicians": "Meet the Team page: Simone Amrita Duggal, Dentist, BDS Liverpool 2017, GDC 270660 (bio: three years as SHO in oral and maxillofacial surgery, passed RCS MFDS, post-graduate Diploma in Implant Dentistry); Dr Sabrina Shima, Dentist, GDC 276335; Dr Boglarka Goroncseri, Dentist, DMD Debrecen 2000, GDC 117830; Dr Roshwin Pereira, Dentist with Special Interest in Dental Implants, GDC 264162; Dr Amisha Patel, GDC 272004; Tessa Lenard, Dental Hygienist, GDC 1553; Charlotte Wright, Practice Manager; Agnieszka Halina Priestley, Dental Nurse; Julia Montgomery, Front of House",
+  "team_photos": "July 2026 shoot portraits matched by face to the site's own headshots: p4 Simone, p12 Sabrina, p9 Boglarka, p17 Tessa, p15 Charlotte, p8 Agnieszka, p5 Julia (her badge reads Julia)",
+  "reviews_used": "Draft Trustindex widget (Google): Sheila Read, Mark Summers, Dave, Sally Connelly, Liz Whitelegg, Joan Barbara Nielsen. Not used: Jemmy Shneider (negative), Liz Mount (names Parag, who is not on the current team page)",
+  "before_after": "Published on woburnsandsdentalpractice.co.uk/smile-gallery: whitening Case 1 + TW2, Invisalign I5 + I3, implants Case 3 + DI2",
+  "kana": "About page: 'We are proudly a part of The Kana Health Group'"
+ },
+ "confirmed": [
+  "4.8 from 403 Google reviews"
+ ],
+ "to_confirm": [
+  "Hygiene price: draft from £81.20 vs fees page from £78.90",
+  "Saturday hours: draft 8am to 1.45pm, site 8.15am to 1.45pm, Google closed",
+  "Review count: draft header 340+ and Trustindex widget 341 vs Google Maps 403 (page uses 4.8 from 403)",
+  "3D digital scan at the new patient check-up (draft lists it; the main site only mentions 3D cone beam X-rays for implant planning): confirm Woburn Sands has an intraoral scanner",
+  "Before-and-afters: from the practice's published smile gallery; written consent for use on paid-ad landing pages to confirm",
+  "Team names matched to July shoot photos by face against the site's headshots (Simone, Sabrina, Boglarka, Tessa, Charlotte, Agnieszka, Julia): practice to confirm",
+  "Meet your dentist: Simone Duggal (named in a draft review); her quote is written from the practice's new patient copy and needs her approval",
+  "Form fields for the Boxly webform (Meta): full name, email, mobile; confirm Boxly doesn't need first/last name split",
+  "Thank-you page: online booking link (Dental Hub link from the site's Book Online button) still current?",
+  "Call / WhatsApp buttons wanted on the thank-you page? (Google draft carries the phone number; the LP rules keep it off the page)"
+ ]
+}

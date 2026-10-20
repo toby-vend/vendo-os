@@ -1,0 +1,12 @@
+# Client media from Drive stays out of git
+assets/photos/
+assets/cutouts/
+assets/awards/
+assets/ba/
+assets/ba-cards/
+assets/team/
+assets/team-chest/
+renders/
+__pycache__/
+.claude-flow/
+assets/src/ba/
