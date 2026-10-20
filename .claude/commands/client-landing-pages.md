@@ -108,7 +108,7 @@ Setup:
    - Create `<Client> — Landing Pages` in the client's Figma folder (Vendo team; create the folder in Chrome if it's missing).
    - Make one page per page type, named "New patient", "Emergency dentist" or "Smile makeover".
    - Capture four frames per page: `lp-desktop`, `lp-mobile`, `ty-desktop`, `ty-mobile`. Use `generate_figma_design`, then `scripts/lp-harness/figma-capture.sh` (headless, never Toby's browser).
-   - Then follow "Figma finishing" in `/client-meta-statics`: strip auto layout parents-first, lift the frames out of the wrapper, name the frames, and lay them out side by side.
+   - Then finish with `scripts/lp-harness/figma-finish.js` in `use_figma`: it picks each artboard by width (desktop and mobile captures nest differently), strips auto layout parents-first, lifts the frames out of the wrapper, names them and lays them out side by side.
    - Screenshot each page to check it.
 
 **GATE:** send Toby the Figma link and the preview path. Wait for his feedback before the other page types.
