@@ -66,9 +66,9 @@ body{{display:flex;flex-direction:column}}
 .split{{display:flex;gap:4px;background:#111}}
 .half{{flex:1;min-width:0;min-height:0;overflow:hidden}}
 img{{display:block;width:100%;height:100%;object-fit:cover}}
-.risk{{padding:{14 if small else 18}px {28 if small else 32}px {16 if small else 20}px;
+.risk{{padding:{18 if small else 24}px {32 if small else 40}px {20 if small else 28}px;
   font-family:'Archivo',sans-serif;font-weight:500;color:rgba(255,255,255,.78);
-  font-size:{15 if small else 19}px;line-height:1.35}}
+  font-size:{22 if small else 28}px;line-height:1.32}}
 </style></head><body>
 {media}
 <div class="risk">{c["risk"]}</div>
