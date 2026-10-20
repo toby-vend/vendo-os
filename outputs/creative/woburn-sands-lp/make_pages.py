@@ -124,7 +124,7 @@ HOURS = {"block": "spotlight", "name": "Opening hours", "eyebrow": "Opening hour
                    ["calendar", "Saturdays", "Saturday, 8am to 1.45pm. Closed Sundays."],
                    ["person", "Step-free access", "Ground-floor surgeries with wide corridors, suitable for wheelchair users."]]}
 MEET = {"block": "meet_dentist", "name": "Simone Duggal", "role": "Dentist · BDS (Liverpool, 2017) · GDC 270660",
-        "quote": "Your first visit is about getting to know you: your oral health, your questions and your goals, explained clearly and with no pressure.",
+        "text": "Your first visit is about getting to know you: your oral health, your questions and your goals, all explained clearly and with no pressure.",
         "creds": ["Three years in hospital service in oral and maxillofacial surgery",
                   "Passed the Royal College of Surgeons MFDS examinations",
                   "Post-graduate Diploma in Implant Dentistry",

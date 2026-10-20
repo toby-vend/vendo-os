@@ -1,6 +1,19 @@
 {
  "_note": "Source of truth (Toby's draft, Meta campaign): lp.woburnsandsdentalpractice.co.uk/new-patients-offer-meta, read 20 Oct 2026. Google version (/new-patients-offer) is identical apart from the phone number in the header and beside each button (not used: the form is the only CTA). Other facts from woburnsandsdentalpractice.co.uk (our-fees, membership-plans, meet-the-team, about-us, smile-gallery, new-patients-the-journey), all read 20 Oct 2026.",
- "prices": ["£85", "£81.20", "£25", "£132.30", "£131.30", "£350", "£145", "£110", "£8.60", "£19.25", "£29.45", "£9.60"],
+ "prices": [
+  "£85",
+  "£81.20",
+  "£25",
+  "£132.30",
+  "£131.30",
+  "£350",
+  "£145",
+  "£110",
+  "£8.60",
+  "£19.25",
+  "£29.45",
+  "£9.60"
+ ],
  "sources": {
   "£85": "New patient check-up including X-rays, 'Only £85' (draft hero + price list). Fees page agrees: New Patient Assessment (Adult) £85.00",
   "£81.20": "Hygiene appointment (from) £81.20 (draft price list). CONFLICT: fees page says Hygiene Appointment starting from £78.90 (prices valid from March 2025). Draft kept per the hero-price rule; flagged",
@@ -26,7 +39,10 @@
   "team_photos": "July 2026 shoot portraits matched by face to the site's own headshots: p4 Simone, p12 Sabrina, p9 Boglarka, p17 Tessa, p15 Charlotte, p8 Agnieszka, p5 Julia (her badge reads Julia)",
   "reviews_used": "Draft Trustindex widget (Google): Sheila Read, Mark Summers, Dave, Sally Connelly, Liz Whitelegg, Joan Barbara Nielsen. Not used: Jemmy Shneider (negative), Liz Mount (names Parag, who is not on the current team page)",
   "before_after": "Published on woburnsandsdentalpractice.co.uk/smile-gallery: whitening Case 1 + TW2, Invisalign I5 + I3, implants Case 3 + DI2",
-  "kana": "About page: 'We are proudly a part of The Kana Health Group'"
+  "kana": "About page: 'We are proudly a part of The Kana Health Group'",
+  "gdc": "Simone Duggal GDC 270660: Meet the Team page (woburnsandsdentalpractice.co.uk/meet-the-team, 'GDC: 270660') and her profile page (/team/simone-amrita-duggal, 'GDC No. 270660'), read 20 Oct 2026",
+  "meet_dentist_copy": "Meet your dentist lead line is practice copy written by Vendo from the new patient journey page, shown without quote marks or attribution (not Simone's words). Credentials from her profile page",
+  "quotes": "Only quoted words on the page are Google reviews from the draft's Trustindex widget, attributed to their authors"
  },
  "confirmed": [
   "4.8 from 403 Google reviews"
@@ -38,9 +54,9 @@
   "3D digital scan at the new patient check-up (draft lists it; the main site only mentions 3D cone beam X-rays for implant planning): confirm Woburn Sands has an intraoral scanner",
   "Before-and-afters: from the practice's published smile gallery; written consent for use on paid-ad landing pages to confirm",
   "Team names matched to July shoot photos by face against the site's headshots (Simone, Sabrina, Boglarka, Tessa, Charlotte, Agnieszka, Julia): practice to confirm",
-  "Meet your dentist: Simone Duggal (named in a draft review); her quote is written from the practice's new patient copy and needs her approval",
   "Form fields for the Boxly webform (Meta): full name, email, mobile; confirm Boxly doesn't need first/last name split",
   "Thank-you page: online booking link (Dental Hub link from the site's Book Online button) still current?",
-  "Call / WhatsApp buttons wanted on the thank-you page? (Google draft carries the phone number; the LP rules keep it off the page)"
+  "Call / WhatsApp buttons wanted on the thank-you page? (Google draft carries the phone number; the LP rules keep it off the page)",
+  "Meet your dentist: Simone Duggal (named in a draft review) as the clinician new patients see; the lead line is plain practice copy, not a quote"
  ]
 }

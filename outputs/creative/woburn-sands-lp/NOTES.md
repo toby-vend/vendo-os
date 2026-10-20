@@ -2,7 +2,7 @@
 
 Built 20 Oct 2026 on the shared harness (`scripts/lp-harness/`) with `/client-landing-pages`, following the MK Smiles
 build. First page type: new patient (Meta). Figma: "Woburn Sands — Landing Pages" jSN5IyJSji3tQf69PR5aZV (Kana Health Group folder). Brand spec page: sheet 4:4,
-desktop 6:4, mobile 5:4. New patient page: desktop 10:4, mobile 8:4, thank-you desktop 2:4, thank-you mobile 3:4.
+desktop 6:4, mobile 5:4. New patient page: desktop 12:4, mobile 13:4, thank-you desktop 2:4, thank-you mobile 3:4.
 
 Brand: Woburn Sands guideline (Figma xOAVGppKkuFSLDgZs0OoyO, harness `outputs/creative/woburn-sands-meta-statics/`),
 the July 2026 Meta statics and woburnsandsdentalpractice.co.uk. `brand.json`: Manrope Bold Woburn Green headlines with
@@ -59,7 +59,8 @@ Every price is in `facts.json`. Build: `/usr/bin/python3 make_assets.py` (once),
   Not shown: Roshwin (MK Smiles shoot), Amisha, Saba, Hafsa, Monisha and the trainees (no matched photo).
 - Meet your dentist: Simone Duggal, named in a draft review for a kind, patient extraction; bio and GDC 270660 from
   her team page. The site lists her without "Dr" (her scrubs say Dr Simone Duggal), so the page uses her name only.
-  Her quote is written from the practice's own new patient copy and needs her approval.
+  The line under her name is plain practice copy (no quote marks, not attributed to her), per the quote rule:
+  only a person's published words go in quote marks. GDC 270660 is from the Meet the Team page and her profile page.
 - Smile gallery: six cases from the practice's published smile gallery (whitening x2, Invisalign x2, implants x2),
   shown before over after. Consent for use on paid-ad landing pages still to confirm.
 - 3D digital scan: kept in "what's included" because the draft lists it; it is not in the hero. Confirm the practice
