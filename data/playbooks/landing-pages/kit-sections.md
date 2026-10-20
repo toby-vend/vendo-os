@@ -29,6 +29,7 @@ handover, never leave it implicit.
 | `practice_tour` | vdk/practice-tour (`vdk-tour`) | Video poster + interior photos | Video tour |
 | `faq` | vdk/faq (`vdk-faq`) | 6–9 questions, first open | Objection handling |
 | `final_cta` | vdk/cta (`vdk-cta`) + vdk/footer | Final headline, tags, trust line, form 3, footer | Final CTA with form |
+| `divider` | Not in kit (an SVG shape divider in the section settings) | The client's own wave or line SVG between two sections | Brand (e.g. Wilson House's site waves) |
 | `thank_you` | Thank-you page | Confirmation, online booking, optional call/WhatsApp | Booking after submission |
 
 Also on Maylands, built by hand in Additional CSS (not in the kit yet): mobile sticky contact bar, patient-smiles

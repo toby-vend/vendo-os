@@ -28,7 +28,7 @@ def pricing(ctx, c, m):
         <i style="flex:none;width:36px;height:36px;border-radius:50%;background:var(--alt);display:flex;align-items:center;justify-content:center">{TICK.format(s=12)}</i>
         <div><div class="h3">{ctx.t(t)}</div><div class="body fg2" style="margin-top:4px">{ctx.t(d)}</div></div></div>''' for t, d in c["get"])
     right = f'''<div style="display:flex;flex-direction:column">
-      {photo(c['photo'], 220 if m else 260)}
+      {photo(c['photo'], 220 if m else 260, frame=ctx.brand.data.get('photo_frame'))}
       <div class="label acc" style="margin-top:32px">{ctx.t(c.get('get_label', 'What you get'))}</div>
       <div style="margin-top:6px">{rows}</div></div>'''
     return sec(ctx, "Pricing", "pricing", grid([price, right], 1 if m else 2, 32 if m else 48), m, c.get("tone"))

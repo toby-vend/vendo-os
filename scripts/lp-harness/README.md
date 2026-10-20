@@ -51,7 +51,10 @@ Add `#static` to view the capture layout instead.
   "shape": {"card", "button", "field", "photo", "thumb"},     // radii in px (999 = pill)
   "button": {"height", "pad", "weight", "size", "tracking", "case"},
   "device": {"type": "sframe|arch|rounded|circle", "cutout": true, "fill": 0.86,
-             "backdrop"?: {"color": "panel", "dx": 24, "dy": 24}},
+             "backdrop"?: {"color": "panel", "dx": 24, "dy": 24},
+             "line"?: "#hex", "inset"?: 10},                 // hairline frame outside the photo, open at the bottom
+  "arch_photos"?: true, "photo_frame"?: {"line", "inset"},   // feature photos: arch top, hairline frame
+  "step_suffix"?: ".",                                       // "01." step numbers
   "hero": {"glow"?},
   "rhythm": {"default": "light", "<block>": "light|panel|card|dark"},   // which tone each section sits in
   "icons": {"stroke": 1.5},

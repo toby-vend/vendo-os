@@ -96,13 +96,25 @@ def stars(n=5, s=16):
     return f'<span class="acc" style="display:inline-flex;gap:2px">{"".join(STAR.format(s=s) for _ in range(n))}</span>'
 
 
-def photo(ph, h, radius="var(--photo-r)", arch=False):
+def photo(ph, h, radius="var(--photo-r)", arch=False, frame=None):
     """ph = {"src": "assets/photos/x.jpg", "pos": "50% 40%"} or a bare path. arch=True gives the brand's arch top
-    (brand.json "arch_photos": true applies it to the feature photos: explainer, meet_dentist, spotlight)."""
+    (brand.json "arch_photos": true applies it to the feature photos: explainer, meet_dentist, spotlight).
+    frame = {"line", "inset"} (brand.json "photo_frame") draws a 1px hairline `inset` px outside the photo, open at
+    the bottom, as Wilson House's site does; ph["shape"] = "side" makes a side arch open on the right, for a photo
+    that bleeds off the page edge."""
     if isinstance(ph, str):
         ph = {"src": ph}
+    side = ph.get("shape") == "side"
     if arch:
         radius = "999px 999px 0 0"
+    if side:
+        radius = f"{h / 2:.0f}px 0 0 {h / 2:.0f}px"
+    if frame:
+        i = frame.get("inset", 8)
+        r = (f"{h / 2 + i + 1:.0f}px 0 0 {h / 2 + i + 1:.0f}px" if side else "999px 999px 0 0" if arch else "0")
+        pad, bord = (f"{i}px 0 {i}px {i}px", "border-right:0") if side else (f"{i}px {i}px 0", "border-bottom:0")
+        return (f'<div data-name="Framed photo" style="padding:{pad};border:1px solid {frame["line"]};{bord};border-radius:{r}">'
+                f'{photo(ph, h - (2 * i + 2 if side else i + 1), radius=radius)}</div>')
     if ph.get("crop"):  # chest-up crop from a face box: crop = {w, h, top, bottom, cx} in source pixels
         c = ph["crop"]
         sc = h / (c["bottom"] - c["top"])
@@ -111,6 +123,14 @@ def photo(ph, h, radius="var(--photo-r)", arch=False):
     else:
         bg = f"url({ph['src']}) {ph.get('pos', '50% 50%')}/cover no-repeat"
     return f'<div data-name="Photo" style="height:{h}px;border-radius:{radius};background:{bg}"></div>'
+
+
+def feature_photo(ctx, ph, h, m=False):
+    """The feature photo of a section (explainer, meet_dentist, spotlight): the brand's arch (brand.json
+    "arch_photos") and hairline frame ("photo_frame"). A side arch (ph["shape"] = "side") bleeds off the right edge."""
+    side = isinstance(ph, dict) and ph.get("shape") == "side"
+    out = photo(ph, h, arch=ctx.brand.data.get("arch_photos", False) and not side, frame=ctx.brand.data.get("photo_frame"))
+    return f'<div style="margin-right:-{20 if m else 80}px">{out}</div>' if side else out
 
 
 def cta_row(ctx, m, top=48):

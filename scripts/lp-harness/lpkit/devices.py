@@ -9,6 +9,9 @@ client's guideline, not from the kit. Types:
 Optional cut-out: the person, background removed (tools/cutout.py), layered over the frame so the head breaks
 out of the top edge. The frame's bottom edge sits at mid-chest (team photos are mid-chest up only).
 
+Optional hairline ("line": colour, "inset": px): a 1px frame drawn `inset` px outside the photo, open at the bottom
+edge, following the device's shape (Wilson House's website frames every photo this way).
+
 Photo spec (from tools/team_crop.py --json): {"src", "w", "h", "head_top", "chest", "face_cx", "cutout"?}.
 """
 
@@ -55,6 +58,13 @@ def frame(ctx, spec, fw, fh, cutout=None):
     if accent:
         back = (f'<div data-name="Backdrop" style="position:absolute;left:{accent.get("dx", 24)}px;top:{accent.get("dy", 24)}px;width:{fw}px;height:{fh}px;'
                 f'border-radius:{ "var(--photo-r)" if kind != "arch" else f"{fw / 2:.0f}px {fw / 2:.0f}px var(--photo-r) var(--photo-r)"};background:var(--{accent.get("color", "panel")})"></div>')
+    line = ctx.brand.device.get("line")
+    if line:  # hairline frame, open at the bottom, `inset` px outside the photo
+        i = ctx.brand.device.get("inset", 8) + 1
+        hh = fw if kind == "circle" else fh
+        r = {"arch": f"{fw / 2 + i:.0f}px {fw / 2 + i:.0f}px 0 0", "circle": "50%"}.get(kind, "0")
+        back += (f'<div data-name="Frame line" style="position:absolute;left:-{i}px;top:{fh - hh - i}px;width:{fw + 2 * i}px;height:{hh + i}px;'
+                 f'border:1px solid {line};border-bottom:0;border-radius:{r}"></div>')
     if not use_cut:
         return back + shape
     # breakout "top": the head breaks out of the top edge only; "all": free above and to the sides, flush at the bottom
