@@ -1,0 +1,674 @@
+{
+ "title": "New patient check-up",
+ "form": {
+  "fields": [
+   {
+    "label": "Full name",
+    "full": true
+   },
+   "Email",
+   "Mobile"
+  ],
+  "label": "New patient offer",
+  "title": "Book your check-up",
+  "sub": "New patients welcome, adults and children.",
+  "note": "£85 new patient check-up, including all X-rays."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "New patients welcome · Newport Pagnell",
+   "title": "Your new patient check-up, <b>only £85.</b>",
+   "tagline": "Including all X-rays and a complimentary 3D digital scan.",
+   "sub": "A private practice on Station Road, Newport Pagnell. A full examination, time to talk through any worries, and a clear treatment plan with no hidden fees.",
+   "ticks": [
+    "Full dental examination",
+    "All X-rays included",
+    "3D digital scan included",
+    "Treatment plan"
+   ],
+   "ticks_m": [],
+   "trust": "Rated Excellent from {{review_count}} Google reviews",
+   "stats": [
+    [
+     "{{review_count}}",
+     "Google reviews"
+    ],
+    [
+     "Free",
+     "On-site parking"
+    ],
+    [
+     "8am",
+     "Weekdays to 6pm"
+    ]
+   ],
+   "stats_m": [
+    [
+     "{{review_count}}",
+     "Reviews"
+    ],
+    [
+     "Free",
+     "Parking"
+    ],
+    [
+     "8am",
+     "To 6pm"
+    ]
+   ],
+   "photo": {
+    "src": "assets/photos/drive/dscf5038.jpg",
+    "w": 1080,
+    "h": 720,
+    "rows": [
+     0,
+     720
+    ],
+    "cx": 600
+   },
+   "device_gap_m": 48,
+   "seal": {
+    "top": "New patients",
+    "price": "£85",
+    "bottom": "Inc. all X-rays"
+   }
+  },
+  {
+   "block": "divider",
+   "name": "Gold curve",
+   "svg": "assets/shapes/curve-line.svg",
+   "bg": "bg",
+   "width": 1280,
+   "width_m": 350,
+   "h": 76,
+   "h_m": 22,
+   "style": "align-items:center"
+  },
+  {
+   "block": "awards",
+   "label": "Award finalists",
+   "items": [
+    {
+     "img": "assets/awards/Private-Dentistry-Awards-2025.png",
+     "result": "Finalist",
+     "title": "Private Dentistry Awards 2025"
+    },
+    {
+     "img": "assets/awards/Dental-Industry-Awards-2025.png",
+     "result": "Finalist",
+     "title": "Dental Industry Awards 2025"
+    },
+    {
+     "img": "assets/awards/Dentistry-Awards-2024.png",
+     "result": "Finalist",
+     "title": "The Dentistry Awards 2024"
+    },
+    {
+     "img": "assets/awards/Private-Dentistry-Awards-2024.png",
+     "result": "Finalist",
+     "title": "Private Dentistry Awards 2024"
+    },
+    {
+     "img": "assets/awards/Dental-Industry-Awards-2024.png",
+     "result": "Finalist",
+     "title": "Dental Industry Awards 2024"
+    },
+    {
+     "img": "assets/awards/Dental-Industry-Awards-2023.png",
+     "result": "Finalist",
+     "title": "Dental Industry Awards 2023"
+    }
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-top-purple.svg",
+   "bg": "bg",
+   "fill": "dark",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "usp_text",
+   "hide_m": false,
+   "label": "Why Newport Pagnell families choose Wilson House",
+   "items": [
+    [
+     "scan",
+     "All X-rays and a 3D digital scan included in your check-up"
+    ],
+    [
+     "card",
+     "Clear pricing explained upfront, with no hidden fees"
+    ],
+    [
+     "pin",
+     "Free on-site parking and a step-free entrance"
+    ],
+    [
+     "heart",
+     "Nervous patients welcome, with time to talk"
+    ]
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-bottom-tan.svg",
+   "bg": "bg",
+   "fill": "dark",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "story_cards",
+   "title": "Real patients, <b>real care.</b>",
+   "sub": "Don’t just take it from us. Here’s what our patients say, in their own words.",
+   "items": [
+    [
+     "Back after eight years",
+     "I hadn’t been to a dental practice in over 8 years and Dr Nisha and Natalia were incredibly welcoming, professional and completely put me at ease. I can’t recommend them enough!",
+     "Hannah Crook"
+    ],
+    [
+     "Nervous patients",
+     "Dr Zak and the team have been great at getting me through treatment despite my fear.",
+     "jacqui burnett"
+    ],
+    [
+     "Urgent care",
+     "Broke crown on Friday evening... Booked in for 10:30 the same day. Crown patched and appointment made to sort out permanently, excellent service.",
+     "doug futers"
+    ]
+   ],
+   "cta": false
+  },
+  {
+   "block": "pricing",
+   "layout": "panel",
+   "eyebrow": "New patient offer",
+   "title": "One clear price, <b>X-rays included.</b>",
+   "sub": "No hidden costs or surprises. If you need any treatment after your check-up, we explain your options and the fees before anything goes ahead.",
+   "price_label": "New patient check-up",
+   "price": "£85",
+   "price_note": "Including all X-rays",
+   "notes": [
+    "Hygiene appointment from £82.80 · with Airflow stain removal from £112.80.",
+    "Denplan Essentials and Denplan Care available to spread the cost of your care."
+   ],
+   "photo": {
+    "src": "assets/photos/web/team-surgery-2.jpg",
+    "pos": "50% 12%"
+   },
+   "get": [
+    [
+     "A full dental examination",
+     "Your teeth, gums, bite and soft tissues, to identify any concerns"
+    ],
+    [
+     "Gum health and oral cancer screening",
+     "A thorough review of your gum health alongside a vital oral cancer screening"
+    ],
+    [
+     "Digital X-rays and a 3D scan",
+     "Safe, high-quality imaging if needed, plus a 3D scan with no messy impressions"
+    ],
+    [
+     "Your personalised treatment plan",
+     "Clear recommendations with no pressure and no hidden fees"
+    ]
+   ]
+  },
+  {
+   "block": "google_reviews",
+   "sub": "Real reviews from Wilson House patients, posted on Google.",
+   "items": [
+    [
+     "Margaret Hallett",
+     "Excellent service… very friendly staff. Explained exactly what and why treatment was needed to keep my teeth in good condition."
+    ],
+    [
+     "Morts Barakat",
+     "Amazing Clinic. Dr Zak is great with adults and kids."
+    ],
+    [
+     "Nader Srouji",
+     "Great service and very friendly and professional team, highly recommended."
+    ]
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-top-purple.svg",
+   "bg": "bg",
+   "fill": "dark",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "form_band",
+   "name": "Book your check-up (form 2)",
+   "eyebrow": "New patient offer",
+   "title": "Your local dentist <b>on Station Road.</b>",
+   "sub": "Book your £85 new patient check-up at Wilson House, with all X-rays and a 3D digital scan included.",
+   "m_sub": "It takes under a minute. Our team will be in touch to confirm your appointment.",
+   "ticks": [
+    "All X-rays included",
+    "Complimentary 3D scan",
+    "Free on-site parking",
+    "Adults and children"
+   ],
+   "form_title": "Book your check-up"
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-bottom-tan.svg",
+   "bg": "bg",
+   "fill": "dark",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "pain_points",
+   "title": "Looking for a dentist <b>you can stick with?</b>",
+   "sub": "Whether it’s been six months or several years, you’ll be welcomed without judgement.",
+   "items": [
+    [
+     "It’s been a while since your last check-up",
+     "We focus on understanding your oral health now and helping you move forward comfortably."
+    ],
+    [
+     "You feel nervous about the dentist",
+     "Appointments are unhurried, everything is explained clearly, and you’re always in control."
+    ],
+    [
+     "You’ve just moved to the area",
+     "A friendly private practice in Newport Pagnell, with free on-site parking."
+    ],
+    [
+     "You want to know the cost first",
+     "One clear price for your check-up, and every fee explained before treatment goes ahead."
+    ],
+    [
+     "You need a dentist for the whole family",
+     "Care for adults and children, under one roof."
+    ],
+    [
+     "Something doesn’t feel quite right",
+     "Pain, swelling or a damaged tooth? We offer emergency appointments, and early attention helps."
+    ]
+   ],
+   "close": "Your check-up is a <b style=\"font-weight:600\">thorough look at your oral health</b>, followed by clear advice and a plan built around you."
+  },
+  {
+   "block": "explainer",
+   "name": "What’s included",
+   "photo_right": true,
+   "photo_h": 600,
+   "photo": {
+    "src": "assets/photos/drive/dscf4909.jpg",
+    "pos": "50% 40%",
+    "shape": "side"
+   },
+   "eyebrow": "What’s included",
+   "title": "A proper check-up, <b>explained clearly.</b>",
+   "text": "We assess your teeth, gums, bite and soft tissues, review your gum health and screen for oral cancer, all for a fixed fee of £85.",
+   "card": {
+    "title": "Time to talk",
+    "text": "Nervous or have questions? We take the time to listen and explain everything clearly, so you feel at ease."
+   },
+   "facts_label": "Included",
+   "facts": [
+    "Full examination",
+    "Digital X-rays",
+    "3D digital scan",
+    "Oral cancer screening",
+    "Gum health check",
+    "Treatment plan"
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-top-purple.svg",
+   "bg": "panel",
+   "fill": "#2A003A",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "steps",
+   "eyebrow": "What happens next",
+   "title": "Your check-up, <b>step by step.</b>",
+   "items": [
+    [
+     "Book your appointment",
+     "Send us your details and our team will be in touch to arrange a time that suits you."
+    ],
+    [
+     "Visit us on Station Road",
+     "Park for free on site. Your dentist examines your teeth and gums, with X-rays and a 3D scan if needed."
+    ],
+    [
+     "Clear advice",
+     "We explain what we find and why, and talk you through your options at a pace that suits you."
+    ],
+    [
+     "Your treatment plan",
+     "Leave with tailored recommendations and next steps, with no pressure and no hidden fees."
+    ]
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-bottom-tan.svg",
+   "bg": "bg",
+   "fill": "#2A003A",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "services",
+   "style": "photo",
+   "eyebrow": "Our care",
+   "title": "Care for every generation, <b>under one roof.</b>",
+   "sub": "Modern dentistry in a calm, friendly setting at our practice in Newport Pagnell.",
+   "items": [
+    {
+     "title": "Check-ups &amp; X-rays",
+     "text": "A full examination with all X-rays included, £85 for new patients.",
+     "photo": {
+      "src": "assets/photos/web/clinician-xray.jpg",
+      "pos": "50% 30%"
+     }
+    },
+    {
+     "title": "Hygiene &amp; Airflow",
+     "text": "Scale and polish from £82.80, or with Airflow stain removal from £112.80.",
+     "photo": {
+      "src": "assets/photos/web/team-surgery-2.jpg",
+      "pos": "50% 35%"
+     }
+    },
+    {
+     "title": "Family dentistry",
+     "text": "From a child’s first visit to ongoing adult care, for the whole family.",
+     "photo": {
+      "src": "assets/photos/web/team-purple.jpg",
+      "pos": "50% 35%"
+     }
+    },
+    {
+     "title": "Nervous patients",
+     "text": "Unhurried appointments, clear explanations, and you’re always in control.",
+     "photo": {
+      "src": "assets/photos/web/chair-nurse.jpg",
+      "pos": "55% 35%"
+     }
+    },
+    {
+     "title": "Emergency appointments",
+     "text": "Pain, swelling or a broken tooth? We offer emergency appointments.",
+     "photo": {
+      "src": "assets/photos/web/team-surgery.jpg",
+      "pos": "50% 40%"
+     }
+    },
+    {
+     "title": "Cosmetic dentistry",
+     "text": "Whitening, bonding, veneers and Invisalign, talked through at your check-up if you’re interested.",
+     "photo": {
+      "src": "assets/photos/web/lounge.jpg",
+      "pos": "50% 50%"
+     }
+    }
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-top-purple.svg",
+   "bg": "bg",
+   "fill": "#2A003A",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "why_us",
+   "eyebrow": "Why Wilson House",
+   "title": "Your trusted home for <b>local dental care.</b>",
+   "items": [
+    [
+     "star",
+     "Rated Excellent on Google",
+     "Hundreds of local patients trust us with their smiles."
+    ],
+    [
+     "calm",
+     "A calm, friendly setting",
+     "Modern dentistry in a warm, welcoming practice on Station Road."
+    ],
+    [
+     "card",
+     "Transparent pricing",
+     "No hidden costs or surprises, just clear, honest treatment plans."
+    ],
+    [
+     "heart",
+     "Nervous patients welcome",
+     "We take the time to listen, so even anxious patients feel at ease."
+    ],
+    [
+     "person",
+     "Adults and children",
+     "Care for every generation of the family, under one roof."
+    ],
+    [
+     "clock",
+     "Emergency appointments",
+     "Here when you need us most, with prompt emergency dental care."
+    ]
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-bottom-tan.svg",
+   "bg": "bg",
+   "fill": "#2A003A",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "spotlight",
+   "name": "Opening hours",
+   "eyebrow": "Find us",
+   "title": "Easy to reach, <b>easy to park.</b>",
+   "sub": "Our practice is in the red-brick house on Station Road, Newport Pagnell, a short drive from Milton Keynes.",
+   "photo": {
+    "src": "assets/photos/web/exterior-gate-blossom.jpg",
+    "pos": "50% 50%"
+   },
+   "badge": {
+    "name": "5 Station Road",
+    "role": "Newport Pagnell, MK16 0AG"
+   },
+   "items": [
+    [
+     "clock",
+     "Monday to Friday",
+     "Open 8am to 6pm. Closed at weekends."
+    ],
+    [
+     "pin",
+     "Free on-site parking",
+     "Accessible parking spaces and a step-free entrance."
+    ],
+    [
+     "shield",
+     "Denplan Essentials and Care",
+     "Ways to spread the cost of your care. Your dentist can talk you through them."
+    ]
+   ]
+  },
+  {
+   "block": "meet_dentist",
+   "name": "Dr Zakaria Ghrouf",
+   "role": "Dentist · DMD · GDC 256699",
+   "quote": "Whether it’s been six months or several years, you’re welcome here. I’ll explain what I find and your options clearly, before anything goes ahead.",
+   "creds": [
+    "GDC-registered dentist at Wilson House",
+    "Named by patients for helping nervous patients through treatment",
+    "“Great with adults and kids”, says a Google review",
+    "Clear explanations and fees upfront"
+   ],
+   "photo": {
+    "src": "assets/team/site-zakaria.jpg",
+    "pos": "45% 20%"
+   }
+  },
+  {
+   "block": "team",
+   "eyebrow": "Meet the team",
+   "title": "The people who’ll <b>look after you.</b>",
+   "sub": "A friendly, family-feel team, with positivity and patient care at its core.",
+   "members": [
+    [
+     "assets/team-chest/zakaria.jpg",
+     "Dr Zakaria",
+     "Dentist"
+    ],
+    [
+     "assets/team-chest/nisha.jpg",
+     "Dr Nisha",
+     "Dentist"
+    ],
+    [
+     "assets/team-chest/keval.jpg",
+     "Dr Keval",
+     "Dentist"
+    ],
+    [
+     "assets/team-chest/ayyub.jpg",
+     "Dr Ayyub",
+     "Associate Dentist"
+    ],
+    [
+     "assets/team-chest/gizel.jpg",
+     "Dr Gizel",
+     "Dentist"
+    ],
+    [
+     "assets/team-chest/sarah.jpg",
+     "Sarah",
+     "Hygienist"
+    ],
+    [
+     "assets/team-chest/zara.jpg",
+     "Zara",
+     "Head Dental Nurse"
+    ],
+    [
+     "assets/team-chest/natalia.jpg",
+     "Natalia",
+     "Dental Nurse"
+    ]
+   ]
+  },
+  {
+   "block": "practice_tour",
+   "eyebrow": "Inside Wilson House",
+   "title": "Take a look <b>around.</b>",
+   "poster": "assets/photos/yt-e9-iPLeN30A.jpg",
+   "photos": [
+    "assets/photos/web/lounge.jpg",
+    "assets/photos/web/nook.jpg",
+    "assets/photos/web/gable-sign.jpg",
+    {
+     "src": "assets/photos/web/aerial.jpg",
+     "pos": "50% 45%"
+    }
+   ]
+  },
+  {
+   "block": "faq",
+   "sub": "Can’t see your question? Send us your details and our team will be in touch.",
+   "items": [
+    [
+     "How much does a new patient check-up cost?",
+     "Your new patient check-up is £85, including X-rays. Any fees are discussed clearly in advance, with no hidden costs, so you know exactly what to expect before any treatment goes ahead."
+    ],
+    [
+     "What happens during a dental check-up?",
+     "A thorough examination of your teeth, gums and mouth. Your dentist looks for signs of tooth decay, gum disease, wear and other oral health concerns, with X-rays if needed."
+    ],
+    [
+     "I’m nervous about visiting the dentist. Can you help?",
+     "Yes. Many patients feel anxious about dental visits. Appointments are unhurried, everything is clearly explained, and you’re always in control. Just let the team know."
+    ],
+    [
+     "Can I book if I haven’t been to the dentist in years?",
+     "Yes. Whether it’s been six months or several years, you’ll be welcomed without judgement."
+    ],
+    [
+     "Will I need treatment straight away?",
+     "Not necessarily. Many issues can simply be monitored. If treatment is recommended, your dentist will explain why and help you plan next steps at a pace that suits you."
+    ],
+    [
+     "How often should I have a check-up?",
+     "Most patients benefit from a check-up every six months, but your dentist will advise based on your oral health, lifestyle and needs."
+    ],
+    [
+     "When are you open?",
+     "Monday to Friday, 8am to 6pm. We’re closed at weekends."
+    ],
+    [
+     "Where are you, and can I park?",
+     "5 Station Road, Newport Pagnell, Milton Keynes MK16 0AG. There’s free on-site parking, with accessible spaces and a step-free entrance."
+    ]
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-top-purple.svg",
+   "bg": "bg",
+   "fill": "#2A003A",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "final_cta",
+   "eyebrow": "Book today",
+   "title": "Your new patient check-up, <b>only £85.</b>",
+   "size": 54,
+   "size_m": 34,
+   "sub": "Book today for a full examination with all X-rays included, at our calm, friendly practice in Newport Pagnell.",
+   "tags": [
+    "All X-rays included",
+    "Free on-site parking",
+    "Station Road, MK16"
+   ],
+   "trust": "Rated Excellent from {{review_count}} Google reviews",
+   "form_title": "Book your check-up"
+  }
+ ],
+ "thank_you": {
+  "text": "Thank you. Our team will be in touch to confirm your check-up. If you’d rather pick a time yourself, you can book online now.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ }
+}
