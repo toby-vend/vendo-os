@@ -187,5 +187,5 @@
   "width_m": 66,
   "width_footer": 110
  },
- "css_extra": ".tone-dark { --turn:#7EBBAF; }\n[data-name=\"Watermark\"] svg { opacity:.05; }\n.tick i { background: url(assets/mark-m-colour.png) center/15px auto no-repeat; border-radius: 0; width: 20px; }\n.tick i svg { display: none; }\n.tone-dark .tick i { background-image: url(assets/mark-m-white.png); }\n.tone-dark .card.tone-card .tick i { background-image: url(assets/mark-m-colour.png); }\n.tone-dark [data-name=\"Watermark\"] svg { filter: brightness(0) invert(1); opacity:.06; }"
+ "css_extra": ".tone-dark { --turn:#7EBBAF; }\n[data-name=\"Watermark\"] svg { opacity:.05; }\n.tick i { background: url(assets/mark-m-colour.png) center/15px auto no-repeat; border-radius: 0; width: 20px; }\n.tick i svg { display: none; }\n.tone-dark .tick i { background-image: url(assets/mark-m-white.png); }\n.tone-dark .card.tone-card .tick i { background-image: url(assets/mark-m-colour.png); }\n.tone-dark [data-name=\"Watermark\"] svg { filter: brightness(0) invert(1); opacity:.06; }\n.tone-light [data-name=\"Story\"], .tone-light [data-name=\"Review\"] { border:1px solid #D5E3E0; box-shadow:0 12px 30px rgba(4,97,105,.06); }\n[data-name=\"Story\"] > div:last-child > div:first-child { flex-wrap:wrap; gap:6px 12px; }"
 }

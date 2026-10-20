@@ -66,7 +66,7 @@ MEMBERSHIP = {"block": "membership", "eyebrow": "Membership plans", "title": "Sp
                    "feats": ["2 dental examinations a year", "2 hygiene appointments a year", "X-rays included", "10% off further private treatment"]},
                   {"name": "Option C", "price": "£34.25", "who": "2 check-ups, 4 hygiene visits", "featured": False,
                    "feats": ["2 dental examinations a year", "4 hygiene appointments a year", "X-rays included", "10% off further private treatment"]}]}]}
-REVIEWS = {"block": "google_reviews", "sub": "Rated Excellent from 286 Google reviews.", "items": [
+REVIEWS = {"block": "google_reviews", "sub": "Real reviews from MK Smiles patients, posted on Google.", "items": [
     ["Jūratė Sabaliauskaitė", "I’m very happy with my dentist Dr Kishan. He is extremely professional, caring, and excellent at what he does. I always feel comfortable and well looked after during my appointments."],
     ["Ashley Washington", "Amazingly friendly staff, warm smiles, very welcoming."],
     ["Mia Walsh", "The team are so kind and patient and always greet me with a warm welcome, and that extends to everyone I’ve met there."]]}
