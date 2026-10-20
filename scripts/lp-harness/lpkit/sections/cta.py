@@ -5,7 +5,7 @@ from ..ui import sec, grid, stars, form_card
 def footer_html(ctx, m, credit=True):
     lw = ctx.brand.data["logo"]
     cr = f' · {ctx.client.get("credit", "Marketing by Vendo Digital")}' if credit else ""
-    return (f'<div style="display:flex;{"flex-direction:column;gap:16px" if m else "justify-content:space-between;align-items:center"}">'
+    return (f'<div style="display:flex;{"flex-direction:column;gap:16px" if m else "justify-content:space-between;align-items:center;gap:32px"}">'
             f'<div class="fg2" style="width:{lw.get("width_footer", 130)}px">{ctx.brand.logo(lw.get("footer", "light"))}</div>'
             f'<span class="body fg2" style="font-size:13px">{ctx.t("{{address}}")}</span>'
             f'<span class="body fg3" style="font-size:13px">© {ctx.client.get("year", 2026)} {ctx.t("{{name}}")}. All rights reserved. <u>Privacy policy</u>{cr}</span></div>')
