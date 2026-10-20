@@ -1,0 +1,211 @@
+{
+ "_source": "Oxford House brand guideline (Figma i0YW4eDguLAwoZpLn4WSTX; harness outputs/creative/oxford-house-meta-statics/build_guideline.py, 20 Oct 2026) and the practice's July 2026 Meta statics. Treatments: Josefin Sans Bold Deep Teal headlines with the turn in Josefin Light Italic (Logo Teal on white, Bright Teal on Deep Teal), Josefin SemiBold caps labels in Gold, Poppins body. Signature device: real practice photography under a Deep Teal wash (hero, form band, final CTA) instead of a framed portrait. Outlined crown list cards (white hairline, Kana crown bullet) in the hero; crown bullets in place of ticks elsewhere. House sketch watermark off an edge. Bright Teal buttons in Josefin Bold title case, 8px corners; square photos; 10px cards. White / Mist / Deep Teal rhythm.",
+ "palette": {
+  "ink": "#06444B",
+  "ink2": "#1E2B2D",
+  "muted": "#5B6E70",
+  "bg": "#FFFFFF",
+  "panel": "#EEF6F6",
+  "card": "#FFFFFF",
+  "accent": "#BFA15C",
+  "turn": "#27A1AC",
+  "offer": "#14B1BF",
+  "on_accent": "#FFFFFF",
+  "dark": "#06444B",
+  "dark2": "#0F717A",
+  "on_dark": "#FFFFFF",
+  "on_dark2": "#D3E8E9",
+  "btn_on_dark": "#14B1BF",
+  "btn_on_dark_fg": "#FFFFFF",
+  "fine": "#D5E7E8",
+  "fine_on_dark": "#BFA15C",
+  "field_border": "#C9DCDD"
+ },
+ "fonts": {
+  "family": "Poppins",
+  "fallback": "sans-serif",
+  "faces": [
+   {
+    "file": "assets/fonts/Poppins-Light.ttf",
+    "weight": 300
+   },
+   {
+    "file": "assets/fonts/Poppins-LightItalic.ttf",
+    "weight": 300,
+    "style": "italic"
+   },
+   {
+    "file": "assets/fonts/Poppins-Regular.ttf",
+    "weight": 400
+   },
+   {
+    "file": "assets/fonts/Poppins-Italic.ttf",
+    "weight": 400,
+    "style": "italic"
+   },
+   {
+    "file": "assets/fonts/Poppins-Medium.ttf",
+    "weight": 500
+   },
+   {
+    "file": "assets/fonts/Poppins-SemiBold.ttf",
+    "weight": 600
+   },
+   {
+    "file": "assets/fonts/Poppins-Bold.ttf",
+    "weight": 700
+   },
+   {
+    "file": "assets/fonts/JosefinSans.ttf",
+    "weight": "100 700",
+    "family": "Josefin Sans"
+   },
+   {
+    "file": "assets/fonts/JosefinSans-Italic.ttf",
+    "weight": "100 700",
+    "style": "italic",
+    "family": "Josefin Sans"
+   }
+  ]
+ },
+ "type": {
+  "display": {
+   "weight": 700,
+   "size": 60,
+   "size_m": 38,
+   "line": 1.06,
+   "tracking": "-.005em",
+   "font": "'Josefin Sans', sans-serif",
+   "bold": {
+    "weight": 300,
+    "style": "italic",
+    "color": "turn"
+   }
+  },
+  "h1": {
+   "weight": 700,
+   "size": 46,
+   "size_m": 32,
+   "line": 1.1,
+   "tracking": "-.005em",
+   "font": "'Josefin Sans', sans-serif",
+   "bold": {
+    "weight": 300,
+    "style": "italic",
+    "color": "turn"
+   }
+  },
+  "h2": {
+   "weight": 700,
+   "size": 26,
+   "line": 1.25,
+   "font": "'Josefin Sans', sans-serif"
+  },
+  "h3": {
+   "weight": 600,
+   "size": 19,
+   "line": 1.35,
+   "font": "'Josefin Sans', sans-serif"
+  },
+  "body": {
+   "weight": 400,
+   "size": 16,
+   "line": 1.7
+  },
+  "label": {
+   "weight": 600,
+   "size": 13,
+   "tracking": ".2em",
+   "case": "uppercase",
+   "font": "'Josefin Sans', sans-serif"
+  },
+  "price": {
+   "weight": 300,
+   "font": "'Josefin Sans', sans-serif"
+  }
+ },
+ "shape": {
+  "card": 10,
+  "button": 8,
+  "field": 8,
+  "photo": 0,
+  "thumb": 8
+ },
+ "button": {
+  "height": 56,
+  "pad": 34,
+  "weight": 700,
+  "size": 16,
+  "tracking": ".02em",
+  "case": "none"
+ },
+ "device": {
+  "type": "rounded",
+  "cutout": false
+ },
+ "watermark": {
+  "file": "assets/mark-house.svg",
+  "light": "#06444B",
+  "dark": "#FFFFFF",
+  "blocks": {
+   "hero_form": {
+    "anchor": "right",
+    "x": -120,
+    "y": 470,
+    "w": 560,
+    "x_m": -90,
+    "y_m": 1180,
+    "w_m": 300
+   },
+   "explainer": {
+    "anchor": "right",
+    "x": -230,
+    "y": -70,
+    "w": 440,
+    "x_m": -120,
+    "y_m": -20,
+    "w_m": 240
+   },
+   "why_us": {
+    "anchor": "right",
+    "x": -130,
+    "y": -30,
+    "w": 620,
+    "x_m": -120,
+    "y_m": 640,
+    "w_m": 260
+   }
+  }
+ },
+ "rhythm": {
+  "default": "light",
+  "usp_text": "panel",
+  "story_cards": "light",
+  "pricing": "panel",
+  "google_reviews": "light",
+  "form_band": "dark",
+  "pain_points": "light",
+  "explainer": "panel",
+  "steps": "light",
+  "services": "panel",
+  "why_us": "dark",
+  "spotlight": "light",
+  "meet_dentist": "panel",
+  "team": "light",
+  "practice_tour": "panel",
+  "faq": "light",
+  "final_cta": "dark",
+  "footer": "dark"
+ },
+ "icons": {
+  "stroke": 1.5
+ },
+ "logo": {
+  "dark": "assets/logo-h-colour.svg",
+  "light": "assets/logo-h-white.svg",
+  "width": 250,
+  "width_m": 168,
+  "width_footer": 230
+ },
+ "css_extra": ".tone-dark { --turn:#14B1BF; }\n.btn { font-family:'Josefin Sans',sans-serif; padding-top:3px; }\n.btn.primary, .tone-dark .btn.primary { background:#14B1BF; color:#FFFFFF; }\n.label { font-family:'Josefin Sans',sans-serif; }\n[data-name=\"Watermark\"] svg { opacity:.1; }\n.tone-dark [data-name=\"Watermark\"] svg { filter:brightness(0) invert(1); opacity:.09; }\n.tick i { background: url(assets/crown-colour.png) center/18px auto no-repeat; border-radius:0; width:22px; }\n.tick i svg { display:none; }\n.tone-dark .tick i { background-image:url(assets/crown-white.png); }\n.tone-dark .card.tone-card .tick i { background-image:url(assets/crown-colour.png); }\n[data-name=\"Hero\"] .tick { border:1.5px solid rgba(255,255,255,.5); background:rgba(255,255,255,.07); border-radius:10px; padding:12px 16px; align-items:center; }\n[data-name=\"Hero\"] .tick i { background-image:url(assets/crown-colour.png); margin-top:0; }\n[data-name=\"Hero\"] .tick span { font-weight:500; }\n.tone-light [data-name=\"Story\"], .tone-light [data-name=\"Review\"] { border:1px solid #D5E7E8; box-shadow:0 12px 30px rgba(6,68,75,.06); }\n[data-name=\"Offer seal\"] { background:#14B1BF !important; border-color:rgba(255,255,255,.6) !important; box-shadow:0 18px 40px rgba(0,0,0,.18); }\n[data-name=\"Offer seal\"] > div:first-child { border-color:rgba(255,255,255,.55) !important; }\n[data-name=\"Offer seal\"] .label { color:#FFFFFF; }\n.label { line-height:1.6; }\n[data-name=\"Practice tour video\"] > .label { bottom:auto !important; top:24px; }"
+}

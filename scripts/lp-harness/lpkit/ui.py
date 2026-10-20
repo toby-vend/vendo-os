@@ -166,6 +166,21 @@ def bullets(ctx, items, size=15):
     return "".join(f'<div class="body fg2" style="font-size:{size}px;line-height:1.5;display:flex;gap:10px"><span class="acc">•</span><span>{ctx.t(i)}</span></div>' for i in items)
 
 
+def wash(ctx, bd, m):
+    """A real photo under the brand's dark wash, as a section background (Oxford House: Deep Teal over the practice).
+    bd = {"src", "pos"?, "pos_m"?, "a"?, "b"?}: desktop fades from a (left, behind the copy) to b (right); mobile shows
+    the photo at the top and fades to solid behind the copy. Returns CSS for the section's style attribute."""
+    from .brand import rgba
+    d = ctx.brand.p["dark"]
+    a, b = bd.get("a", .96), bd.get("b", .35)
+    if m:
+        h = bd.get("h_m", 520)
+        return (f"background:linear-gradient(180deg,{rgba(d, b * .4)} 0px,{rgba(d, b)} {h * .2:.0f}px,{rgba(d, .92)} {h * .4:.0f}px,{d} {h * .75:.0f}px),"
+                f"url({bd['src']}) {bd.get('pos_m', '50% 0%')}/auto {h}px no-repeat,{d};")
+    return (f"background:linear-gradient(90deg,{rgba(d, a)} 0%,{rgba(d, a - .05)} 42%,{rgba(d, b)} 78%,{rgba(d, b - .1)} 100%),"
+            f"url({bd['src']}) {bd.get('pos', '50% 50%')}/cover no-repeat;")
+
+
 def watermark(ctx, block, m, tone="light"):
     """The brand's watermark mark (e.g. Concept's CD monogram in Soft Dune), cropped off an edge of a section.
     brand.json: "watermark": {"file", "light", "dark", "blocks": {"<block>": {"x", "y", "w", "x_m", "y_m", "w_m"}}}"""

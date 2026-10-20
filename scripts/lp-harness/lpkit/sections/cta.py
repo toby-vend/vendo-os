@@ -1,5 +1,5 @@
 """Final CTA with the third form (kit block: vdk/cta) and the footer (kit block: vdk/footer)."""
-from ..ui import sec, grid, stars, form_card
+from ..ui import sec, grid, stars, form_card, wash
 
 
 def footer_html(ctx, m, credit=True):
@@ -27,4 +27,5 @@ def final_cta(ctx, c, m):
     form = form_card(ctx, 350 if m else 500, 24 if m else 40, title=c.get("form_title"))
     inner = grid([left, form], 1, 32) if m else f'<div style="display:grid;grid-template-columns:1fr 500px;gap:96px;align-items:center">{left}{form}</div>'
     foot = f'<div data-name="Footer" style="margin-top:{56 if m else 96}px;padding-top:32px;border-top:1px solid var(--rule)">{footer_html(ctx, m)}</div>'
-    return sec(ctx, "Final CTA", "final_cta", inner + foot, m, c.get("tone"))
+    bg = wash(ctx, c["backdrop"], m) if c.get("backdrop") else ""  # optional washed photo behind a dark band
+    return sec(ctx, "Final CTA", "final_cta", inner + foot, m, c.get("tone"), extra=bg)
