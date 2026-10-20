@@ -1,0 +1,33 @@
+{
+  "_note": "Verified prices and claims for MK Smiles LPs. Sources: Toby's Meta draft lp.mksmiles.co.uk/new-patients-offer-meta (live, read 20 Oct 2026; listed in 'VD | Ad Landing Pages' sheet, tab KHG - MK Smiles), mksmiles.co.uk/prices and /membership-plan (read 20 Oct 2026), Google Maps embed on mksmiles.co.uk (20 Oct 2026).",
+  "prices": ["£50", "£76.70", "£79.80", "£11.25", "£21.50", "£34.25", "£350", "£25"],
+  "sources": {
+    "£50": "New patient dental check-up, offer price (draft hero: '£50', previously £76.70). The fees page also lists 'New Patient Assessment – Adult £50.00'",
+    "£76.70": "New patient check-up usual price, 'including 2 routine x-rays' (fees page second table; struck through on the draft)",
+    "£79.80": "Hygienist appointment, registered patient (draft + fees page first table; fees page second table says £79.00)",
+    "£11.25": "Membership Option A /month: 1 exam, 1 hygiene, X-rays, 10% off (membership page; draft 'from £11.25')",
+    "£21.50": "Membership Option B /month: 2 exams, 2 hygiene (membership page)",
+    "£34.25": "Membership Option C /month: 2 exams, 4 hygiene (membership page)",
+    "£350": "Teeth whitening (draft; fees page 'Home Kit – Boutique £350'); sedation from £350 (draft + fees page)",
+    "£25": "Child new patient assessment (fees page first table); free for children when a parent attends at the same time (second table)"
+  },
+  "claims": {
+    "rating": "4.8 from 295 Google reviews (Google Maps embed, 20 Oct 2026). The draft says '5 stars on Google by 230+ patients': out of date",
+    "hours": "Mon + Wed 8:45am–7pm, Tue/Thu/Fri 8:45am–5pm, Sat 8:45am–4:30pm, Sun closed (draft + mksmiles.co.uk)",
+    "3d_scan": "Complimentary 3D digital scan at the new patient check-up (draft)",
+    "clinicians": "GDC numbers from the draft: Dr Roshwin Pereira Carvalho 264162, Dr Arantxa Menezes 264175 (principals), Dr Kishan Chavda 243885, Dr Raluca Ursache 275597, Dr Anita Eles 247066, Dr Dhaval Shah 270748, Dr Gizele Pereira 313476"
+  },
+  "confirmed": [],
+  "to_confirm": [
+    "Review line: draft says 5 stars from 230+; Google shows 4.8 from 295 (pages use 4.8 / 295)",
+    "Hygiene with airflow: draft £105 vs fees page from £111.50 (left off the page)",
+    "Fillings: draft from £152 vs fees page from £250 / composite from £125 (left off the page)",
+    "Extractions: draft from £131 vs fees page from £140 / simple from £131.30 (left off the page)",
+    "Children's exam: £25, or free with a parent attending at the same time? (fees page gives both)",
+    "Before-and-afters on the draft are from Instagram (Dr Anita Eles, and Kaveet Patel who isn't on the team page): written patient consent for LP use?",
+    "Which dentist leads new patient check-ups (for Meet your dentist)",
+    "HS One online booking link still live (thank-you page)",
+    "Call / WhatsApp buttons wanted on the thank-you page?",
+    "Name spelling: team page 'Dr Gizel Pereira', draft 'Dr Gizele Pereira'"
+  ]
+}

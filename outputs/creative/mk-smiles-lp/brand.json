@@ -1,0 +1,79 @@
+{
+  "_source": "MK Smiles brand guideline (Figma Q67istgFgNYkRSaMFD9kCi, signed off by Toby 20 Oct 2026) and the practice's July 2026 Meta statics (Drive Kana_MK_Smiles_FB_*). Treatments: Poppins SemiBold Teal headlines with the turn in Poppins Light Italic (Sage on light, Mint on Teal), Jost caps labels in Gold, tooth M bullets in place of ticks, square real-photo frames, MK monogram watermark, Mint buttons on Teal and Teal buttons on white, 6px buttons and fields, 10px cards.",
+  "palette": {
+    "ink": "#046169",
+    "ink2": "#33484A",
+    "muted": "#6B7F80",
+    "bg": "#FFFFFF",
+    "panel": "#EEF4F3",
+    "card": "#FFFFFF",
+    "accent": "#BFA05D",
+    "accent_on_dark": "#7EBBAF",
+    "turn": "#7D9F98",
+    "offer": "#7EBBAF",
+    "on_accent": "#0E2A2C",
+    "dark": "#046169",
+    "dark2": "#03535A",
+    "on_dark": "#FFFFFF",
+    "on_dark2": "#D5E6E3",
+    "btn_on_dark": "#7EBBAF",
+    "btn_on_dark_fg": "#0E2A2C",
+    "fine": "#DFD1B5",
+    "fine_on_dark": "#3A8A90",
+    "field_border": "#C9D9D6"
+  },
+  "fonts": {
+    "family": "Poppins",
+    "fallback": "sans-serif",
+    "faces": [
+      {"file": "assets/fonts/Poppins-Light.ttf", "weight": 300},
+      {"file": "assets/fonts/Poppins-LightItalic.ttf", "weight": 300, "style": "italic"},
+      {"file": "assets/fonts/Poppins-Regular.ttf", "weight": 400},
+      {"file": "assets/fonts/Poppins-Medium.ttf", "weight": 500},
+      {"file": "assets/fonts/Poppins-SemiBold.ttf", "weight": 600},
+      {"file": "assets/fonts/Poppins-Bold.ttf", "weight": 700},
+      {"file": "assets/fonts/Jost.ttf", "weight": "100 900", "family": "Jost"}
+    ]
+  },
+  "type": {
+    "display": {"weight": 600, "size": 58, "size_m": 36, "line": 1.1, "tracking": "-.01em",
+                "bold": {"weight": 300, "style": "italic", "color": "turn"}},
+    "h1": {"weight": 600, "size": 44, "size_m": 30, "line": 1.14, "tracking": "-.01em",
+           "bold": {"weight": 300, "style": "italic", "color": "turn"}},
+    "h2": {"weight": 500, "size": 24, "line": 1.3},
+    "h3": {"weight": 600, "size": 18, "line": 1.4},
+    "body": {"weight": 400, "size": 16, "line": 1.7},
+    "label": {"weight": 500, "size": 13, "tracking": ".22em", "case": "uppercase", "font": "'Jost', sans-serif"},
+    "price": {"weight": 300}
+  },
+  "shape": {"card": 10, "button": 6, "field": 6, "photo": 0, "thumb": 6},
+  "button": {"height": 54, "pad": 34, "weight": 500, "size": 15, "tracking": "0", "case": "none"},
+  "device": {"type": "rounded", "cutout": false},
+  "watermark": {
+    "file": "assets/mark-mk-teal.svg",
+    "light": "#046169",
+    "dark": "#FFFFFF",
+    "blocks": {
+      "hero_form": {"x": -170, "y": 600, "w": 560, "x_m": -90, "y_m": 860, "w_m": 300}
+    }
+  },
+  "rhythm": {
+    "default": "light",
+    "usp_text": "dark",
+    "pricing": "panel",
+    "membership": "light",
+    "google_reviews": "panel",
+    "form_band": "dark",
+    "steps": "panel",
+    "services": "light",
+    "why_us": "dark",
+    "meet_dentist": "panel",
+    "team": "light",
+    "practice_tour": "panel",
+    "final_cta": "dark",
+    "footer": "dark"
+  },
+  "icons": {"stroke": 1.5},
+  "logo": {"dark": "assets/logo-colour.svg", "light": "assets/logo-white.svg", "width": 92, "width_m": 66, "width_footer": 110},
+  "css_extra": ".tone-dark { --turn:#7EBBAF; }\n[data-name=\"Watermark\"] svg { opacity:.05; }\n.tick i { background: url(assets/mark-m-colour.png) center/15px auto no-repeat; border-radius: 0; width: 20px; }\n.tick i svg { display: none; }\n.tone-dark .tick i { background-image: url(assets/mark-m-white.png); }\n.tone-dark .card.tone-card .tick i { background-image: url(assets/mark-m-colour.png); }"
+}
