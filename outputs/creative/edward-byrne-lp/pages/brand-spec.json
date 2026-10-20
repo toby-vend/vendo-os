@@ -1,0 +1,168 @@
+{
+ "title": "Brand spec",
+ "form": {
+  "fields": [
+   {
+    "label": "Full name",
+    "full": true
+   },
+   "Email",
+   "Mobile"
+  ],
+  "label": "New patient offer",
+  "title": "Book your check-up",
+  "sub": "New patients welcome at our Bedford practice.",
+  "note": "£60 new patient check-up, with a complimentary 3D digital scan."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "<img src=\"assets/crown.png\" alt=\"\" style=\"height:12px;width:auto;display:inline-block;vertical-align:-1px;margin-right:12px\">New patients welcome · Bedford",
+   "title": "New patient check-up in Bedford, <b>only £60.</b>",
+   "tagline": "Looking for a new private dentist? Your first visit includes a complimentary 3D digital scan.",
+   "sub": "High-quality private dental care in a calm and welcoming practice, with a trusted local team who take the time to listen.",
+   "ticks": [
+    "Comprehensive dental examination",
+    "Complimentary 3D digital scan",
+    "Personalised treatment plan",
+    "Home care and prevention advice"
+   ],
+   "ticks_m": [
+    "Comprehensive dental examination",
+    "Complimentary 3D digital scan"
+   ],
+   "trust": "Rated Excellent from {{review_count}} Google reviews",
+   "stats": [
+    [
+     "{{review_count}}",
+     "Google reviews"
+    ],
+    [
+     "45",
+     "Minute appointments"
+    ],
+    [
+     "Tue",
+     "Open to 7:30pm"
+    ]
+   ],
+   "stats_m": [
+    [
+     "{{review_count}}",
+     "Reviews"
+    ],
+    [
+     "45",
+     "Minutes"
+    ],
+    [
+     "Tue",
+     "To 7:30pm"
+    ]
+   ],
+   "photo": {
+    "src": "assets/photos/p8.jpg",
+    "w": 1012,
+    "h": 1800,
+    "rows": [
+     170,
+     1250
+    ],
+    "cx": 515
+   },
+   "device_gap_m": 130,
+   "seal": {
+    "top": "New patients",
+    "price": "£60",
+    "bottom": "Check-up + 3D scan"
+   }
+  },
+  {
+   "block": "usp_text",
+   "hide_m": false,
+   "label": "<img src=\"assets/crown.png\" alt=\"\" style=\"height:12px;width:auto;display:inline-block;vertical-align:-1px;margin-right:12px\">Why Bedford patients choose Edward Byrne",
+   "items": [
+    [
+     "clock",
+     "Unhurried 45-minute appointments, so you never feel rushed"
+    ],
+    [
+     "scan",
+     "A complimentary 3D digital scan, with no messy impressions"
+    ],
+    [
+     "card",
+     "Clear, transparent pricing with honest advice"
+    ],
+    [
+     "pin",
+     "A red-brick villa on De Parys Avenue, Bedford"
+    ]
+   ]
+  },
+  {
+   "block": "pricing",
+   "layout": "panel",
+   "eyebrow": "Pricing",
+   "title": "One clear price <b>to get started.</b>",
+   "sub": "No unnecessary treatment. If anything is needed after your check-up, we give you a clear treatment plan and costs before you decide to go ahead.",
+   "price_label": "New patient check-up",
+   "price": "£60",
+   "price_note": "45-minute appointment",
+   "notes": [
+    "After your first visit, ongoing check-ups are at our loyalty rate of £47.50.",
+    "Or spread the cost with a membership plan from £9.25 a month."
+   ],
+   "photo": {
+    "src": "assets/photos/l1.jpg",
+    "pos": "50% 55%"
+   },
+   "get": [
+    [
+     "A comprehensive dental examination",
+     "A thorough assessment of your teeth, gums and overall oral health"
+    ],
+    [
+     "A complimentary 3D digital scan",
+     "A detailed digital map of your mouth, without traditional impressions"
+    ],
+    [
+     "Your personalised treatment plan",
+     "Findings explained clearly, with recommendations based on your needs and priorities"
+    ],
+    [
+     "Home care and prevention advice",
+     "Practical guidance to keep your teeth and gums healthy between visits"
+    ]
+   ]
+  },
+  {
+   "block": "form_band",
+   "name": "Book your check-up (form 2)",
+   "eyebrow": "New patient offer",
+   "title": "Your new dentist, <b>in Bedford.</b>",
+   "sub": "Book your £60 new patient check-up at Edward Byrne Associates, with a complimentary 3D digital scan.",
+   "ticks": [
+    "45-minute appointments",
+    "Complimentary 3D scan",
+    "Late Tuesdays to 7:30pm",
+    "Nervous patients welcome"
+   ],
+   "form_title": "Book your check-up",
+   "m_sub": "Send us your details and our team will be in touch to arrange your check-up."
+  }
+ ],
+ "thank_you": {
+  "text": "Thank you. Our team will be in touch to arrange your new patient check-up. If you’d rather pick a time yourself, you can book online now.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ }
+}

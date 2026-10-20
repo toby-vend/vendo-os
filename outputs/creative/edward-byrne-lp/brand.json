@@ -1,0 +1,206 @@
+{
+ "_source": "Edward Byrne Associates brand guideline (Figma hR3IRDkgBzuJoYycZ2qTe4, harness outputs/creative/edward-byrne-meta-statics, 20 Oct 2026), the practice's July 2026 Meta statics and edwardbyrne.com. Treatments: Byrne Black hero and inverted bands (as the statics), Poppins SemiBold headlines with an italic turn (Plum on light, Gold on Black), Jost caps labels, Kana crown bullets in place of ticks, Gold hairline outlined cards, square photos (the site's square tiles) with an offset Gold hairline frame on the hero photo, crown watermark, Gold buttons with Black text and 4px corners, white / Cream / Black rhythm. The logo is PNG only, wrapped as SVG for the harness.",
+ "palette": {
+  "ink": "#241F1F",
+  "ink2": "#4A4040",
+  "muted": "#7A6E6B",
+  "bg": "#FFFFFF",
+  "panel": "#F8EDE2",
+  "card": "#FFFFFF",
+  "accent": "#73424F",
+  "accent_on_dark": "#C2A76C",
+  "turn": "#73424F",
+  "offer": "#C2A76C",
+  "on_accent": "#241F1F",
+  "dark": "#241F1F",
+  "dark2": "#2E2716",
+  "on_dark": "#FFFFFF",
+  "on_dark2": "#E9DCCD",
+  "btn_on_dark": "#C2A76C",
+  "btn_on_dark_fg": "#241F1F",
+  "fine": "#E3D3C0",
+  "fine_on_dark": "#C2A76C",
+  "field_border": "#DCCFC2"
+ },
+ "fonts": {
+  "family": "Poppins",
+  "fallback": "sans-serif",
+  "faces": [
+   {
+    "file": "assets/fonts/Poppins-Light.ttf",
+    "weight": 300
+   },
+   {
+    "file": "assets/fonts/Poppins-LightItalic.ttf",
+    "weight": 300,
+    "style": "italic"
+   },
+   {
+    "file": "assets/fonts/Poppins-Regular.ttf",
+    "weight": 400
+   },
+   {
+    "file": "assets/fonts/Poppins-Italic.ttf",
+    "weight": 400,
+    "style": "italic"
+   },
+   {
+    "file": "assets/fonts/Poppins-Medium.ttf",
+    "weight": 500
+   },
+   {
+    "file": "assets/fonts/Poppins-SemiBold.ttf",
+    "weight": 600
+   },
+   {
+    "file": "assets/fonts/Poppins-Bold.ttf",
+    "weight": 700
+   },
+   {
+    "file": "assets/fonts/Jost.ttf",
+    "weight": "100 900",
+    "family": "Jost"
+   }
+  ]
+ },
+ "type": {
+  "display": {
+   "weight": 600,
+   "size": 58,
+   "size_m": 36,
+   "line": 1.1,
+   "tracking": "-.01em",
+   "bold": {
+    "weight": 400,
+    "style": "italic",
+    "color": "turn"
+   }
+  },
+  "h1": {
+   "weight": 600,
+   "size": 44,
+   "size_m": 30,
+   "line": 1.14,
+   "tracking": "-.01em",
+   "bold": {
+    "weight": 400,
+    "style": "italic",
+    "color": "turn"
+   }
+  },
+  "h2": {
+   "weight": 500,
+   "size": 24,
+   "line": 1.3
+  },
+  "h3": {
+   "weight": 600,
+   "size": 18,
+   "line": 1.4
+  },
+  "body": {
+   "weight": 400,
+   "size": 16,
+   "line": 1.7
+  },
+  "label": {
+   "weight": 500,
+   "size": 13,
+   "tracking": ".22em",
+   "case": "uppercase",
+   "font": "'Jost', sans-serif"
+  },
+  "price": {
+   "weight": 300
+  }
+ },
+ "shape": {
+  "card": 6,
+  "button": 4,
+  "field": 4,
+  "photo": 0,
+  "thumb": 0
+ },
+ "button": {
+  "height": 54,
+  "pad": 32,
+  "weight": 500,
+  "size": 15,
+  "tracking": "0",
+  "case": "none"
+ },
+ "device": {
+  "type": "rounded",
+  "cutout": false,
+  "backdrop": {
+   "color": "panel",
+   "dx": 22,
+   "dy": 22
+  }
+ },
+ "watermark": {
+  "file": "assets/crown.svg",
+  "light": "#241F1F",
+  "dark": "#FFFFFF",
+  "blocks": {
+   "hero_form": {
+    "x": -90,
+    "y": 600,
+    "w": 380,
+    "x_m": -60,
+    "y_m": 860,
+    "w_m": 240
+   },
+   "why_us": {
+    "anchor": "right",
+    "x": -120,
+    "y": -30,
+    "w": 560,
+    "x_m": -80,
+    "y_m": -10,
+    "w_m": 260
+   },
+   "final_cta": {
+    "anchor": "right",
+    "x": -140,
+    "y": 40,
+    "w": 640,
+    "x_m": -90,
+    "y_m": 10,
+    "w_m": 280
+   }
+  }
+ },
+ "rhythm": {
+  "default": "light",
+  "usp_text": "panel",
+  "story_cards": "light",
+  "pricing": "panel",
+  "membership": "light",
+  "google_reviews": "panel",
+  "form_band": "dark",
+  "pain_points": "light",
+  "explainer": "panel",
+  "steps": "light",
+  "services": "panel",
+  "why_us": "dark",
+  "spotlight": "light",
+  "meet_dentist": "panel",
+  "team": "light",
+  "practice_tour": "panel",
+  "faq": "light",
+  "final_cta": "dark",
+  "footer": "dark"
+ },
+ "icons": {
+  "stroke": 1.5
+ },
+ "logo": {
+  "dark": "assets/logo-colour.svg",
+  "light": "assets/logo-white.svg",
+  "width": 190,
+  "width_m": 120,
+  "width_footer": 170
+ },
+ "css_extra": "section[data-name=\"Hero\"].tone-light { --s-bg:#241F1F;--fg:#FFFFFF;--fg2:#E9DCCD;--fg3:#CDBFB0;--surface:#2E2716;--alt:#2E2716;--rule:rgba(233,220,205,.22);--accent:#C2A76C;--fine:#C2A76C;--turn:#C2A76C;--btn-bg:#C2A76C;--btn-fg:#241F1F;color:var(--fg); }\n.tone-dark { --turn:#C2A76C; }\n.tone-light, .tone-panel, .tone-card { --btn-bg:#C2A76C;--btn-fg:#241F1F; }\n.tick i { background: url(assets/crown.png) center/17px auto no-repeat !important; border-radius: 0; width: 22px; }\n.tick i svg { display: none; }\nsection[data-name=\"Pricing\"] i { background: url(assets/crown.png) center/20px auto no-repeat !important; border-radius:0 !important; }\nsection[data-name=\"Pricing\"] i svg { display: none; }\nspan.acc[style*=\"inline-flex\"] { color:#C2A76C; }\n.tone-light [data-name=\"Story\"], .tone-light [data-name=\"Review\"], .tone-panel [data-name=\"Story\"], .tone-panel [data-name=\"Review\"] { border:1px solid #D9C69C; box-shadow:none; }\n.tone-dark .card[data-name=\"Story\"], .tone-dark [data-name=\"Review\"] { border:1px solid #C2A76C; }\n[data-name=\"Backdrop\"] { background:none !important; border:1.5px solid #C2A76C; }\n[data-name=\"Watermark\"] svg { opacity:.09; }\n.tone-dark [data-name=\"Watermark\"] svg, section[data-name=\"Hero\"] [data-name=\"Watermark\"] svg { opacity:.12; }\n[data-name=\"Story\"] > div:last-child > div:first-child { flex-wrap:wrap; gap:6px 12px; }\n.hero-s > div:last-child { left:-46px !important; bottom:40px !important; }"
+}

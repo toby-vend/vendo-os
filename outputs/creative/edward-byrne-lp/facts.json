@@ -1,0 +1,54 @@
+{
+ "_note": "Source of truth: Toby's Meta draft lp.edwardbyrne.com/new-patients-offer-meta (read 20 Oct 2026). The Google draft lp.edwardbyrne.com/new-patients-offer has the same offer, price, inclusions and copy; it only adds the phone number and a 'Book Now' button. Other prices from edwardbyrne.com/prices and membership detail from edwardbyrne.com/membership-plans (both read 20 Oct 2026).",
+ "prices": [
+  "£60",
+  "£47.50",
+  "£9.25",
+  "£19.75",
+  "£31.80",
+  "£68.50",
+  "£89.50",
+  "£299",
+  "£85"
+ ],
+ "sources": {
+  "£60": "New Patient Check Up, only £60 (draft hero + 'compared to the initial £60.00 new patient fee'); fees page agrees: New Patient Assessment, Adult £60.00",
+  "£47.50": "Loyalty rate for ongoing check-ups (draft); fees page: Existing Routine Examination, Adult £47.50",
+  "£9.25": "Membership Plans from £9.25 per month (draft); Denplan Essentials Option A £9.25/month: 1 exam + 1 hygiene a year, X-rays, 10% off (membership page)",
+  "£19.75": "Denplan Essentials Option B £19.75/month: 2 exams + 2 hygiene a year, X-rays, 10% off (membership page)",
+  "£31.80": "Denplan Essentials Option C £31.80/month: 2 exams + 4 hygiene a year, X-rays, 10% off (membership page)",
+  "£68.50": "Hygiene Appointment starting from £68.50 (fees page)",
+  "£89.50": "Fillings starting from £89.50 (fees page)",
+  "£299": "Tooth Whitening starting from £299.00 (fees page)",
+  "£85": "New Patient Emergency Appointment, Adult £85.00 (fees page)"
+ },
+ "claims": {
+  "reviews": "Draft: Trustindex widget 'EXCELLENT, based on 287 reviews' and the header line 'Over 285+ 5 Star Google Reviews'. Brand guideline and statics use 4.9 from 413 Google reviews (Google Maps, 20 Oct 2026).",
+  "included": "Comprehensive dental examination; complimentary 3D digital scan; personalised treatment plan; home care and prevention advice (draft). X-rays only if clinically necessary (draft FAQ).",
+  "duration": "All appointments are 45 minutes (draft FAQ)",
+  "hygiene": "Direct Access hygiene, bookable without a dental exam (draft FAQ)",
+  "hours": "Mon 9am-5pm, Tue 9am-7.30pm, Wed 9am-5pm, Thu 9am-5pm, Fri 9am-3.30pm, Sat 9am-1pm, Sun closed (draft). Site adds: closed for lunch 1-2pm, open alternate Saturdays.",
+  "clinicians": "Draft: Dr Stuart Sumner GDC 66239, Dr Neeta Mehta GDC 82463, Dr Smita Dasgupta GDC 83357, Dr Rishi Patel GDC 245102, Dr Usman Imran GDC 303596, with headshots. Neeta's qualifications from the team page: BDS (Lond) MFDS RCS(Eng) PGDip Clear Aligner Therapy, PGDip Orthodontics.",
+  "denplan_excel": "Denplan Excel accredited (membership page). The page also says 'first in Bedfordshire': not used.",
+  "reviews_used": "Google reviews shown on the draft's Trustindex widget: Andy Bunting, Yvette Pearson, Janine Valerio, Jonathan Tedd, Robert Whitlock, Stephen Chilvers. Diane Bate's review is left out (it carries a negative line).",
+  "videos": "YouTube FhGB-GUYVZc 'General Dentistry at Edward Byrne Associates Dental Practice' and E0SPrpbro-c 'Why Choose Edward Byrne Dental Practice?' (both on the draft, Kana Health Group channel)",
+  "photos": "Joe Goodchild July 2026 shoot. Dr Smita (hero, p8) and Dr Neeta (meet your dentist, p12) are matched by face to the draft's named headshots, not by a badge."
+ },
+ "confirmed": [
+  "Rated Excellent",
+  "287 Google reviews",
+  "45-minute appointments",
+  "Denplan Excel accredited"
+ ],
+ "to_confirm": [
+  "Review count: the draft's widget says 287 (header line '285+'), Google Maps and the brand guideline say 4.9 from 413. The LP uses 287 as the draft does; switch to 413 if the client prefers the Maps figure.",
+  "Saturdays: the draft lists Saturday 9am-1pm; the site says alternate Saturdays only. The LP says 'selected Saturdays'.",
+  "Lead dentist for new patients: Meet your dentist uses Dr Neeta Mehta (on the draft and in the practice videos). Confirm, and confirm the hero photo (Dr Smita at the front door) and the Neeta photo are matched to the right names.",
+  "Dr Neeta Mehta qualifications: the draft says 'MFDS 2005BDS (U.Lond)', the team page 'BDS (Lond) MFDS RCS(Eng) PGDip Clear Aligner Therapy, PGDip Orthodontics'. The LP uses the team page.",
+  "Membership page private fees (£49.20 exam, £71.80 hygiene) differ from the fees page (£47.50, £68.50). Not used on the LP; the site needs updating.",
+  "Implants: the site banner says 'Free Implant Consultations', the fees page £95. No implant pricing on the LP.",
+  "Visiting 'Oral Surgeon' titles on the team page: GDC specialist status unconfirmed, not used on the LP.",
+  "Thank-you page: online booking link (dentalhub, from the site's Book Online button) still the right one? Call or WhatsApp buttons wanted there?",
+  "Template leftovers: edwardbyrne.com's homepage og:site_name reads 'Mk Smile' (the main site, not the draft). The draft's own copy says 'Whether you call or book online' and 'call the practice' (both removed: the form is the only CTA)."
+ ]
+}
