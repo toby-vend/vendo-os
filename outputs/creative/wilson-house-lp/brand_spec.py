@@ -17,7 +17,7 @@ PF = "'Playfair Display', serif"
 ROLES = [("ink", "Headlines (Aubergine)"), ("ink2", "Body text (Charcoal)"), ("turn", "Headline turn on light (Purple)"),
          ("dark", "Inverted bands (Wilson Purple)"), ("offer", "Buttons on light (Royal Purple)"), ("btn_on_dark", "Buttons on Purple (Lilac)"),
          ("bg", "Page background"), ("panel", "Alternate band (Cream)"), ("fine", "Frame hairlines, turn on Purple (Blush)"),
-         ("accent", "Labels, stars, curve (Gold)"), ("tan", "Treatment and team card frames (Tan)"), ("aub", "Star sections (Aubergine)")]
+         ("accent", "Labels, rating stars, curve (Gold)"), ("tan", "Treatment and team card frames (Tan)"), ("aub", "Steps, why us, final CTA (Aubergine)")]
 COL = {**p, "tan": "#B0947B", "aub": "#2A003A"}
 faces = "".join(f"@font-face{{font-family:'{f.get('family', b['fonts']['family'])}';src:url(../{f['file']});font-weight:{f['weight']};font-style:{f.get('style', 'normal')}}}"
                 for f in b["fonts"]["faces"])
@@ -93,7 +93,7 @@ b.turn{{font-family:{PF};font-weight:400;font-style:italic;color:{p['turn']}}}
   <div><div style="height:114px;display:flex;align-items:center">{shape('curve-line.svg', 624, 38)}</div><div class="cap">Gold hairline curve, from the site</div></div>
 </div>
 <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:28px;margin-top:40px;align-items:end">
-  <div><div style="position:relative;height:180px;overflow:hidden;background:#2A003A url(../assets/stars-faded.png) 0 0/900px auto no-repeat"><img src="../assets/shapes/crown-watermark.png" style="position:absolute;right:-30px;top:20px;width:260px;opacity:.08"><div style="position:absolute;left:32px;top:48px;font-family:{PF};font-size:76px;color:{p['btn_on_dark']}">01.</div></div><div class="cap">Aubergine sections · gold stars and crown watermark · steps numbered in Lilac Playfair</div></div>
+  <div><div style="position:relative;height:180px;overflow:hidden;background:#2A003A"><img src="../assets/shapes/crown-watermark.png" style="position:absolute;right:-30px;top:20px;width:260px;opacity:.08"><div style="position:absolute;left:32px;top:48px;font-family:{PF};font-size:76px;color:{p['btn_on_dark']}">01.</div></div><div class="cap">Aubergine sections · crown watermark · steps numbered in Lilac Playfair</div></div>
   <div><div style="display:flex;gap:12px;align-items:center;font-size:15px;color:{p['ink']}"><img src="../assets/crown-gold.png" style="width:20px">Crown bullets replace ticks</div></div>
   <div><img src="../assets/crown-rule-colour.png" style="width:240px"><div class="cap">Crown rule from the logo</div></div>
 </div>

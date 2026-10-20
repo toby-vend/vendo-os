@@ -2,14 +2,14 @@
 
 Built 20 Oct 2026 on the shared harness (`scripts/lp-harness/`) with `/client-landing-pages`, Phases 0 to 3, new
 patient page only (Meta). Figma: "Wilson House — Landing Pages" Dp4CF7h8Obwe2UT1elvp8d (Kana Health Group folder).
-Frames: Brand spec page: sheet 6:4, desktop 5:4, mobile 4:4. New patient page: desktop 12:4, mobile 11:4, thank-you
+Frames: Brand spec page: sheet 16:4, desktop 5:4, mobile 4:4. New patient page: desktop 18:4, mobile 17:4, thank-you
 desktop 3:4, thank-you mobile 2:4. Captured headless, auto layout stripped, sections named.
 
 Brand: Wilson House guideline (Figma IGQz4NTnCHwBgcouPheI90, harness `outputs/creative/wilson-house-meta-statics/`)
 plus the practice website's own shapes, which Toby asked for: arch photo frames with a 1px Blush hairline 8–10px
 outside the photo and open at the bottom, a side arch bleeding off the right edge (What's included), Tan hairline
 treatment and team cards, 100px pill buttons (Royal Purple on light, Lilac on Purple), 24px fields, the site's two-layer
-wave dividers and gold hairline curve (SVGs inlined from `assets/shapes`), gold stars and the crown watermark on
+wave dividers and gold hairline curve (SVGs inlined from `assets/shapes`), the crown watermark on
 Aubergine sections, crown bullets, steps numbered "01." in Lilac Playfair. Rhythm: white / Cream / Wilson Purple, with
 Aubergine for steps, why us and the final CTA.
 Headlines are Playfair Display with an italic turn, as the guideline says. The July 2026 statics use Montserrat Bold
@@ -35,6 +35,10 @@ Every price is in `facts.json`. Build: `python3 make_pages.py`, then from `scrip
 - Left out: membership plans (the site's plan table is labelled 2025 and its options don't line up; Denplan is
   mentioned instead), before-and-afters (none on the draft or the site), a separate hygiene section (folded into
   pricing and services). Phone numbers and call buttons (LP rule: form only).
+
+## Changes after review
+- 20 Oct 2026: gold star pattern removed from every section and the brand spec (Toby didn't like it). The crown
+  watermark stays on the Aubergine sections.
 
 ## Copy changes against the draft
 - CTA "Schedule An Appointment" becomes "Book Appointment" (SOP wording).

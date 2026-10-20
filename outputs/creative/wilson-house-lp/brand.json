@@ -1,5 +1,5 @@
 {
- "_source": "Wilson House Dental Practice brand guideline (Figma IGQz4NTnCHwBgcouPheI90, harness outputs/creative/wilson-house-meta-statics/, 20 Oct 2026) and the practice website's own shapes (homepage computed styles): Playfair Display headlines with an italic turn (Purple on light, Blush on Purple), Montserrat body and SemiBold caps labels in Gold, arch photo frames with a 1px Blush hairline 8px outside the photo and open at the bottom, side arches bleeding off the page edge, Tan hairline treatment and team cards, 100px pill buttons (Royal Purple on light, Lilac on Purple), 24px fields, the site's two-layer wave dividers and gold curve line, gold stars and the crown watermark on Aubergine sections, crown bullets, steps numbered '01.' in Lilac Playfair. Headline font: the guideline moves headlines to Playfair; the July 2026 statics use Montserrat Bold headlines (Toby to confirm).",
+ "_source": "Wilson House Dental Practice brand guideline (Figma IGQz4NTnCHwBgcouPheI90, harness outputs/creative/wilson-house-meta-statics/, 20 Oct 2026) and the practice website's own shapes (homepage computed styles): Playfair Display headlines with an italic turn (Purple on light, Blush on Purple), Montserrat body and SemiBold caps labels in Gold, arch photo frames with a 1px Blush hairline 8px outside the photo and open at the bottom, side arches bleeding off the page edge, Tan hairline treatment and team cards, 100px pill buttons (Royal Purple on light, Lilac on Purple), 24px fields, the site's two-layer wave dividers and gold curve line, the crown watermark on Aubergine sections, crown bullets, steps numbered '01.' in Lilac Playfair. Headline font: the guideline moves headlines to Playfair; the July 2026 statics use Montserrat Bold headlines (Toby to confirm).",
  "palette": {
   "ink": "#2A003A",
   "ink2": "#575756",
@@ -153,6 +153,15 @@
     "x_m": -110,
     "y_m": 20,
     "w_m": 300
+   },
+   "steps": {
+    "anchor": "right",
+    "x": -40,
+    "y": 10,
+    "w": 300,
+    "x_m": -50,
+    "y_m": -36,
+    "w_m": 150
    }
   }
  },
@@ -187,5 +196,5 @@
   "width_m": 70,
   "width_footer": 120
  },
- "css_extra": ".tone-light, .tone-panel, .tone-card { --btn-bg:#4F026B; --btn-fg:#FFFFFF; }\n.tone-dark { --turn:#E0C4AB; }\nsection[data-name=\"Why us\"], section[data-name=\"How it works\"], section[data-name=\"Final CTA\"] { --s-bg:#2A003A; --surface:#3B0B4F; --alt:#3B0B4F; background:#2A003A url(assets/stars-faded.png) 50% 0/1440px auto no-repeat; }\n.m section[data-name=\"Why us\"], .m section[data-name=\"How it works\"], .m section[data-name=\"Final CTA\"] { background-size:780px auto; }\n[data-name=\"Watermark\"] svg { opacity:.08; }\n.tick i { background: url(assets/crown-gold.png) center/17px auto no-repeat; border-radius:0; width:22px; }\n.tick i svg { display:none; }\n.tone-dark .tick i { background-image:url(assets/crown-white.png); }\n.tone-dark .card.tone-card .tick i { background-image:url(assets/crown-gold.png); }\n.tone-light [data-name=\"Story\"], .tone-light [data-name=\"Review\"], .tone-light [data-name=\"Situation\"] { border:1px solid #E0C4AB; }\n[data-name=\"Service\"] { border:1px solid #B0947B; padding:10px 10px 0; border-radius:0 !important; }\n[data-name=\"Team member\"] { border:1px solid #B0947B; padding:10px 10px 20px; }\n[data-name=\"Team member\"] .h3, [data-name=\"Team member\"] .label { padding-left:6px; }\n[data-name=\"Step\"] { border-top:1px solid #E0C4AB !important; }\n[data-name=\"Step\"] .price { color:#D4B8D6; }\n[data-name=\"Booking form\"] { border:1px solid #E0C4AB; }\n[data-name=\"Story\"] > div:last-child > div:first-child { flex-wrap:wrap; gap:6px 12px; }\nsection[data-name=\"Meet your dentist\"] p { font-family:'Playfair Display', serif; font-style:italic; font-weight:400 !important; }"
+ "css_extra": ".tone-light, .tone-panel, .tone-card { --btn-bg:#4F026B; --btn-fg:#FFFFFF; }\n.tone-dark { --turn:#E0C4AB; }\nsection[data-name=\"Why us\"], section[data-name=\"How it works\"], section[data-name=\"Final CTA\"] { --s-bg:#2A003A; --surface:#3B0B4F; --alt:#3B0B4F; background:#2A003A; }\n[data-name=\"Watermark\"] svg { opacity:.08; }\n.tick i { background: url(assets/crown-gold.png) center/17px auto no-repeat; border-radius:0; width:22px; }\n.tick i svg { display:none; }\n.tone-dark .tick i { background-image:url(assets/crown-white.png); }\n.tone-dark .card.tone-card .tick i { background-image:url(assets/crown-gold.png); }\n.tone-light [data-name=\"Story\"], .tone-light [data-name=\"Review\"], .tone-light [data-name=\"Situation\"] { border:1px solid #E0C4AB; }\n[data-name=\"Service\"] { border:1px solid #B0947B; padding:10px 10px 0; border-radius:0 !important; }\n[data-name=\"Team member\"] { border:1px solid #B0947B; padding:10px 10px 20px; }\n[data-name=\"Team member\"] .h3, [data-name=\"Team member\"] .label { padding-left:6px; }\n[data-name=\"Step\"] { border-top:1px solid #E0C4AB !important; }\n[data-name=\"Step\"] .price { color:#D4B8D6; }\n[data-name=\"Booking form\"] { border:1px solid #E0C4AB; }\n[data-name=\"Story\"] > div:last-child > div:first-child { flex-wrap:wrap; gap:6px 12px; }\nsection[data-name=\"Meet your dentist\"] p { font-family:'Playfair Display', serif; font-style:italic; font-weight:400 !important; }"
 }
