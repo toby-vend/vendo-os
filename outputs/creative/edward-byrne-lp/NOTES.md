@@ -2,7 +2,7 @@
 
 Built 20 Oct 2026 on the shared harness (`scripts/lp-harness/`) with `/client-landing-pages`, matched to the MK Smiles
 build (Kana sister practice). First page type: new patient (Meta). Figma: "Edward Byrne Associates — Landing Pages"
-(Kana Health Group folder).
+X8SCuho643YKYYIasWHk3F (Kana Health Group folder).
 
 Brand: Edward Byrne guideline (Figma hR3IRDkgBzuJoYycZ2qTe4, harness `outputs/creative/edward-byrne-meta-statics/`),
 the practice's July 2026 Meta statics and edwardbyrne.com. `brand.json`: Byrne Black hero and inverted bands (as the
@@ -20,6 +20,8 @@ Build: `python3 make_pages.py`, then from `scripts/lp-harness/`: `build.py`, `li
 Brand spec sheet: `python3 brand_spec.py` after building `brand-spec`.
 
 ## Pages in Figma
+Node ids: Brand spec page 0:1 (sheet 5:4, desktop 6:4, mobile 4:4); New patient page 1:2 (desktop 8:4, mobile 7:4,
+thank-you desktop 3:4, thank-you mobile 2:4). Captured 20 Oct 2026, auto layout stripped.
 - "Brand spec": palette + type sheet, desktop and mobile of the hero, USP strip, pricing panel and form band.
 - "New patient": desktop 1440, mobile 390 and both thank-you frames. Sections: header, hero + form (offer seal £60),
   USP strip, patient stories, pricing panel, membership (Denplan Essentials A/B/C), Google reviews, form band, pain

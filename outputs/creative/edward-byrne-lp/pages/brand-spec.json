@@ -156,7 +156,7 @@
   }
  ],
  "thank_you": {
-  "text": "Thank you. Our team will be in touch to arrange your new patient check-up. If you’d rather pick a time yourself, you can book online now.",
+  "text": "Our team will be in touch to arrange your new patient check-up. If you’d rather pick a time yourself, you can book online now.",
   "buttons": [
    {
     "label": "Choose a time online",

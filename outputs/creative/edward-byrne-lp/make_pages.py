@@ -23,7 +23,7 @@ FORM = {"fields": [{"label": "Full name", "full": True}, "Email", "Mobile"]}
 NP_FORM = {"label": "New patient offer", "title": "Book your check-up",
            "sub": "New patients welcome at our Bedford practice.",
            "note": "£60 new patient check-up, with a complimentary 3D digital scan."}
-TY = {"text": "Thank you. Our team will be in touch to arrange your new patient check-up. If you’d rather pick a time yourself, you can book online now.",
+TY = {"text": "Our team will be in touch to arrange your new patient check-up. If you’d rather pick a time yourself, you can book online now.",
       "buttons": [{"label": "Choose a time online", "href": "{{booking_url}}", "style": "primary"}]}
 
 HERO = {"block": "hero_form", "eyebrow": CROWN + "New patients welcome · Bedford",
