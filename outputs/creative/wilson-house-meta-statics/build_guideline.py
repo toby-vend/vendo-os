@@ -17,7 +17,7 @@ Sources (20 Oct 2026):
   avatars. Buttons are full pills (radius 100px): #4F026B fill, #E0C4AB fill, or 1px white outline on dark.
   Form fields 24px radius, panels 20-40px radius. Section dividers are the site's own two-layer wave SVGs, a
   gold #DDAE58 hairline curve and a dot-line-arrow step connector, all downloaded unchanged to
-  assets/site-shapes. Dark sections carry the gold star pattern (stars.png, 5%) and a large crown
+  assets/site-shapes. Dark sections carry a large crown
   watermark (icon.png, 10%). Process steps are numbered "01." in Lilac Playfair.
 - Type: site globals are Playfair Display (headings, with italic turns) + Montserrat (body, accent 700).
   Both Google fonts (github google/fonts, assets/fonts). The July statics pair Montserrat Bold headlines
@@ -132,10 +132,6 @@ def connector(h, extra):
     return svg('step-connector.svg', round(h * 6 / 43), h, extra, stretch=True)
 
 
-def stars(w=1920, extra='left:0;top:0', op=.06):
-    return f'<img class="abs" src="assets/site-shapes/stars.png" style="{extra};width:{w}px;opacity:{op}">'
-
-
 def crown_mark(w, extra, op=.1):
     return f'<img class="abs" src="assets/site-shapes/crown-watermark.png" style="{extra};width:{w}px;opacity:{op}">'
 
@@ -216,7 +212,6 @@ def page(cls, body, n=None, title=None, dark=False):
 def ad_square(s):
     S = lambda v: round(v * s, 2)
     return f"""<div style="position:relative;width:{S(1080)}px;height:{S(1080)}px;overflow:hidden;background:{PURPLE}">
-{stars(S(1400), 'left:0;top:0', .07)}
 {frame('arch', 'team-surgery-2.jpg', S(600), S(150), S(420), S(930), .5, .45, S(10))}
 <div class="abs" style="left:{S(64)}px;top:{S(64)}px">{logo(S(200), True)}</div>
 <div class="abs h" style="left:{S(64)}px;top:{S(290)}px;width:{S(500)}px;font-size:{S(60)}px;color:{WHITE}">Looking for a new dentist in <em style="color:{BLUSH}">Newport Pagnell?</em></div>
@@ -229,7 +224,6 @@ def ad_square(s):
 def ad_story(s):
     S = lambda v: round(v * s, 2)
     return f"""<div style="position:relative;width:{S(1080)}px;height:{S(1920)}px;overflow:hidden;background:{AUB}">
-{stars(S(1600), 'left:0;top:0', .07)}
 {crown_mark(S(700), f'left:{S(190)}px;top:{S(1560)}px', .06)}
 <div class="abs" style="left:0;right:0;top:{S(260)}px;display:flex;justify-content:center">{logo(S(280), True)}</div>
 {frame('arch', 'exterior-gate-blossom.jpg', S(190), S(590), S(700), S(640), .5, .5, S(12))}
@@ -311,12 +305,12 @@ def colour():
         ('Lilac', LILAC, 'Buttons on Purple, step numbers', AUB, 436, 570, 336, 290, False),
         ('Blush', BLUSH, 'Frame hairlines, italic turn on Purple', AUB, 792, 570, 336, 290, False),
         ('Tan', TAN, 'Card frames', WHITE, 1148, 570, 336, 290, False),
-        ('Gold', GOLD, 'Crown, stars, curve line, fine detail', WHITE, 1504, 570, 336, 290, False),
+        ('Gold', GOLD, 'Crown, curve line, fine detail', WHITE, 1504, 570, 336, 290, False),
     ]
     cards = ''.join(f"""<div class="swatch" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;background:{c};color:{t};{'border:1px solid #EDE6DA;' if b else ''}">
 <div style="font-weight:600;font-size:{44 if h > 300 else 28}px">{n}</div><div class="label" style="font-size:12px;margin-top:10px">{c}</div><div class="small" style="margin-top:6px;opacity:.85;font-size:14px">{u}</div></div>""" for n, c, u, t, x, y, w, h, b in sw)
     return page('', f"""{cards}
-<div class="abs small" style="left:80px;top:900px;width:1760px;color:{CHAR}">Wilson Purple leads and carries most ads, as a solid ground or a wash over real practice photography; Aubergine takes the dark sections with the gold stars. Roughly 45% Purple, 28% Cream, 12% Aubergine, the rest accents. Royal Purple and Lilac are buttons, Blush draws the hairline round every photo frame and gives headlines their italic turn on Purple, Tan frames cards, and Gold stays small, as it sits in the logo. Charcoal {CHAR}, the colour of the house sketch, is the body text colour on light. No black panels, no off-palette blues.</div>""", 3, 'Colour')
+<div class="abs small" style="left:80px;top:900px;width:1760px;color:{CHAR}">Wilson Purple leads and carries most ads, as a solid ground or a wash over real practice photography; Aubergine takes the dark sections with the crown watermark. Roughly 45% Purple, 28% Cream, 12% Aubergine, the rest accents. Royal Purple and Lilac are buttons, Blush draws the hairline round every photo frame and gives headlines their italic turn on Purple, Tan frames cards, and Gold stays small, as it sits in the logo. Charcoal {CHAR}, the colour of the house sketch, is the body text colour on light. No black panels, no off-palette blues.</div>""", 3, 'Colour')
 
 
 def typography():
@@ -337,7 +331,6 @@ def typography():
   <div style="margin-top:14px">{btn('Book Your Appointment', 18, 34, 18, 'royal')}</div>
 </div>
 <div class="abs purple" style="left:1240px;top:130px;width:600px;height:800px;padding:56px;overflow:hidden">
-  {stars(900, 'left:0;top:0', .07)}
   <div style="position:relative">
   <div class="label" style="color:{BLUSH}">List · Montserrat SemiBold · crown bullet</div>
   <div style="margin-top:30px">{pills(['Detailed dental examination', 'Free on-site parking', 'Support for nervous patients'], 22, 22, 16, 16, 30)}</div>
@@ -385,11 +378,10 @@ def elements():
 </div>
 <div class="cap" style="left:{col(0)}px;top:584px">Purple wash · 95% to clear, behind every headline</div>
 <div class="abs aub" style="left:{col(1)}px;top:130px;width:417px;height:440px;overflow:hidden">
-  {stars(800, 'left:0;top:0', .1)}
   {crown_mark(300, 'left:58px;top:170px', .1)}
   <div class="abs label" style="left:34px;top:40px;font-size:12px;color:{BLUSH}">Dark sections</div>
 </div>
-<div class="cap" style="left:{col(1)}px;top:584px">Gold stars 5–12% · crown watermark 10%</div>
+<div class="cap" style="left:{col(1)}px;top:584px">Crown watermark 10%</div>
 <div class="abs cream" style="left:{col(2)}px;top:130px;width:417px;height:440px;overflow:hidden">
   <div class="abs" style="left:130px;top:150px;opacity:.14">{house(420)}</div>
   <div class="abs" style="left:40px;top:110px">{crown_rule(260)}</div>
@@ -452,7 +444,7 @@ def voice():
 def applications():
     return page('cream', f"""
 <div class="abs h" style="left:80px;top:130px;font-size:80px;width:560px">In <em>use</em></div>
-<div class="abs body dim" style="left:80px;top:250px;width:520px"><p>Meta statics: a real practice photo in a hairline arch, gold stars over Purple or Aubergine, the white logo, a Playfair headline with its Italic turn, crown list cards and a Lilac pill button.</p>
+<div class="abs body dim" style="left:80px;top:250px;width:520px"><p>Meta statics: a real practice photo in a hairline arch on Purple or Aubergine, the white logo, a Playfair headline with its Italic turn, crown list cards and a Lilac pill button.</p>
 <p>Stories keep the logo and copy out of the top 250px and bottom 340px. Review proof uses the live Google count, rechecked before each batch.</p></div>
 <div class="abs" style="left:680px;top:150px">{ad_square(0.68)}</div>
 <div class="abs label" style="left:680px;top:900px;font-size:11px;opacity:.6">Feed 1:1</div>
@@ -462,7 +454,6 @@ def applications():
 
 def close():
     return page('aub', f"""
-{stars(1920, 'left:0;top:0', .06)}
 {crown_mark(700, 'left:1080px;top:330px', .07)}
 <div class="abs" style="left:160px;top:230px">{logo(420, True)}</div>
 <div class="abs label" style="left:164px;top:700px;font-size:20px;color:{WHITE}">Caring for every smile</div>
