@@ -1,0 +1,212 @@
+{
+ "title": "Brand spec",
+ "form": {
+  "fields": [
+   {
+    "label": "Full name",
+    "full": true
+   },
+   "Email",
+   "Mobile"
+  ],
+  "label": "New patient offer",
+  "title": "Book your check-up",
+  "sub": "New patients welcome, adults and children.",
+  "note": "£85 new patient check-up, including all X-rays."
+ },
+ "sections": [
+  {
+   "block": "header"
+  },
+  {
+   "block": "hero_form",
+   "eyebrow": "New patients welcome · Newport Pagnell",
+   "title": "Your new patient check-up, <b>only £85.</b>",
+   "tagline": "Including all X-rays and a complimentary 3D digital scan.",
+   "sub": "A private practice on Station Road, Newport Pagnell. A full examination, time to talk through any worries, and a clear treatment plan with no hidden fees.",
+   "ticks": [
+    "Full dental examination",
+    "All X-rays included",
+    "3D digital scan included",
+    "Treatment plan"
+   ],
+   "ticks_m": [],
+   "trust": "Rated Excellent from {{review_count}} Google reviews",
+   "stats": [
+    [
+     "{{review_count}}",
+     "Google reviews"
+    ],
+    [
+     "Free",
+     "On-site parking"
+    ],
+    [
+     "8am",
+     "Weekdays to 6pm"
+    ]
+   ],
+   "stats_m": [
+    [
+     "{{review_count}}",
+     "Reviews"
+    ],
+    [
+     "Free",
+     "Parking"
+    ],
+    [
+     "8am",
+     "To 6pm"
+    ]
+   ],
+   "photo": {
+    "src": "assets/photos/drive/dscf5038.jpg",
+    "w": 1080,
+    "h": 720,
+    "rows": [
+     0,
+     720
+    ],
+    "cx": 600
+   },
+   "device_gap_m": 48,
+   "seal": {
+    "top": "New patients",
+    "price": "£85",
+    "bottom": "Inc. all X-rays"
+   }
+  },
+  {
+   "block": "divider",
+   "name": "Gold curve",
+   "svg": "assets/shapes/curve-line.svg",
+   "bg": "bg",
+   "width": 1280,
+   "width_m": 350,
+   "h": 76,
+   "h_m": 22,
+   "style": "align-items:center"
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-top-purple.svg",
+   "bg": "bg",
+   "fill": "dark",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "usp_text",
+   "hide_m": false,
+   "label": "Why Newport Pagnell families choose Wilson House",
+   "items": [
+    [
+     "scan",
+     "All X-rays and a 3D digital scan included in your check-up"
+    ],
+    [
+     "card",
+     "Clear pricing explained upfront, with no hidden fees"
+    ],
+    [
+     "pin",
+     "Free on-site parking and a step-free entrance"
+    ],
+    [
+     "heart",
+     "Nervous patients welcome, with time to talk"
+    ]
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-bottom-tan.svg",
+   "bg": "panel",
+   "fill": "dark",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "pricing",
+   "layout": "panel",
+   "eyebrow": "New patient offer",
+   "title": "One clear price, <b>X-rays included.</b>",
+   "sub": "No hidden costs or surprises. If you need any treatment after your check-up, we explain your options and the fees before anything goes ahead.",
+   "price_label": "New patient check-up",
+   "price": "£85",
+   "price_note": "Including all X-rays",
+   "notes": [
+    "Hygiene appointment from £82.80 · with Airflow stain removal from £112.80.",
+    "Denplan Essentials and Denplan Care available to spread the cost of your care."
+   ],
+   "photo": {
+    "src": "assets/photos/web/team-surgery-2.jpg",
+    "pos": "50% 12%"
+   },
+   "get": [
+    [
+     "A full dental examination",
+     "Your teeth, gums, bite and soft tissues, to identify any concerns"
+    ],
+    [
+     "Gum health and oral cancer screening",
+     "A thorough review of your gum health alongside a vital oral cancer screening"
+    ],
+    [
+     "Digital X-rays and a 3D scan",
+     "Safe, high-quality imaging if needed, plus a 3D scan with no messy impressions"
+    ],
+    [
+     "Your personalised treatment plan",
+     "Clear recommendations with no pressure and no hidden fees"
+    ]
+   ]
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-top-purple.svg",
+   "bg": "panel",
+   "fill": "dark",
+   "h": 84,
+   "h_m": 26
+  },
+  {
+   "block": "form_band",
+   "name": "Book your check-up (form 2)",
+   "eyebrow": "New patient offer",
+   "title": "Your local dentist <b>on Station Road.</b>",
+   "sub": "Book your £85 new patient check-up at Wilson House, with all X-rays and a 3D digital scan included.",
+   "m_sub": "It takes under a minute. Our team will be in touch to confirm your appointment.",
+   "ticks": [
+    "All X-rays included",
+    "Complimentary 3D scan",
+    "Free on-site parking",
+    "Adults and children"
+   ],
+   "form_title": "Book your check-up"
+  },
+  {
+   "block": "divider",
+   "name": "Wave",
+   "svg": "assets/shapes/wave-bottom-tan.svg",
+   "bg": "bg",
+   "fill": "dark",
+   "h": 84,
+   "h_m": 26
+  }
+ ],
+ "thank_you": {
+  "text": "Thank you. Our team will be in touch to confirm your check-up. If you’d rather pick a time yourself, you can book online now.",
+  "buttons": [
+   {
+    "label": "Choose a time online",
+    "href": "{{booking_url}}",
+    "style": "primary"
+   }
+  ]
+ }
+}

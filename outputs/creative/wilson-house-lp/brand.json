@@ -1,0 +1,191 @@
+{
+ "_source": "Wilson House Dental Practice brand guideline (Figma IGQz4NTnCHwBgcouPheI90, harness outputs/creative/wilson-house-meta-statics/, 20 Oct 2026) and the practice website's own shapes (homepage computed styles): Playfair Display headlines with an italic turn (Purple on light, Blush on Purple), Montserrat body and SemiBold caps labels in Gold, arch photo frames with a 1px Blush hairline 8px outside the photo and open at the bottom, side arches bleeding off the page edge, Tan hairline treatment and team cards, 100px pill buttons (Royal Purple on light, Lilac on Purple), 24px fields, the site's two-layer wave dividers and gold curve line, gold stars and the crown watermark on Aubergine sections, crown bullets, steps numbered '01.' in Lilac Playfair. Headline font: the guideline moves headlines to Playfair; the July 2026 statics use Montserrat Bold headlines (Toby to confirm).",
+ "palette": {
+  "ink": "#2A003A",
+  "ink2": "#575756",
+  "muted": "#7C7477",
+  "bg": "#FFFFFF",
+  "panel": "#F8F4EC",
+  "card": "#FFFFFF",
+  "accent": "#BFA05C",
+  "accent_on_dark": "#E0C4AB",
+  "turn": "#722577",
+  "offer": "#4F026B",
+  "on_accent": "#FFFFFF",
+  "dark": "#722577",
+  "dark2": "#5F1C64",
+  "on_dark": "#FFFFFF",
+  "on_dark2": "#EFE3EF",
+  "btn_on_dark": "#D4B8D6",
+  "btn_on_dark_fg": "#2A003A",
+  "fine": "#E0C4AB",
+  "fine_on_dark": "#BFA05C",
+  "field_border": "#E0C4AB"
+ },
+ "fonts": {
+  "family": "Montserrat",
+  "fallback": "sans-serif",
+  "faces": [
+   {
+    "file": "assets/fonts/Montserrat.ttf",
+    "weight": "100 900"
+   },
+   {
+    "file": "assets/fonts/Montserrat-Italic.ttf",
+    "weight": "100 900",
+    "style": "italic"
+   },
+   {
+    "file": "assets/fonts/PlayfairDisplay.ttf",
+    "weight": "400 900",
+    "family": "Playfair Display"
+   },
+   {
+    "file": "assets/fonts/PlayfairDisplay-Italic.ttf",
+    "weight": "400 900",
+    "style": "italic",
+    "family": "Playfair Display"
+   }
+  ]
+ },
+ "type": {
+  "display": {
+   "weight": 400,
+   "size": 62,
+   "size_m": 38,
+   "line": 1.08,
+   "tracking": "-.005em",
+   "font": "'Playfair Display', serif",
+   "bold": {
+    "weight": 400,
+    "style": "italic",
+    "color": "turn",
+    "font": "'Playfair Display', serif"
+   }
+  },
+  "h1": {
+   "weight": 400,
+   "size": 46,
+   "size_m": 32,
+   "line": 1.12,
+   "tracking": "-.005em",
+   "font": "'Playfair Display', serif",
+   "bold": {
+    "weight": 400,
+    "style": "italic",
+    "color": "turn",
+    "font": "'Playfair Display', serif"
+   }
+  },
+  "h2": {
+   "weight": 400,
+   "size": 26,
+   "line": 1.25,
+   "font": "'Playfair Display', serif"
+  },
+  "h3": {
+   "weight": 600,
+   "size": 18,
+   "line": 1.4
+  },
+  "body": {
+   "weight": 400,
+   "size": 16,
+   "line": 1.7
+  },
+  "label": {
+   "weight": 600,
+   "size": 13,
+   "tracking": ".22em",
+   "case": "uppercase"
+  },
+  "price": {
+   "weight": 400,
+   "font": "'Playfair Display', serif"
+  }
+ },
+ "shape": {
+  "card": 20,
+  "button": 100,
+  "field": 24,
+  "photo": 0,
+  "thumb": 0
+ },
+ "button": {
+  "height": 54,
+  "pad": 34,
+  "weight": 600,
+  "size": 15,
+  "tracking": "0",
+  "case": "none"
+ },
+ "device": {
+  "type": "arch",
+  "cutout": false,
+  "line": "#E0C4AB",
+  "inset": 10
+ },
+ "arch_photos": true,
+ "photo_frame": {
+  "line": "#E0C4AB",
+  "inset": 8
+ },
+ "step_suffix": ".",
+ "watermark": {
+  "file": "assets/crown-watermark.svg",
+  "light": "#E0C4AB",
+  "dark": "#E0C4AB",
+  "blocks": {
+   "why_us": {
+    "anchor": "right",
+    "x": -120,
+    "y": 120,
+    "w": 620,
+    "x_m": -90,
+    "y_m": 40,
+    "w_m": 280
+   },
+   "final_cta": {
+    "anchor": "right",
+    "x": -140,
+    "y": 40,
+    "w": 700,
+    "x_m": -110,
+    "y_m": 20,
+    "w_m": 300
+   }
+  }
+ },
+ "rhythm": {
+  "default": "light",
+  "awards": "light",
+  "usp_text": "dark",
+  "story_cards": "light",
+  "pricing": "panel",
+  "google_reviews": "light",
+  "form_band": "dark",
+  "pain_points": "light",
+  "explainer": "panel",
+  "steps": "dark",
+  "services": "light",
+  "why_us": "dark",
+  "spotlight": "light",
+  "meet_dentist": "panel",
+  "team": "light",
+  "practice_tour": "panel",
+  "faq": "light",
+  "final_cta": "dark",
+  "footer": "dark"
+ },
+ "icons": {
+  "stroke": 1.5
+ },
+ "logo": {
+  "dark": "assets/logo-colour.svg",
+  "light": "assets/logo-white.svg",
+  "width": 104,
+  "width_m": 70,
+  "width_footer": 120
+ },
+ "css_extra": ".tone-light, .tone-panel, .tone-card { --btn-bg:#4F026B; --btn-fg:#FFFFFF; }\n.tone-dark { --turn:#E0C4AB; }\nsection[data-name=\"Why us\"], section[data-name=\"How it works\"], section[data-name=\"Final CTA\"] { --s-bg:#2A003A; --surface:#3B0B4F; --alt:#3B0B4F; background:#2A003A url(assets/stars-faded.png) 50% 0/1440px auto no-repeat; }\n.m section[data-name=\"Why us\"], .m section[data-name=\"How it works\"], .m section[data-name=\"Final CTA\"] { background-size:780px auto; }\n[data-name=\"Watermark\"] svg { opacity:.08; }\n.tick i { background: url(assets/crown-gold.png) center/17px auto no-repeat; border-radius:0; width:22px; }\n.tick i svg { display:none; }\n.tone-dark .tick i { background-image:url(assets/crown-white.png); }\n.tone-dark .card.tone-card .tick i { background-image:url(assets/crown-gold.png); }\n.tone-light [data-name=\"Story\"], .tone-light [data-name=\"Review\"], .tone-light [data-name=\"Situation\"] { border:1px solid #E0C4AB; }\n[data-name=\"Service\"] { border:1px solid #B0947B; padding:10px 10px 0; border-radius:0 !important; }\n[data-name=\"Team member\"] { border:1px solid #B0947B; padding:10px 10px 20px; }\n[data-name=\"Team member\"] .h3, [data-name=\"Team member\"] .label { padding-left:6px; }\n[data-name=\"Step\"] { border-top:1px solid #E0C4AB !important; }\n[data-name=\"Step\"] .price { color:#D4B8D6; }\n[data-name=\"Booking form\"] { border:1px solid #E0C4AB; }\n[data-name=\"Story\"] > div:last-child > div:first-child { flex-wrap:wrap; gap:6px 12px; }\nsection[data-name=\"Meet your dentist\"] p { font-family:'Playfair Display', serif; font-style:italic; font-weight:400 !important; }"
+}
