@@ -1,25 +1,17 @@
 <!doctype html><html><head><meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Archivo+Black&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0716}
-.bg,.half img{width:100%;height:100%;object-fit:cover;filter:contrast(1.04) saturate(1.06)}
-.bg{position:absolute;left:0;top:0;width:100%;height:1330px}
-.split{position:absolute;left:0;top:0;right:0;height:1330px;display:flex;gap:6px;background:#0E0716}
-.half{flex:1;overflow:hidden}
-.top{position:absolute;left:0;right:0;top:0;height:450px;
-  background:linear-gradient(rgba(14,7,22,.45),rgba(14,7,22,0))}
-.logo{position:absolute;left:64px;top:258px;width:230px;
-  filter:drop-shadow(0 2px 8px rgba(0,0,0,.35))}
-.foot{position:absolute;left:0;right:0;top:1240px;bottom:0;padding:90px 64px 0;
-  background:linear-gradient(rgba(14,7,22,0),#0E0716 90px)}
-.line{font-family:'Archivo Black',sans-serif;color:#fff;font-size:58px;line-height:1.1;
-  letter-spacing:-.01em;margin-bottom:26px;text-shadow:0 2px 12px rgba(0,0,0,.3)}
-.risk{font-family:'Archivo',sans-serif;font-weight:500;color:rgba(255,255,255,.92);
-  font-size:22px;line-height:1.38}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#111}
+body{display:flex;flex-direction:column}
+.media{flex:1;min-height:0;overflow:hidden}
+.split{display:flex;gap:4px;background:#111}
+.half{flex:1;min-width:0;min-height:0;overflow:hidden}
+img{display:block;width:100%;height:100%;object-fit:cover}
+.risk{padding:18px 32px 20px;
+  font-family:'Archivo',sans-serif;font-weight:500;color:rgba(255,255,255,.78);
+  font-size:19px;line-height:1.35}
 </style></head><body>
-<img class="bg" src="../photos/IMG_5763.jpg" style="object-position:50% 40%">
-<div class="top"></div>
-<img class="logo" src="../logo.svg">
-<div class="foot"><div class="line">One search. One app. Easy.</div><div class="risk">Capital at risk. The value of investments can go down as well as up and you may get back less than you put in. Transferring is not right for everyone. Check for exit fees or benefits you may lose. Compound does not provide financial advice. Compound Digital Ltd is an appointed representative of RiskSave Technologies Ltd, which is authorised and regulated by the Financial Conduct Authority (FRN 775330).</div></div>
+<div class="media"><img src="../photos/IMG_5763.jpg" style="object-position:50% 40%"></div>
+<div class="risk">Capital at risk. The value of investments can go down as well as up and you may get back less than you put in. Transferring is not right for everyone. Check for exit fees or benefits you may lose. Compound does not provide financial advice. Compound Digital Ltd is an appointed representative of RiskSave Technologies Ltd, which is authorised and regulated by the Financial Conduct Authority (FRN 775330).</div>
 </body></html>
