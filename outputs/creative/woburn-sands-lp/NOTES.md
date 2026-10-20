@@ -1,7 +1,8 @@
 # Woburn Sands Dental Practice: landing pages (design)
 
 Built 20 Oct 2026 on the shared harness (`scripts/lp-harness/`) with `/client-landing-pages`, following the MK Smiles
-build. First page type: new patient (Meta). Figma: "Woburn Sands — Landing Pages" (Kana Health Group folder).
+build. First page type: new patient (Meta). Figma: "Woburn Sands — Landing Pages" jSN5IyJSji3tQf69PR5aZV (Kana Health Group folder). Brand spec page: sheet 4:4,
+desktop 6:4, mobile 5:4. New patient page: desktop 10:4, mobile 8:4, thank-you desktop 2:4, thank-you mobile 3:4.
 
 Brand: Woburn Sands guideline (Figma xOAVGppKkuFSLDgZs0OoyO, harness `outputs/creative/woburn-sands-meta-statics/`),
 the July 2026 Meta statics and woburnsandsdentalpractice.co.uk. `brand.json`: Manrope Bold Woburn Green headlines with
