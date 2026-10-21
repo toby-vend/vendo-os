@@ -3,7 +3,7 @@
 Shared building blocks (sec, head, grid, photo, mark, cta_row, awards, why_choose, reviews, tour, gallery, faq)
 come from common.py, a copy of the new patient check-up page's sections. Content here follows the live draft
 with the fixes agreed with Toby on 6 Oct 2026:
-- prices checked against siha.dental (bonding £250 a tooth, veneers £995 a tooth, aligners from £2,195;
+- prices checked against siha.dental (bonding from £1,500 for 6 teeth / £250 a tooth, veneers £995 a tooth, aligners from £2,195;
   whitening left unpriced because Siha's prices are marked limited-time)
 - no "minimum 6 teeth", no Bond Dental carry-over (4 locations, other clinics, Vendo Whitening, £0 deposit line)
 - no "specialist" wording for non-specialists, no unverifiable superlatives, no finance monthly figures
@@ -28,8 +28,8 @@ stories = common.stories
 
 # ---------------------------------------------------------------- pricing: the building blocks with Siha's own prices
 PRICES = [
-    ("Same day", "Composite bonding", "Chips, gaps and uneven edges reshaped by hand, usually in one visit.", "£250", "per tooth (edge)",
-     ["£295 per tooth for a full surface", "Usually one visit of 1 to 2 hours", "No drilling, nothing healthy removed", "12-month warranty"]),
+    ("Same day", "Composite bonding", "Chips, gaps and uneven edges reshaped by hand, usually in one visit.", "from £1,500", "for 6 teeth",
+     ["Or £250 per tooth (edge), £295 for a full surface", "Usually one visit of 1 to 2 hours", "No drilling, nothing healthy removed", "12-month warranty"]),
     ("Straighten first", "Clear aligners", "Straighten first, then finish with whitening or bonding. The foundation of many makeovers.", "£2,195", "from (treatment under 3 months)",
      ["Planned and led by our specialist orthodontist", "Plans for minor to complex cases", "All-inclusive plan, no hidden fees", "Virtually invisible, removable aligners"]),
     ("Biggest change", "Porcelain veneers", "Custom-made porcelain for a bigger change in shape, shade and symmetry.", "£995", "per tooth",
@@ -43,12 +43,14 @@ def pricing(m):
         hi = i == 1
         bg, fg, sub = (C['od'], C['nu'], C['be']) if hi else (C['wh'], C['od'], C['ol'])
         line = 'rgba(225,213,202,.2)' if hi else 'rgba(20,33,26,.1)'
+        pre = f'<span class="body" style="font-size:14px;color:{sub}">from</span>' if price.startswith("from ") else ""
+        price = price.removeprefix("from ")
         feat_html = "".join(f'<div class="body" style="font-size:14px;line-height:1.5;color:{sub};display:flex;gap:10px"><span style="color:{C["bo"]}">•</span><span>{f}</span></div>' for f in feats)
         cards.append(f'''<div class="card" data-name="Price card" style="background:{bg};color:{fg};padding:{28 if m else 36}px;display:flex;flex-direction:column">
           <div class="label" style="color:{C['bo']}">{tag}</div>
           <div class="h3" style="margin-top:12px;font-size:22px">{name}</div>
           <p class="body" style="margin-top:8px;font-size:15px;color:{sub}">{desc}</p>
-          <div style="margin-top:24px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span style="font-weight:300;font-size:56px;line-height:1">{price}</span><span class="body" style="font-size:14px;color:{sub}">{unit}</span></div>
+          <div style="margin-top:24px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">{pre}<span style="font-weight:300;font-size:56px;line-height:1">{price}</span><span class="body" style="font-size:14px;color:{sub}">{unit}</span></div>
           <div style="height:1px;background:{line};margin:24px 0"></div>
           <div style="display:grid;gap:12px">{feat_html}</div></div>''')
     finance = f'''<div class="card" data-name="Finance" style="background:{C['be']};padding:{24 if m else 32}px {24 if m else 40}px;margin-top:24px;display:flex;{'flex-direction:column;gap:12px' if m else 'align-items:center;justify-content:space-between;gap:40px'}">
@@ -194,7 +196,7 @@ def how(m):
 
 
 # ---------------------------------------------------------------- building blocks
-BLOCKS = [("bonding", "Composite bonding", "Chips, gaps and uneven edges sculpted by hand, usually in a single visit. From £250 a tooth, with nothing healthy drilled away."),
+BLOCKS = [("bonding", "Composite bonding", "Chips, gaps and uneven edges sculpted by hand, usually in a single visit. From £1,500 for 6 teeth, with nothing healthy drilled away."),
           ("veneers", "Porcelain veneers", "Thin, custom-made porcelain for a bigger change in shape and shade, from £995 a tooth."),
           ("whitening", "Professional whitening", "Lifts years of staining safely, and is often the finishing touch of a makeover."),
           ("aligners", "Clear aligners", "Invisalign® and clear aligners, planned and led by our specialist orthodontist. Virtually invisible, and often the first step of a makeover."),
@@ -245,7 +247,7 @@ common.FAQ = [
     ("How much does a smile makeover cost?", None), ("How long does a smile makeover take?", None), ("Will the result look natural?", None),
     ("Do I need veneers, or is bonding enough?", None), ("Is any of it painful?", None), ("How do I look after my new smile?", None), ("Do you offer finance?", None)]
 common.FAQ_OPEN = {0, 1}
-# Answers for the collapsed items (for the build): cost = bonding from £250 a tooth, veneers from £995 a tooth,
+# Answers for the collapsed items (for the build): cost = bonding from £1,500 for 6 teeth, veneers from £995 a tooth,
 # clear aligners from £2,195, whitening priced at consultation, full itemised cost upfront, 0% finance over up to 12 months.
 
 

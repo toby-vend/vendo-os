@@ -159,7 +159,7 @@ def hero_d():
     <div class="label" style="color:{C['bo']}">Smile makeovers · Shepherd’s Bush, W12</div>
     <h1 class="display" style="margin-top:22px;font-size:52px">Free smile makeover <b>consultation</b></h1>
     <p class="h2" style="margin-top:18px;font-weight:300">A complete smile makeover, designed around you.</p>
-    <p class="body" style="margin-top:16px;font-size:18px;color:{C['ol']};max-width:500px">Bonding, veneers, whitening and clear aligners, combined into one plan by cosmetic dentists you can trust. Treatments from £250 a tooth.</p>
+    <p class="body" style="margin-top:16px;font-size:18px;color:{C['ol']};max-width:500px">Bonding, veneers, whitening and clear aligners, combined into one plan by cosmetic dentists you can trust. Composite bonding from £1,500 for 6 teeth.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:32px;max-width:520px">
       {tick("Bespoke smile design")}{tick("3D digital preview")}{tick("0% finance available")}{tick("Minimally invasive")}
     </div>
@@ -187,7 +187,7 @@ def hero_m():
   <div class="label" style="color:{C['bo']}">Smile makeovers · Shepherd’s Bush, W12</div>
   <h1 class="display" style="margin-top:16px;font-size:36px">Free smile makeover <b>consultation</b></h1>
   <p class="h2" style="margin-top:12px;font-size:22px;font-weight:300">A complete smile makeover, designed around you.</p>
-  <p class="body" style="margin-top:12px;color:{C['ol']}">Bonding, veneers, whitening and clear aligners, combined into one plan by cosmetic dentists you can trust. Treatments from £250 a tooth.</p>
+  <p class="body" style="margin-top:12px;color:{C['ol']}">Bonding, veneers, whitening and clear aligners, combined into one plan by cosmetic dentists you can trust. Composite bonding from £1,500 for 6 teeth.</p>
   <div style="display:grid;gap:10px;margin-top:20px">{tick("Bespoke smile design", 15)}{tick("3D digital preview", 15)}</div>
   <div data-name="Hero button (scrolls to the form)" style="margin-top:22px"><span class="btn primary" style="height:54px;width:100%">{CTA}</span></div>
   <div data-name="Trust line" style="display:flex;align-items:center;gap:10px;margin-top:18px">{stars(5, 14)}<span class="body" style="font-size:13px;white-space:nowrap;color:{C['ol']}">5.0 from 157 Google reviews</span></div>
