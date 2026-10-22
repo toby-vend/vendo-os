@@ -13,8 +13,8 @@ Concepts (copy and research in copy-*.md, research.md):
   C10 Note to self        - Mark, keeps putting it off. Problem aware, 5. Lo-fi post-it.
 
 Clinic facts (addresses, coordinators) come from each clinic's lp.dentistry.ie/<slug>/new-patients-meta page, 22 Oct 2026.
-No prices or opening hours on image (Toby, 22 Oct 2026). Brand system: build_guideline.py. Toby asked for more of the website
-blues (22 Oct), so grounds rotate through Harbour Blue, Navy and Sky, with Linen as the light ground.
+No prices or opening hours on image (Toby, 22 Oct 2026). Brand system: build_guideline.py. Navy is the main ground (Toby, 22 Oct: majority navy, as in the brand guidelines);
+C4 (Sky), C8 (Linen) and C10 (Harbour Blue) give variety.
 
 Usage: python3 build.py  ->  loc-<clinic>.html (+ -capture.html for Figma): a 1:1 row and a 9:16 row of all 10 concepts.
 """
@@ -94,16 +94,16 @@ def at(addr):
     return 'in' if addr.startswith('Maynooth') else 'at'
 
 
-# ---------------------------------------------------------------- C1 Been a while (Mark) | Harbour Blue
+# ---------------------------------------------------------------- C1 Been a while (Mark) | Navy
 C1_SUB = 'Your first visit is a full check-up and an honest chat about your options. No obligation.'
 
 
 def c1_1x1(c):
     k, area, addr, coord = c
-    return ad('s1', HARBOUR, f"""
-{glow(560, 60, 640, SKY, .45)}
+    return ad('s1', NAVY, f"""
+{glow(560, 60, 640, HARBOUR, .85)}
 <div style="position:absolute;left:72px;top:68px">{logo(230, LINEN)}</div>
-<div style="position:absolute;left:72px;top:190px">{area_chip('New patients welcome in ' + area, 22)}</div>
+<div style="position:absolute;left:72px;top:190px">{area_chip('New patients welcome in ' + area, 22, SKY, NAVY)}</div>
 <div class="h" style="position:absolute;left:72px;top:290px;width:540px;font-size:70px;line-height:1.06;color:{LINEN}">It’s been a few years. <em>We won’t make a thing of it.</em></div>
 <div class="body" style="position:absolute;left:72px;top:690px;width:470px;font-size:25px;line-height:1.5;color:{LINEN};opacity:.88">{C1_SUB}</div>
 <div style="position:absolute;left:72px;top:920px">{btn('Book your check-up', 26, 36, 22, SKY, NAVY)}</div>
@@ -112,17 +112,17 @@ def c1_1x1(c):
 
 def c1_9x16(c):
     k, area, addr, coord = c
-    return ad('s9', HARBOUR, f"""
-{glow(180, 760, 760, SKY, .5)}
+    return ad('s9', NAVY, f"""
+{glow(180, 760, 760, HARBOUR, .85)}
 <div style="position:absolute;left:0;right:0;top:270px;display:flex;justify-content:center">{logo(300, LINEN)}</div>
-<div style="position:absolute;left:0;right:0;top:390px;display:flex;justify-content:center">{area_chip('New patients welcome in ' + area, 26)}</div>
+<div style="position:absolute;left:0;right:0;top:390px;display:flex;justify-content:center">{area_chip('New patients welcome in ' + area, 26, SKY, NAVY)}</div>
 <div class="h" style="position:absolute;left:90px;right:90px;top:490px;text-align:center;font-size:84px;line-height:1.05;color:{LINEN}">It’s been a few years. <em>We won’t make a thing of it.</em></div>
 {heart('mask-team.png', 288, 790, 560)}
 <div class="body" style="position:absolute;left:150px;right:150px;top:1380px;text-align:center;font-size:28px;line-height:1.45;color:{LINEN};opacity:.88">{C1_SUB}</div>
 <div style="position:absolute;left:0;right:0;top:1490px;display:flex;justify-content:center">{btn('Book your check-up', 28, 40, 24, SKY, NAVY)}</div>""")
 
 
-# ---------------------------------------------------------------- C2 One person (Denise) | photo into Harbour Blue
+# ---------------------------------------------------------------- C2 One person (Denise) | photo into Navy
 def badge(coord, area, w, s=1.0):
     who = coord if coord else 'Your coordinator'
     return f"""<div class="card" style="position:relative;width:{w}px;padding:{30 * s}px {34 * s}px;border-radius:{24 * s}px;transform:rotate(-2deg)">
@@ -138,22 +138,22 @@ C2_SUB = 'They explain your options and the costs before anything starts. No pre
 
 def c2_1x1(c):
     k, area, addr, coord = c
-    return ad('s1', HARBOUR, f"""
+    return ad('s1', NAVY, f"""
 {photo('fees.png', 0, 0, 1080, 600, '50% 40%', radius=0)}
 <div style="position:absolute;left:0;top:0;width:1080px;height:240px;background:linear-gradient(180deg,rgba(15,27,41,.8),rgba(15,27,41,0))"></div>
-<div style="position:absolute;left:0;top:380px;width:1080px;height:222px;background:linear-gradient(180deg,rgba(50,116,163,0),{HARBOUR})"></div>
+<div style="position:absolute;left:0;top:380px;width:1080px;height:222px;background:linear-gradient(180deg,rgba(15,27,41,0),{NAVY})"></div>
 <div style="position:absolute;left:72px;top:68px">{logo(230, LINEN)}</div>
 <div class="h" style="position:absolute;left:72px;top:560px;width:940px;font-size:66px;line-height:1.06;color:{LINEN}">One person looks after you, <em>start to finish.</em></div>
 <div class="body" style="position:absolute;left:72px;top:735px;width:880px;font-size:25px;line-height:1.5;color:{LINEN};opacity:.9">{C2_SUB}</div>
 <div style="position:absolute;left:72px;top:860px">{badge(coord, area, 470)}</div>
-<div style="position:absolute;left:600px;top:905px">{btn('Book a new patient visit', 24, 32, 22, NAVY, LINEN)}</div>""")
+<div style="position:absolute;left:600px;top:905px">{btn('Book a new patient visit', 24, 32, 22, SKY, NAVY)}</div>""")
 
 
 def c2_9x16(c):
     k, area, addr, coord = c
-    return ad('s9', HARBOUR, f"""
+    return ad('s9', NAVY, f"""
 {photo('fees.png', 0, 0, 1080, 1120, '45% 50%', radius=0)}
-<div style="position:absolute;left:0;top:640px;width:1080px;height:480px;background:linear-gradient(180deg,rgba(50,116,163,0),{HARBOUR})"></div>
+<div style="position:absolute;left:0;top:640px;width:1080px;height:480px;background:linear-gradient(180deg,rgba(15,27,41,0),{NAVY})"></div>
 <div style="position:absolute;left:0;top:0;width:1080px;height:520px;background:linear-gradient(180deg,rgba(15,27,41,.85) 22%,rgba(15,27,41,0))"></div>
 <div style="position:absolute;left:0;right:0;top:270px;display:flex;justify-content:center">{logo(300, LINEN)}</div>
 <div class="h" style="position:absolute;left:90px;right:90px;top:1060px;text-align:center;font-size:84px;line-height:1.05;color:{LINEN}">One person looks after you, <em>start to finish.</em></div>
@@ -161,7 +161,7 @@ def c2_9x16(c):
 <div style="position:absolute;left:0;right:0;top:1430px;display:flex;justify-content:center">{badge(coord, area, 520)}</div>""")
 
 
-# ---------------------------------------------------------------- C3 New to the area (Sophie) | Harbour band over Linen
+# ---------------------------------------------------------------- C3 New to the area (Sophie) | Navy band over Linen
 VISIT = ['Full dental exam', 'Gum health check', 'Mouth cancer screening', 'A clear plan, explained']
 
 
@@ -178,8 +178,8 @@ def proof_line(size, colour=NAVY, star=HARBOUR):
 def c3_1x1(c):
     k, area, addr, coord = c
     return ad('s1', LINEN, f"""
-<div style="position:absolute;left:0;top:0;width:1080px;height:600px;background:{HARBOUR}"></div>
-{glow(-160, -200, 620, SKY, .45)}
+<div style="position:absolute;left:0;top:0;width:1080px;height:600px;background:{NAVY}"></div>
+{glow(-160, -200, 620, HARBOUR, .8)}
 {photo('why-us-home.png', 540, 70, 470, 600, '56% 45%')}
 <div style="position:absolute;left:72px;top:68px">{logo(230, LINEN)}</div>
 <div class="h" style="position:absolute;left:72px;top:190px;width:480px;font-size:76px;line-height:1.04;color:{LINEN}">Looking for a dentist <em>in {area}?</em></div>
@@ -192,8 +192,8 @@ def c3_1x1(c):
 def c3_9x16(c):
     k, area, addr, coord = c
     return ad('s9', LINEN, f"""
-<div style="position:absolute;left:0;top:0;width:1080px;height:960px;background:{HARBOUR}"></div>
-{glow(600, 100, 700, SKY, .45)}
+<div style="position:absolute;left:0;top:0;width:1080px;height:960px;background:{NAVY}"></div>
+{glow(600, 100, 700, HARBOUR, .8)}
 <div style="position:absolute;left:0;right:0;top:270px;display:flex;justify-content:center">{logo(300, LINEN)}</div>
 <div class="h" style="position:absolute;left:90px;right:90px;top:390px;text-align:center;font-size:92px;line-height:1.03;color:{LINEN}">Looking for a dentist <em>in {area}?</em></div>
 <div style="position:absolute;left:0;right:0;top:640px;display:flex;justify-content:center;align-items:center;gap:10px;font-size:26px;color:{LINEN}">{pin(30, SKY)}{addr}</div>
@@ -305,7 +305,7 @@ def c6_9x16(c):
 <div style="position:absolute;left:0;top:1260px;width:1080px;height:320px;background:{HARBOUR};padding:40px 0">{usp_bar(30, vertical=True)}</div>""")
 
 
-# ---------------------------------------------------------------- C7 Reviews | Harbour Blue + stacked review cards
+# ---------------------------------------------------------------- C7 Reviews | Navy + stacked review cards
 REVIEWS = ['I was talked through everything and everyone was so lovely.',
            'I am delighted that I changed to this dental practice.',
            'As an extremely nervous patient I was so at ease the minute I walked in the door.']
@@ -320,12 +320,12 @@ def c7_1x1(c):
     k, area, addr, coord = c
     cards = ''.join(f'<div style="position:absolute;left:{x}px;top:{y}px">{review_card(q, 760, 1, r)}</div>' for q, x, y, r in
                     zip(REVIEWS, (72, 248, 140), (330, 500, 670), (-1.2, 1, -.6)))
-    return ad('s1', HARBOUR, f"""
-{glow(500, -200, 760, SKY, .45)}
+    return ad('s1', NAVY, f"""
+{glow(500, -200, 760, HARBOUR, .85)}
 <div style="position:absolute;left:72px;top:68px">{logo(230, LINEN)}</div>
 <div class="h" style="position:absolute;left:72px;top:160px;width:940px;font-size:60px;line-height:1.06;color:{LINEN}">Over 500 five-star reviews. <em>Here’s what patients say.</em></div>
 {cards}
-<div style="position:absolute;left:72px;top:935px">{btn('Book a new patient visit', 24, 32, 22, LINEN, NAVY)}</div>
+<div style="position:absolute;left:72px;top:935px">{btn('Book a new patient visit', 24, 32, 22, SKY, NAVY)}</div>
 <div class="small" style="position:absolute;left:560px;top:945px;width:460px;font-size:18px;color:{LINEN};opacity:.8">Google reviews of Dentistry.ie clinics. New patients welcome in {area}.</div>""")
 
 
@@ -333,13 +333,13 @@ def c7_9x16(c):
     k, area, addr, coord = c
     cards = ''.join(f'<div style="position:absolute;left:{x}px;top:{y}px">{review_card(q, 860, 1.1, r)}</div>' for q, x, y, r in
                     zip(REVIEWS, (90, 130, 100), (640, 860, 1080), (-1.2, 1, -.6)))
-    return ad('s9', HARBOUR, f"""
-{glow(400, 1100, 900, SKY, .45)}
+    return ad('s9', NAVY, f"""
+{glow(400, 1100, 900, HARBOUR, .85)}
 <div style="position:absolute;left:0;right:0;top:270px;display:flex;justify-content:center">{logo(300, LINEN)}</div>
 <div class="h" style="position:absolute;left:80px;right:80px;top:390px;text-align:center;font-size:76px;line-height:1.05;color:{LINEN}">Over 500 five-star reviews. <em>Here’s what patients say.</em></div>
 {cards}
 <div class="small" style="position:absolute;left:120px;right:120px;top:1360px;text-align:center;font-size:24px;color:{LINEN};opacity:.85">Google reviews of Dentistry.ie clinics. New patients welcome in {area}.</div>
-<div style="position:absolute;left:0;right:0;top:1460px;display:flex;justify-content:center">{btn('Book a new patient visit', 28, 40, 24, LINEN, NAVY)}</div>""")
+<div style="position:absolute;left:0;right:0;top:1460px;display:flex;justify-content:center">{btn('Book a new patient visit', 28, 40, 24, SKY, NAVY)}</div>""")
 
 
 # ---------------------------------------------------------------- C8 First visit, step by step | Linen + Harbour panel
