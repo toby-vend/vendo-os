@@ -1,6 +1,6 @@
 """Primary text + headlines for the general statics, one set per concept per clinic.
 
-Writes copy-c1-been-a-while.md, copy-c2-one-person.md, copy-c3-new-to-the-area.md and copy.json (for the Figma copy cards).
+Writes copy-c1 … copy-c10 markdown files and copy.json (for the Figma copy cards).
 Research and sources: research.md. Clinic facts: build.CLINICS. UK/Irish English, no em dashes, no prices.
 """
 import json
@@ -80,6 +80,124 @@ A local dentist you’ll actually want to go back to."""
     return text, heads
 
 
+def c4(area, addr, coord):
+    text = f"""If you only go to the dentist when something hurts, you’re not alone.
+
+Maybe there’s a twinge you’ve learned to tune out. Maybe you’re waiting to see if it settles. The trouble is, a tooth often only starts to hurt once a problem has been there a while.
+
+A check-up is the easy way to stay ahead of it. Your first visit at our {area} clinic is a full exam that looks for early signs of decay, gum problems and wear, plus a mouth cancer screening. We explain what we find in plain English, and nothing goes ahead until you’re ready.
+
+{PROOF}
+
+Our {area} clinic is {at(addr)} {addr}, and new patients are welcome. Tap Book Now, leave your details, and the team will be in touch to find a time.
+
+Come in before it hurts, not because it does."""
+    return text, ['Don’t wait for the toothache', f'New patients welcome in {area}', 'A check-up before it hurts']
+
+
+def c5(area, addr, coord):
+    text = f"""Your dentist retired, and now you have to start again.
+
+You knew where you stood with them. They knew your teeth, your history and how you like things explained. Finding someone new feels like a job you keep putting off.
+
+Dentistry.ie has been looking after families since 1980, and we’re 100% Irish owned. At our {area} clinic, your first visit is a full check-up and a proper conversation. We take the time to listen, explain what we find, and agree a plan with you.
+
+You’ll also have a treatment coordinator, so there’s always one person to ask when you have a question.
+
+Over 500 five-star Google reviews across our eight clinics.
+
+Our {area} clinic is {at(addr)} {addr}, and we’re welcoming new patients. Tap Book Now, leave your details, and the team will be in touch.
+
+A dentist you can stay with for years."""
+    return text, ['Old dentist retired?', 'A dentist you can stay with', f'New patients welcome in {area}']
+
+
+def c6(area, addr, coord):
+    text = f"""Yes, we’re taking new patients in {area}.
+
+If you’ve rung around and kept hearing “we’re not taking anyone on”, you can stop ringing.
+
+Our {area} clinic is {at(addr)} {addr}. Leave your details and the team will be in touch to book your first visit: a full check-up, a mouth cancer screening and a plan explained in plain English.
+
+100% Irish owned. Caring for families since 1980. Over 500 five-star Google reviews across our eight clinics.
+
+Tap Book Now to leave your details.
+
+Finding a dentist shouldn’t take ten phone calls."""
+    return text, ['Yes, we’re taking new patients', f'New patients welcome in {area}', 'Stop ringing around']
+
+
+def c7(area, addr, coord):
+    text = f"""Don’t just take our word for it.
+
+“I was talked through everything and everyone was so lovely.”
+
+“I am delighted that I changed to this dental practice.”
+
+“As an extremely nervous patient I was so at ease the minute I walked in the door.”
+
+Those are real Google reviews from patients at our clinics, and we have over 500 five-star reviews in total.
+
+If you’re looking for a new dentist in {area}, start with a full check-up at our clinic {at(addr)} {addr}. We explain what we find in plain English, and nothing goes ahead until you’re ready.
+
+Tap Book Now, leave your details, and the team will be in touch.
+
+Join the patients who were glad they switched."""
+    return text, ['500+ five-star Google reviews', '“Everyone was so lovely”', f'New patients welcome in {area}']
+
+
+def c8(area, addr, coord):
+    text = f"""Not sure what happens at a first dental visit? Here’s exactly what to expect at our {area} clinic.
+
+1. Book online. Leave your details and the team gets in touch to find a time.
+2. A full check-up: teeth, bite, gums and a mouth cancer screening.
+3. We explain what we find, in plain English, with time for your questions.
+4. You leave with a personalised plan and advice for home. Nothing goes ahead until you’re ready.
+
+That’s it. No surprises and no pressure.
+
+{PROOF}
+
+Our {area} clinic is {at(addr)} {addr}, and new patients are welcome. Tap Book Now to get started.
+
+Knowing what’s coming makes it easier to book."""
+    return text, ['Your first visit, step by step', 'No surprises at your first visit', f'New patients welcome in {area}']
+
+
+def c9(area, addr, coord):
+    text = f"""Seeing a dentist, then an orthodontist, then an implant specialist can feel like starting from scratch every time.
+
+Three opinions. Three plans. And you’re left wondering which one to trust.
+
+At Dentistry.ie, our dentists and specialists across eight clinics plan your care together. Your orthodontist talks to your implant specialist. Your cosmetic dentist coordinates with your general dentist. You get one plan where everything fits, and nothing is done twice.
+
+It starts with a new patient visit at our {area} clinic: a full check-up, a mouth cancer screening and a plan explained in plain English.
+
+{PROOF}
+
+Our {area} clinic is {at(addr)} {addr}. Tap Book Now, leave your details, and the team will be in touch.
+
+One team. One plan. You decide."""
+    return text, ['Specialists who talk to each other', 'One team, one plan', f'New patients welcome in {area}']
+
+
+def c10(area, addr, coord):
+    text = f"""How long has “ring the dentist” been on your to-do list?
+
+It keeps getting pushed to next week. Then it’s been a year. Then three. And the longer it goes, the more awkward the call feels.
+
+So let us make the call instead. Tap Book Now, leave your details, and the team at our {area} clinic will get in touch to find a time that suits you.
+
+Your first visit is a full check-up and an honest chat about your options. No lectures and no obligation.
+
+{PROOF}
+
+We’re {at(addr)} {addr}, and new patients are welcome.
+
+Consider this your sign."""
+    return text, ['Consider this your sign', 'Ring the dentist (finally)', f'New patients welcome in {area}']
+
+
 HEADER = {
     'c1': ('copy-c1-been-a-while.md', 'C1 | Been a while', """**Persona:** Mark, the lapsed patient (Dental Persona Bank). 35 to 55, five or more years since a check-up, embarrassed by the gap.
 **Campaign:** General (Private & PRSI), all eight clinics. **Offer:** new patient check-up (no price on the ad, Toby 22 Oct).
@@ -102,9 +220,44 @@ HEADER = {
 **Research:** "My dentist of many decades is retired. I need a new one." (Boards.ie, asking about Maynooth, 2024); "I'm now living in the city and want a 'local' dentist" (Boards.ie, Kilkenny, 2016); "An enormous amount of Dentists are not taking on new patients or if they are, long waiting list to get seen." (Boards.ie, 2021). Client: inclusions from each clinic's new-patients-meta landing page; "100% Irish owned", "since 1980", "500+ 5-star reviews" (dentistry.ie).
 
 **On image:** Looking for a dentist *in [area]?* / pin + address / Your first visit: full dental exam, gum health check, mouth cancer screening, a clear plan explained / 5 stars, 500+ five-star Google reviews / Caring for families since 1980 / Book an appointment. Photo: dentist explaining with a model (from dentistry.ie)."""),
+    'c4': ('copy-c4-before-it-hurts.md', 'C4 | Before it hurts', """**Persona:** Mark / Ray (Dental Persona Bank): only goes when something hurts. **Awareness:** problem aware. **Sophistication:** 4 (catch it early: the exam looks for early decay and wear). **Angle:** come in before the pain decides for you.
+
+**Research:** "I only go when I have bad cavities and toothaches" (Boards.ie, 2017); "I have a constant dull pain that I think I've just got my brain to be able to tune out" (Boards.ie, 2020). Client: the exam checks "to assess your bite, identify any signs of decay, and spot early wear and tear" (clinic landing pages).
+
+**On image:** New patients welcome in [area] / Only go when something hurts? *Come in before it does.* / A full check-up looks for early signs of decay and wear, while they're still small. / Book your check-up. Sky ground, smiling clinician."""),
+    'c5': ('copy-c5-dentist-retired.md', 'C5 | Dentist retired', """**Persona:** Denise / Sophie: the moment their old dentist retired. **Awareness:** problem aware. **Sophistication:** 5 (continuity and trust). **Angle:** a practice that's been here since 1980.
+
+**Research:** "My dentist of many decades is retired. I need a new one." (Boards.ie, asking about Lucan, Celbridge or Maynooth, 2024). Client: "Caring for families since 1980", "100% Irish owned" (dentistry.ie); "We take the time to listen to your needs" (landing pages); dedicated point of contact (dentistry.ie).
+
+**On image:** Your old dentist retired? *We've been here since 1980.* / New patients welcome in [area] / A full check-up and a proper conversation. We take the time to listen, and explain everything in plain English. / Book a new patient visit. Navy ground, team with patient."""),
+    'c6': ('copy-c6-taking-new-patients.md', 'C6 | Taking new patients', """**Persona:** anyone who has rung around and been turned away. **Awareness:** most aware. **Sophistication:** 2 (the plain claim, proven by the sign). **Angle:** the answer they haven't been getting.
+
+**Research:** "rang Village Dental and they're not taking on any new patients and no ETA as to when they might." (Boards.ie, 2021); "An enormous amount of Dentists are not taking on new patients or if they are, long waiting list to get seen." (Boards.ie, 2021).
+
+**On image:** Hanging sign: *Yes,* we're taking new patients / Dentistry.ie [area]. USP bar: 100% Irish owned, Since 1980, 500+ five-star reviews. Blurred reception behind."""),
+    'c7': ('copy-c7-reviews.md', 'C7 | Reviews', """**Persona:** switching or new to the area, comparing practices. **Awareness:** product aware. **Sophistication:** 2 (proof: volume plus specific words). **Angle:** let patients say it.
+
+**Research:** three Google reviews quoted on dentistry.ie, used verbatim and unnamed: Pauline K. (Artane), Gavin S. (McEvoy, Dublin 2), Claire K. (Balbriggan). "500+ 5-star reviews on Google" (dentistry.ie).
+
+**On image:** Over 500 five-star reviews. *Here's what patients say.* / three review cards / Google reviews of Dentistry.ie clinics. New patients welcome in [area]. / Book a new patient visit."""),
+    'c8': ('copy-c8-first-visit.md', 'C8 | First visit, step by step', """**Persona:** Mark: "does not know what happens at a first appointment" (Dental Persona Bank). **Awareness:** solution aware. **Sophistication:** 3 (the process is the reassurance). **Angle:** remove the unknown.
+
+**Research:** "I'm not scared of the dentist but I'm embarrassed to go now because it's been so long" (Boards.ie, 2018). Client: what's included in a new patient appointment and "We'll clearly explain our findings" (clinic landing pages).
+
+**On image:** Your first visit, *step by step.* / At our [area] clinic. New patients welcome. / 1 Book online, 2 Full check-up, 3 Findings explained, 4 Your plan. / Book your first visit. Photo is stock from dentistry.ie."""),
+    'c9': ('copy-c9-specialists.md', 'C9 | Specialists together', """**Persona:** Denise, switching and wary of mixed advice. **Awareness:** solution aware. **Sophistication:** 4 (bigger mechanism: coordinated specialists). **Angle:** one plan instead of three opinions.
+
+**Research:** "I just don't want to be taken for a ride" (Boards.ie, 2020). Client: "Your orthodontist talks to your implant specialist. Your cosmetic dentist coordinates with your general dentist." and "No conflicting treatments - everything works together" (dentistry.ie, Meet the team section).
+
+**On image:** Your dentist and specialists *plan your care together.* / General dentist, Orthodontist, Implant specialist linked to One plan / Specialists across our eight clinics. New patients welcome in [area]. / Book a new patient visit."""),
+    'c10': ('copy-c10-note-to-self.md', 'C10 | Note to self', """**Persona:** Mark: keeps putting it off. **Awareness:** problem aware. **Sophistication:** 5 (identity: the person who finally books). **Angle:** native, lo-fi note-to-self (Pile B), not an ad layout.
+
+**Research:** "I've kept putting it off cause I might not able to afford it and I also get very anxious about the whole situation." (Boards.ie, 2020); "kept putting it off", "head in the sand" (their words).
+
+**On image:** Post-it: Ring the dentist. (It's been 3 years.) / Consider this your sign. *New patients welcome in [area].* / Book your check-up."""),
 }
 
-NOTES = """## Checks for the client (all three concepts)
+NOTES = """## Checks for the client (all ten concepts)
 
 - **New patients at every clinic:** the ads say each clinic is welcoming new patients. Please confirm that's true for all eight right now.
 - **Review count:** dentistry.ie says 500+ five-star Google reviews; the landing pages say 600+. The ads use 500+ until the right number is confirmed.
@@ -113,13 +266,16 @@ NOTES = """## Checks for the client (all three concepts)
 - **What happens after the form:** copy says the team gets in touch to book a time. Confirm that matches how Boxly leads are handled.
 - **Review quote (C2 option):** not used in the primary text. If the client wants "I am delighted that I changed to this dental practice." (a Google review on dentistry.ie) in an ad, it stays unnamed unless the reviewer agrees.
 - **Prices and hours:** left off on purpose. The €85 exam (landing pages) conflicts with €65 for Balbriggan in the July workbook, and Loren is sending updated opening hours.
+- **Review quotes (C7):** three Google reviews quoted on dentistry.ie (Artane, McEvoy and Balbriggan patients) appear word for word, without names, in every clinic's version. Confirm the client is happy to use them in ads.
+- **Specialists (C9):** says specialists across the eight clinics plan care together, as the website does. Confirm patients at every clinic can be referred across the group.
+- **Before it hurts (C4):** "a tooth often only starts to hurt once a problem has been there a while" is a general dental point, not a client claim. Have a clinician sanity-check the wording.
 - **Photos:** all from dentistry.ie. The C3 dentist wears McEvoy scrubs, so the image is from the Dublin 2 team. Swap in each clinic's own team photos when available.
 """
 
 
 def main():
     out = {}
-    for key, fn in (('c1', c1), ('c2', c2), ('c3', c3)):
+    for key, fn in (('c1', c1), ('c2', c2), ('c3', c3), ('c4', c4), ('c5', c5), ('c6', c6), ('c7', c7), ('c8', c8), ('c9', c9), ('c10', c10)):
         fname, title, head = HEADER[key]
         md = [f'# {title} | Dentistry.ie general statics | Meta copy\n', head, '\n---\n']
         out[key] = {}

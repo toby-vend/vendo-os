@@ -210,7 +210,7 @@ The hardest part is booking. We’ll take care of the rest.
 
 ---
 
-## Checks for the client (all three concepts)
+## Checks for the client (all ten concepts)
 
 - **New patients at every clinic:** the ads say each clinic is welcoming new patients. Please confirm that's true for all eight right now.
 - **Review count:** dentistry.ie says 500+ five-star Google reviews; the landing pages say 600+. The ads use 500+ until the right number is confirmed.
@@ -219,4 +219,7 @@ The hardest part is booking. We’ll take care of the rest.
 - **What happens after the form:** copy says the team gets in touch to book a time. Confirm that matches how Boxly leads are handled.
 - **Review quote (C2 option):** not used in the primary text. If the client wants "I am delighted that I changed to this dental practice." (a Google review on dentistry.ie) in an ad, it stays unnamed unless the reviewer agrees.
 - **Prices and hours:** left off on purpose. The €85 exam (landing pages) conflicts with €65 for Balbriggan in the July workbook, and Loren is sending updated opening hours.
+- **Review quotes (C7):** three Google reviews quoted on dentistry.ie (Artane, McEvoy and Balbriggan patients) appear word for word, without names, in every clinic's version. Confirm the client is happy to use them in ads.
+- **Specialists (C9):** says specialists across the eight clinics plan care together, as the website does. Confirm patients at every clinic can be referred across the group.
+- **Before it hurts (C4):** "a tooth often only starts to hurt once a problem has been there a while" is a general dental point, not a client claim. Have a clinician sanity-check the wording.
 - **Photos:** all from dentistry.ie. The C3 dentist wears McEvoy scrubs, so the image is from the Dublin 2 team. Swap in each clinic's own team photos when available.

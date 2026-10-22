@@ -51,6 +51,10 @@ def main():
         im.putalpha(a)
         im.save(P / name)
         print(name)
+    # Blurred reception for the C6 hanging-sign concept.
+    r = Image.open(P / 'fees.png').convert('RGB')
+    r.resize((r.width // 2, r.height // 2)).filter(ImageFilter.GaussianBlur(14)).save(P / 'fees-blur.jpg', quality=85)
+    print('fees-blur.jpg')
 
 
 if __name__ == '__main__':
