@@ -31,7 +31,7 @@ Behind Amy, our dentists and specialists plan your care together, so everything 
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-We’re welcoming new patients at our clinic at Artane Castle Shopping Centre. Tap Book Now, leave your details, and Amy will be in touch to arrange your first visit.
+Our Artane clinic is at Artane Castle Shopping Centre, and we’re welcoming new patients. Tap Book Now, leave your details, and Amy will be in touch to arrange your first visit.
 
 Good dentistry starts with someone who explains it.
 
@@ -58,7 +58,7 @@ Behind Tracy, our dentists and specialists plan your care together, so everythin
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-We’re welcoming new patients at our clinic at 6 Chapel Street, Balbriggan. Tap Book Now, leave your details, and Tracy will be in touch to arrange your first visit.
+Our Balbriggan clinic is at 6 Chapel Street, Balbriggan, and we’re welcoming new patients. Tap Book Now, leave your details, and Tracy will be in touch to arrange your first visit.
 
 Good dentistry starts with someone who explains it.
 
@@ -85,7 +85,7 @@ Behind Gosia, our dentists and specialists plan your care together, so everythin
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-We’re welcoming new patients at our clinic at Ashleigh Centre, Castleknock Road. Tap Book Now, leave your details, and Gosia will be in touch to arrange your first visit.
+Our Castleknock clinic is at Ashleigh Centre, Castleknock Road, and we’re welcoming new patients. Tap Book Now, leave your details, and Gosia will be in touch to arrange your first visit.
 
 Good dentistry starts with someone who explains it.
 
@@ -112,7 +112,7 @@ Behind Natalie, our dentists and specialists plan your care together, so everyth
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-We’re welcoming new patients at our Dublin 2 clinic on Fitzwilliam Street Upper. Tap Book Now, leave your details, and Natalie will be in touch to arrange your first visit.
+Our Dublin 2 clinic is at 17 Fitzwilliam Street Upper, and we’re welcoming new patients. Tap Book Now, leave your details, and Natalie will be in touch to arrange your first visit.
 
 Good dentistry starts with someone who explains it.
 
@@ -139,7 +139,7 @@ Behind Alina, our dentists and specialists plan your care together, so everythin
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-We’re welcoming new patients at our clinic at Claregate Street, Kildare. Tap Book Now, leave your details, and Alina will be in touch to arrange your first visit.
+Our Kildare clinic is at Claregate Street, Kildare, and we’re welcoming new patients. Tap Book Now, leave your details, and Alina will be in touch to arrange your first visit.
 
 Good dentistry starts with someone who explains it.
 
@@ -166,7 +166,7 @@ Behind them, our dentists and specialists plan your care together, so everything
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-We’re welcoming new patients at our clinic at Friary Street, Kilkenny. Tap Book Now, leave your details, and the team will be in touch to arrange your first visit.
+Our Kilkenny clinic is at Friary Street, Kilkenny, and we’re welcoming new patients. Tap Book Now, leave your details, and the team will be in touch to arrange your first visit.
 
 Good dentistry starts with someone who explains it.
 
@@ -193,7 +193,7 @@ Behind AnnMarie, our dentists and specialists plan your care together, so everyt
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-We’re welcoming new patients at our clinic at Sundrive Shopping Centre. Tap Book Now, leave your details, and AnnMarie will be in touch to arrange your first visit.
+Our Kimmage clinic is at Sundrive Shopping Centre, and we’re welcoming new patients. Tap Book Now, leave your details, and AnnMarie will be in touch to arrange your first visit.
 
 Good dentistry starts with someone who explains it.
 
@@ -220,7 +220,7 @@ Behind Gosia, our dentists and specialists plan your care together, so everythin
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-We’re welcoming new patients at our clinic in Maynooth, Co. Kildare. Tap Book Now, leave your details, and Gosia will be in touch to arrange your first visit.
+Our Maynooth clinic is in Maynooth, Co. Kildare, and we’re welcoming new patients. Tap Book Now, leave your details, and Gosia will be in touch to arrange your first visit.
 
 Good dentistry starts with someone who explains it.
 

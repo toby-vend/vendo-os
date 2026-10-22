@@ -13,12 +13,6 @@ HERE = Path(__file__).parent
 PROOF = 'Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.'
 
 
-def where(area, addr):
-    if area == 'Dublin 2':
-        return 'our Dublin 2 clinic on Fitzwilliam Street Upper'
-    return f'our clinic {at(addr)} {addr}'
-
-
 def at(addr):
     return 'in' if addr.startswith('Maynooth') else 'at'
 
@@ -34,7 +28,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 {PROOF}
 
-You’ll find us at {where(area, addr)}. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our {area} clinic is {at(addr)} {addr}. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest."""
     heads = ['It’s been years? That’s fine.', f'New patients welcome in {area}', 'No lecture. Just a check-up.']
@@ -56,7 +50,7 @@ Behind {coord if coord else 'them'}, our dentists and specialists plan your care
 
 {PROOF}
 
-We’re welcoming new patients at {where(area, addr)}. Tap Book Now, leave your details, and {contact} to arrange your first visit.
+Our {area} clinic is {at(addr)} {addr}, and we’re welcoming new patients. Tap Book Now, leave your details, and {contact} to arrange your first visit.
 
 Good dentistry starts with someone who explains it."""
     h1 = f'{coord}, your coordinator in {area}' if coord else f'Your own coordinator in {area}'

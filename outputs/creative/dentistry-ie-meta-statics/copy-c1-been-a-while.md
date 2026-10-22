@@ -29,7 +29,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-You’ll find us at our clinic at Artane Castle Shopping Centre. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our Artane clinic is at Artane Castle Shopping Centre. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest.
 
@@ -54,7 +54,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-You’ll find us at our clinic at 6 Chapel Street, Balbriggan. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our Balbriggan clinic is at 6 Chapel Street, Balbriggan. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest.
 
@@ -79,7 +79,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-You’ll find us at our clinic at Ashleigh Centre, Castleknock Road. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our Castleknock clinic is at Ashleigh Centre, Castleknock Road. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest.
 
@@ -104,7 +104,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-You’ll find us at our Dublin 2 clinic on Fitzwilliam Street Upper. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our Dublin 2 clinic is at 17 Fitzwilliam Street Upper. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest.
 
@@ -129,7 +129,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-You’ll find us at our clinic at Claregate Street, Kildare. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our Kildare clinic is at Claregate Street, Kildare. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest.
 
@@ -154,7 +154,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-You’ll find us at our clinic at Friary Street, Kilkenny. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our Kilkenny clinic is at Friary Street, Kilkenny. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest.
 
@@ -179,7 +179,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-You’ll find us at our clinic at Sundrive Shopping Centre. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our Kimmage clinic is at Sundrive Shopping Centre. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest.
 
@@ -204,7 +204,7 @@ Your first visit is a full check-up: teeth, gums and a mouth cancer screening. T
 
 Over 500 five-star Google reviews across our eight clinics, and caring for families since 1980.
 
-You’ll find us at our clinic in Maynooth, Co. Kildare. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
+Our Maynooth clinic is in Maynooth, Co. Kildare. Tap Book Now, leave your details, and the team will be in touch to find a time that suits you.
 
 The hardest part is booking. We’ll take care of the rest.
 
