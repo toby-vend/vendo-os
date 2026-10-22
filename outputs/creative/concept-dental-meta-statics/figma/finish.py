@@ -25,7 +25,7 @@ names9 = re.findall(r'class="ab s9" id="[^"]+" data-name="([^"]+)"', build.BUILD
 md = (ROOT / f"copy-{persona}.md").read_text()
 cards = []
 for block in re.split(r"\n---\n", md):
-    m = re.search(r"^## (\w\d) \| (.+)$", block, re.M)
+    m = re.search(r"^## (\w+\d) \| (.+)$", block, re.M)
     if not m:
         continue
     head = re.search(r"\*\*Headline:\*\* (.+)", block).group(1).strip()

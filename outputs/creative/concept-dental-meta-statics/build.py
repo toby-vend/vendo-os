@@ -840,6 +840,367 @@ def barry_9x16():
     return page("Concept Dental | Barry | 9x16", b)
 
 
+# ---------------------------------------------------------------- COSMETIC (Amy, Hannah, Josh; replaces Implants, 22 Oct 2026)
+# Toby (21 Oct): photos must not all be arches with a border. Each concept uses one of five treatments:
+# arch, bleed (runs off the edge), rounded, offset (square on a tone block), pill/circle.
+
+CDATE = "261022"
+CTA_FREE = "Book free consultation"
+CTA_COS = "Book a consultation"
+
+
+def shot(x, y, w, h, img, kind="rounded", fx=.5, fy=.5, zoom=1.0, tone=DUNE, off=28):
+    """Photo in one of the five treatments. 'offset' adds a solid tone block behind, offset down-right."""
+    if kind == "arch":
+        return photo(x, y, w, h, img, fx, fy, zoom)
+    if kind == "bleed":
+        return photo(x, y, w, h, img, fx, fy, zoom, arch=False, radius=0, shadow=False)
+    if kind == "offset":
+        block = f'<div class="abs" data-name="Tone block" style="left:{x + off}px;top:{y + off}px;width:{w}px;height:{h}px;background:{tone}"></div>'
+        return block + photo(x, y, w, h, img, fx, fy, zoom, arch=False, radius=0)
+    radius = 9999 if kind == "pill" else 32
+    return photo(x, y, w, h, img, fx, fy, zoom, arch=False, radius=radius)
+
+
+def plan_sheet(x, y, w, rows, rot=-1.5, size=24, title="Your written plan"):
+    """A printed treatment plan: label, line items with right-hand values, a confirmed stamp."""
+    items = "".join(f'<div style="display:flex;justify-content:space-between;gap:20px;align-items:baseline;padding:{size * .6:.0f}px 0;border-bottom:1px solid {DUNE};font-size:{size}px">'
+                    f'<span>{a}</span><span style="font-weight:600;white-space:nowrap">{b}</span></div>' for a, b in rows)
+    inner = (f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:{size * .5:.0f}px">{logo(size * 5.4)}'
+             f'<span class="label" style="font-size:{size * .55:.0f}px;color:{TAUPE_D}">{title}</span></div>{items}'
+             f'<div class="label" style="margin-top:{size:.0f}px;display:inline-block;border:1.5px solid {COFFEE};border-radius:999px;padding:{size * .4:.0f}px {size * .8:.0f}px;font-size:{size * .55:.0f}px">Confirmed before you start</div>')
+    return paper(x, y, w, inner, rot=rot, pad=round(size * 1.8))
+
+
+A_PLAN = [("Invisalign, your case", "Confirmed price"), ("Consultation", "Free"), ("Retainer after (Essix)", "£100 per arch")]
+
+
+def amy_1x1():
+    b = []
+    b.append(board("A1", f"Not in the quote | Static | Object | Plan sheet | 1x1 | {CDATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.75)', '25% 15%')}
+  {watermark(760, 700, 420, VANILLA, .5)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:220px;width:900px;font-size:66px">Ask what&rsquo;s <em>not</em> in the quote.</div>
+  {plan_sheet(470, 400, 530, A_PLAN, rot=2, size=22)}
+  <div class="abs body" style="left:80px;top:420px;width:340px;font-size:27px">The number you were given isn&rsquo;t always the number you pay.</div>
+  <div class="abs body" style="left:80px;top:640px;width:340px;font-size:24px">Invisalign from <b style="font-weight:600">£2,000.</b> Your price confirmed in writing first.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_FREE, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("A2", f"Lips closed | Static | Lifestyle | Party | 1x1 | {CDATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '80% 25%')}
+  {shot(0, 0, 500, 1080, 'gen-amy-a2-party.jpg', 'bleed', fx=.42, fy=.5)}
+  <div class="abs" style="left:580px;top:96px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:580px;top:260px;width:430px;font-size:58px;color:{VANILLA}">Same smile in every photo. <em>Lips closed.</em></div>
+  <div class="abs body" style="left:580px;top:520px;width:420px;font-size:26px;color:{DUNE}">You know which side to stand on. You know when to stop laughing.</div>
+  <div class="abs rule" style="left:580px;top:690px;width:400px"></div>
+  <div class="abs body" style="left:580px;top:720px;width:420px;font-size:25px;color:{VANILLA}">Free Invisalign consultation. From <b style="font-weight:600">£2,000.</b></div>
+  <div class="abs" style="left:580px;top:916px">{cta(CTA_FREE, 'light', size=17, h=66, pad=30)}</div>
+"""))
+    b.append(board("A3", f"Braces wore off | Static | Lifestyle | Aligner in hand | 1x1 | {CDATE}", "s1", VANILLA, f"""
+  {glow()}
+  {shot(560, 120, 440, 640, 'stock-amy-a3-aligner-hold.jpg', 'rounded', fx=.45, fy=.3)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:260px;width:440px;font-size:68px">You had braces <em>at 14.</em></div>
+  <div class="abs body" style="left:80px;top:470px;width:430px;font-size:27px">Your teeth didn&rsquo;t stay where they put them.</div>
+  <div class="abs body" style="left:80px;top:610px;width:430px;font-size:25px">Aligners can move them back, and a retainer keeps them there this time.</div>
+  <div class="abs body" style="left:560px;top:800px;width:440px;font-size:22px;color:{TAUPE_D}">Invisalign from £2,000. Consultation free.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_FREE, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("A4", f"From 2000 | Static | Object | Aligner case | 1x1 | {CDATE}", "s1", VANILLA, f"""
+  {glow()}
+  {shot(660, 100, 320, 500, 'stock-amy-a4-case.jpg', 'offset', fx=.5, fy=.5, tone=TAUPE)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs label" style="left:84px;top:290px;color:{TAUPE_D}">Invisalign from</div>
+  <div class="abs price" style="left:66px;top:350px;font-size:160px">£2,000</div>
+  <div class="abs hl" style="left:80px;top:680px;width:520px;font-size:44px">You&rsquo;ve been thinking about it <em>for years.</em></div>
+  <div class="abs body" style="left:660px;top:700px;width:340px;font-size:23px">Free consultation. Confirmed price in writing before you start.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_FREE, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("A5", f"22 hours | Static | Object | Lunch with aligners | 1x1 | {CDATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '30% 20%')}
+  {shot(620, 80, 380, 840, 'gen-amy-a5-lunch.jpg', 'pill', fx=.45, fy=.5)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs label" style="left:84px;top:280px;color:{TAUPE_D}">Aligners, the honest version</div>
+  <div class="abs hl" style="left:80px;top:330px;width:500px;font-size:70px">20 to 22 <em>hours a day.</em></div>
+  <div class="abs body" style="left:80px;top:540px;width:480px;font-size:26px">That&rsquo;s the part nobody likes to mention. Out to eat, back in after.</div>
+  <div class="abs body" style="left:80px;top:700px;width:480px;font-size:24px">We&rsquo;ll talk through how it fits your day before you commit.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_FREE, size=18, h=68, pad=34)}</div>
+"""))
+    return page("Concept Dental | Amy | 1x1", b)
+
+
+def amy_9x16():
+    b = []
+    b.append(board("A1s", f"Not in the quote | Static | Object | Plan sheet | 9x16 | {CDATE}", "s9", DUNE, f"""
+  {glow('rgba(252,246,238,.75)', '50% 20%')}
+  {watermark(640, 1420, 560, VANILLA, .5)}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:80px">Ask what&rsquo;s <em>not</em> in the quote.</div>
+  {plan_sheet(170, 700, 740, A_PLAN, rot=-1.5, size=28)}
+  <div class="abs body" style="left:120px;right:120px;top:1250px;text-align:center;font-size:32px">Invisalign from <b style="font-weight:600">£2,000.</b> Your price confirmed in writing before you start.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_FREE)}</div>
+"""))
+    b.append(board("A2s", f"Lips closed | Static | Lifestyle | Party | 9x16 | {CDATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '50% 30%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:420px;text-align:center;font-size:76px;color:{VANILLA}">Same smile in every photo. <em>Lips closed.</em></div>
+  {shot(0, 680, 1080, 640, 'gen-amy-a2-party.jpg', 'bleed', fx=.5, fy=.45)}
+  <div class="abs body" style="left:120px;right:120px;top:1350px;text-align:center;font-size:32px;color:{DUNE}">Free Invisalign consultation. From <b style="font-weight:600;color:{VANILLA}">£2,000.</b></div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_FREE, 'light')}</div>
+"""))
+    b.append(board("A3s", f"Braces wore off | Static | Lifestyle | Aligner in hand | 9x16 | {CDATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:84px">You had braces <em>at 14.</em></div>
+  {shot(220, 650, 640, 640, 'stock-amy-a3-aligner-hold.jpg', 'rounded', fx=.45, fy=.3)}
+  <div class="abs body" style="left:120px;right:120px;top:1330px;text-align:center;font-size:32px">Your teeth didn&rsquo;t stay put. Aligners can move them back, and a retainer keeps them there.</div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta(CTA_FREE)}</div>
+"""))
+    b.append(board("A4s", f"From 2000 | Static | Object | Aligner case | 9x16 | {CDATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  {shot(290, 420, 470, 520, 'stock-amy-a4-case.jpg', 'offset', fx=.5, fy=.5, tone=TAUPE, off=34)}
+  <div class="abs label" style="left:0;right:0;top:1020px;text-align:center;color:{TAUPE_D}">Invisalign from</div>
+  <div class="abs price" style="left:0;right:0;top:1070px;text-align:center;font-size:200px">£2,000</div>
+  <div class="abs hl" style="left:100px;right:100px;top:1280px;text-align:center;font-size:46px">You&rsquo;ve been thinking about it <em>for years.</em></div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_FREE)}</div>
+"""))
+    b.append(board("A5s", f"22 hours | Static | Object | Lunch with aligners | 9x16 | {CDATE}", "s9", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '50% 20%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:84px">20 to 22 <em>hours a day.</em></div>
+  {shot(290, 640, 500, 680, 'gen-amy-a5-lunch.jpg', 'pill', fx=.45, fy=.5)}
+  <div class="abs body" style="left:120px;right:120px;top:1350px;text-align:center;font-size:32px">Out to eat, back in after. We&rsquo;ll talk through how it fits your day.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_FREE)}</div>
+"""))
+    return page("Concept Dental | Amy | 9x16", b)
+
+
+def compare_two(x, y, w, size=1.0, stack=False):
+    """Bonding vs veneers, side by side (or stacked)."""
+    def card(dark, kicker, title, rows, price):
+        bg, fg, sub = (COFFEE, VANILLA, TAUPE) if dark else ("#FFFDF9", COFFEE, TAUPE_D)
+        items = "".join(f'<div style="display:flex;gap:12px;font-size:{20 * size:.0f}px;line-height:1.35">{TICK.format(s=round(20 * size), c=sub)}<span>{r}</span></div>' for r in rows)
+        return (f'<div style="flex:1;background:{bg};color:{fg};border-radius:10px;padding:{32 * size:.0f}px {28 * size:.0f}px;box-shadow:0 22px 44px rgba(70,58,52,.18);display:flex;flex-direction:column;gap:{14 * size:.0f}px">'
+                f'<div class="label" style="font-size:{14 * size:.0f}px;color:{sub}">{kicker}</div>'
+                f'<div style="font-size:{36 * size:.0f}px;font-weight:400;line-height:1.1">{title}</div>'
+                f'<div style="display:flex;flex-direction:column;gap:{10 * size:.0f}px">{items}</div>'
+                f'<div style="font-size:{48 * size:.0f}px;font-weight:300;line-height:1;margin-top:auto;padding-top:{10 * size:.0f}px">{price}</div></div>')
+    a = card(True, "Adds to your tooth", "Composite bonding", ["Little or no preparation", "Often one visit", "Can be repaired if it chips"], "from £300")
+    v = card(False, "Prepares the tooth", "E.max veneers", ["Tooth prepared first", "Can&rsquo;t be reversed", "Shade, shape and fit checked with you"], "£695")
+    return f'<div class="abs" data-name="Compare" style="left:{x}px;top:{y}px;width:{w}px;display:flex;flex-direction:{"column" if stack else "row"};gap:22px">{a}{v}</div>'
+
+
+H_TICKS = ["Shade-matched", "Often one visit", "Little or no preparation"]
+
+
+def hannah_1x1():
+    b = []
+    b.append(board("H1", f"Same teeth | Static | Lifestyle | Friends | 1x1 | {CDATE}", "s1", VANILLA, f"""
+  {glow()}
+  {shot(560, 120, 440, 880, 'stock-hannah-h1-friends.jpg', 'arch', fx=.08, fy=.4, zoom=1.25)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:270px;width:460px;font-size:70px">Same teeth. <em>Just better.</em></div>
+  <div class="abs body" style="left:80px;top:480px;width:440px;font-size:27px">Not new teeth. Yours, fixed where they need it.</div>
+  <div class="abs body" style="left:80px;top:640px;width:440px;font-size:23px;color:{TAUPE_D}">Bonding adds to your teeth, shade-matched to the ones around it. From £300.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("H2", f"Not the white strip | Static | Object | Shade guide | 1x1 | {CDATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.75)', '25% 15%')}
+  {shot(560, 120, 420, 480, 'stock-hannah-h2-shades.jpg', 'offset', fx=.5, fy=.55, tone=VANILLA)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:250px;width:440px;font-size:58px">Not the <em>one big white strip.</em></div>
+  <div class="abs body" style="left:80px;top:520px;width:420px;font-size:26px">Natural shape. A shade that suits you. Checked with you first.</div>
+  <div class="abs body" style="left:560px;top:680px;width:420px;font-size:22px;color:{TAUPE_D}">Composite bonding from £300. E.max veneers £695.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("H3", f"Add or take away | Static | Object | Compare cards | 1x1 | {CDATE}", "s1", VANILLA, f"""
+  {glow()}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:220px;width:920px;font-size:54px">Bonding adds. <em>Veneers prepare.</em></div>
+  {compare_two(80, 340, 920, size=.95)}
+  <div class="abs body" style="left:80px;top:830px;width:900px;font-size:23px">One of those can&rsquo;t be undone. We&rsquo;ll tell you which you actually need.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("H4", f"Lost on options | Static | Lifestyle | Sofa phone | 1x1 | {CDATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '20% 25%')}
+  {shot(580, 0, 500, 1080, 'stock-hannah-h4-sofa.jpg', 'bleed', fx=.48, fy=.5)}
+  <div class="abs" style="left:80px;top:80px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:80px;top:250px;width:460px;font-size:56px;color:{VANILLA}">Bonding? Veneers? <em>Aligners?</em></div>
+  <div class="abs body" style="left:80px;top:490px;width:440px;font-size:26px;color:{DUNE}">You know what bothers you. You just don&rsquo;t know what it&rsquo;s called.</div>
+  <div class="abs rule" style="left:80px;top:660px;width:420px"></div>
+  <div class="abs body" style="left:80px;top:690px;width:440px;font-size:25px;color:{VANILLA}">Tell us. We&rsquo;ll tell you what would help, and what it costs.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, 'light', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("H5", f"From 300 | Static | Lifestyle | Selfie | 1x1 | {CDATE}", "s1", VANILLA, f"""
+  {glow()}
+  {shot(660, 140, 340, 340, 'stock-hannah-h5-selfie.jpg', 'pill', fx=.55, fy=.35)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs label" style="left:84px;top:270px;color:{TAUPE_D}">Composite bonding from</div>
+  <div class="abs price" style="left:64px;top:330px;font-size:180px">£300</div>
+  <div class="abs hl" style="left:80px;top:580px;width:470px;font-size:44px">You might need <em>less than you think.</em></div>
+  <div class="abs" style="left:620px;top:640px;width:380px">{ticks(H_TICKS, size=24, gap=14)}</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, size=18, h=68, pad=34)}</div>
+"""))
+    return page("Concept Dental | Hannah | 1x1", b)
+
+
+def hannah_9x16():
+    b = []
+    b.append(board("H1s", f"Same teeth | Static | Lifestyle | Friends | 9x16 | {CDATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:88px">Same teeth. <em>Just better.</em></div>
+  {shot(240, 660, 600, 660, 'stock-hannah-h1-friends.jpg', 'arch', fx=.08, fy=.4, zoom=1.25)}
+  <div class="abs body" style="left:120px;right:120px;top:1350px;text-align:center;font-size:32px">Not new teeth. Yours, fixed where they need it. Bonding from £300.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_COS)}</div>
+"""))
+    b.append(board("H2s", f"Not the white strip | Static | Object | Shade guide | 9x16 | {CDATE}", "s9", DUNE, f"""
+  {glow('rgba(252,246,238,.75)', '50% 20%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:80px">Not the <em>one big white strip.</em></div>
+  {shot(230, 700, 590, 560, 'stock-hannah-h2-shades.jpg', 'offset', fx=.5, fy=.55, tone=VANILLA, off=34)}
+  <div class="abs body" style="left:120px;right:120px;top:1340px;text-align:center;font-size:32px">Natural shape. A shade that suits you. Checked with you first.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_COS)}</div>
+"""))
+    b.append(board("H3s", f"Add or take away | Static | Object | Compare cards | 9x16 | {CDATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:100px;top:270px">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;top:420px;width:880px;font-size:76px">Bonding adds. <em>Veneers prepare.</em></div>
+  {compare_two(100, 640, 880, size=1.05, stack=True)}
+  <div class="abs" style="left:100px;top:1470px">{cta(CTA_COS)}</div>
+"""))
+    b.append(board("H4s", f"Lost on options | Static | Lifestyle | Sofa phone | 9x16 | {CDATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '50% 30%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:420px;text-align:center;font-size:76px;color:{VANILLA}">Bonding? Veneers? <em>Aligners?</em></div>
+  {shot(0, 680, 1080, 620, 'stock-hannah-h4-sofa.jpg', 'bleed', fx=.5, fy=.4)}
+  <div class="abs body" style="left:120px;right:120px;top:1340px;text-align:center;font-size:32px;color:{DUNE}">Tell us what bothers you. We&rsquo;ll tell you what would help, and what it costs.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_COS, 'light')}</div>
+"""))
+    b.append(board("H5s", f"From 300 | Static | Lifestyle | Selfie | 9x16 | {CDATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  {shot(290, 400, 500, 500, 'stock-hannah-h5-selfie.jpg', 'pill', fx=.55, fy=.35)}
+  <div class="abs label" style="left:0;right:0;top:960px;text-align:center;color:{TAUPE_D}">Composite bonding from</div>
+  <div class="abs price" style="left:0;right:0;top:1010px;text-align:center;font-size:220px">£300</div>
+  <div class="abs hl" style="left:100px;right:100px;top:1250px;text-align:center;font-size:48px">You might need <em>less than you think.</em></div>
+  <div class="abs body" style="left:120px;right:120px;top:1380px;text-align:center;font-size:26px;color:{TAUPE_D}">Shade-matched. Often one visit.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_COS)}</div>
+"""))
+    return page("Concept Dental | Hannah | 9x16", b)
+
+
+X_RECEIPT = ["Shade-matched to your teeth", "Often done in one visit", "Little or no preparation", "Price in writing before you start"]
+
+
+def bond_receipt(x, y, w, rot=1.2, size=24):
+    items = "".join(f'<div style="display:flex;gap:14px;align-items:baseline;font-size:{size}px;padding:{size * .45:.0f}px 0;border-bottom:1px dashed {TAUPE}">'
+                    f'{TICK.format(s=round(size * .9), c=COFFEE)}<span>{r}</span></div>' for r in X_RECEIPT)
+    inner = (f'<div class="label" style="font-size:{size * .6:.0f}px;color:{TAUPE_D};margin-bottom:12px">Composite bonding</div>{items}'
+             f'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:{size * .8:.0f}px">'
+             f'<span class="label" style="font-size:{size * .6:.0f}px">From</span><span style="font-size:{size * 2.6:.0f}px;font-weight:300">£300</span></div>')
+    return paper(x, y, w, inner, rot=rot, pad=round(size * 1.7))
+
+
+def josh_1x1():
+    b = []
+    b.append(board("X1", f"One visit | Static | Lifestyle | Mirror | 1x1 | {CDATE}", "s1", VANILLA, f"""
+  {glow()}
+  {shot(560, 120, 440, 680, 'stock-josh-js1-mirror.jpg', 'rounded', fx=.4, fy=.35)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:260px;width:460px;font-size:64px">One visit. <em>Straight edges.</em></div>
+  <div class="abs body" style="left:80px;top:500px;width:440px;font-size:26px">No months of treatment. No new set of teeth.</div>
+  <div class="abs body" style="left:80px;top:610px;width:440px;font-size:24px">Bonding is added to your own teeth and shaped in the chair. <b style="font-weight:600">From £300.</b></div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("X2", f"Sunday league | Static | Object | Football boots | 1x1 | {CDATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '80% 25%')}
+  {shot(0, 0, 500, 1080, 'stock-josh-js2-boots.jpg', 'bleed', fx=.62, fy=.5)}
+  <div class="abs" style="left:580px;top:96px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:580px;top:260px;width:430px;font-size:60px;color:{VANILLA}">That chip from <em>Sunday league.</em></div>
+  <div class="abs body" style="left:580px;top:500px;width:420px;font-size:26px;color:{DUNE}">You stopped noticing it. You didn&rsquo;t stop hiding it.</div>
+  <div class="abs rule" style="left:580px;top:670px;width:400px"></div>
+  <div class="abs body" style="left:580px;top:700px;width:420px;font-size:25px;color:{VANILLA}">Rebuilt in your own shade, often in one visit. From <b style="font-weight:600">£300.</b></div>
+  <div class="abs" style="left:580px;top:916px">{cta(CTA_COS, 'light', size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("X3", f"On camera | Static | Lifestyle | Video call | 1x1 | {CDATE}", "s1", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '30% 20%')}
+  {shot(560, 120, 440, 880, 'stock-josh-js3-call.jpg', 'arch', fx=.42, fy=.4)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:250px;width:450px;font-size:50px">More time looking at your teeth on calls <em>than in the mirror.</em></div>
+  <div class="abs body" style="left:80px;top:590px;width:420px;font-size:26px">And now you can&rsquo;t stop seeing it.</div>
+  <div class="abs body" style="left:80px;top:720px;width:420px;font-size:24px">Bonding, often in one visit. <b style="font-weight:600">From £300.</b></div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("X4", f"Honest answer | Static | Object | Coffee | 1x1 | {CDATE}", "s1", VANILLA, f"""
+  {glow()}
+  {shot(600, 140, 400, 400, 'stock-josh-js4-coffee.jpg', 'pill', fx=.5, fy=.5)}
+  <div class="abs" style="left:80px;top:80px">{logo(190)}</div>
+  <div class="abs hl" style="left:80px;top:250px;width:480px;font-size:62px">Will bonding stain? <em>Honest answer.</em></div>
+  <div class="abs" style="left:80px;top:590px;width:900px">{ticks(['Tea, coffee and smoking can stain it over time', 'A polish helps keep it fresh', 'If it chips, it can be repaired'], size=26, gap=16)}</div>
+  <div class="abs body" style="left:80px;top:820px;width:900px;font-size:22px;color:{TAUPE_D}">Composite bonding from £300. Written price before anything starts.</div>
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, size=18, h=68, pad=34)}</div>
+"""))
+    b.append(board("X5", f"Not a full set | Static | Object | Receipt | 1x1 | {CDATE}", "s1", COFFEE, f"""
+  {glow('rgba(202,179,156,.2)', '75% 30%')}
+  {watermark(-120, 620, 520, COFFEE_L)}
+  <div class="abs" style="left:80px;top:80px">{logo(170, VANILLA)}</div>
+  <div class="abs hl" style="left:80px;top:250px;width:420px;font-size:64px;color:{VANILLA}">Not a full set. <em>From £300.</em></div>
+  <div class="abs body" style="left:80px;top:500px;width:400px;font-size:26px;color:{DUNE}">You don&rsquo;t need veneers to fix one edge.</div>
+  {bond_receipt(530, 200, 470, rot=2, size=23)}
+  <div class="abs" style="left:80px;top:916px">{cta(CTA_COS, 'light', size=18, h=68, pad=34)}</div>
+"""))
+    return page("Concept Dental | Josh | 1x1", b)
+
+
+def josh_9x16():
+    b = []
+    b.append(board("X1s", f"One visit | Static | Lifestyle | Mirror | 9x16 | {CDATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:430px;text-align:center;font-size:88px">One visit. <em>Straight edges.</em></div>
+  {shot(220, 660, 640, 640, 'stock-josh-js1-mirror.jpg', 'rounded', fx=.4, fy=.35)}
+  <div class="abs body" style="left:120px;right:120px;top:1340px;text-align:center;font-size:32px">Bonding is added to your own teeth and shaped in the chair. <b style="font-weight:600">From £300.</b></div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta(CTA_COS)}</div>
+"""))
+    b.append(board("X2s", f"Sunday league | Static | Object | Football boots | 9x16 | {CDATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.18)', '50% 30%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:420px;text-align:center;font-size:80px;color:{VANILLA}">That chip from <em>Sunday league.</em></div>
+  {shot(0, 680, 1080, 620, 'stock-josh-js2-boots.jpg', 'bleed', fx=.6, fy=.5)}
+  <div class="abs body" style="left:120px;right:120px;top:1340px;text-align:center;font-size:32px;color:{DUNE}">You stopped noticing it. You didn&rsquo;t stop hiding it. Often fixed in one visit.</div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta(CTA_COS, 'light')}</div>
+"""))
+    b.append(board("X3s", f"On camera | Static | Lifestyle | Video call | 9x16 | {CDATE}", "s9", DUNE, f"""
+  {glow('rgba(252,246,238,.7)', '50% 20%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:90px;right:90px;top:420px;text-align:center;font-size:62px">More time looking at your teeth on calls <em>than in the mirror.</em></div>
+  {shot(240, 700, 600, 600, 'stock-josh-js3-call.jpg', 'arch', fx=.42, fy=.4)}
+  <div class="abs body" style="left:120px;right:120px;top:1340px;text-align:center;font-size:32px">Bonding, often in one visit. <b style="font-weight:600">From £300.</b></div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_COS)}</div>
+"""))
+    b.append(board("X4s", f"Honest answer | Static | Object | Coffee | 9x16 | {CDATE}", "s9", VANILLA, f"""
+  {glow(at='50% 15%')}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:420px;text-align:center;font-size:80px">Will bonding stain? <em>Honest answer.</em></div>
+  {shot(340, 690, 400, 400, 'stock-josh-js4-coffee.jpg', 'pill', fx=.5, fy=.5)}
+  <div class="abs" style="left:150px;top:1150px;width:800px">{ticks(['Tea, coffee and smoking can stain it over time', 'A polish helps keep it fresh', 'If it chips, it can be repaired'], size=30, gap=14)}</div>
+  <div class="abs" style="left:0;right:0;top:1480px;display:flex;justify-content:center">{cta(CTA_COS)}</div>
+"""))
+    b.append(board("X5s", f"Not a full set | Static | Object | Receipt | 9x16 | {CDATE}", "s9", COFFEE, f"""
+  {glow('rgba(202,179,156,.2)', '50% 35%')}
+  {watermark(620, 1400, 560, COFFEE_L)}
+  <div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(200, VANILLA)}</div>
+  <div class="abs hl" style="left:100px;right:100px;top:420px;text-align:center;font-size:84px;color:{VANILLA}">Not a full set. <em>From £300.</em></div>
+  {bond_receipt(200, 680, 680, rot=-1.5, size=30)}
+  <div class="abs body" style="left:120px;right:120px;top:1340px;text-align:center;font-size:32px;color:{DUNE}">You don&rsquo;t need veneers to fix one edge.</div>
+  <div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center">{cta(CTA_COS, 'light')}</div>
+"""))
+    return page("Concept Dental | Josh | 9x16", b)
+
+
 BUILDS = {
     "mark": (mark_1x1, mark_9x16),
     "denise": (denise_1x1, denise_9x16),
@@ -847,6 +1208,9 @@ BUILDS = {
     "peter": (peter_1x1, peter_9x16),
     "linda": (linda_1x1, linda_9x16),
     "barry": (barry_1x1, barry_9x16),
+    "amy": (amy_1x1, amy_9x16),
+    "hannah": (hannah_1x1, hannah_9x16),
+    "josh": (josh_1x1, josh_9x16),
 }
 
 if __name__ == "__main__":
