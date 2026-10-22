@@ -1,4 +1,4 @@
-import { createClient, type Client, type Row } from '@libsql/client';
+import { createClient, type Client, type InStatement, type Row } from '@libsql/client';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,8 +12,12 @@ const raw: Client = createClient({
 
 // A connection left idle (e.g. during a 20-minute upload on an editor's laptop) or a Wi-Fi blip can fail the next
 // request before it is sent (EPIPE, DNS lookup). Those are retried once; errors after a request may have reached
-// the database are not, so a write is never applied twice.
+// the database are not, so a write is never applied twice. A reused socket the server already closed surfaces as
+// "socket hang up" (ECONNRESET), which can't tell us whether the request landed, so it is retried only for
+// statements that are safe to repeat (reads and CREATE … IF NOT EXISTS).
 const BEFORE_SEND = /EPIPE|ENOTFOUND|EAI_AGAIN|ECONNREFUSED/;
+const CONN_RESET = /socket hang up|ECONNRESET/;
+const REPEATABLE = /^\s*(SELECT|WITH|PRAGMA|CREATE\s+(TABLE|INDEX)\s+IF\s+NOT\s+EXISTS)\b/i;
 const client: Client = new Proxy(raw, {
   get(target, prop, receiver) {
     if (prop === 'execute') {
@@ -21,7 +25,10 @@ const client: Client = new Proxy(raw, {
         try {
           return await target.execute(...args);
         } catch (err) {
-          if (!BEFORE_SEND.test(String((err as Error)?.message ?? err))) throw err;
+          const message = String((err as Error)?.message ?? err);
+          const stmt = args[0] as InStatement;
+          const sql = typeof stmt === 'string' ? stmt : stmt.sql;
+          if (!BEFORE_SEND.test(message) && !(CONN_RESET.test(message) && REPEATABLE.test(sql))) throw err;
           await new Promise((r) => setTimeout(r, 1000));
           return target.execute(...args);
         }
