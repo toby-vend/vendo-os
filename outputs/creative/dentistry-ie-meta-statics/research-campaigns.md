@@ -56,7 +56,7 @@ Medical cards
 |---|---|---|---|
 | Implants | Eat What You Want | Navy | problem aware, outcome |
 | Implants | Used To The Gap | Navy | problem aware, accommodation |
-| Implants | Four Steps | Linen | solution aware, mechanism (CBCT) |
+| Implants | Four Steps | Navy | solution aware, mechanism (CBCT) |
 | Implants | Going Abroad | Navy | product aware, aftercare objection |
 | Implants | Dentures Slipping | Navy | problem aware, failed solution |
 | SMO | Hiding In Photos | Navy | problem aware |
@@ -71,6 +71,9 @@ Medical cards
 | Medical | Local Dentist | Navy | local search |
 
 ## Photos
+
+Implants were rebuilt on 23 Oct 2026 after Toby's review: he only liked Dentures Slipping, so all five now use its layout (a warm lifestyle photo on top with the headline below on navy). The angles stay the same. New photos: stk-couple-lunch-laugh (Eat What You Want), stk-family-selfie (Used To The Gap), stk-couple-cooking (Four Steps), stk-couple-seashore (Going Abroad).
+
 
 Lifestyle stock licensed through Magnific/Freepik (free licence) for the older implant and medical card audiences: stk-man-apple, stk-man-breakfast, stk-friends-toast, stk-woman-laugh-dinner (unused), stk-couple-tea, stk-couple-sofa, stk-woman-coffee-friends. Smile makeover uses photos from dentistry.ie (home-hero, orthodontics, facial, beautiful-patient-stock-photo); usage rights to be confirmed by the client, as with the general set.
 

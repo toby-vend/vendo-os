@@ -88,48 +88,46 @@ def addr_line(addr, size, colour=LINEN, align='flex-start'):
 IMP_CTA = 'Book an implant consultation'
 
 
-def i1_1(area, addr):  # Eat what you want | Navy, full-bleed lifestyle
+def i1_1(area, addr):  # Eat what you want | Navy, photo top (the Dentures Slipping layout Toby picked)
     return ad('s1', NAVY, f"""
-{photo('stk-man-apple.jpg', 380, 0, 700, 1080, '56% 40%', radius=0)}
-<div style="position:absolute;left:380px;top:0;width:420px;height:1080px;background:linear-gradient(90deg,{NAVY},rgba(15,27,41,0))"></div>
+{photo('stk-couple-lunch-laugh.jpg', 0, 0, 1080, 610, '62% 30%', radius=0)}
+{fade(0, 220, up=True)}{fade(390, 222)}
 {logo1()}
-<div style="position:absolute;left:72px;top:190px">{area_chip('Dental implants in ' + area, 22, SKY, NAVY)}</div>
-{head(72, 290, 560, 74, 'Bite into an apple <em>without thinking twice.</em>')}
-{sub(72, 640, 450, 25, 'Implants replace missing teeth with fixed teeth that look natural and don’t slip or click.')}
-<div style="position:absolute;left:72px;top:920px">{btn(IMP_CTA, 24, 32, 22, SKY, NAVY)}</div>""")
+{head(72, 560, 940, 66, 'Order what you fancy. <em>Not what’s easy to chew.</em>')}
+{sub(72, 735, 820, 25, 'Implants replace missing teeth with fixed teeth that look natural and don’t slip or click.')}
+<div style="position:absolute;left:72px;top:900px">{btn(IMP_CTA, 24, 32, 22, SKY, NAVY)}</div>
+<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>""")
 
 
 def i1_9(area, addr):
     return ad('s9', NAVY, f"""
-{photo('stk-man-apple.jpg', 0, 640, 1080, 680, '45% 40%', radius=0)}
-{fade(1060, 262)}{fade(640, 260, up=True)}
+{photo('stk-couple-lunch-laugh.jpg', 0, 0, 1080, 1150, '66% 40%', radius=0)}
+{fade(0, 560, up=True)}{fade(700, 452)}
 {logo9()}
-{centre(390, area_chip('Dental implants in ' + area, 26, SKY, NAVY))}
-{head(80, 480, 920, 86, 'Bite into an apple <em>without thinking twice.</em>', align='center')}
-{sub(140, 1330, 800, 29, 'Implants replace missing teeth with fixed teeth that look natural and don’t slip or click.', align='center', op=.95)}
-{centre(1480, btn(IMP_CTA, 28, 40, 24, SKY, NAVY))}""")
+{head(80, 1060, 920, 74, 'Order what you fancy. <em>Not what’s easy to chew.</em>', align='center')}
+{sub(140, 1330, 800, 29, 'Implants replace missing teeth with fixed teeth that look natural and don’t slip or click.', align='center')}
+{centre(1460, btn(IMP_CTA, 28, 40, 24, SKY, NAVY))}""")
 
 
-def i2_1(area, addr):  # Used to the gap | Navy, circle portrait
+def i2_1(area, addr):  # Used to the gap | Navy, photo top
     return ad('s1', NAVY, f"""
-{glow(560, 60, 640, HARBOUR, .85)}
+{photo('stk-family-selfie.jpg', 0, 0, 1080, 610, '50% 35%', radius=0)}
+{fade(0, 220, up=True)}{fade(390, 222)}
 {logo1()}
-<div style="position:absolute;left:72px;top:190px">{area_chip('Dental implants in ' + area, 22, SKY, NAVY)}</div>
-{head(72, 290, 540, 72, 'You’ve got used to the gap. <em>You don’t have to.</em>')}
-{sub(72, 680, 460, 25, 'A single implant replaces one missing tooth without touching the healthy teeth either side.')}
-<div style="position:absolute;left:72px;top:920px">{btn(IMP_CTA, 24, 32, 22, SKY, NAVY)}</div>
-{portrait('stk-man-breakfast.jpg', 836, 590, 390, '30% 30%', 1.5, '30% 22%')}""")
+{head(72, 560, 940, 66, 'You’ve got used to the gap. <em>You don’t have to.</em>')}
+{sub(72, 735, 820, 25, 'A single implant replaces one missing tooth without touching the healthy teeth either side.')}
+<div style="position:absolute;left:72px;top:900px">{btn(IMP_CTA, 24, 32, 22, SKY, NAVY)}</div>
+<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>""")
 
 
 def i2_9(area, addr):
     return ad('s9', NAVY, f"""
-{glow(180, 760, 760, HARBOUR, .85)}
+{photo('stk-family-selfie.jpg', 0, 0, 1080, 1150, '48% 40%', radius=0)}
+{fade(0, 560, up=True)}{fade(700, 452)}
 {logo9()}
-{centre(390, area_chip('Dental implants in ' + area, 26, SKY, NAVY))}
-{head(90, 490, 900, 84, 'You’ve got used to the gap. <em>You don’t have to.</em>', align='center')}
-{portrait('stk-man-breakfast.jpg', 540, 1060, 520, '30% 30%', 1.5, '30% 22%')}
-{sub(150, 1370, 780, 28, 'A single implant replaces one missing tooth without touching the healthy teeth either side.', align='center')}
-{centre(1490, btn(IMP_CTA, 28, 40, 24, SKY, NAVY))}""")
+{head(80, 1060, 920, 74, 'You’ve got used to the gap. <em>You don’t have to.</em>', align='center')}
+{sub(140, 1330, 800, 29, 'A single implant replaces one missing tooth without touching the healthy teeth either side.', align='center')}
+{centre(1460, btn(IMP_CTA, 28, 40, 24, SKY, NAVY))}""")
 
 
 IMP_STEPS = [('Consultation', 'Your goals, your options, your questions'),
@@ -138,47 +136,55 @@ IMP_STEPS = [('Consultation', 'Your goals, your options, your questions'),
              ('Your new tooth', 'A custom crown, made to match')]
 
 
-def i3_1(area, addr):  # Four steps | Linen, journey in a navy panel
-    return ad('s1', LINEN, f"""
-<div style="position:absolute;left:560px;top:80px;width:450px;height:920px;border-radius:36px;background:{NAVY};overflow:hidden">{glow(100, 400, 520, HARBOUR, .8)}</div>
-{logo1(NAVY)}
-{head(72, 190, 460, 68, 'Implants, explained <em>before anything starts.</em>', NAVY)}
-<div style="position:absolute;left:610px;top:150px">{steps(IMP_STEPS, 360, .95)}</div>
-{sub(72, 560, 440, 25, 'Every step is explained, and nothing goes ahead until you’re ready.', NAVY, op=1)}
-<div style="position:absolute;left:72px;top:745px">{addr_line('Dental implants in ' + area, 24, NAVY)}</div>
-<div style="position:absolute;left:72px;top:920px">{btn(IMP_CTA, 24, 32, 22, NAVY, LINEN)}</div>""")
+def step_row(items, w, cols, s=1.0):
+    """Numbered steps in a grid on navy: Sky number, Linen title."""
+    d = round(46 * s)
+    cells = ''.join(f"""<div style="display:flex;gap:{16 * s}px;align-items:center">
+<div style="width:{d}px;height:{d}px;border-radius:50%;background:{SKY};color:{NAVY};flex:none;display:flex;align-items:center;justify-content:center;font-size:{21 * s}px;font-weight:500">{i + 1}</div>
+<div style="font-size:{24 * s}px;font-weight:500;color:{LINEN};line-height:1.2">{t}</div></div>""" for i, (t, _) in enumerate(items))
+    return f'<div style="width:{w}px;display:grid;grid-template-columns:repeat({cols},1fr);gap:{26 * s}px {24 * s}px">{cells}</div>'
+
+
+def i3_1(area, addr):  # Four steps | Navy, photo top + step grid
+    return ad('s1', NAVY, f"""
+{photo('stk-couple-cooking.jpg', 0, 0, 1080, 560, '45% 30%', radius=0)}
+{fade(0, 220, up=True)}{fade(340, 222)}
+{logo1()}
+{head(72, 500, 940, 66, 'Implants, explained <em>before anything starts.</em>')}
+<div style="position:absolute;left:72px;top:680px">{step_row(IMP_STEPS, 900, 2, 1.1)}</div>
+<div style="position:absolute;left:72px;top:900px">{btn(IMP_CTA, 24, 32, 22, SKY, NAVY)}</div>
+<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>""")
 
 
 def i3_9(area, addr):
-    return ad('s9', LINEN, f"""
-<div style="position:absolute;left:0;top:1000px;width:1080px;height:920px;background:{NAVY}"></div>
-{glow(500, 1100, 700, HARBOUR, .8)}
-{logo9(NAVY)}
-{head(90, 390, 900, 84, 'Implants, explained <em>before anything starts.</em>', NAVY, 'center')}
-<div style="position:absolute;left:170px;top:640px">{steps(IMP_STEPS[:2], 760, 1.0, dark=False)}</div>
-<div style="position:absolute;left:170px;top:1080px">{steps(IMP_STEPS[2:], 760, 1.0, start=3)}</div>
-{centre(1390, addr_line('Dental implants in ' + area, 28))}
-{centre(1480, btn(IMP_CTA, 28, 40, 24, SKY, NAVY))}""")
+    return ad('s9', NAVY, f"""
+{photo('stk-couple-cooking.jpg', 0, 360, 1080, 740, '45% 40%', radius=0)}
+{fade(360, 200, up=True)}{fade(760, 342)}
+{logo9()}
+{head(80, 900, 920, 74, 'Implants, explained <em>before anything starts.</em>', align='center')}
+<div style="position:absolute;left:120px;top:1130px">{step_row(IMP_STEPS, 860, 2, 1.3)}</div>
+{centre(1460, btn(IMP_CTA, 28, 40, 24, SKY, NAVY))}""")
 
 
-def i4_1(area, addr):  # Going abroad | Navy, hand note
+def i4_1(area, addr):  # Going abroad | Navy, photo top
     return ad('s1', NAVY, f"""
-{glow(-150, 500, 700, HARBOUR, .8)}
+{photo('stk-couple-seashore.jpg', 0, 0, 1080, 580, '50% 40%', radius=0)}
+{fade(0, 220, up=True)}{fade(360, 222)}
 {logo1()}
-{head(72, 190, 940, 64, 'Thinking of going abroad for implants? <em>Ask who looks after them after.</em>')}
-<div style="position:absolute;left:560px;top:450px">{handnote([('Implant questions', HARBOUR, False), ('Who checks it after?', NAVY, False), ('Who fixes it if it fails?', NAVY, False), ('How many flights?', NAVY, False)], 470, .7, 2)}</div>
-{sub(72, 470, 440, 25, f'Your implant team is in {area}, for every check-up and question after it’s placed.')}
-<div style="position:absolute;left:72px;top:920px">{btn(IMP_CTA, 24, 32, 22, SKY, NAVY)}</div>""")
+{head(72, 495, 940, 58, 'Thinking of going abroad for implants? <em>Ask who looks after them after.</em>')}
+{sub(72, 735, 820, 25, f'Your implant team is in {area}, for every check-up and question after it’s placed.')}
+<div style="position:absolute;left:72px;top:900px">{btn(IMP_CTA, 24, 32, 22, SKY, NAVY)}</div>
+<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>""")
 
 
 def i4_9(area, addr):
     return ad('s9', NAVY, f"""
-{glow(400, 700, 800, HARBOUR, .8)}
+{photo('stk-couple-seashore.jpg', 0, 380, 1080, 720, '50% 40%', radius=0)}
+{fade(380, 200, up=True)}{fade(800, 302)}
 {logo9()}
-{head(80, 390, 920, 76, 'Thinking of going abroad for implants? <em>Ask who looks after them after.</em>', align='center')}
-<div style="position:absolute;left:250px;top:760px">{handnote([('Implant questions', HARBOUR, False), ('Who checks it after?', NAVY, False), ('Who fixes it if it fails?', NAVY, False), ('How many flights?', NAVY, False)], 580, .82, 2)}</div>
-{sub(150, 1300, 780, 29, f'Your implant team is in {area}, for every check-up and question after it’s placed.', align='center')}
-{centre(1470, btn(IMP_CTA, 28, 40, 24, SKY, NAVY))}""")
+{head(80, 980, 920, 70, 'Thinking of going abroad for implants? <em>Ask who looks after them after.</em>', align='center')}
+{sub(140, 1300, 800, 29, f'Your implant team is in {area}, for every check-up and question after it’s placed.', align='center')}
+{centre(1460, btn(IMP_CTA, 28, 40, 24, SKY, NAVY))}""")
 
 
 def i5_1(area, addr):  # Dentures slipping | Navy, photo top

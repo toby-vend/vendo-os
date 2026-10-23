@@ -21,9 +21,9 @@ def where(area, addr):
 def implants(area, addr):
     close = f'{where(area, addr)} Tap Book Now, leave your details, and the team will be in touch to arrange your implant consultation.'
     return [
-        (f"""Remember biting into an apple without a second thought?
+        (f"""When did you last order without thinking about what you can chew?
 
-When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the crusty bread. It becomes so normal you barely notice you’re doing it.
+When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the steak or the crusty bread. It becomes so normal you barely notice you’re doing it.
 
 Dental implants replace the root of the tooth as well as the tooth itself. They’re fixed in place, so they don’t slip, click or come out, and each one is finished with a crown made to match your own teeth.
 
@@ -34,7 +34,7 @@ At your consultation in {area}, you’ll talk through your goals and your option
 {close}
 
 Eat what you like again.""",
-         ['Eat what you like again', f'Dental implants in {area}', 'Fixed teeth that don’t slip']),
+         ['Order what you fancy again', f'Dental implants in {area}', 'Fixed teeth that don’t slip']),
 
         (f"""You’ve got used to the gap. Most people do.
 

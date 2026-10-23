@@ -7,15 +7,15 @@ Research and rules: research-campaigns.md.
 ### Eat What You Want
 
 **Headlines:**
-- Eat what you like again
+- Order what you fancy again
 - Dental implants in Balbriggan
 - Fixed teeth that don’t slip
 
 **Primary text:**
 
-Remember biting into an apple without a second thought?
+When did you last order without thinking about what you can chew?
 
-When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the crusty bread. It becomes so normal you barely notice you’re doing it.
+When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the steak or the crusty bread. It becomes so normal you barely notice you’re doing it.
 
 Dental implants replace the root of the tooth as well as the tooth itself. They’re fixed in place, so they don’t slip, click or come out, and each one is finished with a crown made to match your own teeth.
 
@@ -139,15 +139,15 @@ Laugh like you mean it.
 ### Eat What You Want
 
 **Headlines:**
-- Eat what you like again
+- Order what you fancy again
 - Dental implants in Kildare
 - Fixed teeth that don’t slip
 
 **Primary text:**
 
-Remember biting into an apple without a second thought?
+When did you last order without thinking about what you can chew?
 
-When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the crusty bread. It becomes so normal you barely notice you’re doing it.
+When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the steak or the crusty bread. It becomes so normal you barely notice you’re doing it.
 
 Dental implants replace the root of the tooth as well as the tooth itself. They’re fixed in place, so they don’t slip, click or come out, and each one is finished with a crown made to match your own teeth.
 
@@ -271,15 +271,15 @@ Laugh like you mean it.
 ### Eat What You Want
 
 **Headlines:**
-- Eat what you like again
+- Order what you fancy again
 - Dental implants in Kilkenny
 - Fixed teeth that don’t slip
 
 **Primary text:**
 
-Remember biting into an apple without a second thought?
+When did you last order without thinking about what you can chew?
 
-When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the crusty bread. It becomes so normal you barely notice you’re doing it.
+When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the steak or the crusty bread. It becomes so normal you barely notice you’re doing it.
 
 Dental implants replace the root of the tooth as well as the tooth itself. They’re fixed in place, so they don’t slip, click or come out, and each one is finished with a crown made to match your own teeth.
 
@@ -403,15 +403,15 @@ Laugh like you mean it.
 ### Eat What You Want
 
 **Headlines:**
-- Eat what you like again
+- Order what you fancy again
 - Dental implants in Dublin 2
 - Fixed teeth that don’t slip
 
 **Primary text:**
 
-Remember biting into an apple without a second thought?
+When did you last order without thinking about what you can chew?
 
-When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the crusty bread. It becomes so normal you barely notice you’re doing it.
+When a tooth is missing, you start eating around it. Chewing on one side. Cutting everything small. Passing on the steak or the crusty bread. It becomes so normal you barely notice you’re doing it.
 
 Dental implants replace the root of the tooth as well as the tooth itself. They’re fixed in place, so they don’t slip, click or come out, and each one is finished with a crown made to match your own teeth.
 
