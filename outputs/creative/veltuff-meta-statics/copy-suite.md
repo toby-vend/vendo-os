@@ -42,17 +42,15 @@
 - **On image:**
   - Black Friday lockup.
   - Badge: "UP TO 60% OFF RRP".
-  - Three cut-outs: Waterproof Bomber, Cotton Trade Trousers, Cargo Hi-Vis Trousers.
+  - Three cut-outs: Waterproof Bomber, Teamline Reflective Trousers, Cargo Hi-Vis Trousers. (Cotton Trade swapped out, Stuart 22 Oct: last few in poor sizes.)
   - CTA: "CHECK THE OFFERS".
 - **Headline:** Black Friday: up to 60% off RRP
 - **Primary text:**
   > If you've ever split a pair of work trousers inside six months, you already know cheap isn't cheap.
   >
-  > Our Black Friday deals are on. Up to 60% off RRP across a dedicated range of VELTUFF trousers, jackets and hi-vis. That's Cotton Trade Trousers with CORDURA® on the wear areas at £21 (RRP £70), a Waterproof Bomber with sealed seams at £18 (RRP £35.95) and Class 2 Cargo Hi-Vis Trousers at £18 (RRP £42.95).
+  > Our Black Friday deals are on. Up to 60% off RRP across a dedicated range of VELTUFF trousers, jackets and hi-vis. That's Teamline Reflective Trousers with knee pad pockets at £16.30 (RRP £33.95), a Waterproof Bomber with sealed seams at £18 (RRP £35.95) and Class 2 Cargo Hi-Vis Trousers at £18 (RRP £42.95).
   >
   > Prices are already on the site, so there's no code to remember. Trousers run small, so go one waist size up. You've got 30 days to send them back.
-  >
-  > The Black Friday range is live until Thursday 26 November.
   >
   > Built for the graft, priced for the wear.
 
@@ -60,26 +58,26 @@
 
 ## S02 · Hero sale products (one product per ad)
 
-### S02a · Cotton Trade Trousers
-- **Labels:** solution aware · sophistication 3–4 · angle: the trousers you can afford to wreck, built so you don't.
-- **Research:** "No way I'd throw £80 at a pair of strides that'll be covered in glue, grout, Silicon and screed".
+### S02a · Teamline Reflective Trousers
+Replaces Cotton Trade Trousers (Stuart, 22 Oct 2026: down to the last few in poor sizes; use veltuff.co.uk/products/teamline-reflective-trousers). Price checked on the live site 23 Oct: £16.30, RRP £33.95, tag BLKNOV.
+- **Labels:** solution aware · sophistication 3 · angle: seen when the light goes.
 - **On image:**
-  - Hook: "£70 TROUSERS. £21."
-  - Problem shown: the trousers on dark concrete, with knee pad pouch and pockets visible.
-  - Chips: CORDURA® wear areas · Knee pad pouches · 100% cotton.
-  - Price badge: £21, RRP £70 struck through.
-- **Headline:** Cotton Trade Trousers, now £21
+  - Hook: "SEEN ON SITE. £16.30."
+  - Trousers cut-out with the reflective strips showing.
+  - Chips: Reflective strips · Knee pad pockets · Triple-stitched stress points.
+  - Price badge: £16.30, RRP £33.95 struck through.
+- **Headline:** Teamline Reflective Trousers, now £16.30
 - **Primary text:**
-  > Nobody wants to spend £80 on a pair of strides that'll be covered in grout by Wednesday.
+  > Dark mornings, dark afternoons, and you're still the one crossing the yard in black trousers.
   >
-  > So don't. The VELTUFF Cotton Trade Trousers are 100% cotton with CORDURA® fabric on the high-wear areas and pockets, which means the bits that usually go first are the bits that are built heaviest. Top-loading knee pad pouches, cargo pockets, a phone pocket and a gripper waistband that stays put when you kneel.
+  > The VELTUFF Teamline Reflective Trousers have two big reflective strips on the lower leg, so you're easier to spot when the light goes. Bottom-loading knee pad pockets, cargo pockets on both legs, a gripper waistband that stays put when you kneel, and triple stitching on the stress points so the seams hold.
   >
-  > RRP £70. Black Friday price £21.
+  > RRP £33.95. Black Friday price £16.30.
   >
   > Go one waist size up, as they run small. 30 days to return.
   >
-  > The pair you don't have to baby.
-- **Notes:** £21/£70 is 70% off RRP, more than the "up to 60%" headline. Ask Stuart how he wants that worded.
+  > Seen on site. Built for it.
+- **Notes:** Reflective strips only: not certified hi-vis, so never call them hi-vis or EN ISO 20471.
 
 ### S02b · Waterproof Bomber Jacket
 - **Labels:** product aware · sophistication 3 · angle: dry for the price of a takeaway.
@@ -96,7 +94,7 @@
   >
   > RRP £35.95. Black Friday price £18.
   >
-  > On the site now until 26 November, or while sizes last.
+  > On the site now, while sizes last.
   >
   > Wet weather isn't a day off.
 - **Notes:** £18 is the promo price from the bottom block of Stuart's sheet (currently £23). Confirm it's live by 16 Nov.
@@ -106,7 +104,7 @@
 - **Research:** "i used to have problems with my knees" (Tilers Forums). Avoid "heavy duty": the 4★ review asked for thicker fabric.
 - **On image:**
   - Hook: "MADE FOR KNEELING."
-  - Kneeling model shot (TR8825_2).
+  - Kneeling model shot (TR8825_4; TR8825_2 dropped, Stuart 22 Oct: strange image).
   - Chips: Stretch knee panels · Bottom-loading knee pad pockets · Zip-off holster pockets.
   - Badge: £25, RRP £62.95.
 - **Headline:** Stretch Multi-Pocket Trousers, £25
@@ -128,7 +126,7 @@
 - **On image:**
   - Black Friday lockup.
   - Four product tiles. Each tile has a cut-out, the name, a big now price, the RRP struck through and a lime down-arrow.
-    - Cotton Trade Trousers £21 (£70)
+    - Teamline Reflective Trousers £16.30 (£33.95)
     - Cargo Hybrid Trousers £26 (£65)
     - Bomber Work Jacket £28.06 (£52.95)
     - Two Tone Softshell £19.98 (£39.95)
@@ -137,9 +135,7 @@
 - **Primary text:**
   > No code, no small print. The prices have dropped on the site.
   >
-  > Cotton Trade Trousers £21 (RRP £70). Cargo Hybrid Trousers £26 (RRP £65). Bomber Work Jacket £28.06 (RRP £52.95). Two Tone Softshell Jacket £19.98 (RRP £39.95).
-  >
-  > Black Friday deals run until Thursday 26 November.
+  > Teamline Reflective Trousers £16.30 (RRP £33.95). Cargo Hybrid Trousers £26 (RRP £65). Bomber Work Jacket £28.06 (RRP £52.95). Two Tone Softshell Jacket £19.98 (RRP £39.95).
   >
   > Real workwear. Lower prices.
 - **Notes:** All four prices need checking on the live site on 16 Nov.
@@ -151,12 +147,12 @@
 - **Cards:**
   1. Cover: the Black Friday lockup, "Up to 60% off RRP", "Swipe for the best of it →"
   2. Jackets: Waterproof Bomber £18 · Bomber Work Jacket £28.06
-  3. Trousers: Cotton Trade £21 · Stretch Multi-Pocket £25
+  3. Trousers: Cargo Hybrid £26 · Stretch Multi-Pocket £25
   4. Hi-vis: Cargo Hi-Vis Trousers £18 (Class 2) · Teamline Reflective £16.30
   5. Crew kit: Two Tone Softshell £19.98 · Duratex™ 1/4 Zip Sweatshirt £9, "Logo-ready"
-- **Card headlines (Meta):** Jackets from £18 · Trousers from £21 · Hi-vis from £16.30 · Crew kit from £9
+- **Card headlines (Meta):** Jackets from £18 · Trousers from £25 · Hi-vis from £16.30 · Crew kit from £9
 - **Primary text:**
-  > Our Black Friday deals are live. Up to 60% off RRP across a dedicated range of VELTUFF workwear. Swipe through the jackets, trousers, hi-vis and crew kit, and get the prices before the sizes go. Range ends Thursday 26 November.
+  > Our Black Friday deals are live. Up to 60% off RRP across a dedicated range of VELTUFF workwear. Swipe through the jackets, trousers, hi-vis and crew kit, and get the prices before the sizes go.
 
 ---
 
@@ -178,7 +174,7 @@
 - "30% OFF SITEWIDE"
 - "LAST DAYS"
 
-**DPA caption template:** "Black Friday price: {{product.price}} (RRP {{product.compare_at_price}}). No code needed. Range ends 26 Nov."
+**DPA caption template:** "Black Friday price: {{product.price}} (RRP {{product.compare_at_price}}). No code needed."
 
 ---
 
@@ -197,11 +193,7 @@ Overlay text and end cards to match the statics:
 ---
 
 ## S08 · Countdown / urgency (real dates only)
-- **S08a, Tue 24 Nov:**
-  - On image: "3 DAYS LEFT", the Black Friday lockup, "Up to 60% off RRP ends Thursday".
-  - Headline: Black Friday range ends Thursday
-  - Primary text:
-    > Three days left on our Black Friday deals. Up to 60% off RRP across a dedicated range of VELTUFF trousers, jackets and hi-vis ends Thursday 26 November. The prices are already on the site, so there's no code needed. Trousers run small, so go one waist size up.
+- **S08a countdown: DROPPED.** Stuart (22 Oct 2026): no countdown, and nothing actually ends Thursday. Never write an end date for the 16–26 Nov range.
 - **S08b, Fri 27 Nov:**
   - On image: "BLACK FRIDAY · 30% OFF SITEWIDE", "Applied automatically at checkout · excludes reduced items".
   - Headline: 30% off sitewide, no code needed
@@ -216,7 +208,10 @@ Overlay text and end cards to match the statics:
 
 ---
 
-## S09 · 30% weekend extension (HOLD: do not launch without Stuart's sign-off)
+## S09 · 30% weekend extension: DROPPED
+Removed from the Figma file after Stuart's 22 Oct comment ("Not sure when that will be used"). Copy kept below for reference only.
+
+### Previous copy
 - **On image:**
   - "EXTENDED".
   - "30% OFF SITEWIDE".
@@ -232,8 +227,8 @@ Overlay text and end cards to match the statics:
 ## Checks for the client (Stuart)
 1. Start date: does the category open on 16 Nov or earlier? The banner says 01/11.
 2. The end time of the 30% weekend on 30 Nov. (No code: it applies automatically at checkout, per Toby 8 Oct.)
-3. Several BLKNOV items are more than 60% off RRP (Cotton Trade 70%, Turbocharge 70%, Duratex Sweatshirt 70%). Should the headline stay at "up to 60%"?
+3. Several BLKNOV items are more than 60% off RRP ( Turbocharge 70%, Duratex Sweatshirt 70%). Should the headline stay at "up to 60%"?
 4. Do the extra promo prices (Waterproof Bomber £18, Cargo Hi-Vis £18, Two Tone Polo £7.95, Hi-Vis LS Polo £9.95, Hi-Vis Vest £5) go live on 16 Nov?
 5. Can "Proud manufacturers for DSV, Amazon, GLS, Swissport, DFDS" be used in paid ads?
 6. Christmas returns window or gift receipts for Black Friday orders.
-7. Is there a 30% weekend extension? (S09 is held until confirmed.)
+

@@ -11,7 +11,7 @@ shot() { "$CH" --headless=new --disable-gpu --hide-scrollbars --virtual-time-bud
 shot suite-1x1 15200,1240
 shot suite-9x16 15200,2080
 shot carousel 6000,1240
-n=10
+n=8
 for i in $(seq 0 $((n-1))); do
   ffmpeg -loglevel error -y -i renders/suite-1x1.png -vf "crop=540:540:$((40+i*580)):40" renders/a$((i+1)).png
   ffmpeg -loglevel error -y -i renders/suite-9x16.png -vf "crop=540:960:$((40+i*580)):40" renders/b$((i+1)).png

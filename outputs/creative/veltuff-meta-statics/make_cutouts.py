@@ -28,6 +28,8 @@ NAMES = {
     'TR5515_black_f7873b04-0088-4323-ac5e-27f86c78fc97.jpg': 'teamline-trousers',
     'HV2264_orange.jpg': 'hivis-sweatshirt',
     'HV8108-2.jpg': 'protex1-jacket',
+    'HV5310_ora.jpg': 'hivis-bodywarmer',
+    'SH1323_black.jpg': 'work-polo',
 }
 
 

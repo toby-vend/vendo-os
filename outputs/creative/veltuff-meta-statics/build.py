@@ -24,7 +24,7 @@ body{{background:#2a2a2a;font-family:'Brockmann',sans-serif;font-synthesis:none;
 .promo{{font-family:'Brockmann',sans-serif;font-weight:700;text-transform:uppercase;line-height:.88}}
 .body{{font-size:30px;line-height:1.35}}
 .lbl{{font-weight:700;font-size:22px;letter-spacing:.18em;text-transform:uppercase}}
-.btn{{display:inline-flex;align-items:center;justify-content:center;height:84px;padding:0 46px;background:{SIG};color:{BLACK};font-weight:700;font-size:28px;letter-spacing:.1em;text-transform:uppercase}}
+.btn{{display:inline-flex;align-items:center;justify-content:center;height:84px;padding:0 46px;background:{SIG};color:{BLACK};font-weight:700;font-size:28px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}}
 .chip{{display:flex;align-items:center;gap:14px;height:58px;padding:0 22px 0 10px;border:2px solid rgba(210,240,0,.55);background:rgba(0,0,0,.55);font-weight:700;font-size:21px;letter-spacing:.07em;text-transform:uppercase;color:{WHITE};white-space:nowrap}}
 .chip i{{display:block;flex:none;width:38px;height:38px;background:{LIME};position:relative}}
 .chip i:after{{content:'';position:absolute;left:13px;top:6px;width:10px;height:19px;border:solid {BLACK};border-width:0 4px 4px 0;transform:rotate(45deg)}}
@@ -88,9 +88,8 @@ def chips(items, x, y, gap=14):
     return f'<div class="abs" style="left:{x}px;top:{y}px;display:flex;flex-direction:column;align-items:flex-start;gap:{gap}px">{inner}</div>'
 
 
-def cta(text, x, y, w=None):
-    width = f'width:{w}px;' if w else ''
-    return f'<div class="abs btn" style="left:{x}px;top:{y}px;{width}">{text}</div>'
+def cta(text, y):
+    return f'<div class="abs btn" style="left:50%;top:{y}px;transform:translateX(-50%)">{text}</div>'
 
 
 def tear(x, y, w, angle=0, flip=False):
@@ -134,13 +133,13 @@ def s01b(s):
         return n, f"""{logo('white', 200, 440, 50)}
 {lockup(620, 230, 120)}
 <div class="abs" style="left:0;right:0;top:385px;text-align:center"><span class="h" style="font-size:44px;color:{SIG}">Up to </span><span class="h" style="font-size:110px;color:{SIG}">60%</span><span class="h" style="font-size:44px;color:{SIG}"> off RRP</span></div>
-{product('waterproof-bomber', 250, 910, 360)}{product('cotton-trade-trousers', 540, 920, 430)}{product('cargo-hivis-trousers', 830, 910, 400)}
-{cta('Check the offers', 335, 950, 410)}"""
+{product('waterproof-bomber', 250, 910, 360)}{product('teamline-trousers', 540, 920, 430)}{product('cargo-hivis-trousers', 830, 910, 400)}
+{cta('Check the offers', 950)}"""
     return n, f"""{logo('white', 230, 425, 260)}
 {lockup(860, 110, 360)}
 <div class="abs" style="left:0;right:0;top:720px;text-align:center"><span class="h" style="font-size:54px;color:{SIG}">Up to </span><span class="h" style="font-size:150px;color:{SIG}">60%</span><span class="h" style="font-size:54px;color:{SIG}"> off RRP</span></div>
-{product('waterproof-bomber', 240, 1420, 470)}{product('cotton-trade-trousers', 540, 1460, 600)}{product('cargo-hivis-trousers', 845, 1420, 540)}
-{cta('Check the offers', 320, 1490, 440)}"""
+{product('waterproof-bomber', 240, 1420, 470)}{product('teamline-trousers', 540, 1460, 600)}{product('cargo-hivis-trousers', 845, 1420, 540)}
+{cta('Check the offers', 1490)}"""
 
 
 def hero_product(s, name, cut, hook, chip_list, now, was, product_h=(820, 1040)):
@@ -158,8 +157,8 @@ def hero_product(s, name, cut, hook, chip_list, now, was, product_h=(820, 1040))
 
 
 def s02a(s):
-    return hero_product(s, 'S02a Cotton Trade Trousers | Static | Product | £21 was £70', 'cotton-trade-trousers',
-                        f'£70 trousers.<br><span style="color:{SIG}">£21.</span>', ['CORDURA® wear areas', 'Knee pad pouches', '100% cotton'], '£21', '£70')
+    return hero_product(s, 'S02a Teamline Reflective Trousers | Static | Product | £16.30 was £33.95', 'teamline-trousers',
+                        f'Seen on site.<br><span style="color:{SIG}">£16.30.</span>', ['Reflective strips', 'Knee pad pockets', 'Triple-stitched stress points'], '£16.30', '£33.95')
 
 
 def s02b(s):
@@ -170,12 +169,12 @@ def s02b(s):
 def s02c(s):
     n = 'S02c Stretch Multi-Pocket | Static | Model | Made for kneeling'
     if s == 's1':
-        return n, f"""{photo("TR8825_2.jpg", 560, 60, 460, 960, "35% 50%", 'border:3px solid ' + SIG + ';filter:brightness(.92) contrast(1.05)')}
+        return n, f"""{photo("TR8825_4.jpg", 520, 230, 500, 600, "52% 50%", 'border:3px solid ' + SIG + ';filter:brightness(.92) contrast(1.05)')}
 {logo('white', 190, 60, 60)}
 <div class="abs h" style="left:60px;top:170px;font-size:82px;width:470px">Made for<br><span style="color:{SIG}">kneeling.</span></div>
 {chips(['Stretch knee panels', 'Knee pad pockets', 'Zip-off holsters'], 60, 450)}
 {price('£25', '£62.95', 60, 720, 120)}{lockup(300, 60, 975)}"""
-    return n, f"""{photo('TR8825_2.jpg', 60, 860, 960, 720, '45% 45%', 'border:3px solid ' + SIG)}
+    return n, f"""{photo('TR8825_4.jpg', 60, 860, 960, 720, '50% 55%', 'border:3px solid ' + SIG)}
 {logo('white', 220, 60, 260)}{lockup(330, 690, 230)}
 <div class="abs h" style="left:60px;top:400px;font-size:128px;width:960px">Made for <span style="color:{SIG}">kneeling.</span></div>
 {chips(['Stretch knee panels', 'Knee pad pockets'], 60, 680)}
@@ -183,7 +182,7 @@ def s02c(s):
 
 
 def s03(s):
-    items = [('cotton-trade-trousers', 'Cotton Trade Trousers', '£21', '£70'), ('cargo-hybrid', 'Cargo Hybrid Trousers', '£26', '£65'),
+    items = [('teamline-trousers', 'Teamline Reflective Trousers', '£16.30', '£33.95'), ('cargo-hybrid', 'Cargo Hybrid Trousers', '£26', '£65'),
              ('bomber-work-jacket', 'Bomber Work Jacket', '£28.06', '£52.95'), ('two-tone-softshell', 'Two Tone Softshell', '£19.98', '£39.95')]
     n = 'S03 Price drops | Static | Range | Was now x4'
     tw, th = (470, 390) if s == 's1' else (470, 450)
@@ -227,21 +226,6 @@ def weekend(s, name, kicker, big, sub, small, flag=None):
 {product('protex1-jacket', 720, 1580, 500)}"""
 
 
-def s08a(s):
-    n = 'S08a Countdown 3 days | Static | Range | Category ends Thu'
-    if s == 's1':
-        return n, f"""{logo('white', 190, 445, 60)}
-<div class="abs" style="left:0;right:0;top:170px;text-align:center"><span class="promo" style="font-size:260px;color:{SIG}">3</span><span class="promo" style="font-size:110px;color:{WHITE}"> days left</span></div>
-{lockup(620, 230, 470)}
-<div class="abs h" style="left:0;right:0;top:760px;text-align:center;font-size:48px">Up to 60% off RRP ends Thursday</div>
-{cta('Check the offers', 335, 880, 410)}"""
-    return n, f"""{logo('white', 230, 425, 260)}
-<div class="abs promo" style="left:0;right:0;top:420px;text-align:center;font-size:420px;color:{SIG}">3</div>
-<div class="abs promo" style="left:0;right:0;top:800px;text-align:center;font-size:130px">days left</div>
-{lockup(760, 160, 990)}
-<div class="abs h" style="left:0;right:0;top:1340px;text-align:center;font-size:56px">Up to 60% off RRP<br>ends Thursday</div>"""
-
-
 def s08b(s):
     return weekend(s, 'S08b Black Friday 30 sitewide | Static | Protex1 | Code', "It's Black Friday", '30% off', 'Sitewide',
                    'Applied automatically at checkout<br>Excludes reduced items · Ends midnight Mon 30 Nov')
@@ -252,12 +236,8 @@ def s08c(s):
                    'Applied automatically at checkout<br>Sitewide · Excludes reduced items')
 
 
-def s09(s):
-    return weekend(s, 'S09 HOLD Extension | Static | Protex1 | Extended', 'Extended', '30% off', 'Sitewide',
-                   'Now ends <span class="ph">[DAY DATE]</span><br>Applied at checkout · Excludes reduced items', flag='HOLD')
-
-
-CONCEPTS = [s01a, s01b, s02a, s02b, s02c, s03, s08a, s08b, s08c, s09]
+# S08a countdown and S09 extension dropped (Stuart, 22 Oct: no countdown, nothing ends Thursday).
+CONCEPTS = [s01a, s01b, s02a, s02b, s02c, s03, s08b, s08c]
 
 
 # ---------- carousel (1:1 cards) ----------
@@ -276,7 +256,7 @@ def carousel():
 <div class="abs" style="left:60px;top:930px;width:460px"><div class="lbl" style="font-size:18px;color:{CONCRETE}">{na}</div><div class="h" style="font-size:58px;margin-top:4px">{pa} <span style="font-size:24px;font-weight:600;color:{STEEL};font-family:'Brockmann'">{'RRP <span class="strike">' + wa + '</span>' if wa else ''}</span></div></div>
 <div class="abs" style="left:560px;top:930px;width:460px"><div class="lbl" style="font-size:18px;color:{CONCRETE}">{nb}</div><div class="h" style="font-size:58px;margin-top:4px">{pb} <span style="font-size:24px;font-weight:600;color:{STEEL};font-family:'Brockmann'">{'RRP <span class="strike">' + wb + '</span>' if wb else ''}</span></div></div>"""
     cards.append(('S04 Card 2 Jackets', pair(f'Jackets <span style="color:{SIG}">from £18</span>', ('waterproof-bomber', 'Waterproof Bomber', '£18', '£35.95'), ('bomber-work-jacket', 'Bomber Work Jacket', '£28.06', '£52.95'))))
-    cards.append(('S04 Card 3 Trousers', pair(f'Trousers <span style="color:{SIG}">from £21</span>', ('cotton-trade-trousers', 'Cotton Trade Trousers', '£21', '£70'), ('stretch-multi-pocket', 'Stretch Multi-Pocket', '£25', '£62.95'))))
+    cards.append(('S04 Card 3 Trousers', pair(f'Trousers <span style="color:{SIG}">from £25</span>', ('cargo-hybrid', 'Cargo Hybrid Trousers', '£26', '£65'), ('stretch-multi-pocket', 'Stretch Multi-Pocket', '£25', '£62.95'))))
     cards.append(('S04 Card 4 Hi-vis', pair(f'Hi-vis <span style="color:{SIG}">from £16.30</span>', ('cargo-hivis-trousers', 'Cargo Hi-Vis · Class 2', '£18', '£42.95'), ('teamline-trousers', 'Teamline Reflective', '£16.30', '£33.95'))))
     cards.append(('S04 Card 5 Crew kit', pair(f'Crew kit <span style="color:{SIG}">from £9</span>', ('two-tone-softshell', 'Two Tone Softshell', '£19.98', '£39.95'), ('duratex-sweatshirt', 'Duratex™ 1/4 Zip · Logo-ready', '£9', '£30'))))
     return cards
