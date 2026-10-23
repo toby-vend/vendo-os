@@ -1,0 +1,10 @@
+assets/photos/
+src/uploads/*.jpg
+src/uploads/*.png
+src/*.html
+!src/Oxted Evergreen Ads.dc.html
+!src/Studio Glide Brand Cheat Sheet.dc.html
+src/_ds/
+src/.thumbnail
+src/.image-slots.state.json
+.claude-flow/
