@@ -212,118 +212,89 @@ def i5_9(area, addr):
 SMO_CTA = 'Book a smile consultation'
 
 
-def s1_1(area, addr):  # Hiding in photos | Navy, circle portrait
+def smo_1(img, pos, h, body, photo_h=610, top=560, size=66, sub_top=735, extra=''):
+    """Smile makeover 1:1 in the approved photo-top layout (Dentures Slipping): warm group photo, headline below on navy."""
     return ad('s1', NAVY, f"""
-{glow(560, 60, 640, HARBOUR, .85)}
+{photo(img, 0, 0, 1080, photo_h, pos, radius=0)}
+{fade(0, 220, up=True)}{fade(photo_h - 220, 222)}
 {logo1()}
-<div style="position:absolute;left:72px;top:190px">{area_chip('Smile makeovers in ' + area, 22, SKY, NAVY)}</div>
-{head(72, 290, 540, 74, 'Stop hiding your smile <em>in every photo.</em>')}
-{sub(72, 610, 470, 25, 'Straighten, brighten and fix chips, cracks and gaps. All under one roof.')}
-<div style="position:absolute;left:72px;top:920px">{btn(SMO_CTA, 24, 32, 22, SKY, NAVY)}</div>
-{portrait('home-hero.png', 836, 590, 390, '50% 30%', 1.15, '55% 30%')}""")
+{head(72, top, 940, size, h)}
+{sub(72, sub_top, 820, 25, body) if body else ''}{extra}
+<div style="position:absolute;left:72px;top:900px">{btn(SMO_CTA, 24, 32, 22, SKY, NAVY)}</div>""")
+
+
+def smo_9(img, pos, h, body, photo_top=0, head_top=1060, size=74, extra=''):
+    return ad('s9', NAVY, f"""
+{photo(img, 0, photo_top, 1080, 1150 - photo_top, pos, radius=0)}
+{fade(photo_top, 560 - photo_top // 2, up=True)}{fade(700, 452)}
+{logo9()}
+{head(80, head_top, 920, size, h, align='center')}
+{sub(140, 1330, 800, 29, body, align='center') if body else ''}{extra}
+{centre(1460, btn(SMO_CTA, 28, 40, 24, SKY, NAVY))}""")
+
+
+S1_H = 'Next group photo, <em>you’ll want a copy too.</em>'
+S1_B = 'Straighten, brighten and fix chips and gaps, with one plan under one roof.'
+
+
+def s1_1(area, addr):  # Hiding in photos | friends laughing at a photo on a phone over dinner
+    return smo_1('stk-friends-phone-laugh.jpg', '55% 35%', S1_H, S1_B, extra=f'<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>')
 
 
 def s1_9(area, addr):
-    return ad('s9', NAVY, f"""
-{glow(180, 760, 760, HARBOUR, .85)}
-{logo9()}
-{centre(390, area_chip('Smile makeovers in ' + area, 26, SKY, NAVY))}
-{head(90, 490, 900, 88, 'Stop hiding your smile <em>in every photo.</em>', align='center')}
-{portrait('home-hero.png', 540, 1050, 520, '50% 30%', 1.15, '55% 30%')}
-{sub(150, 1370, 780, 29, 'Straighten, brighten and fix chips, cracks and gaps. All under one roof.', align='center')}
-{centre(1480, btn(SMO_CTA, 28, 40, 24, SKY, NAVY))}""")
+    return smo_9('stk-friends-phone-laugh.jpg', '58% 40%', S1_H, S1_B, photo_top=380)
 
 
-def s2_1(area, addr):  # No train tracks | Navy, aligner photo
-    return ad('s1', NAVY, f"""
-{photo('orthodontics.png', 0, 0, 1080, 560, '55% 50%', radius=0)}
-{fade(360, 202)}
-{logo1(NAVY)}
-{head(72, 545, 940, 70, 'Straighter teeth, <em>without the train tracks.</em>')}
-{sub(72, 720, 860, 25, 'Invisalign clear aligners are custom-made, barely noticeable, and come with a bespoke retainer.')}
-<div style="position:absolute;left:72px;top:900px">{btn(SMO_CTA, 24, 32, 22, SKY, NAVY)}</div>
-<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>""")
+S2_H = 'The straighter smile you’ve wanted for years. <em>No train tracks.</em>'
+S2_B = 'Invisalign clear aligners are custom-made, barely noticeable, and come with a bespoke retainer.'
+
+
+def s2_1(area, addr):  # No train tracks | friends laughing over a glass of wine
+    return smo_1('stk-women-wine-laugh.jpg', '45% 30%', S2_H, S2_B, extra=f'<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>')
 
 
 def s2_9(area, addr):
-    return ad('s9', NAVY, f"""
-{photo('orthodontics.png', 0, 0, 1080, 1180, '58% 50%', radius=0)}
-{fade(760, 422)}
-<div style="position:absolute;left:0;top:0;width:1080px;height:420px;background:linear-gradient(180deg,rgba(250,249,246,.7),rgba(250,249,246,0))"></div>
-{logo9(NAVY)}
-{head(80, 1090, 920, 84, 'Straighter teeth, <em>without the train tracks.</em>', align='center')}
-{sub(130, 1300, 820, 29, 'Invisalign clear aligners are custom-made, barely noticeable, and come with a bespoke retainer.', align='center')}
-{centre(1470, btn(SMO_CTA, 28, 40, 24, SKY, NAVY))}""")
+    return smo_9('stk-women-wine-laugh.jpg', '58% 40%', S2_H, S2_B, photo_top=380)
 
 
 SMO_PLAN = [('Invisalign', 'Straighten crowding and gaps'), ('Whitening', 'Lift the shade'), ('Bonding', 'Refine chips and edges')]
+S3_H = 'One plan for the smile you’ve pictured. <em>Not three separate fixes.</em>'
 
 
-def s3_1(area, addr):  # One plan | Navy, journey + linen card
-    return ad('s1', NAVY, f"""
-{glow(500, 300, 700, HARBOUR, .8)}
-{logo1()}
-{head(72, 190, 520, 68, 'One plan for your whole smile, <em>not three separate fixes.</em>')}
-<div class="card" style="left:600px;top:150px;width:410px;padding:40px 40px 14px;transform:rotate(1.5deg)"><div class="label" style="font-size:14px;color:{HARBOUR};margin-bottom:22px">Example plan</div>{steps(SMO_PLAN, 330, .9, dark=False)}</div>
-{sub(72, 640, 470, 25, 'We plan the order with you, so every step builds on the last and the result looks like you.')}
-<div style="position:absolute;left:72px;top:920px">{btn(SMO_CTA, 24, 32, 22, SKY, NAVY)}</div>
-<div style="position:absolute;left:640px;top:937px">{addr_line(area, 24)}</div>""")
+def s3_1(area, addr):  # One plan | friends toasting at lunch + the plan as a step row
+    return smo_1('stk-friends-lunch-cheers.jpg', '40% 30%', S3_H, '', photo_h=560, top=500,
+                 extra=f'<div style="position:absolute;left:72px;top:720px">{step_row(SMO_PLAN, 900, 3, 1.1)}</div>'
+                       f'<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>')
 
 
 def s3_9(area, addr):
-    return ad('s9', NAVY, f"""
-{glow(150, 800, 800, HARBOUR, .8)}
-{logo9()}
-{head(80, 390, 920, 80, 'One plan for your whole smile, <em>not three separate fixes.</em>', align='center')}
-<div class="card" style="left:200px;top:700px;width:680px;padding:50px 56px 20px;transform:rotate(1.2deg)"><div class="label" style="font-size:17px;color:{HARBOUR};margin-bottom:26px">Example plan</div>{steps(SMO_PLAN, 560, 1.1, dark=False)}</div>
-{sub(150, 1250, 780, 29, 'We plan the order with you, so every step builds on the last and the result looks like you.', align='center')}
-{centre(1400, addr_line('Smile makeovers in ' + area, 26, align='center'))}
-{centre(1480, btn(SMO_CTA, 28, 40, 24, SKY, NAVY))}""")
+    return smo_9('stk-friends-lunch-cheers.jpg', '42% 40%', S3_H, '', photo_top=360, head_top=900,
+                 extra=f'<div style="position:absolute;left:120px;top:1170px">{step_row(SMO_PLAN, 860, 3, 1.3)}</div>'
+                       f'{centre(1340, addr_line("Smile makeovers in " + area, 26, align="center"))}')
 
 
-def s4_1(area, addr):  # Chipped tooth | Sky
-    return ad('s1', SKY, f"""
-{glow(520, 500, 700, LINEN, .55)}
-{photo('facial.png', 600, 90, 410, 560, '50% 30%')}
-{logo1(NAVY)}
-<div style="position:absolute;left:72px;top:190px">{area_chip('Composite bonding in ' + area, 22)}</div>
-{head(72, 290, 520, 70, 'That chip you always notice? <em>Fixed in one visit.</em>', NAVY)}
-{sub(72, 700, 860, 26, 'Composite bonding is colour-matched to your teeth and shaped by hand, usually in a single appointment.', NAVY, op=1)}
-<div style="position:absolute;left:72px;top:900px">{btn(SMO_CTA, 24, 32, 22, NAVY, LINEN)}</div>""")
+S4_H = 'Laugh without thinking about that chip. <em>Often fixed in one visit.</em>'
+S4_B = 'Composite bonding is colour-matched to your teeth and shaped by hand, usually in a single appointment.'
+
+
+def s4_1(area, addr):  # Chipped tooth | man mid-laugh with friends at the bar
+    return smo_1('stk-man-bar-laugh.jpg', '62% 30%', S4_H, S4_B, extra=f'<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>')
 
 
 def s4_9(area, addr):
-    return ad('s9', SKY, f"""
-{glow(150, 900, 800, LINEN, .55)}
-{logo9(NAVY)}
-{centre(390, area_chip('Composite bonding in ' + area, 26))}
-{head(80, 480, 920, 80, 'That chip you always notice? <em>Fixed in one visit.</em>', NAVY, 'center')}
-{photo('facial.png', 240, 760, 600, 580, '50% 30%')}
-{sub(130, 1380, 820, 29, 'Composite bonding is colour-matched to your teeth and shaped by hand, usually in a single appointment.', NAVY, 'center', 1)}
-{centre(1500, btn(SMO_CTA, 28, 40, 24, NAVY, LINEN))}""")
+    return smo_9('stk-man-bar-laugh.jpg', '64% 40%', S4_H, S4_B, photo_top=380)
 
 
-SMO_CONSULT = ['Digital scan of your teeth', 'Photos of your smile', 'Your options, honestly', 'A clear, written plan']
+S5_H = 'Picture your new smile <em>before you commit to anything.</em>'
+S5_B = 'Your consultation includes a digital scan, photos of your smile and a clear, written plan.'
 
 
-def s5_1(area, addr):  # See what's possible | Navy, photo + tick card
-    return ad('s1', NAVY, f"""
-{photo('beautiful-patient-stock-photo.png', 540, 0, 540, 1080, '50% 50%', radius=0)}
-<div style="position:absolute;left:540px;top:0;width:180px;height:1080px;background:linear-gradient(90deg,{NAVY},rgba(15,27,41,0))"></div>
-{logo1()}
-{head(72, 190, 560, 74, 'See what’s possible <em>before you commit.</em>')}
-<div style="position:absolute;left:72px;top:500px">{tick_card('Your smile consultation', SMO_CONSULT, 470, .95, -1.5)}</div>
-<div style="position:absolute;left:72px;top:920px">{btn(SMO_CTA, 24, 32, 22, SKY, NAVY)}</div>""")
+def s5_1(area, addr):  # See what's possible | woman laughing at dinner with friends
+    return smo_1('stk-woman-dinner-laugh.jpg', '50% 30%', S5_H, S5_B, extra=f'<div style="position:absolute;left:640px;top:917px">{addr_line(area, 24)}</div>')
 
 
 def s5_9(area, addr):
-    return ad('s9', NAVY, f"""
-{photo('beautiful-patient-stock-photo.png', 0, 600, 1080, 820, '28% 45%', radius=0)}
-{fade(600, 240, up=True)}{fade(1180, 242)}
-{logo9()}
-{head(80, 390, 920, 86, 'See what’s possible <em>before you commit.</em>', align='center')}
-<div style="position:absolute;left:250px;top:1180px">{tick_card('Your smile consultation', SMO_CONSULT, 580, 1.05, -1.5)}</div>
-{centre(1530, btn(SMO_CTA, 28, 40, 24, SKY, NAVY))}""")
+    return smo_9('stk-woman-dinner-laugh.jpg', '50% 40%', S5_H, S5_B, photo_top=380)
 
 
 # ============================================================ MEDICAL CARDS
@@ -457,9 +428,9 @@ CAMPAIGNS = {
                      ('Dentures Slipping', 'Lifestyle', i5_1, i5_9)]},
     'smo': {
         'title': 'Smile Makeover & Ortho', 'clinics': list(ALL),
-        'concepts': [('Hiding In Photos', 'Lifestyle', s1_1, s1_9), ('No Train Tracks', 'Aligner', s2_1, s2_9),
-                     ('One Plan', 'Graphic', s3_1, s3_9), ('Chipped Tooth', 'Lifestyle', s4_1, s4_9),
-                     ('See What’s Possible', 'Patient', s5_1, s5_9)]},
+        'concepts': [('Hiding In Photos', 'Lifestyle', s1_1, s1_9), ('No Train Tracks', 'Lifestyle', s2_1, s2_9),
+                     ('One Plan', 'Lifestyle', s3_1, s3_9), ('Chipped Tooth', 'Lifestyle', s4_1, s4_9),
+                     ('See What’s Possible', 'Lifestyle', s5_1, s5_9)]},
     'medical': {
         'title': 'Medical Cards', 'clinics': ['artane', 'balbriggan', 'kimmage'],
         'concepts': [('We Accept Medical Cards', 'Lifestyle', m1_1, m1_9), ('What It Covers', 'Lifestyle', m2_1, m2_9),

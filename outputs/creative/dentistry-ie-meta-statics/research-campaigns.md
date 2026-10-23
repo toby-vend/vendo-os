@@ -75,7 +75,7 @@ Medical cards
 Implants were rebuilt on 23 Oct 2026 after Toby's review: he only liked Dentures Slipping, so all five now use its layout (a warm lifestyle photo on top with the headline below on navy). The angles stay the same. New photos: stk-couple-lunch-laugh (Eat What You Want), stk-family-selfie (Used To The Gap), stk-couple-cooking (Four Steps), stk-couple-seashore (Going Abroad).
 
 
-Lifestyle stock licensed through Magnific/Freepik (free licence) for the older implant and medical card audiences: stk-man-apple, stk-man-breakfast, stk-friends-toast, stk-woman-laugh-dinner (unused), stk-couple-tea, stk-couple-sofa, stk-woman-coffee-friends. Smile makeover uses photos from dentistry.ie (home-hero, orthodontics, facial, beautiful-patient-stock-photo); usage rights to be confirmed by the client, as with the general set.
+Lifestyle stock licensed through Magnific/Freepik (free licence) for the older implant and medical card audiences: stk-man-apple, stk-man-breakfast, stk-friends-toast, stk-woman-laugh-dinner (unused), stk-couple-tea, stk-couple-sofa, stk-woman-coffee-friends. Smile Makeover was rebuilt on 23 Oct 2026 in the same photo-top layout, because Toby found the first version flat with no emotional substance. Each ad now uses Magnific/Freepik lifestyle stock of people aged 25 to 45 laughing together: stk-friends-phone-laugh (Hiding In Photos), stk-women-wine-laugh (No Train Tracks), stk-friends-lunch-cheers (One Plan), stk-man-bar-laugh (Chipped Tooth) and stk-woman-dinner-laugh (See What's Possible). Headlines lead with the feeling and stay positive, never pointing at the reader's flaws, which Meta flags under its personal attributes rule.
 
 ## Checks for the client
 
