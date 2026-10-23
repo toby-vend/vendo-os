@@ -66,13 +66,13 @@ def heart(src, x, y, h, shadow=True):
     return f'<img src="assets/photos/{src}" style="position:absolute;left:{x}px;top:{y}px;height:{h}px;width:{round(h * .905)}px;display:block;{sh}">'
 
 
-def portrait(src, cx, cy, d, pos='50% 30%'):
+def portrait(src, cx, cy, d, pos='50% 30%', zoom=1, focus='50% 50%'):
     """Circle portrait with an offset Sky ring and a heart-mark badge (the website frames team photos in circles)."""
     r = d / 2
     ring = d + 56
     b = round(d * .2)
     return f"""<div style="position:absolute;left:{cx - ring / 2 + 14}px;top:{cy - ring / 2 - 10}px;width:{ring}px;height:{ring}px;border-radius:50%;border:3px solid {SKY};opacity:.9"></div>
-<div style="position:absolute;left:{cx - r}px;top:{cy - r}px;width:{d}px;height:{d}px;border-radius:50%;overflow:hidden;box-shadow:0 40px 80px -30px rgba(0,0,0,.6)"><img src="assets/photos/{src}" style="width:100%;height:100%;object-fit:cover;object-position:{pos};display:block"></div>
+<div style="position:absolute;left:{cx - r}px;top:{cy - r}px;width:{d}px;height:{d}px;border-radius:50%;overflow:hidden;box-shadow:0 40px 80px -30px rgba(0,0,0,.6)"><img src="assets/photos/{src}" style="width:100%;height:100%;object-fit:cover;object-position:{pos};display:block;transform:scale({zoom});transform-origin:{focus}"></div>
 <div style="position:absolute;left:{cx + r * .62 - b / 2}px;top:{cy + r * .62 - b / 2}px;width:{b}px;height:{b}px;border-radius:50%;background:{SKY};display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px -10px rgba(0,0,0,.5)">{mark(round(b * .55), NAVY)}</div>"""
 
 
@@ -117,7 +117,7 @@ def c1_1x1(c):
 <div class="h" style="position:absolute;left:72px;top:290px;width:540px;font-size:70px;line-height:1.06;color:{LINEN}">It’s been a few years. <em>We won’t make a thing of it.</em></div>
 <div class="body" style="position:absolute;left:72px;top:690px;width:470px;font-size:25px;line-height:1.5;color:{LINEN};opacity:.88">{C1_SUB}</div>
 <div style="position:absolute;left:72px;top:920px">{btn('Book your check-up', 26, 36, 22, SKY, NAVY)}</div>
-{portrait('dental-implants.png', 836, 600, 380, '50% 28%')}""")
+{portrait('stock-photo-from-adobe.png', 836, 600, 380, '71% 50%', 1.45, '52% 36%')}""")
 
 
 def c1_9x16(c):
@@ -127,7 +127,7 @@ def c1_9x16(c):
 <div style="position:absolute;left:0;right:0;top:270px;display:flex;justify-content:center">{logo(300, LINEN)}</div>
 <div style="position:absolute;left:0;right:0;top:390px;display:flex;justify-content:center">{area_chip('New patients welcome in ' + area, 26, SKY, NAVY)}</div>
 <div class="h" style="position:absolute;left:90px;right:90px;top:490px;text-align:center;font-size:84px;line-height:1.05;color:{LINEN}">It’s been a few years. <em>We won’t make a thing of it.</em></div>
-{portrait('dental-implants.png', 540, 1060, 540, '50% 28%')}
+{portrait('stock-photo-from-adobe.png', 540, 1060, 540, '71% 50%', 1.45, '52% 36%')}
 <div class="body" style="position:absolute;left:150px;right:150px;top:1380px;text-align:center;font-size:28px;line-height:1.45;color:{LINEN};opacity:.88">{C1_SUB}</div>
 <div style="position:absolute;left:0;right:0;top:1490px;display:flex;justify-content:center">{btn('Book your check-up', 28, 40, 24, SKY, NAVY)}</div>""")
 
