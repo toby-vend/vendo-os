@@ -14,7 +14,7 @@ CTA (instant form): fill in the short form and the team calls you to book.
 **Awareness:** solution aware. **Sophistication:** 4. **Angle:** the failed-solutions journey.
 Research: "I have spent many years with all manner of dental problems." / "my remaining teeth started to wobble and the infections returned" (Mumsnet [5]). Persona bank: "Stop repairing, start again."
 
-**On image:** Another filling. Another crown. Another repair. / A full arch on implants is planned once, around a 3D scan of your jaw. / Led by Dr Simon Chard / Book a consultation
+**On image:** Full arch implants in Staines / Another filling. Another crown. Another repair. / A full arch on implants is planned once, around a 3D scan of your jaw. Led by Dr Simon Chard. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** Stop patching. Plan it once.
 
@@ -43,7 +43,7 @@ One plan instead of a hundred repairs.
 **Awareness:** product aware (comparing abroad). **Sophistication:** 4. **Angle:** UK aftercare, total cost of ownership.
 Research: "This is costing me a fraction of what it would cost me in the UK." (Mumsnet [5]). Aftercare worries across Turkey threads (Mumsnet [6]). Persona bank: "UK aftercare vs abroad on total cost of ownership, evidenced and calm, never fearmongering."
 
-**On image:** Comparing full-arch quotes? Ask one more question. / Who checks it, cleans it and fixes it in year five? / Right here in Staines, for generations / Book a consultation
+**On image:** Comparing full-arch quotes? / Ask one more question: who looks after it in year five? / Checks, cleaning and fixes, right here in Staines. We've been here for generations. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** Ask who looks after it later.
 
@@ -74,7 +74,7 @@ The cheapest teeth are the ones that are still right in ten years.
 **Awareness:** product aware. **Sophistication:** 5 (identity + authority). **Angle:** choosing the person.
 Research: "Dr. Chard's skill is masterful." (Chris Ambrose, full upper arch on six implants). "the care and attention to detail he put into every step" (J cook, two implants). why-choose-us: BACD President, Person of the Year 2022.
 
-**On image:** For a full arch, choose the dentist, not the deal. / Dr Simon Chard. Past President, British Academy of Cosmetic Dentistry. / 4.8 from 593 Google reviews / Book a consultation
+**On image:** Full arch implants / For a full arch, choose the dentist, not the deal. / Dr Simon Chard. Past President, British Academy of Cosmetic Dentistry. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** Choose the dentist, not the deal.
 
@@ -101,7 +101,7 @@ Some decisions you only want to make once.
 **Awareness:** solution aware. **Sophistication:** 4. **Angle:** shrink the first decision.
 Research: Persona bank: "CT scan as a no-commitment step one, which replaces a £20,000 decision with a small one." Fee guide: CBCT from £344, implant consultation from £199.
 
-**On image:** You don't have to decide on a full arch today. / Step one is a consultation and a 3D scan. Then you'll know what's possible. / Consultation from £199 / Book now
+**On image:** Full arch implants / You don't have to decide on a full arch today. / Step one is a consultation and a 3D scan. Then you'll know what's possible. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** Start with a scan, not a decision.
 
@@ -130,7 +130,7 @@ Small step first. Big decision later, with all the facts.
 **Awareness:** problem aware. **Sophistication:** 5 (identity). **Angle:** the moment.
 Research: "I wanted to take control before I lost all my teeth." / "the thought of being able to eat properly and have a smile I'm going to be proud of" (Mumsnet [5]).
 
-**On image:** Take control before your teeth decide for you. / A fixed, full set of teeth, planned around a 3D scan of your jaw. / Book a consultation
+**On image:** Take control before your teeth decide for you. / A fixed, full set of teeth, planned around a 3D scan of your jaw. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** Decide before your teeth do.
 

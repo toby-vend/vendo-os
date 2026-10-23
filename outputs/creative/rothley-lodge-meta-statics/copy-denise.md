@@ -14,7 +14,7 @@ CTA (instant form): fill in the short form and reception calls you to book.
 **Awareness:** problem aware. **Sophistication:** 3. **Angle:** the letter.
 Research: "the practice could no longer see NHS patients." (Mumsnet [10]). "they took me off the NHS list and I need to go private." (Mumsnet [9]).
 
-**On image:** Lost your NHS dentist? / Private check-ups in Staines from £60. No waiting list. / 4.8 from 593 Google reviews / Book a check-up
+**On image:** Lost your NHS dentist? / Private check-ups in Staines, from £60. / A written plan with every cost before any treatment. And a straight answer on what can wait. / 4.8 from 593 Google reviews / Book a check-up
 
 **Headline:** Check-ups from £60 in Staines.
 
@@ -41,7 +41,7 @@ A good dentist, a fair price, and a straight answer.
 **Awareness:** solution aware. **Sophistication:** 3 (price on screen). **Angle:** the unanswered question.
 Research: "How much do people pay, just so I know what's realistic." (Mumsnet [9]). Persona bank: "has no idea if a check-up is £40 or £150."
 
-**On image:** How much is a private check-up, really? / Examination from £60. X-rays from £21 if you need them. Everything else in writing first. / Book a check-up
+**On image:** A question worth answering / How much is a private check-up, really? / 4.8 from 593 Google reviews / Book a check-up
 
 **Headline:** A private check-up: from £60.
 
@@ -68,7 +68,7 @@ Now you know the number. The rest is up to you.
 **Awareness:** problem aware. **Sophistication:** 4. **Angle:** the upsell fear.
 Research: "always trying to flog you something you don't need." (Mumsnet [9]). "No hard sell for most expensive treatment." (john cunningham, Google). Persona bank: "We will tell you what needs doing and what can wait."
 
-**On image:** Worried private means being sold to? / We'll tell you what needs doing now, what can wait, and what doesn't need doing at all. / 4.8 from 593 Google reviews / Book a check-up
+**On image:** Worried private means being sold to? / What's needed. What can wait. What isn't. / After your check-up, we sort it into three, in writing, and you decide. / 4.8 from 593 Google reviews / Book a check-up
 
 **Headline:** What's needed. What can wait.
 
@@ -97,7 +97,7 @@ Honest advice is the best value there is.
 **Awareness:** solution aware. **Sophistication:** 4. **Angle:** predictable cost.
 Research: "He also recommended me to go on denplan! Which has made things a lot easier for me financially" (Kimberley Grewal, Google). Denplan page: "you pay a monthly fee to cover the work"; "set a bespoke monthly price".
 
-**On image:** Prefer a fixed monthly cost to surprise bills? / Ask about Denplan. Your price is set after your first check-up, based on what your teeth need. / Book a check-up
+**On image:** Prefer a fixed monthly cost? / Your dental care, spread monthly. / Ask about Denplan. Your price is set after your first check-up, based on what your teeth need. / 4.8 from 593 Google reviews / Book a check-up
 
 **Headline:** Your dental care, monthly.
 
@@ -126,7 +126,7 @@ Look after your teeth like you look after everything else: steadily.
 **Awareness:** product aware. **Sophistication:** 4 (mechanism). **Angle:** the hygienist visit you'll actually notice.
 Research: Fee guide: "Hygienist consultation (45 mins) Airflow Stain Removal & Guided Biofilm Therapy £110.00"; 45 minutes on British Dental Hygiene Association guidance. Review topic: hygienist, 55.
 
-**On image:** A hygiene visit that takes its time. / 45 minutes. Airflow stain removal. £110. / 55 Google reviews mention our hygienists / Book now
+**On image:** Hygiene appointments / A hygiene visit that takes its time. / Book now
 
 **Headline:** A proper clean: 45 minutes.
 

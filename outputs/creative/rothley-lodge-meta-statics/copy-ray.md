@@ -14,7 +14,7 @@ CTA (instant form): fill in the short form and reception calls you back as soon 
 **Awareness:** problem aware. **Sophistication:** 3. **Angle:** the twinge he's been ignoring.
 Research: Persona bank hook: "Pain that comes and goes is not pain that is going." "I had been dreading going to the dentist fearing pain." (Elaine Henderson, Google).
 
-**On image:** Pain that comes and goes is not pain that's going. / Let us take a look before it decides for you. / Book a call back
+**On image:** Toothache? / Pain that comes and goes is not pain that's going. / Let us take a look before it decides for you. / 4.8 from 593 Google reviews / Book a call back
 
 **Headline:** It's not going away on its own.
 
@@ -74,7 +74,7 @@ Get some sleep. We'll take it from here in the morning.
 **Awareness:** solution aware. **Sophistication:** 4. **Angle:** availability.
 Research: "very helpful in booking an appointment (on same day) on 2 occasions." (Sara Stanton). "I managed to secure an appointment for the following day to have a tooth looked at." (Amy). Review topic: reception staff, 59.
 
-**On image:** Toothache? Tell reception it hurts. / We'll find you the earliest appointment we can. Sometimes that's today. / 59 reviews mention our reception team / Book a call back
+**On image:** Toothache? / Tell reception it hurts. / We'll find the earliest appointment we can. Sometimes that's today. 59 Google reviews mention our reception team. / Book a call back
 
 **Headline:** In pain? We'll find a slot.
 
@@ -103,7 +103,7 @@ One call, and it's in someone else's hands.
 **Awareness:** problem aware. **Sophistication:** 5 (emotion). **Angle:** fear of the treatment.
 Research: "I saw Fionnuala due to an infected tooth, she had the tooth numbed and removed in less than 10 minutes" (Thomas Roake, Google). "I was very nervous about today having had to book a tooth extraction." (Charlie, Google). Review topic: tooth extraction, 23.
 
-**On image:** The worst part is usually the waiting. / Most patients say the treatment was quicker and easier than they'd feared. / 4.8 from 593 Google reviews / Book a call back
+**On image:** The worst part is usually the waiting. / Our patients tell us the treatment was quicker and easier than they'd feared. / 4.8 from 593 Google reviews / Book a call back
 
 **Headline:** Quicker than you've imagined.
 
@@ -132,7 +132,7 @@ The dread is worse than the dentist. Let's get it over with.
 **Awareness:** problem aware. **Sophistication:** 4. **Angle:** chewing on the other side (general).
 Research: Persona bank: "Any age." Review: "Today he removed a broken tooth for me" (Deborah Carey, Google). "a tooth looked at" (Amy, Google).
 
-**On image:** Been chewing on the other side for a week? / That's your body telling you something. Let us take a look. / Check-ups from £60 / Book a call back
+**On image:** Toothache? / Been chewing on the other side for a week? / That's your body telling you something. Check-ups from £60. Let us take a look. / 4.8 from 593 Google reviews / Book a call back
 
 **Headline:** Get that tooth looked at.
 

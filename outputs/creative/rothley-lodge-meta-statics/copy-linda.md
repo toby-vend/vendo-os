@@ -14,7 +14,7 @@ CTA (instant form): fill in the short form and the team calls you to book.
 **Awareness:** problem aware, solution unaware. **Sophistication:** 3 to 4. **Angle:** the daily ritual.
 Research: "The adhesive poligrip only seems to work for one meal" (Mumsnet [3]). Persona bank: "If you are still using adhesive every morning, there is another option."
 
-**On image:** Still using adhesive every morning? / There's another way. Your denture can clip onto implants, so it stays put. / 4.8 from 593 Google reviews / Book a consultation
+**On image:** Wear a denture? / Still using adhesive every morning? / There's another way. Your denture can clip onto implants, so it stays put. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** A denture that stays put.
 
@@ -76,7 +76,7 @@ Eat what you fancy. Not what's safe.
 **Awareness:** problem aware. **Sophistication:** 5. **Angle:** laughing and talking.
 Research: "I'm always paranoid it will flip out" / "it makes me self conscious when I speak to people" (Mumsnet [4]). Persona bank: "careful about laughing".
 
-**On image:** You laugh with your hand near your mouth. Just in case. / Implants hold your teeth firmly, so you can stop checking. / 4.8 from 593 Google reviews / Book a consultation
+**On image:** Dentures and implants / You laugh with your hand near your mouth. Just in case. / Implants hold your teeth firmly, so you can stop checking. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** Laugh without checking first.
 
@@ -105,7 +105,7 @@ Laugh first. Think later.
 **Awareness:** solution aware. **Sophistication:** 4. **Angle:** "Am I too old for this?"
 Research: persona bank: "Does not know implant-stabilised dentures exist"; "Age is not a barrier, cast 60 to 75." "If I had the money I'd get rid of it as soon as I could." (Mumsnet [4]).
 
-**On image:** "Am I too old for implants?" / It depends on your bone and your health, not your birthday. A 3D scan tells us. / Book a consultation
+**On image:** A question we hear a lot / “Am I too old for implants?” / It depends on your bone and your health, not your birthday. A 3D scan tells us. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** Too old for implants? Let's check.
 
@@ -134,7 +134,7 @@ The best time to ask was years ago. The next best is now.
 **Awareness:** problem unaware. **Sophistication:** 4 (mechanism). **Angle:** why the fit keeps getting worse.
 Research: Rothley implants page: "your jaw bone and surrounding tissues start to resorb"; "Retained bone structure prevents the face from acquiring a 'sunken' look." Mumsnet [3]: the bone "regresses" and leaves "no ridge to support the denture" (from the search summary; language only, not quoted).
 
-**On image:** Why does your denture feel looser every year? / Without roots, the bone underneath slowly shrinks. Implants give it a reason to stay. / Book a consultation
+**On image:** Why does your denture feel looser every year? / Without roots, the bone underneath slowly shrinks. Implants give it a reason to stay. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** Why dentures loosen over time.
 

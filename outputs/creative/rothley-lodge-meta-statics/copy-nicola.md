@@ -14,7 +14,7 @@ CTA (instant form): fill in the short form and the team calls you back.
 **Awareness:** problem aware (acute). **Sophistication:** 3. **Angle:** the work worry.
 Research: "I'm in shock more than anything and scared about what work will say" / "I doubt I'll be very popular with the company if I go in looking like a pirate." (Mumsnet [7]).
 
-**On image:** Lost a front tooth? Breathe. / Front teeth are what we do. Tell us what happened and we'll talk you through your options. / Book a call back
+**On image:** Lost a front tooth? / Breathe. Tell us what happened. / We'll call you back and talk you through your options to cover the gap. / 4.8 from 593 Google reviews / Book a call back
 
 **Headline:** Lost a front tooth? Start here.
 
@@ -41,7 +41,7 @@ Then you can tell work it's handled.
 **Awareness:** solution aware. **Sophistication:** 4 (mechanism). **Angle:** timeline.
 Research: Persona bank: "Timeline graphic: first visit, temporary, healing, final tooth." "Your dentist should be able to make a temporary composite one straight away till a replacement has been made." (Mumsnet [7]).
 
-**On image:** Replacing a front tooth, step by step. / 1. Scan and plan 2. Temporary tooth 3. Implant heals 4. Final tooth, shade-matched / Book a consultation
+**On image:** Replacing a front tooth / A front tooth, step by step. / Every stage explained before it starts, and every cost in writing. / 4.8 from 593 Google reviews / Book a consultation
 
 **Headline:** A front tooth, step by step.
 
@@ -72,7 +72,7 @@ A gap with a plan is just a gap for now.
 **Awareness:** solution aware. **Sophistication:** 5 (identity + authority). **Angle:** shade and shape matching.
 Research: why-choose-us: dental photography systems, microscopes; new site: "Digital smile design". Simon: Past President, BACD. Persona bank: "Shade matching explained."
 
-**On image:** The goal: a front tooth nobody can pick out. / Shade, shape and translucency matched to the teeth beside it. / Led by a Past President of the British Academy of Cosmetic Dentistry
+**On image:** Front tooth implants / The goal: a front tooth nobody can pick out. / Shade, shape and translucency matched to the teeth beside it. / Book a consultation
 
 **Headline:** Matched so nobody can tell.
 
@@ -101,7 +101,7 @@ The best result is the one nobody comments on.
 **Awareness:** problem aware. **Sophistication:** 4 (mechanism). **Angle:** CEREC same-day crown.
 Research: why-choose-us: "CEREC crowns in a day system utilizing CAD-CAM technology". New site: "Same-day ceramic restorations. Design, create and fit crowns or veneers in a single visit".
 
-**On image:** Broken a front tooth? / If enough of it is left, we can design, make and fit a ceramic crown in one visit. / Book a call back
+**On image:** Broken a front tooth? It might be one visit. / If enough tooth is left, we can design, make and fit a ceramic crown in a single visit. / 4.8 from 593 Google reviews / Book a call back
 
 **Headline:** A new crown in one visit.
 
@@ -128,7 +128,7 @@ Walk in with a broken tooth. Walk out with a whole one.
 **Awareness:** solution aware (failed solution). **Sophistication:** 3. **Angle:** the stopgap.
 Research: "There is dental glue you can actually buy from a pharmacist to temporarily stick the tooth back on" (Mumsnet [7]).
 
-**On image:** Before you reach for the pharmacy glue... / Call us. A front tooth deserves a proper fix, and there's usually more we can do than you'd think. / Book a call back
+**On image:** Before you reach for the pharmacy glue... / Call us. A front tooth deserves a proper fix, and there's usually more we can do than you'd think. / 4.8 from 593 Google reviews / Book a call back
 
 **Headline:** Skip the glue. Call us.
 

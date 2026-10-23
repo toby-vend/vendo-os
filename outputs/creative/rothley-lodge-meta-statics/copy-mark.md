@@ -14,7 +14,7 @@ CTA (instant form): fill in the short form and reception calls you to find a tim
 **Awareness:** problem aware. **Sophistication:** 5 (identity). **Angle:** no judgement.
 Research: Persona bank hook: "Nobody here is going to ask why you left it so long." "I had a check up which was long overdue on my behalf." (Angela Kemp, Google). Past dentist "overly lectured me" vs "didn't lecture me at all." (Mumsnet [8]).
 
-**On image:** Nobody here is going to ask why you left it so long. / We see people who've been away for years every week. We just start from today. / 4.8 from 593 Google reviews / Book a check-up
+**On image:** Been a while? / Nobody here will ask why you left it so long. / People come back after years away all the time. We just start from today. / 4.8 from 593 Google reviews / Book a check-up
 
 **Headline:** No lectures. Just a check-up.
 
@@ -45,7 +45,7 @@ The hardest part is the booking. That's the bit we've made easy.
 **Awareness:** problem aware. **Sophistication:** 5. **Angle:** the moment (the twinge).
 Research: "I have been building up the courage to go to the dentist" (Mumsnet [8]). Persona bank: "Triggered by a twinge that has not gone away."
 
-**On image:** That twinge has been there for weeks now. / You've been building up to this. Let's make the first step a small one. / Book a check-up from £60
+**On image:** That twinge has been there for weeks now. / You've been building up to this. Let's make the first step a small one. / 4.8 from 593 Google reviews / Book a check-up from £60
 
 **Headline:** That twinge isn't going away.
 
@@ -103,7 +103,7 @@ Knowing is better than imagining. It's usually cheaper too.
 **Awareness:** solution aware. **Sophistication:** 4 (mechanism: removing the unknown). **Angle:** what actually happens.
 Research: Persona bank: "First appointment, filmed. Removes the unknown." "Does not know what happens at a first appointment." "She took some X-rays and showed me the scans afterwards" (Annabelle West, Google).
 
-**On image:** What actually happens at your first visit: / Chat first. A look. X-rays if needed. Your options, explained. You decide. / Check-up from £60
+**On image:** Your first visit / No surprises. Here's what happens. / Check-up from £60. X-rays from £21 if you need them. / 4.8 from 593 Google reviews / Book a check-up
 
 **Headline:** No surprises at your first visit.
 
@@ -136,7 +136,7 @@ Now you know. That was the hard part.
 **Awareness:** product aware. **Sophistication:** 5 (identity). **Angle:** who he becomes.
 Research: "I've now gone from someone who would avoid going to the dentist at any cost, to someone who is much more at ease" (Mark Stansbury, Google). Review topics: calming atmosphere 29, caring staff 79.
 
-**On image:** For people who avoid the dentist at any cost. / 79 Google reviews mention our caring staff. 29 mention how calm it feels. / Book a check-up
+**On image:** For people who avoid the dentist / You don't have to love it. Just come back. / What our patients mention most in their Google reviews: / Book a check-up
 
 **Headline:** For people who'd rather not.
 

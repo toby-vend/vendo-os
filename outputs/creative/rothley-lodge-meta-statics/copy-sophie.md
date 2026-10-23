@@ -14,7 +14,7 @@ CTA (instant form): fill in the short form and reception calls you to book the f
 **Awareness:** solution aware. **Sophistication:** 3 to 4. **Angle:** the move.
 Research: Persona bank: "new to the area. Choosing on logistics and on whether she trusts the people." why-choose-us: "Rothley Lodge is the oldest practice in Staines".
 
-**On image:** New to Staines? Your family dentist has been here for generations. / The oldest dental practice in Staines. Some families have been with us for four generations. / Book the family in
+**On image:** New to Staines? / Your family dentist has been here for generations. / The oldest dental practice in Staines. Some families have been with us for four generations. / 4.8 from 593 Google reviews / Book the family in
 
 **Headline:** New to Staines? Start here.
 
@@ -45,7 +45,7 @@ Welcome to Staines. You've just found the dentist your kids will still use at 40
 **Awareness:** solution aware. **Sophistication:** 4. **Angle:** logistics.
 Research: "Today I had a joint appointment with my 4 year old son." (Lorraine Docherty, Google). Persona bank: "One trip, everyone seen."
 
-**On image:** One trip. Everyone seen. / Book back-to-back family appointments, so the school run only happens once. / Book the family in
+**On image:** Family check-ups / One trip. Everyone seen. / Book back-to-back family appointments, so the school run only happens once. / 4.8 from 593 Google reviews / Book the family in
 
 **Headline:** The whole family, one trip.
 
@@ -74,7 +74,7 @@ One visit. One trip. Done until next time.
 **Awareness:** product aware. **Sophistication:** 3 (plain offer). **Angle:** price.
 Research: Fee guide: "Child Private Exam (0-5 years) of parents currently on our Private/Denplan Scheme £0.00". Persona bank: "Price on screen wins."
 
-**On image:** Under 5? Their check-ups are free. / When a parent is a patient at Rothley Lodge, children aged 0 to 5 are seen at no cost. / 4.8 from 593 Google reviews / Book the family in
+**On image:** Family dentistry in Staines / Under 5? Their check-ups are free. / 4.8 from 593 Google reviews / Book the family in
 
 **Headline:** Little ones seen free.
 
@@ -105,7 +105,7 @@ Start them young, and the dentist is just somewhere they go.
 **Awareness:** problem aware. **Sophistication:** 5. **Angle:** the child who's scared.
 Research: "My 10 year old son is very anxious about dentist visits." ... "Made my son feel very comfortable" (Anne Kurlej). "she's very scared of the dentist but dr Megan made her feel very comfortable and was very patient" (Maria Santos). "putting a nervous little boy at complete ease" (Erica Bayley).
 
-**On image:** Your child's nervous about the dentist? / Ours are patient, gentle and explain every step to them first. / Parents say so in our reviews / Book a check-up
+**On image:** Children's dentistry / Your child's nervous about the dentist? / Ours are patient, gentle and explain every step to them first. Parents say so in our reviews. / 4.8 from 593 Google reviews / Book a check-up
 
 **Headline:** Gentle with nervous kids.
 
@@ -134,7 +134,7 @@ Calm kids grow into adults who don't avoid the dentist.
 **Awareness:** product aware. **Sophistication:** 5 (identity, continuity). **Angle:** generations.
 Research: "I have been visiting Rothley Lodge with my children for the last 17 years." (Janine Lynch). "I have been a patient here since being a child" (S J). why-choose-us: patients from four generations.
 
-**On image:** Some of our patients first came here as children. Now they bring theirs. / Family dentistry in Staines, for four generations. / Book the family in
+**On image:** Some of our patients came here as children. Now they bring theirs. / Family dentistry in Staines, for four generations. / 4.8 from 593 Google reviews / Book the family in
 
 **Headline:** Family dentistry, for generations.
 
