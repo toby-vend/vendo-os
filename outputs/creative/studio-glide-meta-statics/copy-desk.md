@@ -3,6 +3,7 @@
 - **Who:** office or home-office days, commutes or works locally, wants movement that fits a lunch break or straight after work and actually switches the brain off.
 - **Campaign:** VD | Oxted | Leads, ad set Oxted | Leads | Statics (instant form, then self-booking on the Oxted timetable).
 - **Offer:** First Time Pass, up to 6 classes for £60 within 2 weeks, new clients only (LP, 23 Oct 2026).
+- **Description (every concept):** First Time Pass: 6 classes for £60. Every image leads with "6 classes for £60" above the button and "5.0 · 200+ Google reviews" under the logo (Toby, 23 Oct 2026).
 - **Rules:** no pain relief, back-fix or posture-cure claims (Meta health policy). Talk about the day, not a body part. No lunchtime-class claim unless the timetable has one; the LP says "early mornings to evening sessions". Set 2e "Undo the desk day" already exists, so these take different angles. UK English, no em dashes.
 
 ---

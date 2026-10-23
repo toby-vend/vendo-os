@@ -3,6 +3,7 @@
 - **Who:** has tried the gym, hated it or never went back. Might be 50+ and starting from scratch. Wants something low-impact, guided and not intimidating.
 - **Campaign:** VD | Oxted | Leads, ad set Oxted | Leads | Statics (instant form, then self-booking on the Oxted timetable).
 - **Offer:** First Time Pass, up to 6 classes for £60 within 2 weeks, new clients only (LP, 23 Oct 2026).
+- **Description (every concept):** First Time Pass: 6 classes for £60. Every image leads with "6 classes for £60" above the button and "5.0 · 200+ Google reviews" under the logo (Toby, 23 Oct 2026).
 - **Rules:** never name or imply the viewer's age ("at your age", "over 50s"); show it through imagery and the reviewer's own words only. No health or flexibility outcome claims as promises. UK English, no em dashes.
 
 ---

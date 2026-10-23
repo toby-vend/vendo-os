@@ -21,14 +21,16 @@ import json
 import re
 from pathlib import Path
 
+from offer_update import rewrite_html, rewrite_text
+
 HERE = Path(__file__).parent
 SRC = (HERE / 'src/Oxted Evergreen Ads.dc.html').read_text()
 COPY = json.loads((HERE / '../../../data/studio-glide/oxted-evergreen-ad-copy.json').read_text())
-ADS = {a['ref']: a for a in COPY['ads']}
-CAROUSEL = COPY['carousel']
+ADS = {a['ref']: {k: rewrite_text(v) if isinstance(v, str) else v for k, v in a.items()} for a in COPY['ads']}
+CAROUSEL = [{k: rewrite_text(v) if isinstance(v, str) else v for k, v in c.items()} for c in COPY['carousel']]
 
 TURNS = {
-    '9': 'First Time Pass (6 for £60)', '8': 'Evergreen 3 for £29', '7': 'Review carousel',
+    '9': 'First Time Pass (6 for £60)', '8': 'Evergreen price-led', '7': 'Review carousel',
     '6': 'Platform-native II', '5': 'Platform-native I', '4': 'Chat statics', '3': 'Intro pack',
     '2': 'Brand photo',
 }
@@ -84,14 +86,14 @@ def localise(h):
     for k, v in PHOTO_MAP.items():
         h = re.sub(rf'https://images\.squarespace-cdn\.com/[^"]*/{k}\.jpg\?format=\d+w', f'assets/photos/{v}', h)
     h = h.replace('src="uploads/', 'src="src/uploads/')
-    return h.replace(APPLE, "'Inter',sans-serif")
+    return rewrite_html(h.replace(APPLE, "'Inter',sans-serif"))
 
 
 def flags(text):
     """Offer lines on the ad or its copy that no longer match the Oxted LP."""
     t = html.unescape(re.sub(r'<[^>]+>', ' ', text))
     out = []
-    if re.search(r'£\s*29|3 classes|three classes|Start with three|3 for', t, re.I):
+    if re.search(r'£\s*29', t):
         out.append('Offer is 3 for £29. LP now: up to 6 classes for £60 (First Time Pass)')
     if re.search(r'capped at 10|classes of 10|10 people|max(imum)? 10', t, re.I):
         out.append('Class size says 10. LP now: 6 to 8 per class')
@@ -109,6 +111,7 @@ def card(ref, label, extra_text=''):
             ) if a else '<div class="p" style="color:#8F6047">No primary text or headline on file for this ad. Write before launch.</div>'
     fl = flags(extra_text + (a['primary'] + a['headline'] if a else ''))
     fl_html = ''.join(f'<div class="f">Check · {html.escape(f)}</div>' for f in fl)
+    fl_html += '<div class="f" style="background:#1C1B19">Offer updated to the First Time Pass, 6 classes for £60 (23 Oct 2026)</div>'
     return f'<div class="card"><div class="t">{ref} · {html.escape(label)}</div>{fl_html}{body}</div>'
 
 
@@ -186,7 +189,7 @@ def page(turn, refs, crs, col0=0):
             squares.append(f'<div class="slot" data-name="{ref}" style="left:{x}px;top:80px">{localise(sq[0][2])}</div>')
         if st:
             stories.append(f'<div class="slot" data-name="{ref}" style="left:{x}px;top:STORYY">{localise(st[0][2])}</div>')
-        cards.append(card(ref, c['label'], ''.join(b[2] for b in c['boards'])).replace('class="card"', f'class="card" style="left:{x}px;top:1240px"', 1))
+        cards.append(card(ref, c['label'], rewrite_html(''.join(b[2] for b in c['boards']))).replace('class="card"', f'class="card" style="left:{x}px;top:1240px"', 1))
         col += 1
     story_y = 1240 + 1320
     width = 80 + col * GAP

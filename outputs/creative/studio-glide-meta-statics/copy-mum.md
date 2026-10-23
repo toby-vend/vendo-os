@@ -3,6 +3,7 @@
 - **Who:** kids at school or nursery, has put her own exercise last for years, wants an hour that is hers and a way back in that won't wreck her.
 - **Campaign:** VD | Oxted | Leads, ad set Oxted | Leads | Statics (instant form, then self-booking on the Oxted timetable).
 - **Offer:** First Time Pass, up to 6 classes for £60 within 2 weeks, new clients only (LP, 23 Oct 2026).
+- **Description (every concept):** First Time Pass: 6 classes for £60. Every image leads with "6 classes for £60" above the button and "5.0 · 200+ Google reviews" under the logo (Toby, 23 Oct 2026).
 - **Rules:** no postnatal or mama-and-baby claims (Banstead classes, not confirmed for Oxted). No body-change or "get your body back" claims (Meta). Don't name age or parental status as "you are a mum" in a way that asserts personal attributes; speak to the situation (school run, putting yourself last). UK English, no em dashes.
 
 ---

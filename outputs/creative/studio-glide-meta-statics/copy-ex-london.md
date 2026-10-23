@@ -3,6 +3,7 @@
 - **Who:** used to do boutique Reformer in London, now lives in or near Oxted, misses that standard and doesn't want the train or the London price to get it.
 - **Campaign:** VD | Oxted | Leads, ad set Oxted | Leads | Statics (instant form, then self-booking on the Oxted timetable).
 - **Offer:** First Time Pass, up to 6 classes for £60 within 2 weeks, new clients only (LP, 23 Oct 2026).
+- **Description (every concept):** First Time Pass: 6 classes for £60. Every image leads with "6 classes for £60" above the button and "5.0 · 200+ Google reviews" under the logo (Toby, 23 Oct 2026).
 - **Rules:** no London price figures (unverified). Reviews are Banstead members. UK English, no em dashes.
 
 ---

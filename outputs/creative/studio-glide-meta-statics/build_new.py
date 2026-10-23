@@ -73,6 +73,23 @@ def btn(text, kind='light', size=26):
     return f'<div class="btn" style="background:{bg};color:{fg};font-size:{size}px;padding:{size * .95}px {size * 2.1}px">{text}</div>'
 
 
+def offer(dark, size, align='center'):
+    """The lead offer, on every ad: First Time Pass, 6 classes for £60 (Oxted LP, 23 Oct 2026)."""
+    main, em, sub = (IVORY, SAND, TAUPE) if dark else (CHAR, TERRA, TERRA)
+    return (f'<div style="margin-top:{size * .7}px;text-align:{align}">'
+            f'<div style="font-family:\'Playfair Display\',serif;font-size:{size}px;line-height:1.1;color:{main}">6 classes for <em style="color:{em}">£60</em></div>'
+            f'<div style="font-size:{max(size * .36, 16)}px;letter-spacing:{".14em" if align == "left" else ".24em"};text-transform:uppercase;white-space:nowrap;color:{sub};margin-top:{size * .3}px">First Time Pass · £10 a class · New clients</div></div>')
+
+
+def proof(dark, x=None, top=0, W=1080):
+    """Volume proof: 5.0 on Google from 200+ reviews (LP rating; review count from Toby, 23 Oct 2026)."""
+    c = SAND if dark else TERRA
+    t = IVORY if dark else CHAR
+    pos = f'left:0;right:0;justify-content:center' if x is None else f'left:{x}px'
+    return (f'<div class="abs" style="{pos};top:{top}px;display:flex;align-items:center;gap:14px">{stars(c, 24)}'
+            f'<div style="font-size:20px;letter-spacing:.16em;text-transform:uppercase;color:{t}">5.0 · 200+ Google reviews</div></div>')
+
+
 def grain():
     return '<div class="abs grain" style="inset:0"></div>'
 
@@ -92,14 +109,15 @@ def t_photo(c, W, H):
     return f'''{photo(c['photo'], 0, 0, W, H, *c.get('focus', (.5, .4)))}
 <div class="abs" style="left:0;right:0;bottom:0;height:{H * (.62 if tall else .75)}px;background:linear-gradient(180deg,rgba(28,27,25,0) 0%,rgba(28,27,25,.6) 40%,rgba(28,27,25,.92) 100%)"></div>
 <div class="abs" style="left:0;right:0;top:0;height:{top + 160}px;background:linear-gradient(180deg,rgba(28,27,25,.45) 0%,rgba(28,27,25,0) 100%)"></div>
-{grain()}{logo(300, 'white', W, top - 10)}
+{grain()}{logo(300, 'white', W, top - 10)}{proof(True, top=top + 104)}
 <div class="abs col" style="left:90px;right:90px;bottom:{body_bottom}px;align-items:center;text-align:center">
   <div class="eyebrow" style="color:{SAND}">{c['eyebrow']}</div>
   <div class="h" style="font-size:{c.get('hs', 92) * (1.08 if tall else 1)}px;color:{IVORY};margin-top:26px">{c['hook']}</div>
   <div class="rule" style="margin:34px auto 0"></div>
   <div class="sub" style="color:{BONE};margin-top:30px;max-width:820px">{c['sub']}</div>
-  <div style="margin-top:44px">{btn(CTA)}</div>
-  <div class="foot" style="color:{TAUPE};margin-top:26px">{FOOT}</div>
+  {offer(True, 66 if tall else 56)}
+  <div style="margin-top:36px">{btn(CTA)}</div>
+  {f'<div class="foot" style="color:{TAUPE};margin-top:26px">{FOOT}</div>' if tall else ''}
 </div>'''
 
 
@@ -107,18 +125,19 @@ def t_arch(c, W, H):
     """Ivory ground, arch-framed photo (the studio mirrors), headline under it."""
     tall = H > W
     if tall:
-        aw, ah, ax, ay = 640, 820, (W - 640) / 2, 360
-        ty = ay + ah + 60
+        aw, ah, ax, ay = 430, 440, (W - 430) / 2, 390
+        ty = ay + ah + 50
     else:
         aw, ah, ax, ay = 400, 560, 90, 260
         ty = None
     text_block = f'''<div class="eyebrow">{c['eyebrow']}</div>
-  <div class="h" style="font-size:{c.get('hs', 84) * (1 if tall else .8)}px;margin-top:22px">{c['hook']}</div>
+  <div class="h" style="font-size:{c.get('hs', 84) * (.9 if tall else .8)}px;margin-top:22px">{c['hook']}</div>
   <div class="rule" style="margin-top:30px;{'margin-left:auto;margin-right:auto' if tall else ''}"></div>
-  <div class="sub" style="color:{GREY};margin-top:28px;font-size:{32 if tall else 27}px">{c['sub']}</div>
+  <div class="sub" style="color:{GREY};margin-top:28px;font-size:{30 if tall else 27}px">{c['sub']}</div>
   {c.get('extra', '')}
-  <div style="margin-top:40px">{btn(CTA, 'dark', 26 if tall else 19)}</div>
-  <div class="foot" style="color:{TAUPE};margin-top:24px">{FOOT}</div>'''
+  {offer(False, 62 if tall else 50, 'center' if tall else 'left')}
+  <div style="margin-top:{34 if tall else 24}px">{btn(CTA, 'dark', 26 if tall else 19)}</div>
+  '''
     if tall:
         text = f'<div class="abs col" style="left:90px;right:90px;top:{ty}px;align-items:center;text-align:center">{text_block}</div>'
     else:
@@ -126,51 +145,54 @@ def t_arch(c, W, H):
     return f'''<div class="abs" style="inset:0;background:{IVORY}"></div>
 <div class="abs" style="left:{ax - 14}px;top:{ay - 14}px;width:{aw + 28}px;height:{ah + 14}px;border:1px solid {SAND};border-bottom:0;border-radius:{(aw + 28) / 2}px {(aw + 28) / 2}px 0 0"></div>
 {photo(c['photo'], ax, ay, aw, ah, *c.get('focus', (.5, .4)), radius=f'{aw / 2}px {aw / 2}px 0 0')}
-{grain()}{logo(260, 'charcoal', W, 250 if tall else 80) if tall else f'<img class="abs" src="assets/logo/logo-charcoal.png" style="left:90px;top:96px;width:260px">'}
+{grain()}{logo(260, 'charcoal', W, 250 if tall else 80) if tall else f'<img class="abs" src="assets/logo/logo-charcoal.png" style="left:90px;top:96px;width:260px">'}{proof(False, top=330) if tall else proof(False, x=560, top=118)}
 {text}'''
 
 
 def t_split(c, W, H):
     """Photo on top, charcoal panel below with the headline."""
     tall = H > W
-    ph = round(H * (.5 if tall else .42))
+    ph = round(H * (.39 if tall else .36))
     return f'''<div class="abs" style="inset:0;background:{CHAR}"></div>
 {photo(c['photo'], 0, 0, W, ph, *c.get('focus', (.5, .45)))}
 <div class="abs" style="left:0;right:0;top:0;height:{(250 if tall else 70) + 150}px;background:linear-gradient(180deg,rgba(28,27,25,.5) 0%,rgba(28,27,25,0) 100%)"></div>
-{grain()}{logo(280, 'white', W, (250 if tall else 70) - 10)}
+{grain()}{logo(280, 'white', W, (250 if tall else 70) - 10)}{proof(True, top=(250 if tall else 70) + 96)}
 <div class="abs col" style="left:90px;right:90px;top:{ph + (90 if tall else 56)}px;align-items:center;text-align:center">
   <div class="eyebrow" style="color:{TAUPE}">{c['eyebrow']}</div>
   <div class="h" style="font-size:{c.get('hs', 80) * (1 if tall else .86)}px;color:{IVORY};margin-top:22px">{c['hook']}</div>
   <div class="sub" style="color:{BONE};margin-top:26px;max-width:860px">{c['sub']}</div>
-  <div style="margin-top:{44 if tall else 34}px">{btn(CTA)}</div>
-  <div class="foot" style="color:{TAUPE};margin-top:22px">{FOOT}</div>
+  {offer(True, 58 if tall else 44)}
+  <div style="margin-top:{36 if tall else 24}px">{btn(CTA)}</div>
+  {f'<div class="foot" style="color:{TAUPE};margin-top:22px">{FOOT}</div>' if tall else ''}
 </div>'''
 
 
 def t_steps(c, W, H):
     """Bone ground, ghost-number steps, small arch photo."""
     tall = H > W
-    rows = ''.join(f'<div style="display:flex;gap:30px;align-items:center;padding:{22 if tall else 16}px 0;border-top:1px solid {SAND}">'
+    rows = ''.join(f'<div style="display:flex;gap:30px;align-items:center;padding:{18 if tall else 16}px 0;border-top:1px solid {SAND}">'
                    f'<div class="num" style="font-size:{86 if tall else 70}px;width:{120 if tall else 100}px">0{i + 1}</div>'
                    f'<div style="font-size:{34 if tall else 30}px;color:{CHAR};line-height:1.3">{s}</div></div>' for i, s in enumerate(c['steps']))
     if tall:
-        return f'''<div class="abs" style="inset:0;background:{BONE}"></div>{grain()}{logo(260, 'charcoal', W, 250)}
-<div class="abs col" style="left:100px;right:100px;top:420px">
+        return f'''<div class="abs" style="inset:0;background:{BONE}"></div>{grain()}{logo(260, 'charcoal', W, 250)}{proof(False, top=330)}
+<div class="abs col" style="left:100px;right:100px;top:400px">
   <div class="eyebrow">{c['eyebrow']}</div>
   <div class="h" style="font-size:96px;margin-top:22px">{c['hook']}</div>
   <div style="margin-top:56px">{rows}</div>
-  <div style="margin-top:56px;display:flex;align-items:center;gap:30px">{btn(CTA, 'dark')}</div>
+  {offer(False, 64, 'left')}
+  <div style="margin-top:40px">{btn(CTA, 'dark')}</div>
   <div class="foot" style="color:{TAUPE};margin-top:24px">{FOOT}</div>
 </div>'''
     return f'''<div class="abs" style="inset:0;background:{BONE}"></div>
 {photo(c['photo'], 700, 0, 380, 1080, *c.get('focus', (.5, .5)))}
-{grain()}<img class="abs" src="assets/logo/logo-charcoal.png" style="left:80px;top:80px;width:240px">
+{grain()}<img class="abs" src="assets/logo/logo-charcoal.png" style="left:80px;top:70px;width:240px">{proof(False, x=80, top=140)}
 <div class="abs col" style="left:80px;width:560px;top:200px">
   <div class="eyebrow">{c['eyebrow']}</div>
   <div class="h" style="font-size:66px;margin-top:18px">{c['hook']}</div>
   <div style="margin-top:30px">{rows}</div>
-  <div style="margin-top:34px">{btn(CTA, 'dark', 22)}</div>
-  <div class="foot" style="color:{TAUPE};margin-top:18px">{FOOT}</div>
+  {offer(False, 44, 'left')}
+  <div style="margin-top:24px">{btn(CTA, 'dark', 22)}</div>
+  
 </div>'''
 
 
@@ -181,13 +203,14 @@ def t_card(c, W, H):
     return f'''<div class="abs" style="inset:0;background:{CHAR}"></div>
 {photo(c['photo'], 0, 0, W, H, *c.get('focus', (.5, .5)))}
 <div class="abs" style="inset:0;background:rgba(28,27,25,.72)"></div>
-{grain()}{logo(260, 'white', W, 250 if tall else 70)}
-<div class="abs col" style="left:{(W - card_w) / 2}px;width:{card_w}px;top:{430 if tall else 190}px;align-items:center;text-align:center">
-  <div class="eyebrow" style="color:{SAND}">{c['eyebrow']}</div>
-  <div class="h" style="font-size:{c.get('hs', 70)}px;color:{IVORY};margin-top:20px">{c['hook']}</div>
-  <div style="margin-top:{44 if tall else 30}px;width:100%;background:{IVORY};padding:{48 if tall else 36}px {52 if tall else 44}px;text-align:left;box-shadow:0 30px 60px rgba(0,0,0,.35)">{c['card']}</div>
-  <div style="margin-top:{48 if tall else 34}px">{btn(CTA)}</div>
-  <div class="foot" style="color:{TAUPE};margin-top:22px">{FOOT}</div>
+{grain()}{logo(260, 'white', W, 250 if tall else 56)}{proof(True, top=330 if tall else 126)}
+<div class="abs col" style="left:{(W - card_w) / 2}px;width:{card_w}px;top:{400 if tall else 186}px;align-items:center;text-align:center">
+  {f'<div class="eyebrow" style="color:{SAND};margin-bottom:20px">{c["eyebrow"]}</div>' if tall else ''}
+  <div class="h" style="font-size:{c.get('hs', 70) * (1 if tall else .9)}px;color:{IVORY}">{c['hook']}</div>
+  <div style="margin-top:{44 if tall else 22}px;width:100%;background:{IVORY};padding:{40 if tall else 26}px {52 if tall else 40}px;text-align:left;box-shadow:0 30px 60px rgba(0,0,0,.35)">{c['card']}</div>
+  {offer(True, 58 if tall else 42)}
+  <div style="margin-top:{36 if tall else 22}px">{btn(CTA)}</div>
+  {f'<div class="foot" style="color:{TAUPE};margin-top:22px">{FOOT}</div>' if tall else ''}
 </div>'''
 
 
@@ -307,6 +330,7 @@ def build(slug, label, md, concepts):
         head, prim = parse_copy(md, c['code'])
         cards.append(f'<div class="card" style="left:{x}px;top:1240px"><div class="t">{c["code"]} · {html.escape(c["name"])}</div>'
                      f'<div class="k">Headline</div><div class="v">{html.escape(head)}</div>'
+                     f'<div class="k">Description</div><div class="v">First Time Pass: 6 classes for £60</div>'
                      f'<div class="k">Primary text</div><div class="p">{html.escape(prim)}</div>'
                      f'<div class="k">CTA button</div><div class="v">Sign Up · instant form, then self-booking on the Oxted timetable</div></div>')
     width = 80 + len(concepts) * 1160
