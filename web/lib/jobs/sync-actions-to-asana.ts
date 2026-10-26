@@ -53,12 +53,14 @@ const SLT_NAMES: Set<string> = new Set([
 ]);
 
 /**
- * People who have opted out of meeting auto-tasks. Items that resolve to
- * them are logged to the daily filtered-items digest instead of becoming
- * Asana tasks (the Oct 2026 audit showed 64% of Toby's were bulk-cleared).
+ * Directors are opted out of meeting auto-tasks. Items that resolve to them
+ * are logged to the daily filtered-items digest instead of becoming Asana
+ * tasks (the Oct 2026 audit showed 64% of Toby's were bulk-cleared).
  */
 const AUTO_TASK_OPT_OUT: Set<string> = new Set([
   'toby raeburn',
+  'max rivens',
+  'alfie wakelin',
 ]);
 
 /** Signal used to abort task creation when a QA rejection matches. */
