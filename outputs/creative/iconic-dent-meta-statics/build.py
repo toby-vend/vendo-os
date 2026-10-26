@@ -1713,7 +1713,7 @@ STOCK = [
     (mi5, {"mirror-boutique.jpg": (S + "mi5-260272416.jpg", .5, .4)}),
     (h4, {"mirror-boutique.jpg": (S + "h4-2954979.jpg", .5, .62)}),
     (h5, {"sign-wall-tall.jpg": (S + "h5-906842.jpg", .45, .35)}),
-    (p3, {"surgery.jpg": (S + "p3-7089839.jpg", .6, .45)}),
+    (p3, {"surgery.jpg": (S + "p3-40005332.jpg", .45, .35)}),
     (p4, {"surgery.jpg": (S + "p4-19924941.jpg", .45, .28)}),
     (g4, {"consult-room.jpg": (S + "g4-28998814.jpg", .5, .4)}),
     (l3, {"consult-room.jpg": (S + "l3-25910484.jpg", .32, .4), "reception-side.jpg": (S + "l3-25910484.jpg", .32, .4)}),
@@ -1737,6 +1737,15 @@ if __name__ == "__main__":
         which.remove("stock")
         for size, suffix in FILES.items():
             (ROOT / f"stock-{suffix}.html").write_text(page(f"Iconic | stock options | {suffix}", stock_boards(size)))
+    if "stock-one" in which:  # one ad, all three sizes on one page, for re-capturing a single swap: stock-one <fn>
+        i = which.index("stock-one"); fn = which[i + 1]; del which[i:i + 2]
+        f, swap = next(x for x in STOCK if x[0].__name__ == fn)
+        boards = []
+        for size in FILES:
+            SWAP.clear(); SWAP.update(swap)
+            boards.append(f(size).replace(" | Static | Practice photo | ", " | Static | Stock lifestyle | "))
+        SWAP.clear()
+        (ROOT / f"stock-{fn}.html").write_text(page(f"Iconic | stock | {fn}", boards))
     for p in which:
         for size, suffix in FILES.items():
             (ROOT / f"{p}-{suffix}.html").write_text(page(f"Iconic | {p} | {suffix}", [f(size) for f in PERSONAS[p]]))
