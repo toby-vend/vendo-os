@@ -136,6 +136,7 @@ Team (site, About page): Dr Lana Nashef and Dr Lana Haj Yahya (directors), Dr Il
 - [S8] https://iconicdent.co.uk/dentures/
 - [S9] https://iconicdent.co.uk/denture-repair/
 - [S10] https://iconicdent.co.uk/nervous-patients/
+- [S11] https://iconicdent.co.uk/partial-dentures/
 - [SP] Iconic Dent Content Shoot Plan, 4 Oct 2026 (Drive 1jnB8WaR8IJ3LsU_2fBdKcx6mgwOy_5ATZZIDcj1KoO4)
 - [F1] Fathom, Iconic Dent monthly call 18 Sep 2026: https://fathom.video/calls/826622162
 - [F2] Fathom, 21 Aug 2026: https://fathom.video/calls/791870400
