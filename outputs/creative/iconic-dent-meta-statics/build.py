@@ -585,10 +585,11 @@ def mi1(size):
 MI2_PROBLEMS = ["Closed-mouth smile in every photo", "A hand over your mouth when you laugh", "“I'll get them done one day”"]
 
 
-def problems(fs, w):
-    return (f'<div style="width:{w}px"><div class="eyebrow" style="font-size:{fs * .6:.0f}px">Sound familiar?</div>'
+def problems(fs, w, items=None, label="Sound familiar?"):
+    items = items or MI2_PROBLEMS
+    return (f'<div style="width:{w}px"><div class="eyebrow" style="font-size:{fs * .6:.0f}px">{label}</div>'
             + "".join(f'<div style="display:flex;align-items:center;gap:{fs * .7:.0f}px;padding:{fs * .8:.0f}px 0;border-bottom:1px solid rgba(227,223,211,.18)">{TOOTH.format(s=round(fs * 1.5), c=GOLD)}'
-                      f'<span style="font-family:Montserrat;font-weight:500;font-size:{fs:.0f}px;line-height:1.3;color:{LINEN}">{t}</span></div>' for t in MI2_PROBLEMS) + '</div>')
+                      f'<span style="font-family:Montserrat;font-weight:500;font-size:{fs:.0f}px;line-height:1.3;color:{LINEN}">{t}</span></div>' for t in items) + '</div>')
 
 
 def arrow_chip(d, direction="down"):
@@ -597,10 +598,11 @@ def arrow_chip(d, direction="down"):
             f'box-shadow:0 8px 20px rgba(0,0,0,.3)">{ARROW.format(s=round(d * .5), d=path)}</div>')
 
 
-def solution(fs):
+def solution(fs, head="See Your New Smile <b>Before We Start.</b>", price=None):
+    price = price or bond_price(fs * .7)
     return (f'<div class="eyebrow" style="font-size:{fs * .32:.0f}px">The solution</div>'
-            f'<div class="hl" style="font-size:{fs:.0f}px;color:{LINEN};margin-top:{fs * .15:.0f}px">See Your New Smile <b>Before We Start.</b></div>'
-            f'<div style="margin-top:{fs * .3:.0f}px">{bond_price(fs * .7)}</div>')
+            f'<div class="hl" style="font-size:{fs:.0f}px;color:{LINEN};margin-top:{fs * .15:.0f}px">{head}</div>'
+            f'<div style="margin-top:{fs * .3:.0f}px">{price}</div>')
 
 
 def mi2(size):
@@ -1145,10 +1147,192 @@ def p5(size):
     return board(size, name, inner, bg=PAPER)
 
 
+# ---------------------------------------------------------------- GEOFF (failing teeth, full arch)
+MOSAIC = [("Tegan-Lewis-Dental-Nurse.jpg", .5, .35), ("surgery.jpg", .55, .5), ("P1217728.jpg", .5, .35),
+          ("cbct.jpg", .42, .45), ("P1080465.jpg", .5, .35), ("consult-room.jpg", .45, .5)]
+
+
+def mosaic(x, y, cols, cw, ch, gap):
+    out = []
+    for i, (src, fx, fy) in enumerate(MOSAIC):
+        r, c = divmod(i, cols)
+        out.append(photo(src, x + c * (cw + gap), y + r * (ch + gap), cw, ch, fx, fy, radius=round(min(cw, ch) * .08),
+                         extra="box-shadow:0 14px 34px rgba(0,0,0,.3);"))
+    return "".join(out)
+
+
+def arch_price(fs, col=STONE):
+    return (f'<div style="display:flex;align-items:baseline;gap:{fs * .25:.0f}px;white-space:nowrap"><span class="body" style="font-size:{fs * .42:.0f}px;color:{col}">Full-arch implants from</span>'
+            f'<span class="hl" style="font-size:{fs:.0f}px;line-height:1;color:{GOLD}">£15,000</span><span class="body" style="font-size:{fs * .42:.0f}px;color:{col}">per arch</span></div>')
+
+
+def g1(size):
+    """VT-13 Team mosaic: six real practice and team photos with the headline."""
+    name = f"{IMP} | Static | Team photo | The team"
+    if size == "ls":
+        inner = f"""{mosaic(560, 40, 3, 184, 266, 12)}
+<div class="abs" style="left:56px;top:46px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:140px;width:460px;font-size:48px;color:{LINEN}">The Team Behind <b>Your New Teeth.</b></div>
+<div class="abs body" style="left:56px;top:300px;width:450px;font-size:17px">Full-arch implants, planned and looked after in Norwich.</div>
+<div class="abs" style="left:56px;top:380px">{arch_price(36)}</div>
+<div class="abs" style="left:56px;top:470px">{cta(CTA_CONSULT, 17)}</div>
+<div class="abs" style="left:56px;top:560px">{proof(13, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:260px">{logo(190, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:80px;top:360px;width:920px;font-size:84px;color:{LINEN}">The Team Behind <b>Your New Teeth.</b></div>
+{mosaic(80, 600, 2, 452, 250, 16)}
+<div class="abs body" style="left:80px;top:1440px;width:920px;font-size:26px">Full-arch implants, planned and looked after in Norwich.</div>
+<div class="abs" style="left:80px;top:1500px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 24)}{proof(17, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    inner = f"""<div class="abs" style="left:70px;top:56px">{logo(170, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:70px;top:130px;width:940px;font-size:66px;color:{LINEN}">The Team Behind <b>Your New Teeth.</b></div>
+{mosaic(70, 330, 3, 302, 260, 17)}
+<div class="abs body" style="left:70px;top:900px;width:600px;font-size:21px">Planned and looked after in Norwich.</div>
+<div class="abs" style="left:70px;top:960px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 21)}{proof(15, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+def g2(size):
+    """Custom: type-led price on Charcoal, gold rule, monogram watermark, circle of the consult room."""
+    name = f"{IMP} | Static | Typographic | The real price"
+    big = lambda fs: (f'<div class="eyebrow" style="font-size:{fs * .13:.0f}px">Full-arch implants</div>'
+                      f'<div class="hl" style="font-size:{fs * .3:.0f}px;color:{LINEN};margin-top:{fs * .1:.0f}px">from</div>'
+                      f'<div class="hl" style="font-size:{fs:.0f}px;line-height:.9;color:{GOLD};white-space:nowrap">£15,000</div>'
+                      f'<div class="hl" style="font-size:{fs * .36:.0f}px;color:{LINEN};margin-top:{fs * .05:.0f}px">per arch.</div>')
+    if size == "ls":
+        inner = f"""{mono(560, 'cream', 'position:absolute;left:760px;top:-60px;opacity:.06')}
+{circle('consult-room.jpg', 860, 170, 300, .45, .5, disc=(0, 210, 70))}
+<div class="abs" style="left:56px;top:46px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:56px;top:120px">{big(150)}</div>
+<div class="abs rule" style="left:56px;top:425px;width:80px"></div>
+<div class="abs body" style="left:56px;top:445px;width:620px;font-size:17px">Free consultation with a 3D scan and a written plan.</div>
+<div class="abs" style="left:56px;top:510px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 17)}{proof(13, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{mono(1100, 'cream', 'position:absolute;left:200px;top:300px;opacity:.06')}
+<div class="abs" style="left:80px;top:270px">{logo(120, 'cream')}</div>
+<div class="abs" style="left:80px;top:500px">{big(270)}</div>
+<div class="abs rule" style="left:80px;top:1060px;width:110px"></div>
+<div class="abs body" style="left:80px;top:1100px;width:520px;font-size:28px">Free consultation with a 3D scan and a written plan.</div>
+{circle('consult-room.jpg', 640, 1060, 360, .45, .5, disc=(270, 260, 90))}
+<div class="abs" style="left:80px;top:1260px">{proof(18, LINEN)}</div>
+<div class="abs" style="left:80px;top:1340px">{cta(CTA_CONSULT, 25)}</div>"""
+        return board(size, name, inner, bg="char")
+    inner = f"""{mono(820, 'cream', 'position:absolute;left:420px;top:240px;opacity:.06')}
+<div class="abs" style="left:70px;top:70px">{logo(100, 'cream')}</div>
+<div class="abs" style="left:70px;top:250px">{big(220)}</div>
+<div class="abs rule" style="left:70px;top:700px;width:90px"></div>
+<div class="abs body" style="left:70px;top:730px;width:560px;font-size:24px">Free consultation with a 3D scan and a written plan.</div>
+{circle('consult-room.jpg', 700, 620, 320, .45, .5, disc=(0, 230, 76))}
+<div class="abs" style="left:70px;top:840px">{cta(CTA_CONSULT, 22)}</div>
+<div class="abs" style="left:70px;top:960px">{proof(17, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+G3_QS = ["Can I see my 3D scan?", "What's the full price, in writing?", "Who looks after it afterwards?", "How many appointments, and where?", "Could I leave with teeth the same day?"]
+
+
+def q_card(w, fs, rot=-1.2):
+    rows = "".join(f'<div style="display:flex;align-items:baseline;gap:{fs * .8:.0f}px;padding:{fs * .62:.0f}px 0;border-bottom:1.5px solid rgba(190,161,122,.4)">'
+                   f'<span class="hl" style="font-size:{fs * 1.4:.0f}px;color:{GOLD};width:{fs * 1.2:.0f}px;flex:none">{i + 1}</span>'
+                   f'<span style="font-family:Montserrat;font-weight:500;font-size:{fs:.0f}px;line-height:1.3;color:{INK}">{q}</span></div>' for i, q in enumerate(G3_QS))
+    return (f'<div style="width:{w}px;padding:{fs * 1.3:.0f}px {fs * 1.4:.0f}px {fs:.0f}px;background:#FCFAF6;transform:rotate({rot}deg);'
+            f'box-shadow:0 {fs * .9:.0f}px {fs * 2.4:.0f}px rgba(46,36,24,.28),0 2px 4px rgba(46,36,24,.15)">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center">{logo(round(fs * 8), "charcoal", "horizontal")}<span class="eyebrow" style="font-size:{fs * .55:.0f}px">Before you decide</span></div>'
+            f'<div style="margin-top:{fs * .3:.0f}px">{rows}</div></div>')
+
+
+def g3(size):
+    """Custom: a printed question card on Linen with a circle of the real 3D scanner."""
+    name = f"{IMP} | Static | Typographic | Questions worth asking"
+    if size == "ls":
+        inner = f"""{circle('cbct.jpg', 1010, -70, 260, .42, .4, disc=(10, 180, 50))}
+<div class="abs hl" style="left:56px;top:60px;width:440px;font-size:46px">Five Questions To Ask <b>Before Full-Arch Implants.</b></div>
+<div class="abs" style="left:56px;top:330px">{cta(CTA_CONSULT, 17)}</div>
+<div class="abs" style="left:56px;top:420px">{proof(14)}</div>
+<div class="abs" style="left:56px;top:520px">{logo(170, 'charcoal', 'horizontal')}</div>
+<div class="abs" style="left:560px;top:50px">{q_card(560, 17)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{circle('cbct.jpg', 740, 200, 300, .42, .4, disc=(0, 210, 60))}
+<div class="abs" style="left:80px;top:270px">{logo(120)}</div>
+<div class="abs hl" style="left:80px;top:540px;width:920px;font-size:78px">Five Questions To Ask <b>Before Full-Arch Implants.</b></div>
+<div class="abs" style="left:90px;top:800px">{q_card(900, 28)}</div>
+<div class="abs" style="left:80px;top:1480px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 24)}{proof(17)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{circle('cbct.jpg', 790, -90, 380, .42, .4, disc=(20, 270, 70))}
+<div class="abs hl" style="left:70px;top:70px;width:700px;font-size:62px">Five Questions To Ask <b>Before Full-Arch Implants.</b></div>
+<div class="abs" style="left:80px;top:280px">{q_card(920, 23)}</div>
+<div class="abs" style="left:70px;top:930px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 22)}{proof(17)}</div>"""
+    return board(size, name, inner)
+
+
+G4_PROBLEMS = ["Teeth that wobble when you bite", "Infections that keep coming back", "Cutting everything up small"]
+G4_HEAD = "One Fixed Arch <b>Of New Teeth.</b>"
+
+
+def g4(size):
+    """VT-30 Problem and solution: three problems on Charcoal, arrow chip, solution over the consult room."""
+    name = f"{IMP} | Static | Practice photo | Loose teeth"
+    if size == "ls":
+        inner = f"""{photo('consult-room.jpg', 560, 0, 640, 628, .45, .5)}
+<div class="abs" data-name="Overlay" style="left:560px;top:0;width:640px;height:628px;background:linear-gradient(180deg,rgba(46,44,43,.25) 0%,rgba(46,44,43,.85) 45%,rgba(46,44,43,.92) 100%)"></div>
+<div class="abs" style="left:48px;top:40px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:48px;top:120px">{problems(20, 470, G4_PROBLEMS, "Sound familiar?")}</div>
+<div class="abs" style="left:48px;top:500px">{cta(CTA_CONSULT, 17)}</div>
+<div class="abs" style="left:530px;top:280px">{arrow_chip(60, 'right')}</div>
+<div class="abs" style="left:610px;top:290px;width:560px">{solution(40, G4_HEAD, arch_price(28))}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    split = 1000 if s9 else 560
+    inner = f"""{photo('consult-room.jpg', 0, split, 1080, (1920 if s9 else 1080) - split, .45, .5)}
+<div class="abs" data-name="Overlay" style="left:0;top:{split}px;width:1080px;height:{(1920 if s9 else 1080) - split}px;background:linear-gradient(180deg,rgba(46,44,43,.05) 0%,rgba(46,44,43,.88) {65 if s9 else 70}%)"></div>
+<div class="abs rule" style="left:0;right:0;top:{split}px;opacity:1"></div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{270 if s9 else 50}px">{logo(190 if s9 else 160, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{430 if s9 else 140}px">{problems(34 if s9 else 27, 900, G4_PROBLEMS)}</div>
+<div class="abs" style="left:{880 if s9 else 900}px;top:{split - 55}px">{arrow_chip(110 if s9 else 96)}</div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{1180 if s9 else 690}px;width:920px">{solution(84 if s9 else 62, G4_HEAD, arch_price(58 if s9 else 44))}</div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{1490 if s9 else 960}px;display:flex;align-items:center;gap:28px">{cta(CTA_CONSULT, 24 if s9 else 19)}{proof(17 if s9 else 14, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+def g5(size):
+    """VT-11 Statement: the real reception full bleed, warm scrim, gold rules and one large statement."""
+    name = f"{IMP} | Static | Practice photo | Often the same day"
+    stmt = lambda fs: f'<div class="hl" style="font-size:{fs}px;color:{LINEN};text-align:center">Walk In With Failing Teeth.<br><b>Often, Walk Out With New Ones.</b></div>'
+    if size == "ls":
+        inner = f"""{photo('reception-front.jpg', 0, 0, 1200, 628, .55, .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:rgba(46,44,43,.78)"></div>
+<div class="abs" style="left:0;right:0;top:40px;display:flex;justify-content:center">{logo(170, 'cream', 'horizontal')}</div>
+<div class="abs rule" style="left:520px;width:160px;top:130px"></div>
+<div class="abs" style="left:80px;right:80px;top:165px">{stmt(48)}</div>
+<div class="abs rule" style="left:520px;width:160px;top:320px"></div>
+<div class="abs" style="left:0;right:0;top:360px;display:flex;justify-content:center">{arch_price(34)}</div>
+<div class="abs" style="left:0;right:0;top:450px;display:flex;justify-content:center;align-items:center;gap:24px">{cta(CTA_CONSULT, 17)}{proof(13, LINEN)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    H = 1920 if s9 else 1080
+    inner = f"""{photo('DJI_20260322152923_0097_D-scaled.jpg' if s9 else 'reception-front.jpg', 0, 0, 1080, H, .5, .45 if s9 else .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,.7),rgba(46,44,43,.82) 50%,rgba(46,44,43,.9))"></div>
+<div class="abs" style="left:0;right:0;top:{270 if s9 else 70}px;display:flex;justify-content:center">{logo(130 if s9 else 110, 'cream')}</div>
+<div class="abs rule" style="left:440px;width:200px;top:{620 if s9 else 300}px"></div>
+<div class="abs" style="left:70px;right:70px;top:{680 if s9 else 340}px">{stmt(92 if s9 else 70)}</div>
+<div class="abs rule" style="left:440px;width:200px;top:{1110 if s9 else 660}px"></div>
+<div class="abs" style="left:0;right:0;top:{1170 if s9 else 710}px;display:flex;justify-content:center">{arch_price(60 if s9 else 50)}</div>
+<div class="abs" style="left:0;right:0;top:{1330 if s9 else 840}px;display:flex;justify-content:center">{cta(CTA_CONSULT, 25 if s9 else 22)}</div>
+<div class="abs" style="left:0;right:0;top:{1460 if s9 else 960}px;display:flex;justify-content:center">{proof(18 if s9 else 16, LINEN)}</div>"""
+    return board(size, name, inner)
+
+
 PERSONAS = {"mark": [m1, m2, m3, m4, m5], "denise": [d1, d2, d3, d4, d5],
             "michelle": [mi1, mi2, mi3, mi4, mi5],
             "hannah": [h1, h2, h3, h4, h5],
-            "peter": [p1, p2, p3, p4, p5]}
+            "peter": [p1, p2, p3, p4, p5],
+            "geoff": [g1, g2, g3, g4, g5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
