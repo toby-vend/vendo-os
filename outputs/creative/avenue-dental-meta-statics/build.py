@@ -368,7 +368,182 @@ def p5(size):
     return board(size, name, inner)
 
 
-PERSONAS = {"peter": [p1, p2, p3, p4, p5]}
+# ---------------------------------------------------------------- GEOFF (full arch)
+GEOFF = "Missing Teeth"
+TICK = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" style="display:block;flex:none" fill="none" stroke="{c}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg>'
+
+
+def ticks(items, size=24, gap=14, color=WHITE, tick=GOLD):
+    return "".join(f'<div style="display:flex;align-items:center;gap:{size * .6:.0f}px;margin-top:{gap if i else 0}px;font-family:Lexend;font-weight:300;font-size:{size}px;color:{color}">'
+                   f'{TICK.format(s=round(size * 1.1), c=tick)}{t}</div>' for i, t in enumerate(items))
+
+
+def address(size=18, color=SOFT):
+    return f'<div style="display:flex;align-items:center;gap:{size * .5:.0f}px;font-family:Lexend;font-weight:300;font-size:{size}px;color:{color}">{PIN.format(s=round(size * 1.2))}2 Lime Avenue, Leamington Spa, CV32 7DA</div>'
+
+
+def g1(size):
+    """Custom: editorial, dark. Leaf-framed portrait bleeding off the edge, headline left."""
+    name = f"{GEOFF} | Static | Stock 60-70 | Not for a day"
+    if size == "ls":
+        inner = f"""
+{photo('geoff-table.jpg', 640, 0, 560, 628, .46, .42, corner='bl', r=120)}
+<div class="abs" style="left:60px;top:52px">{logo(118)}</div>
+<div class="abs hl" style="left:60px;top:170px;width:540px;font-size:58px">You won't leave without teeth. <b>Not for a day.</b></div>
+<div class="abs label" style="left:60px;top:370px;font-size:14px;color:{GOLD}">Full-arch implants, fixed the same day</div>
+<div class="abs" style="left:60px;top:430px">{cta(CTA_FREE, 18)}</div>
+<div class="abs" style="left:60px;top:520px">{proof(14)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""
+{photo('geoff-table.jpg', 0, 0, 1080, 1130, .46, .4, corner='br', r=220)}
+<div class="abs" style="left:0;right:0;top:0;height:420px;background:linear-gradient(180deg,rgba(27,27,27,.75),rgba(27,27,27,0))"></div>
+<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
+<div class="abs hl" style="left:80px;top:1165px;width:920px;font-size:84px">You won't leave without teeth. <b>Not for a day.</b></div>
+<div class="abs label" style="left:80px;top:1440px;font-size:21px;color:{GOLD}">Full-arch implants, fixed the same day</div>
+<div class="abs" style="left:80px;top:1495px;display:flex;align-items:center;gap:34px">{cta(CTA_FREE, 26)}{proof(21)}</div>"""
+        return board(size, name, inner)
+    inner = f"""
+{photo('geoff-table.jpg', 560, 0, 520, 1080, .46, .45, corner='bl', r=200)}
+<div class="abs" style="left:80px;top:80px">{logo(130)}</div>
+<div class="abs hl" style="left:80px;top:300px;width:470px;font-size:80px">You won't leave without teeth. <b>Not for a day.</b></div>
+<div class="abs label" style="left:80px;top:690px;width:440px;font-size:18px;line-height:1.6;color:{GOLD}">Full-arch implants,<br>fixed the same day</div>
+<div class="abs" style="left:80px;top:810px">{cta(CTA_FREE, 22)}</div>
+<div class="abs" style="left:80px;top:930px">{proof(18)}</div>"""
+    return board(size, name, inner)
+
+
+def pills(items, size=20):
+    return "".join(f'<span style="display:inline-flex;align-items:center;gap:{size * .5:.0f}px;padding:{size * .55:.0f}px {size * .8:.0f}px;border:1.5px solid rgba(168,140,97,.7);border-radius:999px;font-family:Lexend;font-weight:300;font-size:{size}px;color:{WHITE};white-space:nowrap">{TICK.format(s=size, c=GOLD)}{t}</span>' for t in items)
+
+
+G2_PILLS = ["Free consultation", "3D scan included", "12-month guarantee"]
+
+
+def g2(size):
+    """VT-03 Brand card over a practice photo."""
+    name = f"{GEOFF} | Static | Practice photo | One plan instead of another repair"
+    def card(w, fs, ps, pad, logo_w):
+        return (f'<div style="width:{w}px;background:rgba(27,27,27,.94);border-radius:0 {pad * 1.6:.0f}px 0 0;padding:{pad}px">'
+                f'<div style="margin-bottom:{pad * .7:.0f}px">{logo(logo_w)}</div>'
+                f'<div class="hl" style="font-size:{fs}px;color:{SOFT};font-weight:400;line-height:1.25">Another crown.<br>Another filling.<br>Another tooth that\'s started to move.</div>'
+                f'<div class="hl" style="font-size:{fs * 1.25:.0f}px;margin-top:{pad * .45:.0f}px"><b>Or one plan for the whole arch.</b></div>'
+                f'<div style="display:flex;flex-wrap:wrap;gap:{ps * .6:.0f}px;margin-top:{pad * .6:.0f}px">{pills(G2_PILLS, ps)}</div>'
+                f'<div style="display:flex;align-items:center;gap:{pad * .5:.0f}px;margin-top:{pad * .7:.0f}px">{cta(CTA_FREE, ps + 2)}{proof(ps - 2)}</div></div>')
+    if size == "ls":
+        inner = f"""{photo('lounge-sign.jpg', 0, 0, 1200, 628, .5, .45)}
+<div class="abs" style="left:40px;top:40px">{card(640, 30, 15, 34, 100)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    H = 1920 if s9 else 1080
+    inner = f"""{photo('lounge-sign.jpg', 0, 0, 1080, H, .5, .4)}
+<div class="abs" style="left:70px;top:{900 if s9 else 520}px">{card(940, 44, 20, 48, 130)}</div>"""
+    return board(size, name, inner)
+
+
+def g3(size):
+    """VT-06 Offer footer: the free consultation and 3D scan as the offer."""
+    name = f"{GEOFF} | Static | Practice photo | Start with a free 3D scan"
+    def panel(w, big, sm, pad, logo_w):
+        return (f'<div style="display:flex;gap:{pad}px;align-items:flex-start">'
+                f'<div style="flex:1"><div class="label" style="font-size:{sm}px;color:{GOLD}">Full-arch implants · Step one</div>'
+                f'<div class="hl" style="font-size:{big}px;margin-top:{sm * .6:.0f}px;color:{GOLD};letter-spacing:-.02em">Free</div>'
+                f'<div class="body" style="font-size:{sm * 1.35:.0f}px;color:{WHITE};margin-top:{sm * .3:.0f}px">Consultation and 3D scan, worth £250</div>'
+                f'<div class="body" style="font-size:{sm * 1.15:.0f}px;margin-top:{sm * .5:.0f}px">No commitment to treatment</div></div>'
+                f'<div style="width:1.5px;align-self:stretch;background:rgba(168,140,97,.6)"></div>'
+                f'<div style="width:{logo_w * 1.9:.0f}px;display:flex;flex-direction:column;gap:{sm}px">{logo(logo_w)}{proof(sm - 1)}{cta(CTA_FREE, sm + 1)}</div></div>')
+    if size == "ls":
+        inner = f"""{photo('scanner-a.jpg', 0, 0, 480, 628, .45, .5, corner='br', r=110)}
+<div class="abs hl" style="left:530px;top:60px;width:610px;font-size:40px">You don't have to decide on a full arch today.</div>
+<div class="abs" style="left:530px;top:200px;width:620px">{panel(620, 110, 14, 26, 108)}</div>
+<div class="abs" style="left:530px;top:550px">{address(15)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    ph = 900 if s9 else 470
+    top = 250 if s9 else 0
+    inner = f"""{photo('scanner-a.jpg', 0, top, 1080, ph, .45, .45, corner='br' if s9 else None, r=160)}
+<div class="abs hl" style="left:80px;top:{top + ph + 50}px;width:920px;font-size:{60 if s9 else 50}px">You don't have to decide on a full arch today.</div>
+<div class="abs" style="left:80px;top:{top + ph + (230 if s9 else 190)}px;width:920px">{panel(920, 150 if s9 else 120, 19 if s9 else 17, 40, 140)}</div>
+<div class="abs" style="left:80px;top:{top + ph + (610 if s9 else 520)}px;width:920px;border-top:1.5px solid rgba(168,140,97,.5);padding-top:24px">{address(20 if s9 else 18)}</div>"""
+    return board(size, name, inner)
+
+
+def compare_lines(rows, size=24):
+    return "".join(f'<div style="display:flex;gap:{size}px;padding:{size * .7:.0f}px 0;border-top:1.5px solid rgba(168,140,97,.55)">'
+                   f'<span class="label" style="width:{size * 7:.0f}px;flex:none;font-size:{size * .6:.0f}px;color:{GOLD};padding-top:{size * .25:.0f}px">{a}</span>'
+                   f'<span class="body" style="font-size:{size}px;color:{WHITE}">{b}</span></div>' for a, b in rows) + '<div style="border-top:1.5px solid rgba(168,140,97,.55)"></div>'
+
+
+G4_ROWS = [("Check-ups", "Here on Lime Avenue, Leamington Spa"), ("Adjustments", "Book a time and drive over"), ("Guarantee", "12 months on the implants and teeth")]
+
+
+def g4(size):
+    """Custom: the building at night in a leaf frame, calm UK aftercare comparison."""
+    name = f"{GEOFF} | Static | Practice photo | Aftercare a drive away"
+    if size == "ls":
+        inner = f"""{photo('exterior-night.jpg', 700, 0, 500, 628, .4, .5, corner='bl', r=120)}
+<div class="abs" style="left:60px;top:52px">{logo(118)}</div>
+<div class="abs hl" style="left:60px;top:160px;width:600px;font-size:46px">Your check-ups should be a drive away, <b>not a flight.</b></div>
+<div class="abs" style="left:60px;top:320px;width:600px">{compare_lines(G4_ROWS[::2], 17)}</div>
+<div class="abs" style="left:60px;top:480px">{cta(CTA_FREE, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('exterior-night.jpg', 0, 250, 1080, 820, .5, .5, corner='br', r=200)}
+<div class="abs" style="left:80px;top:290px">{logo(150)}</div>
+<div class="abs hl" style="left:80px;top:1120px;width:920px;font-size:76px">Your check-ups should be a drive away, <b>not a flight.</b></div>
+<div class="abs" style="left:80px;top:1330px;width:920px">{compare_lines(G4_ROWS, 26)}</div>
+<div class="abs" style="left:80px;top:1610px">{cta(CTA_FREE, 26)}</div>"""
+        return board(size, name, inner).replace('top:1610px', 'top:1560px')
+    inner = f"""{photo('exterior-night.jpg', 560, 0, 520, 1080, .38, .5, corner='bl', r=200)}
+<div class="abs" style="left:80px;top:80px">{logo(130)}</div>
+<div class="abs hl" style="left:80px;top:270px;width:460px;font-size:62px">Your check-ups should be a drive away, <b>not a flight.</b></div>
+<div class="abs" style="left:80px;top:610px;width:440px">{compare_lines(G4_ROWS, 20)}</div>
+<div class="abs" style="left:80px;top:930px">{cta(CTA_FREE, 22)}</div>"""
+    return board(size, name, inner)
+
+
+MOSAIC = [("scanner-a.jpg", .45, .45), ("lounge-chat.jpg", .45, .5), ("mirror.jpg", .55, .45), ("scanner-b.jpg", .45, .45), ("dentist-treating.jpg", .5, .4), ("exterior-day.jpg", .5, .6)]
+G5_TICKS = ["Free full-arch consultation", "3D scan included", "4.9 from 227 Google reviews"]
+
+
+def mosaic(x, y, w, h, cols, rows, gap=6):
+    cw, ch = (w - gap * (cols - 1)) / cols, (h - gap * (rows - 1)) / rows
+    return "".join(photo(src, round(x + (i % cols) * (cw + gap)), round(y + (i // cols) * (ch + gap)), round(cw), round(ch), fx, fy)
+                   for i, (src, fx, fy) in enumerate(MOSAIC[:cols * rows]))
+
+
+def g5(size):
+    """VT-13 Team mosaic (real practice photos only)."""
+    name = f"{GEOFF} | Static | Practice photos | Meet the team"
+    if size == "ls":
+        inner = f"""{mosaic(560, 0, 640, 628, 3, 2)}
+<div class="abs" style="left:56px;top:52px">{logo(110)}</div>
+<div class="abs hl" style="left:56px;top:170px;width:460px;font-size:46px">Meet the team behind your <b>new smile</b></div>
+<div class="abs" style="left:56px;top:320px">{ticks(G5_TICKS, 17, 10)}</div>
+<div class="abs" style="left:56px;top:470px">{cta(CTA_FREE, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""
+<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
+<div class="abs hl" style="left:80px;top:470px;width:920px;font-size:84px">Meet the team behind your <b>new smile</b></div>
+<div class="abs" style="left:80px;top:700px">{ticks(G5_TICKS + ['Lime Avenue, Leamington Spa'], 26, 16)}</div>
+{mosaic(0, 960, 1080, 600, 3, 2)}
+<div class="abs" style="left:80px;top:1600px;display:none"></div>"""
+        inner = inner.replace('<div class="abs" style="left:80px;top:1600px;display:none"></div>', f'<div class="abs" style="left:80px;top:1478px">{cta(CTA_FREE, 26)}</div>')
+        inner = inner.replace(mosaic(0, 960, 1080, 600, 3, 2), mosaic(0, 940, 1080, 500, 3, 2))
+        return board(size, name, inner)
+    inner = f"""{mosaic(500, 0, 580, 1080, 2, 3)}
+<div class="abs" style="left:70px;top:80px">{logo(130)}</div>
+<div class="abs hl" style="left:70px;top:300px;width:400px;font-size:62px">Meet the team behind your <b>new smile</b></div>
+<div class="abs" style="left:70px;top:560px">{ticks(G5_TICKS, 20, 14)}</div>
+<div class="abs" style="left:70px;top:720px">{address(17)}</div>
+<div class="abs" style="left:70px;top:900px">{cta(CTA_FREE, 21)}</div>"""
+    return board(size, name, inner)
+
+PERSONAS = {"peter": [p1, p2, p3, p4, p5], "geoff": [g1, g2, g3, g4, g5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
