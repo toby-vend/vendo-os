@@ -258,17 +258,30 @@ export async function resolveAssigneeFromCall(
   );
   if (onCall.length === 0) return undefined;
 
-  // Build a name/email/initials lookup limited to on-call users.
+  // Build a name/email/initials lookup limited to on-call users. A key shared
+  // by two on-call people (two Alfies, two Benjamins) is dropped rather than
+  // letting whichever loaded last win — the caller then leaves it unresolved.
   const map = new Map<string, VendoAssignee>();
+  const ambiguous = new Set<string>();
+  const setUnique = (key: string, record: VendoAssignee) => {
+    if (!key || ambiguous.has(key)) return;
+    const existing = map.get(key);
+    if (existing && existing.gid !== record.gid) {
+      map.delete(key);
+      ambiguous.add(key);
+      return;
+    }
+    map.set(key, record);
+  };
   for (const u of onCall) {
     if (!u.email) continue;
     const record: VendoAssignee = { gid: u.gid, name: u.name, email: u.email };
-    map.set(u.name.toLowerCase().trim(), record);
-    map.set(norm(u.name), record);
+    setUnique(u.name.toLowerCase().trim(), record);
+    setUnique(norm(u.name), record);
     const parts = u.name.split(/\s+/);
-    if (parts[0]) map.set(parts[0].toLowerCase(), record);
-    if (parts.length > 1) map.set(parts[parts.length - 1].toLowerCase(), record);
-    map.set(u.email.toLowerCase(), record);
+    if (parts[0]) setUnique(parts[0].toLowerCase(), record);
+    if (parts.length > 1) setUnique(parts[parts.length - 1].toLowerCase(), record);
+    setUnique(u.email.toLowerCase(), record);
   }
 
   // Initials enrichment, scoped to on-call users only — so "SF" never
@@ -284,7 +297,7 @@ export async function resolveAssigneeFromCall(
         map.get(fullName) ||
         map.get(norm(row.name as string)) ||
         map.get(fullName.split(/\s+/)[0]);
-      if (existing) map.set(initials, existing);
+      if (existing) setUnique(initials, existing);
     }
   } catch {
     /* table may not exist */

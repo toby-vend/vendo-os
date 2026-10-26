@@ -278,6 +278,7 @@ export const fathomWebhookRoutes: FastifyPluginAsync = async (app) => {
           meetingUrl: meeting.share_url || meeting.url || null,
           invitees: meeting.calendar_invitees || null,
           forceProjectMode: classification.type === 'SLT' ? 'slt_only' : undefined,
+          summary,
         });
         if (result.created > 0) {
           routedTo.push(classification.type === 'SLT' ? 'asana_slt_only' : 'asana_standard');
