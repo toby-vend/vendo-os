@@ -58,7 +58,8 @@ body {{ background: #3a3733; font-family: Lexend, sans-serif; font-weight: 300; 
 .label {{ font-family: Jost, sans-serif; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; }}
 .eyebrow {{ display: flex; align-items: center; gap: .7em; font-family: Jost, sans-serif; font-weight: 500; }}
 .eyebrow:before {{ content: ''; width: 2.2em; height: 2px; background: {GOLD}; }}
-.cta {{ display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; font-family: Jost, sans-serif; font-weight: 600; white-space: nowrap; background: {GOLD}; color: {BLACK}; }}
+.cta {{ display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; font-family: Jost, sans-serif; font-weight: 600; white-space: nowrap; background: linear-gradient(180deg, #D3B67F 0%, {GOLD} 52%, #8C7149 100%); color: {BLACK}; box-shadow: inset 0 2px 0 rgba(255,240,212,.55), inset 0 -2px 0 rgba(60,44,20,.35), 0 12px 28px rgba(0,0,0,.4); }}
+.glow {{ text-shadow: 0 0 46px rgba(196,156,96,.45); }}
 .rule {{ height: 1.5px; background: {GOLD}; opacity: .7; }}
 """
 
@@ -117,8 +118,21 @@ def wash(direction="90deg", a=.96, b=0, stop=60, extra=""):
             f'rgba(27,27,27,{a}) 0%,rgba(27,27,27,{(a + b) / 2:.2f}) {stop * .6:.0f}%,rgba(27,27,27,{b}) {stop}%)"></div>')
 
 
+def lit(size, light=False):
+    """Board background: the brand black (or blush) lit like a room, from depth.panel."""
+    import depth
+    w, h = SIZES[size]
+    m = max(w, h)
+    glows = [(w * .3, h * .24, m * .3, .17), (w * .68, h * .72, m * .36, .08)]
+    if light:
+        return f"{BLUSH} url({depth.panel(w, h, glows, key='bg-blush', ink=BLUSH, tone='#7A6447', light='#FFF8EE', vignette=.13)}) center/cover"
+    return f"{BLACK} url({depth.panel(w, h, glows, key='bg-dark')}) center/cover"
+
+
 def board(size, name, inner, bg=BLACK):
     w, h = SIZES[size]
+    if bg in (BLACK, BLUSH):
+        bg = lit(size, bg == BLUSH)
     return (f'<div class="ab" data-name="{name} | {SUFFIX[size]} | {DATE}" style="width:{w}px;height:{h}px;background:{bg}">'
             f'{inner}<div class="grain"></div></div>')
 
@@ -203,9 +217,9 @@ def p1(size):
 <div class="abs" style="left:60px;top:400px">{proof(16)}</div>
 <div class="abs" style="left:60px;top:448px">{cta(CTA_FREE, 19)}</div>
 <div class="abs body" style="left:60px;top:540px;font-size:16px;color:{GOLD}">Single implants from £2,450, crown included</div>
-<div class="abs" style="left:590px;top:90px;width:270px;height:330px;background:{PANEL};border-radius:0 40px 0 0;padding:26px 20px">
+<div class="abs" style="left:590px;top:90px;width:270px;height:330px;background:linear-gradient(180deg,#2E2B28 0%,#1F1E1C 100%);box-shadow:inset 0 1px 0 rgba(255,240,212,.08),0 26px 56px rgba(0,0,0,.5);border-radius:0 40px 0 0;padding:26px 20px">
   <div class="label" style="font-size:12px;color:{GOLD}">Now</div><div style="margin-top:44px">{jaw_now(230, 148)}</div></div>
-<div class="abs" style="left:900px;top:90px;width:270px;height:330px;background:{PANEL};border-radius:0 40px 0 0;padding:26px 20px">
+<div class="abs" style="left:900px;top:90px;width:270px;height:330px;background:linear-gradient(180deg,#2E2B28 0%,#1F1E1C 100%);box-shadow:inset 0 1px 0 rgba(255,240,212,.08),0 26px 56px rgba(0,0,0,.5);border-radius:0 40px 0 0;padding:26px 20px">
   <div class="label" style="font-size:12px;color:{GOLD}">Over time</div><div style="margin-top:44px">{jaw_later(230, 148)}</div></div>
 <div class="abs body" style="left:590px;top:450px;width:580px;font-size:18px">Teeth either side lean in, the one above drops, and the bone shrinks back.</div>
 <div class="abs" style="left:858px;top:236px;width:40px;height:40px;border-radius:50%;background:{GOLD};display:flex;align-items:center;justify-content:center;color:{BLACK};font-family:Jost;font-size:22px;font-weight:600">&rarr;</div>"""
@@ -215,10 +229,10 @@ def p1(size):
     inner = f"""
 <div class="abs" style="left:0;right:0;top:{top}px;display:flex;justify-content:center">{logo(170 if s9 else 150)}</div>
 <div class="abs hl" style="left:80px;right:80px;top:{top + (210 if s9 else 175)}px;text-align:center;font-size:{74 if s9 else 62}px">Nobody can see the gap.<br><b>Here's why it still matters.</b></div>
-<div class="abs" style="left:80px;top:{top + (480 if s9 else 365)}px;width:440px;height:{400 if s9 else 330}px;background:{PANEL};border-radius:0 48px 0 0;padding:30px 30px">
+<div class="abs" style="left:80px;top:{top + (480 if s9 else 365)}px;width:440px;height:{400 if s9 else 330}px;background:linear-gradient(180deg,#2E2B28 0%,#1F1E1C 100%);box-shadow:inset 0 1px 0 rgba(255,240,212,.08),0 26px 56px rgba(0,0,0,.5);border-radius:0 48px 0 0;padding:30px 30px">
   <div class="label" style="font-size:15px;color:{GOLD}">Now</div>
   <div style="margin-top:{60 if s9 else 34}px">{jaw_now(380, 244)}</div></div>
-<div class="abs" style="left:560px;top:{top + (480 if s9 else 365)}px;width:440px;height:{400 if s9 else 330}px;background:{PANEL};border-radius:0 48px 0 0;padding:30px 30px">
+<div class="abs" style="left:560px;top:{top + (480 if s9 else 365)}px;width:440px;height:{400 if s9 else 330}px;background:linear-gradient(180deg,#2E2B28 0%,#1F1E1C 100%);box-shadow:inset 0 1px 0 rgba(255,240,212,.08),0 26px 56px rgba(0,0,0,.5);border-radius:0 48px 0 0;padding:30px 30px">
   <div class="label" style="font-size:15px;color:{GOLD}">Over time</div>
   <div style="margin-top:{60 if s9 else 34}px">{jaw_later(380, 244)}</div></div>
 <div class="abs" style="left:514px;top:{top + (650 if s9 else 505)}px;width:52px;height:52px;border-radius:50%;background:{GOLD};display:flex;align-items:center;justify-content:center;color:{BLACK};font-family:Jost;font-size:28px;font-weight:600">&rarr;</div>
@@ -314,7 +328,7 @@ def p4(size):
 {photo('lounge-sign.jpg', 600, 0, 600, 628, .45, .45)}
 {wash('90deg', 1, 0, 100, 'left:540px;right:0;')}
 <div class="abs label" style="left:60px;top:150px;font-size:14px;color:{GOLD}">A single implant, in full</div>
-<div class="abs hl" style="left:56px;top:178px;font-size:120px;color:{GOLD}">£2,450</div>
+<div class="abs hl glow" style="left:56px;top:178px;font-size:120px;color:{GOLD}">£2,450</div>
 <div class="abs" style="left:60px;top:330px;width:470px">{price_list(PETER_ITEMS[1:], 18)}</div>
 <div class="abs" style="left:60px;top:500px">{cta(CTA_FREE, 18)}</div>
 <div class="abs body" style="left:360px;top:516px;font-size:14px">Crown included</div>"""
@@ -325,7 +339,7 @@ def p4(size):
 {photo('lounge-sign.jpg', 0, 0, 1080, H, .5, .4)}
 <div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(27,27,27,.55) 0%,rgba(27,27,27,.88) {38 if s9 else 30}%,{BLACK} {62 if s9 else 56}%)"></div>
 <div class="abs label" style="left:80px;top:{780 if s9 else 330}px;font-size:{22 if s9 else 19}px;color:{GOLD}">A single implant, in full</div>
-<div class="abs hl" style="left:72px;top:{820 if s9 else 365}px;font-size:{220 if s9 else 180}px;color:{GOLD};letter-spacing:-.03em">£2,450</div>
+<div class="abs hl glow" style="left:72px;top:{820 if s9 else 365}px;font-size:{220 if s9 else 180}px;color:{GOLD};letter-spacing:-.03em">£2,450</div>
 <div class="abs" style="left:80px;top:{1090 if s9 else 590}px;width:920px">{price_list(PETER_ITEMS, 30 if s9 else 26)}</div>
 <div class="abs" style="left:80px;top:{1440 if s9 else 900}px;display:flex;align-items:center;gap:34px">{cta(CTA_FREE, 26 if s9 else 22)}{proof(21 if s9 else 18)}</div>"""
     return board(size, name, inner)
@@ -450,7 +464,7 @@ def g3(size):
     def panel(w, big, sm, pad, logo_w):
         return (f'<div style="display:flex;gap:{pad}px;align-items:flex-start">'
                 f'<div style="flex:1"><div class="label" style="font-size:{sm}px;color:{GOLD}">Full-arch implants · Step one</div>'
-                f'<div class="hl" style="font-size:{big}px;margin-top:{sm * .6:.0f}px;color:{GOLD};letter-spacing:-.02em">Free</div>'
+                f'<div class="hl glow" style="font-size:{big}px;margin-top:{sm * .6:.0f}px;color:{GOLD};letter-spacing:-.02em">Free</div>'
                 f'<div class="body" style="font-size:{sm * 1.35:.0f}px;color:{WHITE};margin-top:{sm * .3:.0f}px">Consultation and 3D scan, worth £250</div>'
                 f'<div class="body" style="font-size:{sm * 1.15:.0f}px;margin-top:{sm * .5:.0f}px">No commitment to treatment</div></div>'
                 f'<div style="width:1.5px;align-self:stretch;background:rgba(168,140,97,.6)"></div>'
@@ -723,7 +737,7 @@ def problems(size=28, gap=22):
 
 
 def price_tooth(big, small, color=GOLD):
-    return (f'<div style="display:flex;align-items:baseline;gap:{small * .5:.0f}px"><span class="body" style="font-size:{small}px;color:{SOFT}">from</span>'
+    return (f'<div class="glow" style="display:flex;align-items:baseline;gap:{small * .5:.0f}px"><span class="body" style="font-size:{small}px;color:{SOFT}">from</span>'
             f'<span class="hl" style="font-size:{big}px;color:{color}">£175</span><span class="body" style="font-size:{small}px;color:{SOFT}">per tooth</span></div>')
 
 
@@ -850,62 +864,85 @@ J4_USPS = ["Usually one visit", "No drilling in most cases", "Free smile preview
 
 
 def j4(size):
-    """VT-01 Offer band."""
+    """VT-01 Offer band, with depth: a lit band and Josh's head breaking over its edge (rim light, cast shadow)."""
+    import depth
     name = f"{SMO} | Static | Stock 24-32 | From £175 a tooth"
+    band_css = "box-shadow:0 30px 70px rgba(0,0,0,.55)"
     if size == "ls":
-        inner = f"""{photo('josh-tea.jpg', 600, 0, 600, 628, .5, .4)}
-<div class="abs" style="left:0;top:0;width:640px;height:628px;background:{BLACK};border-radius:0 0 120px 0"></div>
-<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
+        frame, fx, fy, zoom = (560, 0, 640, 628), .73, .5, 1.0
+        band = f'<div class="abs" data-name="Band" style="left:0;top:0;width:640px;height:628px;background:{lit("ls")};border-radius:0 0 120px 0;{band_css}"></div>'
+        clip = (0, 0, 640, 628)
+        text = f"""<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
 <div class="abs hl" style="left:56px;top:160px;font-size:44px">Even up your smile</div>
 <div class="abs" style="left:56px;top:220px">{price_tooth(76, 20)}</div>
 <div class="abs" style="left:56px;top:340px">{ticks(J4_USPS, 18, 10)}</div>
 <div class="abs" style="left:56px;top:500px">{cta(CTA_FREE, 18)}</div>"""
-        return board(size, name, inner)
-    s9 = size == "s9"
-    band = 1160 if s9 else 740
-    inner = f"""{photo('josh-tea.jpg', 0, band - 80, 1080, (1920 if s9 else 1080) - band + 80, .5, .3)}
-<div class="abs" style="left:0;top:0;width:1080px;height:{band}px;background:{BLACK};border-radius:0 0 {200 if s9 else 140}px 0"></div>
-<div class="abs" style="left:0;right:0;top:{270 if s9 else 60}px;display:flex;justify-content:center">{logo(150 if s9 else 120)}</div>
-<div class="abs hl" style="left:0;right:0;top:{470 if s9 else 220}px;text-align:center;font-size:{70 if s9 else 58}px">Even up your smile</div>
-<div class="abs" style="left:0;right:0;top:{560 if s9 else 296}px;display:flex;justify-content:center">{price_tooth(120 if s9 else 100, 30 if s9 else 26)}</div>
-<div class="abs" style="left:0;right:0;top:{760 if s9 else 440}px;display:flex;justify-content:center"><div>{ticks(J4_USPS, 28 if s9 else 23, 14)}</div></div>
-<div class="abs" style="left:0;right:0;top:{980 if s9 else 610}px;display:flex;justify-content:center">{cta(CTA_FREE, 26 if s9 else 22)}</div>"""
+    elif size == "s9":
+        frame, fx, fy, zoom = (0, 1000, 1080, 920), .347, 0, 1.2
+        band = f'<div class="abs" data-name="Band" style="left:0;top:0;width:1080px;height:1160px;background:{lit("s9")};border-radius:0 0 200px 0;{band_css}"></div>'
+        clip = (0, 0, 1080, 1160)
+        text = f"""<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
+<div class="abs hl" style="left:80px;top:470px;font-size:72px">Even up your smile</div>
+<div class="abs" style="left:80px;top:560px">{price_tooth(124, 30)}</div>
+<div class="abs" style="left:80px;top:770px">{ticks(J4_USPS, 28, 14)}</div>
+<div class="abs" style="left:80px;top:972px">{cta(CTA_FREE, 26)}</div>"""
+    else:
+        frame, fx, fy, zoom = (0, 500, 1080, 580), 0, 0, 1.4
+        band = f'<div class="abs" data-name="Band" style="left:0;top:0;width:1080px;height:700px;background:{BLACK} url({depth.panel(1080, 700, [(330, 300, 300, .22), (730, 700, 220, .16)], key="j4-band")}) center/cover;border-radius:0 0 140px 0;{band_css}"></div>'
+        clip = (0, 0, 1080, 700)
+        text = f"""<div class="abs" style="left:80px;top:70px">{logo(120)}</div>
+<div class="abs hl" style="left:80px;top:215px;font-size:60px">Even up your smile</div>
+<div class="abs" style="left:80px;top:290px">{price_tooth(104, 26)}</div>
+<div class="abs" style="left:80px;top:440px">{ticks(J4_USPS, 23, 14)}</div>
+<div class="abs" style="left:80px;top:596px">{cta(CTA_FREE, 22)}</div>"""
+    josh = depth.person("josh-tea-cut.png", SIZES[size], frame, fx, fy, zoom, key=f"j4-josh-{size}", shadow_clip=clip,
+                        shadow=(-22, 30, 30, .6) if size == "ls" else (26, 34, 34, .6))
+    inner = f"""{photo('josh-tea.jpg', *frame, fx, fy, zoom)}
+{band}
+<img class="abs" data-name="Josh cut-out" src="{josh}" style="left:0;top:0;width:{SIZES[size][0]}px;height:{SIZES[size][1]}px">
+{text}"""
     return board(size, name, inner)
-
-
-def selfview(w, h, s):
-    S = lambda v: round(v * s)
-    return (f'<div class="abs" style="left:0;top:0;width:{w}px;height:{h}px;border:{S(4)}px solid {GOLD};border-radius:{S(22)}px"></div>'
-            f'<div class="abs" style="left:{S(18)}px;bottom:{S(18)}px;padding:{S(8)}px {S(16)}px;border-radius:{S(10)}px;background:rgba(27,27,27,.7);font-family:Lexend;font-size:{S(20)}px;color:{WHITE}">You</div>'
-            f'<div class="abs" style="right:{S(18)}px;bottom:{S(18)}px;width:{S(44)}px;height:{S(44)}px;border-radius:50%;background:rgba(27,27,27,.7);display:flex;align-items:center;justify-content:center">'
-            f'<svg width="{S(22)}" height="{S(22)}" viewBox="0 0 24 24" fill="none" stroke="{WHITE}" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>')
 
 
 def j5(size):
-    """Custom: native photo, the video-call self-view."""
+    """Custom: lit portrait. Josh cut out behind his laptop, closed-mouth smile, warm screen light; no call UI."""
+    import depth
     name = f"{SMO} | Static | Stock 24-32 | Closed-mouth smile"
+    w, h = SIZES[size]
     if size == "ls":
-        inner = f"""<div class="abs" style="left:620px;top:60px;width:540px;height:508px">{photo('josh-call2.jpg', 0, 0, 540, 508, .5, .35)}{selfview(540, 508, .8)}</div>
-<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
-<div class="abs hl" style="left:56px;top:170px;width:520px;font-size:46px">You've got a closed-mouth smile <b>for calls.</b></div>
+        frame = (420, 121, 760, 507)
+        glows = [(900, 260, 200, .2), (250, 170, 220, .14)]
+        text = f"""<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
+<div class="abs hl" style="left:56px;top:160px;width:520px;font-size:44px">You've got a closed-mouth smile <b>for calls.</b></div>
 <div class="abs" style="left:56px;top:350px">{price_tooth(54, 18)}</div>
-<div class="abs label" style="left:56px;top:430px;font-size:13px;color:{GOLD}">Edge bonding · usually one visit</div>
+<div class="abs label" style="left:56px;top:432px;font-size:13px;color:{GOLD}">Edge bonding · usually one visit</div>
 <div class="abs" style="left:56px;top:480px">{cta(CTA_FREE, 18)}</div>"""
-        return board(size, name, inner)
-    s9 = size == "s9"
-    if s9:
-        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
+    elif size == "s9":
+        frame = (-60, 1100, 1230, 820)
+        glows = [(760, 1330, 380, .22), (330, 520, 380, .14)]
+        text = f"""<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
 <div class="abs hl" style="left:80px;top:450px;width:920px;font-size:76px">You've got a closed-mouth smile <b>for calls.</b></div>
-<div class="abs" style="left:80px;top:720px;width:920px;height:640px">{photo('josh-call2.jpg', 0, 0, 920, 640, .5, .35)}{selfview(920, 640, 1.2)}</div>
-<div class="abs" style="left:80px;top:1400px">{price_tooth(70, 24)}</div>
-<div class="abs" style="left:560px;top:1430px">{cta(CTA_FREE, 22)}</div>"""
-        return board(size, name, inner)
-    inner = f"""<div class="abs" style="left:70px;top:70px">{logo(120)}</div>
-<div class="abs hl" style="left:70px;top:210px;width:940px;font-size:58px">You've got a closed-mouth smile <b>for calls.</b></div>
-<div class="abs" style="left:70px;top:390px;width:940px;height:480px">{photo('josh-call2.jpg', 0, 0, 940, 480, .5, .3)}{selfview(940, 480, 1.0)}</div>
-<div class="abs" style="left:70px;top:915px">{price_tooth(60, 21)}</div>
-<div class="abs" style="left:600px;top:925px">{cta(CTA_FREE, 21)}</div>"""
-    return board(size, name, inner)
+<div class="abs" style="left:80px;top:740px">{price_tooth(84, 26)}</div>
+<div class="abs label" style="left:80px;top:870px;font-size:20px;color:{GOLD}">Edge bonding · usually one visit</div>
+<div class="abs" style="left:80px;top:930px">{cta(CTA_FREE, 24)}</div>"""
+    else:
+        frame = (120, 345, 1110, 740)
+        glows = [(850, 560, 300, .22), (280, 280, 300, .15)]
+        text = f"""<div class="abs" style="left:70px;top:70px">{logo(120)}</div>
+<div class="abs hl" style="left:70px;top:200px;width:460px;font-size:56px">You've got a closed-mouth smile <b>for calls.</b></div>
+<div class="abs" style="left:70px;top:540px">{price_tooth(64, 21)}</div>
+<div class="abs label" style="left:70px;top:640px;font-size:16px;color:{GOLD}">Edge bonding · usually one visit</div>
+<div class="abs" style="left:70px;top:690px">{cta(CTA_FREE, 21)}</div>
+<div class="abs" style="left:70px;top:985px">{proof(17)}</div>"""
+    bg = depth.panel(w, h, glows, key=f"j5-bg-{size}")
+    josh = depth.person("josh-call2-cut.png", (w, h), frame, .5, .5, 1.0, key=f"j5-josh-{size}", light=(1, -1), shadow=None)
+    lid = frame[1] + round(frame[3] * .79)  # the laptop lid sits in shadow; the screen lights his face, not the back of the lid
+    shade = f'<div class="abs" data-name="Overlay" style="left:0;top:{lid}px;width:{w}px;height:{h - lid}px;background:linear-gradient(180deg,rgba(20,18,16,.5) 0%,rgba(20,18,16,.72) 100%)"></div>'
+    inner = f"""<img class="abs" data-name="Josh cut-out" src="{josh}" style="left:0;top:0;width:{w}px;height:{h}px">
+{shade}
+{text}"""
+    return board(size, name, inner, bg=f"{BLACK} url({bg}) center/cover")
+
 
 # ---------------------------------------------------------------- MARK (lapsed patient)
 GEN = "General"
@@ -1021,7 +1058,7 @@ def ma5(size):
     """VT-10 Membership."""
     name = f"{GEN} | Static | Practice photo | Spread the cost"
     price = lambda big, sm: (f'<div style="display:flex;align-items:baseline;gap:{sm * .5:.0f}px"><span class="body" style="font-size:{sm}px">from</span>'
-                             f'<span class="hl" style="font-size:{big}px;color:{GOLD}">£24.94</span><span class="body" style="font-size:{sm}px">a month</span></div>')
+                             f'<span class="hl glow" style="font-size:{big}px;color:{GOLD}">£24.94</span><span class="body" style="font-size:{sm}px">a month</span></div>')
     if size == "ls":
         inner = f"""{photo('mirror.jpg', 820, 0, 380, 628, .55, .45, corner='bl', r=110)}
 <div class="abs" style="left:56px;top:48px">{logo(110)}</div>

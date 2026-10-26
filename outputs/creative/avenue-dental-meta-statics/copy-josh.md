@@ -119,7 +119,7 @@ One appointment. Straight edges. Done.
 ---
 
 ## J5 | You on camera
-**Layout:** Custom: native photo. A man in his late twenties on a laptop video call, smiling with lips closed (licensed stock, cast to age), the call window's self-view tile outlined; one line above it.
+**Layout:** Custom: lit portrait. A man in his late twenties behind his laptop, smiling with lips closed (licensed stock, cast to age), cut out onto the lit dark backdrop with the laptop lid in shadow; headline, price and button in the left column. No call UI.
 **Awareness:** problem aware. **Sophistication:** 5 (identity). **Angle:** the accommodation: the closed-mouth smile.
 Research: "it's tricky to find any pics where I smile" ([Z]); "I rarely show my teeth when I smile" ([Z]).
 
