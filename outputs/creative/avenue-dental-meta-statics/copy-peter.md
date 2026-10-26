@@ -114,7 +114,7 @@ You leave with a written plan and the full cost. Nothing is booked until you dec
 
 The implant and crown are guaranteed for 12 months.
 
-4.9 from 227 Google reviews, from people in Leamington Spa, Warwick and Kenilworth.
+4.9 from 227 Google reviews.
 
 Tap below to book your free consultation. A £35 deposit holds the slot and is refunded when you arrive.
 
