@@ -124,7 +124,7 @@ Research: site: "Treating problems one at a time, years apart, is how people end
 **Headline:** One plan, so it all matches
 
 **Primary text:**
-A crown here, a filling there, whitening one year, a veneer five years later. That's how most smiles end up not quite matching.
+A crown here, a filling there, whitening one year, a veneer five years later. That's how smiles end up not quite matching.
 
 A smile makeover works the other way round. The shade, shape and spacing are decided once, with the finished result in mind.
 
