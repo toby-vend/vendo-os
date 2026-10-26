@@ -907,7 +907,149 @@ def j5(size):
 <div class="abs" style="left:600px;top:925px">{cta(CTA_FREE, 21)}</div>"""
     return board(size, name, inner)
 
-PERSONAS = {"peter": [p1, p2, p3, p4, p5], "geoff": [g1, g2, g3, g4, g5], "michelle": [mi1, mi2, mi3, mi4, mi5], "josh": [j1, j2, j3, j4, j5]}
+# ---------------------------------------------------------------- MARK (lapsed patient)
+GEN = "General"
+AWARD = '<img src="assets/award.png" style="display:block;width:{w}px">'
+
+
+def ma1(size):
+    """Custom: editorial, dark. The lounge in a leaf frame, headline left, commendation small."""
+    name = f"{GEN} | Static | Practice photo | Nobody will ask why"
+    if size == "ls":
+        inner = f"""{photo('lounge-sign.jpg', 700, 0, 500, 628, .4, .5, corner='bl', r=120)}
+<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
+<div class="abs hl" style="left:56px;top:160px;width:600px;font-size:48px">Nobody here will ask why you <b>left it so long.</b></div>
+<div class="abs" style="left:56px;top:350px">{proof(15)}</div>
+<div class="abs label" style="left:56px;top:392px;font-size:12px;color:{GOLD}">Highly Commended · Treatment of Nervous Patients</div>
+<div class="abs" style="left:56px;top:470px">{cta(CTA_BOOK, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('lounge-sign.jpg', 0, 250, 1080, 820, .45, .5, corner='br', r=200)}
+<div class="abs" style="left:80px;top:1110px">{logo(130)}</div>
+<div class="abs hl" style="left:80px;top:1240px;width:920px;font-size:72px">Nobody here will ask why you <b>left it so long.</b></div>
+<div class="abs" style="left:80px;top:1430px">{proof(21)}</div>
+<div class="abs" style="left:80px;top:1490px">{cta(CTA_BOOK, 24)}</div>
+<div class="abs" style="left:640px;top:1470px">{AWARD.format(w=170)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('lounge-sign.jpg', 580, 0, 500, 1080, .4, .5, corner='bl', r=200)}
+<div class="abs" style="left:70px;top:80px">{logo(130)}</div>
+<div class="abs hl" style="left:70px;top:280px;width:480px;font-size:68px">Nobody here will ask why you <b>left it so long.</b></div>
+<div class="abs label" style="left:70px;top:640px;width:460px;font-size:15px;line-height:1.7;color:{GOLD}">New patients welcome<br>on Lime Avenue</div>
+<div class="abs" style="left:70px;top:760px">{proof(17)}</div>
+<div class="abs" style="left:70px;top:830px">{cta(CTA_BOOK, 21)}</div>
+<div class="abs" style="left:66px;top:940px">{AWARD.format(w=150)}</div>"""
+    return board(size, name, inner)
+
+
+MA_STEPS = ["A full check-up, X-rays only if needed", "A 3D scan, so you can see it too", "A plan in plain English, with prices"]
+
+
+def tick_circles(items, size=26, gap=26, color=INK):
+    return "".join(f'<div style="display:flex;align-items:center;gap:{size * .7:.0f}px;margin-top:{gap if i else 0}px">'
+                   f'<div style="width:{size * 1.6:.0f}px;height:{size * 1.6:.0f}px;flex:none;border-radius:50%;background:{BLACK};display:flex;align-items:center;justify-content:center">{TICK.format(s=round(size * .9), c=GOLD)}</div>'
+                   f'<span class="body" style="font-size:{size}px;color:{color};font-weight:400">{t}</span></div>' for i, t in enumerate(items))
+
+
+def review_bar(w, size=20):
+    return (f'<div style="width:{w}px;display:flex;align-items:center;justify-content:space-between;padding:{size * .6:.0f}px {size * .6:.0f}px {size * .6:.0f}px {size * 1.2:.0f}px;border-radius:999px;background:{BLACK}">'
+            f'{proof(size)}{cta(CTA_BOOK, size, h=round(size * 2.6))}</div>')
+
+
+def ma2(size):
+    """VT-07 Three reasons, repurposed as three steps, on Blush Gold."""
+    name = f"{GEN} | Static | Practice photo | What actually happens"
+    if size == "ls":
+        inner = f"""{photo('lounge-chat.jpg', 860, 40, 300, 548, .3, .5, corner='tr', r=60)}
+<div class="abs hl" style="left:56px;top:50px;width:760px;font-size:40px;color:{INK}">If it's been years, <b>here's what happens.</b></div>
+<div class="abs" style="left:56px;top:180px">{tick_circles(MA_STEPS, 21, 20)}</div>
+<div class="abs" style="left:56px;top:430px">{review_bar(760, 17)}</div>
+<div class="abs" style="left:56px;top:525px">{logo(82, 'primary')}</div>"""
+        return board(size, name, inner, bg=BLUSH)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(140, 'primary')}</div>
+<div class="abs hl" style="left:80px;top:440px;width:920px;font-size:76px;color:{INK}">If it's been years, <b>here's what happens.</b></div>
+{photo('lounge-chat.jpg', 600, 700, 400, 560, .28, .5, corner='tr', r=80)}
+<div class="abs" style="left:80px;top:760px;width:500px">{tick_circles(MA_STEPS, 28, 60)}</div>
+<div class="abs" style="left:80px;top:1400px">{review_bar(920, 22)}</div>"""
+        return board(size, name, inner, bg=BLUSH)
+    inner = f"""<div class="abs hl" style="left:70px;top:80px;width:940px;font-size:62px;color:{INK}">If it's been years, <b>here's what happens.</b></div>
+{photo('lounge-chat.jpg', 640, 290, 370, 560, .28, .5, corner='tr', r=70)}
+<div class="abs" style="left:70px;top:330px;width:540px">{tick_circles(MA_STEPS, 26, 56)}</div>
+<div class="abs" style="left:70px;top:880px">{review_bar(940, 20)}</div>
+<div class="abs" style="left:70px;top:975px">{logo(100, 'primary')}</div>"""
+    return board(size, name, inner, bg=BLUSH)
+
+
+def ma3(size):
+    """VT-18 Native practice photo: the lounge, logo bug only."""
+    name = f"{GEN} | Static | Practice photo | The lounge"
+    w, h = SIZES[size]
+    bug = 110 if size == "ls" else 140
+    top = 250 if size == "s9" else 40
+    fy = {"s1": .3, "s9": .5, "ls": .22}[size]
+    inner = f"""{photo('lounge-sign.jpg', 0, 0, w, h, .5, fy)}
+<div class="abs" style="left:{w - bug - 40}px;top:{top}px;padding:14px 16px;border-radius:14px;background:rgba(27,27,27,.72)">{logo(bug)}</div>"""
+    return board(size, name, inner)
+
+
+def ma4(size):
+    """Custom: the client's own award mark, large on black."""
+    name = f"{GEN} | Static | Award | Highly Commended"
+    if size == "ls":
+        inner = f"""<div class="abs" style="left:40px;top:40px">{AWARD.format(w=560)}</div>
+<div class="abs" style="left:640px;top:0;width:1.5px;height:628px;background:{GOLD};opacity:.5"></div>
+<div class="abs" style="left:690px;top:60px">{logo(110)}</div>
+<div class="abs hl" style="left:690px;top:180px;width:470px;font-size:38px">If your last dentist made you feel bad, <b>start again here.</b></div>
+<div class="abs" style="left:690px;top:400px">{proof(15)}</div>
+<div class="abs" style="left:690px;top:460px">{cta(CTA_BOOK, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    inner = f"""<div class="abs" style="left:0;right:0;top:{270 if s9 else 70}px;display:flex;justify-content:center">{logo(140 if s9 else 120)}</div>
+<div class="abs" style="left:{90 if s9 else 190}px;top:{470 if s9 else 220}px">{AWARD.format(w=900 if s9 else 700)}</div>
+<div class="abs rule" style="left:340px;right:340px;top:{1170 if s9 else 760}px"></div>
+<div class="abs hl" style="left:80px;right:80px;top:{1220 if s9 else 795}px;text-align:center;font-size:{60 if s9 else 44}px">If your last dentist made you feel bad, <b>start again here.</b></div>
+<div class="abs" style="left:0;right:0;top:{1420 if s9 else 940}px;display:flex;justify-content:center;align-items:center;gap:30px">{cta(CTA_BOOK, 24 if s9 else 20)}{proof(20 if s9 else 17)}</div>"""
+    return board(size, name, inner)
+
+
+MA5_ITEMS = ["2 check-ups a year", "2 hygiene visits a year", "X-rays when needed", "20% off routine treatment"]
+
+
+def ma5(size):
+    """VT-10 Membership."""
+    name = f"{GEN} | Static | Practice photo | Spread the cost"
+    price = lambda big, sm: (f'<div style="display:flex;align-items:baseline;gap:{sm * .5:.0f}px"><span class="body" style="font-size:{sm}px">from</span>'
+                             f'<span class="hl" style="font-size:{big}px;color:{GOLD}">£24.94</span><span class="body" style="font-size:{sm}px">a month</span></div>')
+    if size == "ls":
+        inner = f"""{photo('mirror.jpg', 820, 0, 380, 628, .55, .45, corner='bl', r=110)}
+<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
+<div class="abs hl" style="left:56px;top:150px;font-size:40px">Join our dental <b>membership</b></div>
+<div class="abs" style="left:56px;top:220px">{price(66, 18)}</div>
+<div class="abs" style="left:56px;top:330px;display:grid;grid-template-columns:330px 330px;row-gap:12px">{''.join(ticks([t], 17) for t in MA5_ITEMS)}</div>
+<div class="abs" style="left:56px;top:480px">{cta(CTA_BOOK, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
+<div class="abs hl" style="left:80px;top:460px;width:920px;font-size:80px">Join our dental <b>membership</b></div>
+<div class="abs" style="left:80px;top:660px">{price(120, 30)}</div>
+<div class="abs" style="left:80px;top:860px">{ticks(MA5_ITEMS, 30, 22)}</div>
+{photo('mirror.jpg', 560, 1060, 520, 520, .55, .45, corner='tl', r=140)}
+<div class="abs" style="left:80px;top:1180px">{proof(21)}</div>
+<div class="abs" style="left:80px;top:1260px">{cta(CTA_BOOK, 24)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('mirror.jpg', 620, 600, 460, 480, .55, .45, corner='tl', r=130)}
+<div class="abs" style="left:70px;top:80px">{logo(130)}</div>
+<div class="abs hl" style="left:70px;top:270px;width:900px;font-size:66px">Join our dental <b>membership</b></div>
+<div class="abs" style="left:70px;top:420px">{price(100, 26)}</div>
+<div class="abs" style="left:70px;top:610px">{ticks(MA5_ITEMS, 24, 16)}</div>
+<div class="abs" style="left:70px;top:860px">{cta(CTA_BOOK, 21)}</div>
+<div class="abs" style="left:70px;top:970px">{proof(16)}</div>"""
+    return board(size, name, inner)
+
+PERSONAS = {"peter": [p1, p2, p3, p4, p5], "geoff": [g1, g2, g3, g4, g5], "michelle": [mi1, mi2, mi3, mi4, mi5], "josh": [j1, j2, j3, j4, j5], "mark": [ma1, ma2, ma3, ma4, ma5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
