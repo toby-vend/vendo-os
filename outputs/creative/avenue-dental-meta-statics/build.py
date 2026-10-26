@@ -712,7 +712,202 @@ def mi5(size):
 <div class="abs" style="left:70px;top:940px;display:flex;align-items:center;gap:30px">{cta(CTA_FREE, 22, dark=True)}<span class="label" style="font-size:16px;color:{GOLD}">One plan, one shade</span></div>"""
     return board(size, name, inner, bg=BLUSH)
 
-PERSONAS = {"peter": [p1, p2, p3, p4, p5], "geoff": [g1, g2, g3, g4, g5], "michelle": [mi1, mi2, mi3, mi4, mi5]}
+# ---------------------------------------------------------------- JOSH (edge bonding)
+J_PROBLEMS = ["A chipped corner", "Uneven edges", "A small gap"]
+TOOTH_ICON = '<svg width="{s}" height="{s}" viewBox="0 0 48 48" fill="none" stroke="{c}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:block;flex:none"><path d="M16 6c-5 0-9 4-9 10 0 5 2 8 3 12 1 5 2 14 6 14 3 0 3-9 8-9s5 9 8 9c4 0 5-9 6-14 1-4 3-7 3-12 0-6-4-10-9-10-3 0-5 2-8 2s-5-2-8-2z"/></svg>'
+
+
+def problems(size=28, gap=22):
+    return "".join(f'<div style="display:flex;align-items:center;gap:{size * .7:.0f}px;padding:{gap * .6:.0f}px 0;border-bottom:1.5px solid rgba(168,140,97,.4)">'
+                   f'{TOOTH_ICON.format(s=round(size * 1.3), c=GOLD)}<span class="hl" style="font-size:{size}px;font-weight:400">{t}</span></div>' for t in J_PROBLEMS)
+
+
+def price_tooth(big, small, color=GOLD):
+    return (f'<div style="display:flex;align-items:baseline;gap:{small * .5:.0f}px"><span class="body" style="font-size:{small}px;color:{SOFT}">from</span>'
+            f'<span class="hl" style="font-size:{big}px;color:{color}">£175</span><span class="body" style="font-size:{small}px;color:{SOFT}">per tooth</span></div>')
+
+
+def j1(size):
+    """VT-30 Problem and solution."""
+    name = f"{SMO} | Static | Practice photo | Chips edges gaps"
+    arrow = lambda d: f'<div style="width:{d}px;height:{d}px;border-radius:50%;background:{GOLD};display:flex;align-items:center;justify-content:center;color:{BLACK};font-family:Jost;font-weight:600;font-size:{d * .5:.0f}px">&rarr;</div>'
+    if size == "ls":
+        inner = f"""{photo('dentist-treating.jpg', 640, 0, 560, 628, .5, .4)}
+{wash('0deg', .92, 0, 60, 'left:640px;')}
+<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
+<div class="abs label" style="left:56px;top:170px;font-size:13px;color:{GOLD}">The problem</div>
+<div class="abs" style="left:56px;top:196px;width:500px">{problems(22, 16)}</div>
+<div class="abs" style="left:56px;top:470px">{cta(CTA_FREE, 18)}</div>
+<div class="abs" style="left:614px;top:290px">{arrow(52)}</div>
+<div class="abs label" style="left:690px;top:450px;font-size:13px;color:{GOLD}">The solution</div>
+<div class="abs hl" style="left:690px;top:476px;font-size:34px">Edge bonding</div>
+<div class="abs" style="left:690px;top:520px">{price_tooth(44, 17)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('dentist-treating.jpg', 0, 900, 1080, 1020, .5, .35)}
+{wash('0deg', .95, 0, 70, 'top:900px;')}
+<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
+<div class="abs label" style="left:80px;top:470px;font-size:20px;color:{GOLD}">The problem</div>
+<div class="abs" style="left:80px;top:510px;width:920px">{problems(40, 30)}</div>
+<div class="abs" style="left:500px;top:868px">{arrow(80)}</div>
+<div class="abs label" style="left:80px;top:1250px;font-size:20px;color:{GOLD}">The solution</div>
+<div class="abs hl" style="left:80px;top:1290px;font-size:70px">Edge bonding</div>
+<div class="abs" style="left:80px;top:1410px">{price_tooth(66, 24)}</div>
+<div class="abs" style="left:80px;top:1512px">{cta(CTA_FREE, 22)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('dentist-treating.jpg', 520, 0, 560, 1080, .5, .4)}
+{wash('0deg', .95, 0, 65, 'left:520px;')}
+<div class="abs" style="left:520px;top:0;width:2px;height:1080px;background:{GOLD};opacity:.6"></div>
+<div class="abs" style="left:70px;top:80px">{logo(130)}</div>
+<div class="abs label" style="left:70px;top:300px;font-size:17px;color:{GOLD}">The problem</div>
+<div class="abs" style="left:70px;top:336px;width:400px">{problems(30, 24)}</div>
+<div class="abs" style="left:70px;top:900px">{cta(CTA_FREE, 22)}</div>
+<div class="abs" style="left:490px;top:500px">{arrow(60)}</div>
+<div class="abs label" style="left:580px;top:760px;font-size:17px;color:{GOLD}">The solution</div>
+<div class="abs hl" style="left:580px;top:792px;font-size:54px">Edge bonding</div>
+<div class="abs" style="left:580px;top:860px">{price_tooth(64, 22)}</div>"""
+    return board(size, name, inner)
+
+
+def notif(w, s, title, body):
+    S = lambda v: round(v * s)
+    return (f'<div style="width:{w}px;padding:{S(22)}px {S(24)}px;border-radius:{S(26)}px;background:rgba(245,242,236,.82);display:flex;gap:{S(18)}px;align-items:flex-start;box-shadow:0 {S(8)}px {S(24)}px rgba(0,0,0,.25)">'
+            f'<div style="width:{S(58)}px;height:{S(58)}px;flex:none;border-radius:{S(14)}px;background:{BLACK};display:flex;align-items:center;justify-content:center">{mono(S(40))}</div>'
+            f'<div style="flex:1"><div style="display:flex;justify-content:space-between;font-family:Lexend;font-weight:500;font-size:{S(21)}px;color:#1b1b1b">Avenue Dental<span style="font-weight:300;color:#6b6760;font-size:{S(18)}px">now</span></div>'
+            f'<div style="font-family:Lexend;font-weight:500;font-size:{S(22)}px;color:#1b1b1b;margin-top:{S(4)}px">{title}</div>'
+            f'<div style="font-family:Lexend;font-weight:300;font-size:{S(21)}px;color:#2b2925;margin-top:{S(2)}px;line-height:1.35">{body}</div></div></div>')
+
+
+J2_N = [("Your smile preview is ready", "See your new edges before anything touches your teeth."), ("Edge bonding", "From £175 per tooth. Usually one visit.")]
+
+
+def j2(size):
+    """VT-27 Phone notification."""
+    name = f"{SMO} | Static | Stock 24-32 | Your smile preview"
+    clock = lambda fs: f'<div style="text-align:center;color:{WHITE}"><div style="font-family:Lexend;font-weight:400;font-size:{fs * .2:.0f}px">Tuesday</div><div style="font-family:Lexend;font-weight:500;font-size:{fs}px;line-height:1;letter-spacing:-.02em">18:42</div></div>'
+    if size == "ls":
+        inner = f"""{photo('josh-street.jpg', 0, 0, 1200, 628, .45, .35)}
+{wash('90deg', .1, .85, 100)}
+<div class="abs" style="left:60px;top:52px">{logo(118)}</div>
+<div class="abs" style="left:640px;top:70px">{notif(500, .8, *J2_N[0])}</div>
+<div class="abs" style="left:640px;top:210px">{notif(500, .8, *J2_N[1])}</div>
+<div class="abs hl" style="left:640px;top:360px;width:520px;font-size:40px">See it <b>before you decide.</b></div>
+<div class="abs" style="left:640px;top:480px">{cta(CTA_FREE, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    H = 1920 if s9 else 1080
+    inner = f"""{photo('josh-street.jpg', 0, 0, 1080, H, .52 if s9 else .5, .35)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(27,27,27,.45) 0%,rgba(27,27,27,.1) 35%,rgba(27,27,27,.55) 60%,rgba(27,27,27,.92) 100%)"></div>
+<div class="abs" style="left:0;right:0;top:{300 if s9 else 70}px">{clock(170 if s9 else 120)}</div>
+<div class="abs" style="left:90px;top:{1040 if s9 else 560}px">{notif(900, 1.15 if s9 else 1.05, *J2_N[0])}</div>
+<div class="abs" style="left:90px;top:{1230 if s9 else 735}px">{notif(900, 1.15 if s9 else 1.05, *J2_N[1])}</div>
+<div class="abs" style="left:90px;top:{1440 if s9 else 920}px;display:flex;align-items:center;gap:34px">{cta(CTA_FREE, 26 if s9 else 22)}{proof(21 if s9 else 18)}</div>"""
+    return board(size, name, inner)
+
+
+def notes_card(w, s, rot=-1.5):
+    S = lambda v: round(v * s)
+    lines = ["bonding vs veneers ??", "", "- chip on front left", "- the two either side look short", "- don't want them filed down", "- price??"]
+    body = "".join(f'<div style="min-height:{S(36)}px">{l}</div>' for l in lines[2:])
+    return (f'<div style="width:{w}px;border-radius:{S(28)}px;background:#FBFAF7;transform:rotate({rot}deg);box-shadow:0 {S(24)}px {S(60)}px rgba(0,0,0,.55);overflow:hidden">'
+            f'<div style="padding:{S(26)}px {S(34)}px {S(10)}px;font-family:Lexend;font-size:{S(20)}px;color:#C49C60;font-weight:500">&lsaquo; Notes</div>'
+            f'<div style="padding:{S(6)}px {S(34)}px {S(34)}px">'
+            f'<div style="font-family:Lexend;font-weight:600;font-size:{S(36)}px;color:#1b1b1b">{lines[0]}</div>'
+            f'<div style="font-family:Lexend;font-weight:300;font-size:{S(25)}px;color:#2b2925;margin-top:{S(16)}px;line-height:1.4">{body}</div></div></div>')
+
+
+J3_ROWS = [("Bonding", "Added to your tooth. No drilling in most cases. From £175 per tooth."), ("Veneers", "Thin shells for bigger changes. From £775 per tooth.")]
+
+
+def j3(size):
+    """Custom: native note-to-self."""
+    name = f"{SMO} | Static | Graphic | Bonding or veneers"
+    if size == "ls":
+        inner = f"""<div class="abs" style="left:60px;top:70px">{notes_card(470, .78)}</div>
+<div class="abs" style="left:600px;top:52px">{logo(110)}</div>
+<div class="abs hl" style="left:600px;top:160px;width:540px;font-size:38px">Keep your teeth. <b>Change the edges.</b></div>
+<div class="abs" style="left:600px;top:270px;width:540px">{compare_lines(J3_ROWS, 16)}</div>
+<div class="abs" style="left:600px;top:500px">{cta(CTA_FREE, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
+<div class="abs" style="left:110px;top:470px">{notes_card(860, 1.25)}</div>
+<div class="abs hl" style="left:80px;top:1060px;width:920px;font-size:64px">Keep your teeth. <b>Change the edges.</b></div>
+<div class="abs" style="left:80px;top:1265px;width:920px">{compare_lines(J3_ROWS, 24)}</div>
+<div class="abs" style="left:80px;top:1500px">{cta(CTA_FREE, 24)}</div>"""
+        return board(size, name, inner)
+    inner = f"""<div class="abs" style="left:70px;top:70px">{logo(120)}</div>
+<div class="abs" style="left:150px;top:170px">{notes_card(780, 1.08)}</div>
+<div class="abs hl" style="left:70px;top:650px;width:900px;font-size:50px">Keep your teeth. <b>Change the edges.</b></div>
+<div class="abs" style="left:70px;top:730px;width:940px">{compare_lines(J3_ROWS, 20)}</div>
+<div class="abs" style="left:70px;top:950px">{cta(CTA_FREE, 21)}</div>"""
+    return board(size, name, inner)
+
+
+J4_USPS = ["Usually one visit", "No drilling in most cases", "Free smile preview"]
+
+
+def j4(size):
+    """VT-01 Offer band."""
+    name = f"{SMO} | Static | Stock 24-32 | From £175 a tooth"
+    if size == "ls":
+        inner = f"""{photo('josh-tea.jpg', 600, 0, 600, 628, .5, .4)}
+<div class="abs" style="left:0;top:0;width:640px;height:628px;background:{BLACK};border-radius:0 0 120px 0"></div>
+<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
+<div class="abs hl" style="left:56px;top:160px;font-size:44px">Even up your smile</div>
+<div class="abs" style="left:56px;top:220px">{price_tooth(76, 20)}</div>
+<div class="abs" style="left:56px;top:340px">{ticks(J4_USPS, 18, 10)}</div>
+<div class="abs" style="left:56px;top:500px">{cta(CTA_FREE, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    band = 1160 if s9 else 740
+    inner = f"""{photo('josh-tea.jpg', 0, band - 80, 1080, (1920 if s9 else 1080) - band + 80, .5, .3)}
+<div class="abs" style="left:0;top:0;width:1080px;height:{band}px;background:{BLACK};border-radius:0 0 {200 if s9 else 140}px 0"></div>
+<div class="abs" style="left:0;right:0;top:{270 if s9 else 60}px;display:flex;justify-content:center">{logo(150 if s9 else 120)}</div>
+<div class="abs hl" style="left:0;right:0;top:{470 if s9 else 220}px;text-align:center;font-size:{70 if s9 else 58}px">Even up your smile</div>
+<div class="abs" style="left:0;right:0;top:{560 if s9 else 296}px;display:flex;justify-content:center">{price_tooth(120 if s9 else 100, 30 if s9 else 26)}</div>
+<div class="abs" style="left:0;right:0;top:{760 if s9 else 440}px;display:flex;justify-content:center"><div>{ticks(J4_USPS, 28 if s9 else 23, 14)}</div></div>
+<div class="abs" style="left:0;right:0;top:{980 if s9 else 610}px;display:flex;justify-content:center">{cta(CTA_FREE, 26 if s9 else 22)}</div>"""
+    return board(size, name, inner)
+
+
+def selfview(w, h, s):
+    S = lambda v: round(v * s)
+    return (f'<div class="abs" style="left:0;top:0;width:{w}px;height:{h}px;border:{S(4)}px solid {GOLD};border-radius:{S(22)}px"></div>'
+            f'<div class="abs" style="left:{S(18)}px;bottom:{S(18)}px;padding:{S(8)}px {S(16)}px;border-radius:{S(10)}px;background:rgba(27,27,27,.7);font-family:Lexend;font-size:{S(20)}px;color:{WHITE}">You</div>'
+            f'<div class="abs" style="right:{S(18)}px;bottom:{S(18)}px;width:{S(44)}px;height:{S(44)}px;border-radius:50%;background:rgba(27,27,27,.7);display:flex;align-items:center;justify-content:center">'
+            f'<svg width="{S(22)}" height="{S(22)}" viewBox="0 0 24 24" fill="none" stroke="{WHITE}" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>')
+
+
+def j5(size):
+    """Custom: native photo, the video-call self-view."""
+    name = f"{SMO} | Static | Stock 24-32 | Closed-mouth smile"
+    if size == "ls":
+        inner = f"""<div class="abs" style="left:620px;top:60px;width:540px;height:508px">{photo('josh-call2.jpg', 0, 0, 540, 508, .5, .35)}{selfview(540, 508, .8)}</div>
+<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
+<div class="abs hl" style="left:56px;top:170px;width:520px;font-size:46px">You've got a closed-mouth smile <b>for calls.</b></div>
+<div class="abs" style="left:56px;top:350px">{price_tooth(54, 18)}</div>
+<div class="abs label" style="left:56px;top:430px;font-size:13px;color:{GOLD}">Edge bonding · usually one visit</div>
+<div class="abs" style="left:56px;top:480px">{cta(CTA_FREE, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(150)}</div>
+<div class="abs hl" style="left:80px;top:450px;width:920px;font-size:76px">You've got a closed-mouth smile <b>for calls.</b></div>
+<div class="abs" style="left:80px;top:720px;width:920px;height:640px">{photo('josh-call2.jpg', 0, 0, 920, 640, .5, .35)}{selfview(920, 640, 1.2)}</div>
+<div class="abs" style="left:80px;top:1400px">{price_tooth(70, 24)}</div>
+<div class="abs" style="left:560px;top:1430px">{cta(CTA_FREE, 22)}</div>"""
+        return board(size, name, inner)
+    inner = f"""<div class="abs" style="left:70px;top:70px">{logo(120)}</div>
+<div class="abs hl" style="left:70px;top:210px;width:940px;font-size:58px">You've got a closed-mouth smile <b>for calls.</b></div>
+<div class="abs" style="left:70px;top:390px;width:940px;height:480px">{photo('josh-call2.jpg', 0, 0, 940, 480, .5, .3)}{selfview(940, 480, 1.0)}</div>
+<div class="abs" style="left:70px;top:915px">{price_tooth(60, 21)}</div>
+<div class="abs" style="left:600px;top:925px">{cta(CTA_FREE, 21)}</div>"""
+    return board(size, name, inner)
+
+PERSONAS = {"peter": [p1, p2, p3, p4, p5], "geoff": [g1, g2, g3, g4, g5], "michelle": [mi1, mi2, mi3, mi4, mi5], "josh": [j1, j2, j3, j4, j5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
