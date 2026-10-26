@@ -17,7 +17,7 @@ Rules for Geoff:
 ---
 
 ## G1 | The team
-**Layout:** VT-13 Team mosaic. Six real photos from the practice (team, surgery, 3D scanner, consult room) in a grid on Charcoal, with the headline and one USP line.
+**Layout:** VT-13 Team mosaic. Six real team portraits from the About page (Dr Ilias Kranias, Dr Lana Nashef, Dr Lana Haj Yahya and three of the nursing team) in a grid on Charcoal, unnamed on the image, with the headline and one USP line.
 **Awareness:** solution aware (he's comparing where to have it done). **Sophistication:** 5 (identity and trust: who looks after you). **Angle:** local people you can see, before and after.
 **Research:** "my remaining teeth started to wobble and the infections returned" [MN8]. "he talked me through all my options for replacing my missing teeth" [G14] (paraphrased, never quoted). Overseas worry: "UK dentists refuse to touch work that's been done abroad." [MN9] (context only, not used on the ad).
 
@@ -163,7 +163,7 @@ Find out if it could be you.
 1. **Price:** "from £15,000 per arch" is on the landing page and the fees page. Confirm it's current and what's included (implants, fixed teeth, scan, aftercare).
 2. **Same day:** the landing page says All-on-4 "often" lets patients leave with new teeth the same day. Confirm the clinical team is happy with "often", and that it's offered at Iconic now.
 3. **"Planned, placed and looked after here in Norwich" (G1):** confirm all stages (surgery, fitting, aftercare) happen at Magdalen Street, and that no part is referred out.
-4. **Team photos (G1):** uses the team photos from the website. Confirm everyone pictured is still at the practice and is happy to appear in ads. We haven't named anyone. If you'd like Dr Ilias named as the implant surgeon, please confirm.
+4. **Team photos (G1):** uses the six team portraits from the About page, dentists first (Dr Ilias, Dr Lana Nashef, Dr Lana Haj Yahya) then three nurses. Confirm everyone is still at the practice and happy to appear in ads. Names show on their tunic badges, not in the ad copy. If you'd like Dr Ilias named as the implant surgeon, please confirm.
 5. **Free consultation and 3D scan:** same check as Peter (note 2).
 6. **"Designed not to slip or move" (G4):** from the landing page ("a permanent solution that won't slip or move"). Softened to "designed not to". Confirm.
 7. **No abroad knocking:** G3 asks neutral questions and doesn't mention other countries on the image. The primary text mentions "abroad" once, as an option people compare. Happy to remove it.

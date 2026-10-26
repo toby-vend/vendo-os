@@ -1153,8 +1153,8 @@ def p5(size):
 
 
 # ---------------------------------------------------------------- GEOFF (failing teeth, full arch)
-MOSAIC = [("Tegan-Lewis-Dental-Nurse.jpg", .5, .35), ("surgery.jpg", .55, .5), ("P1217728.jpg", .5, .35),
-          ("cbct.jpg", .42, .45), ("P1080465.jpg", .5, .35), ("consult-room.jpg", .45, .5)]
+MOSAIC = [("team-dr-ilias-kranias.jpg", .5, .3), ("team-dr-lana-nashef.jpg", .5, .3), ("team-dr-lana-haj-yahya.jpg", .45, .3),
+          ("team-nurse-p1080301.jpg", .5, .3), ("Tegan-Lewis-Dental-Nurse.jpg", .5, .3), ("P1217728.jpg", .5, .3)]  # dentists first, from the About page
 
 
 def mosaic(x, y, cols, cw, ch, gap):
