@@ -122,7 +122,7 @@ Research: persona bank: "Assumes the longer he has left it, the bigger the bill"
 **Headline:** Check-ups from £24.94 a month
 
 **Primary text:**
-If the bill is what's kept you away, here's how most of our patients pay for their routine care.
+If the bill is what's kept you away, there's a way to spread it.
 
 Avenue's membership is £24.94 a month. That covers two check-ups and two hygiene visits a year, X-rays when they're clinically needed and emergency appointments, plus 20% off routine treatment.
 
