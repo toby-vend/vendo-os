@@ -530,7 +530,221 @@ def d5(size):
     return board(size, name, inner)
 
 
-PERSONAS = {"mark": [m1, m2, m3, m4, m5], "denise": [d1, d2, d3, d4, d5]}
+# ---------------------------------------------------------------- MICHELLE (wanted it for years)
+SMILE = "Smile Makeover"
+CTA_CONSULT = "Book your free consultation"
+TOOTH = ('<svg viewBox="0 0 24 24" width="{s}" height="{s}" style="display:block;flex:none"><path d="M7.2 3.2c-2.6 0-4.2 2-4.2 4.6 0 2.4 1.1 3.8 1.6 5.6.6 2.2.8 7.4 2.7 7.4 1.7 0 1.6-4.6 3-5.6.5-.4 1.1-.4 1.6 0 1.4 1 1.3 5.6 3 5.6 1.9 0 2.1-5.2 2.7-7.4.5-1.8 1.6-3.2 1.6-5.6 0-2.6-1.6-4.6-4.2-4.6-1.9 0-2.9 1.1-4.8 1.1S9.1 3.2 7.2 3.2z" '
+         'fill="none" stroke="{c}" stroke-width="1.6" stroke-linejoin="round"/></svg>')
+ARROW = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" style="display:block"><path d="{d}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+
+
+def bond_price(fs, col=LINEN):
+    return (f'<div style="display:flex;align-items:baseline;gap:{fs * .25:.0f}px;white-space:nowrap"><span class="body" style="font-size:{fs * .42:.0f}px;color:{STONE if col == LINEN else GREY}">Composite bonding from</span>'
+            f'<span class="hl" style="font-size:{fs:.0f}px;line-height:1;color:{GOLD}">£150</span><span class="body" style="font-size:{fs * .42:.0f}px;color:{STONE if col == LINEN else GREY}">per tooth</span></div>')
+
+
+def mi1(size):
+    """VT-04 Side column: Charcoal column with the soft question, the boutique hand mirror photo beside it."""
+    name = f"{SMILE} | Static | Practice photo | Still thinking about your smile"
+    hl = lambda fs: f'<div class="hl" style="font-size:{fs}px;color:{LINEN}">Still Thinking About <b>Your Smile?</b></div>'
+    if size == "ls":
+        inner = f"""{photo('mirror-boutique.jpg', 560, 0, 640, 628, .6, .72)}
+<div class="abs" data-name="Overlay" style="left:400px;top:0;width:320px;height:628px;background:linear-gradient(90deg,{CHAR} 50%,rgba(46,44,43,0))"></div>
+<div class="abs" style="left:0;top:0;width:480px;height:628px;background:{CHAR}"></div>
+<div class="abs" style="left:56px;top:48px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:56px;top:140px;width:520px">{hl(54)}</div>
+<div class="abs rule" style="left:56px;top:300px;width:70px"></div>
+<div class="abs" style="left:56px;top:330px">{bond_price(44)}</div>
+<div class="abs eyebrow" style="left:56px;top:410px;font-size:14px">Free smile consultation · Norwich</div>
+<div class="abs" style="left:56px;top:470px">{cta(CTA_CONSULT, 18)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('mirror-boutique.jpg', 380, 0, 700, 1920, .6, .9, 1.8)}
+<div class="abs" data-name="Overlay" style="left:0;top:0;width:1080px;height:1920px;background:linear-gradient(90deg,{CHAR} 45%,rgba(46,44,43,.6) 62%,rgba(46,44,43,0) 85%)"></div>
+<div class="abs" style="left:80px;top:270px">{logo(130, 'cream')}</div>
+<div class="abs" style="left:80px;top:620px;width:640px">{hl(104)}</div>
+<div class="abs rule" style="left:80px;top:990px;width:90px"></div>
+<div class="abs" style="left:80px;top:1030px">{bond_price(74)}</div>
+<div class="abs eyebrow" style="left:80px;top:1160px;font-size:20px">Free smile consultation · Norwich</div>
+<div class="abs" style="left:80px;top:1260px">{cta(CTA_CONSULT, 26)}</div>
+<div class="abs" style="left:80px;top:1400px">{proof(19, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    inner = f"""{photo('mirror-boutique.jpg', 430, 0, 650, 1080, .62, .74, 1.45)}
+<div class="abs" data-name="Overlay" style="left:0;top:0;width:1080px;height:1080px;background:linear-gradient(90deg,{CHAR} 42%,rgba(46,44,43,.5) 60%,rgba(46,44,43,0) 82%)"></div>
+<div class="abs" style="left:70px;top:70px">{logo(170, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:70px;top:220px;width:600px">{hl(88)}</div>
+<div class="abs rule" style="left:70px;top:540px;width:80px"></div>
+<div class="abs" style="left:70px;top:580px">{bond_price(62)}</div>
+<div class="abs eyebrow" style="left:70px;top:690px;font-size:17px">Free smile consultation · Norwich</div>
+<div class="abs" style="left:70px;top:780px">{cta(CTA_CONSULT, 23)}</div>
+<div class="abs" style="left:70px;top:910px">{proof(17, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+MI2_PROBLEMS = ["Closed-mouth smile in every photo", "A hand over your mouth when you laugh", "“I'll get them done one day”"]
+
+
+def problems(fs, w):
+    return (f'<div style="width:{w}px"><div class="eyebrow" style="font-size:{fs * .6:.0f}px">Sound familiar?</div>'
+            + "".join(f'<div style="display:flex;align-items:center;gap:{fs * .7:.0f}px;padding:{fs * .8:.0f}px 0;border-bottom:1px solid rgba(227,223,211,.18)">{TOOTH.format(s=round(fs * 1.5), c=GOLD)}'
+                      f'<span style="font-family:Montserrat;font-weight:500;font-size:{fs:.0f}px;line-height:1.3;color:{LINEN}">{t}</span></div>' for t in MI2_PROBLEMS) + '</div>')
+
+
+def arrow_chip(d, direction="down"):
+    path = "M12 5v14M6 13l6 6 6-6" if direction == "down" else "M5 12h14M13 6l6 6-6 6"
+    return (f'<div style="width:{d}px;height:{d}px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #D2BB98, {GOLD} 55%, #A88B62);display:flex;align-items:center;justify-content:center;'
+            f'box-shadow:0 8px 20px rgba(0,0,0,.3)">{ARROW.format(s=round(d * .5), d=path)}</div>')
+
+
+def solution(fs):
+    return (f'<div class="eyebrow" style="font-size:{fs * .32:.0f}px">The solution</div>'
+            f'<div class="hl" style="font-size:{fs:.0f}px;color:{LINEN};margin-top:{fs * .15:.0f}px">See Your New Smile <b>Before We Start.</b></div>'
+            f'<div style="margin-top:{fs * .3:.0f}px">{bond_price(fs * .7)}</div>')
+
+
+def mi2(size):
+    """VT-30 Problem and solution: three habits on Charcoal, arrow chip, solution over the consult room."""
+    name = f"{SMILE} | Static | Practice photo | Three habits"
+    if size == "ls":
+        inner = f"""{photo('consult-room.jpg', 560, 0, 640, 628, .5, .5)}
+<div class="abs" data-name="Overlay" style="left:560px;top:0;width:640px;height:628px;background:linear-gradient(180deg,rgba(46,44,43,.25) 0%,rgba(46,44,43,.85) 45%,rgba(46,44,43,.92) 100%)"></div>
+<div class="abs" style="left:48px;top:40px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:48px;top:120px">{problems(20, 470)}</div>
+<div class="abs" style="left:48px;top:500px">{cta(CTA_CONSULT, 17)}</div>
+<div class="abs" style="left:530px;top:280px">{arrow_chip(60, 'right')}</div>
+<div class="abs" style="left:610px;top:290px;width:560px">{solution(36)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    split = 1000 if s9 else 560
+    inner = f"""{photo('consult-room.jpg', 0, split, 1080, (1920 if s9 else 1080) - split, .5, .5)}
+<div class="abs" data-name="Overlay" style="left:0;top:{split}px;width:1080px;height:{(1920 if s9 else 1080) - split}px;background:linear-gradient(180deg,rgba(46,44,43,.05) 0%,rgba(46,44,43,.88) {65 if s9 else 70}%)"></div>
+<div class="abs rule" style="left:0;right:0;top:{split}px;opacity:1"></div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{270 if s9 else 50}px">{logo(190 if s9 else 160, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{430 if s9 else 140}px">{problems(34 if s9 else 27, 900)}</div>
+<div class="abs" style="left:{880 if s9 else 900}px;top:{split - 55}px">{arrow_chip(110 if s9 else 96)}</div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{1180 if s9 else 700}px;width:920px">{solution(80 if s9 else 58)}</div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{1490 if s9 else 960}px;display:flex;align-items:center;gap:28px">{cta(CTA_CONSULT, 24 if s9 else 19)}{proof(17 if s9 else 14, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+def notif(w, fs, app, title, msg, icon="mono"):
+    ic = (f'<div style="width:{fs * 2.3:.0f}px;height:{fs * 2.3:.0f}px;border-radius:{fs * .55:.0f}px;background:{CHAR};display:flex;align-items:center;justify-content:center;flex:none">{mono(round(fs * 1.5), "gold")}</div>'
+          if icon == "mono" else
+          f'<div style="width:{fs * 2.3:.0f}px;height:{fs * 2.3:.0f}px;border-radius:{fs * .55:.0f}px;background:conic-gradient(#F2B84B,#E8746A,#B77BD6,#5FA8E8,#6CC58A,#F2B84B);flex:none"></div>')
+    return (f'<div style="width:{w}px;display:flex;gap:{fs * .7:.0f}px;padding:{fs * .8:.0f}px {fs * .9:.0f}px;border-radius:{fs * 1.2:.0f}px;background:rgba(246,243,238,.86);'
+            f'backdrop-filter:blur(18px);box-shadow:0 {fs * .4:.0f}px {fs * 1.2:.0f}px rgba(0,0,0,.25)">{ic}'
+            f'<div style="flex:1;font-family:Montserrat;color:#1d1b19"><div style="display:flex;justify-content:space-between;font-size:{fs * .75:.0f}px;color:#6d675f;text-transform:uppercase;letter-spacing:.06em"><span>{app}</span><span style="text-transform:none">now</span></div>'
+            f'<div style="font-weight:600;font-size:{fs:.0f}px;margin-top:{fs * .2:.0f}px">{title}</div><div style="font-size:{fs * .92:.0f}px;line-height:1.35;margin-top:{fs * .1:.0f}px;color:#3a3632">{msg}</div></div></div>')
+
+
+def mi3(size):
+    """VT-27 Phone notification: lock screen over the real lounge, a photo memory and an Iconic message."""
+    name = f"{SMILE} | Static | Practice photo | On this day"
+    n1 = lambda w, fs: notif(w, fs, "Photos", "On this day", "You have memories from 2016", icon="photos")
+    n2 = lambda w, fs: notif(w, fs, "Iconic Dent", "Free smile consultation", "See your new smile on screen before anything starts.")
+    clock = lambda fs: (f'<div style="text-align:center;color:{WHITE};font-family:Montserrat;text-shadow:0 2px 12px rgba(0,0,0,.25)"><div style="font-weight:500;font-size:{fs * .2:.0f}px">Saturday</div>'
+                        f'<div style="font-weight:600;font-size:{fs:.0f}px;line-height:1;letter-spacing:-.02em">9:41</div></div>')
+    if size == "ls":
+        inner = f"""{photo('IMG_7396.jpg', 0, 0, 1200, 628, .5, .6)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(90deg,rgba(46,44,43,.88) 0%,rgba(46,44,43,.55) 55%,rgba(46,44,43,.1) 100%)"></div>
+<div class="abs" style="left:56px;top:44px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:120px;width:560px;font-size:46px;color:{LINEN}">Another Year Of<br><b>Closed&#8209;Mouth Photos?</b></div>
+<div class="abs" style="left:56px;top:300px">{n1(560, 17)}</div>
+<div class="abs" style="left:56px;top:400px">{n2(560, 17)}</div>
+<div class="abs" style="left:56px;top:530px;display:flex;align-items:center;gap:22px">{cta(CTA_CONSULT, 16)}{proof(13, LINEN)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('IMG_7396.jpg', 0, 0, 1080, 1920, .5, .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,.5) 0%,rgba(46,44,43,.45) 20%,rgba(46,44,43,.78) 38%,rgba(46,44,43,.8) 70%,rgba(46,44,43,.92) 100%)"></div>
+<div class="abs" style="left:0;right:0;top:300px">{clock(220)}</div>
+<div class="abs hl" style="left:80px;right:80px;top:640px;text-align:center;font-size:76px;color:{LINEN}">Another Year Of<br><b>Closed&#8209;Mouth Photos?</b></div>
+<div class="abs" style="left:70px;top:1030px">{n1(940, 28)}</div>
+<div class="abs" style="left:70px;top:1210px">{n2(940, 28)}</div>
+<div class="abs" style="left:70px;top:1440px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 25)}{proof(17, LINEN)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('IMG_7396.jpg', 0, 0, 1080, 1080, .5, .6)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,.85) 0%,rgba(46,44,43,.7) 35%,rgba(46,44,43,.8) 62%,rgba(46,44,43,.92) 100%)"></div>
+<div class="abs" style="left:70px;top:56px">{logo(160, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:70px;top:150px;width:900px;font-size:72px;color:{LINEN}">Another Year Of<br><b>Closed&#8209;Mouth Photos?</b></div>
+<div class="abs" style="left:70px;top:560px">{n1(940, 25)}</div>
+<div class="abs" style="left:70px;top:720px">{n2(940, 25)}</div>
+<div class="abs" style="left:70px;top:925px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 22)}{proof(16, LINEN)}</div>"""
+    return board(size, name, inner)
+
+
+def mi4(size):
+    """Custom: the Iconic hand mirror in a big circle frame off the right edge, gold disc, headline on Linen."""
+    name = f"{SMILE} | Static | Practice photo | See it before we start"
+    if size == "ls":
+        inner = f"""{mono(480, 'white', 'position:absolute;left:-300px;top:260px;opacity:.35')}
+{circle('mirror-boutique.jpg', 690, -60, 640, .62, .68, disc=(20, 440, 120))}
+<div class="abs" style="left:60px;top:46px">{logo(90)}</div>
+<div class="abs hl" style="left:60px;top:175px;width:560px;font-size:60px">See It <b>Before We Start.</b></div>
+<div class="abs body" style="left:60px;top:325px;width:520px;font-size:19px;color:{INK}">Your new smile, designed on screen first.</div>
+<div class="abs eyebrow" style="left:60px;top:390px;font-size:14px">Free smile consultation</div>
+<div class="abs" style="left:60px;top:470px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 17)}{proof(14)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{mono(900, 'white', 'position:absolute;left:-420px;top:1180px;opacity:.35')}
+{circle('mirror-boutique.jpg', 250, 280, 860, .62, .66, disc=(30, 600, 150))}
+<div class="abs" style="left:80px;top:270px">{logo(120)}</div>
+<div class="abs hl" style="left:80px;top:1180px;width:920px;font-size:100px">See It <b>Before We Start.</b></div>
+<div class="abs body" style="left:80px;top:1400px;width:920px;font-size:30px;color:{INK}">Your new smile, designed on screen first.</div>
+<div class="abs eyebrow" style="left:80px;top:1470px;font-size:20px">Free smile consultation</div>
+<div class="abs" style="left:80px;top:1560px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 25)}{proof(18)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{mono(700, 'white', 'position:absolute;left:-380px;top:560px;opacity:.35')}
+{circle('mirror-boutique.jpg', 560, 60, 820, .62, .66, disc=(10, 590, 140))}
+<div class="abs" style="left:70px;top:70px">{logo(110)}</div>
+<div class="abs hl" style="left:70px;top:300px;width:520px;font-size:92px">See It <b>Before We Start.</b></div>
+<div class="abs body" style="left:70px;top:520px;width:430px;font-size:26px;color:{INK}">Your new smile, designed on screen first.</div>
+<div class="abs eyebrow" style="left:70px;top:660px;font-size:17px">Free smile consultation</div>
+<div class="abs" style="left:70px;top:820px">{cta(CTA_CONSULT, 22)}</div>
+<div class="abs" style="left:70px;top:945px">{proof(18)}</div>"""
+    return board(size, name, inner)
+
+
+def mi5(size):
+    """Custom: type-led on Charcoal, gold second line, rule, monogram watermark, small mirror circle."""
+    name = f"{SMILE} | Static | Typographic | Mouth closed"
+    hl = lambda fs, w: f'<div class="hl" style="width:{w}px;font-size:{fs}px;line-height:1.02;color:{LINEN}">Years Of Smiling With <b>Your Mouth Closed?</b></div>'
+    if size == "ls":
+        inner = f"""{mono(560, 'cream', 'position:absolute;left:760px;top:-60px;opacity:.06')}
+{circle('mirror-boutique.jpg', 880, 190, 280, .62, .68, disc=(0, 200, 64))}
+<div class="abs" style="left:56px;top:46px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:56px;top:140px">{hl(58, 760)}</div>
+<div class="abs rule" style="left:56px;top:330px;width:80px"></div>
+<div class="abs eyebrow" style="left:56px;top:360px;font-size:15px">Free smile consultation in Norwich</div>
+<div class="abs" style="left:56px;top:420px">{proof(15, LINEN)}</div>
+<div class="abs" style="left:56px;top:480px">{cta(CTA_CONSULT, 18)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{mono(1100, 'cream', 'position:absolute;left:200px;top:300px;opacity:.06')}
+<div class="abs" style="left:80px;top:270px">{logo(120, 'cream')}</div>
+<div class="abs" style="left:80px;top:560px">{hl(118, 920)}</div>
+<div class="abs rule" style="left:80px;top:1060px;width:110px"></div>
+<div class="abs eyebrow" style="left:80px;top:1100px;font-size:21px">Free smile consultation in Norwich</div>
+{circle('mirror-boutique.jpg', 640, 1150, 360, .62, .68, disc=(270, 260, 90))}
+<div class="abs" style="left:80px;top:1250px">{proof(19, LINEN)}</div>
+<div class="abs" style="left:80px;top:1340px">{cta(CTA_CONSULT, 25)}</div>"""
+        return board(size, name, inner, bg="char")
+    inner = f"""{mono(820, 'cream', 'position:absolute;left:420px;top:240px;opacity:.06')}
+<div class="abs" style="left:70px;top:70px">{logo(100, 'cream')}</div>
+<div class="abs" style="left:70px;top:270px">{hl(92, 900)}</div>
+<div class="abs rule" style="left:70px;top:590px;width:90px"></div>
+<div class="abs eyebrow" style="left:70px;top:625px;font-size:18px">Free smile consultation in Norwich</div>
+{circle('mirror-boutique.jpg', 700, 640, 320, .62, .68, disc=(0, 230, 76))}
+<div class="abs" style="left:70px;top:740px">{proof(18, LINEN)}</div>
+<div class="abs" style="left:70px;top:820px">{cta(CTA_CONSULT, 23)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+PERSONAS = {"mark": [m1, m2, m3, m4, m5], "denise": [d1, d2, d3, d4, d5],
+            "michelle": [mi1, mi2, mi3, mi4, mi5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
