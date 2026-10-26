@@ -1153,8 +1153,10 @@ def p5(size):
 
 
 # ---------------------------------------------------------------- GEOFF (failing teeth, full arch)
-MOSAIC = [("team-dr-ilias-kranias.jpg", .5, .3), ("team-dr-lana-nashef.jpg", .5, .3), ("team-dr-lana-haj-yahya.jpg", .45, .3),
-          ("team-nurse-p1080301.jpg", .5, .3), ("Tegan-Lewis-Dental-Nurse.jpg", .5, .3), ("P1217728.jpg", .5, .3)]  # dentists first, from the About page
+# Team portraits from the About page, dentists first. Each is pre-cropped by face detection (macOS Vision) to the same
+# head-and-shoulders framing: face 33% of the frame width, centred, eyes-level at 40% down, so every tile matches.
+MOSAIC = [("team-norm-dr-ilias-kranias.jpg", .5, .42), ("team-norm-dr-lana-nashef.jpg", .5, .42), ("team-norm-dr-lana-haj-yahya.jpg", .5, .42),
+          ("team-norm-nurse-p1080301.jpg", .5, .42), ("team-norm-Tegan-Lewis-Dental-Nurse.jpg", .5, .42), ("team-norm-P1217728.jpg", .5, .42)]
 
 
 def mosaic(x, y, cols, cw, ch, gap):
