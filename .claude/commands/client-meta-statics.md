@@ -2,7 +2,7 @@
 
 Usage: `/client-meta-statics <client name> <website URL> [guideline|statics|all]`
 
-This takes a client from nothing to a Figma brand guideline and a Figma file of researched Meta static ads. Each ad comes in 1:1 and 9:16, with primary text and a headline. The Siha Dental build (Oct 2026) is the reference implementation:
+This takes a client from nothing to a Figma brand guideline and a Figma file of researched Meta static ads. Each ad comes in 1:1, 9:16 and 1200×628 (1.91:1), with primary text and a headline. The Siha Dental build (Oct 2026) is the reference implementation:
 - Harness, copy and research: `outputs/creative/siha-meta-statics/`
 - Brand guideline: https://www.figma.com/design/AbtwUHTD50G38QuOaCG4Hh
 - Statics: https://www.figma.com/design/UwQkUCpzSoFVngNIRjkSG5
@@ -23,7 +23,7 @@ Collect these before building anything. Look first and only ask for what's missi
 3. **Target area:**
    - Dental clients: a 3–5 mile radius, per the dental SOP.
    - Confirm whether copy names a place. Practice town and target areas often differ.
-4. **Volume:** personas × concepts × sizes. Siha was 5 personas × 5 concepts × (1:1 + 9:16).
+4. **Volume:** personas × concepts × sizes. Sizes are 1:1, 9:16 and 1200×628 by default. Siha was 5 personas × 5 concepts (1:1 + 9:16, before the landscape size was added).
 5. **Onboarding call:** find it in Fathom (`mcp__fathom__search_meetings`). The client's own numbers and wording come from here.
 
 Create the working folder `outputs/creative/<client>-meta-statics/` and a new branch `feat/<client>-meta-statics`.
@@ -80,14 +80,21 @@ Follow `data/playbooks/yt-doc/how-to-write-meta-ads-that-scale-copywriting-maste
    - **What to find, per persona:** the accommodation, the failed or rejected solution, the "nearly didn't buy", the customer's own word, the moment they decide, and the after.
    - **Proof ladder:** volume proof is usable now. Named reviews need the reviewer's permission first.
    - **Offer facts:** prices, timings and guarantees, each with its source URL.
-2. **`copy-<persona>.md`,** one per persona. Each file holds the persona, campaign, offer and the rules for that persona. Each concept gets:
+2. **Read the template library:** `data/creative-templates/vendo-dental-statics/README.md` (32 layouts, VT-01 to VT-32, grouped by treatment, each with a preview). It is the default source of layouts. Read the previews for the treatment group that matches the campaign, plus Brand & trust, which works for any treatment.
+3. **`copy-<persona>.md`,** one per persona. Each file holds the persona, campaign, offer and the rules for that persona. Each concept gets:
+   - **Layout:** a library template code and name (e.g. `VT-20 Editorial price split`), or `Custom: <one line>` for a bespoke layout. Write the copy to fit that layout's slots.
    - **Labels:** awareness stage, sophistication stage and angle. Image, headline and primary text all start at the same stage.
    - **Research:** the verbatim quote(s) it's built on.
    - **On image:** hook, problem, promise, mechanism. The problem is shown in the imagery.
    - **Headline.**
    - **Primary text:** the nine beats. Proof, offer, risk reversal and a CTA that says what happens next. End on an identity line.
    - **Notes:** a closing section listing every unconfirmed claim for the client to check.
-3. **Hard rules:**
+4. **Layout mix, per persona:**
+   - Use the library by default. At least 2 concepts come from the library and at least 1 is a custom layout. The custom layouts are what has worked before (photo-led, real objects, depth).
+   - No layout repeats within a persona. Spread across personas too.
+   - A gate in a template's name (consented cases only, sourced stats only, real practice photos only, consent + verbatim quote) must be met, or that template is out.
+   - Client-specific rejections in memory still win for that client (e.g. no boxed tick cards for Signature Smiles, no "● LABEL" pills).
+5. **Hard rules:**
    - Never invent a quote, number, offer or result.
    - Urgency only if an offer is genuinely live.
    - No before-and-afters without consented cases.
@@ -105,24 +112,25 @@ Follow `data/playbooks/yt-doc/how-to-write-meta-ads-that-scale-copywriting-maste
    - The logo SVGs in `assets/`.
    - The photo set in `assets/photos/`. Use the client's own photography from their site or Drive, and keep `assets/photos/` gitignored.
    - The brand graphic device (Siha's was `sframe()`). Any photo mask must **cover-crop from the real image aspect** (read the JPEG header), never stretch.
-2. **Shared pieces you can reuse:**
+2. **Library layouts:** rebuild the chosen VT template in the harness from its preview (`data/creative-templates/vendo-dental-statics/previews/<code>.jpg`). Keep its structure and slots, but apply the client's palette, font, logo, photos and graphic shapes, plus the usual depth (grain, light, shadow). Never ship the Vendo placeholder look. Proof lines like "Based on Over 100+ Reviews" are placeholders: use the client's real rating and count. Only open the Figma file (node id in the README) if you need exact positions. The Figma MCP has a monthly cap.
+3. **Shared pieces you can reuse:**
    - `proof()`: the stars and review count.
    - `steps` / `timeline`, `compare_cards`, `plan_card`, `receipt` and `bullets`.
    - A grain overlay.
    - CTA constants.
-3. **Artboards:** 1080×1080 and 1080×1920, with 9:16 safe zones (keep the top 250px and bottom 340px clear of key copy). Write one `<persona>-1x1.html` and one `<persona>-9x16.html` per persona.
-4. **Render QA, before every capture:**
+4. **Artboards:** 1080×1080, 1080×1920 and 1200×628. Keep the 9:16 safe zones (the top 250px and bottom 340px clear of key copy). The 1200×628 is a real recomposition, not a crop: text on one side and the image on the other, as in the library's landscape frames. Write `<persona>-1x1.html`, `<persona>-9x16.html` and `<persona>-landscape.html` per persona.
+5. **Render QA, before every capture:**
    - Serve locally: `python3 -m http.server 8765` in the folder.
-   - Render with headless Chrome: `--force-device-scale-factor=0.5`, `--window-size=11600,2400` for 1x1, `11600,4160` for 9x16.
+   - Render with headless Chrome: `--force-device-scale-factor=0.5`, `--window-size=11600,2400` for 1x1, `11600,4160` for 9x16, and `80 + n×1280` by `788` for n landscape boards.
    - Crop each artboard with ffmpeg and look at every one. Check overlaps, crops, legibility, and whether the image matches the copy (who's pictured has to fit the line).
-5. **Capture into Figma:**
+6. **Capture into Figma:**
    - Create the statics file in the client's folder. Use one page per persona, named "01 <Persona> | <angle>".
    - Run `generate_figma_design` with capture.js in the page.
    - Open the URL with `#figmacapture=<id>&figmaendpoint=...&figmadelay=2000` in Chrome. Take a screenshot to keep the tab active, then poll.
    - The capture keeps the custom font on text. CSS `outline` is dropped, so use borders.
-6. **Name ads to the build standard:** `<Concept> | Static | <Talent> | <Detail> | 1x1 | YYMMDD`.
-7. **Copy row:** add a row of copy cards (Inter) under the 1:1 row on each page, holding the primary text and headline per concept.
-8. **Build one persona at a time** and show Toby each before moving on.
+7. **Name ads to the build standard:** `<Concept> | Static | <Talent> | <Detail> | <1x1 / 9x16 / 1.91x1> | YYMMDD`.
+8. **Copy row:** add a row of copy cards (Inter) under the 1:1 row on each page, holding the primary text and headline per concept.
+9. **Build one persona at a time** and show Toby each before moving on.
 
 ---
 
@@ -138,7 +146,7 @@ Do these in this order. Getting it wrong stacks every artboard on top of each ot
 2. **Lift each artboard** out of the capture wrapper ("<page> | 1x1" > "Body") to page level, keeping its absolute x/y. Then delete the empty wrapper.
 3. **Lock** the full-size grain layer (rename it "Grain (locked)") and the large gradient overlays ("Overlay (locked)"). Otherwise they catch every click and Toby can't drag anything.
 4. **Name** image frames "Photo".
-5. **Lay out:** 1:1 row at y=80 with x = 80 + i×1160; copy row below it; 9:16 row below that.
+5. **Lay out:** 1:1 row at y=80 with x = 80 + i×1160; copy row below it; 9:16 row below that; 1200×628 row below the 9:16s, x = 80 + i×1280.
 6. **Check:** take one screenshot per page.
 
 ---
@@ -148,7 +156,7 @@ Do these in this order. Getting it wrong stacks every artboard on top of each ot
 1. Commit after each persona: `feat(<client>): <persona> statics and copy`. Push.
 2. Report to Toby:
    - Both Figma links.
-   - A one-line table per persona (concept, image headline, angle).
+   - A one-line table per persona (concept, layout, image headline, angle).
    - **Checks for the client:** every open item from the copy files' Notes sections (price conflicts, offers, reviewer permissions, consented before-and-afters, staff availability).
 3. Save a `project_<client>_client.md` memory with the asset locations, palette, font, Figma file ids and verified facts.
 
