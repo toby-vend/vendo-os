@@ -1328,11 +1328,209 @@ def g5(size):
     return board(size, name, inner)
 
 
+# ---------------------------------------------------------------- LINDA (a denture that's never felt right)
+DENT = "Dentures"
+CTA_DENT = "Book a denture appointment"
+L1_FOODS = ["Crusty bread", "Steak", "An apple", "Corn on the cob"]
+
+
+def menu_card(w, fs, rot=-2):
+    items = "".join(f'<div style="position:relative;display:inline-block;margin-top:{fs * .55:.0f}px"><span class="hl" style="font-size:{fs:.0f}px;color:{INK}">{t}</span>'
+                    f'<span style="position:absolute;left:-{fs * .2:.0f}px;right:-{fs * .2:.0f}px;top:52%;height:{fs * .12:.0f}px;border-radius:{fs * .1:.0f}px;background:{GOLD};transform:rotate({-3 + (i % 2) * 4}deg)"></span></div><br>'
+                    for i, t in enumerate(L1_FOODS))
+    return (f'<div style="width:{w}px;padding:{fs * 1.3:.0f}px {fs:.0f}px {fs * 1.2:.0f}px;background:#FCFAF6;transform:rotate({rot}deg);text-align:center;'
+            f'box-shadow:0 {fs * .6:.0f}px {fs * 1.6:.0f}px rgba(46,36,24,.28),0 2px 4px rgba(46,36,24,.15)">'
+            f'<div style="border:1.5px solid rgba(190,161,122,.55);position:absolute;inset:{fs * .4:.0f}px;pointer-events:none"></div>'
+            f'<div class="eyebrow" style="font-size:{fs * .42:.0f}px">Tonight\'s menu</div>'
+            f'<div style="width:{fs * 2:.0f}px;height:1.5px;background:{GOLD};margin:{fs * .5:.0f}px auto 0"></div>{items}'
+            '</div>')
+
+
+def dent_price(fs, col=GREY):
+    return (f'<div style="display:flex;align-items:baseline;gap:{fs * .25:.0f}px;flex-wrap:wrap;white-space:nowrap">'
+            f'<span class="body" style="font-size:{fs * .42:.0f}px;color:{col}">Relines</span><span class="hl" style="font-size:{fs:.0f}px;line-height:1;color:{GOLD}">£90</span>'
+            f'<span class="body" style="font-size:{fs * .42:.0f}px;color:{col};margin-left:{fs * .3:.0f}px">New dentures from</span><span class="hl" style="font-size:{fs:.0f}px;line-height:1;color:{GOLD}">£800</span></div>')
+
+
+def l1(size):
+    """Custom: a printed menu card with the foods she's given up crossed through in gold."""
+    name = f"{DENT} | Static | Object | Off the menu"
+    if size == "ls":
+        inner = f"""<div class="abs" style="left:56px;top:46px">{logo(150, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:140px;width:560px;font-size:54px">Has Your Denture <b>Changed The Menu?</b></div>
+<div class="abs" style="left:56px;top:310px">{dent_price(36)}</div>
+<div class="abs" style="left:56px;top:400px">{cta(CTA_DENT, 18)}</div>
+<div class="abs" style="left:56px;top:510px">{proof(15)}</div>
+<div class="abs" style="left:770px;top:40px">{menu_card(360, 34)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(120)}</div>
+<div class="abs hl" style="left:80px;right:80px;top:470px;text-align:center;font-size:88px">Has Your Denture <b>Changed The Menu?</b></div>
+<div class="abs" style="left:250px;top:720px">{menu_card(580, 52)}</div>
+<div class="abs" style="left:0;right:0;top:1360px;display:flex;justify-content:center">{dent_price(52)}</div>
+<div class="abs" style="left:0;right:0;top:1460px;display:flex;justify-content:center;align-items:center;gap:30px">{cta(CTA_DENT, 24)}{proof(17)}</div>"""
+        return board(size, name, inner)
+    inner = f"""<div class="abs" style="left:70px;top:70px">{logo(170, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:70px;top:190px;width:520px;font-size:78px">Has Your Denture <b>Changed The Menu?</b></div>
+<div class="abs" style="left:70px;top:600px;width:500px">{dent_price(46)}</div>
+<div class="abs" style="left:70px;top:720px">{cta(CTA_DENT, 22)}</div>
+<div class="abs" style="left:70px;top:845px">{proof(17)}</div>
+<div class="abs" style="left:610px;top:180px">{menu_card(400, 44)}</div>"""
+    return board(size, name, inner)
+
+
+L2_TICKS = ["Reline for a better fit · <b style='color:#BEA17A;font-weight:600'>£90</b>", "Repair a crack or chip · <b style='color:#BEA17A;font-weight:600'>£150</b>",
+            "New full denture · <b style='color:#BEA17A;font-weight:600'>from £800</b> per arch"]
+
+
+def l2(size):
+    """VT-07 Three reasons: capsule of the consult room on a Linen half-capsule block, three priced options, review bar."""
+    name = f"{DENT} | Static | Practice photo | Three ways to sort it"
+    if size == "ls":
+        inner = f"""{capsule('consult-room.jpg', 900, 40, 250, 548, .5, .5)}
+<div class="abs hl" style="left:56px;top:44px;width:800px;font-size:44px">Denture Not Fitting? <b>Three Ways To Sort It.</b></div>
+<div class="abs" style="left:56px;top:190px">{ticks(L2_TICKS, 21, 22)}</div>
+<div class="abs" style="left:56px;top:415px">{review_bar(800, 16, CTA_DENT)}</div>
+<div class="abs" style="left:56px;top:520px">{logo(170, 'charcoal', 'horizontal')}</div>"""
+        return board(size, name, inner, bg=PAPER)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(110)}</div>
+<div class="abs hl" style="left:80px;top:470px;width:920px;font-size:88px">Denture Not Fitting? <b>Three Ways To Sort It.</b></div>
+<div class="abs" style="left:610px;top:720px;width:470px;height:680px;background:{LINEN};border-radius:340px 0 0 340px"></div>
+{capsule('consult-room.jpg', 650, 760, 360, 620, .5, .5)}
+<div class="abs" style="left:80px;top:800px;width:560px">{ticks(L2_TICKS, 30, 60)}</div>
+<div class="abs" style="left:80px;top:1440px">{review_bar(920, 21, CTA_DENT)}</div>"""
+        return board(size, name, inner, bg=PAPER)
+    inner = f"""<div class="abs hl" style="left:70px;top:80px;width:940px;font-size:74px">Denture Not Fitting? <b>Three Ways To Sort It.</b></div>
+<div class="abs" style="left:640px;top:250px;width:440px;height:600px;background:{LINEN};border-radius:300px 0 0 300px"></div>
+{capsule('consult-room.jpg', 690, 280, 340, 570, .5, .5)}
+<div class="abs" style="left:70px;top:340px;width:580px">{ticks(L2_TICKS, 27, 56)}</div>
+<div class="abs" style="left:70px;top:880px">{review_bar(940, 19, CTA_DENT)}</div>
+<div class="abs" style="left:70px;top:985px">{logo(190, 'charcoal', 'horizontal')}</div>"""
+    return board(size, name, inner, bg=PAPER)
+
+
+def l3(size):
+    """VT-04 Side column: Charcoal column with the soft question and prices, beside the real consult room."""
+    name = f"{DENT} | Static | Practice photo | Still putting up with it"
+    hl = lambda fs: f'<div class="hl" style="font-size:{fs}px;color:{LINEN}">Still Putting Up With <b>Your Denture?</b></div>'
+    if size == "ls":
+        inner = f"""{photo('consult-room.jpg', 560, 0, 640, 628, .5, .5)}
+<div class="abs" data-name="Overlay" style="left:400px;top:0;width:320px;height:628px;background:linear-gradient(90deg,{CHAR} 50%,rgba(46,44,43,0))"></div>
+<div class="abs" style="left:0;top:0;width:480px;height:628px;background:{CHAR}"></div>
+<div class="abs" style="left:56px;top:48px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:56px;top:140px;width:540px">{hl(54)}</div>
+<div class="abs rule" style="left:56px;top:300px;width:70px"></div>
+<div class="abs" style="left:56px;top:330px">{dent_price(38, STONE)}</div>
+<div class="abs" style="left:56px;top:440px">{cta(CTA_DENT, 18)}</div>
+<div class="abs" style="left:56px;top:540px">{proof(13, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('reception-side.jpg', 380, 0, 700, 1920, .5, .5)}
+<div class="abs" data-name="Overlay" style="left:0;top:0;width:1080px;height:1920px;background:linear-gradient(90deg,{CHAR} 45%,rgba(46,44,43,.6) 62%,rgba(46,44,43,0) 85%)"></div>
+<div class="abs" style="left:80px;top:270px">{logo(130, 'cream')}</div>
+<div class="abs" style="left:80px;top:620px;width:660px">{hl(100)}</div>
+<div class="abs rule" style="left:80px;top:990px;width:90px"></div>
+<div class="abs" style="left:80px;top:1030px;width:600px">{dent_price(66, STONE)}</div>
+<div class="abs" style="left:80px;top:1260px">{cta(CTA_DENT, 26)}</div>
+<div class="abs" style="left:80px;top:1400px">{proof(19, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    inner = f"""{photo('consult-room.jpg', 430, 0, 650, 1080, .45, .5)}
+<div class="abs" data-name="Overlay" style="left:0;top:0;width:1080px;height:1080px;background:linear-gradient(90deg,{CHAR} 42%,rgba(46,44,43,.5) 60%,rgba(46,44,43,0) 82%)"></div>
+<div class="abs" style="left:70px;top:70px">{logo(170, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:70px;top:220px;width:620px">{hl(86)}</div>
+<div class="abs rule" style="left:70px;top:540px;width:80px"></div>
+<div class="abs" style="left:70px;top:580px;width:560px">{dent_price(54, STONE)}</div>
+<div class="abs" style="left:70px;top:780px">{cta(CTA_DENT, 23)}</div>
+<div class="abs" style="left:70px;top:910px">{proof(17, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+L4_STEPS = [("Assessment", "We check your mouth, gums and current denture"), ("Digital impressions", "Made to the shape of your mouth as it is now"),
+            ("Fitting", "Adjusted for comfort and a natural bite"), ("Follow-ups", "We see you again as you settle in")]
+
+
+def steps(w, fs):
+    items = "".join(f'<div style="display:flex;gap:{fs * 1.1:.0f}px;align-items:flex-start;margin-top:{fs * 1.2 if i else 0:.0f}px;position:relative">'
+                    f'<div style="width:{fs * 2.2:.0f}px;height:{fs * 2.2:.0f}px;border-radius:50%;flex:none;border:1.5px solid {GOLD};background:{CHAR};display:flex;align-items:center;justify-content:center;font-family:\'Mongolian Baiti\';font-size:{fs * 1.2:.0f}px;color:{GOLD}">{i + 1}</div>'
+                    f'<div><div class="hl" style="font-size:{fs * 1.35:.0f}px;color:{LINEN};line-height:1.1">{a}</div><div class="body" style="font-size:{fs * .85:.0f}px;margin-top:{fs * .25:.0f}px">{b}</div></div></div>'
+                    for i, (a, b) in enumerate(L4_STEPS))
+    return f'<div style="position:relative;width:{w}px"><div style="position:absolute;left:{fs * 1.1 - 1:.0f}px;top:{fs:.0f}px;bottom:{fs * 2:.0f}px;width:1.5px;background:rgba(190,161,122,.5)"></div>{items}</div>'
+
+
+def l4(size):
+    """Custom: four numbered steps down a gold line on Charcoal, monogram watermark, circle of the surgery."""
+    name = f"{DENT} | Static | Typographic | Made to fit"
+    pr = lambda fs: (f'<div style="display:flex;align-items:baseline;gap:{fs * .25:.0f}px;white-space:nowrap"><span class="body" style="font-size:{fs * .42:.0f}px;color:{STONE}">New full dentures from</span>'
+                     f'<span class="hl" style="font-size:{fs:.0f}px;line-height:1;color:{GOLD}">£800</span><span class="body" style="font-size:{fs * .42:.0f}px;color:{STONE}">per arch</span></div>')
+    if size == "ls":
+        inner = f"""{mono(560, 'cream', 'position:absolute;left:760px;top:-60px;opacity:.06')}
+<div class="abs" style="left:56px;top:46px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:130px;width:460px;font-size:52px;color:{LINEN}">New Dentures, <b>Made To Fit.</b></div>
+<div class="abs" style="left:56px;top:300px">{pr(40)}</div>
+<div class="abs" style="left:56px;top:400px">{cta(CTA_DENT, 17)}</div>
+<div class="abs" style="left:56px;top:500px">{proof(13, LINEN)}</div>
+<div class="abs" style="left:620px;top:60px">{steps(540, 18)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{mono(1100, 'cream', 'position:absolute;left:200px;top:300px;opacity:.06')}
+<div class="abs" style="left:80px;top:270px">{logo(120, 'cream')}</div>
+{circle('surgery.jpg', 700, 230, 300, .55, .5, disc=(0, 210, 60))}
+<div class="abs hl" style="left:80px;top:560px;width:900px;font-size:100px;color:{LINEN}">New Dentures, <b>Made To Fit.</b></div>
+<div class="abs" style="left:80px;top:830px">{steps(900, 30)}</div>
+<div class="abs" style="left:80px;top:1360px">{pr(62)}</div>
+<div class="abs" style="left:80px;top:1470px;display:flex;align-items:center;gap:30px">{cta(CTA_DENT, 24)}{proof(17, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    inner = f"""{mono(820, 'cream', 'position:absolute;left:420px;top:240px;opacity:.06')}
+{circle('surgery.jpg', 790, -90, 380, .55, .5, disc=(20, 270, 70))}
+<div class="abs" style="left:70px;top:70px">{logo(170, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:70px;top:160px;width:700px;font-size:76px;color:{LINEN}">New Dentures, <b>Made To Fit.</b></div>
+<div class="abs" style="left:70px;top:370px">{steps(900, 23)}</div>
+<div class="abs" style="left:70px;top:840px">{pr(50)}</div>
+<div class="abs" style="left:70px;top:950px;display:flex;align-items:center;gap:30px">{cta(CTA_DENT, 21)}{proof(15, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+def l5(size):
+    """VT-29 Search bar: 'denture keeps rubbing' over the real reception, Iconic result card with relines from £90."""
+    name = f"{DENT} | Static | Practice photo | Search"
+    q, note_ = "denture keeps rubbing", "Denture relines from £90"
+    if size == "ls":
+        inner = f"""{photo('reception-side.jpg', 0, 0, 1200, 628, .5, .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(90deg,rgba(46,44,43,.15) 0%,rgba(46,44,43,.55) 45%,rgba(46,44,43,.88) 100%)"></div>
+<div class="abs" style="left:620px;top:60px">{search_bar(530, 19, q)}</div>
+<div class="abs" style="left:620px;top:150px">{result_card(530, 19, note_)}</div>
+<div class="abs" style="left:620px;top:470px">{cta(CTA_DENT, 18)}</div>
+<div class="abs" style="left:48px;top:40px;padding:12px 14px;border-radius:14px;background:rgba(46,44,43,.5)">{logo(120, 'cream')}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('sign-wall-chair.jpg', 0, 0, 1080, 1920, .5, .4)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,.35) 0%,rgba(46,44,43,.1) 30%,rgba(46,44,43,.6) 50%,rgba(46,44,43,.92) 75%)"></div>
+<div class="abs" style="left:80px;top:270px">{logo(190, 'cream')}</div>
+<div class="abs" style="left:80px;top:960px">{search_bar(920, 30, q)}</div>
+<div class="abs" style="left:80px;top:1100px">{result_card(920, 30, note_)}</div>
+<div class="abs" style="left:80px;top:1480px">{cta(CTA_DENT, 27)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('reception-side.jpg', 0, 0, 1080, 1080, .5, .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,.25) 0%,rgba(46,44,43,.15) 25%,rgba(46,44,43,.75) 50%,rgba(46,44,43,.92) 100%)"></div>
+<div class="abs" style="left:70px;top:60px">{logo(160, 'cream')}</div>
+<div class="abs" style="left:70px;top:420px">{search_bar(940, 26, q)}</div>
+<div class="abs" style="left:70px;top:540px">{result_card(940, 26, note_)}</div>
+<div class="abs" style="left:70px;top:935px">{cta(CTA_DENT, 23)}</div>"""
+    return board(size, name, inner)
+
+
 PERSONAS = {"mark": [m1, m2, m3, m4, m5], "denise": [d1, d2, d3, d4, d5],
             "michelle": [mi1, mi2, mi3, mi4, mi5],
             "hannah": [h1, h2, h3, h4, h5],
             "peter": [p1, p2, p3, p4, p5],
-            "geoff": [g1, g2, g3, g4, g5]}
+            "geoff": [g1, g2, g3, g4, g5],
+            "linda": [l1, l2, l3, l4, l5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
