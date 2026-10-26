@@ -329,7 +329,208 @@ def m5(size):
     return board(size, name, inner, bg="char")
 
 
-PERSONAS = {"mark": [m1, m2, m3, m4, m5]}
+# ---------------------------------------------------------------- DENISE (can't find an NHS place)
+SEARCH = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" style="display:block;flex:none"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="{c}" stroke-width="2.2"/><path d="M15.5 15.5L21 21" stroke="{c}" stroke-width="2.2" stroke-linecap="round"/></svg>'
+MIC = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" style="display:block;flex:none"><rect x="9" y="3" width="6" height="11" rx="3" fill="{c}"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4" fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round"/></svg>'
+
+
+def search_bar(w, fs, query):
+    return (f'<div style="width:{w}px;height:{fs * 2.9:.0f}px;display:flex;align-items:center;gap:{fs * .7:.0f}px;padding:0 {fs * 1.1:.0f}px;border-radius:999px;background:{WHITE};'
+            f'box-shadow:0 {fs * .5:.0f}px {fs * 1.4:.0f}px rgba(0,0,0,.28)">{SEARCH.format(s=round(fs * 1.15), c=GREY)}'
+            f'<span style="flex:1;font-family:Montserrat;font-weight:400;font-size:{fs}px;color:{INK};white-space:nowrap">{query}<span style="display:inline-block;width:2px;height:{fs * 1.1:.0f}px;background:{GOLD};vertical-align:middle;margin-left:3px"></span></span>{MIC.format(s=round(fs * 1.1), c=GOLD)}</div>')
+
+
+def result_card(w, fs, note="New patients welcome. No waiting list."):
+    stars = "".join(STAR.format(s=round(fs * .95), c="#E7A33A") for _ in range(5))
+    return (f'<div style="width:{w}px;padding:{fs * 1.1:.0f}px {fs * 1.2:.0f}px;border-radius:{fs:.0f}px;background:{WHITE};box-shadow:0 {fs * .6:.0f}px {fs * 1.6:.0f}px rgba(0,0,0,.3)">'
+            f'<div style="display:flex;align-items:center;gap:{fs * .7:.0f}px"><div style="width:{fs * 2.4:.0f}px;height:{fs * 2.4:.0f}px;border-radius:50%;background:{CHAR};display:flex;align-items:center;justify-content:center">{mono(round(fs * 1.5), "gold")}</div>'
+            f'<div><div style="font-family:Montserrat;font-weight:600;font-size:{fs * 1.15:.0f}px;color:#1a0dab">Iconic Dent</div><div style="font-family:Montserrat;font-size:{fs * .8:.0f}px;color:{GREY}">Dentist · Norwich</div></div></div>'
+            f'<div style="display:flex;align-items:center;gap:{fs * .4:.0f}px;margin-top:{fs * .8:.0f}px;font-family:Montserrat;font-weight:500;font-size:{fs * .9:.0f}px;color:{INK}">5.0<span style="display:flex;gap:1px">{stars}</span><span style="color:{GREY};font-weight:400">(125 Google reviews)</span></div>'
+            f'<div style="margin-top:{fs * .4:.0f}px;font-family:Montserrat;font-size:{fs * .85:.0f}px;color:{GREY}">2 Magdalen Street, Norwich</div>'
+            f'<div style="margin-top:{fs * .8:.0f}px;padding-top:{fs * .7:.0f}px;border-top:1px solid #E6E1D8;display:flex;align-items:center;gap:{fs * .5:.0f}px;font-family:Montserrat;font-weight:600;font-size:{fs * .9:.0f}px;color:#1E7A46">'
+            f'<span style="width:{fs * .55:.0f}px;height:{fs * .55:.0f}px;border-radius:50%;background:#1E9A55;flex:none"></span>{note}</div></div>')
+
+
+def d1(size):
+    """VT-29 Search bar over the real reception, Iconic result card underneath."""
+    name = f"{GEN} | Static | Practice photo | Search bar"
+    q = "dentist Norwich taking new patients"
+    if size == "ls":
+        inner = f"""{photo('reception-front.jpg', 0, 0, 1200, 628, .55, .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(90deg,rgba(46,44,43,.15) 0%,rgba(46,44,43,.55) 45%,rgba(46,44,43,.88) 100%)"></div>
+<div class="abs" style="left:620px;top:60px">{search_bar(530, 19, q)}</div>
+<div class="abs" style="left:620px;top:150px">{result_card(530, 19)}</div>
+<div class="abs" style="left:620px;top:470px">{cta(CTA_CHECK40, 19)}</div>
+<div class="abs" style="left:48px;top:40px;padding:12px 14px;border-radius:14px;background:rgba(46,44,43,.5)">{logo(120, 'cream')}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('DJI_20260322152923_0097_D-scaled.jpg', 0, 0, 1080, 1920, .5, .45)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,.35) 0%,rgba(46,44,43,.1) 30%,rgba(46,44,43,.6) 55%,rgba(46,44,43,.92) 80%)"></div>
+<div class="abs" style="left:80px;top:270px">{logo(190, 'cream')}</div>
+<div class="abs" style="left:80px;top:960px">{search_bar(920, 30, q)}</div>
+<div class="abs" style="left:80px;top:1100px">{result_card(920, 30)}</div>
+<div class="abs" style="left:80px;top:1480px">{cta(CTA_CHECK40, 27)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('reception-front.jpg', 0, 0, 1080, 1080, .5, .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,.25) 0%,rgba(46,44,43,.15) 25%,rgba(46,44,43,.75) 50%,rgba(46,44,43,.92) 100%)"></div>
+<div class="abs" style="left:70px;top:60px">{logo(160, 'cream')}</div>
+<div class="abs" style="left:70px;top:420px">{search_bar(940, 26, q)}</div>
+<div class="abs" style="left:70px;top:540px">{result_card(940, 26)}</div>
+<div class="abs" style="left:70px;top:935px">{cta(CTA_CHECK40, 23)}</div>"""
+    return board(size, name, inner)
+
+
+def offer_panel(fs, w, dark=True):
+    col = LINEN if dark else INK
+    return (f'<div style="width:{w}px"><div class="eyebrow" style="font-size:{fs * .28:.0f}px">New patient offer</div>'
+            f'<div class="hl" style="font-size:{fs:.0f}px;color:{col};margin-top:{fs * .3:.0f}px;white-space:nowrap">Check-ups from</div><div class="hl" style="font-size:{fs * 2:.0f}px;line-height:1;color:{GOLD}">£40</div>'
+            f'<div class="body" style="margin-top:{fs * .3:.0f}px;font-size:{fs * .45:.0f}px">Full exam, x-rays only if needed, and a written plan with costs.</div></div>')
+
+
+def d2(size):
+    """VT-06 Offer footer: photo, Charcoal offer panel, address footer."""
+    name = f"{GEN} | Static | Practice photo | New patient offer"
+    if size == "ls":
+        inner = f"""{photo('reception-side.jpg', 0, 0, 560, 628, .5, .5)}
+<div class="abs" style="left:620px;top:50px">{logo(160, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:620px;top:120px">{offer_panel(44, 540)}</div>
+<div class="abs" style="left:620px;top:440px;display:flex;align-items:center;gap:22px">{cta(CTA_CHECK, 18)}{proof(14, LINEN)}</div>
+<div class="abs rule" style="left:620px;top:525px;width:520px;opacity:.35"></div>
+<div class="abs" style="left:620px;top:550px">{address(16, STONE)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    ph = 880 if s9 else 470
+    top = ph + (70 if s9 else 50)
+    fs = 84 if s9 else 58
+    inner = f"""{photo('reception-side.jpg', 0, 0, 1080, ph, .5, .5)}
+<div class="abs" style="left:{80 if s9 else 70}px;top:{270 if s9 else 50}px;padding:16px 20px;border-radius:16px;background:rgba(46,44,43,.55)">{logo(170, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{top}px">{offer_panel(fs, 560 if not s9 else 600)}</div>
+<div class="abs" style="left:{700 if s9 else 700}px;top:{top + (60 if s9 else 40)}px;display:flex;flex-direction:column;align-items:flex-start;gap:{26 if s9 else 22}px">{logo(150 if s9 else 120, 'cream')}{cta(CTA_CHECK, 22 if s9 else 19)}{proof(15 if s9 else 13, LINEN)}</div>
+<div class="abs rule" style="left:{80 if s9 else 70}px;right:{80 if s9 else 70}px;top:{1500 if s9 else 975}px;opacity:.35"></div>
+<div class="abs" style="left:0;right:0;top:{1528 if s9 else 1000}px;display:flex;justify-content:center">{address(22 if s9 else 19, STONE)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+D3_ITEMS = ["2 check-ups a year", "2 hygiene appointments", "2 x-rays", "5% off general dentistry"]
+
+
+def d3(size):
+    """VT-10 Membership: price a month, four ticks, lounge photo in a quarter-round corner."""
+    name = f"{GEN} | Static | Practice photo | Membership"
+    price = lambda fs: (f'<div class="body" style="font-size:{fs * .32:.0f}px;color:{STONE}">from just</div>'
+                        f'<div style="display:flex;align-items:baseline;gap:{fs * .15:.0f}px"><span class="hl" style="font-size:{fs:.0f}px;line-height:1;color:{GOLD}">£14.90</span>'
+                        f'<span class="hl" style="font-size:{fs * .38:.0f}px;color:{LINEN}">a month</span></div>')
+    badge = lambda d: (f'<div style="width:{d}px;height:{d}px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #D2BB98, {GOLD} 55%, #A88B62);display:flex;align-items:center;justify-content:center;text-align:center;'
+                       f'font-family:Montserrat;font-weight:600;font-size:{d * .14:.0f}px;line-height:1.15;color:{WHITE};box-shadow:0 10px 24px rgba(0,0,0,.3)">No waiting<br>list</div>')
+    if size == "ls":
+        inner = f"""{photo('IMG_7396.jpg', 820, 0, 380, 628, .5, .55, radius=0, extra='border-radius:190px 0 0 0;')}
+<div class="abs" style="left:56px;top:44px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:120px;font-size:44px">Join Our Dental <b>Membership</b></div>
+<div class="abs" style="left:56px;top:190px">{price(96)}</div>
+<div class="abs" style="left:56px;top:345px;display:grid;grid-template-columns:330px 330px;row-gap:16px">{''.join(ticks([t], 18, 0, LINEN) for t in D3_ITEMS)}</div>
+<div class="abs" style="left:56px;top:470px;display:flex;align-items:center;gap:24px">{cta(CTA_CHECK, 18)}{proof(14, LINEN)}</div>
+<div class="abs" style="left:700px;top:430px">{badge(130)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('IMG_7396.jpg', 520, 1080, 560, 840, .5, .5, extra='border-radius:280px 0 0 0;')}
+<div class="abs" style="left:80px;top:270px">{logo(120, 'cream')}</div>
+<div class="abs" style="left:820px;top:280px">{badge(180)}</div>
+<div class="abs hl" style="left:80px;top:500px;width:900px;font-size:92px">Join Our Dental <b>Membership</b></div>
+<div class="abs" style="left:80px;top:720px">{price(170)}</div>
+<div class="abs" style="left:80px;top:1010px;width:460px">{ticks(D3_ITEMS, 28, 36, LINEN)}</div>
+<div class="abs" style="left:80px;top:1400px">{cta(CTA_CHECK, 25)}</div>
+<div class="abs" style="left:80px;top:1520px">{proof(18, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    inner = f"""{photo('IMG_7396.jpg', 640, 560, 440, 520, .5, .5, extra='border-radius:220px 0 0 0;')}
+<div class="abs" style="left:70px;top:60px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:880px;top:40px">{badge(150)}</div>
+<div class="abs hl" style="left:70px;top:170px;width:780px;font-size:72px">Join Our Dental <b>Membership</b></div>
+<div class="abs" style="left:70px;top:340px">{price(140)}</div>
+<div class="abs" style="left:70px;top:600px;width:540px">{ticks(D3_ITEMS, 25, 28, LINEN)}</div>
+<div class="abs" style="left:70px;top:880px">{cta(CTA_CHECK, 22)}</div>
+<div class="abs" style="left:70px;top:1000px">{proof(17, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+D4_ROWS = [("New patient check-up", "£40"), ("X-rays, only if needed", "£15 each"), ("Hygiene appointment", "£65"), ("Anything else", "In writing first")]
+
+
+def price_card(w, fs, rot=-1.5):
+    rows = "".join(f'<div style="display:flex;justify-content:space-between;align-items:baseline;gap:{fs}px;padding:{fs * .75:.0f}px 0;border-bottom:1.5px solid rgba(190,161,122,.45)">'
+                   f'<span style="font-family:Montserrat;font-weight:500;font-size:{fs:.0f}px;color:{INK}">{a}</span>'
+                   f'<span class="hl" style="font-size:{fs * (1.15 if "£" in b else .95):.0f}px;color:{GOLD if "£" in b else INK};white-space:nowrap">{b}</span></div>' for a, b in D4_ROWS)
+    return (f'<div style="width:{w}px;padding:{fs * 1.6:.0f}px {fs * 1.5:.0f}px {fs * 1.2:.0f}px;background:#FCFAF6;transform:rotate({rot}deg);'
+            f'box-shadow:0 {fs * .9:.0f}px {fs * 2.4:.0f}px rgba(46,36,24,.28),0 2px 4px rgba(46,36,24,.15)">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center">{logo(round(fs * 9), "charcoal", "horizontal")}'
+            f'<span class="eyebrow" style="font-size:{fs * .6:.0f}px">Your first visit</span></div>'
+            f'<div style="margin-top:{fs * .6:.0f}px">{rows}</div>'
+            f'<div style="margin-top:{fs * .9:.0f}px;font-family:Montserrat;font-size:{fs * .7:.0f}px;color:{GREY}">Nothing beyond the check-up is booked until you agree your plan.</div></div>')
+
+
+def d4(size):
+    """Custom: a printed price card on Linen with cast shadow, circle of the consult room and gold disc."""
+    name = f"{GEN} | Static | Typographic | Price before the chair"
+    if size == "ls":
+        inner = f"""{circle('consult-room.jpg', 1010, -70, 260, .45, .5, disc=(10, 180, 50))}
+<div class="abs hl" style="left:56px;top:60px;width:470px;font-size:52px">Know The Price <b>Before You Sit Down.</b></div>
+<div class="abs" style="left:56px;top:330px">{cta(CTA_CHECK40, 19)}</div>
+<div class="abs" style="left:56px;top:430px">{proof(15)}</div>
+<div class="abs" style="left:56px;top:520px">{logo(170, 'charcoal', 'horizontal')}</div>
+<div class="abs" style="left:575px;top:70px">{price_card(540, 18, -1.5)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{circle('consult-room.jpg', 740, 200, 300, .45, .5, disc=(0, 210, 60))}
+<div class="abs" style="left:80px;top:270px">{logo(120)}</div>
+<div class="abs hl" style="left:80px;top:560px;width:900px;font-size:94px">Know The Price <b>Before You Sit Down.</b></div>
+<div class="abs" style="left:90px;top:830px">{price_card(900, 30, -1.5)}</div>
+<div class="abs" style="left:80px;top:1500px;display:flex;align-items:center;gap:30px">{cta(CTA_CHECK40, 25)}{proof(18)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{circle('consult-room.jpg', 790, -90, 380, .45, .5, disc=(20, 270, 70))}
+<div class="abs hl" style="left:70px;top:70px;width:700px;font-size:74px">Know The Price <b>Before You Sit Down.</b></div>
+<div class="abs" style="left:80px;top:300px">{price_card(920, 25, -1.2)}</div>
+<div class="abs" style="left:70px;top:925px;display:flex;align-items:center;gap:30px">{cta(CTA_CHECK40, 22)}{proof(17)}</div>"""
+    return board(size, name, inner)
+
+
+def usp_pill(t, fs):
+    return (f'<span style="display:inline-flex;align-items:center;gap:{fs * .5:.0f}px;padding:{fs * .45:.0f}px {fs * .9:.0f}px;border:1.5px solid {GOLD};border-radius:999px;'
+            f'font-family:Montserrat;font-weight:500;font-size:{fs:.0f}px;color:{LINEN};white-space:nowrap">{TICK.format(s=round(fs * 1.1), c=GOLD)}{t}</span>')
+
+
+def brand_card(w, fs):
+    pills = "".join(usp_pill(t, fs * .5) for t in ["No waiting list", "Written plan with costs"])
+    return (f'<div style="position:relative;width:{w}px;padding:{fs * .8:.0f}px {fs * .8:.0f}px {fs * .75:.0f}px;border-radius:{fs * .5:.0f}px;background:rgba(46,44,43,.94);box-shadow:0 {fs * .4:.0f}px {fs:.0f}px rgba(0,0,0,.35)">'
+            f'<div style="position:absolute;left:0;top:-{fs * 1.05:.0f}px;padding:{fs * .3:.0f}px {fs * .5:.0f}px;border-radius:{fs * .35:.0f}px {fs * .35:.0f}px 0 0;background:rgba(46,44,43,.94)">{logo(round(fs * 3.6), "cream", "horizontal")}</div>'
+            f'<div class="hl" style="font-size:{fs:.0f}px;color:{LINEN}">Your New Dentist In <b>Norwich.</b></div>'
+            f'<div style="display:flex;align-items:baseline;gap:{fs * .2:.0f}px;margin-top:{fs * .3:.0f}px"><span class="body" style="font-size:{fs * .38:.0f}px;color:{STONE}">Check-ups</span><span class="hl" style="font-size:{fs * .75:.0f}px;color:{GOLD}">£40</span></div>'
+            f'<div style="display:flex;gap:{fs * .25:.0f}px;margin-top:{fs * .35:.0f}px;flex-wrap:wrap">{pills}</div>'
+            f'<div style="display:flex;align-items:center;gap:{fs * .5:.0f}px;margin-top:{fs * .6:.0f}px">{cta(CTA_CHECK, round(fs * .34))}{proof(round(fs * .24), LINEN)}</div></div>')
+
+
+def d5(size):
+    """VT-03 Brand card over the reception logo wall."""
+    name = f"{GEN} | Static | Practice photo | Your new dentist"
+    if size == "ls":
+        inner = f"""{photo('DJI_20260322152923_0097_D-scaled.jpg', 0, 0, 1200, 628, .5, .32)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(90deg,rgba(46,44,43,.6) 0%,rgba(46,44,43,0) 70%)"></div>
+<div class="abs" style="left:48px;top:120px">{brand_card(600, 46)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('DJI_20260322152923_0097_D-scaled.jpg', 0, 0, 1080, 1920, .5, .4)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,0) 45%,rgba(46,44,43,.55) 100%)"></div>
+<div class="abs" style="left:70px;top:860px">{brand_card(940, 84)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('DJI_20260322152923_0097_D-scaled.jpg', 0, 0, 1080, 1080, .5, .3)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,0) 40%,rgba(46,44,43,.5) 100%)"></div>
+<div class="abs" style="left:60px;top:400px">{brand_card(860, 64)}</div>"""
+    return board(size, name, inner)
+
+
+PERSONAS = {"mark": [m1, m2, m3, m4, m5], "denise": [d1, d2, d3, d4, d5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
