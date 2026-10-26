@@ -44,6 +44,7 @@ GRAIN = ("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width=
 CSS = f"""
 @font-face {{ font-family: Jost; src: url(assets/fonts/Jost.ttf); font-weight: 100 900; }}
 @font-face {{ font-family: Lexend; src: url(assets/fonts/Lexend.ttf); font-weight: 100 900; }}
+@font-face {{ font-family: Caveat; src: url(assets/fonts/Caveat.ttf); font-weight: 400 700; }}
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{ background: #3a3733; font-family: Lexend, sans-serif; font-weight: 300; display: flex; gap: 80px; padding: 80px; align-items: flex-start; -webkit-font-smoothing: antialiased; }}
 .ab {{ position: relative; overflow: hidden; flex: none; background: {BLACK}; color: {WHITE}; }}
@@ -73,9 +74,10 @@ def proof(size=22, color=WHITE, star=GOLD, text="4.9 from 227 Google reviews"):
             f'<span style="display:flex;gap:2px">{stars}</span>{text}</div>')
 
 
-def cta(text, size=24, h=None):
+def cta(text, size=24, h=None, dark=False):
     h = h or round(size * 3)
-    return f'<span class="cta" style="height:{h}px;padding:0 {round(size * 1.8)}px;font-size:{size}px">{text}</span>'
+    col = f"background:{BLACK};color:{WHITE};" if dark else ""
+    return f'<span class="cta" style="height:{h}px;padding:0 {round(size * 1.8)}px;font-size:{size}px;{col}">{text}</span>'
 
 
 def crop(src, w, h, fx=.5, fy=.5, zoom=1.0):
@@ -543,7 +545,174 @@ def g5(size):
 <div class="abs" style="left:70px;top:900px">{cta(CTA_FREE, 21)}</div>"""
     return board(size, name, inner)
 
-PERSONAS = {"peter": [p1, p2, p3, p4, p5], "geoff": [g1, g2, g3, g4, g5]}
+# ---------------------------------------------------------------- MICHELLE (wanted it for twenty years)
+SMO = "Smile Makeover"
+MI_PRICES = [("Edge bonding", "from £175 a tooth"), ("Veneers", "from £775 a tooth"), ("Clear aligners", "from £2,500")]
+
+
+def mi1(size):
+    """VT-04 Side column."""
+    name = f"{SMO} | Static | Stock 50-60 | Still thinking about it"
+    if size == "ls":
+        inner = f"""{photo('michelle-portrait.jpg', 420, 0, 780, 628, .4, .4)}
+<div class="abs" style="left:0;top:0;width:640px;height:628px;background:linear-gradient(90deg,{BLACK} 62%,rgba(27,27,27,0))"></div>
+<div class="abs" style="left:60px;top:52px">{logo(118)}</div>
+<div class="abs hl" style="left:60px;top:170px;width:480px;font-size:56px">Still thinking about <b>your smile?</b></div>
+<div class="abs body" style="left:60px;top:320px;width:420px;font-size:19px">Two or three things have bothered you for years.</div>
+<div class="abs" style="left:60px;top:400px">{address(15)}</div>
+<div class="abs" style="left:60px;top:470px">{cta(CTA_FREE, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    H = 1920 if s9 else 1080
+    colw = 560 if not s9 else 1080
+    if s9:
+        inner = f"""{photo('michelle-portrait.jpg', 0, 0, 1080, 1250, .38, .45)}
+<div class="abs" style="left:0;right:0;top:820px;height:430px;background:linear-gradient(0deg,{BLACK},rgba(27,27,27,0))"></div>
+<div class="abs" style="left:0;right:0;top:0;height:520px;background:linear-gradient(180deg,rgba(27,27,27,.75),rgba(27,27,27,0))"></div>
+<div class="abs" style="left:80px;top:1010px">{logo(140)}</div>
+<div class="abs hl" style="left:80px;top:1160px;width:900px;font-size:96px">Still thinking about <b>your smile?</b></div>
+<div class="abs body" style="left:80px;top:1390px;width:880px;font-size:30px">Two or three things have bothered you for years.</div>
+<div class="abs" style="left:80px;top:1480px;display:flex;align-items:center;gap:34px">{cta(CTA_FREE, 26)}{proof(21)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('michelle-portrait.jpg', 380, 0, 700, 1080, .4, .45)}
+<div class="abs" style="left:0;top:0;width:{colw}px;height:1080px;background:linear-gradient(90deg,{BLACK} 70%,rgba(27,27,27,0))"></div>
+<div class="abs" style="left:70px;top:80px">{logo(130)}</div>
+<div class="abs hl" style="left:70px;top:300px;width:440px;font-size:76px">Still thinking about <b>your smile?</b></div>
+<div class="abs rule" style="left:70px;top:560px;width:90px"></div>
+<div class="abs body" style="left:70px;top:600px;width:400px;font-size:26px">Two or three things have bothered you for years.</div>
+<div class="abs" style="left:70px;top:740px">{address(17)}</div>
+<div class="abs" style="left:70px;top:840px">{cta(CTA_FREE, 22)}</div>
+<div class="abs" style="left:70px;top:960px">{proof(17)}</div>"""
+    return board(size, name, inner)
+
+
+def mi2(size):
+    """Custom: photo-led, the accommodation."""
+    name = f"{SMO} | Static | Stock 50-60 | Always taking the photo"
+    if size == "ls":
+        inner = f"""{photo('michelle-friends.jpg', 560, 0, 640, 628, .32, .45, corner='bl', r=120)}
+<div class="abs" style="left:60px;top:52px">{logo(118)}</div>
+<div class="abs hl" style="left:60px;top:200px;width:520px;font-size:56px">You're always the one <b>taking the photo.</b></div>
+<div class="abs label" style="left:60px;top:390px;font-size:14px;color:{GOLD}">Free smile consultation in Leamington Spa</div>
+<div class="abs" style="left:60px;top:440px">{cta(CTA_FREE, 18)}</div>
+<div class="abs" style="left:60px;top:530px">{proof(14)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    H = 1920 if s9 else 1080
+    inner = f"""{photo('michelle-friends.jpg', 0, 0, 1080, H, .36 if s9 else .4, .4)}
+<div class="abs" data-name="Overlay" style="left:0;right:0;bottom:0;height:{H * (.5 if s9 else .55):.0f}px;background:linear-gradient(0deg,{BLACK} 45%,rgba(27,27,27,.8) 70%,rgba(27,27,27,0))"></div>
+<div class="abs" style="left:0;right:0;top:0;height:{480 if s9 else 260}px;background:linear-gradient(180deg,rgba(27,27,27,.7),rgba(27,27,27,0))"></div>
+<div class="abs" style="left:80px;top:{270 if s9 else 70}px">{logo(150 if s9 else 130)}</div>
+<div class="abs hl" style="left:80px;top:{1150 if s9 else 600}px;width:920px;font-size:{92 if s9 else 76}px">You're always the one <b>taking the photo.</b></div>
+<div class="abs label" style="left:80px;top:{1390 if s9 else 810}px;font-size:{20 if s9 else 17}px;color:{GOLD}">Free smile consultation in Leamington Spa</div>
+<div class="abs" style="left:80px;top:{1450 if s9 else 870}px;display:flex;align-items:center;gap:34px">{cta(CTA_FREE, 26 if s9 else 22)}{proof(21 if s9 else 18)}</div>"""
+    return board(size, name, inner)
+
+
+def mi_prices(size=28):
+    return price_list([(a, b) for a, b in MI_PRICES], size)
+
+
+def mi3(size):
+    """VT-20 Editorial price split (three from-prices)."""
+    name = f"{SMO} | Static | Stock 50-60 | What it actually costs"
+    if size == "ls":
+        inner = f"""{photo('michelle-sofa.jpg', 680, 0, 520, 628, .58, .4, corner='bl', r=110)}
+<div class="abs" style="left:56px;top:48px">{logo(110)}</div>
+<div class="abs hl" style="left:56px;top:160px;width:560px;font-size:40px">What a smile makeover <b>actually costs</b></div>
+<div class="abs" style="left:56px;top:270px;width:560px">{mi_prices(18)}</div>
+<div class="abs body" style="left:56px;top:440px;font-size:15px">Full cost in writing before you start</div>
+<div class="abs" style="left:56px;top:490px">{cta(CTA_FREE, 18)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('michelle-sofa.jpg', 0, 0, 1080, 860, .5, .4, corner='br', r=200)}
+<div class="abs" style="left:0;right:0;top:0;height:520px;background:linear-gradient(180deg,rgba(27,27,27,.75),rgba(27,27,27,0))"></div>
+<div class="abs" style="left:80px;top:900px">{logo(130)}</div>
+<div class="abs hl" style="left:80px;top:1030px;width:920px;font-size:72px">What a smile makeover <b>actually costs</b></div>
+<div class="abs" style="left:80px;top:1220px;width:920px">{mi_prices(26)}</div>
+<div class="abs body" style="left:80px;top:1455px;font-size:23px">Full cost in writing before you start</div>
+<div class="abs" style="left:80px;top:1505px;display:flex;align-items:center;gap:34px">{cta(CTA_FREE, 24)}{proof(21)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{photo('michelle-sofa.jpg', 600, 0, 480, 1080, .6, .4)}
+<div class="abs" style="left:70px;top:80px">{logo(130)}</div>
+<div class="abs hl" style="left:70px;top:270px;width:480px;font-size:62px">What a smile makeover <b>actually costs</b></div>
+<div class="abs" style="left:70px;top:480px;width:470px">{mi_prices(22)}</div>
+<div class="abs body" style="left:70px;top:700px;width:460px;font-size:21px">Full cost in writing before you start</div>
+<div class="abs" style="left:70px;top:820px">{cta(CTA_FREE, 21)}</div>
+<div class="abs" style="left:70px;top:940px">{proof(16)}</div>"""
+    return board(size, name, inner)
+
+
+def note(w, fs, rot=-2.5):
+    tape = f'<div style="position:absolute;left:50%;top:{-fs * .45:.0f}px;width:{fs * 3.2:.0f}px;height:{fs * .9:.0f}px;transform:translateX(-50%) rotate(3deg);background:rgba(237,226,207,.82);box-shadow:0 1px 2px rgba(0,0,0,.15)"></div>'
+    return (f'<div style="position:relative;width:{w}px;padding:{fs * 1.1:.0f}px {fs * 1.0:.0f}px {fs * 1.2:.0f}px;background:#F7F2E8;transform:rotate({rot}deg);'
+            f'box-shadow:0 {fs * .5:.0f}px {fs * 1.2:.0f}px rgba(0,0,0,.45),0 2px 4px rgba(0,0,0,.25)">{tape}'
+            f'<div style="font-family:Caveat;font-weight:600;font-size:{fs}px;line-height:1.12;color:#22201d">Tell us what you\'d change.</div>'
+            f'<div style="font-family:Caveat;font-weight:600;font-size:{fs}px;line-height:1.12;color:#22201d;margin-top:{fs * .2:.0f}px">We\'ll tell you what\'s <span style="border-bottom:{fs * .07:.1f}px solid {GOLD}">possible.</span></div>'
+            f'<div style="font-family:Caveat;font-weight:500;font-size:{fs * .62:.0f}px;color:#6b645a;margin-top:{fs * .45:.0f}px;text-align:right">Avenue Dental</div></div>')
+
+
+def mi4(size):
+    """VT-31 Handwritten sign: a note in the Avenue lounge."""
+    name = f"{SMO} | Static | Practice photo | Tell us what you'd change"
+    if size == "ls":
+        inner = f"""{photo('lounge-blur.jpg', 0, 0, 1200, 628, .5, .5)}
+<div class="abs" style="inset:0;background:linear-gradient(90deg,rgba(27,27,27,.85),rgba(27,27,27,.3))"></div>
+<div class="abs" style="left:60px;top:52px">{logo(118)}</div>
+<div class="abs hl" style="left:60px;top:190px;width:500px;font-size:48px;text-shadow:0 2px 12px rgba(0,0,0,.4)">You don't need to know <b>the treatment.</b></div>
+<div class="abs" style="left:60px;top:400px">{cta(CTA_FREE, 18)}</div>
+<div class="abs" style="left:60px;top:490px">{proof(14)}</div>
+<div class="abs" style="left:690px;top:110px">{note(440, 46)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    H = 1920 if s9 else 1080
+    inner = f"""{photo('lounge-blur.jpg', 0, 0, 1080, H, .5, .5)}
+<div class="abs" style="inset:0;background:linear-gradient(180deg,rgba(27,27,27,.4),rgba(27,27,27,.25) 45%,rgba(27,27,27,.92) 72%)"></div>
+<div class="abs" style="left:80px;top:{270 if s9 else 70}px">{logo(150 if s9 else 130)}</div>
+<div class="abs" style="left:{150 if s9 else 220}px;top:{560 if s9 else 230}px">{note(780 if s9 else 620, 84 if s9 else 64)}</div>
+<div class="abs label" style="left:80px;top:{1330 if s9 else 820}px;font-size:{20 if s9 else 17}px;color:{GOLD}">Free smile consultation · Lime Avenue</div>
+<div class="abs" style="left:80px;top:{1390 if s9 else 880}px;display:flex;align-items:center;gap:34px">{cta(CTA_FREE, 26 if s9 else 22)}{proof(21 if s9 else 18)}</div>"""
+    return board(size, name, inner)
+
+
+MI_STEPS = [("1", "Health first", "Cosmetic work lasts longer on healthy gums."), ("2", "Straighten and whiten", "So everything after is matched to it."), ("3", "Bonding or veneers to finish", "Shade, shape and spacing decided once.")]
+
+
+def steps(size=26, gap=26):
+    return "".join(f'<div style="display:flex;gap:{size * .8:.0f}px;align-items:flex-start;margin-top:{gap if i else 0}px">'
+                   f'<div class="hl" style="font-size:{size * 2:.0f}px;color:{GOLD};line-height:.9;width:{size * 1.3:.0f}px">{n}</div>'
+                   f'<div><div class="hl" style="font-size:{size * 1.1:.0f}px;color:{INK}">{t}</div><div class="body" style="font-size:{size * .8:.0f}px;color:#5a554e;margin-top:4px">{d}</div></div></div>'
+                   for i, (n, t, d) in enumerate(MI_STEPS))
+
+
+def mi5(size):
+    """Custom: three-step band on Blush Gold with the lounge in a leaf frame."""
+    name = f"{SMO} | Static | Practice photo | Done in the right order"
+    if size == "ls":
+        inner = f"""{photo('lounge-sign.jpg', 820, 0, 380, 628, .3, .5, corner='bl', r=110)}
+<div class="abs" style="left:56px;top:48px">{logo(110, 'primary')}</div>
+<div class="abs hl" style="left:56px;top:150px;width:700px;font-size:38px;color:{INK}">Why fixing one tooth at a time <b>stops matching</b></div>
+<div class="abs" style="left:56px;top:270px;width:700px">{steps(18, 16)}</div>
+<div class="abs" style="left:56px;top:520px">{cta(CTA_FREE, 18, dark=True)}</div>"""
+        return board(size, name, inner, bg=BLUSH)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('lounge-sign.jpg', 540, 250, 540, 640, .3, .5, corner='bl', r=160)}
+<div class="abs" style="left:80px;top:270px">{logo(150, 'primary')}</div>
+<div class="abs hl" style="left:80px;top:500px;width:440px;font-size:66px;color:{INK}">Why fixing one tooth at a time <b>stops matching</b></div>
+<div class="abs" style="left:80px;top:960px;width:920px">{steps(32, 40)}</div>
+<div class="abs label" style="left:80px;top:1420px;font-size:20px;color:{GOLD}">One plan, one shade</div>
+<div class="abs" style="left:80px;top:1480px">{cta(CTA_FREE, 26, dark=True)}</div>"""
+        return board(size, name, inner, bg=BLUSH)
+    inner = f"""{photo('lounge-sign.jpg', 640, 0, 440, 520, .3, .5, corner='bl', r=140)}
+<div class="abs" style="left:70px;top:80px">{logo(130, 'primary')}</div>
+<div class="abs hl" style="left:70px;top:260px;width:520px;font-size:56px;color:{INK}">Why fixing one tooth at a time <b>stops matching</b></div>
+<div class="abs" style="left:70px;top:580px;width:940px">{steps(26, 28)}</div>
+<div class="abs" style="left:70px;top:940px;display:flex;align-items:center;gap:30px">{cta(CTA_FREE, 22, dark=True)}<span class="label" style="font-size:16px;color:{GOLD}">One plan, one shade</span></div>"""
+    return board(size, name, inner, bg=BLUSH)
+
+PERSONAS = {"peter": [p1, p2, p3, p4, p5], "geoff": [g1, g2, g3, g4, g5], "michelle": [mi1, mi2, mi3, mi4, mi5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
