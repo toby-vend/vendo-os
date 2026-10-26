@@ -154,7 +154,7 @@ These were backed up and shared by Toby. **New or changed values for the new hos
 | Blob replacement credentials | Whatever the new file storage needs |
 | Remove: `VERCEL`, `VERCEL_URL`, `VERCEL_PROJECT_PRODUCTION_URL`, `VERCEL_PROJECT_URL`, `BLOB_READ_WRITE_TOKEN`, `AI_GATEWAY_API_KEY` | Vercel-only |
 
-The full list of names the code reads is everything matching `process.env.*` under `web/` and `api/`. At the time of writing that's about 95 names, including Turso, Asana, Fathom, Slack (bot token, signing secret and webhook URLs), Google OAuth, Google Ads, Xero, Harvest, GoHighLevel (including the Squat Success token), Frame.io, Supabase portal, VAPID push keys, `SESSION_SECRET`, `TOKEN_ENCRYPTION_KEY(_PREVIOUS)` and `CRON_SECRET`. **Carry `SESSION_SECRET` and `TOKEN_ENCRYPTION_KEY` over unchanged**, or existing sessions and encrypted tokens stop working.
+The full list of names the code reads is everything matching `process.env.*` under `web/` and `api/`. At the time of writing that's 90 names, including Turso, Asana, Fathom, Slack (bot token, signing secret and webhook URLs), Google OAuth, Google Ads, Xero, Harvest, GoHighLevel (including the Squat Success token), Frame.io, Supabase portal, VAPID push keys, `SESSION_SECRET`, `TOKEN_ENCRYPTION_KEY(_PREVIOUS)` and `CRON_SECRET`. **Carry `SESSION_SECRET` and `TOKEN_ENCRYPTION_KEY` over unchanged**, or existing sessions and encrypted tokens stop working.
 
 ---
 
