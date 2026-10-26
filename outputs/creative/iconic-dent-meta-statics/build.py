@@ -120,7 +120,12 @@ def crop(src, w, h, fx=.5, fy=.5, zoom=1.0):
     return f"assets/photos/web/crops/{out.name}"
 
 
+SWAP = {}  # src -> (stock src, fx, fy): set per ad when building the stock-options pages
+
+
 def photo(src, x, y, w, h, fx=.5, fy=.5, zoom=1.0, radius=0, extra=""):
+    if src in SWAP:
+        src, fx, fy, zoom = (*SWAP[src], 1.0)
     rad = f"border-radius:{radius}px;" if radius else ""
     return (f'<div class="ph" data-name="Photo" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;{rad}{extra}">'
             f'<img src="{crop(src, w, h, fx, fy, zoom)}"></div>')
@@ -1696,8 +1701,42 @@ PERSONAS = {"mark": [m1, m2, m3, m4, m5], "denise": [d1, d2, d3, d4, d5],
             "carol": [c1, c2, c3, c4, c5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
+# Stock options (licensed Freepik via Magnific, previews until bought): one persona-age photo per ad, replacing
+# the practice photo. Built as stock-<size>.html; the practice-photo originals stay unchanged.
+S = "stock/"
+STOCK = [
+    (d1, {"reception-front.jpg": (S + "d1-10890215.jpg", .5, .28), "DJI_20260322152923_0097_D-scaled.jpg": (S + "d1-10890215.jpg", .5, .3)}),
+    (d3, {"IMG_7396.jpg": (S + "d3-294022451.jpg", .72, .45)}),
+    (mi1, {"mirror-boutique.jpg": (S + "mi1-16691011.jpg", .55, .38)}),
+    (mi2, {"consult-room.jpg": (S + "mi2-9633374.jpg", .33, .4)}),
+    (mi3, {"IMG_7396.jpg": (S + "mi3-430642377.jpg", .5, .35)}),
+    (mi5, {"mirror-boutique.jpg": (S + "mi5-260272416.jpg", .5, .4)}),
+    (h4, {"mirror-boutique.jpg": (S + "h4-2954979.jpg", .5, .62)}),
+    (h5, {"sign-wall-tall.jpg": (S + "h5-906842.jpg", .45, .35)}),
+    (p3, {"surgery.jpg": (S + "p3-7089839.jpg", .6, .45)}),
+    (p4, {"surgery.jpg": (S + "p4-19924941.jpg", .45, .28)}),
+    (g4, {"consult-room.jpg": (S + "g4-28998814.jpg", .5, .4)}),
+    (l3, {"consult-room.jpg": (S + "l3-25910484.jpg", .32, .4), "reception-side.jpg": (S + "l3-25910484.jpg", .32, .4)}),
+    (l5, {"reception-side.jpg": (S + "l5-3776098.jpg", .6, .4), "sign-wall-chair.jpg": (S + "l5-3776098.jpg", .6, .4)}),
+    (c3, {"consult-room.jpg": (S + "c3-5384068.jpg", .5, .25)}),
+    (c4, {"IMG_7396.jpg": (S + "c4-260272155.jpg", .5, .4)}),
+]
+
+
+def stock_boards(size):
+    out = []
+    for f, swap in STOCK:
+        SWAP.clear(); SWAP.update(swap)
+        out.append(f(size).replace(" | Static | Practice photo | ", " | Static | Stock lifestyle | ").replace(" | Static | Typographic | ", " | Static | Stock lifestyle | "))
+    SWAP.clear()
+    return out
+
 if __name__ == "__main__":
     which = sys.argv[1:] or list(PERSONAS)
+    if "stock" in which:
+        which.remove("stock")
+        for size, suffix in FILES.items():
+            (ROOT / f"stock-{suffix}.html").write_text(page(f"Iconic | stock options | {suffix}", stock_boards(size)))
     for p in which:
         for size, suffix in FILES.items():
             (ROOT / f"{p}-{suffix}.html").write_text(page(f"Iconic | {p} | {suffix}", [f(size) for f in PERSONAS[p]]))
