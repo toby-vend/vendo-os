@@ -936,9 +936,219 @@ def h5(size):
     return board(size, name, inner)
 
 
+# ---------------------------------------------------------------- PETER (one missing tooth)
+IMP = "Dental Implants"
+CROSS = ('<svg width="{s}" height="{s}" viewBox="0 0 24 24" style="display:block;flex:none"><circle cx="12" cy="12" r="11.2" fill="none" stroke="{c}" stroke-width="1.6"/>'
+         '<path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="{c}" stroke-width="2" stroke-linecap="round"/></svg>')
+
+
+def implant_price(fs, col=INK, sub=GREY):
+    return (f'<div class="eyebrow" style="font-size:{fs * .14:.0f}px">Single dental implant</div>'
+            f'<div style="display:flex;align-items:baseline;gap:{fs * .08:.0f}px;margin-top:{fs * .08:.0f}px"><span class="body" style="font-size:{fs * .16:.0f}px;color:{sub}">from</span>'
+            f'<span class="hl" style="font-size:{fs:.0f}px;line-height:.95;color:{GOLD}">£2,500</span></div>'
+            f'<div class="hl" style="font-size:{fs * .3:.0f}px;color:{col};margin-top:{fs * .06:.0f}px">Crown <b>Included.</b></div>')
+
+
+def p1(size):
+    """VT-20 Editorial price split: big price on Linen beside a capsule of the real 3D scanner."""
+    name = f"{IMP} | Static | Practice photo | One price"
+    if size == "ls":
+        inner = f"""<div class="abs" style="left:56px;top:46px">{logo(150, 'charcoal', 'horizontal')}</div>
+<div class="abs" style="left:56px;top:140px">{implant_price(150)}</div>
+<div class="abs body" style="left:56px;top:400px;width:560px;font-size:18px;color:{INK}">Free consultation with a 3D scan and a written plan.</div>
+<div class="abs" style="left:56px;top:470px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 18)}{proof(14)}</div>
+<div class="abs" style="left:790px;top:30px;width:360px;height:568px;background:{SAND};border-radius:180px"></div>
+{capsule('cbct.jpg', 820, 50, 300, 528, .45, .5)}
+<div class="abs" style="left:800px;top:420px;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #D2BB98, {GOLD} 55%, #A88B62);box-shadow:0 10px 24px rgba(60,44,20,.25)"></div>"""
+        return board(size, name, inner, bg=PAPER)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(120)}</div>
+<div class="abs" style="left:560px;top:250px;width:440px;height:760px;background:{SAND};border-radius:220px"></div>
+{capsule('cbct.jpg', 600, 290, 360, 680, .45, .45)}
+<div class="abs" style="left:570px;top:820px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #D2BB98, {GOLD} 55%, #A88B62);box-shadow:0 10px 24px rgba(60,44,20,.25)"></div>
+<div class="abs" style="left:80px;top:1040px">{implant_price(230)}</div>
+<div class="abs body" style="left:80px;top:1450px;width:900px;font-size:29px;color:{INK}">Free consultation with a 3D scan and a written plan.</div>
+<div class="abs" style="left:80px;top:1530px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 24)}{proof(17)}</div>"""
+        return board(size, name, inner, bg=PAPER)
+    inner = f"""<div class="abs" style="left:70px;top:70px">{logo(170, 'charcoal', 'horizontal')}</div>
+<div class="abs" style="left:690px;top:60px;width:340px;height:960px;background:{SAND};border-radius:170px"></div>
+{capsule('cbct.jpg', 720, 90, 280, 900, .45, .5)}
+<div class="abs" style="left:690px;top:760px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #D2BB98, {GOLD} 55%, #A88B62);box-shadow:0 10px 24px rgba(60,44,20,.25)"></div>
+<div class="abs" style="left:70px;top:290px">{implant_price(170)}</div>
+<div class="abs body" style="left:70px;top:620px;width:560px;font-size:25px;color:{INK}">Free consultation with a 3D scan and a written plan.</div>
+<div class="abs" style="left:70px;top:780px">{cta(CTA_CONSULT, 22)}</div>
+<div class="abs" style="left:70px;top:905px">{proof(17)}</div>"""
+    return board(size, name, inner, bg=PAPER)
+
+
+P2_GAP = ["Chewing on one side", "Food getting stuck", "Teeth either side can shift"]
+P2_IMP = ["Fixed, like your own tooth", "Doesn't rely on the teeth next to it", "12-month guarantee"]
+
+
+def vs_card(w, fs, dark, title, items, photo_html=""):
+    bg = f"background:{CHAR}" if dark else f"background:#FCFAF6"
+    tc, ic = (LINEN, STONE) if dark else (INK, INK)
+    icon = (lambda: CROSS.format(s=round(fs * 1.3), c="#9C948A")) if dark else (lambda: TICK.format(s=round(fs * 1.3), c=GOLD))
+    rows = "".join(f'<div style="display:flex;align-items:center;gap:{fs * .6:.0f}px;margin-top:{fs * .9:.0f}px">{icon()}<span style="font-family:Montserrat;font-weight:500;font-size:{fs:.0f}px;line-height:1.3;color:{ic}">{t}</span></div>' for t in items)
+    return (f'<div style="width:{w}px;{bg};border-radius:{fs * 1.1:.0f}px;padding:{fs * 1.4:.0f}px {fs * 1.3:.0f}px {fs * 1.5:.0f}px;box-shadow:0 {fs * .8:.0f}px {fs * 2:.0f}px rgba(46,44,43,.22);overflow:hidden">'
+            f'{photo_html}<div class="hl" style="font-size:{fs * 1.7:.0f}px;color:{tc}">{title}</div>{rows}</div>')
+
+
+def vs_badge(d):
+    return (f'<div style="width:{d}px;height:{d}px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #D2BB98, {GOLD} 55%, #A88B62);display:flex;align-items:center;justify-content:center;'
+            f'font-family:\'Mongolian Baiti\';font-size:{d * .38:.0f}px;color:{WHITE};box-shadow:0 10px 24px rgba(0,0,0,.25)">vs</div>')
+
+
+def p2(size):
+    """VT-22 Two-card comparison: living with the gap vs one implant. No competitor named."""
+    name = f"{IMP} | Static | Typographic | Living with the gap"
+    if size == "ls":
+        inner = f"""<div class="abs hl" style="left:56px;top:40px;width:800px;font-size:44px">Got Used To The Gap? <b>Here's What It's Costing.</b></div>
+<div class="abs" style="left:56px;top:170px">{vs_card(520, 17, True, "Living with the gap", P2_GAP)}</div>
+<div class="abs" style="left:624px;top:170px">{vs_card(520, 17, False, "One implant", P2_IMP)}</div>
+<div class="abs" style="left:557px;top:255px">{vs_badge(84)}</div>
+<div class="abs" style="left:56px;top:520px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 17)}<span class="body" style="font-size:16px;color:{INK}">From <b style="color:{GOLD};font-weight:600">£2,500</b>, crown included</span></div>
+<div class="abs" style="left:960px;top:520px">{logo(180, 'charcoal', 'horizontal')}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(120)}</div>
+<div class="abs hl" style="left:80px;top:450px;width:920px;font-size:80px">Got Used To The Gap? <b>Here's What It's Costing.</b></div>
+<div class="abs" style="left:80px;top:680px">{vs_card(920, 30, True, "Living with the gap", P2_GAP)}</div>
+<div class="abs" style="left:80px;top:1080px">{vs_card(920, 30, False, "One implant", P2_IMP)}</div>
+<div class="abs" style="left:880px;top:1005px">{vs_badge(130)}</div>
+<div class="abs" style="left:80px;top:1500px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 24)}<span class="body" style="font-size:24px;color:{INK}">From <b style="color:{GOLD};font-weight:600">£2,500</b>, crown included</span></div>"""
+        return board(size, name, inner)
+    inner = f"""<div class="abs hl" style="left:70px;top:70px;width:940px;font-size:68px">Got Used To The Gap? <b>Here's What It's Costing.</b></div>
+<div class="abs" style="left:70px;top:300px">{vs_card(455, 21, True, "Living with the gap", P2_GAP)}</div>
+<div class="abs" style="left:555px;top:300px">{vs_card(455, 21, False, "One implant", P2_IMP)}</div>
+<div class="abs" style="left:490px;top:420px">{vs_badge(100)}</div>
+<div class="abs" style="left:70px;top:800px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 22)}<span class="body" style="font-size:22px;color:{INK}">From <b style="color:{GOLD};font-weight:600">£2,500</b>, crown included</span></div>
+<div class="abs" style="left:70px;top:960px">{logo(170, 'charcoal', 'horizontal')}</div>
+<div class="abs" style="left:760px;top:965px">{proof(15)}</div>"""
+    return board(size, name, inner)
+
+
+def p3(size):
+    """Custom: big question on Linen with a large circle of the real surgery bleeding off the edge."""
+    name = f"{IMP} | Static | Practice photo | Chewing on one side"
+    sub = "One implant. Crown included. From"
+    pl = lambda fs: f'<div class="body" style="font-size:{fs}px;color:{INK}">{sub} <b class="hl" style="font-weight:400;color:{GOLD};font-size:{fs * 1.6:.0f}px">£2,500.</b></div>'
+    if size == "ls":
+        inner = f"""{circle('surgery.jpg', 700, 40, 560, .55, .55, disc=(30, 400, 100))}
+<div class="abs" style="left:56px;top:46px">{logo(150, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:140px;width:600px;font-size:64px">Still Chewing <b>On One Side?</b></div>
+<div class="abs" style="left:56px;top:320px;width:600px">{pl(19)}</div>
+<div class="abs" style="left:56px;top:420px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 17)}{proof(13)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{circle('surgery.jpg', 140, 1020, 1100, .55, .55, disc=(80, 160, 150))}
+<div class="abs" style="left:80px;top:270px">{logo(120)}</div>
+<div class="abs hl" style="left:80px;top:470px;width:920px;font-size:118px">Still Chewing <b>On One Side?</b></div>
+<div class="abs" style="left:80px;top:760px;width:920px">{pl(30)}</div>
+<div class="abs" style="left:80px;top:870px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 24)}{proof(17)}</div>"""
+        return board(size, name, inner)
+    inner = f"""{circle('surgery.jpg', 520, 420, 820, .55, .55, disc=(40, 120, 120))}
+<div class="abs" style="left:70px;top:70px">{logo(170, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:70px;top:190px;width:900px;font-size:96px">Still Chewing <b>On One Side?</b></div>
+<div class="abs" style="left:70px;top:430px;width:520px">{pl(25)}</div>
+<div class="abs" style="left:70px;top:820px">{cta(CTA_CONSULT, 22)}</div>
+<div class="abs" style="left:70px;top:945px">{proof(17)}</div>"""
+    return board(size, name, inner)
+
+
+P4_PILLS = ["Free consultation", "3D scan", "12-month guarantee"]
+
+
+def p4(size):
+    """VT-02 Lifestyle lower third: the real surgery full bleed, scrim, lower-third offer."""
+    name = f"{IMP} | Static | Practice photo | What's included"
+    pills = lambda fs: "".join(usp_pill(t, fs) for t in P4_PILLS)
+    if size == "ls":
+        inner = f"""{photo('surgery.jpg', 0, 0, 1200, 628, .55, .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(90deg,rgba(46,44,43,.93) 0%,rgba(46,44,43,.8) 45%,rgba(46,44,43,.05) 80%)"></div>
+<div class="abs" style="left:56px;top:46px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:140px;width:560px;font-size:50px;color:{LINEN}">One Price. <b>Implant And Crown.</b></div>
+<div class="abs" style="left:56px;top:290px;display:flex;align-items:baseline;gap:10px"><span class="body" style="font-size:18px;color:{STONE}">from</span><span class="hl" style="font-size:72px;color:{GOLD};line-height:1">£2,500</span></div>
+<div class="abs" style="left:56px;top:400px;display:flex;gap:10px">{pills(14)}</div>
+<div class="abs" style="left:56px;top:480px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 17)}{proof(13, LINEN)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    H = 1920 if s9 else 1080
+    t = 1060 if s9 else 560
+    inner = f"""{photo('surgery.jpg', 0, 0, 1080, H, .55 if s9 else .5, .5)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(46,44,43,.35) 0%,rgba(46,44,43,0) 25%,rgba(46,44,43,.55) {48 if s9 else 42}%,rgba(46,44,43,.94) {64 if s9 else 62}%)"></div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{270 if s9 else 56}px">{logo(190 if s9 else 170, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:{80 if s9 else 70}px;top:{t}px;width:920px;font-size:{86 if s9 else 72}px;color:{LINEN}">One Price. <b>Implant And Crown.</b></div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{t + (220 if s9 else 100)}px;display:flex;align-items:baseline;gap:14px"><span class="body" style="font-size:{28 if s9 else 24}px;color:{STONE}">from</span><span class="hl" style="font-size:{130 if s9 else 104}px;color:{GOLD};line-height:1">£2,500</span></div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{t + (390 if s9 else 240)}px;display:flex;gap:12px;flex-wrap:wrap;width:920px">{pills(24 if s9 else 19)}</div>
+<div class="abs" style="left:{80 if s9 else 70}px;top:{t + (480 if s9 else 330)}px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 24 if s9 else 21)}{proof(17 if s9 else 15, LINEN)}</div>"""
+    return board(size, name, inner)
+
+
+P5_CALLOUTS = ["3D scan of your jaw", "Shows the bone before we quote", "Written plan with the full cost"]
+
+
+def callout(text, fs, w):
+    return (f'<div style="width:{w}px;padding:{fs * .75:.0f}px {fs:.0f}px;border-radius:{fs * .6:.0f}px;background:#FCFAF6;border-left:{fs * .25:.0f}px solid {GOLD};'
+            f'box-shadow:0 {fs * .4:.0f}px {fs * 1.2:.0f}px rgba(46,44,43,.18);font-family:Montserrat;font-weight:500;font-size:{fs:.0f}px;line-height:1.3;color:{INK}">{text}</div>')
+
+
+def leader(x1, y1, x2, y2):
+    """A thin gold leader line from (x1,y1) to a dot at (x2,y2)."""
+    import math
+    L = math.hypot(x2 - x1, y2 - y1)
+    a = math.degrees(math.atan2(y2 - y1, x2 - x1))
+    return (f'<div class="abs" style="left:{x1}px;top:{y1}px;width:{L:.0f}px;height:2px;background:{GOLD};transform-origin:0 50%;transform:rotate({a:.1f}deg)"></div>'
+            f'<div class="abs" style="left:{x2 - 9}px;top:{y2 - 9}px;width:18px;height:18px;border-radius:50%;background:{GOLD};box-shadow:0 0 0 6px rgba(190,161,122,.3)"></div>')
+
+
+def p5(size):
+    """VT-23 Annotated callouts on the real 3D scanner."""
+    name = f"{IMP} | Static | Practice photo | Starts with a scan"
+    if size == "ls":
+        inner = f"""{photo('cbct.jpg', 0, 0, 460, 628, .4, .45)}
+<div class="abs" style="left:520px;top:46px">{logo(150, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:520px;top:120px;width:640px;font-size:44px">Your Implant Starts <b>With A Scan.</b></div>
+<div class="abs" style="left:520px;top:250px">{callout(P5_CALLOUTS[0], 17, 300)}</div>
+<div class="abs" style="left:840px;top:250px">{callout(P5_CALLOUTS[1], 17, 320)}</div>
+<div class="abs" style="left:520px;top:340px">{callout(P5_CALLOUTS[2], 17, 300)}</div>
+{leader(520, 275, 300, 180)}
+<div class="abs" style="left:840px;top:350px"><span class="body" style="font-size:17px;color:{INK}">From <b class="hl" style="font-weight:400;color:{GOLD};font-size:34px">£2,500</b>, crown included</span></div>
+<div class="abs" style="left:520px;top:470px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 17)}{proof(13)}</div>"""
+        return board(size, name, inner, bg=PAPER)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{photo('cbct.jpg', 0, 0, 1080, 1920, .42, .5, 1.15)}
+<div class="abs" data-name="Overlay" style="inset:0;background:linear-gradient(180deg,rgba(244,240,239,.96) 0%,rgba(244,240,239,.94) 26%,rgba(244,240,239,0) 40%,rgba(244,240,239,0) 62%,rgba(244,240,239,.94) 78%)"></div>
+<div class="abs" style="left:80px;top:270px">{logo(190, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:80px;top:380px;width:920px;font-size:76px">Your Implant Starts <b>With A Scan.</b></div>
+<div class="abs" style="left:600px;top:700px">{callout(P5_CALLOUTS[0], 26, 400)}</div>
+<div class="abs" style="left:600px;top:880px">{callout(P5_CALLOUTS[1], 26, 400)}</div>
+<div class="abs" style="left:600px;top:1100px">{callout(P5_CALLOUTS[2], 26, 400)}</div>
+{leader(600, 735, 470, 690)}{leader(600, 935, 470, 960)}
+<div class="abs" style="left:80px;top:1360px"><span class="body" style="font-size:28px;color:{INK}">From <b class="hl" style="font-weight:400;color:{GOLD};font-size:64px">£2,500</b>, crown included</span></div>
+<div class="abs" style="left:80px;top:1480px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 24)}{proof(17)}</div>"""
+        return board(size, name, inner, bg=PAPER)
+    inner = f"""{photo('cbct.jpg', 0, 0, 520, 1080, .42, .45)}
+<div class="abs" style="left:580px;top:60px">{logo(170, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:580px;top:160px;width:440px;font-size:64px">Your Implant Starts <b>With A Scan.</b></div>
+<div class="abs" style="left:580px;top:420px">{callout(P5_CALLOUTS[0], 22, 420)}</div>
+<div class="abs" style="left:580px;top:530px">{callout(P5_CALLOUTS[1], 22, 420)}</div>
+<div class="abs" style="left:580px;top:640px">{callout(P5_CALLOUTS[2], 22, 420)}</div>
+{leader(580, 450, 330, 300)}
+<div class="abs" style="left:580px;top:770px"><span class="body" style="font-size:22px;color:{INK}">From <b class="hl" style="font-weight:400;color:{GOLD};font-size:52px">£2,500</b>, crown included</span></div>
+<div class="abs" style="left:580px;top:880px">{cta(CTA_CONSULT, 21)}</div>
+<div class="abs" style="left:580px;top:990px">{proof(15)}</div>"""
+    return board(size, name, inner, bg=PAPER)
+
+
 PERSONAS = {"mark": [m1, m2, m3, m4, m5], "denise": [d1, d2, d3, d4, d5],
             "michelle": [mi1, mi2, mi3, mi4, mi5],
-            "hannah": [h1, h2, h3, h4, h5]}
+            "hannah": [h1, h2, h3, h4, h5],
+            "peter": [p1, p2, p3, p4, p5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
