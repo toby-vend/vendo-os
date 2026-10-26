@@ -132,6 +132,25 @@ export async function postDirectorActionItems(input: {
   return { posted };
 }
 
+/**
+ * Daily DM to Toby listing the meeting action items the auto-task filter
+ * kept out of Asana, so over-filtering is easy to spot. No-op when empty.
+ */
+export async function dmTobyFilteredDigest(
+  items: Array<{ meeting_title: string | null; client_name: string | null; action_description: string; reason: string }>,
+): Promise<boolean> {
+  const webhookUrl = process.env.SLACK_WEBHOOK_TOBY_DM;
+  if (!webhookUrl || items.length === 0) return false;
+  const MAX_LINES = 40;
+  const lines = [`:broom: *Auto-tasks filtered out in the last 24h: ${items.length}*`];
+  for (const i of items.slice(0, MAX_LINES)) {
+    const where = [i.client_name, i.meeting_title].filter(Boolean).join(' · ');
+    lines.push(`• ${i.action_description} _(${i.reason}${where ? ` — ${where}` : ''})_`);
+  }
+  if (items.length > MAX_LINES) lines.push(`…and ${items.length - MAX_LINES} more`);
+  return slackPost(webhookUrl, { text: lines.join('\n') });
+}
+
 /** Post a fail-safe DM to Toby. Bare text payload — short and actionable. */
 export async function dmTobyFailsafe(input: {
   meetingTitle: string;
