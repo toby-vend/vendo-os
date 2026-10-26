@@ -743,8 +743,202 @@ def mi5(size):
     return board(size, name, inner, bg="char")
 
 
+# ---------------------------------------------------------------- HANNAH (getting married)
+def seal(d):
+    return (f'<div style="width:{d}px;height:{d}px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #D6BE99, {GOLD} 50%, #94774F);display:flex;align-items:center;justify-content:center;'
+            f'box-shadow:0 {d * .08:.0f}px {d * .2:.0f}px rgba(40,30,15,.35), inset 0 0 0 {d * .06:.0f}px rgba(255,240,215,.25)">{mono(round(d * .55), "white", "opacity:.9")}</div>')
+
+
+def invite(w, fs):
+    """Save-the-date card half out of a Charcoal envelope with a gold monogram seal (VT-28)."""
+    h_card, h_env = w * 1.0, w * .62
+    card = (f'<div style="position:absolute;left:{w * .08:.0f}px;top:0;width:{w * .84:.0f}px;height:{h_card:.0f}px;background:#FCFAF6;transform:rotate(-2deg);'
+            f'box-shadow:0 {fs * .5:.0f}px {fs * 1.4:.0f}px rgba(40,30,15,.25);padding:{fs * 1.4:.0f}px {fs:.0f}px;text-align:center">'
+            f'<div style="border:1.5px solid rgba(190,161,122,.6);position:absolute;inset:{fs * .5:.0f}px"></div>'
+            f'<div class="eyebrow" style="font-size:{fs * .55:.0f}px">Save the date</div>'
+            f'<div style="font-family:Caveat;font-weight:600;font-size:{fs * 2.2:.0f}px;line-height:1;color:#24211e;margin-top:{fs * .5:.0f}px">Then tell us.</div>'
+            f'<div style="width:{fs * 3:.0f}px;height:1.5px;background:{GOLD};margin:{fs * .7:.0f}px auto"></div>'
+            f'<div class="hl" style="font-size:{fs * 1.05:.0f}px">Free Smile <b>Consultation</b></div></div>')
+    env = (f'<div style="position:absolute;left:0;top:{h_card * .55:.0f}px;width:{w}px;height:{h_env:.0f}px;background:linear-gradient(180deg,#3a3734,{CHAR});border-radius:{fs * .3:.0f}px;'
+           f'box-shadow:0 {fs:.0f}px {fs * 2.2:.0f}px rgba(40,30,15,.35);overflow:hidden">'
+           f'<div style="position:absolute;left:0;top:0;width:0;height:0;border-left:{w / 2:.0f}px solid transparent;border-right:{w / 2:.0f}px solid transparent;border-top:{h_env * .55:.0f}px solid rgba(255,255,255,.05)"></div></div>'
+           f'<div style="position:absolute;left:{w / 2 - fs * 1.6:.0f}px;top:{h_card * .55 + h_env * .38:.0f}px">{seal(round(fs * 3.2))}</div>')
+    return f'<div style="position:relative;width:{w}px;height:{h_card * .55 + h_env:.0f}px">{card}{env}</div>'
+
+
+def h1(size):
+    name = f"{SMILE} | Static | Object | Save the date"
+    if size == "ls":
+        inner = f"""<div class="abs" style="left:56px;top:46px">{logo(150, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:150px;width:520px;font-size:52px">Getting Married? <b>Tell Us The Date First.</b></div>
+<div class="abs body" style="left:56px;top:320px;width:480px;font-size:19px;color:{INK}">We'll plan your smile around your wedding.</div>
+<div class="abs" style="left:56px;top:400px">{cta(CTA_CONSULT, 18)}</div>
+<div class="abs" style="left:56px;top:510px">{proof(15)}</div>
+<div class="abs" style="left:690px;top:50px">{invite(420, 22)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:0;right:0;top:270px;display:flex;justify-content:center">{logo(120)}</div>
+<div class="abs" style="left:230px;top:470px">{invite(620, 32)}</div>
+<div class="abs hl" style="left:80px;right:80px;top:1250px;text-align:center;font-size:72px">Getting Married? <b>Tell Us The Date First.</b></div>
+<div class="abs body" style="left:80px;right:80px;top:1420px;text-align:center;font-size:28px;color:{INK}">We'll plan your smile around your wedding.</div>
+<div class="abs" style="left:0;right:0;top:1490px;display:flex;justify-content:center;align-items:center;gap:30px">{cta(CTA_CONSULT, 24)}{proof(17)}</div>"""
+        return board(size, name, inner)
+    inner = f"""<div class="abs" style="left:70px;top:60px">{logo(170, 'charcoal', 'horizontal')}</div>
+<div class="abs" style="left:300px;top:130px">{invite(480, 26)}</div>
+<div class="abs hl" style="left:70px;right:70px;top:780px;text-align:center;font-size:58px">Getting Married? <b>Tell Us The Date First.</b></div>
+<div class="abs" style="left:0;right:0;top:930px;display:flex;justify-content:center;align-items:center;gap:30px">{cta(CTA_CONSULT, 21)}{proof(16)}</div>"""
+    return board(size, name, inner)
+
+
+H2_LIST = ["Venue", "Dress", "Photographer", "Flowers"]
+
+
+def notepad(w, fs):
+    lh = fs * 1.55
+    rows = "".join(f'<div style="display:flex;align-items:center;justify-content:space-between;height:{lh:.0f}px;font-family:Caveat;font-weight:600;font-size:{fs:.0f}px;color:#24211e">'
+                   f'<span>{t}</span>{TICK.format(s=round(fs * .8), c=GOLD)}</div>' for t in H2_LIST)
+    last = (f'<div style="display:flex;align-items:center;height:{lh:.0f}px;font-family:Caveat;font-weight:600;font-size:{fs:.0f}px;color:#24211e">My smile'
+            f'<span style="flex:1;margin-left:{fs * .3:.0f}px;border-bottom:2px dashed {GOLD};height:{fs * .6:.0f}px"></span><span style="margin-left:{fs * .3:.0f}px;color:{GOLD}">?</span></div>')
+    lines = f"repeating-linear-gradient(180deg,transparent 0,transparent {lh - 1.5:.1f}px,rgba(120,150,180,.28) {lh - 1.5:.1f}px,rgba(120,150,180,.28) {lh:.1f}px)"
+    return (f'<div style="position:relative;width:{w}px;padding:{fs * 1.6:.0f}px {fs * .9:.0f}px {fs * .9:.0f}px {fs * 1.6:.0f}px;background:#FDFBF5;transform:rotate(2deg);'
+            f'box-shadow:0 {fs * .5:.0f}px {fs * 1.4:.0f}px rgba(40,30,15,.28),0 2px 4px rgba(40,30,15,.15)">'
+            f'<div style="position:absolute;left:0;right:0;top:0;height:{fs * .9:.0f}px;background:repeating-linear-gradient(90deg,#3a3734 0,#3a3734 {fs * .25:.0f}px,transparent {fs * .25:.0f}px,transparent {fs * .6:.0f}px)"></div>'
+            f'<div style="position:absolute;left:{fs * 1.1:.0f}px;top:0;bottom:0;width:1.5px;background:rgba(200,90,90,.35)"></div>'
+            f'<div style="font-family:Caveat;font-weight:700;font-size:{fs * 1.1:.0f}px;color:{GOLD};margin-bottom:{fs * .2:.0f}px">Wedding list</div>'
+            f'<div style="background:{lines}">{rows}{last}</div></div>')
+
+
+def h2(size):
+    name = f"{SMILE} | Static | Object | The wedding list"
+    if size == "ls":
+        inner = f"""<div class="abs" style="left:56px;top:46px">{logo(150, 'charcoal', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:150px;width:520px;font-size:58px">One Thing Left <b>On The List?</b></div>
+<div class="abs eyebrow" style="left:56px;top:310px;font-size:14px">Free smile consultation · Norwich</div>
+<div class="abs" style="left:56px;top:380px">{cta(CTA_CONSULT, 18)}</div>
+<div class="abs" style="left:56px;top:490px">{proof(15)}</div>
+<div class="abs" style="left:700px;top:40px">{notepad(420, 34)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    if s9:
+        inner = f"""<div class="abs" style="left:80px;top:270px">{logo(120)}</div>
+<div class="abs hl" style="left:80px;top:460px;width:920px;font-size:100px">One Thing Left <b>On The List?</b></div>
+<div class="abs" style="left:170px;top:740px">{notepad(740, 58)}</div>
+<div class="abs" style="left:80px;top:1440px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 25)}{proof(17)}</div>"""
+        return board(size, name, inner)
+    inner = f"""<div class="abs hl" style="left:70px;top:80px;width:520px;font-size:84px">One Thing Left <b>On The List?</b></div>
+<div class="abs eyebrow" style="left:70px;top:390px;font-size:17px">Free smile consultation</div>
+<div class="abs" style="left:70px;top:820px">{cta(CTA_CONSULT, 22)}</div>
+<div class="abs" style="left:70px;top:945px">{proof(17)}</div>
+<div class="abs" style="left:70px;top:460px">{logo(110)}</div>
+<div class="abs" style="left:590px;top:110px">{notepad(430, 40)}</div>"""
+    return board(size, name, inner)
+
+
+H3_STEPS = [("A few weeks", "Whitening and composite bonding"), ("A few months or more", "Clear aligners as well"), ("Today", "Free smile consultation")]
+
+
+def timeline(w, fs, vertical=False):
+    dot = lambda: f'<div style="width:{fs * 1.1:.0f}px;height:{fs * 1.1:.0f}px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #D2BB98, {GOLD} 55%, #A88B62);box-shadow:0 0 0 {fs * .35:.0f}px rgba(190,161,122,.18);flex:none"></div>'
+    if vertical:
+        items = "".join(f'<div style="display:flex;gap:{fs * 1.1:.0f}px;align-items:flex-start;margin-top:{fs * 1.6 if i else 0:.0f}px;position:relative">{dot()}'
+                        f'<div><div class="hl" style="font-size:{fs * 1.5:.0f}px;color:{GOLD};line-height:1">{a}</div><div class="body" style="font-size:{fs:.0f}px;margin-top:{fs * .3:.0f}px">{b}</div></div></div>'
+                        for i, (a, b) in enumerate(H3_STEPS))
+        return (f'<div style="position:relative;width:{w}px"><div style="position:absolute;left:{fs * .55 - 1:.0f}px;top:{fs * .5:.0f}px;bottom:{fs * 2:.0f}px;width:2px;background:rgba(190,161,122,.5)"></div>{items}</div>')
+    items = "".join(f'<div style="flex:1;padding-right:{fs:.0f}px">{dot()}<div class="hl" style="font-size:{fs * 1.35:.0f}px;color:{GOLD};line-height:1.05;margin-top:{fs * .9:.0f}px">{a}</div>'
+                    f'<div class="body" style="font-size:{fs * .85:.0f}px;margin-top:{fs * .35:.0f}px">{b}</div></div>' for a, b in H3_STEPS)
+    return (f'<div style="position:relative;width:{w}px;display:flex"><div style="position:absolute;left:0;right:{fs:.0f}px;top:{fs * .55 - 1:.0f}px;height:2px;background:rgba(190,161,122,.5)"></div>{items}</div>')
+
+
+def h3(size):
+    name = f"{SMILE} | Static | Typographic | How long until the day"
+    if size == "ls":
+        inner = f"""{mono(560, 'cream', 'position:absolute;left:760px;top:-60px;opacity:.06')}
+<div class="abs" style="left:56px;top:46px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:56px;top:120px;width:900px;font-size:54px">How Long Until <b>The Big Day?</b></div>
+<div class="abs" style="left:56px;top:250px">{timeline(1090, 20)}</div>
+<div class="abs" style="left:56px;top:500px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 18)}{proof(14, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    if s9:
+        inner = f"""{mono(1100, 'cream', 'position:absolute;left:200px;top:300px;opacity:.06')}
+<div class="abs" style="left:80px;top:270px">{logo(120, 'cream')}</div>
+<div class="abs hl" style="left:80px;top:480px;width:900px;font-size:104px">How Long Until <b>The Big Day?</b></div>
+<div class="abs" style="left:80px;top:790px">{timeline(900, 32, True)}</div>
+<div class="abs" style="left:80px;top:1400px">{cta(CTA_CONSULT, 25)}</div>
+<div class="abs" style="left:80px;top:1520px">{proof(18, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    inner = f"""{mono(820, 'cream', 'position:absolute;left:420px;top:240px;opacity:.06')}
+<div class="abs" style="left:70px;top:70px">{logo(170, 'cream', 'horizontal')}</div>
+<div class="abs hl" style="left:70px;top:190px;width:900px;font-size:88px">How Long Until <b>The Big Day?</b></div>
+<div class="abs" style="left:70px;top:480px">{timeline(960, 28)}</div>
+<div class="abs" style="left:70px;top:840px;display:flex;align-items:center;gap:30px">{cta(CTA_CONSULT, 22)}{proof(17, LINEN)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+H4_USPS = ["Free smile consultation", "See your smile on screen first", "Every cost in writing"]
+
+
+def band(fs, w, centred=True):
+    al = "center" if centred else "flex-start"
+    usps = "".join(f'<div style="display:flex;align-items:center;gap:{fs * .25:.0f}px;font-family:Montserrat;font-weight:500;font-size:{fs * .3:.0f}px;color:{LINEN};white-space:nowrap">{TICK.format(s=round(fs * .36), c=GOLD)}{t}</div>' for t in H4_USPS)
+    return (f'<div style="width:{w}px;display:flex;flex-direction:column;align-items:{al};text-align:{"center" if centred else "left"}">'
+            f'<div class="hl" style="font-size:{fs:.0f}px;color:{LINEN}">Wedding-Ready <b>Smiles</b></div>'
+            f'<div style="margin-top:{fs * .3:.0f}px">{bond_price(fs * .8)}</div>'
+            f'<div style="display:flex;flex-wrap:wrap;justify-content:{al};gap:{fs * .2:.0f}px {fs * .45:.0f}px;margin-top:{fs * .4:.0f}px">{usps}</div></div>')
+
+
+def h4(size):
+    """VT-01 Offer band: Charcoal band with price and USPs over the boutique smile display."""
+    name = f"{SMILE} | Static | Practice photo | Wedding-ready smiles"
+    if size == "ls":
+        inner = f"""{photo('mirror-boutique.jpg', 640, 0, 560, 628, .6, .72)}
+<div class="abs" data-name="Overlay" style="left:540px;top:0;width:260px;height:628px;background:linear-gradient(90deg,{CHAR},rgba(46,44,43,0))"></div>
+<div class="abs" style="left:56px;top:46px">{logo(150, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:56px;top:150px">{band(56, 600, False)}</div>
+<div class="abs" style="left:56px;top:450px;display:flex;align-items:center;gap:24px">{cta(CTA_CONSULT, 18)}{proof(14, LINEN)}</div>"""
+        return board(size, name, inner, bg="char")
+    s9 = size == "s9"
+    H = 1920 if s9 else 1080
+    top = 0
+    bh = 820 if s9 else 430
+    inner = f"""{photo('mirror-boutique.jpg', 0, 0, 1080, H, .6, .78 if s9 else .6, 1.3 if s9 else 1.0)}
+<div class="abs" style="left:0;right:0;top:{top}px;height:{bh}px;background:linear-gradient(180deg,rgba(46,44,43,.96),rgba(46,44,43,.9));box-shadow:0 20px 50px rgba(0,0,0,.3)"></div>
+<div class="abs rule" style="left:0;right:0;top:{top + bh}px;opacity:1"></div>
+<div class="abs" style="left:0;right:0;top:{top + (270 if s9 else 40)}px;display:flex;justify-content:center">{logo(130 if s9 else 110, 'cream', 'stacked') if s9 else logo(170, 'cream', 'horizontal')}</div>
+<div class="abs" style="left:60px;right:60px;top:{top + (470 if s9 else 130)}px;display:flex;justify-content:center">{band(84 if s9 else 76, 960)}</div>
+<div class="abs" style="left:0;right:0;top:{1450 if s9 else 940}px;display:flex;justify-content:center">{cta(CTA_CONSULT, 26 if s9 else 23)}</div>"""
+    return board(size, name, inner, bg="char")
+
+
+def h5(size):
+    """VT-17 Centre band split: reception sign photo, gold band headline, Linen panel with the offer."""
+    name = f"{SMILE} | Static | Practice photo | Photos last forever"
+    gband = lambda fs, w, h: (f'<div style="width:{w}px;height:{h}px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#CDB28C,{GOLD} 55%,#A68A63);'
+                              f'box-shadow:0 14px 34px rgba(60,44,20,.25)"><div class="hl" style="font-size:{fs}px;color:{WHITE};text-align:center">The Photos Last Forever.</div></div>')
+    if size == "ls":
+        inner = f"""{photo('sign-wall-tall.jpg', 0, 0, 400, 628, .5, .32)}
+<div class="abs" style="left:400px;top:0">{gband(46, 400, 628)}</div>
+<div class="abs" style="left:840px;top:60px">{logo(110)}</div>
+<div class="abs hl" style="left:840px;top:250px;width:330px;font-size:34px">Plan Your Smile Around <b>Your Wedding.</b></div>
+<div class="abs eyebrow" style="left:840px;top:390px;font-size:12px">Free consultation · Norwich</div>
+<div class="abs" style="left:840px;top:440px">{cta(CTA_CONSULT, 15)}</div>
+<div class="abs" style="left:840px;top:530px">{proof(11)}</div>"""
+        return board(size, name, inner)
+    s9 = size == "s9"
+    ph = 900 if s9 else 470
+    bh = 200 if s9 else 150
+    inner = f"""{photo('sign-wall-tall.jpg', 0, 0, 1080, ph, .5, .35)}
+<div class="abs" style="left:0;top:{ph}px">{gband(84 if s9 else 70, 1080, bh)}</div>
+<div class="abs hl" style="left:80px;right:80px;top:{ph + bh + (90 if s9 else 50)}px;text-align:center;font-size:{64 if s9 else 46}px">Plan Your Smile Around <b>Your Wedding.</b></div>
+<div class="abs eyebrow" style="left:0;right:0;top:{ph + bh + (290 if s9 else 130)}px;text-align:center;font-size:{20 if s9 else 16}px">Free smile consultation in Norwich</div>
+<div class="abs" style="left:0;right:0;top:{ph + bh + (360 if s9 else 185)}px;display:flex;justify-content:center;align-items:center;gap:30px">{cta(CTA_CONSULT, 25 if s9 else 21)}{proof(17 if s9 else 15)}</div>"""
+    return board(size, name, inner)
+
+
 PERSONAS = {"mark": [m1, m2, m3, m4, m5], "denise": [d1, d2, d3, d4, d5],
-            "michelle": [mi1, mi2, mi3, mi4, mi5]}
+            "michelle": [mi1, mi2, mi3, mi4, mi5],
+            "hannah": [h1, h2, h3, h4, h5]}
 FILES = {"s1": "1x1", "s9": "9x16", "ls": "landscape"}
 
 if __name__ == "__main__":
