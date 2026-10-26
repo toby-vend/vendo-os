@@ -24,6 +24,8 @@ CTA_FREE = 'Book FREE Consultation'  # Priya, 12 Oct 2026: Invisalign everywhere
 # Priya, 12 Oct 2026: headline lines too close together. Smaller type, more leading, on every board.
 HL_SCALE, HL_LH = 0.85, 1.22
 SITES = {'banstead': 'Banstead', 'battersea': 'Battersea'}
+# Priya, 26 Oct 2026: these two Dr Akshay shots are "not a good picture" and must never be used again.
+BANNED_PHOTOS = {'shoot/zh-26.jpg', 'shoot/zh-27.jpg'}
 
 
 def logo(colour, width):
@@ -49,6 +51,8 @@ def photo_aspect(img):
 
 def cover(img, w, h, fx=0.5, fy=0.5, zoom=1.0, x=0, y=0):
     """Cover-crop a photo into a w x h box from its real aspect (never stretched)."""
+    if img in BANNED_PHOTOS:
+        raise ValueError(f'{img} is banned by the client, pick another photo')
     a = photo_aspect(img)
     bw, bh = (w, w / a) if w / h > a else (h * a, h)
     bw, bh = bw * zoom, bh * zoom
