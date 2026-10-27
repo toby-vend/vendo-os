@@ -400,9 +400,141 @@ def dan_d3(size):
     return board(name, size, BASE, inner)
 
 
+# ================================================================ ADE
+
+REASONS = ['Planned by a specialist orthodontist', 'Comprehensive aligner plans for crowding and bite problems',
+           'A 3D scan and preview before you decide']
+
+
+def reasons(size_px, gap, colour=INK):
+    return ''.join(f'<div style="display:flex;gap:{size_px * .7:.0f}px;align-items:flex-start;margin-top:{gap}px">'
+                   f'<div style="width:{size_px * 1.5:.0f}px;height:{size_px * 1.5:.0f}px;border-radius:50%;background:{NAVY};display:flex;align-items:center;justify-content:center;flex:none">'
+                   f'{TICK.format(s=round(size_px * .95), c=WHITE)}</div>'
+                   f'<div class="body" style="font-size:{size_px}px;color:{colour};padding-top:{size_px * .12:.0f}px">{t}</div></div>' for t in REASONS)
+
+
+def ade_a1(size):
+    """VT-07 Three reasons, with the 3D scan photo in the house frame."""
+    name = ad_name('Ade Complex cases specialist', 'Practice', 'Three reasons', size)
+    light = f'<div class="abs" style="inset:0;background:radial-gradient(circle at 20% 25%,rgba(255,255,255,.9),rgba(244,244,244,0) 60%)"></div>'
+    title = '3 reasons complex cases choose <b>Cheam Village</b>'
+    if size == '1x1':
+        inner = f"""{light}
+{house('bl-07.jpg', 640, 160, 400, 920, .72, .45)}
+<div class="abs" style="left:72px;top:72px">{logo('stacked', 250)}</div>
+<div class="abs h" style="left:72px;top:230px;width:520px;font-size:38px;color:{INK}">{title}</div>
+<div class="abs" style="left:72px;top:440px;width:530px">{reasons(23, 22)}</div>
+<div class="abs" style="left:72px;top:745px">{proof(16)}</div>
+<div class="abs" style="left:72px;top:800px">{date_line(15)}</div>
+<div class="abs" style="left:72px;top:860px">{btn(18)}</div>
+<div class="abs label" style="left:72px;top:960px;font-size:15px;color:{NAVY}">£500 off Invisalign and Angel Aligner</div>"""
+    elif size == '9x16':
+        inner = f"""{light}
+<div class="abs" style="left:0;right:0;top:120px;display:flex;justify-content:center">{logo('horizontal', 640)}</div>
+{house('bl-07.jpg', 240, 240, 600, 640, .72, .4)}
+<div class="abs h" style="left:90px;right:90px;top:920px;text-align:center;font-size:44px;color:{INK}">{title}</div>
+<div class="abs" style="left:150px;top:1060px;width:800px">{reasons(27, 24)}</div>
+<div class="abs" style="left:0;right:0;top:1360px;display:flex;justify-content:center">{offer_band(17)}</div>
+<div class="abs" style="left:0;right:0;top:1460px;display:flex;justify-content:center;gap:30px;align-items:center">{btn(19)}{proof(16)}</div>"""
+    else:
+        inner = f"""{light}
+{house('bl-07.jpg', 820, 40, 340, 588, .72, .45)}
+<div class="abs" style="left:56px;top:44px">{logo('stacked', 180)}</div>
+<div class="abs h" style="left:56px;top:140px;width:700px;font-size:30px;color:{INK}">{title}</div>
+<div class="abs" style="left:56px;top:210px;width:700px">{reasons(18, 16)}</div>
+<div class="abs" style="left:56px;top:420px">{offer_band(12)}</div>
+<div class="abs" style="left:56px;top:486px">{proof(13)}</div>
+<div class="abs" style="left:56px;top:530px">{btn(14)}</div>"""
+    return board(name, size, BASE, inner)
+
+
+def letter(w, s=1.0):
+    """A generic assessment letter pinned to the wall: the old verdict struck through, 'Ask a specialist' in pen."""
+    S = lambda v: f'{v * s:.1f}px'
+    bars = lambda widths: ''.join(f'<div style="height:{S(10)};width:{x}%;background:#D9D8D1;border-radius:{S(5)};margin-top:{S(14)}"></div>' for x in widths)
+    return f"""<div style="position:relative;width:{w}px;transform:rotate(1.5deg)">
+<div class="paper" style="padding:{S(54)} {S(52)} {S(60)};background:#FCFBF8">
+  <div class="label" style="font-size:{S(13)};color:{STONE}">Orthodontic assessment</div>
+  <div style="height:{S(2)};background:#C9C9C2;margin:{S(16)} 0 {S(8)}"></div>
+  {bars([92, 80, 88])}
+  <div style="position:relative;margin-top:{S(30)};font-size:{S(30)};font-weight:600;color:{INK}">Not suitable for clear aligners.
+    <svg class="abs" style="left:{S(-8)};top:{S(14)}" width="{w * .9:.0f}" height="{S(16)}" viewBox="0 0 400 16" preserveAspectRatio="none"><path d="M2 10 C 90 4, 200 14, 398 6" fill="none" stroke="{NAVY}" stroke-width="4" stroke-linecap="round"/></svg></div>
+  {bars([70, 84])}
+  <div style="display:flex;align-items:center;gap:{S(14)};margin-top:{S(26)}">
+    <svg width="{S(64)}" height="{S(40)}" viewBox="0 0 64 40"><path d="M4 32 C 20 30, 40 22, 56 10 M44 8 L57 9 L52 21" fill="none" stroke="{NAVY}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div style="font-family:Caveat;font-weight:700;font-size:{S(60)};color:{NAVY};line-height:1">Ask a specialist</div></div>
+</div>
+<div class="abs" style="left:50%;top:{S(14)};width:{S(22)};height:{S(22)};margin-left:{S(-11)};border-radius:50%;background:radial-gradient(circle at 35% 35%,#E3C77B,{GOLD} 55%,#8E7B3E);box-shadow:0 3px 5px rgba(0,0,0,.35)"></div>
+</div>"""
+
+
+def ade_a2(size):
+    """Custom: the old 'not suitable' letter pinned to the practice's navy wall, struck through."""
+    name = ad_name('Ade Told aligners wont work', 'Practice', 'Struck-through letter', size)
+    if size == '1x1':
+        inner = f"""{photo('bl-10.jpg', 0, 0, 1080, 1080, .55, .45)}
+<div class="abs" style="inset:0;background:linear-gradient(180deg,rgba(30,68,91,.35) 0%,rgba(30,68,91,.2) 38%,rgba(30,68,91,.97) 64%)"></div>
+<div class="abs" style="left:64px;top:56px">{logo('stacked', 230, WHITE)}</div>
+<div class="abs" style="left:96px;top:150px">{letter(560, .95)}</div>
+<div class="abs h" style="left:72px;top:770px;width:640px;font-size:38px;color:{WHITE}">Told your case was <b>too complex?</b></div>
+<div class="abs label" style="left:72px;top:880px;font-size:15px;color:{MIST}">Specialist orthodontist · Cheam</div>
+<div class="abs" style="left:72px;top:930px;display:flex;gap:28px;align-items:center">{btn(18, WHITE, NAVY)}<div class="label" style="font-size:14px;color:{WHITE}">£500 off aligners · until 23 Dec</div></div>"""
+    elif size == '9x16':
+        inner = f"""{photo('bl-10.jpg', 0, 0, 1080, 1920, .45, .45)}
+<div class="abs" style="inset:0;background:linear-gradient(180deg,rgba(13,13,13,.6) 0%,rgba(30,68,91,.1) 14%,rgba(30,68,91,.15) 44%,rgba(30,68,91,.98) 60%)"></div>
+<div class="abs" style="left:0;right:0;top:120px;display:flex;justify-content:center">{logo('horizontal', 640, WHITE)}</div>
+<div class="abs" style="left:150px;top:330px">{letter(780, 1.3)}</div>
+<div class="abs h" style="left:90px;right:90px;top:1200px;text-align:center;font-size:46px;color:{WHITE}">Told your case was <b>too complex?</b></div>
+<div class="abs label" style="left:0;right:0;top:1340px;text-align:center;font-size:17px;color:{MIST}">Specialist orthodontist · Cheam</div>
+<div class="abs" style="left:0;right:0;top:1400px;display:flex;justify-content:center">{offer_band(17, WHITE, NAVY)}</div>
+<div class="abs" style="left:0;right:0;top:1500px;display:flex;justify-content:center">{btn(20, WHITE, NAVY)}</div>"""
+    else:
+        inner = f"""{photo('bl-10.jpg', 480, 0, 720, 628, .5, .45)}
+<div class="abs" style="left:0;top:0;width:560px;height:628px;background:{NAVY}"></div>
+<div class="abs" style="left:540px;top:0;width:120px;height:628px;background:linear-gradient(90deg,{NAVY},rgba(30,68,91,0))"></div>
+<div class="abs" style="left:56px;top:48px">{logo('stacked', 190, WHITE)}</div>
+<div class="abs h" style="left:56px;top:160px;width:480px;font-size:30px;color:{WHITE}">Told your case was <b>too complex?</b></div>
+<div class="abs label" style="left:56px;top:300px;font-size:13px;color:{MIST}">Specialist orthodontist · Cheam</div>
+<div class="abs body" style="left:56px;top:340px;width:440px;font-size:18px;color:#D7E1E3">£500 off Invisalign and Angel Aligner when you start by 23 December.</div>
+<div class="abs" style="left:56px;top:455px">{proof(13, WHITE)}</div>
+<div class="abs" style="left:56px;top:510px">{btn(14, WHITE, NAVY)}</div>
+<div class="abs" style="left:640px;top:70px">{letter(460, .72)}</div>"""
+    return board(name, size, NAVY, inner)
+
+
+def logo_bug(s=1.0):
+    S = lambda v: f'{v * s:.1f}px'
+    return (f'<div style="display:inline-flex;align-items:center;gap:{S(14)};background:rgba(244,244,244,.92);padding:{S(12)} {S(20)} {S(12)} {S(12)};border-radius:{S(40)}">'
+            f'<div style="width:{S(44)};height:{S(44)};border-radius:50%;background:{NAVY};display:flex;align-items:center;justify-content:center">{logo("tooth", round(20 * s), WHITE)}</div>'
+            f'<div class="label" style="font-size:{S(13)};color:{INK};letter-spacing:.22em">Cheam Village Dental Studios</div></div>')
+
+
+ADE_LINE = 'Specialist-led aligners in Cheam. £500 off until 23 Dec.'
+
+
+def ade_a3(size):
+    """VT-18 Native practice photo: the waiting room as it is, a logo bug and one line."""
+    name = ad_name('Ade The practice as it is', 'Practice', 'Native photo', size)
+    foot = lambda a: f'<div class="abs" style="inset:0;background:linear-gradient(180deg,rgba(13,13,13,0) {a}%,rgba(13,13,13,.82) 100%)"></div>'
+    if size == '1x1':
+        inner = f"""{photo('bl-12.jpg', 0, 0, 1080, 1080, .5, .5)}{foot(60)}
+<div class="abs" style="left:48px;top:48px">{logo_bug()}</div>
+<div class="abs" style="left:56px;right:56px;bottom:56px;font-size:30px;font-weight:500;color:{WHITE};line-height:1.35">{ADE_LINE}</div>"""
+    elif size == '9x16':
+        inner = f"""{photo('bl-11.jpg', 0, 0, 1080, 1920, .5, .5)}{foot(55)}
+<div class="abs" style="left:0;right:0;top:260px;display:flex;justify-content:center">{logo_bug(1.2)}</div>
+<div class="abs" style="left:60px;right:60px;top:1440px;text-align:center;font-size:33px;font-weight:500;color:{WHITE};line-height:1.35">{ADE_LINE}</div>"""
+    else:
+        inner = f"""{photo('bl-12.jpg', 0, 0, 1200, 628, .5, .55)}{foot(50)}
+<div class="abs" style="left:40px;top:36px">{logo_bug(.9)}</div>
+<div class="abs" style="left:48px;right:48px;bottom:40px;font-size:26px;font-weight:500;color:{WHITE}">{ADE_LINE}</div>"""
+    return board(name, size, NAVY, inner)
+
+
 PERSONAS = {
     'amy': ('Amy | aligner researcher', [amy_a1, amy_a2, amy_a3]),
     'dan': ('Dan | relapsed after braces', [dan_d1, dan_d2, dan_d3]),
+    'ade': ('Ade | told he was too complex', [ade_a1, ade_a2, ade_a3]),
 }
 
 
