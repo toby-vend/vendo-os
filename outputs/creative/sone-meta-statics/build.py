@@ -388,6 +388,277 @@ def o5(size):
 
 PERSONAS = {"owner": [o1, o2, o3, o4, o5]}
 
+
+# ---------------------------------------------------------------- GROWTH-MODE PRINCIPAL
+import math
+
+
+def xcross(s, color="#c8261d"):
+    return (f'<svg viewBox="0 0 24 24" width="{s}" height="{s}" fill="none" stroke="{color}" stroke-width="2.6" stroke-linecap="round">'
+            f'<path d="M6 6l12 12M18 6L6 18"/></svg>')
+
+
+def vs_card(x, y, w, h, img, pos, title, points, ours, fs=28):
+    """Comparison card: photo on top, title, ticks (ours) or crosses (theirs)."""
+    ph = round(h * .52)
+    mark = (lambda: f'<span style="color:{K};display:flex">{icon("tick", round(fs * 1.05))}</span>') if ours else (lambda: f'<span style="display:flex">{xcross(round(fs * 1.05))}</span>')
+    rows = "".join(f'<div style="display:flex;gap:{fs * .45:.0f}px;align-items:flex-start;margin-top:{fs * .55:.0f}px">{mark()}<span>{t}</span></div>' for t in points)
+    bg = Y if ours else "#262626"
+    col = K if ours else "#bdbab2"
+    extra = "" if ours else "filter:grayscale(.85) contrast(.9) brightness(.9);"
+    stamp = "" if ours else (f'<div class="abs lab" style="left:0;right:0;top:{ph / 2 - fs * .9:.0f}px;text-align:center;font-size:{fs * 1.5:.0f}px;color:rgba(255,255,255,.75);'
+                             f'letter-spacing:.2em;transform:rotate(-12deg)">stock</div>')
+    return (f'<div class="abs" data-name="{"Our card" if ours else "Their card"}" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;background:{bg};border-radius:22px;overflow:hidden;'
+            f'box-shadow:0 30px 60px rgba(0,0,0,.45)">'
+            f'{photo(img, 0, 0, w, ph, pos, extra)}{stamp}'
+            f'<div class="abs" style="left:{fs}px;right:{fs}px;top:{ph + fs * .8:.0f}px;color:{col};font-size:{fs * .9:.0f}px;line-height:1.25">'
+            f'<div class="lab" style="font-size:{fs * 1.25:.0f}px;color:{K if ours else S}">{title}</div>{rows}</div></div>')
+
+
+def vs_badge(x, y, d):
+    return (f'<div class="abs lab" data-name="VS badge" style="left:{x}px;top:{y}px;width:{d}px;height:{d}px;border-radius:50%;background:{K};color:{S};'
+            f'border:4px solid {Y};display:flex;align-items:center;justify-content:center;font-size:{d * .34:.0f}px;box-shadow:0 10px 24px rgba(0,0,0,.5)">vs</div>')
+
+
+G1_THEM = ["the same model as every practice", "reads as an advert"]
+G1_US = ["your rooms, your team", "reads as real"]
+
+
+def g1(size):
+    name = "Stock vs your practice | Static | Clinician | Us vs them"
+    if size == "1x1":
+        inner = f"""
+<div class="cover" style="background:radial-gradient(circle at 50% 30%,#2b2b2b,{K} 70%)"></div>
+{logo(80, 70, 180)}
+<div class="abs hl" style="left:80px;top:150px;font-size:72px;color:{S}">your ads look like<br>everyone else&rsquo;s{DOT}</div>
+{vs_card(80, 360, 440, 560, 'stock-smile.jpg', '50% 30%', 'stock photo', G1_THEM, False, 26)}
+{vs_card(560, 360, 440, 560, 'iconic-consult.jpg', '48% 45%', 'your practice', G1_US, True, 26)}
+{vs_badge(495, 520, 90)}
+{cta(80, 960, scale=.85)}"""
+    elif size == "9x16":
+        inner = f"""
+<div class="cover" style="background:radial-gradient(circle at 50% 35%,#2b2b2b,{K} 70%)"></div>
+{logo(90, 270, 190)}
+<div class="abs hl" style="left:90px;top:370px;font-size:92px;color:{S}">your ads look like<br>everyone else&rsquo;s{DOT}</div>
+{vs_card(70, 640, 455, 780, 'stock-smile.jpg', '50% 30%', 'stock photo', G1_THEM, False, 30)}
+{vs_card(555, 640, 455, 780, 'iconic-consult.jpg', '48% 45%', 'your practice', G1_US, True, 30)}
+{vs_badge(490, 850, 100)}
+{cta(90, 1480)}"""
+    else:
+        inner = f"""
+<div class="cover" style="background:radial-gradient(circle at 70% 40%,#2b2b2b,{K} 70%)"></div>
+{logo(56, 50, 140)}
+<div class="abs hl" style="left:56px;top:150px;font-size:56px;color:{S}">your ads look<br>like everyone<br>else&rsquo;s{DOT}</div>
+{cta(56, 470, scale=.8)}
+{vs_card(520, 40, 310, 548, 'stock-smile.jpg', '50% 30%', 'stock photo', G1_THEM, False, 21)}
+{vs_card(860, 40, 310, 548, 'iconic-consult.jpg', '48% 45%', 'your practice', G1_US, True, 21)}
+{vs_badge(806, 170, 78)}"""
+    return board("G1", name, size, K, inner)
+
+
+def joe(x, y, h):
+    w = round(h * 1254 / 960)
+    return f'<img class="abs" data-name="Photo" src="assets/photos/joe-gimbal.png" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px">'
+
+
+def g2(size):
+    name = "750 for the day | Static | Founder | Editorial price split"
+    small = "Want it edited? From £1,250 + VAT."
+    if size == "1x1":
+        inner = f"""
+{joe(300, 140, 940)}
+<div class="abs" style="left:0;top:0;width:600px;height:1080px;background:linear-gradient(90deg,{K} 0%,{K} 78%,rgba(0,0,0,0) 100%)"></div>
+{logo(80, 80, 190)}
+<div class="abs lab" style="left:80px;top:250px;font-size:34px;color:{Y}">dental content shoot day{DOT}</div>
+<div class="abs price" style="left:72px;top:300px;font-size:230px;color:{S}">£750</div>
+<div class="abs lab" style="left:84px;top:530px;font-size:40px;color:{S}">+ VAT</div>
+<div class="abs body" style="left:80px;top:610px;width:440px;color:{S}">One full day at your practice. Footage ready for your editor.</div>
+{cta(80, 820)}
+<div class="abs body" style="left:80px;top:930px;width:460px;font-size:22px;color:#a8a49a">{small}</div>"""
+    elif size == "9x16":
+        inner = f"""
+{joe(200, 900, 1020)}
+<div class="abs" style="left:0;top:0;width:1080px;height:1200px;background:linear-gradient(180deg,{K} 0%,{K} 80%,rgba(0,0,0,0) 100%)"></div>
+{logo(90, 270, 200)}
+<div class="abs lab" style="left:90px;top:420px;font-size:42px;color:{Y}">dental content shoot day{DOT}</div>
+<div class="abs price" style="left:80px;top:480px;font-size:300px;color:{S}">£750</div>
+<div class="abs lab" style="left:96px;top:790px;font-size:50px;color:{S}">+ VAT</div>
+<div class="abs body" style="left:90px;top:870px;width:600px;font-size:34px;color:{S}">One full day at your practice. Footage ready for your editor.</div>
+<div class="abs" style="left:0;top:1380px;width:1080px;height:540px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.75) 45%)"></div>
+{cta(90, 1470)}"""
+    else:
+        inner = f"""
+{joe(560, 40, 588)}
+<div class="abs" style="left:0;top:0;width:640px;height:628px;background:linear-gradient(90deg,{K} 0%,{K} 80%,rgba(0,0,0,0) 100%)"></div>
+{logo(56, 46, 140)}
+<div class="abs lab" style="left:56px;top:130px;font-size:24px;color:{Y}">dental content shoot day{DOT}</div>
+<div class="abs price" style="left:50px;top:160px;font-size:160px;color:{S}">£750</div>
+<div class="abs lab" style="left:60px;top:322px;font-size:28px;color:{S}">+ VAT</div>
+<div class="abs body" style="left:56px;top:370px;width:440px;font-size:22px;color:{S}">One full day at your practice. Footage ready for your editor.</div>
+{cta(56, 470, scale=.8)}
+<div class="abs body" style="left:56px;top:565px;font-size:17px;color:#a8a49a">{small}</div>"""
+    return board("G2", name, size, K, inner)
+
+
+def viewfinder(w, h, inset, fs):
+    """Camera viewfinder overlay: corner brackets, REC, timecode, battery, 9:16 and 1:1 guides."""
+    c = 3
+    L = round(min(w, h) * .07)
+    br = "".join(f'<div class="abs" style="{sx}:{inset}px;{sy}:{inset}px;width:{L}px;height:{L}px;border-{sy}:{c + 1}px solid {S};border-{sx}:{c + 1}px solid {S}"></div>'
+                 for sx in ("left", "right") for sy in ("top", "bottom"))
+    g9w = round(h * .78 * 9 / 16)
+    g9h = round(h * .78)
+    g1s = round(min(w, h) * .62)
+    guides = (f'<div class="abs" data-name="Guide 9:16" style="left:{(w - g9w) / 2:.0f}px;top:{(h - g9h) / 2:.0f}px;width:{g9w}px;height:{g9h}px;border:2px dashed rgba(252,218,67,.9)">'
+              f'<span class="abs lab" style="left:8px;top:6px;font-size:{fs * .7:.0f}px;color:{Y}">9:16</span></div>'
+              f'<div class="abs" data-name="Guide 1:1" style="left:{(w - g1s) / 2:.0f}px;top:{(h - g1s) / 2:.0f}px;width:{g1s}px;height:{g1s}px;border:2px dashed rgba(247,245,239,.7)">'
+              f'<span class="abs lab" style="right:8px;bottom:6px;font-size:{fs * .7:.0f}px;color:{S}">1:1</span></div>')
+    hud = (f'<div class="abs" style="left:{inset + L + 14}px;top:{inset + 6}px;display:flex;align-items:center;gap:12px;font-family:\'Fira Sans\',sans-serif;font-weight:600;font-size:{fs}px;color:{S}">'
+           f'<span style="width:{fs * .7:.0f}px;height:{fs * .7:.0f}px;border-radius:50%;background:#e23b2e;box-shadow:0 0 12px rgba(226,59,46,.8)"></span>REC</div>'
+           f'<div class="abs" style="right:{inset + L + 14}px;top:{inset + 6}px;font-family:\'Fira Sans\',sans-serif;font-weight:600;font-size:{fs}px;color:{S};letter-spacing:.06em">00:00:12:08</div>'
+           f'<div class="abs" style="left:{inset + L + 14}px;bottom:{inset + 6}px;font-family:\'Fira Sans\',sans-serif;font-size:{fs * .8:.0f}px;color:{S};opacity:.85">4K &middot; 25p &middot; ISO 800</div>')
+    return f'<div class="abs" data-name="Viewfinder" style="inset:0">{br}{guides}{hud}</div>'
+
+
+def g3(size):
+    name = "Shot for the feed | Static | Clinician | Viewfinder"
+    sub = "Every clip planned for where it'll run."
+    if size == "1x1":
+        inner = f"""
+{photo('smdc-loupes.jpg', 0, 0, 1080, 760, '50% 40%')}
+<div class="abs" style="left:0;top:0;width:1080px;height:760px;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.45))"></div>
+<div class="abs" style="left:0;top:0;width:1080px;height:760px">{viewfinder(1080, 760, 40, 26)}</div>
+<div class="abs" style="left:0;top:760px;width:1080px;height:320px;background:{K}"></div>
+<div class="abs hl" style="left:80px;top:800px;font-size:66px;color:{S}">shot for your ads,<br>not your showreel{DOT}</div>
+<div class="abs body" style="left:80px;top:960px;font-size:26px;color:#cfccc4">{sub}</div>
+{cta(640, 950, scale=.85)}"""
+    elif size == "9x16":
+        inner = f"""
+{photo('smdc-loupes.jpg', 0, 0, 1080, 1340, '55% 40%')}
+<div class="abs" style="left:0;top:0;width:1080px;height:1340px">{viewfinder(1080, 1340, 50, 30)}</div>
+<div class="abs" style="left:0;top:1340px;width:1080px;height:580px;background:{K}"></div>
+<div class="abs hl" style="left:90px;top:1370px;font-size:76px;color:{S}">shot for your ads,<br>not your showreel{DOT}</div>
+<div class="abs body" style="left:90px;top:1550px;width:480px;font-size:28px;color:#cfccc4">{sub}</div>
+{cta(600, 1530, scale=.85)}
+<div class="abs" style="left:0;top:0;width:1080px;height:250px;background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0))"></div>"""
+    else:
+        inner = f"""
+{photo('smdc-loupes.jpg', 480, 0, 720, 628, '50% 40%')}
+<div class="abs" style="left:480px;top:0;width:720px;height:628px">{viewfinder(720, 628, 28, 20)}</div>
+<div class="abs" style="left:0;top:0;width:480px;height:628px;background:{K}"></div>
+{logo(56, 50, 140)}
+<div class="abs hl" style="left:56px;top:160px;font-size:52px;color:{S}">shot for<br>your ads,<br>not your<br>showreel{DOT}</div>
+<div class="abs body" style="left:56px;top:420px;width:380px;font-size:20px;color:#cfccc4">{sub}</div>
+{cta(56, 500, scale=.8)}"""
+    if size == "1x1":
+        inner += logo(830, 815, 170)
+    elif size == "9x16":
+        inner += logo(860, 1390, 140)
+    return board("G3", name, size, K, inner)
+
+
+def callout(bx, by, text, px, py, fs, w):
+    """Callout box (top-left bx,by, width w) with a leader line from its nearest edge to the point (px,py)."""
+    pad_y, pad_x = fs * .45, fs * .7
+    lines = max(1, math.ceil(len(text) * fs * .56 / (w - 2 * pad_x)))
+    h = lines * fs * 1.15 + 2 * pad_y
+    cx, cy = bx + w / 2, by + h / 2
+    if py > by + h:
+        ax, ay = min(max(px, bx + 20), bx + w - 20), by + h
+    elif py < by:
+        ax, ay = min(max(px, bx + 20), bx + w - 20), by
+    else:
+        ax, ay = (bx + w if px > cx else bx), cy
+    dx, dy = px - ax, py - ay
+    length, ang = math.hypot(dx, dy), math.degrees(math.atan2(dy, dx))
+    return (f'<div class="abs" data-name="Leader line" style="left:{ax:.0f}px;top:{ay - 1.5:.0f}px;width:{length:.0f}px;height:3px;background:{Y};transform-origin:0 50%;transform:rotate({ang:.1f}deg)"></div>'
+            f'<div class="abs" data-name="Callout point" style="left:{px - 9}px;top:{py - 9}px;width:18px;height:18px;border-radius:50%;background:{Y};box-shadow:0 0 0 6px rgba(252,218,67,.35)"></div>'
+            f'<div class="abs lab" data-name="Callout box" style="left:{bx}px;top:{by}px;width:{w}px;padding:{pad_y:.0f}px {pad_x:.0f}px;background:{S};color:{K};'
+            f'border-radius:{fs * .4:.0f}px;font-size:{fs}px;line-height:1.15;box-shadow:0 12px 26px rgba(0,0,0,.4)">{text}</div>')
+
+
+def g4(size):
+    name = "What's in a shoot day | Static | Sone crew | Callouts"
+    if size == "1x1":
+        inner = f"""
+<div class="cover" style="background:{K}"></div>
+{logo(80, 70, 180)}
+<div class="abs hl" style="left:80px;top:150px;font-size:72px;color:{S}">what you get<br>in one day{DOT}</div>
+<div class="abs" style="left:80px;top:360px;width:920px;height:518px;border-radius:20px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.6)">{photo('crew-lounge.jpg', 0, 0, 920, 518, '50% 45%')}</div>
+{callout(150, 395, 'lighting and audio sorted', 120, 520, 24, 320)}
+{callout(110, 800, 'direction for every clinician', 400, 690, 24, 380)}
+{callout(600, 400, 'shot list planned before we arrive', 830, 610, 24, 360)}
+<div class="abs lab" style="left:640px;top:180px;font-size:30px;color:{Y}">from £750 + VAT</div>
+{cta(80, 960, scale=.85)}
+<div class="abs body" style="left:520px;top:975px;width:480px;font-size:22px;color:#cfccc4">Edited for ads, website and socials.</div>"""
+    elif size == "9x16":
+        inner = f"""
+<div class="cover" style="background:{K}"></div>
+{logo(90, 270, 190)}
+<div class="abs hl" style="left:90px;top:370px;font-size:96px;color:{S}">what you get<br>in one day{DOT}</div>
+<div class="abs" style="left:0;top:660px;width:1080px;height:700px;overflow:hidden">{photo('crew-lounge.jpg', 0, 0, 1080, 700, '45% 45%')}</div>
+{callout(60, 690, 'lighting and audio sorted', 100, 830, 30, 380)}
+{callout(60, 1300, 'direction for every clinician', 420, 1120, 30, 440)}
+{callout(560, 700, 'shot list planned before we arrive', 900, 960, 30, 440)}
+<div class="abs lab" style="left:90px;top:1500px;font-size:36px;color:{Y}">from £750 + VAT</div>
+{cta(560, 1480, scale=.85)}"""
+    else:
+        inner = f"""
+<div class="cover" style="background:{K}"></div>
+{logo(56, 46, 140)}
+<div class="abs hl" style="left:56px;top:140px;font-size:54px;color:{S}">what you<br>get in<br>one day{DOT}</div>
+<div class="abs lab" style="left:56px;top:370px;font-size:24px;color:{Y}">from £750 + VAT</div>
+{cta(56, 460, scale=.8)}
+<div class="abs" style="left:440px;top:60px;width:720px;height:420px;border-radius:16px;overflow:hidden">{photo('crew-lounge.jpg', 0, 0, 720, 420, '50% 45%')}</div>
+{callout(470, 80, 'lighting and audio sorted', 470, 160, 18, 250)}
+{callout(470, 520, 'direction for every clinician', 700, 400, 18, 300)}
+{callout(860, 520, 'shot list planned before we arrive', 1000, 300, 18, 300)}"""
+    return board("G4", name, size, K, inner)
+
+
+G5_ITEMS = ["We only film dentistry", "Every video planned before we arrive", "Edited for ads, website and socials"]
+
+
+def reasons(items, fs, gap):
+    return "".join(f'<div style="display:flex;gap:{fs * .6:.0f}px;align-items:center;margin-bottom:{gap}px">'
+                   f'<span style="flex:none;width:{fs * 1.6:.0f}px;height:{fs * 1.6:.0f}px;border-radius:50%;background:{K};color:{Y};display:flex;align-items:center;justify-content:center">{icon("tick", round(fs * .95))}</span>'
+                   f'<span style="font-size:{fs}px;line-height:1.25;color:{K}">{t}</span></div>' for t in items)
+
+
+def price_bar(x, y, w, h, fs):
+    return (f'<div class="abs" data-name="Price bar" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;border-radius:{h / 2:.0f}px;background:{K};display:flex;align-items:center;justify-content:space-between;padding:0 {h * .14:.0f}px 0 {h * .45:.0f}px">'
+            f'<span class="lab" style="font-size:{fs}px;color:{S}">from <span style="color:{Y}">£750</span> + VAT</span>'
+            f'<span class="cta" style="height:{h * .72:.0f}px;font-size:{fs * .85:.0f}px;padding:0 {fs * 1.2:.0f}px;box-shadow:none">Book a discovery call</span></div>')
+
+
+def g5(size):
+    name = "Three reasons | Static | Clinician | Three reasons"
+    if size == "1x1":
+        inner = f"""
+<div class="abs hl" style="left:80px;top:90px;font-size:70px;color:{K}">3 reasons to book<br>a sone<span style="color:#e0b800">.</span> shoot day</div>
+<div class="abs" style="left:80px;top:330px;width:500px">{reasons(G5_ITEMS, 32, 52)}</div>
+<div class="abs" style="left:640px;top:300px;width:360px;height:560px;border-radius:24px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.25)">{photo('nuyu-consult-m.jpg', 0, 0, 360, 560, '50% 40%')}</div>
+<div class="abs" style="left:610px;top:270px;width:90px;height:80px;border-radius:18px;background:{Y}"></div>
+{price_bar(80, 930, 920, 96, 30)}"""
+    elif size == "9x16":
+        inner = f"""
+<div class="abs hl" style="left:90px;top:280px;font-size:88px;color:{K}">3 reasons to book<br>a sone<span style="color:#e0b800">.</span> shoot day</div>
+<div class="abs" style="left:90px;top:560px;width:900px">{reasons(G5_ITEMS, 40, 50)}</div>
+<div class="abs" style="left:300px;top:900px;width:690px;height:520px;border-radius:28px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.25)">{photo('nuyu-consult-m.jpg', 0, 0, 690, 520, '50% 35%')}</div>
+<div class="abs" style="left:250px;top:860px;width:110px;height:96px;border-radius:22px;background:{Y}"></div>
+{price_bar(90, 1470, 900, 100, 30)}"""
+    else:
+        inner = f"""
+<div class="abs hl" style="left:56px;top:56px;font-size:50px;color:{K}">3 reasons to book<br>a sone<span style="color:#e0b800">.</span> shoot day</div>
+<div class="abs" style="left:56px;top:220px;width:560px">{reasons(G5_ITEMS, 24, 26)}</div>
+<div class="abs" style="left:880px;top:40px;width:280px;height:548px;border-radius:20px;overflow:hidden">{photo('nuyu-consult-m.jpg', 0, 0, 280, 548, '50% 40%')}</div>
+{price_bar(56, 480, 760, 80, 24)}"""
+    return board("G5", name, size, S, inner)
+
+
+PERSONAS["growth"] = [g1, g2, g3, g4, g5]
+
+
 if __name__ == "__main__":
     for key, fns in PERSONAS.items():
         rows = []
