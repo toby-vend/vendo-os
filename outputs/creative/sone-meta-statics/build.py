@@ -659,6 +659,204 @@ def g5(size):
 PERSONAS["growth"] = [g1, g2, g3, g4, g5]
 
 
+
+# ---------------------------------------------------------------- COSMETIC CLINICIAN
+def caption(text, fs):
+    return (f'<span style="display:inline-block;background:{S};color:{K};font-family:Komet,\'Fira Sans\',sans-serif;font-size:{fs}px;'
+            f'line-height:1.15;padding:{fs * .28:.0f}px {fs * .45:.0f}px;border-radius:{fs * .22:.0f}px;margin:0;box-shadow:0 6px 16px rgba(0,0,0,.25)">{text}</span>')
+
+
+def c1(size):
+    name = "You on camera | Static | Clinician | Native captions"
+    caps = lambda fs: f'<div style="text-align:center">{caption("you&rsquo;re not bad on camera.", fs)}<br>{caption("nobody&rsquo;s directing you.", fs)}</div>'
+    if size == "1x1":
+        inner = f"""
+{photo('nuyu-explainer.jpg', pos='50% 40%')}
+<div class="abs" style="left:0;right:0;top:868px">{caps(50)}</div>
+{logo(40, 40, 150, dark_bg=False)}"""
+    elif size == "9x16":
+        inner = f"""
+{photo('nuyu-explainer.jpg', pos='50% 50%')}
+<div class="abs" style="left:0;right:0;top:1192px">{caps(60)}</div>
+{logo(60, 270, 160, dark_bg=False)}"""
+    else:
+        inner = f"""
+{photo('nuyu-explainer.jpg', 640, 0, 560, 628, '50% 30%')}
+<div class="abs" style="left:640px;width:560px;top:470px">{caps(30)}</div>
+<div class="abs" style="left:0;top:0;width:640px;height:628px;background:{K}"></div>
+{logo(56, 50, 140)}
+<div class="abs hl" style="left:56px;top:150px;font-size:54px;color:{S}">you&rsquo;re not<br>stiff<span style="color:{Y}">.</span> you&rsquo;re<br>undirected{DOT}</div>
+<div class="abs body" style="left:56px;top:380px;width:520px;font-size:22px;color:#cfccc4">Scripts you approve before the day. Direction on the day.</div>
+{cta(56, 480, scale=.8)}"""
+    return board("C1", name, size, K, inner)
+
+
+C2_FRAMES = [("broll-intraoral.jpg", "50% 50%"), ("broll-mirror.jpg", "50% 50%"), ("broll-design.jpg", "50% 50%"),
+             ("broll-burs.jpg", "50% 50%"), ("broll-teeth.jpg", "50% 50%"), ("broll-scanner.jpg", "50% 50%")]
+
+
+def contact_sheet(x, y, w, cols, rows, frames, rot, circle=2):
+    """Film contact sheet on a light box: dark strip with sprocket holes, frames, one circled in yellow."""
+    pad = round(w * .035); sp = round(w * .02)
+    fw = (w - 2 * pad - (cols - 1) * sp) / cols; fh = fw * 9 / 16
+    hole = lambda yy: "".join(f'<div class="abs" style="left:{pad + k * (w - 2 * pad) / 22:.0f}px;top:{yy}px;width:{w / 60:.0f}px;height:{w / 60 * .7:.0f}px;border-radius:2px;background:#f4f1e6"></div>' for k in range(22))
+    h = round(2 * pad + rows * fh + (rows - 1) * sp * 3 + rows * 0)
+    out = []
+    for i, (img, pos) in enumerate(frames[:cols * rows]):
+        cx = pad + (i % cols) * (fw + sp); cy = pad + (i // cols) * (fh + sp * 3)
+        out.append(photo(img, round(cx), round(cy), round(fw), round(fh), pos))
+        if i == circle:
+            out.append(f'<div class="abs" data-name="Circle" style="left:{cx - fw * .12:.0f}px;top:{cy - fh * .16:.0f}px;width:{fw * 1.24:.0f}px;height:{fh * 1.32:.0f}px;'
+                       f'border:{w / 160:.0f}px solid {Y};border-radius:50%;transform:rotate(-4deg)"></div>')
+    holes = hole(round(pad * .25)) + "".join(hole(round(pad + (r + 1) * fh + r * sp * 3 + sp * .9)) for r in range(rows - 1)) + hole(h - round(pad * .7))
+    return (f'<div class="abs" data-name="Contact sheet" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;transform:rotate({rot}deg);background:#151515;'
+            f'border-radius:6px;box-shadow:0 40px 70px rgba(0,0,0,.45),0 0 0 10px rgba(255,255,255,.04)">{holes}{"".join(out)}</div>')
+
+
+def lightbox():
+    return (f'<div class="cover" style="background:radial-gradient(ellipse at 50% 45%,#ffffff 0%,#f4f2ea 45%,#d9d5c9 100%)"></div>'
+            f'<div class="cover" style="opacity:.5;background:repeating-linear-gradient(0deg,rgba(0,0,0,.03) 0,rgba(0,0,0,.03) 1px,transparent 1px,transparent 6px)"></div>')
+
+
+def c2(size):
+    name = "Your work, shot properly | Static | No talent | Contact sheet"
+    sub = "Treatment explainers, patient stories, b-roll. One day."
+    if size == "1x1":
+        inner = f"""
+{lightbox()}
+<div class="abs hl" style="left:80px;top:80px;font-size:76px;color:{K}">your work deserves<br>better than a<br>phone clip{DOT}</div>
+{contact_sheet(80, 400, 920, 3, 2, C2_FRAMES, -2)}
+<div class="abs body" style="left:80px;top:880px;width:640px;font-size:26px;color:#3a3a3a">{sub}</div>
+{cta(80, 950, scale=.85, dark=True)}
+{logo(800, 980, 200, dark_bg=False)}"""
+    elif size == "9x16":
+        inner = f"""
+{lightbox()}
+{logo(90, 270, 190, dark_bg=False)}
+<div class="abs hl" style="left:90px;top:380px;font-size:94px;color:{K}">your work<br>deserves better<br>than a phone clip{DOT}</div>
+{contact_sheet(60, 800, 960, 3, 2, C2_FRAMES, -2)}
+<div class="abs body" style="left:90px;top:1360px;width:600px;font-size:30px;color:#3a3a3a">{sub}</div>
+{cta(90, 1460, dark=True)}"""
+    else:
+        inner = f"""
+{lightbox()}
+{logo(56, 50, 140, dark_bg=False)}
+<div class="abs hl" style="left:56px;top:140px;font-size:50px;color:{K}">your work<br>deserves better<br>than a phone<br>clip{DOT}</div>
+<div class="abs body" style="left:56px;top:390px;width:400px;font-size:20px;color:#3a3a3a">{sub}</div>
+{cta(56, 480, scale=.8, dark=True)}
+{contact_sheet(500, 90, 650, 3, 2, C2_FRAMES, -2)}"""
+    return board("C2", name, size, S, inner)
+
+
+def side_column(x, y, w, h, fs):
+    return f"""
+<div class="abs" data-name="Column" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;background:{K};padding:{fs * 1.6:.0f}px {fs * 1.4:.0f}px">
+  <div class="lab" style="font-size:{fs * 1.55:.0f}px;line-height:1.05;color:{S}">still letting your before-and-afters do all the talking?</div>
+  <div style="height:3px;width:{fs * 3}px;background:{Y};margin:{fs * 1.2:.0f}px 0"></div>
+  <div style="font-size:{fs * .85:.0f}px;color:#cfccc4">treatment explainers from</div>
+  <div class="price" style="font-size:{fs * 3.4:.0f}px;color:{Y};margin-top:{fs * .2:.0f}px">£1,250</div>
+  <div style="font-size:{fs * .85:.0f}px;color:#cfccc4;margin-top:{fs * .3:.0f}px">+ VAT, edited, with scripting support</div>
+</div>"""
+
+
+def c3(size):
+    name = "Watched before they booked | Static | Clinician | Side column"
+    if size == "1x1":
+        inner = f"""
+{photo('nuyu-consult-f.jpg', 0, 0, 620, 1080, '40% 40%')}
+{side_column(620, 0, 460, 1080, 30)}
+{cta(660, 930, scale=.85)}
+<img class="logo abs" data-name="Logo" src="assets/logos/sone-wordmark-stone-mustard.png" style="left:40px;top:40px;width:150px">"""
+    elif size == "9x16":
+        inner = f"""
+{photo('nuyu-consult-f.jpg', 0, 0, 1080, 1100, '40% 30%')}
+{side_column(0, 1000, 1080, 920, 40)}
+<div class="abs" style="left:0;top:1000px;width:1080px;height:920px;pointer-events:none"></div>
+{cta(600, 1360, scale=.9)}
+<img class="logo abs" data-name="Logo" src="assets/logos/sone-wordmark-stone-mustard.png" style="left:60px;top:270px;width:170px">"""
+    else:
+        inner = f"""
+{photo('nuyu-consult-f.jpg', 0, 0, 640, 628, '40% 30%')}
+{side_column(640, 0, 560, 628, 24)}
+{cta(680, 530, scale=.75)}
+<img class="logo abs" data-name="Logo" src="assets/logos/sone-wordmark-stone-mustard.png" style="left:30px;top:30px;width:120px">"""
+    return board("C3", name, size, K, inner)
+
+
+def step_card(x, y, w, n, label, img, pos, fs):
+    h = round(w * .78)
+    return (f'<div class="abs" data-name="Step {n}" style="left:{x}px;top:{y}px;width:{w}px">'
+            f'<div style="position:relative;width:{w}px;height:{h}px;border-radius:{fs * .6:.0f}px;overflow:hidden;box-shadow:0 18px 36px rgba(0,0,0,.35)">{photo(img, 0, 0, w, h, pos)}</div>'
+            f'<div style="display:flex;gap:{fs * .4:.0f}px;align-items:center;margin-top:{fs * .6:.0f}px">'
+            f'<span class="lab" style="flex:none;width:{fs * 1.5:.0f}px;height:{fs * 1.5:.0f}px;border-radius:50%;background:{Y};color:{K};display:flex;align-items:center;justify-content:center;font-size:{fs * .85:.0f}px">{n}</span>'
+            f'<span class="lab" style="font-size:{fs}px;line-height:1.1;color:{S}">{label}</span></div></div>')
+
+
+C4_STEPS = [("a clip in<br>their feed", "nuyu-explainer.jpg", "50% 25%"), ("your treatment<br>explainer", "broll-design.jpg", "50% 50%"),
+            ("a patient&rsquo;s<br>story", "nuyu-patient.jpg", "50% 35%")]
+
+
+def arrow_h(x, y, w):
+    return f'<div class="abs" style="left:{x}px;top:{y}px;color:{Y}">{icon("arrow", w)}</div>'
+
+
+def c4(size):
+    name = "Path to a consultation | Static | Clinician | Question and diagram"
+    q = "what does a bonding patient watch before they book?"
+    if size == "1x1":
+        steps = "".join(step_card(80 + i * 320, 420, 280, i + 1, l, im, ps, 26) for i, (l, im, ps) in enumerate(C4_STEPS))
+        inner = f"""
+<div class="cover" style="background:radial-gradient(circle at 50% 20%,#262626,{K} 70%)"></div>
+{logo(80, 70, 170)}
+<div class="abs hl" style="left:80px;top:150px;font-size:66px;color:{S}">{q}</div>
+{steps}{arrow_h(364, 520, 36)}{arrow_h(684, 520, 36)}
+<div class="abs" style="left:80px;top:800px;display:flex;align-items:center;gap:16px"><span style="color:{Y};display:flex">{icon('tick', 34)}</span><span class="lab" style="font-size:34px;color:{Y}">consultation booked<span style="color:{S}">.</span></span></div>
+<div class="abs body" style="left:80px;top:870px;font-size:24px;color:#cfccc4">We plan all three in one shoot day.</div>
+{cta(80, 940, scale=.85)}"""
+    elif size == "9x16":
+        rows = "".join(f'<div class="abs" style="left:90px;top:{560 + i * 300}px;width:900px;height:260px;display:flex;gap:30px;align-items:center">'
+                       f'<div style="position:relative;flex:none;width:340px;height:240px;border-radius:18px;overflow:hidden;box-shadow:0 18px 36px rgba(0,0,0,.4)">{photo(im, 0, 0, 340, 240, ps)}</div>'
+                       f'<div style="display:flex;gap:18px;align-items:center"><span class="lab" style="flex:none;width:64px;height:64px;border-radius:50%;background:{Y};color:{K};display:flex;align-items:center;justify-content:center;font-size:36px">{i + 1}</span>'
+                       f'<span class="lab" style="font-size:44px;line-height:1.08;color:{S}">{l}</span></div></div>'
+                       for i, (l, im, ps) in enumerate(C4_STEPS))
+        inner = f"""
+<div class="cover" style="background:radial-gradient(circle at 50% 20%,#262626,{K} 70%)"></div>
+{logo(90, 270, 180)}
+<div class="abs hl" style="left:90px;top:360px;font-size:72px;color:{S}">{q}</div>
+{rows}
+<div class="abs" style="left:90px;top:1470px;display:flex;align-items:center;gap:16px"><span style="color:{Y};display:flex">{icon('tick', 40)}</span><span class="lab" style="font-size:40px;color:{Y}">consultation booked<span style="color:{S}">.</span></span></div>
+{cta(600, 1458, scale=.8)}"""
+    else:
+        steps = "".join(step_card(480 + i * 240, 140, 210, i + 1, l, im, ps, 20) for i, (l, im, ps) in enumerate(C4_STEPS))
+        inner = f"""
+<div class="cover" style="background:{K}"></div>
+{logo(56, 50, 140)}
+<div class="abs hl" style="left:56px;top:140px;font-size:44px;color:{S}">what does a<br>bonding patient<br>watch before<br>they book?</div>
+{cta(56, 470, scale=.8)}
+{steps}{arrow_h(693, 210, 26)}{arrow_h(933, 210, 26)}
+<div class="abs" style="left:480px;top:470px;display:flex;align-items:center;gap:12px"><span style="color:{Y};display:flex">{icon('tick', 28)}</span><span class="lab" style="font-size:28px;color:{Y}">consultation booked<span style="color:{S}">.</span></span></div>
+<div class="abs body" style="left:480px;top:520px;font-size:18px;color:#cfccc4">We plan all three in one shoot day.</div>"""
+    return board("C4", name, size, K, inner)
+
+
+def c5(size):
+    name = "Shot on a Sone shoot day | Static | Clinician | Native photo"
+    bug = lambda w, x, y, fs: (f'<div class="abs" data-name="Logo bug" style="left:{x}px;top:{y}px;display:flex;align-items:center;gap:{fs * .6:.0f}px;background:rgba(0,0,0,.55);'
+                               f'backdrop-filter:blur(6px);padding:{fs * .5:.0f}px {fs * .8:.0f}px;border-radius:999px">'
+                               f'<img src="assets/logos/sone-icon-mustard.png" style="width:{fs * 1.6:.0f}px">'
+                               f'<span class="lab" style="font-size:{fs}px;color:{S}">shot on a sone<span style="color:{Y}">.</span> shoot day</span></div>')
+    if size == "1x1":
+        inner = f"""{photo('iconic-team.jpg', pos='48% 50%')}{bug(0, 40, 980, 30)}"""
+    elif size == "9x16":
+        inner = f"""{photo('iconic-team.jpg', pos='52% 50%')}{bug(0, 60, 1480, 36)}"""
+    else:
+        inner = f"""{photo('iconic-team.jpg', pos='50% 45%')}{bug(0, 30, 548, 24)}"""
+    return board("C5", name, size, K, inner)
+
+
+PERSONAS["cosmetic"] = [c1, c2, c3, c4, c5]
+
+
 if __name__ == "__main__":
     for key, fns in PERSONAS.items():
         rows = []

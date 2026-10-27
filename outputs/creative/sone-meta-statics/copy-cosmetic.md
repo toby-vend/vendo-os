@@ -124,14 +124,14 @@ Every video should have a job. Ours do.
 
 ---
 
-## C5 | Behind the camera
-**Layout:** VT-18 Native practice photo (real behind-the-scenes photo of a Sone shoot, small logo bug)
+## C5 | Shot on a Sone shoot day
+**Layout:** VT-18 Native practice photo (a real, uncaptioned still from a Sone dental shoot, small logo bug)
 **Awareness:** product aware. **Sophistication:** 3. **Angle:** native, quiet proof: this is what the day really looks like.
 Research: proof ladder step 1 (demonstration); "Dental-specific direction so you feel confident and natural on camera" (LP).
 
-**On image:** Plain behind-the-scenes photo of a Sone crew filming in a clinic. Small "sone." logo bug and one short line: "this is what a shoot day looks like."
+**On image:** Plain still of two clinicians at work, taken from Sone's Iconic Dent walkthrough. Small "sone." logo bug and one short line: "shot on a sone. shoot day."
 
-**Headline:** What a Sone shoot day actually looks like.
+**Headline:** Shot on a Sone shoot day.
 
 **Primary text:**
 No circus. No crowd. A small crew, lights in the right place, and someone making sure you sound like yourself.
@@ -160,4 +160,5 @@ The quality you deliver in the chair, on camera.
 - **Patient stories (C3, C4, C5):** only possible when the client's patients consent. Copy says "when you have patients happy to take part".
 - **750+ shoot days (C5):** LP says 750+, Ad Scripts doc says 75+. Confirm.
 - **Clinician stills (C1, C3):** from Sone's published explainers. Confirm consent for use in Sone's ads.
+- **C5 photo:** we have no behind-the-scenes photo of Sone filming inside a clinic, so C5 shows a finished still instead. If Joe has on-set clinic photos, they would make a stronger C5.
 - **"Script approved by you" (C1, C5):** in line with how Vendo shoots run (scripts sent to the practice in advance). Confirm it's standard for Sone's direct clients.
