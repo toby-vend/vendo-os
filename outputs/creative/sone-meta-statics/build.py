@@ -857,6 +857,234 @@ def c5(size):
 PERSONAS["cosmetic"] = [c1, c2, c3, c4, c5]
 
 
+
+# ---------------------------------------------------------------- PRACTICE GOING PRIVATE
+def p1(size):
+    name = "Going private | Static | Clinician | Statement"
+    def block(fs, w):
+        return (f'<div style="width:{w}px;margin:0 auto;text-align:center;color:{S}">'
+                f'<div class="hl" style="font-size:{fs * 1.9:.0f}px">going private?</div>'
+                f'<div class="lab" style="font-size:{fs * .95:.0f}px;margin-top:{fs * .5:.0f}px;color:{S}">your new patients<br>haven&rsquo;t met you yet{DOT}</div>'
+                f'<div style="width:{fs * 3}px;height:3px;background:{Y};margin:{fs * .9:.0f}px auto"></div>'
+                f'<div style="font-size:{fs * .62:.0f}px;line-height:1.4;color:#d8d5cc">Meet-the-dentist, treatment and practice videos.<br>One shoot day.</div></div>')
+    if size == "1x1":
+        inner = f"""
+{photo('iconic-woman.jpg', pos='50% 30%')}
+<div class="cover" style="background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.55),rgba(0,0,0,.85))"></div>
+{logo(445, 90, 190)}
+<div class="abs" style="left:0;right:0;top:280px">{block(56, 900)}</div>
+<div class="abs" style="left:0;right:0;top:880px;text-align:center"><span class="cta">Book a discovery call</span></div>"""
+    elif size == "9x16":
+        inner = f"""
+{photo('iconic-woman.jpg', pos='50% 40%')}
+<div class="cover" style="background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.5),rgba(0,0,0,.85))"></div>
+{logo(440, 300, 200)}
+<div class="abs" style="left:0;right:0;top:640px">{block(66, 940)}</div>
+<div class="abs" style="left:0;right:0;top:1400px;text-align:center"><span class="cta">Book a discovery call</span></div>"""
+    else:
+        inner = f"""
+{photo('iconic-woman.jpg', 760, 0, 440, 628, '50% 30%')}
+<div class="abs" style="left:0;top:0;width:800px;height:628px;background:linear-gradient(90deg,{K} 0%,{K} 85%,rgba(0,0,0,0) 100%)"></div>
+{logo(56, 50, 140)}
+<div class="abs hl" style="left:56px;top:150px;font-size:84px;color:{S}">going private?</div>
+<div class="abs lab" style="left:56px;top:260px;font-size:34px;color:{S}">your new patients haven&rsquo;t met you yet{DOT}</div>
+<div class="abs" style="left:56px;top:330px;width:120px;height:3px;background:{Y}"></div>
+<div class="abs body" style="left:56px;top:360px;width:600px;font-size:22px;color:#d8d5cc">Meet-the-dentist, treatment and practice videos. One shoot day.</div>
+{cta(56, 470, scale=.8)}"""
+    return board("P1", name, size, K, inner)
+
+
+def letter(x, y, w, rot, fs):
+    h = round(w * 1.3)
+    lines = ["Dear patient,", "",
+             "From next month, our practice will offer private care only.",
+             "We know this is a big change, and we want to explain what it means for you,",
+             "your appointments and your family.", "",
+             "Your plan options and fees are set out overleaf."]
+    body = "".join(f'<div style="min-height:{fs * 1.5:.0f}px">{l}</div>' for l in lines)
+    return (f'<div class="abs" data-name="Letter" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;transform:rotate({rot}deg);background:#fdfcf8;'
+            f'box-shadow:0 40px 70px rgba(0,0,0,.5),0 8px 16px rgba(0,0,0,.25);padding:{fs * 3:.0f}px {fs * 2.6:.0f}px;font-family:Georgia,serif;color:#2b2b2b">'
+            f'<div style="font-size:{fs * .8:.0f}px;letter-spacing:.14em;color:#8b877c;text-transform:uppercase">The Practice</div>'
+            f'<div style="height:1px;background:#d9d4c7;margin:{fs * .8:.0f}px 0 {fs * 1.6:.0f}px"></div>'
+            f'<div style="font-size:{fs * 1.5:.0f}px;font-weight:700;margin-bottom:{fs * 1.2:.0f}px">Changes to your dental care</div>'
+            f'<div style="font-size:{fs}px;line-height:1.5;color:#4a4a4a">{body}</div>'
+            f'<div class="abs" style="left:{fs * 2.6:.0f}px;right:{fs * 2.6:.0f}px;bottom:{fs * 3:.0f}px">'
+            + "".join(f'<div style="height:{fs * .5:.0f}px;background:#e7e3d8;border-radius:3px;margin-top:{fs * .7:.0f}px;width:{88 - 9 * k}%"></div>' for k in range(4))
+            + '</div></div>')
+
+
+def phone(x, y, w, rot, img, pos):
+    h = round(w * 2.05)
+    r = round(w * .14)
+    return (f'<div class="abs" data-name="Phone" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;transform:rotate({rot}deg);border-radius:{r}px;'
+            f'background:#0c0c0c;padding:{w * .035:.0f}px;box-shadow:0 50px 80px rgba(0,0,0,.6),inset 0 0 0 2px #2c2c2c">'
+            f'<div style="position:relative;width:100%;height:100%;border-radius:{r * .8:.0f}px;overflow:hidden">'
+            f'{photo(img, 0, 0, round(w * .93), round(h - w * .07), pos, "background-size:165% auto;background-position:50% 4%")}'
+            f'<div class="abs" data-name="Player shade" style="left:0;right:0;bottom:0;height:30%;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.92) 45%)"></div>'
+            f'<div class="abs" style="left:50%;top:44%;width:{w * .24:.0f}px;height:{w * .24:.0f}px;margin-left:-{w * .12:.0f}px;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center">'
+            f'<svg viewBox="0 0 24 24" width="{w * .11:.0f}" height="{w * .11:.0f}" style="margin-left:{w * .01:.0f}px"><path d="M7 4.5v15l12.5-7.5z" fill="{S}"/></svg></div>'
+            f'<div class="abs" style="left:6%;right:6%;bottom:{w * .1:.0f}px;height:{w * .018:.0f}px;border-radius:9px;background:rgba(255,255,255,.35)"><div style="width:38%;height:100%;background:{Y};border-radius:9px"></div></div>'
+            f'<div class="abs" style="left:50%;top:{w * .03:.0f}px;width:{w * .3:.0f}px;height:{w * .07:.0f}px;margin-left:-{w * .15:.0f}px;border-radius:99px;background:#0c0c0c"></div>'
+            f'</div></div>')
+
+
+def p2(size):
+    name = "The letter isn't enough | Static | Clinician | Letter and phone"
+    if size == "1x1":
+        inner = f"""
+{desk()}
+<div class="abs hl" style="left:80px;top:80px;font-size:76px;color:{S}">a letter explains it<span style="color:{Y}">.</span><br>a video earns it{DOT}</div>
+{letter(110, 330, 520, -5, 15)}
+{phone(600, 300, 330, 7, 'sami-talk.jpg', '50% 20%')}
+{cta(80, 950, scale=.85)}
+{logo(800, 975, 190)}"""
+    elif size == "9x16":
+        inner = f"""
+{desk()}
+{logo(90, 270, 190)}
+<div class="abs hl" style="left:90px;top:380px;font-size:92px;color:{S}">a letter<br>explains it<span style="color:{Y}">.</span><br>a video earns it{DOT}</div>
+{letter(80, 850, 600, -5, 17)}
+{phone(600, 760, 380, 7, 'sami-talk.jpg', '50% 20%')}
+{cta(90, 1480)}"""
+    else:
+        inner = f"""
+{desk()}
+{logo(56, 50, 140)}
+<div class="abs hl" style="left:56px;top:150px;font-size:54px;color:{S}">a letter<br>explains it<span style="color:{Y}">.</span><br>a video<br>earns it{DOT}</div>
+{cta(56, 480, scale=.8)}
+{letter(520, 70, 400, -5, 11.5)}
+{phone(880, 50, 250, 7, 'sami-talk.jpg', '50% 20%')}"""
+    return board("P2", name, size, K, inner)
+
+
+def search_ui(x, y, w, fs, img, pos):
+    g = lambda c: f'<span style="color:{c}">'
+    bar = (f'<div style="display:flex;align-items:center;gap:{fs * .7:.0f}px;background:#fff;border-radius:999px;padding:{fs * .75:.0f}px {fs:.0f}px;box-shadow:0 14px 30px rgba(0,0,0,.3);'
+           f'font-family:Arial,sans-serif;font-size:{fs:.0f}px;color:#202124">'
+           f'<svg viewBox="0 0 24 24" width="{fs * 1.1:.0f}" height="{fs * 1.1:.0f}" fill="none" stroke="#5f6368" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>'
+           f'<span style="flex:1">private dentist near me</span>'
+           f'<svg viewBox="0 0 24 24" width="{fs * 1.1:.0f}" height="{fs * 1.1:.0f}"><rect x="9" y="3" width="6" height="12" rx="3" fill="#4285f4"/><path d="M6 11a6 6 0 0012 0M12 17v4" stroke="#34a853" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>')
+    thumb_w = round(w * .36)
+    card = (f'<div style="margin-top:{fs * .8:.0f}px;background:#fff;border-radius:{fs * .9:.0f}px;padding:{fs:.0f}px;box-shadow:0 14px 30px rgba(0,0,0,.3);display:flex;gap:{fs:.0f}px;font-family:Arial,sans-serif">'
+            f'<div style="position:relative;flex:none;width:{thumb_w}px;height:{thumb_w * .62:.0f}px;border-radius:{fs * .5:.0f}px;overflow:hidden">{photo(img, 0, 0, thumb_w, round(thumb_w * .62), pos)}'
+            f'<div class="abs" style="left:50%;top:50%;width:{fs * 2.4:.0f}px;height:{fs * 2.4:.0f}px;margin:-{fs * 1.2:.0f}px 0 0 -{fs * 1.2:.0f}px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center">'
+            f'<svg viewBox="0 0 24 24" width="{fs * 1.05:.0f}" height="{fs * 1.05:.0f}" style="margin-left:{fs * .1:.0f}px"><path d="M7 4.5v15l12.5-7.5z" fill="#fff"/></svg></div>'
+            f'<span class="abs" style="right:{fs * .4:.0f}px;bottom:{fs * .4:.0f}px;background:rgba(0,0,0,.75);color:#fff;font-size:{fs * .62:.0f}px;padding:2px {fs * .3:.0f}px;border-radius:4px">1:42</span></div>'
+            f'<div style="flex:1;min-width:0"><div style="font-size:{fs * 1.1:.0f}px;color:#1a0dab">Your practice</div>'
+            f'<div style="font-size:{fs * .72:.0f}px;color:#4d5156;margin-top:{fs * .25:.0f}px">Private dentist</div>'
+            f'<div style="font-size:{fs * .8:.0f}px;color:#202124;margin-top:{fs * .6:.0f}px;line-height:1.35">Meet the dentist: what private care looks like here</div></div></div>')
+    return f'<div class="abs" data-name="Search" style="left:{x}px;top:{y}px;width:{w}px">{bar}{card}</div>'
+
+
+def p3(size):
+    name = "What new patients find | Static | Clinician | Search bar"
+    if size == "1x1":
+        inner = f"""
+{photo('nuyu-surgery.jpg', pos='50% 50%', extra='filter:blur(2px)')}
+<div class="cover" style="background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,rgba(0,0,0,.35) 40%,rgba(0,0,0,.8) 100%)"></div>
+{logo(80, 70, 180)}
+<div class="abs hl" style="left:80px;top:160px;font-size:78px;color:{S}">when they find you,<br>what do they see?</div>
+{search_ui(80, 470, 920, 30, 'sami-talk2.jpg', '50% 22%')}
+{cta(80, 940, scale=.85)}"""
+    elif size == "9x16":
+        inner = f"""
+{photo('nuyu-surgery.jpg', pos='50% 50%', extra='filter:blur(2px)')}
+<div class="cover" style="background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,rgba(0,0,0,.3) 45%,rgba(0,0,0,.85) 100%)"></div>
+{logo(90, 270, 190)}
+<div class="abs hl" style="left:90px;top:380px;font-size:96px;color:{S}">when they<br>find you, what<br>do they see?</div>
+{search_ui(70, 860, 940, 34, 'sami-talk2.jpg', '50% 22%')}
+{cta(90, 1470)}"""
+    else:
+        inner = f"""
+{photo('nuyu-surgery.jpg', 600, 0, 600, 628, '50% 50%', 'filter:blur(2px)')}
+<div class="abs" style="left:0;top:0;width:640px;height:628px;background:linear-gradient(90deg,{K} 0%,{K} 85%,rgba(0,0,0,0) 100%)"></div>
+{logo(56, 50, 140)}
+<div class="abs hl" style="left:56px;top:150px;font-size:56px;color:{S}">when they<br>find you,<br>what do<br>they see?</div>
+{cta(56, 480, scale=.8)}
+{search_ui(560, 150, 590, 21, 'sami-talk2.jpg', '50% 22%')}"""
+    return board("P3", name, size, K, inner)
+
+
+def offer_panel(x, y, w, h, fs):
+    return f"""
+<div class="abs" data-name="Offer panel" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;background:{K}">
+  <div class="abs lab" style="left:{fs * 2}px;top:{fs * 1.6:.0f}px;font-size:{fs * .95:.0f}px;color:{Y}">your launch shoot day{DOT}</div>
+  <div class="abs" style="left:{fs * 2}px;top:{fs * 3.3:.0f}px;font-size:{fs * .75:.0f}px;color:#cfccc4">edited package from</div>
+  <div class="abs price" style="left:{fs * 1.85:.0f}px;top:{fs * 4.4:.0f}px;font-size:{fs * 3.6:.0f}px;color:{S}">£1,250 <span style="font-size:{fs:.0f}px">+ VAT</span></div>
+  <div class="abs" style="left:{fs * 2}px;top:{fs * 9:.0f}px;font-size:{fs * .72:.0f}px;color:#cfccc4">Meet the dentist &middot; practice walkthrough &middot; treatment explainers</div>
+</div>"""
+
+
+def p4(size):
+    name = "One day before launch | Static | Sone crew | Offer footer"
+    foot = lambda fs: (f'<div style="display:flex;align-items:center;justify-content:center;gap:{fs * .5:.0f}px;font-size:{fs}px;color:#cfccc4">'
+                       f'<span style="color:{Y};display:flex">{icon("tick", round(fs * 1.1))}</span>Dental-only crew &middot; UK-wide &middot; back in 2 to 3 weeks</div>')
+    if size == "1x1":
+        inner = f"""
+{photo('crew-sofa.jpg', 0, 0, 1080, 520, '50% 40%')}
+{offer_panel(0, 520, 1080, 560, 34)}
+{logo(800, 580, 200)}
+{cta(690, 760, scale=.85)}
+<div class="abs" style="left:0;right:0;top:960px;border-top:1px solid #2e2e2e;padding-top:30px">{foot(22)}</div>"""
+    elif size == "9x16":
+        inner = f"""
+{photo('crew-sofa.jpg', 0, 0, 1080, 900, '55% 40%')}
+<div class="abs" style="left:0;top:0;width:1080px;height:300px;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0))"></div>
+{offer_panel(0, 900, 1080, 1020, 40)}
+{logo(790, 965, 200)}
+{cta(90, 1400)}
+<div class="abs" style="left:0;right:0;top:1510px">{foot(24)}</div>"""
+    else:
+        inner = f"""
+{photo('crew-sofa.jpg', 0, 0, 560, 628, '45% 40%')}
+{offer_panel(560, 0, 640, 628, 26)}
+{logo(1000, 40, 140)}
+{cta(612, 470, scale=.8)}
+<div class="abs" style="left:560px;right:0;top:575px">{foot(15)}</div>"""
+    return board("P4", name, size, K, inner)
+
+
+def spotlight(cx, cy, d, img, pos, fs):
+    ring = round(d * .035)
+    return (f'<div class="abs" data-name="Spotlight" style="left:{cx - d / 2:.0f}px;top:{cy - d / 2:.0f}px;width:{d}px;height:{d}px;border-radius:50%;background:{Y};padding:{ring}px;box-shadow:0 30px 60px rgba(0,0,0,.5)">'
+            f'<div style="position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden">{photo(img, 0, 0, d - 2 * ring, d - 2 * ring, pos)}</div></div>'
+            f'<div class="abs" data-name="Name tag" style="left:{cx - d * .62:.0f}px;top:{cy + d * .28:.0f}px;background:{S};border-radius:999px;padding:{fs * .55:.0f}px {fs * 1.2:.0f}px;box-shadow:0 14px 30px rgba(0,0,0,.4)">'
+            f'<div class="lab" style="font-size:{fs * 1.15:.0f}px;color:{K}">meet the dentist</div>'
+            f'<div style="font-size:{fs * .62:.0f}px;color:#6b675e">filmed on a sone<span style="color:#d9a800">.</span> shoot day</div></div>')
+
+
+def p5(size):
+    name = "Meet the dentist | Static | Clinician | Clinician spotlight"
+    if size == "1x1":
+        inner = f"""
+<div class="cover" style="background:radial-gradient(circle at 70% 45%,#2a2a2a,{K} 65%)"></div>
+<div class="abs" style="left:40px;top:40px;right:40px;bottom:40px;border:2px solid rgba(252,218,67,.5);border-radius:28px"></div>
+{logo(90, 90, 170)}
+<div class="abs hl" style="left:90px;top:190px;font-size:64px;color:{S}">you&rsquo;re the reason<br>they&rsquo;ll go private<br>with you{DOT}</div>
+{spotlight(720, 640, 520, 'sami-talk.jpg', '50% 18%', 30)}
+{cta(90, 900, scale=.85)}"""
+    elif size == "9x16":
+        inner = f"""
+<div class="cover" style="background:radial-gradient(circle at 50% 50%,#2a2a2a,{K} 65%)"></div>
+<div class="abs" style="left:50px;top:220px;right:50px;bottom:300px;border:2px solid rgba(252,218,67,.5);border-radius:32px"></div>
+{logo(100, 280, 180)}
+<div class="abs hl" style="left:100px;top:380px;font-size:80px;color:{S}">you&rsquo;re the reason<br>they&rsquo;ll go private<br>with you{DOT}</div>
+{spotlight(600, 1040, 680, 'sami-talk.jpg', '50% 18%', 36)}
+{cta(100, 1460)}"""
+    else:
+        inner = f"""
+<div class="cover" style="background:radial-gradient(circle at 75% 50%,#2a2a2a,{K} 65%)"></div>
+<div class="abs" style="left:24px;top:24px;right:24px;bottom:24px;border:2px solid rgba(252,218,67,.5);border-radius:22px"></div>
+{logo(60, 56, 140)}
+<div class="abs hl" style="left:60px;top:150px;font-size:50px;color:{S}">you&rsquo;re the<br>reason they&rsquo;ll<br>go private<br>with you{DOT}</div>
+{cta(60, 480, scale=.8)}
+{spotlight(900, 300, 440, 'sami-talk.jpg', '50% 18%', 22)}"""
+    return board("P5", name, size, K, inner)
+
+
+PERSONAS["private"] = [p1, p2, p3, p4, p5]
+
+
 if __name__ == "__main__":
     for key, fns in PERSONAS.items():
         rows = []

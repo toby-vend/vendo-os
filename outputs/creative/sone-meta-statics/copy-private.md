@@ -125,11 +125,11 @@ Launch as the practice you're becoming.
 ---
 
 ## P5 | Meet the dentist
-**Layout:** VT-08 Clinician spotlight (cut-out of a clinician from a real Sone explainer, tag reads "meet the dentist", no name)
+**Layout:** VT-08 Clinician spotlight, adapted: the clinician from a real Sone explainer sits in a yellow-ringed circle (Sone site motif) instead of a cut-out. The tag reads "meet the dentist" with "filmed on a sone. shoot day" beneath, and no name.
 **Awareness:** solution aware. **Sophistication:** 5 (identity). **Angle:** you are the reason they'll pay private fees.
 Research: "Video is how they meet you first" (persona rule); LP "Warm, professional introductions that make your practice feel approachable, premium, and trustworthy."
 
-**On image:** Clinician cut-out on brand yellow circle, tag "meet the dentist". / Headline: you're the reason they'll go private with you. / Book a discovery call
+**On image:** Clinician in a yellow-ringed circle, tag "meet the dentist / filmed on a sone. shoot day". / Headline: you're the reason they'll go private with you. / Book a discovery call
 
 **Headline:** You're the reason they'll stay.
 
