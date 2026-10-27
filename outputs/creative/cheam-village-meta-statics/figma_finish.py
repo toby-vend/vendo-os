@@ -22,7 +22,8 @@ JS = r"""
 const WRAP = {'1x1': '%W1%', '9x16': '%W9%', 'landscape': '%WL%'};
 const NAMES = %NAMES%;
 const COPY = %COPY%;
-const page = figma.currentPage;
+const page = (await figma.getNodeByIdAsync('%W1%')).parent;
+await figma.setCurrentPageAsync(page);
 const out = {boards: {}, grain: 0, overlays: 0, photos: 0};
 for (const [size, wid] of Object.entries(WRAP)) {
   const wrap = await figma.getNodeByIdAsync(wid);
@@ -65,12 +66,12 @@ COPY.forEach((c, i) => {
   const card = figma.createAutoLayout('VERTICAL', {name: 'Copy | ' + c.title, itemSpacing: 18});
   card.paddingTop = card.paddingBottom = 40; card.paddingLeft = card.paddingRight = 44;
   card.fills = [{type: 'SOLID', color: {r: 1, g: 1, b: 1}}]; card.cornerRadius = 8;
+  card.resize(1080, 100); card.counterAxisSizingMode = 'FIXED'; card.primaryAxisSizingMode = 'AUTO';
   const t = (txt, style, size, col) => { const n = figma.createText(); n.fontName = {family: 'Inter', style}; n.fontSize = size; n.characters = txt; n.fills = [{type: 'SOLID', color: col}]; card.appendChild(n); n.layoutSizingHorizontal = 'FILL'; n.textAutoResize = 'HEIGHT'; return n; };
   const grey = {r: .45, g: .47, b: .5}, ink = {r: .1, g: .1, b: .12};
   t(c.title, 'Semi Bold', 14, grey);
   t('Headline', 'Semi Bold', 13, grey); t(c.headline, 'Semi Bold', 24, ink);
   t('Primary text', 'Semi Bold', 13, grey); t(c.primary, 'Regular', 18, ink);
-  card.resize(1080, card.height); card.counterAxisSizingMode = 'FIXED'; card.primaryAxisSizingMode = 'AUTO';
   card.x = X0 + i * 1160; card.y = Y0 + 1080 + 80;
   copyBottom = Math.max(copyBottom, card.y + card.height);
   out.cards.push(card.id);

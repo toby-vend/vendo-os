@@ -86,6 +86,7 @@ def date_line(size, colour=NAVY, slash_colour=MIST):
 
 CSS = f"""
 @font-face{{font-family:'Montserrat';src:url('assets/fonts/Montserrat.ttf');font-weight:100 900}}
+@font-face{{font-family:'Caveat';src:url('assets/fonts/Caveat.ttf');font-weight:400 700}}
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{background:#3b4145;font-family:'Montserrat',sans-serif;color:{INK};display:flex;gap:80px;padding:80px;align-items:flex-start;-webkit-font-smoothing:antialiased}}
 .ab{{position:relative;overflow:hidden;flex:none}}
@@ -266,8 +267,142 @@ def amy_a3(size):
     return board(name, size, NAVY, inner)
 
 
+# ================================================================ DAN
+
+OFFER_BAND = '£500 off aligners · start by 23 Dec'
+
+
+def note(w, s=1.0):
+    """Handwritten note taped to the wall (Caveat, Navy ink)."""
+    S = lambda v: f'{v * s:.1f}px'
+    ticks = ''.join(f'<div style="display:flex;align-items:center;gap:{S(14)};margin-top:{S(10)}">{TICK.format(s=round(34 * s), c=NAVY)}'
+                    f'<div style="font-family:Caveat;font-weight:600;font-size:{S(46)};color:{NAVY};line-height:1.1">{t}</div></div>'
+                    for t in ['Stopped wearing the retainer', 'Teeth moved back', 'It happens'])
+    return f"""<div style="position:relative;width:{w}px;transform:rotate(-2deg)">
+<div class="paper" style="padding:{S(56)} {S(50)} {S(48)};background:#FBF8EE">
+  <div style="font-family:Caveat;font-weight:700;font-size:{S(70)};color:{NAVY};line-height:1">Had braces as a teen?</div>
+  <svg width="{w * .62:.0f}" height="{12 * s:.0f}" viewBox="0 0 300 12" preserveAspectRatio="none" style="display:block;margin:{S(6)} 0 {S(18)}"><path d="M2 8 C 80 2, 180 12, 298 4" fill="none" stroke="{NAVY}" stroke-width="3" stroke-linecap="round"/></svg>
+  {ticks}
+</div>
+<div class="abs" style="left:50%;top:{S(-18)};width:{S(150)};height:{S(40)};margin-left:{S(-75)};background:rgba(229,229,216,.85);transform:rotate(3deg);box-shadow:0 2px 4px rgba(0,0,0,.12)"></div>
+</div>"""
+
+
+def offer_band(size_px, bg=NAVY, fg=WHITE):
+    return (f'<div style="display:inline-flex;align-items:center;gap:{size_px * .8:.0f}px;background:{bg};color:{fg};padding:{size_px * .9:.0f}px {size_px * 1.4:.0f}px">'
+            f'{slash(size_px * 1.2, MIST)}<div class="label" style="font-size:{size_px}px">{OFFER_BAND}</div></div>')
+
+
+def dan_d1(size):
+    """VT-31 Handwritten sign: a note taped to the slatted reception wall."""
+    name = ad_name('Dan Teeth moved back', 'Practice', 'Handwritten note', size)
+    wall = lambda w, h: (photo('bl-08-slats.jpg', 0, 0, w, h, .5, .4) +
+                         f'<div class="abs" style="inset:0;background:radial-gradient(circle at 45% 40%,rgba(255,255,255,.08),rgba(13,13,13,.45) 85%)"></div>')
+    if size == '1x1':
+        inner = f"""{wall(1080, 1080)}
+<div class="abs" style="left:64px;top:56px">{logo('stacked', 230, WHITE)}</div>
+<div class="abs" style="left:250px;top:200px">{note(600)}</div>
+<div class="abs" style="left:0;right:0;top:800px;display:flex;justify-content:center">{offer_band(17)}</div>
+<div class="abs" style="left:0;right:0;top:910px;display:flex;justify-content:center;gap:30px;align-items:center">{btn(18, WHITE, NAVY)}{proof(16, WHITE)}</div>"""
+    elif size == '9x16':
+        inner = f"""{wall(1080, 1920)}
+<div class="abs" style="left:0;right:0;top:120px;display:flex;justify-content:center">{logo('horizontal', 640, WHITE)}</div>
+<div class="abs" style="left:170px;top:420px">{note(740, 1.2)}</div>
+<div class="abs" style="left:0;right:0;top:1250px;display:flex;justify-content:center">{offer_band(20)}</div>
+<div class="abs" style="left:0;right:0;top:1390px;display:flex;justify-content:center">{btn(21, WHITE, NAVY)}</div>
+<div class="abs" style="left:0;right:0;top:1490px;display:flex;justify-content:center">{proof(18, WHITE)}</div>"""
+    else:
+        inner = f"""{wall(1200, 628)}
+<div class="abs" style="left:0;top:0;width:560px;height:628px;background:linear-gradient(90deg,rgba(30,68,91,.95),rgba(30,68,91,.75) 70%,rgba(30,68,91,0))"></div>
+<div class="abs" style="left:56px;top:48px">{logo('stacked', 190, WHITE)}</div>
+<div class="abs h" style="left:56px;top:180px;width:440px;font-size:32px;color:{WHITE}">Teeth moved back <b>after braces?</b></div>
+<div class="abs body" style="left:56px;top:330px;width:420px;font-size:18px;color:#D7E1E3">A specialist orthodontist in Cheam. £500 off Invisalign and Angel Aligner, start by 23 December.</div>
+<div class="abs" style="left:56px;top:455px">{proof(13, WHITE)}</div>
+<div class="abs" style="left:56px;top:510px">{btn(14, WHITE, NAVY)}</div>
+<div class="abs" style="left:640px;top:70px">{note(470, .8)}</div>"""
+    return board(name, size, NAVY, inner)
+
+
+def notif(w, title, msg, s=1.0, when='now'):
+    S = lambda v: f'{v * s:.1f}px'
+    return f"""<div style="width:{w}px;border-radius:{S(28)};background:rgba(244,244,244,.9);box-shadow:0 10px 30px rgba(0,0,0,.25);padding:{S(22)} {S(26)};display:flex;gap:{S(18)}">
+<div style="width:{S(62)};height:{S(62)};border-radius:{S(14)};background:{NAVY};display:flex;align-items:center;justify-content:center;flex:none">{logo('tooth', round(30 * s), WHITE)}</div>
+<div style="flex:1"><div style="display:flex;justify-content:space-between"><div style="font-size:{S(21)};font-weight:600;color:{INK}">{title}</div><div style="font-size:{S(18)};color:{STONE}">{when}</div></div>
+<div style="font-size:{S(23)};line-height:1.35;color:{CHAR};margin-top:{S(6)}">{msg}</div></div></div>"""
+
+
+N1 = 'Teeth moved back since your braces? It might be a smaller job than you think.'
+N2 = '£500 off Invisalign and Angel Aligner. Start by 23 Dec.'
+
+
+def dan_d2(size):
+    """VT-27 Phone notification: two lock-screen messages from the practice."""
+    name = ad_name('Dan Braces didnt fail', 'Stock', 'Phone notification', size)
+    title = 'Cheam Village Dental Studios'
+    if size == '1x1':
+        inner = f"""{photo('stock-dan-scarf.jpg', 0, 0, 1080, 1080, .62, .4)}
+<div class="abs" style="inset:0;background:linear-gradient(180deg,rgba(13,13,13,.92) 0%,rgba(13,13,13,.35) 16%,rgba(13,13,13,0) 32%,rgba(30,68,91,.0) 45%,rgba(30,68,91,.92) 100%)"></div>
+<div class="abs" style="left:64px;top:56px">{logo('stacked', 230, WHITE)}</div>
+<div class="abs" style="left:110px;top:560px">{notif(860, title, N1)}</div>
+<div class="abs" style="left:110px;top:720px">{notif(860, title, N2, when='1m ago')}</div>
+<div class="abs" style="left:110px;top:900px;display:flex;gap:30px;align-items:center">{btn(18, WHITE, NAVY)}{proof(16, WHITE)}</div>"""
+    elif size == '9x16':
+        inner = f"""{photo('stock-dan-scarf.jpg', 0, 0, 1080, 1920, .66, .4)}
+<div class="abs" style="inset:0;background:linear-gradient(180deg,rgba(13,13,13,.92) 0%,rgba(13,13,13,.3) 10%,rgba(13,13,13,0) 20%,rgba(30,68,91,0) 45%,rgba(30,68,91,.94) 85%)"></div>
+<div class="abs" style="left:0;right:0;top:120px;display:flex;justify-content:center">{logo('horizontal', 640, WHITE)}</div>
+<div class="abs" style="left:90px;top:1030px">{notif(900, title, N1, 1.08)}</div>
+<div class="abs" style="left:90px;top:1210px">{notif(900, title, N2, 1.08, when='1m ago')}</div>
+<div class="abs" style="left:0;right:0;top:1440px;display:flex;justify-content:center">{btn(21, WHITE, NAVY)}</div>
+<div class="abs" style="left:0;right:0;top:1530px;display:flex;justify-content:center">{proof(18, WHITE)}</div>"""
+    else:
+        inner = f"""{photo('stock-dan-scarf.jpg', 520, 0, 680, 628, .6, .4)}
+<div class="abs" style="left:0;top:0;width:600px;height:628px;background:{NAVY}"></div>
+<div class="abs" style="left:560px;top:0;width:140px;height:628px;background:linear-gradient(90deg,{NAVY},rgba(30,68,91,0))"></div>
+<div class="abs" style="left:56px;top:44px">{logo('stacked', 180, WHITE)}</div>
+<div class="abs" style="left:56px;top:150px">{notif(620, title, N1, .82)}</div>
+<div class="abs" style="left:56px;top:290px">{notif(620, title, N2, .82, when='1m ago')}</div>
+<div class="abs" style="left:56px;top:450px">{proof(13, WHITE)}</div>
+<div class="abs" style="left:56px;top:505px">{btn(14, WHITE, NAVY)}</div>"""
+    return board(name, size, NAVY, inner)
+
+
+def dan_d3(size):
+    """Custom: house-framed portrait with the closed-mouth line and a Tuesday Night aside."""
+    name = ad_name('Dan Smile with your teeth', 'Stock', 'House frame portrait', size)
+    light = f'<div class="abs" style="inset:0;background:radial-gradient(circle at 25% 30%,rgba(255,255,255,.9),rgba(244,244,244,0) 60%)"></div>'
+    if size == '1x1':
+        inner = f"""{light}
+{house('stock-dan-cafe.jpg', 600, 140, 420, 830, .62, .4)}
+<div class="abs" style="left:72px;top:72px">{logo('stacked', 250)}</div>
+<div class="abs h" style="left:72px;top:250px;width:500px;font-size:40px;color:{INK}">Smiling with your <b>mouth closed</b> again?</div>
+{script('since the braces came off', 62, NAVY, 76, 470)}
+<div class="abs body" style="left:72px;top:600px;width:470px;font-size:24px;color:{CHAR}">A specialist orthodontist in Cheam can often move them back with clear aligners.</div>
+<div class="abs" style="left:72px;top:760px">{proof(16)}</div>
+<div class="abs" style="left:72px;top:820px">{btn(18)}</div>
+<div class="abs" style="left:0;right:0;bottom:0;height:110px;background:{NAVY};display:flex;align-items:center;justify-content:center;gap:16px">{slash(22)}<div class="label" style="font-size:18px;color:{WHITE}">{OFFER_BAND}</div></div>"""
+    elif size == '9x16':
+        inner = f"""{light}
+<div class="abs" style="left:0;right:0;top:120px;display:flex;justify-content:center">{logo('horizontal', 640)}</div>
+{house('stock-dan-cafe.jpg', 220, 260, 640, 760, .6, .4)}
+<div class="abs h" style="left:90px;right:90px;top:1060px;text-align:center;font-size:46px;color:{INK}">Smiling with your <b>mouth closed</b> again?</div>
+<div class="abs" style="left:0;right:0;top:1210px;height:90px">{script('since the braces came off', 70, NAVY, 175, 0)}</div>
+<div class="abs" style="left:0;right:0;top:1360px;display:flex;justify-content:center">{offer_band(18)}</div>
+<div class="abs" style="left:0;right:0;top:1470px;display:flex;justify-content:center;gap:30px;align-items:center">{btn(19)}{proof(16)}</div>"""
+    else:
+        inner = f"""{light}
+{house('stock-dan-cafe.jpg', 800, 40, 360, 588, .62, .4)}
+<div class="abs" style="left:56px;top:48px">{logo('stacked', 190)}</div>
+<div class="abs h" style="left:56px;top:160px;width:620px;font-size:34px;color:{INK}">Smiling with your <b>mouth closed</b> again?</div>
+{script('since the braces came off', 50, NAVY, 60, 290)}
+<div class="abs" style="left:56px;top:400px">{offer_band(13)}</div>
+<div class="abs" style="left:56px;top:480px">{proof(13)}</div>
+<div class="abs" style="left:56px;top:530px">{btn(14)}</div>"""
+    return board(name, size, BASE, inner)
+
+
 PERSONAS = {
     'amy': ('Amy | aligner researcher', [amy_a1, amy_a2, amy_a3]),
+    'dan': ('Dan | relapsed after braces', [dan_d1, dan_d2, dan_d3]),
 }
 
 

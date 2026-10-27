@@ -69,7 +69,7 @@ You straightened them once. This time they stay.
 ---
 
 ## D3 | The photo you avoid
-**Layout:** Custom: house-framed photo (the brand gable) of a man in his late 30s laughing with his mouth closed, beside a large Montserrat headline and a short Tuesday Night line. "£500 off" in a slim Navy band at the foot.
+**Layout:** Custom: house-framed photo (the brand gable) of a man around 40 with a closed-lip half-smile at a café table (stock), beside a large Montserrat headline and a short Tuesday Night line. "£500 off" in a slim Navy band at the foot.
 **Awareness:** problem aware. **Sophistication:** 5. **Angle:** the accommodation (the closed-mouth smile) and the identity line.
 Research: "I spent hours perfecting a weird smile that would hide the worst parts of my teeth" (Mumsnet); "I can get my photo taken now without even thinking about it." (Mumsnet).
 
