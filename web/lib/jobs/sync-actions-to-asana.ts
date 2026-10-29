@@ -13,6 +13,7 @@ import { getRejectionReason } from '../queries/auto-tasks.js';
 import { validateTaskWithQa, recordQaSkip } from '../qa/auto-task-qa.js';
 import { reviewActionItem, recordFiltered, wasFiltered, getFilteredSince } from '../asana/task-filter.js';
 import { dmTobyFilteredDigest } from '../classification/slack.js';
+import { asanaAutoTasksEnabled } from '../../../scripts/utils/asana-client.js';
 
 /**
  * Turso-native port of scripts/automation/fathom-to-asana.ts. Runs from the
@@ -31,12 +32,6 @@ const ASANA_DEFAULT_PROJECT_GID = process.env.ASANA_DEFAULT_PROJECT_GID || '';
 const ASANA_SENIOR_LEADER_PROJECT_GID = process.env.ASANA_SENIOR_LEADER_PROJECT_GID || '';
 const ASANA_VENDO_OS_PROJECT_GID = process.env.ASANA_VENDO_OS_PROJECT_GID || '';
 const ASANA_BASE_URL = 'https://app.asana.com/api/1.0';
-/**
- * Meeting action items → Asana is switched off (Toby, 28 Oct 2026). Set
- * FATHOM_ASANA_AUTOTASKS=true to turn it back on. Escalation and NPS tasks
- * and manual admin overrides are unaffected.
- */
-const MEETING_AUTOTASKS_ENABLED = process.env.FATHOM_ASANA_AUTOTASKS === 'true';
 const LOG_SOURCE = 'sync-actions-to-asana';
 const AFTER_HOUR_CUTOFF = 15; // meetings starting ≥ 15:00 Europe/London → due next day
 
@@ -706,7 +701,7 @@ export async function createTasksForMeeting(input: {
   /** Fathom meeting summary — context for the task filter. Loaded from the DB when omitted. */
   summary?: string | null;
 }): Promise<SyncCount> {
-  if (!MEETING_AUTOTASKS_ENABLED || !ASANA_API_KEY || !input.rawActionItems) return { created: 0, skipped: 0 };
+  if (!asanaAutoTasksEnabled() || !ASANA_API_KEY || !input.rawActionItems) return { created: 0, skipped: 0 };
   await ensureSyncTable();
 
   const items = parseActionItems(input.rawActionItems);
@@ -1006,8 +1001,8 @@ export interface SyncActionsResult {
 }
 
 export async function syncActionsToAsana(): Promise<SyncActionsResult> {
-  if (!ASANA_API_KEY) {
-    consoleLog(LOG_SOURCE, 'ASANA_API_KEY not configured — skipping');
+  if (!asanaAutoTasksEnabled() || !ASANA_API_KEY) {
+    consoleLog(LOG_SOURCE, 'Auto-tasks off or ASANA_API_KEY not configured — skipping');
     return { meetings: { created: 0, skipped: 0 }, escalations: { created: 0, skipped: 0 }, nps: { created: 0, skipped: 0 }, durationMs: 0 };
   }
   const start = Date.now();

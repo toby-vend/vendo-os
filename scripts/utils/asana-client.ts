@@ -10,6 +10,17 @@ const PAT = process.env.ASANA_PAT || process.env.ASANA_API_KEY;
 const WORKSPACE_ID = process.env.ASANA_WORKSPACE_ID || process.env.ASANA_WORKSPACE_GID;
 const BASE_URL = 'https://app.asana.com/api/1.0';
 
+/**
+ * Automatic Asana task creation is switched off (Toby, 29 Oct 2026). Set
+ * ASANA_AUTOTASKS=true to turn it back on. Covers meeting actions,
+ * escalations, NPS, monitors, traffic lights and the Frame.io hand-off.
+ * Tasks a person creates by hand (task form, Slack button, Atlas approval,
+ * admin override) are unaffected.
+ */
+export function asanaAutoTasksEnabled(): boolean {
+  return process.env.ASANA_AUTOTASKS === 'true';
+}
+
 interface AsanaTaskResult {
   gid: string;
   name: string;
@@ -24,6 +35,10 @@ export async function createAsanaTask(opts: {
   dueDate?: string; // YYYY-MM-DD
   tags?: string[];
 }): Promise<AsanaTaskResult | null> {
+  if (!asanaAutoTasksEnabled()) {
+    console.log(`[asana] Auto-tasks off — skipped: ${opts.name}`);
+    return null;
+  }
   if (!PAT || !WORKSPACE_ID) {
     console.warn('[asana] ASANA_PAT or ASANA_WORKSPACE_ID not set — skipping task creation');
     return null;

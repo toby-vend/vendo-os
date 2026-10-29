@@ -8,6 +8,7 @@
  */
 import { resolveClientAMGid } from '../asana/assignee.js';
 import { createPrivateAsanaTask } from '../asana/tasks.js';
+import { asanaAutoTasksEnabled } from '../../../scripts/utils/asana-client.js';
 
 export interface CreateAdCopyTaskInput {
   reviewId: number;
@@ -59,6 +60,7 @@ function buildTaskNotes(input: CreateAdCopyTaskInput): string {
 export async function createAdCopyAsanaTask(
   input: CreateAdCopyTaskInput,
 ): Promise<CreateAdCopyTaskResult | CreateAdCopyTaskError> {
+  if (!asanaAutoTasksEnabled()) return { ok: false, reason: 'asana_autotasks_off' };
   // Resolve assignee with fallback chain. Both calls swallow their own
   // errors so we just inspect the return value.
   let assigneeGid: string | undefined;
